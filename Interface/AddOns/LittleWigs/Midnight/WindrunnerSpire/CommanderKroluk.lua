@@ -39,11 +39,11 @@ mod:SetRenames({
 mod:SetAuraData({
 	{467620, duration = 5, note = CL.tank_hit}, -- Rampage
 	{468659, duration = 6, dispel = "bleed", mechanic = "bleeding", soundOnApplied = "alert", note = CL.bleed}, -- Throw Axe
-	{1283247, duration = 10, note = CL.preDebuffNote}, -- Reckless Leap
-	{472054, duration = 12, note = CL.mainDebuffNote}, -- Reckless Leap
+	{1283247, duration = 10, tip = CL.preDebuffNote}, -- Reckless Leap
+	{472054, duration = 12, tip = CL.mainDebuffNote}, -- Reckless Leap
 	{1253030, duration = 6, mechanic = "fleeing", soundOnApplied = "warning", note = CL.soak}, -- Intimidating Shout
 	{470966, duration = 3, soundOnApplied = "warning", note = CL.fixate}, -- Bladestorm
-	{468924, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Bladestorm
+	{468924, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Bladestorm
 })
 
 --------------------------------------------------------------------------------

@@ -11,6 +11,32 @@ end
 -- added 2026-08-19 21:08
 -- added 2026-08-21 22:59
 -- added 2026-08-25 localized gap fill
+-- added 2026-09-11 existing L translations
+L["副本额外设置"] = true
+L["单位名称"] = true
+L["血量百分比"] = true
+L["血量条预览"] = true
+L["开怪倒数与数字语音。"] = true
+L["统一副本额外提示的位置与开关；血量条共用下方外观设置，风火图保留原有样式。"] = true
+L["启用副本额外提示"] = true
+L["红玉新生法池：尾王风火图"] = true
+L["毒牙祭坛：指定小怪血量"] = true
+L["血量条随剩余血量染色"] = true
+L["已接管的副本提示"] = true
+L["统一锚点"] = true
+L["血量条排列"] = true
+L["血量条外观"] = true
+L["Wago API 不可用"] = true
+L["Wago API 导入失败："] = true
+L["Wago API 导入成功，正在重载界面"] = true
+L["Wago API 导入成功"] = true
+L["测试：通过 Wago API 导入"] = true
+L["请选择 Author 配置并输入新名称"] = true
+L["复制失败：未返回新配置"] = true
+L["已复制为新配置："] = true
+L["这里只管理 Author。输入新名称后可复制为独立配置；User 覆盖始终绑定 Author。"] = true
+L["复制配置"] = true
+
 L["%d 个 action"] = true
 L["%s · 分类管理"] = true
 L["● 当前筛选"] = true
@@ -2094,3 +2120,4 @@ L["启用双点音效"] = true
 L["仅5人本启用"] = true
 L["测试施法 "] = true
 L["2.5s"] = true
+L["关闭光环语音注册（重载后生效）"] = true

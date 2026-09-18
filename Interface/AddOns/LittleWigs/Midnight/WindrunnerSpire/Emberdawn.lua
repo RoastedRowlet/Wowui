@@ -38,7 +38,7 @@ mod:SetAuraData({
 	{466091, duration = 8, soundOnApplied = "alarm", note = CL.tank_hit}, -- Searing Beak
 	{466559, duration = 6, soundOnApplied = "warning", note = CL.fire_debuffs}, -- Flaming Updraft
 	{470212, duration = 2, mechanic = "stunned", soundOnApplied = "warning"}, -- Flaming Twisters
-	{472118, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Ignited Embers
+	{472118, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Ignited Embers
 })
 
 --------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 ## Interface: 120100
 ## Title: |cFF00FFFFNorthern Sky Raid Tools|r
-## Version: 12.1.21
+## Version: 12.1.23
 ## IconTexture: Interface\AddOns\NorthernSkyRaidTools\Media\NSLogo.blp
 ## Author: Reloe, Rav
 ## DefaultState: Enable
@@ -53,6 +53,7 @@ PaceComparison.lua
 QoL.lua
 QoLDisplay.lua
 PlayerStatsDisplay.lua
+BreakTimer.lua
 Profiles.lua
 InterruptDisplay.lua
 

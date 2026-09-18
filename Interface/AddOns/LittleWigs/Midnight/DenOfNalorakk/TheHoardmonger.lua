@@ -33,10 +33,10 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-	{1234846, duration = 12, dispel = "poison", soundOnApplied = "info", soundOnAppliedDose = "info", note = CL.debuffWalkIntoObjectNote:format(mod:SpellName(-32665))}, -- Toxic Spores
-	{1234681, duration = 10, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1235118))}, -- Ravenous Bellow
-	{1235125, duration = 10, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1235125))}, -- Hearty Bellow
-	{1235405, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Bonespiked
+	{1234846, duration = 12, dispel = "poison", soundOnApplied = "info", soundOnAppliedDose = "info", tip = CL.debuffWalkIntoObjectNote:format(mod:SpellName(-32665))}, -- Toxic Spores
+	{1234681, duration = 10, tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(1235118))}, -- Ravenous Bellow
+	{1235125, duration = 10, tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(1235125))}, -- Hearty Bellow
+	{1235405, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Bonespiked
 })
 
 --------------------------------------------------------------------------------

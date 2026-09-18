@@ -1979,7 +1979,8 @@ CCS.SRI = {
     [38] = { boss=2895, raid=1320, name=select(1,EJ_GetEncounterInfo(2895)), icon=select(5,EJ_GetCreatureInfo(1,2895)), normal=63567, heroic=63568, mythic=63569 }, -- Ula'tek
     -- The Tidebound Grotto select(1,EJ_GetInstanceInfo(1317))
     [39] = { boss=2849, raid=1317, name=select(1,EJ_GetEncounterInfo(2849)), icon=select(5,EJ_GetCreatureInfo(1,2849)), normal=63614, heroic=63615, mythic=63616 }, -- Nymrissa Wavecaller
-  
+    -- The Unbinding of Kith'ix select(1,EJ_GetInstanceInfo(1324))
+    [40] = { boss=2896, raid=1324, name=select(1,EJ_GetEncounterInfo(2896)), icon=select(5,EJ_GetCreatureInfo(1,2896)), normal=63840, heroic=63841, mythic=63842 }, -- Kith'ix
 
 }
 
@@ -2055,6 +2056,15 @@ CCS.RaidLayout = {
     title = select(1,EJ_GetInstanceInfo(1317)) or "",
     bosses = { 39 }
   },
+
+  {
+    raid = 1324, -- The Unbiding of Kith'ix
+    num_bosses = 1,
+    tocinfo = {120105, 120109},
+    shortname = "UK",
+    title = select(1,EJ_GetInstanceInfo(1324)) or "",
+    bosses = { 40 }
+  },  
 }
 
 end

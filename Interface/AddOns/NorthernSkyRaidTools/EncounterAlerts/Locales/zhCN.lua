@@ -186,7 +186,6 @@ L[3455] = {
     ["Soaks"]      = {group = "瓦什尼克", name = "催化胆汁（踩圈）", text = "踩圈"},
     ["Waves"]      = {group = "瓦什尼克", name = "瘟疫泡沫", text = "波浪"},
     ["WaveSpread"] = {group = "瓦什尼克", name = "瘟疫泡沫（分散）", text = "预分散"},
-    ["WavesLine"]  = {group = "瓦什尼克", name = "波浪辅助线", text = ""},
 }
 
 -- The Lost Explorers (3497)
@@ -217,16 +216,15 @@ L[3420] = {
     ["SerpentsFury"] = {group = "斯索拉克", name = "毒蛇之怒（集合）", text = "集合"},
     ["WindsHelper"]  = {group = "斯索拉克", name = "呼啸漩涡助手"},
     ["VenomousSurgeTargets"]    = {group = "斯索拉克", name = "剧毒涌动目标"},
-    ["MarkerMap"]    = {group = "斯索拉克", name = "标记地图"},
 }
 
 -- The Twin Fangs (3421)
 L[3421] = {
     ["Defensives"]  = {group = "双子毒牙", name = "搅动深渊（减伤）", text = "减伤"},
     ["Soak"]        = {group = "双子毒牙", name = "贪婪盛宴（分摊）", text = "分摊"},
-    ["Soak1"]       = {group = "双子毒牙", name = "贪婪盛宴（分摊）", text = "分摊"},
-    ["Soak2"]       = {group = "双子毒牙", name = "贪婪盛宴（分摊）", text = "分摊"},
-    ["Soak3"]       = {group = "双子毒牙", name = "贪婪盛宴（分摊）", text = "分摊"},
+    ["Soak1"]       = {group = "双子毒牙", name = "贪婪盛宴（1分摊）", text = "分摊"},
+    ["Soak2"]       = {group = "双子毒牙", name = "贪婪盛宴（2分摊）", text = "分摊"},
+    ["Soak3"]       = {group = "双子毒牙", name = "贪婪盛宴（3分摊）", text = "分摊"},
     ["PreSpread"]   = {group = "双子毒牙", name = "盘卷脓液（分散）", text = "预分散"},
     ["WatchSide"]   = {group = "双子毒牙", name = "邪恶洪流（观察）", text = "看方向"},
     ["Adds"]        = {group = "双子毒牙", name = "剧毒涌现（小怪）", text = "小怪刷新"},
@@ -235,7 +233,7 @@ L[3421] = {
     ["WatchSpawns"] = {group = "双子毒牙", name = "碎石击（推开）", text = "推开"},
     ["Knock"]       = {group = "双子毒牙", name = "腐蚀洪流（击退）", text = "击退"},
     ["DebuffOverview"] = {group = "双子毒牙", name = "永恒毒液总览", text = "永恒毒液总览"},
-    -- ["InterruptWhisperAlert"] = {group = "Twin Fangs", name = "Interrupt Whisper Alert", text = "Your Interrupt"},
+    ["InterruptWhisperAlert"] = {group = "双子毒牙", name = "打断密语提醒", text = "打断"},
 }
 
 -- The Coiled Altar (3429)
@@ -268,6 +266,7 @@ L[3429] = {
 L[3492] = {
     ["HitKnock"]            = {group = "乌拉特克", name = "蛇母之怒（坦克）", text = "坦克击退"},
     ["Waves"]               = {group = "乌拉特克", name = "腐蚀浪潮", text = "波浪"},
+    -- ["DragOut"]             = {group = "Ula'tek", name = "Drag out", text = "Drag out"},
     ["DamageAmpIn"]         = {group = "乌拉特克", name = "被缚之怒（易伤）", text = "准备易伤"},
     ["DamageAmp"]           = {group = "乌拉特克", name = "易伤倒计时", text = "易伤"},
     ["PlatformBreak"]       = {group = "乌拉特克", name = "盘绕猎物（场地）", text = "摧毁平台"},
@@ -277,16 +276,18 @@ L[3492] = {
     ["AddSoak"]             = {group = "乌拉特克", name = "溃烂爆发（分摊）", text = "大怪分摊"},
     ["Adds"]                = {group = "乌拉特克", name = "毒蛇呼唤（小怪）", text = "小怪刷新"},
     ["BossSpawn"]           = {group = "乌拉特克", name = "首领刷新", text = "首领刷新"},
+    -- ["FirstBreak"]          = {group = "Ula'tek", name = "First Break", text = "First Break"},
+    -- ["SecondBreak"]         = {group = "Ula'tek", name = "Second Break", text = "Second Break"},
     ["Sweep"]               = {group = "乌拉特克", name = "恶臭痛击", text = "范围横扫"},
     ["Soak"]                = {group = "乌拉特克", name = "幽魂盘卷（分摊）", text = "分摊"},
     ["TransitionSoakFirst"]   = {group = "乌拉特克", name = "幽魂盘卷（1分摊）", text = "1 分摊"},
     ["TransitionSoakSecond"]  = {group = "乌拉特克", name = "幽魂盘卷（2分摊）", text = "2 分摊"},
     ["GraspingFangsOverview"] = {group = "乌拉特克", name = "攫取毒牙总览", text = ""},
     ["WrongTarget"]           = {group = "乌拉特克", name = "易伤目标错误", text = "目标错误"},
-    ["WaveDirection"]         = {group = "乌拉特克", name = "波浪方向显示", text = ""},
-    ["WaveDirectionPrompt"]   = {group = "乌拉特克", name = "波浪方向点宏提醒", text = "点击方向宏"},
-    ["WaveLines"]             = {group = "乌拉特克", name = "P3 波浪辅助线", text = ""},
+    ["WaveDirection"]         = {group = "乌拉特克", name = "躲波方向显示", text = ""},
+    ["WaveDirectionPrompt"]   = {group = "乌拉特克", name = "躲波方向点宏提醒", text = "点击方向宏"},
     ["InterruptAssignments"]  = {group = "乌拉特克", name = "打断分配", text = "打断"},
     ["TransitionPatternSoaks"] = {group = "乌拉特克", name = "转阶段分摊", text = "分摊"},
-    ["TransitionPatternArrow"] = {group = "乌拉特克", name = "转阶段箭头", text = ""},
+    -- ["PrePot"] = {group = "Ula'tek", name = "Pre-Pot", text = "Pre-Pot"},
+    -- ["AutoRelease"] = {group = "Ula'tek", name = "Auto Release", text = "Auto Release"},
 }

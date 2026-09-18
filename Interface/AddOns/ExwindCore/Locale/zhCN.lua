@@ -10,6 +10,38 @@ if not L then return end
 -- added 2026-08-21 22:46
 -- added 2026-08-23 03:02
 -- added 2026-08-28 22:11
+-- added 2026-09-11 existing L translations
+L["DK血沸普通版"] = true
+L["血沸冷却更新时显示 3 秒倒数图标。"] = true
+L["DK血沸智能版"] = true
+L["仅在需要手动施放高亮血沸时显示图标。"] = true
+L["|cffff0000[ExwindTools] 单位事件错误 [%s][%s]: %s|r"] = true
+L["EXBOSS"] = true
+L["EXTOOLS"] = true
+L["选择需要显示的模块；左键拖拽模块，右键打开设置"] = true
+L["范围伤害"] = true
+L["卡视野规避"] = true
+L["可打断"] = true
+L["无法盾反"] = true
+L["总是命中(无法闪招)"] = true
+L["无法格挡"] = true
+L["无法躲闪"] = true
+L["无法招架"] = true
+L["盾反仅免疫伤害"] = true
+L["诅咒"] = true
+L["疾病"] = true
+L["激怒"] = true
+L["魔法"] = true
+L["中毒"] = true
+L["沉睡"] = true
+L["迷惑"] = true
+L["冻结"] = true
+L["变形"] = true
+L["定身"] = true
+L["诱捕"] = true
+L["昏迷"] = true
+L["DK血沸图标"] = true
+
 L["野兽"] = true
 L["龙类"] = true
 L["恶魔"] = true

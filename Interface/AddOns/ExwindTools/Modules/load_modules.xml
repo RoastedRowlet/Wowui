@@ -51,6 +51,7 @@
     <Script file="TEXT/ExClass.NoMoveSkillAlert.lua"/>
     <Script file="TEXT/ExClass.RangeCheck.lua"/>
     <Script file="ICON/ExClass.DKBloodBoil.lua"/>
+    <Script file="ICON/ExClass.DKBloodBoilSmart.lua"/>
     <Script file="TIMER/ExClass.FocusCast.lua"/>
     <Script file="TIMER/ExClass.BrewmasterStagger.lua"/>
 

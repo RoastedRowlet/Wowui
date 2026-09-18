@@ -1,4 +1,11 @@
 Version: 1
+Frame: CraftScanScannerMenuButton
+FrameLevel: 249
+Anchor: LEFT
+X: 44
+Y: -235
+W: 53
+H: 53
 Frame: MRTNote
 FrameLevel: 1
 Anchor: CENTER
@@ -34,13 +41,6 @@ X: 0
 Y: 0
 W: 520
 H: 546
-Frame: CraftScanScannerMenuButton
-FrameLevel: 244
-Anchor: LEFT
-X: 44
-Y: -235
-W: 53
-H: 53
 Frame: MRTCombatTimer
 FrameLevel: 1
 Anchor: CENTER

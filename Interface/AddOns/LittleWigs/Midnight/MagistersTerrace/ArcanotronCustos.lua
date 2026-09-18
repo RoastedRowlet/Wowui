@@ -34,8 +34,8 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-	{1214038, duration = 15, dispel = "magic", mechanic = "rooted", note = CL.debuffPossibleAfterCastNote:format(CL.extra:format(mod:SpellName(1214032), CL.dispels))}, -- Ethereal Shackles
-	{1214089, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Arcane Residue
+	{1214038, duration = 15, dispel = "magic", mechanic = "rooted", tip = CL.debuffPossibleAfterCastNote:format(CL.extra:format(mod:SpellName(1214032), CL.dispels))}, -- Ethereal Shackles
+	{1214089, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Arcane Residue
 })
 
 --------------------------------------------------------------------------------

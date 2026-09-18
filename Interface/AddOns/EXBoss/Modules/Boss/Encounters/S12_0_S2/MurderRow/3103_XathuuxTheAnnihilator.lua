@@ -2,10 +2,12 @@
 
 do
     local ExwindTools = _G.ExwindTools
+    local L = (ExBoss and ExBoss.L) or setmetatable({}, { __index = function(_, key) return key end })
     local ENCOUNTER_ID = 3103
     local EVENT_ID = 32
     local VULNERABILITY_PERCENT = 30
     local VULNERABILITY_KEY = "exboss:3103:32:vulnerability"
+    local EXTRA_KEY = "vulnerability"
 
     local function StopVulnerability()
         if ExBoss and type(ExBoss.StopVulnerability) == "function" then
@@ -20,6 +22,8 @@ do
         if tonumber(type(payload) == "table" and payload.eventID or nil) ~= EVENT_ID then
             return
         end
+        local config = ExBoss.BossConfig:GetExtraConfig("mplus", ENCOUNTER_ID, EXTRA_KEY)
+        if not config or config.enabled ~= true then return end
         if not (ExBoss and type(ExBoss.ShowVulnerability) == "function") then
             return
         end
@@ -43,16 +47,32 @@ do
             end
         end)
     end
+    local R = ExBoss and ExBoss.BossEncounters
+    if not R then return end
+
+    R:Register({
+        encounterID = 3103,
+        dungeon = { key = "murder_row", name = "Murder Row", zhCN = "密谋小径" },
+        boss = { key = "xathuux_the_annihilator", name = "Xathuux the Annihilator", zhCN = "歼灭者萨祖克斯" },
+        phaseAlerts = {},
+        vulnerability = {},
+        extras = {
+            {
+                key = EXTRA_KEY,
+                label = L["易伤提示"],
+                icon = 135860,
+                description = L["提前 4 秒提示易伤，随后显示持续 15 秒的 30% 易伤阶段倒数。"],
+                defaults = { enabled = true },
+                layout = {
+                    { key = "settings", type = "card", x = 1, y = 1, w = 200, h = 14,
+                        label = L["易伤提示"], titleSize = 17, keepBorderVisible = true },
+                    { key = "enabled", type = "checkbox", x = 4, y = 8, w = 70, h = 5,
+                        label = L["启用易伤提示"] },
+                },
+                onChanged = function(config)
+                    if config and config.enabled ~= true then StopVulnerability() end
+                end,
+            },
+        },
+    })
 end
-
-local R = ExBoss and ExBoss.BossEncounters
-if not R then return end
-
-R:Register({
-    encounterID = 3103,
-    dungeon = { key = "murder_row", name = "Murder Row", zhCN = "密谋小径" },
-    boss = { key = "xathuux_the_annihilator", name = "Xathuux the Annihilator", zhCN = "歼灭者萨祖克斯" },
-    phaseAlerts = {},
-    vulnerability = {},
-    extras = {},
-})

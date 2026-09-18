@@ -1,0 +1,262 @@
+if GetLocale() ~= "esES" then return end
+
+local _, ns = ...
+local L = ns.L
+
+-- Spanish (Spain). Rules and argument notes are in enUS.lua.
+
+-- == General ==
+L.UNKNOWN_SOURCE               = "Desconocido"
+L.TITLE_VERSION                = "%s v%s"
+
+-- == Context Labels ==
+L.CTX_CITY                     = "Ciudad"
+L.CTX_WITH_COMBAT              = "%s (en combate)"
+L.CTX_DUNGEON                  = "Mazmorra / M+"
+L.CTX_DUNGEON_PLAIN            = "Mazmorra"
+L.CTX_PVP                      = "JcJ"
+L.CTX_RAID                     = "Banda"
+L.CTX_SCENARIO                 = "Gesta"
+L.CTX_WORLD                    = "Mundo abierto"
+
+-- == Cause Definitions ==
+L.DEF_ADDON                    = "Este addon hizo demasiado trabajo mientras el juego dibujaba un fotograma."
+L.DEF_ENGINE                   = "Un único fotograma lento del propio juego, a menudo al cargar un modelo o un efecto de hechizo. No es tu interfaz."
+L.DEF_GC                       = "El juego se detuvo un instante para limpiar la memoria temporal que crearon tus addons (la recolección de basura). Si es breve y ocasional, es normal."
+L.DEF_LOADING                  = "Acabas de cambiar de zona o de llegar a un sitio nuevo, y el juego lo estaba cargando."
+L.DEF_SUSTAINED                = "Tus fotogramas llevan un rato siendo lentos, no solo este. Eso apunta a la configuración gráfica o a tu ordenador, no a tus addons."
+L.DEF_UNCLEAR                  = "Este fotograma tardó demasiado, pero no pudimos atribuirlo a tus addons ni a una causa clara del juego."
+
+-- == Overlay Headlines ==
+L.HEADLINE_ENGINE              = "Pico del motor"
+L.HEADLINE_ENGINE_TIP          = "Motor del juego: normalmente no hay nada que hacer. Si se repite en el mismo sitio, el juego está cargando recursos allí."
+L.HEADLINE_GC                  = "Limpieza de memoria"
+L.HEADLINE_GC_TIP              = "Limpieza de memoria: normalmente nada. Si ocurre a menudo, puede que un addon derroche memoria - revisa las principales fuentes."
+L.HEADLINE_LOADING             = "Carga de zona"
+L.HEADLINE_LOADING_TIP         = "Zona cargando: es normal. Tener WoW en un SSD rápido los acorta."
+L.HEADLINE_SUSTAINED           = "Ralentización sostenida"
+L.HEADLINE_SUSTAINED_TIP       = "Ralentización sostenida: baja las sombras, la distancia de visión o los efectos, y cierra las aplicaciones en segundo plano."
+L.HEADLINE_UNCLEAR             = "Causa poco clara"
+L.HEADLINE_UNCLEAR_TIP         = "Origen poco claro: nada que cambiar todavía. Vigila Recientes y Principales para ver si hay un patrón."
+
+-- == Menu Options ==
+L.MENU_BANNERS                 = "Avisos emergentes"
+L.MENU_BANNERS_ALL             = "Todos (tirones en directo + resúmenes del pull)"
+L.MENU_BANNERS_OFF             = "Desactivados (solo icono y descripción)"
+L.MENU_BANNERS_SUMMARY         = "Solo resúmenes del pull"
+L.MENU_CLEAR_HIST              = "Borrar historial de tirones"
+L.MENU_GROWTH_AUTO             = "Automático (anclaje inteligente)"
+L.MENU_GROWTH_DIR              = "Dirección de los avisos"
+L.MENU_GROWTH_LD               = "Hacia la izquierda y abajo"
+L.MENU_GROWTH_LU               = "Hacia la izquierda y arriba"
+L.MENU_GROWTH_RD               = "Hacia la derecha y abajo"
+L.MENU_GROWTH_RU               = "Hacia la derecha y arriba"
+L.MENU_LOCK                    = "Bloquear posición"
+L.MENU_RESET                   = "Devolver junto al menú"
+L.MENU_SIZE                    = "Tamaño del botón"
+L.MENU_SIZE_DEFAULT            = "Predeterminado (tamaño del menú)"
+L.MENU_SIZE_M                  = "Mediano (64x64)"
+L.MENU_SIZE_S                  = "Pequeño (32x32)"
+L.PREVIEW_MODE                 = "Modo de vista previa"
+
+-- == Severity Levels ==
+L.SEV_CALM                     = "Tranquilo"
+L.SEV_CRITICAL                 = "Crítico"
+L.SEV_ELEVATED                 = "Elevado"
+
+-- == Slash Commands ==
+L.SLASH_BANNERS                = "Avisos emergentes: %s"
+L.SLASH_BANNERS_ALL            = "todos (tirones en directo y resúmenes del pull)"
+L.SLASH_BANNERS_OFF            = "desactivados - el color del icono y la descripción siguen funcionando"
+L.SLASH_BANNERS_SUMMARY        = "solo resúmenes del pull"
+L.SLASH_DISABLED               = "Supervisión desactivada."
+L.SLASH_ENABLED                = "Supervisión activada."
+L.SLASH_LOCKED                 = "Botón bloqueado."
+L.SLASH_RESET                  = "Botón devuelto debajo del minimapa."
+L.SLASH_UNLOCKED               = "Botón desbloqueado - arrástralo adonde quieras."
+L.SLASH_USAGE_BANNERS          = "/sa banners all|summary|off - elige qué avisos emergentes aparecen"
+L.SLASH_USAGE_HEADER           = "Comandos de StutterAlert:"
+L.SLASH_USAGE_LOCK             = "/sa lock - bloquea el botón en su sitio"
+L.SLASH_USAGE_REPORT           = "/sa report - abre el informe completo y los consejos"
+L.SLASH_USAGE_RESET            = "/sa reset - devuelve el botón debajo del minimapa"
+L.SLASH_USAGE_TOGGLE           = "/sa toggle - activa o desactiva la supervisión"
+L.SLASH_USAGE_UNLOCK           = "/sa unlock - desbloquea para arrastrar el botón"
+
+-- == Post-pull Summary ==
+L.SUMMARY_PULL                 = "Último pull  -  tirones: %d (addons %d, juego %d)"
+L.SUMMARY_PULL_CLEAN           = "Último pull: sin tirones. Fluido."
+
+-- == Tooltips ==
+L.TT_ACTION_ADDON              = "- Tirones de addons: actualiza, reconfigura o desactiva a los reincidentes."
+L.TT_ACTION_ENGINE             = "- Tirones del juego/motor: suelen ser puntuales, cuando el juego carga un modelo o un efecto. Si se repiten en el mismo sitio, baja tu configuración gráfica."
+L.TT_ACTION_HEADER             = "Cómo mejorar el rendimiento:"
+L.TT_CTX_COMBAT                = "en combate"
+L.TT_CTX_ENEMIES               = "enemigos: %d"
+L.TT_CTX_LATENCY               = "mundo %d ms"
+L.TT_CTX_PREFIX                = "En ese momento: %s"
+L.TT_HINT_BANNERS_OFF          = "Los avisos emergentes están reducidos. La supervisión sigue activa - clic derecho para cambiarlo."
+L.TT_HINT_CLEAR                = "Mayús+clic izquierdo para borrar el historial"
+L.TT_HINT_LOCKED               = "Desbloquea con /sa unlock para moverlo."
+L.TT_HINT_MENU                 = "Clic derecho para el menú"
+L.TT_HINT_UNLOCKED             = "Arrastra para moverlo. Bloquéalo con /sa lock."
+L.TT_HITCH_EXPLAIN             = "Un tirón es un solo fotograma que tardó demasiado en dibujarse y provoca una parada visible."
+L.TT_RECENT_HEADER             = "Tirones recientes"
+L.TT_RECENT_NONE               = "Aún no hay tirones registrados."
+L.TT_RECENT_RIGHT              = "%d ms  -  %s  -  %s"
+L.TT_RECENT_RIGHT_MULT         = "%d ms  -  %dx lo habitual  -  %s"
+L.TT_SEVERITY                  = "Gravedad: %s"
+L.TT_THROTTLED                 = "Supervisión en pausa - la tasa de fotogramas está limitada"
+L.TT_THROTTLED_CVAR            = "Cada fotograma cae justo en tu límite de %s, así que nada de esto es un tirón. La detección se reanudará sola."
+L.TT_THROTTLED_WHY             = "Todos los fotogramas duran lo mismo: es un límite de fotogramas, no un tirón. La detección se reanudará sola."
+L.TT_TIME_HOUR                 = "hace %d h"
+L.TT_TIME_MIN                  = "hace %d min"
+L.TT_TIME_SEC                  = "hace %d s"
+L.TT_TOP_HEADER                = "Principales fuentes de tirones (desde el último borrado)"
+L.TT_TOP_RIGHT                 = "tirones: %d  -  pico %d ms  -  %s"
+
+-- == Granular Game Causes ==
+L.HEADLINE_SCENE               = "Escena cargada"
+L.HEADLINE_SCENE_TIP           = "Escena cargada: normal en pulls grandes o en zonas abarrotadas, cuando el juego carga modelos y efectos. Bajar la distancia de visión y la densidad de efectos ayuda."
+L.DEF_SCENE                    = "Aparecieron muchas unidades a la vez y el juego cargó sus modelos y efectos en un solo fotograma. Habitual en pulls grandes o al llegar a una multitud. No son tus addons."
+L.HEADLINE_COMBAT_FX           = "Efectos de combate"
+L.HEADLINE_COMBAT_FX_TIP       = "Efectos de combate: efectos de hechizos y partículas que se cargan en pleno combate. Bajar la densidad de hechizos, la densidad de partículas y las texturas proyectadas ayuda."
+L.DEF_COMBAT_FX                = "Se cargó un efecto de hechizo, una ráfaga de partículas o una textura proyectada durante el combate. Habitual en jefes y grupos pequeños. No son tus addons."
+L.HEADLINE_STREAMING           = "Carga del mundo"
+L.HEADLINE_STREAMING_TIP       = "Carga del mundo: el juego carga el terreno mientras viajas. Un SSD rápido es lo que más ayuda; bajar la distancia de visión lo alivia."
+L.DEF_STREAMING                = "El juego cargó terreno y texturas al entrar en una zona nueva. Habitual al volar o ir montado. No son tus addons."
+
+-- == Toast Banners ==
+L.TOAST_ONE                    = "%s  -  %d ms"
+L.TOAST_MANY                   = "%s  x%d  -  pico %d ms"
+
+-- == Last Pulls (tooltip) ==
+L.TT_PULLS_HEADER              = "Últimos 5 pulls (esta sesión)"
+L.TT_PULLS_NONE                = "Aún no has completado ningún pull en esta sesión."
+L.TT_PULL_CLEAN                = "Limpio - sin tirones"
+L.TT_PULL_LINE                 = "tirones: %d (juego %d, addons %d)  -  peor %d ms"
+
+-- == Post-pull Summary (additional) ==
+L.SUMMARY_PULL_WORST           = "Último pull  -  tirones: %d, peor %s %d ms (juego: %d)"
+
+-- == Tooltip hint (additional) ==
+L.TT_HINT_EXPORT               = "Clic izquierdo para el informe completo y los consejos"
+
+-- == Export Report ==
+L.EXPORT_SCOPE                 = "Las cifras de abajo cubren todo desde que se borró el historial por última vez."
+L.EXPORT_TLDR                  = "Tirones registrados: %d  -  de addons: %d, del juego: %d."
+L.EXPORT_TLDR_CLEAN            = "No hay tirones registrados. Fluido hasta ahora."
+L.EXPORT_WORST                 = "Peor addon: %s  -  %d ms (%dx su coste habitual)"
+L.EXPORT_WORST_NOMULT          = "Peor addon: %s  -  %d ms"
+L.EXPORT_TOP_HEADER            = "Principales addons responsables:"
+L.EXPORT_TOP_LINE              = "  - %s  -  tirones: %d, pico %d ms"
+L.EXPORT_CAUSES_HEADER         = "Causas del juego (no tus addons):"
+L.EXPORT_CAUSE_LINE            = "  - %s: %d"
+L.EXPORT_BASELINE              = "Tiempo de fotograma típico: %d ms"
+L.EXPORT_BASELINE_WARMING      = "Tiempo de fotograma típico: aún midiendo."
+
+-- == Advice Panel ==
+L.PANEL_REPORT_HEADER          = "Informe para compartir (Ctrl+C para copiar)"
+L.ADVISE_WHY_HEADER            = "¿Por qué tengo tirones?"
+L.ADVISE_VERDICT_NONE          = "Aún no hay tirones registrados. Juega un rato y vuelve a mirar aquí."
+L.ADVISE_VERDICT_GAME          = "La mayoría de tus tirones vienen del propio juego, no de tus addons (%d de %d)."
+L.ADVISE_VERDICT_ADDON         = "La mayoría de tus tirones vienen de tus addons (%d de %d). Los culpables están en el informe de la derecha."
+L.ADVISE_WHERE                 = "Suelen ocurrir: %s."
+L.ADVISE_PAT_COMBAT            = "en combate"
+L.ADVISE_PAT_TRAVEL            = "al viajar"
+L.ADVISE_PAT_ZONE              = "en %s"
+L.ADVISE_CAUSE_HEADER          = "Qué los provoca"
+L.ADVISE_TRY_HEADER            = "Qué puedes probar"
+L.ADVISE_RAID_NOTE             = "Tus picos se concentran en bandas, así que los valores de abajo son tu configuración gráfica de banda."
+L.ADVISE_SETTINGS_OK           = "Tu configuración gráfica ya parece moderada. Los picos restantes probablemente se deban al hardware, los controladores o la carga de recursos - no a opciones que puedas cambiar aquí."
+L.ADVISE_SETTINGS_HEADER       = "Tus opciones relevantes"
+L.ADVISE_SLIDER                = "Baja %s - ahora %s (predeterminado %s)"
+L.ADVISE_TOGGLE                = "Desactiva %s (ahora activado)"
+L.ADVISE_SETTING_LINE          = "%s: %s (predeterminado %s)"
+L.ADVISE_CHANGE_WHERE          = "Cámbialas en el menú del juego: Sistema > Gráficos (y Avanzado)."
+L.ADVISE_AIO                   = "También usas Advanced Interface Options - escribe /aio para ver todas las CVar."
+
+L.ADVISE_TIP_COMBAT_FX         = "El combate carga efectos de hechizos y partículas. Las opciones de abajo son las que más reducen ese exceso."
+L.ADVISE_TIP_SCENE             = "Los pulls grandes y las multitudes cargan muchos modelos a la vez. La densidad de partículas y la distancia de visión son lo que más ayuda."
+L.ADVISE_TIP_STREAMING         = "Al viajar, el mundo se carga desde el disco. Un SSD es lo que más ayuda; baja la distancia de visión para que el juego cargue menos de golpe."
+L.ADVISE_TIP_SUSTAINED         = "Tus fotogramas son lentos en general, no solo con picos. Baja las opciones más exigentes y cierra las aplicaciones en segundo plano (navegadores, superposición de Discord)."
+L.ADVISE_TIP_ENGINE            = "Son fotogramas aislados cuando el juego carga un modelo o un efecto. Suele ser normal; las opciones de abajo hacen que ocurran menos."
+L.ADVISE_TIP_GC                = "Las limpiezas de memoria frecuentes suelen indicar un addon derrochador. Revisa los principales addons responsables en el informe."
+L.ADVISE_TIP_LOADING           = "Los picos de carga son normales. Un SSD rápido los acorta; no hay nada más que cambiar."
+
+-- == Units and shared fragments ==
+L.UNIT_KB                      = "%d KB"
+L.UNIT_MB                      = "%.1f MB"
+L.LIST_SEP                     = ", "
+L.DUR_HM                       = "%d h %d min"
+L.DUR_M                        = "%d min"
+L.DUR_S                        = "%d s"
+
+-- == Allocation buckets ==
+L.ALLOC_NONE                   = "casi sin reservar memoria"
+L.ALLOC_SMALL                  = "reservando algo de memoria"
+L.ALLOC_MEDIUM                 = "reservando unos pocos MB"
+L.ALLOC_LARGE                  = "reservando mucha memoria"
+
+-- == Export Report: detail ==
+L.EXPORT_CLIENT                = "Cliente %s (compilación %s)"
+L.EXPORT_CLIENT_FLAVOR         = "Cliente %s %s (compilación %s)"
+L.EXPORT_SPAN                  = "Medido durante %s de juego  -  unos %.1f por minuto."
+L.EXPORT_THROTTLED             = "Otros %s no se cuentan arriba: la tasa de fotogramas estaba limitada (ventana en segundo plano o un límite de FPS fijado), así que no se midió nada."
+L.EXPORT_BASELINE_CAP          = "Nota: tu tasa de fotogramas está limitada a %d (%s). Eso marca el mínimo aquí, y ninguna opción gráfica de abajo puede subirlo - cambia el propio límite."
+L.EXPORT_CHRONIC_HEADER        = "Coste constante de los addons (en cada fotograma, haya tirón o no):"
+L.EXPORT_CHRONIC_TOTAL         = "  Todos los addons juntos: unos %.2f ms de cada fotograma."
+L.EXPORT_CHRONIC_LINE          = "  - %s: %.2f ms/fotograma"
+L.EXPORT_TOP_LINE_VER          = "  - %s (%s)  -  tirones: %d, pico %d ms"
+L.EXPORT_D_WHERE               = "      Dónde: %s"
+L.EXPORT_D_CTX                 = "%s x%d"
+L.EXPORT_D_SHARE               = "      En el peor momento fue el %d%% de todo el fotograma"
+L.EXPORT_D_SHARE_ALL           = "      En el peor momento ocupó prácticamente todo el fotograma"
+L.EXPORT_D_LIBRARY             = "      Es un paquete de bibliotecas compartido - el coste es del addon que lo llamó, y el juego no nos deja identificarlo"
+L.EXPORT_D_LIBRARY_HOST        = "      Es un paquete de bibliotecas compartido (incluido con %s) - el coste es del addon que lo llamó"
+L.EXPORT_D_MULT                = "      El pico fue %dx su coste normal"
+L.EXPORT_D_ALLOC               = "      Reservó %s en ese fotograma"
+L.EXPORT_D_PERIOD              = "      Ritmo regular: aproximadamente cada %d s (sugiere un temporizador)"
+L.EXPORT_D_OVER                = "      Contador de sesión del propio juego  -  fotogramas de más de 100 ms: %d, de más de 500 ms: %d"
+L.EXPORT_D_OVER_NOTE           = "      (el cliente cuenta toda la sesión, incluidas las pantallas de carga, que StutterAlert excluye)"
+L.EXPORT_D_CO                  = "      También tuvo picos junto a %s (x%d) - probablemente un mismo desencadenante"
+L.EXPORT_D_VER_SPAN            = "      Registrado entre las versiones %s y %s"
+L.EXPORT_D_VER_NOW             = "      Registrado con %s; ahora usas %s"
+L.EXPORT_D_MEM                 = "      Memoria en uso: %s"
+L.EXPORT_D_MEM_GROW            = "      Memoria en uso: %s (creció %s desde la última comprobación)"
+L.EXPORT_D_SIG                 = "      %d de %d compartían un mismo patrón: %s"
+L.EXPORT_D_SIG_ALL             = "      Todos los tirones compartían un mismo patrón: %s"
+L.EXPORT_SIG_COMBAT            = "en combate"
+L.EXPORT_SIG_CALM              = "fuera de combate"
+L.EXPORT_SIG_EVENT             = "provocado por %s"
+
+-- == Export Report: events ==
+L.EXPORT_D_EV_PEAK             = "      Eventos en ese fotograma: %s"
+L.EXPORT_D_EV_ITEM             = "%s x%d"
+L.EXPORT_D_EV_COMMON           = "      Evento más frecuente (%d de %d): %s"
+L.EXPORT_D_EV_PREFIX           = "      Tráfico de addons: mensajes con la etiqueta %s (x%d)"
+L.EXPORT_D_EV_BURST            = "      Más eventos en ese fotograma: %d  -  una ráfaga de eventos"
+L.EXPORT_D_EV_NONE             = "      No se disparó ningún evento en ese fotograma - el trabajo venía de un OnUpdate o de un temporizador"
+
+-- == CVar display names (the game's own options wording) ==
+L.CVAR_MAX_FPS                 = "FPS máx. en primer plano"
+L.CVAR_MAX_FPS_BK              = "FPS máx. en segundo plano"
+L.CVAR_VIEW_DISTANCE           = "Distancia de visión"
+L.CVAR_ENV_DETAIL              = "Detalle del entorno"
+L.CVAR_GROUND_CLUTTER          = "Detalle del suelo"
+L.CVAR_SHADOW                  = "Calidad de las sombras"
+L.CVAR_LIQUID                  = "Detalle de los líquidos"
+L.CVAR_SUNSHAFTS               = "Rayos de sol"
+L.CVAR_PARTICLE                = "Densidad de partículas"
+L.CVAR_SSAO                    = "Oclusión ambiental"
+L.CVAR_DEPTH                   = "Efectos de profundidad"
+L.CVAR_TEXTURE_RES             = "Resolución de texturas"
+L.CVAR_PROJECTED               = "Texturas proyectadas"
+L.CVAR_SPELL_DENSITY           = "Densidad de hechizos"
+
+-- == Client / Flavor Names ==
+L.FLAVOR_RETAIL                = "Retail"
+L.FLAVOR_MISTS                 = "Mists of Pandaria Classic"
+L.FLAVOR_CATA                  = "Cataclysm Classic"
+L.FLAVOR_WRATH                 = "Wrath of the Lich King Classic"
+L.FLAVOR_TBC                   = "Burning Crusade Classic"
+L.FLAVOR_CLASSIC_ERA           = "Classic Era"

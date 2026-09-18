@@ -63,7 +63,7 @@ local function hookfix()
         CharacterFrameCloseButton:SetPoint("TOPRIGHT", CharacterFrameBg, "TOPRIGHT", -5, 0)
         CharacterFrameCloseButton:SetSize(32, 32)
         CharacterFrameCloseButton:SetScale(.5)
-        CharacterFrame.NineSlice:Hide()
+        --CharacterFrame.NineSlice:Hide()
         CharacterFrame.PortraitContainer:Hide()
         if CharacterFrame.Background ~= nil then
             CharacterFrame.Background:Hide()
@@ -151,7 +151,6 @@ local function MoveModelRight()
 end
 
 function CCS.Clicky(endstate)
-
 
     if _G["CCSf"] then _G["CCSf"]:Hide() end
     if _G["ccs_sf"] then _G["ccs_sf"]:Hide() end
@@ -1358,6 +1357,7 @@ function module:SetupBlizzardFrameOverrides()
     CCSsetbtn:SetSize(32, 32)
     CCSsetbtn:SetPoint("TOPRIGHT", CharacterFrameCloseButton, "TOPLEFT", -5, 0)
     CCSsetbtn:SetScale(.5)
+    CCSsetbtn:SetFrameLevel(510)
     CCSsetbtn:Show()
     local optionsFrame = _G["CCS_Options"]
     CCSsetbtn:SetScript("OnClick", function()
@@ -1384,8 +1384,22 @@ function module:SetupBlizzardFrameOverrides()
 
     CharacterLevelText:ClearAllPoints()
     CharacterLevelText:SetPoint("TOP", CharacterFrameTitleText, "BOTTOM", 0, 0)
+--==========
+--==========
+--==========
 
+--==========These are test elements for bliz theme ================
     CharacterFrame.NineSlice:Hide()
+    --CharacterFrame.NineSlice:SetPoint("BOTTOMRIGHT", CharacterFrameBg, "BOTTOMRIGHT", 0, 0)
+    --CharacterFrame.NineSlice.TopLeftCorner:SetAtlas(CharacterFrame.NineSlice.TopRightCorner:GetAtlas())
+    --CharacterFrame.NineSlice.TopLeftCorner:SetTexCoord(1, 0, 0, 1)
+    --CharacterFrame.NineSlice.TopLeftCorner:SetPoint("TOPLEFT", CharacterFrame.NineSlice, "TOPLEFT", -4, 16)
+    --CharacterFrame.NineSlice.LeftEdge:SetPoint("TOPLEFT", CharacterFrame.NineSlice.TopLeftCorner, "BOTTOMLEFT", -9, 0)    
+--==========
+--==========
+--==========
+--==========
+    
     CharacterFramePortrait:Hide()
     
     CharacterFrameInsetRight.Bg:Hide();
@@ -1693,7 +1707,7 @@ function module:ApplyDynamicLayout()
 			CharacterFrameBg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+65, 0); --279  .449
 		end   
         
-        CharacterFrame.Background:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+50, 0); --275  .449
+        CharacterFrame.Background:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+65, 0); --275  .449
 
 		CharacterFrameCloseButton:ClearAllPoints();
 		CharacterFrameCloseButton:SetPoint("TOPRIGHT", CharacterFrameBg, "TOPRIGHT", -10, -10)

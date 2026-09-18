@@ -115,10 +115,10 @@ end
 
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{1303039, duration = 4, note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1303039))}, -- Hunting Leap
-		{1302945, duration = 5, dispel = "bleed", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1302945))}, -- Impaling Spear
-		{1303490, duration = 10, dispel = "bleed", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1303488))}, -- Savage Maul
-		{1303267, duration = 15, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1303267))}, -- Gilded Destruction
+		{1303039, duration = 4, tip = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1303039))}, -- Hunting Leap
+		{1302945, duration = 5, dispel = "bleed", tip = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1302945))}, -- Impaling Spear
+		{1303490, duration = 10, dispel = "bleed", tip = CL.debuffTankAfterCastNote:format(mod:SpellName(1303488))}, -- Savage Maul
+		{1303267, duration = 15, tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(1303267))}, -- Gilded Destruction
 	})
 end
 
@@ -270,9 +270,10 @@ function mod:HuntingLeapTimeline(eventInfo) -- Hunting Leap
 	return {
 		msg = barText,
 		key = 269230,
-		callback = function()
-			self:Error("Hunting Leap now has a callback")
-		end,
+		--callback = function()
+			-- there is a callback but it's late
+			--self:Error("Hunting Leap now has a callback")
+		--end,
 		cancelCallback = function()
 			if timer then
 				self:CancelTimer(timer)
@@ -313,7 +314,7 @@ function mod:AerialSmashTimeline(eventInfo) -- Aerial Smash
 		msg = barText,
 		key = 1303115,
 		--callback = function()
-			-- TODO there is a callback but it's likely late
+			-- there is a callback but it's late
 			--self:Error("Aerial Smash now has a callback")
 		--end,
 		cancelCallback = function()
@@ -368,7 +369,7 @@ function mod:QuakingLeapTimeline(eventInfo) -- Quaking Leap
 		msg = barText,
 		key = 1303327,
 		--callback = function()
-			-- TODO there is a callback but it's likely late
+			-- there is a callback but it's late
 			--self:Error("Quaking Leap now has a callback")
 		--end,
 		cancelCallback = function()

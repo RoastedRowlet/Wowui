@@ -7,6 +7,32 @@ end
 
 -- English placeholder generated 2026-08-21 22:59
 -- added 2026-08-25 localized gap fill
+-- added 2026-09-11 existing L translations
+L["副本额外设置"] = "Configurações adicionais de masmorras"
+L["单位名称"] = "Nome da unidade"
+L["血量百分比"] = "Porcentagem de vida"
+L["血量条预览"] = "Prévia da barra de vida"
+L["开怪倒数与数字语音。"] = "Contagem regressiva para iniciar o combate e números falados."
+L["统一副本额外提示的位置与开关；血量条共用下方外观设置，风火图保留原有样式。"] = "Controla a posição e a ativação dos alertas adicionais de masmorras; as barras de vida compartilham as configurações de aparência abaixo, enquanto o diagrama de vento/fogo mantém seu estilo original."
+L["启用副本额外提示"] = "Ativar alertas adicionais de masmorras"
+L["红玉新生法池：尾王风火图"] = "Poços da Vida Rubi: diagrama de vento/fogo do chefe final"
+L["毒牙祭坛：指定小怪血量"] = "Altar das Presas: vida de inimigos selecionados"
+L["血量条随剩余血量染色"] = "Colorir barras conforme a vida restante"
+L["已接管的副本提示"] = "Alertas de masmorra gerenciados"
+L["统一锚点"] = "Âncora compartilhada"
+L["血量条排列"] = "Disposição das barras de vida"
+L["血量条外观"] = "Aparência das barras de vida"
+L["Wago API 不可用"] = "API do Wago indisponível"
+L["Wago API 导入失败："] = "Falha ao importar pela API do Wago: "
+L["Wago API 导入成功，正在重载界面"] = "Importação pela API do Wago concluída. Recarregando a interface."
+L["Wago API 导入成功"] = "Importação pela API do Wago concluída"
+L["测试：通过 Wago API 导入"] = "Teste: importar pela API do Wago"
+L["请选择 Author 配置并输入新名称"] = "Selecione um perfil Author e insira um novo nome"
+L["复制失败：未返回新配置"] = "Falha ao copiar: nenhum novo perfil foi retornado"
+L["已复制为新配置："] = "Copiado para um novo perfil: "
+L["这里只管理 Author。输入新名称后可复制为独立配置；User 覆盖始终绑定 Author。"] = "Aqui são gerenciados apenas perfis Author. Insira um novo nome para criar uma cópia independente; as substituições User permanecem vinculadas ao seu Author."
+L["复制配置"] = "Copiar perfil"
+
 L["%d 个 action"] = "%d ações"
 L["%s · 分类管理"] = "%s · Gerenciamento de categorias"
 L["● 当前筛选"] = "● Filtro atual"
@@ -2003,3 +2029,4 @@ L["这里只管理 Author。User 覆盖始终绑定 Author，不可独立选择�
 L["选择 Author 配置"] = "Selecionar Configuração do Autor"
 L["Author 名称"] = "Nome do Autor"
 L["保留的用户覆盖"] = "Substituição de Usuário Preservada"
+L["关闭光环语音注册（重载后生效）"] = "Desativar o registro de voz de auras (aplica após recarregar)"

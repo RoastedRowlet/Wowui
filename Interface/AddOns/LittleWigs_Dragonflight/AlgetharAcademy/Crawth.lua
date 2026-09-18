@@ -118,9 +118,9 @@ end
 
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{376760, duration = 20, soundOnApplied = "info", note = CL.debuffWalkIntoObjectNote:format(CL.orb)}, -- Gale Force
-		{376997, duration = 10, dispel = "bleed", note = CL.debuffTankAfterCastNote:format(mod:SpellName(376997))}, -- Savage Peck
-		{377009, duration = 8, note = CL.debuffDotAfterCastNote:format(mod:SpellName(377009))}, -- Deafening Screech
+		{376760, duration = 20, soundOnApplied = "info", tip = CL.debuffWalkIntoObjectNote:format(CL.orb)}, -- Gale Force
+		{376997, duration = 10, dispel = "bleed", tip = CL.debuffTankAfterCastNote:format(mod:SpellName(376997))}, -- Savage Peck
+		{377009, duration = 8, tip = CL.debuffDotAfterCastNote:format(mod:SpellName(377009))}, -- Deafening Screech
 	})
 end
 

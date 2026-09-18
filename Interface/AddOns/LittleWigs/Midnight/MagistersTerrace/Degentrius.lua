@@ -40,11 +40,11 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-	{1215161, duration = 40, soundOnAppliedDose = "none", note = CL.other:format(CL.bouncing_ball, CL.debuffFailureNote)}, -- Void Destruction
+	{1215161, duration = 40, soundOnAppliedDose = "none", note = CL.bouncing_ball, tip = CL.debuffFailureNote}, -- Void Destruction
 	{1215897, duration = 16, soundOnApplied = "warning", note = CL.orbs}, -- Devouring Entropy
-	{1269631, duration = 5, mechanic = "rooted", note = CL.other:format(CL.orbs , CL.debuffFailureNote)}, -- Entropy Orb
-	{1284627, duration = 30, dispel = "magic", soundOnAppliedDose = "none", note = CL.debuffTankAfterCastNote:format(CL.extra:format(mod:SpellName(1280113), CL.tank_debuff))}, -- Umbral Splinters
-	{1284633, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Stygian Ichor
+	{1269631, duration = 5, mechanic = "rooted", note = CL.orbs, tip = CL.debuffFailureNote}, -- Entropy Orb
+	{1284627, duration = 30, dispel = "magic", soundOnAppliedDose = "none", tip = CL.debuffTankAfterCastNote:format(CL.extra:format(mod:SpellName(1280113), CL.tank_debuff))}, -- Umbral Splinters
+	{1284633, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Stygian Ichor
 })
 
 --------------------------------------------------------------------------------

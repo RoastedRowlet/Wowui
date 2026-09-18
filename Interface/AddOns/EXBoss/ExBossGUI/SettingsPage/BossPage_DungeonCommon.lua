@@ -396,6 +396,14 @@ local function SetAuraSoundActionFields(dungeonKey, slotKey, actionID, fields)
     return cfg:SetMplusDungeonAuraSoundActionFields(slotKey, dungeonKey, actionID, fields)
 end
 
+local function SetAuraSoundActionsEnabled(dungeonKey, slotKey, actionIDs, enabled)
+    local cfg = ExBoss and ExBoss.BossConfig
+    if not (cfg and type(cfg.SetMplusDungeonAuraSoundActionsEnabled) == "function") then
+        return false, "M+ Aura action batch API unavailable", 0
+    end
+    return cfg:SetMplusDungeonAuraSoundActionsEnabled(slotKey, dungeonKey, actionIDs, enabled)
+end
+
 local function CreateAuraSoundAction(dungeonKey, slotKey, actionID, action)
     local cfg = ExBoss and ExBoss.BossConfig
     if not (cfg and type(cfg.CreateMplusDungeonAuraSoundAction) == "function") then
@@ -901,6 +909,10 @@ function Common.UpdateAuraSoundVirtualList(host, context)
         if left._enabled ~= right._enabled then return left._enabled == true end
         return (left._sourceIndex or 0) < (right._sourceIndex or 0)
     end)
+    UI.auraSoundVisibleActionIDs = {}
+    for i = 1, #items do
+        UI.auraSoundVisibleActionIDs[i] = items[i].actionID
+    end
     -- 先同步稳定上下文，再 SetData；后者可能在 Grid release/update 的交错周期
     -- 中触发 Refresh，稳定缓存必须始终比 list.context 更长寿。
     CacheAuraSoundVirtualContext(dungeonKey, slotKey, host)
@@ -918,6 +930,9 @@ function Common.UpdateAuraSoundVirtualList(host, context)
     Common._virtualListRestore = nil
     if type(Common.RefreshAuraSoundToolbarSummary) == "function" then
         Common.RefreshAuraSoundToolbarSummary(#items, totalCount)
+    end
+    if type(Common.RefreshAuraSoundHeaderSelection) == "function" then
+        Common:RefreshAuraSoundHeaderSelection()
     end
     list:Show()
 end
@@ -946,6 +961,10 @@ function Common.ReleaseAuraSoundVirtualList(host)
         list:ClearAllPoints()
         if UI.root then list:SetParent(UI.root) end
     end
+    UI.auraSoundVisibleActionIDs = nil
+    if type(Common.RefreshAuraSoundHeaderSelection) == "function" then
+        Common:RefreshAuraSoundHeaderSelection()
+    end
     -- 不能清空 UI 引用：WoW Frame 不会随 Lua 引用立即销毁。清空引用会让下一次
     -- Mount 新建整套虚拟行，旧行却仍挂在 root 下，造成切页阶梯式内存增长。
 end
@@ -964,6 +983,55 @@ end
 
 -- 表头不用依赖等宽空格。UI 缩放后空格列会和实际行错开，而声音列正好又在
 -- 最容易被挤压的位置；将其与行共用 LayoutAuraSoundColumns 才能稳定对齐。
+function Common:RefreshAuraSoundHeaderSelection()
+    local header = UI.auraSoundHeader
+    local check = header and header.check
+    if not check then return end
+
+    local actionIDs = UI.auraSoundVisibleActionIDs or {}
+    local enabledCount = 0
+    for i = 1, #actionIDs do
+        local row = GetAuraSoundActionView(UI.dungeonKey, UI.slotKey, actionIDs[i])
+        if type(row) == "table" and row.enabled ~= false then
+            enabledCount = enabledCount + 1
+        end
+    end
+
+    check:SetChecked(#actionIDs > 0 and enabledCount == #actionIDs)
+    if check.checkbox and check.checkbox.SetEnabled then
+        check.checkbox:SetEnabled(#actionIDs > 0)
+    elseif check.checkbox and #actionIDs > 0 and check.checkbox.Enable then
+        check.checkbox:Enable()
+    elseif check.checkbox and check.checkbox.Disable then
+        check.checkbox:Disable()
+    end
+    if check.checkbox then
+        local alpha = #actionIDs == 0 and 0.35
+            or (enabledCount > 0 and enabledCount < #actionIDs) and 0.65
+            or 1.00
+        check.checkbox:SetAlpha(alpha)
+    end
+end
+
+function Common:SetVisibleAuraSoundActionsEnabled(enabled)
+    local actionIDs = UI.auraSoundVisibleActionIDs or {}
+    if #actionIDs == 0 then
+        self:RefreshAuraSoundHeaderSelection()
+        return
+    end
+
+    local ok, _, changed = SetAuraSoundActionsEnabled(UI.dungeonKey, UI.slotKey, actionIDs, enabled == true)
+    if not ok then
+        if (tonumber(changed) or 0) > 0 then
+            self:RefreshAuraSoundRows()
+        else
+            self:RefreshAuraSoundHeaderSelection()
+        end
+        return
+    end
+    self:RefreshAuraSoundRows()
+end
+
 function Common.EnsureAuraSoundHeaderRenderer()
     if Common._auraSoundHeaderRendererRegistered then return end
     local Grid = _G.ExwindGrid
@@ -992,7 +1060,9 @@ function Common.EnsureAuraSoundHeaderRenderer()
                     return fs
                 end
                 host._auraSoundHeader = {
-                    check = CreateHeaderText(),
+                    check = ExwindTools.UI:CreateCheckbox(host, "", false, function(checked)
+                        Common:SetVisibleAuraSoundActionsEnabled(checked)
+                    end),
                     icon = CreateHeaderText(),
                     title = CreateHeaderText(),
                     unit = CreateHeaderText(),
@@ -1007,7 +1077,8 @@ function Common.EnsureAuraSoundHeaderRenderer()
                 -- 占位即可，后续列仍严格与真实行图标右缘对齐。
                 host._auraSoundHeader.icon:SetText("")
                 host._auraSoundHeader.icon:SetWidth(30)
-                host._auraSoundHeader.check:SetText("")
+                host._auraSoundHeader.check:SetSize(28, 28)
+                RaiseInteractiveChild(host._auraSoundHeader.check, host, 3)
                 host._auraSoundHeader.title:SetText(L["光环 Action"])
                 host._auraSoundHeader.unit:SetText("")
                 host._auraSoundHeader.category:SetText(L["分类"])
@@ -1017,6 +1088,8 @@ function Common.EnsureAuraSoundHeaderRenderer()
                 host._auraSoundHeader.preview:SetText(L["试听"])
                 host._auraSoundHeader.edit:SetText(L["编辑"])
             end
+            UI.auraSoundHeader = host._auraSoundHeader
+            Common:RefreshAuraSoundHeaderSelection()
             LayoutAuraSoundColumns(host, host._auraSoundHeader, 30)
             host._auraSoundHeaderBackground:Show()
             host._auraSoundHeaderLine:Show()
@@ -1024,6 +1097,8 @@ function Common.EnsureAuraSoundHeaderRenderer()
         end,
         update = function(host)
             if host._auraSoundHeader then
+                UI.auraSoundHeader = host._auraSoundHeader
+                Common:RefreshAuraSoundHeaderSelection()
                 LayoutAuraSoundColumns(host, host._auraSoundHeader, 30)
                 host._auraSoundHeaderBackground:Show()
                 host._auraSoundHeaderLine:Show()
@@ -1032,6 +1107,7 @@ function Common.EnsureAuraSoundHeaderRenderer()
         end,
         release = function(host)
             if host._auraSoundHeader then
+                if UI.auraSoundHeader == host._auraSoundHeader then UI.auraSoundHeader = nil end
                 host._auraSoundHeaderBackground:Hide()
                 host._auraSoundHeaderLine:Hide()
                 for _, fs in pairs(host._auraSoundHeader) do fs:Hide() end

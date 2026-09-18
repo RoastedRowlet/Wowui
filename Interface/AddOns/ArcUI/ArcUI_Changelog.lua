@@ -29,6 +29,41 @@ local C_DESC  = "ffb0b0b0"  -- entry description
 -- ===================================================================
 CL.versions = {
   {
+    version = "3.8.10",
+    sections = {
+      {
+        header = "Improvements", color = C_IMP, items = {
+          { title = "New Icons Load Only On Their Spec", desc = "A newly created aura icon or arc icon now loads only on the spec it was created on instead of all specs. Widen it any time with the spec checkboxes in Load Conditions; existing icons are unchanged." },
+          { title = "Totem Slot Controls in the Icon Catalog", desc = "Selecting a totem slot icon in the Icon Catalog now shows the totem tracking switches (the master toggle and each per-slot toggle) right there, instead of only in the Add Arc Icon section." },
+        },
+      },
+      {
+        header = "Bug Fixes", color = C_FIX, items = {
+          { title = "Totem Slot Dragging", desc = "Free-placed totem slot icons could permanently lose their dragging after a spec change or reload while everything else about them looked fine. They now stay movable." },
+          { title = "Spec Settings Survive Profile Sync", desc = "With shared same-class profiles, unchecking specs or setting talent conditions on a synced character no longer gets reverted at the next login. Each character now keeps its own load conditions; everything else still syncs from the source as before." },
+          { title = "Masque Skins at Login", desc = "Masque skins now apply right at login. Previously they could silently stay off for the whole session until the options panel was opened once." },
+          { title = "Tooltips on Reappearing Groups", desc = "Icons in groups shown by visibility conditions (for example combat-only groups) no longer come back with their tooltip behavior flipped against your settings." },
+        },
+      },
+    },
+  },
+  {
+    version = "3.8.9",
+    sections = {
+      {
+        header = "New Features", color = C_NEW, items = {
+          { title = "Aura Tracking Editor", desc = "Aura icons can now be edited after creation: select one in the Icon Catalog and the new Aura Tracking section changes what it watches - buff or debuff, which units, Own Auras Only, even the spell ID - while the icon keeps its look, position, and group placement. No more delete-and-recreate because one option was missed." },
+          { title = "Loot Planner Guide Buttons", desc = "The bar inside the Adventure Guide now carries a Set Up button that opens the Loot Planner options directly, and a small x that can switch the whole module off right from the guide (re-enable any time in Settings > Modules). Gear scanning moved into the Loot Planner options tab." },
+        },
+      },
+      {
+        header = "Bug Fixes", color = C_FIX, items = {
+          { title = "Masque and Aura Icons", desc = "With Masque enabled, aura icons no longer show broken skin pieces (empty silver border squares, a backdrop covering the live aura), and they keep their own Zoom, Aspect Ratio, and Padding instead of losing them to Masque - the sliders stay editable too. Masque skinning is not yet supported on aura icons (a proper version is planned), so they now stay cleanly under ArcUI's control; every other icon type is unaffected." },
+        },
+      },
+    },
+  },
+  {
     version = "3.8.8.a",
     sections = {
       {

@@ -1642,6 +1642,10 @@ loopitems = function()
 		initmplusframe()
 		initclickframe()
 		InspectFrame.ccsinitload = true
+	else
+		local btnfont1 = _G["InspectMPlusfs1"]
+		local textstring = CCS.getraiderioscoreinspect() or ""
+		if btnfont1 ~= nil then btnfont1:SetText(textstring) end
 	end
 end 
 

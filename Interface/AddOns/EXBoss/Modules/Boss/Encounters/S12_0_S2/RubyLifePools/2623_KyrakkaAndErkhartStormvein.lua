@@ -118,6 +118,16 @@ do
         panel = CreateFrame("Frame", "EXBossKyrakkaWindFirePanel", UIParent, "BackdropTemplate")
         panel:SetSize(PANEL_SIZE + 40, PANEL_SIZE + 70)
         panel:EnableMouse(true)
+        panel:RegisterForDrag("LeftButton")
+        panel:SetScript("OnDragStart", function()
+            if ExtrasEnabled() then ExBoss.UI.DungeonExtras:StartPanelDrag() end
+        end)
+        local function StopPanelDrag()
+            local extras = ExBoss.UI and ExBoss.UI.DungeonExtras
+            if extras then extras:StopPanelDrag() end
+        end
+        panel:SetScript("OnDragStop", StopPanelDrag)
+        panel:HookScript("OnHide", StopPanelDrag)
         -- 位置由统一容器拥有；旧 kyrakkaWindFirePosition 数据保留，不迁移或删除。
         -- 本文件加载早于显示容器，真正显示时才建立相对锚点。
         panel:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8x8", edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = 1 })

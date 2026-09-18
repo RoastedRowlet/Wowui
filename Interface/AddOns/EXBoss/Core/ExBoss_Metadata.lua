@@ -3,13 +3,31 @@
 -- 请勿手动通过 Git 提交修改此文件中的版本号，除非你是为了测试。
 
 ExBoss_MetaData = {
-    version = "v26.9.10.1512",
+    version = "v26.9.15.1537",
     changelog = {
-        version = "v26.9.10.1512",
-        title = "v26.9.10.1512 更新日志",
-        publishedAt = "2026-09-10 15:12",
+        version = "v26.9.15.1537",
+        title = "v26.9.15.1537 更新日志",
+        publishedAt = "2026-09-15 15:37",
         fontSize = 14,
         content = [[
+@H1@ v26.9.15.1537
+
+@CN@ @H2@ 通用
+@CN@ - 修复%e:3202时间轴偶尔失效问题
+
+@EN@ @H2@ General
+@EN@ - Fixed an issue where the %e:3202 timeline would occasionally stop working.
+
+@H1@ v26.9.11.0736
+
+@CN@ @H2@ 通用
+@CN@ - 修复了红玉(RLP)尾王面板无法移动问题
+@CN@ - 现在这些所有的额外面板 请在编辑模式中的副本额外面板移动
+
+@EN@ @H2@ General
+@EN@ - Fixed an issue where the panel for the final boss of Ruby Life Pools (RLP) could not be moved.
+@EN@ - All additional dungeon panels can now be repositioned through the “Dungeon Extras” panel in Edit Mode.
+
 @H1@ v26.9.10.1512
 
 @CN@ @H2@ AI声明

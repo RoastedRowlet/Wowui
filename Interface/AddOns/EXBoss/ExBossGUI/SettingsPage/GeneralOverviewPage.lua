@@ -116,7 +116,7 @@ local LAYOUT = {
     { key = "timerBarSources", type = "multiselect", x = 135, y = 17, w = 63, h = 6, label = L["计时条显示"], items = BAR_SOURCE_OPTIONS, parentKey = "ui.general" },
     { key = "disableBlizzardEncounterTimeline", type = "checkbox", x = 1, y = 23, w = 76, h = 6, label = L["关闭暴雪原生计时条"], parentKey = "ui.general" },
     { key = "disableEXBossInRaid", type = "checkbox", x = 1, y = 30, w = 76, h = 6, label = L["团本中禁用 EXBoss"], parentKey = "ui.general" },
-    { key = "autoDisableCAAInBoss", type = "checkbox", x = 1, y = 36, w = 76, h = 6, label = L["首领战时自动关闭战斗音频预警"], parentKey = "ui.general" },
+    { key = "disableAuraSoundRegistration", type = "checkbox", x = 1, y = 36, w = 90, h = 6, label = L["关闭光环语音注册（重载后生效）"], parentKey = "voice.global" },
     { key = "hideTankBossAlertsForDps", type = "checkbox", x = 1, y = 43, w = 76, h = 6, label = L["DPS职责下不提示坦克技能"], parentKey = "ui.general" },
     { key = "hideTankBossAlertsForHeal", type = "checkbox", x = 1, y = 50, w = 76, h = 6, label = L["治疗职责下不提示坦克技能"], parentKey = "ui.general" },
     { key = "showSpellOccurrenceCount", type = "checkbox", x = 1, y = 57, w = 73, h = 6, label = L["法术名称显示次数"], parentKey = "ui.general" },
@@ -177,11 +177,6 @@ local function EnsureRootDB()
     else
         general.disableEXBossInRaid = (general.disableEXBossInRaid == true)
     end
-    if general.autoDisableCAAInBoss == nil then
-        general.autoDisableCAAInBoss = false
-    else
-        general.autoDisableCAAInBoss = (general.autoDisableCAAInBoss == true)
-    end
     if general.hideTankBossAlertsForDps == nil then
         general.hideTankBossAlertsForDps = true
     else
@@ -225,6 +220,7 @@ local function EnsureRootDB()
     local voice = EXBOSS12S2.voice.global
     voice.channel = tostring(voice.channel or "Master")
     voice.volume = tonumber(voice.volume) or 1.0
+    voice.disableAuraSoundRegistration = (voice.disableAuraSoundRegistration == true)
     if voice.volume < 0 then voice.volume = 0 end
     if voice.volume > 1 then voice.volume = 1 end
 
@@ -316,9 +312,6 @@ local function ApplyBossSceneToggleChange()
     end
 
     if sceneEnabled == false then
-        if ExBoss and ExBoss.ApplyBossAutoCAASetting then
-            ExBoss.ApplyBossAutoCAASetting(false)
-        end
         if sched and sched.EndBoss then
             sched:EndBoss()
         end
@@ -392,6 +385,10 @@ ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
 
 local function RefreshActiveSurfaces(changedPath)
     local rootDB = EnsureRootDB()
+    if changedPath == "voice.global.disableAuraSoundRegistration" then
+        -- 这个开关只保存下次加载要采用的值；当前会话不刷新或移除注册。
+        return
+    end
     if changedPath == "ui.general.bunBarSources" or changedPath == "ui.general.timerBarSources" then
         -- Scheduler 在每个既有分发点读取该选择；不需要也不能重启当前 Boss 时间轴。
         return
@@ -404,7 +401,6 @@ local function RefreshActiveSurfaces(changedPath)
     ApplyBlizzardHintCountdownChange()
     ApplyBarModeChange()
     ApplyBossSceneToggleChange()
-    if ExBoss and ExBoss.ApplyBossAutoCAASetting then ExBoss.ApplyBossAutoCAASetting() end
     local mod = ExBoss and ExBoss.AutoGossip
     if mod and type(mod.NotifySettingsChanged) == "function" then mod.NotifySettingsChanged() end
     ApplyVoiceOverrides()

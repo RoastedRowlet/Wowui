@@ -1190,7 +1190,6 @@ CCS.Raid.TheVenomousAbyss = {
     },
 }
 
-
 CCS.Raid.TheTideboundGrotto = {
     ejID = 1317,
     bosses = {
@@ -1210,6 +1209,27 @@ CCS.Raid.TheTideboundGrotto = {
                 { itemID = 268247 }, -- Breakwater Boots
                 { itemID = 268266 }, -- Alluring Bubbleband
                 { itemID = 270167 }, -- Wavecaller's Seastone
+            },
+        },
+    },
+}
+
+CCS.Raid.TheUnbindingofKithix = {
+    ejID = 1324,
+    bosses = {
+        {
+            id = 2896, -- Kith'ix
+            loot = {
+                { itemID = 280799 }, -- Lu'selama, Light's Justice
+                { itemID = 281056 }, -- Sanctified Knight's Phoenixblade
+                { itemID = 281239 }, -- Corroded Hulk's Skullcap
+                { itemID = 281235 }, -- Voidweaver's Vestments
+                { itemID = 281238 }, -- Aberrant Commander's Gauntlets
+                { itemID = 281236 }, -- Leggings of Palpable Terror
+                { itemID = 281029 }, -- Band of the Swarmcaller
+                { itemID = 280617 }, -- Lightbearer's Shield Fragment
+                { itemID = 280835 }, -- Sigil of the Impending Eclipse
+                { itemID = 281215 }, -- Twisted Horror's Tendril
             },
         },
     },
@@ -1386,6 +1406,7 @@ CCS.Data[11][2].season = { -- Midnight Season 2
     raids = {
         [1320] = CCS.Raid.TheVenomousAbyss,
         [1317] = CCS.Raid.TheTideboundGrotto,
+        [1324] = CCS.Raid.TheUnbindingofKithix,
     },
 
     classSets = CCS.Data[11][2].classSets,

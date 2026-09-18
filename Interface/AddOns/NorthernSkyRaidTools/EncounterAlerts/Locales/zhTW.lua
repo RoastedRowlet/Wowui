@@ -147,7 +147,7 @@ L[3379] = {
     ["Knockback"]     = {group = "妮莉莎", name = "擊退", text = "擊退"},
     ["ChillingFrost"] = {group = "妮莉莎", name = "刺骨冰霜", text = "Debuff"},
     ["AbyssalRain"]   = {group = "妮莉莎", name = "深淵之雨", text = "AE"},
-    ["WaterJet"]      = {group = "妮莉莎", name = "水流噴射", text = "頭前"},
+    ["WaterJet"]      = {group = "妮莉莎", name = "水流噴射", text = "射線"},
     ["WaterFlurry"]   = {group = "妮莉莎", name = "脈動浪潮", text = "打坦技"},
     ["Taunt"]         = {group = "妮莉莎", name = "嘲諷", text = "嘲諷"},
 }
@@ -159,7 +159,7 @@ L[3470] = {
     ["SoulcoilIgnition"] = {group = "尼札利", name = "纏魂點燃", text = "AE"},
     ["HungeringPyre"]    = {group = "尼札利", name = "飢饞蛇火", text = "分傷"},
     ["RestlessAmani"]    = {group = "尼札利", name = "出小怪", text = "小怪"},
-    ["Invoke"]           = {group = "尼札利", name = "祈求", text = "躲"},
+    ["Invoke"]           = {group = "尼札利", name = "祈求", text = "躲地板"},
     ["InvokeMythic"]     = {group = "尼札利", name = "祈求", text = "停止唱法"},
 }
 
@@ -171,7 +171,7 @@ L[3445] = {
     ["BloodSoak"]          = {group = "衛哨", name = "血 分傷", text = "血 分傷"},
     ["BloodSoakPool"]      = {group = "衛哨", name = "血 分傷放水", text = "放水"},
     ["BloodDispels"]       = {group = "衛哨", name = "血 驅散", text = "驅散"},
-    ["PoisonAdd"]          = {group = "衛哨", name = "毒 小怪", text = "毒 小怪"},
+    ["PoisonAdd"]          = {group = "衛哨", name = "毒 小怪", text = "毒軟泥"},
     ["OrbSpawn"]           = {group = "衛哨", name = "出球", text = "Bait球"},
     ["ShiftingProtovenom"] = {group = "衛哨", name = "移轉原型毒液", text = "分散"},
     ["TransitionDebuffs"]  = {group = "衛哨", name = "轉階 Debuff", text = "數字遊戲"},
@@ -183,12 +183,11 @@ L[3455] = {
     ["TankHits"]   = {group = "伐許尼克", name = "打坦技", text = "打坦技"},
     ["Taunts"]     = {group = "伐許尼克", name = "嘲諷", text = "嘲諷"},
     ["Adds"]       = {group = "伐許尼克", name = "小怪", text = "小怪"},
-    ["Infection"]  = {group = "伐許尼克", name = "感染", text = "感染"},
+    ["Infection"]  = {group = "伐許尼克", name = "感染", text = "吸收盾"},
     ["AoE"]        = {group = "伐許尼克", name = "AE", text = "AE"},
-    ["Soaks"]      = {group = "伐許尼克", name = "分傷", text = "分傷"},
+    ["Soaks"]      = {group = "伐許尼克", name = "分傷", text = "踩圈"},
     ["Waves"]      = {group = "伐許尼克", name = "波", text = "波"},
     ["WaveSpread"] = {group = "伐許尼克", name = "波 分散", text = "分散"},
-    ["WavesLine"]  = {group = "伐許尼克", name = "波 瞄準線", text = ""},
 }
 
 -- The Lost Explorers (3497)
@@ -219,7 +218,6 @@ L[3420] = {
     ["SerpentsFury"] = {group = "司佐拉", name = "毒蛇之怒", text = "集中"},
     ["WindsHelper"]  = {group = "司佐拉", name = "吹風方向"},
     ["VenomousSurgeTargets"] = {group = "司佐拉", name = "Debuff 目標"},
-    ["MarkerMap"]    = {group = "司佐拉", name = "標記地圖"},
 }
 
 -- The Twin Fangs (3421)
@@ -234,10 +232,10 @@ L[3421] = {
     ["Adds"]        = {group = "雙生毒牙", name = "小怪", text = "小怪"},
     ["Orbs"]        = {group = "雙生毒牙", name = "球", text = "球"},
     ["TankSoak"]    = {group = "雙生毒牙", name = "坦克吃圈", text = "吃圈"},
-    ["WatchSpawns"] = {group = "雙生毒牙", name = "推進", text = "推進"},
+    ["WatchSpawns"] = {group = "雙生毒牙", name = "碎石擊", text = "碎石擊"},
     ["Knock"]       = {group = "雙生毒牙", name = "擊退", text = "擊退"},
     ["DebuffOverview"] = {group = "雙生毒牙", name = "永恆毒液層數", text = "永恆毒液層數"},
-    -- ["InterruptWhisperAlert"] = {group = "Twin Fangs", name = "Interrupt Whisper Alert", text = "Your Interrupt"},
+    ["InterruptWhisperAlert"] = {group = "雙生毒牙", name = "打斷密語提醒", text = "打斷"},
 }
 
 -- The Coiled Altar (3429)
@@ -270,15 +268,18 @@ L[3429] = {
 L[3492] = {
     ["HitKnock"]            = {group = "烏拉特克", name = "蛇母之怒", text = "擊退"},
     ["Waves"]               = {group = "烏拉特克", name = "腐蝕波", text = "波"},
+    -- ["DragOut"]             = {group = "Ula'tek", name = "Drag out", text = "Drag out"},
     ["DamageAmpIn"]         = {group = "烏拉特克", name = "劇毒心臟", text = "準備增傷"},
     ["DamageAmp"]           = {group = "烏拉特克", name = "劇毒心臟", text = "增傷"},
     ["PlatformBreak"]       = {group = "烏拉特克", name = "包圍獵物", text = "平台裂開"},
     ["Debuffs"]             = {group = "烏拉特克", name = "毒蛇之咬", text = "Debuff"},
     ["Eggs"]                = {group = "烏拉特克", name = "蛋", text = "蛋"},
-    -- ["EggDeadline"]         = {group = "Ula'tek", name = "Egg Deadline", text = "Egg Deadline"},
-    -- ["AddSoak"]             = {group = "Ula'tek", name = "Add Soak", text = "Add Soak"},
+    ["EggDeadline"]         = {group = "烏拉特克", name = "Egg Deadline", text = "Egg Deadline"},
+    ["AddSoak"]             = {group = "烏拉特克", name = "Add Soak", text = "Add Soak"},
     ["Adds"]                = {group = "烏拉特克", name = "P3 小怪", text = "小怪"},
-    -- ["BossSpawn"]           = {group = "Ula'tek", name = "Boss Spawn", text = "Boss Spawn"},
+    ["BossSpawn"]           = {group = "烏拉特克", name = "王出現", text = "王出現"},
+    -- ["FirstBreak"]          = {group = "Ula'tek", name = "First Break", text = "First Break"},
+    -- ["SecondBreak"]         = {group = "Ula'tek", name = "Second Break", text = "Second Break"},
     ["Sweep"]               = {group = "烏拉特克", name = "大圈", text = "大圈"},
     ["Soak"]                = {group = "烏拉特克", name = "分傷", text = "分傷"},
     ["TransitionSoakFirst"] = {group = "烏拉特克", name = "分傷1", text = "分傷1"},
@@ -287,10 +288,10 @@ L[3492] = {
     ["WrongTarget"] = {group = "烏拉特克", name = "打錯目標", text = "打錯目標"},
     ["WaveDirection"] = {group = "烏拉特克", name = "波左右方向", text = ""},
     ["InterruptAssignments"] = {group = "烏拉特克", name = "打斷分配", text = "打斷"},
-    -- ["WaveDirection"] = {group = "Ula'tek", name = "Wave Direction Display", text = ""},
-    -- ["WaveDirectionPrompt"] = {group = "Ula'tek", name = "Wave Direction Input", text = "Input Direction"},
-    -- ["WaveLines"] = {group = "Ula'tek", name = "P3 Wave lines", text = ""},
-    -- ["InterruptAssignments"] = {group = "Ula'tek", name = "Interrupt Assignments", text = "Interrupts"},
-    -- ["TransitionPatternSoaks"] = {group = "Ula'tek", name = "Transition Soaks", text = "Soak"},
-    -- ["TransitionPatternArrow"] = {group = "Ula'tek", name = "Transition Arrow", text = ""},
+    ["WaveDirection"] = {group = "烏拉特克", name = "波浪方向顯示", text = ""},
+    ["WaveDirectionPrompt"] = {group = "烏拉特克", name = "波浪方向輸入", text = "方向巨集"},
+    ["InterruptAssignments"] = {group = "烏拉特克", name = "打斷分配", text = "打斷"},
+    ["TransitionPatternSoaks"] = {group = "烏拉特克", name = "轉階分傷", text = "分傷"},
+    -- ["PrePot"] = {group = "Ula'tek", name = "Pre-Pot", text = "Pre-Pot"},
+    -- ["AutoRelease"] = {group = "Ula'tek", name = "Auto Release", text = "Auto Release"},
 }

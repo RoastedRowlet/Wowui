@@ -1,0 +1,262 @@
+if GetLocale() ~= "koKR" then return end
+
+local _, ns = ...
+local L = ns.L
+
+-- Korean. Rules and argument notes are in enUS.lua.
+
+-- == General ==
+L.UNKNOWN_SOURCE               = "알 수 없음"
+L.TITLE_VERSION                = "%s v%s"
+
+-- == Context Labels ==
+L.CTX_CITY                     = "도시"
+L.CTX_WITH_COMBAT              = "%s (전투 중)"
+L.CTX_DUNGEON                  = "던전 / 쐐기"
+L.CTX_DUNGEON_PLAIN            = "던전"
+L.CTX_PVP                      = "PvP"
+L.CTX_RAID                     = "공격대"
+L.CTX_SCENARIO                 = "시나리오"
+L.CTX_WORLD                    = "필드"
+
+-- == Cause Definitions ==
+L.DEF_ADDON                    = "게임이 프레임 하나를 그리는 동안 이 애드온이 너무 많은 작업을 했습니다."
+L.DEF_ENGINE                   = "게임 자체에서 생긴 느린 프레임 하나로, 주로 모델이나 주문 효과를 불러올 때 발생합니다. UI 문제가 아닙니다."
+L.DEF_GC                       = "애드온이 만든 임시 메모리를 정리하느라 게임이 잠깐 멈췄습니다 (가비지 컬렉션). 짧고 가끔이라면 정상입니다."
+L.DEF_LOADING                  = "방금 지역을 이동했거나 새로운 곳에 들어가서 게임이 그곳을 불러오고 있었습니다."
+L.DEF_SUSTAINED                = "이 프레임만이 아니라 한동안 프레임이 계속 느렸습니다. 애드온보다는 그래픽 설정이나 PC 쪽 문제로 보입니다."
+L.DEF_UNCLEAR                  = "이 프레임이 오래 걸렸지만 애드온이나 뚜렷한 게임 원인으로 특정하지 못했습니다."
+
+-- == Overlay Headlines ==
+L.HEADLINE_ENGINE              = "엔진 급등"
+L.HEADLINE_ENGINE_TIP          = "게임 엔진: 보통은 할 일이 없습니다. 같은 장소에서 반복된다면 게임이 그곳의 리소스를 불러오는 중입니다."
+L.HEADLINE_GC                  = "메모리 정리"
+L.HEADLINE_GC_TIP              = "메모리 정리: 보통은 문제없습니다. 계속 발생한다면 어떤 애드온이 메모리를 낭비하고 있을 수 있습니다 - 주요 원인을 확인하세요."
+L.HEADLINE_LOADING             = "지역 불러오기"
+L.HEADLINE_LOADING_TIP         = "지역 불러오는 중: 정상입니다. 빠른 SSD에 WoW를 설치하면 더 짧아집니다."
+L.HEADLINE_SUSTAINED           = "지속적인 저하"
+L.HEADLINE_SUSTAINED_TIP       = "지속적인 저하: 그림자, 시야 거리, 효과를 낮추고 백그라운드 프로그램을 종료하세요."
+L.HEADLINE_UNCLEAR             = "원인 불명확"
+L.HEADLINE_UNCLEAR_TIP         = "원인 불명확: 아직 바꿀 것은 없습니다. 최근 기록과 주요 원인에서 패턴이 보이는지 지켜보세요."
+
+-- == Menu Options ==
+L.MENU_BANNERS                 = "팝업 배너"
+L.MENU_BANNERS_ALL             = "전체 (실시간 끊김 + 전투 요약)"
+L.MENU_BANNERS_OFF             = "끄기 (아이콘과 툴팁만)"
+L.MENU_BANNERS_SUMMARY         = "전투 요약만"
+L.MENU_CLEAR_HIST              = "끊김 기록 지우기"
+L.MENU_GROWTH_AUTO             = "자동 (스마트 고정)"
+L.MENU_GROWTH_DIR              = "배너 확장 방향"
+L.MENU_GROWTH_LD               = "왼쪽 아래로"
+L.MENU_GROWTH_LU               = "왼쪽 위로"
+L.MENU_GROWTH_RD               = "오른쪽 아래로"
+L.MENU_GROWTH_RU               = "오른쪽 위로"
+L.MENU_LOCK                    = "위치 잠금"
+L.MENU_RESET                   = "메뉴 옆으로 위치 초기화"
+L.MENU_SIZE                    = "버튼 크기"
+L.MENU_SIZE_DEFAULT            = "기본 (메뉴 크기)"
+L.MENU_SIZE_M                  = "중간 (64x64)"
+L.MENU_SIZE_S                  = "작게 (32x32)"
+L.PREVIEW_MODE                 = "미리보기 모드"
+
+-- == Severity Levels ==
+L.SEV_CALM                     = "안정"
+L.SEV_CRITICAL                 = "심각"
+L.SEV_ELEVATED                 = "주의"
+
+-- == Slash Commands ==
+L.SLASH_BANNERS                = "팝업 배너: %s"
+L.SLASH_BANNERS_ALL            = "전체 (실시간 끊김과 전투 요약)"
+L.SLASH_BANNERS_OFF            = "끄기 - 아이콘 색상과 툴팁은 계속 작동합니다"
+L.SLASH_BANNERS_SUMMARY        = "전투 요약만"
+L.SLASH_DISABLED               = "감시를 껐습니다."
+L.SLASH_ENABLED                = "감시를 켰습니다."
+L.SLASH_LOCKED                 = "버튼을 잠갔습니다."
+L.SLASH_RESET                  = "버튼을 미니맵 아래로 되돌렸습니다."
+L.SLASH_UNLOCKED               = "버튼 잠금을 풀었습니다 - 원하는 곳으로 끌어다 놓으세요."
+L.SLASH_USAGE_BANNERS          = "/sa banners all|summary|off - 표시할 팝업 배너 선택"
+L.SLASH_USAGE_HEADER           = "StutterAlert 명령어:"
+L.SLASH_USAGE_LOCK             = "/sa lock - 버튼을 제자리에 잠금"
+L.SLASH_USAGE_REPORT           = "/sa report - 전체 보고서와 조언 열기"
+L.SLASH_USAGE_RESET            = "/sa reset - 버튼을 미니맵 아래로 되돌리기"
+L.SLASH_USAGE_TOGGLE           = "/sa toggle - 감시 켜기/끄기"
+L.SLASH_USAGE_UNLOCK           = "/sa unlock - 잠금을 풀고 버튼 옮기기"
+
+-- == Post-pull Summary ==
+L.SUMMARY_PULL                 = "마지막 전투  -  끊김 %d회 (애드온 %d, 게임 %d)"
+L.SUMMARY_PULL_CLEAN           = "마지막 전투: 끊김 없음. 매끄러웠습니다."
+
+-- == Tooltips ==
+L.TT_ACTION_ADDON              = "- 애드온 끊김: 반복되는 애드온은 업데이트하거나 설정을 바꾸거나 끄세요."
+L.TT_ACTION_ENGINE             = "- 게임/엔진 끊김: 보통 게임이 모델이나 효과를 불러올 때 한 번씩 생깁니다. 같은 장소에서 반복되면 그래픽 설정을 낮추세요."
+L.TT_ACTION_HEADER             = "성능을 개선하려면:"
+L.TT_CTX_COMBAT                = "전투 중"
+L.TT_CTX_ENEMIES               = "적 %d명"
+L.TT_CTX_LATENCY               = "월드 %d ms"
+L.TT_CTX_PREFIX                = "발생 당시: %s"
+L.TT_HINT_BANNERS_OFF          = "팝업 배너가 줄어든 상태입니다. 감시는 계속됩니다 - 오른쪽 클릭으로 변경하세요."
+L.TT_HINT_CLEAR                = "Shift+왼쪽 클릭으로 기록 지우기"
+L.TT_HINT_LOCKED               = "/sa unlock 으로 잠금을 풀면 옮길 수 있습니다."
+L.TT_HINT_MENU                 = "오른쪽 클릭으로 메뉴"
+L.TT_HINT_UNLOCKED             = "끌어서 옮기세요. /sa lock 으로 잠급니다."
+L.TT_HITCH_EXPLAIN             = "끊김이란 그리는 데 너무 오래 걸려 화면이 눈에 띄게 멈칫한 프레임 하나를 말합니다."
+L.TT_RECENT_HEADER             = "최근 끊김"
+L.TT_RECENT_NONE               = "아직 기록된 끊김이 없습니다."
+L.TT_RECENT_RIGHT              = "%d ms  -  %s  -  %s"
+L.TT_RECENT_RIGHT_MULT         = "%d ms  -  평소의 %d배  -  %s"
+L.TT_SEVERITY                  = "심각도: %s"
+L.TT_THROTTLED                 = "감시 일시 중지 - 프레임 속도가 제한됨"
+L.TT_THROTTLED_CVAR            = "모든 프레임이 %s 제한에 정확히 맞춰져 있으므로 끊김이 아닙니다. 감지는 자동으로 다시 시작됩니다."
+L.TT_THROTTLED_WHY             = "모든 프레임의 길이가 같습니다. 끊김이 아니라 프레임 속도 제한입니다. 감지는 자동으로 다시 시작됩니다."
+L.TT_TIME_HOUR                 = "%d시간 전"
+L.TT_TIME_MIN                  = "%d분 전"
+L.TT_TIME_SEC                  = "%d초 전"
+L.TT_TOP_HEADER                = "주요 끊김 원인 (마지막으로 지운 이후)"
+L.TT_TOP_RIGHT                 = "끊김 %d회  -  최대 %d ms  -  %s"
+
+-- == Granular Game Causes ==
+L.HEADLINE_SCENE               = "복잡한 장면"
+L.HEADLINE_SCENE_TIP           = "복잡한 장면: 큰 풀링이나 붐비는 장소에서 게임이 모델과 효과를 불러올 때 정상입니다. 시야 거리와 효과 밀도를 낮추면 완화됩니다."
+L.DEF_SCENE                    = "많은 유닛이 한꺼번에 나타나 게임이 그 모델과 효과를 한 프레임에 불러왔습니다. 큰 풀링이나 사람이 많은 곳에 들어갈 때 흔합니다. 애드온 문제가 아닙니다."
+L.HEADLINE_COMBAT_FX           = "전투 효과"
+L.HEADLINE_COMBAT_FX_TIP       = "전투 효과: 전투 중에 주문 효과와 입자를 불러오는 중입니다. 주문 밀도, 입자 밀도, 투영 텍스처를 낮추면 완화됩니다."
+L.DEF_COMBAT_FX                = "전투 중에 주문 효과, 입자 폭발 또는 투영 텍스처를 불러왔습니다. 우두머리전이나 소규모 몹 무리에서 흔합니다. 애드온 문제가 아닙니다."
+L.HEADLINE_STREAMING           = "월드 불러오기"
+L.HEADLINE_STREAMING_TIP       = "월드 불러오기: 이동하는 동안 게임이 지형을 불러옵니다. 빠른 SSD가 가장 효과적이고, 시야 거리를 낮추면 완화됩니다."
+L.DEF_STREAMING                = "새로운 지역에 들어서면서 게임이 지형과 텍스처를 불러왔습니다. 비행이나 탈것 이동 중에 흔합니다. 애드온 문제가 아닙니다."
+
+-- == Toast Banners ==
+L.TOAST_ONE                    = "%s  -  %d ms"
+L.TOAST_MANY                   = "%s  x%d  -  최대 %d ms"
+
+-- == Last Pulls (tooltip) ==
+L.TT_PULLS_HEADER              = "최근 전투 5회 (이번 접속)"
+L.TT_PULLS_NONE                = "이번 접속에서 끝난 전투가 아직 없습니다."
+L.TT_PULL_CLEAN                = "깨끗함 - 끊김 없음"
+L.TT_PULL_LINE                 = "끊김 %d회 (게임 %d, 애드온 %d)  -  최악 %d ms"
+
+-- == Post-pull Summary (additional) ==
+L.SUMMARY_PULL_WORST           = "마지막 전투  -  끊김 %d회, 최악 %s %d ms (게임: %d)"
+
+-- == Tooltip hint (additional) ==
+L.TT_HINT_EXPORT               = "왼쪽 클릭으로 전체 보고서와 조언 보기"
+
+-- == Export Report ==
+L.EXPORT_SCOPE                 = "아래 수치는 마지막으로 기록을 지운 이후 전체를 포함합니다."
+L.EXPORT_TLDR                  = "기록된 끊김: %d회  -  애드온: %d, 게임: %d."
+L.EXPORT_TLDR_CLEAN            = "기록된 끊김이 없습니다. 지금까지 매끄럽습니다."
+L.EXPORT_WORST                 = "최악의 애드온: %s  -  %d ms (평소 비용의 %d배)"
+L.EXPORT_WORST_NOMULT          = "최악의 애드온: %s  -  %d ms"
+L.EXPORT_TOP_HEADER            = "주요 애드온 원인:"
+L.EXPORT_TOP_LINE              = "  - %s  -  끊김 %d회, 최대 %d ms"
+L.EXPORT_CAUSES_HEADER         = "게임 원인 (애드온 아님):"
+L.EXPORT_CAUSE_LINE            = "  - %s: %d"
+L.EXPORT_BASELINE              = "평소 프레임 시간: %d ms"
+L.EXPORT_BASELINE_WARMING      = "평소 프레임 시간: 아직 측정 중."
+
+-- == Advice Panel ==
+L.PANEL_REPORT_HEADER          = "공유용 보고서 (Ctrl+C로 복사)"
+L.ADVISE_WHY_HEADER            = "왜 끊기나요?"
+L.ADVISE_VERDICT_NONE          = "아직 기록된 끊김이 없습니다. 조금 플레이한 뒤 다시 확인하세요."
+L.ADVISE_VERDICT_GAME          = "끊김 대부분은 애드온이 아니라 게임 자체에서 발생합니다 (%d/%d)."
+L.ADVISE_VERDICT_ADDON         = "끊김 대부분은 애드온에서 발생합니다 (%d/%d). 원인 애드온은 오른쪽 보고서를 확인하세요."
+L.ADVISE_WHERE                 = "주로 발생하는 상황: %s."
+L.ADVISE_PAT_COMBAT            = "전투 중"
+L.ADVISE_PAT_TRAVEL            = "이동 중"
+L.ADVISE_PAT_ZONE              = "%s에서"
+L.ADVISE_CAUSE_HEADER          = "원인"
+L.ADVISE_TRY_HEADER            = "시도해 볼 만한 것"
+L.ADVISE_RAID_NOTE             = "급등이 공격대에 몰려 있으므로 아래 값은 공격대 그래픽 설정입니다."
+L.ADVISE_SETTINGS_OK           = "그래픽 설정은 이미 적당해 보입니다. 남은 급등은 하드웨어, 드라이버, 리소스 불러오기 때문일 가능성이 높으며 여기서 바꿀 수 있는 설정이 아닙니다."
+L.ADVISE_SETTINGS_HEADER       = "관련 설정"
+L.ADVISE_SLIDER                = "%s 낮추기 - 현재 %s (기본값 %s)"
+L.ADVISE_TOGGLE                = "%s 끄기 (현재 켜짐)"
+L.ADVISE_SETTING_LINE          = "%s: %s (기본값 %s)"
+L.ADVISE_CHANGE_WHERE          = "게임 메뉴에서 변경하세요: 시스템 > 그래픽 (및 고급)."
+L.ADVISE_AIO                   = "Advanced Interface Options도 사용 중입니다 - /aio 를 입력하면 전체 CVar 목록을 볼 수 있습니다."
+
+L.ADVISE_TIP_COMBAT_FX         = "전투는 주문과 입자 효과를 불러옵니다. 아래 설정이 그 부담을 가장 많이 줄여 줍니다."
+L.ADVISE_TIP_SCENE             = "큰 풀링과 인파는 많은 모델을 한꺼번에 불러옵니다. 입자 밀도와 시야 거리가 가장 효과적입니다."
+L.ADVISE_TIP_STREAMING         = "이동 중에는 월드를 디스크에서 불러옵니다. SSD가 가장 효과적이며, 시야 거리를 낮추면 한 번에 불러오는 양이 줄어듭니다."
+L.ADVISE_TIP_SUSTAINED         = "급등만이 아니라 프레임이 전반적으로 느립니다. 가장 무거운 설정을 낮추고 백그라운드 프로그램(브라우저, Discord 오버레이)을 종료하세요."
+L.ADVISE_TIP_ENGINE            = "게임이 모델이나 효과를 불러올 때 생기는 단발성 프레임입니다. 흔히 정상이며, 아래 설정으로 빈도를 줄일 수 있습니다."
+L.ADVISE_TIP_GC                = "메모리 정리가 잦다면 보통 메모리를 낭비하는 애드온이 있다는 뜻입니다. 보고서의 주요 애드온 원인을 확인하세요."
+L.ADVISE_TIP_LOADING           = "불러오기 급등은 정상입니다. 빠른 SSD가 시간을 줄여 주며, 그 밖에 바꿀 것은 없습니다."
+
+-- == Units and shared fragments ==
+L.UNIT_KB                      = "%d KB"
+L.UNIT_MB                      = "%.1f MB"
+L.LIST_SEP                     = ", "
+L.DUR_HM                       = "%d시간 %d분"
+L.DUR_M                        = "%d분"
+L.DUR_S                        = "%d초"
+
+-- == Allocation buckets ==
+L.ALLOC_NONE                   = "메모리 할당 거의 없음"
+L.ALLOC_SMALL                  = "메모리 약간 할당"
+L.ALLOC_MEDIUM                 = "몇 MB 할당"
+L.ALLOC_LARGE                  = "메모리 대량 할당"
+
+-- == Export Report: detail ==
+L.EXPORT_CLIENT                = "클라이언트 %s (빌드 %s)"
+L.EXPORT_CLIENT_FLAVOR         = "클라이언트 %s %s (빌드 %s)"
+L.EXPORT_SPAN                  = "%s 동안 측정  -  분당 약 %.1f회."
+L.EXPORT_THROTTLED             = "추가로 %s은(는) 위에 포함되지 않았습니다: 프레임 속도가 제한되어 있어(창이 백그라운드에 있거나 FPS 제한 설정) 측정하지 않았습니다."
+L.EXPORT_BASELINE_CAP          = "참고: 프레임 속도가 %d(으)로 제한되어 있습니다 (%s). 이것이 여기서의 하한이며 아래 어떤 그래픽 설정으로도 올릴 수 없습니다 - 제한 자체를 바꾸세요."
+L.EXPORT_CHRONIC_HEADER        = "애드온 상시 비용 (끊김 여부와 관계없이 매 프레임):"
+L.EXPORT_CHRONIC_TOTAL         = "  전체 애드온 합계: 매 프레임 약 %.2f ms."
+L.EXPORT_CHRONIC_LINE          = "  - %s: %.2f ms/프레임"
+L.EXPORT_TOP_LINE_VER          = "  - %s (%s)  -  끊김 %d회, 최대 %d ms"
+L.EXPORT_D_WHERE               = "      위치: %s"
+L.EXPORT_D_CTX                 = "%s x%d"
+L.EXPORT_D_SHARE               = "      최악의 순간에는 전체 프레임의 %d%%를 차지"
+L.EXPORT_D_SHARE_ALL           = "      최악의 순간에는 사실상 프레임 전체를 차지"
+L.EXPORT_D_LIBRARY             = "      공유 라이브러리 패키지입니다 - 비용은 이를 호출한 애드온의 것이지만, 게임에서 그 애드온을 알 수 없습니다"
+L.EXPORT_D_LIBRARY_HOST        = "      공유 라이브러리 패키지입니다 (%s에 포함) - 비용은 이를 호출한 애드온의 것입니다"
+L.EXPORT_D_MULT                = "      최대치는 평소 비용의 %d배"
+L.EXPORT_D_ALLOC               = "      해당 프레임에서 %s 할당"
+L.EXPORT_D_PERIOD              = "      규칙적인 주기: 약 %d초마다 (타이머로 추정)"
+L.EXPORT_D_OVER                = "      게임 자체 세션 카운터  -  100 ms 초과 프레임: %d, 500 ms 초과: %d"
+L.EXPORT_D_OVER_NOTE           = "      (클라이언트는 불러오기 화면을 포함한 전체 세션을 세지만, StutterAlert는 이를 제외합니다)"
+L.EXPORT_D_CO                  = "      %s와(과) 함께 급등하기도 함 (x%d) - 같은 원인일 가능성"
+L.EXPORT_D_VER_SPAN            = "      버전 %s부터 %s까지 기록됨"
+L.EXPORT_D_VER_NOW             = "      %s에서 기록됨; 현재 %s 사용 중"
+L.EXPORT_D_MEM                 = "      사용 중인 메모리: %s"
+L.EXPORT_D_MEM_GROW            = "      사용 중인 메모리: %s (지난 확인 이후 %s 증가)"
+L.EXPORT_D_SIG                 = "      %d/%d회가 같은 패턴: %s"
+L.EXPORT_D_SIG_ALL             = "      모든 끊김이 같은 패턴: %s"
+L.EXPORT_SIG_COMBAT            = "전투 중"
+L.EXPORT_SIG_CALM              = "비전투"
+L.EXPORT_SIG_EVENT             = "%s에 의해 발생"
+
+-- == Export Report: events ==
+L.EXPORT_D_EV_PEAK             = "      해당 프레임의 이벤트: %s"
+L.EXPORT_D_EV_ITEM             = "%s x%d"
+L.EXPORT_D_EV_COMMON           = "      가장 흔한 이벤트 (%d/%d): %s"
+L.EXPORT_D_EV_PREFIX           = "      애드온 통신: 접두사가 %s인 메시지 (x%d)"
+L.EXPORT_D_EV_BURST            = "      해당 프레임의 추가 이벤트: %d  -  이벤트 폭주"
+L.EXPORT_D_EV_NONE             = "      해당 프레임에 발생한 이벤트 없음 - 작업이 OnUpdate나 타이머에서 나왔습니다"
+
+-- == CVar display names (the game's own options wording) ==
+L.CVAR_MAX_FPS                 = "최대 전경 FPS"
+L.CVAR_MAX_FPS_BK              = "최대 배경 FPS"
+L.CVAR_VIEW_DISTANCE           = "시야 거리"
+L.CVAR_ENV_DETAIL              = "환경 세부 묘사"
+L.CVAR_GROUND_CLUTTER          = "지면 효과 밀도"
+L.CVAR_SHADOW                  = "그림자 품질"
+L.CVAR_LIQUID                  = "액체 세부 묘사"
+L.CVAR_SUNSHAFTS               = "태양 광선"
+L.CVAR_PARTICLE                = "입자 밀도"
+L.CVAR_SSAO                    = "주변광 차폐"
+L.CVAR_DEPTH                   = "심도 효과"
+L.CVAR_TEXTURE_RES             = "텍스처 해상도"
+L.CVAR_PROJECTED               = "투영 텍스처"
+L.CVAR_SPELL_DENSITY           = "주문 밀도"
+
+-- == Client / Flavor Names ==
+L.FLAVOR_RETAIL                = "본 서버"
+L.FLAVOR_MISTS                 = "판다리아의 안개 클래식"
+L.FLAVOR_CATA                  = "대격변 클래식"
+L.FLAVOR_WRATH                 = "리치 왕의 분노 클래식"
+L.FLAVOR_TBC                   = "불타는 성전 클래식"
+L.FLAVOR_CLASSIC_ERA           = "클래식 에라"

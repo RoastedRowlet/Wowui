@@ -35,12 +35,12 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-	{1276586, duration = 8, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1234753))}, -- Bedrock Surge
-	{1234802, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Fertile Loam
-	{1235574, soundOnApplied = "info", note = CL.debuffWalkIntoObjectNote:format(CL.beam)}, -- Lightblossom Beam
-	{1235828, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Light-Scorched Earth
-	{1261276, duration = 3, note = CL.debuffTargetedNote:format(mod:SpellName(1235640))}, -- Thornblade
-	{1235865, duration = 12, dispel = "bleed", mechanic = "bleeding", soundOnApplied = "alert", note = CL.debuffDotAfterCastNote:format(mod:SpellName(1235640))}, -- Thornblade
+	{1276586, duration = 8, tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(1234753))}, -- Bedrock Surge
+	{1234802, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Fertile Loam
+	{1235574, soundOnApplied = "info", tip = CL.debuffWalkIntoObjectNote:format(CL.beam)}, -- Lightblossom Beam
+	{1235828, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Light-Scorched Earth
+	{1261276, duration = 3, tip = CL.debuffTargetedNote:format(mod:SpellName(1235640))}, -- Thornblade
+	{1235865, duration = 12, dispel = "bleed", mechanic = "bleeding", soundOnApplied = "alert", tip = CL.debuffDotAfterCastNote:format(mod:SpellName(1235640))}, -- Thornblade
 })
 
 --------------------------------------------------------------------------------

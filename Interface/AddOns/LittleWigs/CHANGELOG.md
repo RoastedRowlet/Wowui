@@ -1,29 +1,18 @@
 # LittleWigs
 
-## [v12.1.13](https://github.com/BigWigsMods/LittleWigs/tree/v12.1.13) (2026-09-06)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.1.12...v12.1.13) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v12.1.14](https://github.com/BigWigsMods/LittleWigs/tree/v12.1.14) (2026-09-12)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.1.13...v12.1.14) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
-- BfA/KingsRest/Trash: Fix Suppresion Slam aura info  
-- Midnight/MurderRow/KystiaManaheart: Add default sound for Fel Spray  
-- Midnight/MurderRow/Trash: Update aura data  
-- Midnight/TheBlindingVale/Trash: Update aura data  
-- Midnight/VoidscarArena/Trash: Update aura data  
-- Midnight/AltarOfFangs/Trash: Update aura data  
-- Midnight/VoidscarArena/Atroxus: Fix note  
-- Midnight/VoidscarArena/Charonus: Update aura data  
-- Midnight/VoidscarArena/Atroxus: Update aura notes  
-- Midnight/VoidscarArena/TazRah: Update aura data  
-- Midnight/TheBlindingVale/LightblossomTrinity: Update aura data  
-- Midnight/TheBlindingVale/IkuzzTheLightHunter: Update aura data  
-- Midnight/TheBlindingVale/LightwardenRuia: Update aura data  
-- Midnight/TheBlindingVale/Ziekket: Update aura data  
-- Midnight/MurderRow/LithielCinderfury: Update aura data  
-- Midnight/MurderRow/XathuuxTheAnnihilator: Update aura data  
-- Midnight/MurderRow/ZaenBladesorrow: Update aura data  
-- Midnight/MurderRow/KystiaManaheart: Update aura data  
-- Midnight/AltarOfFangs/Zuljan: Update aura data  
-- Midnight/AltarOfFangs/TheWrithingCoil: Update aura data  
-- Midnight/AltarOfFangs/Ravi: Update aura data  
-- BfA/KingsRest/Trash: Update aura data  
-- Dragonflight/RubyLifePools/Trash: Update aura data  
-- Midnight/Trash: Set menu sort order  
+- BfA/KingsRest/Trash: Additional aura data  
+- Dragonflight/RubyLifePools/MelidrussaChillworn: Fix possible timer issue after Frost Overload  
+- Midnight/Trash: Suppress alert on cast success after switching targets  
+- Midnight/VoidscarArena/TazRah: Disable error print  
+- Dragonflight/RubyLifePools/KokiaBlazehoof: Add difficulty marker to Scorched Earth  
+- Midnight/MurderRow/Trash: Disguised  
+- BfA/TempleOfSethraliss/Merektha: Add difficulty marker to A Knot of Snakes  
+- Dragonflight/RubyLifePools/MelidrussaChillworn: Add difficutly marker to Frost Overload  
+- Midnight/DenOfNalorakk/Nalorakk: Disable error print  
+- BfA/KingsRest/Dazar: Disable error print  
+- Convert most aura notes to tips  
+- Use `self:UnitLevel`  
+- Bump toc  

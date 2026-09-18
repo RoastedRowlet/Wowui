@@ -2,7 +2,7 @@ local _, NSI = ... -- Internal namespace
 
 -- Built-in aura sound entries accept:
 -- {spellID = 12345, sound = "SoundName"}                         -- defaults to unit = "player", eventType = "applied"
--- {spellID = 12345, sound = "SoundName", unit = "target"}         -- unit can also be cotank, a player name, raid/party unit, bossN, focus, etc.
+-- {spellID = 12345, sound = "SoundName", unit = "target"}         -- unit can also be cotank, a player name, raid/party unit, bossN, raid, party, boss, focus, etc.
 -- {spellID = 12345, sound = "SoundName", eventType = "removed"}   -- eventType can be "applied", "removed", or "stackGain"
 -- Duplicate spell/unit/event combinations are supported; built-in entry keys are assigned automatically.
 NSI.AuraSoundCategories = {
@@ -232,6 +232,19 @@ NSI.AuraSoundCategories = {
         {key = "den_of_nalorakk", label = "Den of Nalorakk", entries = {
             {spellID = 1242869, sound = "Spread"}, -- Echoing Maul
         }},
+        -- Season 3
+        {key = "thraegars_stand", label = "Thraegar's Stand", entries = {
+        }},
+        {key = "uldaman", label = "Uldaman", entries = {
+        }},
+        {key = "sanguine_depths", label = "Sanguine Depths", entries = {
+        }},
+        {key = "the_underrot", label = "The Underrot", entries = {
+        }},
+        {key = "iron_docks", label = "Iron Docks", entries = {
+        }},
+        {key = "the_stonecore", label = "The Stonecore", entries = {
+        }},
     },
     Custom = {},
 }
@@ -253,17 +266,30 @@ NSI.AuraSoundDungeonIcons = {
     seat_of_the_triumvirate = 1711340,
     skyreach = 1002596,
     algethar_academy = 4578414,
+    uldaman = 4578418,
+    sanguine_depths = 3601540,
+    the_underrot = 2011151,
+    iron_docks = 1003154,
+    the_stonecore = 409595,
 }
 
-NSI.CurrentAuraSoundDungeonKeys = {
-    altar_of_fangs = true,
-    temple_of_sethraliss = true,
-    ruby_life_pools = true,
-    kings_rest = true,
-    voidscar_arena = true,
-    blinding_vale = true,
-    murder_row = true,
-    den_of_nalorakk = true,
+NSI.AuraSoundDungeonSeasonKeys = {
+    magisters_terrace = {1, 3},
+    maisara_caverns = {1, 3},
+    altar_of_fangs = 2,
+    temple_of_sethraliss = 2,
+    ruby_life_pools = 2,
+    kings_rest = 2,
+    voidscar_arena = 2,
+    blinding_vale = 2,
+    murder_row = 2,
+    den_of_nalorakk = 2,
+    thraegars_stand = 3,
+    uldaman = 3,
+    sanguine_depths = 3,
+    the_underrot = 3,
+    iron_docks = 3,
+    the_stonecore = 3,
 }
 
 function NSI:GetAuraSoundKey(spellID, unit, eventType)
@@ -331,8 +357,21 @@ function NSI:ResolveAuraSoundUnit(unit)
 end
 
 function NSI:ResolveAuraSoundUnits(unit)
-    if type(unit) == "string" and strlower(strtrim(unit)) == "cotank" then
-        return self:GetCoTankUnits()
+    if type(unit) == "string" then
+        local lower = strlower(strtrim(unit))
+        if lower == "cotank" then
+            return self:GetCoTankUnits()
+        end
+
+        local multiUnitCounts = {raid = 40, party = 4, boss = 10}
+        local count = multiUnitCounts[lower]
+        if count then
+            local units = {}
+            for index = 1, count do
+                units[index] = lower .. index
+            end
+            return units
+        end
     end
 
     local resolvedUnit = self:ResolveAuraSoundUnit(unit)

@@ -1,11 +1,21 @@
 -- ExwindTools 的游戏内更新日志正文。由发布打包器写入；Core 只提供共享查看窗口。
 ExwindTools_ChangelogData = {
     changelog = {
-        version = "v26.9.10.1512",
-        title = "v26.9.10.1512 更新日志",
-        publishedAt = "2026-09-10 15:12",
+        version = "v26.9.13.0946",
+        title = "v26.9.13.0946 更新日志",
+        publishedAt = "2026-09-13 09:46",
         fontSize = 14,
         content = [[
+@H1@ v26.9.13.0946
+
+@CN@ @H2@ 通用
+@CN@ - 新增DK智能版版血沸模块 可以跟普通版并存
+@CN@ - 智能版本原理:需要手动打才会显示 否则不显示 也可以理解为看到图标才打 没看到就什么都不管
+
+@EN@ @H2@ General
+@EN@ - Added a smart DK Blood Boil module that can coexist with the standard version
+@EN@ - How the smart version works: it only appears when you need to cast it manually; otherwise, it stays hidden. In other words, cast it when you see the icon, and ignore it when you don't
+
 @H1@ v26.9.10.1512
 
 @CN@ @H2@ 周围怪物DEBUFF

@@ -1,0 +1,262 @@
+if GetLocale() ~= "zhTW" then return end
+
+local _, ns = ...
+local L = ns.L
+
+-- Traditional Chinese (Taiwan). Rules and argument notes are in enUS.lua.
+
+-- == General ==
+L.UNKNOWN_SOURCE               = "未知"
+L.TITLE_VERSION                = "%s v%s"
+
+-- == Context Labels ==
+L.CTX_CITY                     = "主城"
+L.CTX_WITH_COMBAT              = "%s（戰鬥中）"
+L.CTX_DUNGEON                  = "地城 / 傳奇鑰石"
+L.CTX_DUNGEON_PLAIN            = "地城"
+L.CTX_PVP                      = "PvP"
+L.CTX_RAID                     = "團隊副本"
+L.CTX_SCENARIO                 = "事件"
+L.CTX_WORLD                    = "野外"
+
+-- == Cause Definitions ==
+L.DEF_ADDON                    = "遊戲繪製一幀畫面時，這個插件做了太多工作。"
+L.DEF_ENGINE                   = "遊戲本身的一次單幀緩慢，通常發生在載入模型或法術特效時。不是你的介面問題。"
+L.DEF_GC                       = "遊戲短暫暫停，清理插件產生的暫存記憶體（即垃圾回收）。偶爾發生且時間很短屬於正常。"
+L.DEF_LOADING                  = "你剛切換區域或來到新地點，遊戲正在載入該區域。"
+L.DEF_SUSTAINED                = "不只是這一幀，你的畫面已經慢了一段時間。這指向圖形設定或電腦本身，而不是插件。"
+L.DEF_UNCLEAR                  = "這一幀耗時過長，但無法歸咎於你的插件，也找不到明確的遊戲原因。"
+
+-- == Overlay Headlines ==
+L.HEADLINE_ENGINE              = "引擎尖峰"
+L.HEADLINE_ENGINE_TIP          = "遊戲引擎：通常不需處理。如果總在同一地點出現，表示遊戲正在那裡載入資源。"
+L.HEADLINE_GC                  = "記憶體清理"
+L.HEADLINE_GC_TIP              = "記憶體清理：通常沒問題。如果頻繁出現，可能有插件在浪費記憶體 - 查看主要來源。"
+L.HEADLINE_LOADING             = "區域載入"
+L.HEADLINE_LOADING_TIP         = "正在載入區域：屬於正常。把魔獸世界裝在高速固態硬碟上可以縮短這類卡頓。"
+L.HEADLINE_SUSTAINED           = "持續變慢"
+L.HEADLINE_SUSTAINED_TIP       = "持續變慢：降低陰影、視野距離或特效，並關閉背景程式。"
+L.HEADLINE_UNCLEAR             = "原因不明"
+L.HEADLINE_UNCLEAR_TIP         = "來源不明：暫時不需調整。留意「最近」和「主要來源」中是否出現規律。"
+
+-- == Menu Options ==
+L.MENU_BANNERS                 = "彈出橫幅"
+L.MENU_BANNERS_ALL             = "全部（即時卡頓 + 戰鬥總結）"
+L.MENU_BANNERS_OFF             = "關閉（僅圖示和滑鼠提示）"
+L.MENU_BANNERS_SUMMARY         = "僅戰鬥總結"
+L.MENU_CLEAR_HIST              = "清除卡頓紀錄"
+L.MENU_GROWTH_AUTO             = "自動（智慧停靠）"
+L.MENU_GROWTH_DIR              = "橫幅延伸方向"
+L.MENU_GROWTH_LD               = "向左下延伸"
+L.MENU_GROWTH_LU               = "向左上延伸"
+L.MENU_GROWTH_RD               = "向右下延伸"
+L.MENU_GROWTH_RU               = "向右上延伸"
+L.MENU_LOCK                    = "鎖定位置"
+L.MENU_RESET                   = "重設到選單旁"
+L.MENU_SIZE                    = "按鈕大小"
+L.MENU_SIZE_DEFAULT            = "預設（選單大小）"
+L.MENU_SIZE_M                  = "中（64x64）"
+L.MENU_SIZE_S                  = "小（32x32）"
+L.PREVIEW_MODE                 = "預覽模式"
+
+-- == Severity Levels ==
+L.SEV_CALM                     = "平穩"
+L.SEV_CRITICAL                 = "嚴重"
+L.SEV_ELEVATED                 = "偏高"
+
+-- == Slash Commands ==
+L.SLASH_BANNERS                = "彈出橫幅：%s"
+L.SLASH_BANNERS_ALL            = "全部（即時卡頓和戰鬥總結）"
+L.SLASH_BANNERS_OFF            = "關閉 - 圖示顏色和滑鼠提示仍然有效"
+L.SLASH_BANNERS_SUMMARY        = "僅戰鬥總結"
+L.SLASH_DISABLED               = "監控已關閉。"
+L.SLASH_ENABLED                = "監控已開啟。"
+L.SLASH_LOCKED                 = "按鈕已鎖定。"
+L.SLASH_RESET                  = "按鈕已重設到小地圖下方。"
+L.SLASH_UNLOCKED               = "按鈕已解鎖 - 拖曳到你想要的位置。"
+L.SLASH_USAGE_BANNERS          = "/sa banners all|summary|off - 選擇顯示哪些彈出橫幅"
+L.SLASH_USAGE_HEADER           = "StutterAlert 指令："
+L.SLASH_USAGE_LOCK             = "/sa lock - 鎖定按鈕位置"
+L.SLASH_USAGE_REPORT           = "/sa report - 開啟完整報告和建議"
+L.SLASH_USAGE_RESET            = "/sa reset - 把按鈕移回小地圖下方"
+L.SLASH_USAGE_TOGGLE           = "/sa toggle - 開啟或關閉監控"
+L.SLASH_USAGE_UNLOCK           = "/sa unlock - 解鎖以拖曳按鈕"
+
+-- == Post-pull Summary ==
+L.SUMMARY_PULL                 = "上一場戰鬥  -  卡頓 %d 次（插件 %d，遊戲 %d）"
+L.SUMMARY_PULL_CLEAN           = "上一場戰鬥：沒有卡頓，很流暢。"
+
+-- == Tooltips ==
+L.TT_ACTION_ADDON              = "- 插件卡頓：更新、重新設定或停用反覆出問題的插件。"
+L.TT_ACTION_ENGINE             = "- 遊戲/引擎卡頓：通常是遊戲載入模型或特效時的偶發情況。如果總在同一地點出現，請降低圖形設定。"
+L.TT_ACTION_HEADER             = "如何提升效能："
+L.TT_CTX_COMBAT                = "戰鬥中"
+L.TT_CTX_ENEMIES               = "敵人 %d 個"
+L.TT_CTX_LATENCY               = "世界延遲 %d ms"
+L.TT_CTX_PREFIX                = "發生時：%s"
+L.TT_HINT_BANNERS_OFF          = "彈出橫幅已減少，監控仍在運作 - 右鍵點擊可更改。"
+L.TT_HINT_CLEAR                = "Shift+左鍵點擊清除紀錄"
+L.TT_HINT_LOCKED               = "輸入 /sa unlock 解鎖後可移動。"
+L.TT_HINT_MENU                 = "右鍵點擊開啟選單"
+L.TT_HINT_UNLOCKED             = "拖曳以移動。輸入 /sa lock 鎖定。"
+L.TT_HITCH_EXPLAIN             = "卡頓是指某一幀渲染耗時過長，導致畫面明顯停頓。"
+L.TT_RECENT_HEADER             = "最近的卡頓"
+L.TT_RECENT_NONE               = "尚未紀錄到卡頓。"
+L.TT_RECENT_RIGHT              = "%d ms  -  %s  -  %s"
+L.TT_RECENT_RIGHT_MULT         = "%d ms  -  平時的 %d 倍  -  %s"
+L.TT_SEVERITY                  = "嚴重程度：%s"
+L.TT_THROTTLED                 = "監控已暫停 - 幀數已被限制"
+L.TT_THROTTLED_CVAR            = "每一幀都剛好落在你的「%s」上限上，所以這裡沒有卡頓。偵測會自動恢復。"
+L.TT_THROTTLED_WHY             = "每一幀的時長都相同，這是幀數限制而不是卡頓。偵測會自動恢復。"
+L.TT_TIME_HOUR                 = "%d小時前"
+L.TT_TIME_MIN                  = "%d分鐘前"
+L.TT_TIME_SEC                  = "%d秒前"
+L.TT_TOP_HEADER                = "主要卡頓來源（自上次清除以來）"
+L.TT_TOP_RIGHT                 = "卡頓 %d 次  -  峰值 %d ms  -  %s"
+
+-- == Granular Game Causes ==
+L.HEADLINE_SCENE               = "場景繁忙"
+L.HEADLINE_SCENE_TIP           = "場景繁忙：大型拉怪或人多的地方，遊戲載入單位模型和特效時屬於正常。降低視野距離和特效密度可以緩解。"
+L.DEF_SCENE                    = "大量單位同時出現，遊戲在一幀內載入了它們的模型和特效。常見於大型拉怪或進入人群時。不是插件問題。"
+L.HEADLINE_COMBAT_FX           = "戰鬥特效"
+L.HEADLINE_COMBAT_FX_TIP       = "戰鬥特效：戰鬥中載入法術效果和粒子。降低法術密度、粒子密度和投影材質可以緩解。"
+L.DEF_COMBAT_FX                = "戰鬥中載入了法術特效、粒子爆發或投影材質。常見於首領戰和小群怪物。不是插件問題。"
+L.HEADLINE_STREAMING           = "世界載入"
+L.HEADLINE_STREAMING_TIP       = "世界載入：移動時遊戲正在載入地形。高速固態硬碟幫助最大；降低視野距離可以緩解。"
+L.DEF_STREAMING                = "你進入新區域時，遊戲載入了地形和材質。常見於飛行或騎乘時。不是插件問題。"
+
+-- == Toast Banners ==
+L.TOAST_ONE                    = "%s  -  %d ms"
+L.TOAST_MANY                   = "%s  x%d  -  峰值 %d ms"
+
+-- == Last Pulls (tooltip) ==
+L.TT_PULLS_HEADER              = "最近 5 場戰鬥（本次登入）"
+L.TT_PULLS_NONE                = "本次登入尚無已結束的戰鬥。"
+L.TT_PULL_CLEAN                = "乾淨 - 沒有卡頓"
+L.TT_PULL_LINE                 = "卡頓 %d 次（遊戲 %d，插件 %d）  -  最差 %d ms"
+
+-- == Post-pull Summary (additional) ==
+L.SUMMARY_PULL_WORST           = "上一場戰鬥  -  卡頓 %d 次，最差 %s %d ms（遊戲：%d）"
+
+-- == Tooltip hint (additional) ==
+L.TT_HINT_EXPORT               = "左鍵點擊查看完整報告和建議"
+
+-- == Export Report ==
+L.EXPORT_SCOPE                 = "以下數據涵蓋自上次清除紀錄以來的全部內容。"
+L.EXPORT_TLDR                  = "紀錄到的卡頓：%d 次  -  來自插件：%d，來自遊戲：%d。"
+L.EXPORT_TLDR_CLEAN            = "沒有紀錄到卡頓，目前很流暢。"
+L.EXPORT_WORST                 = "最差插件：%s  -  %d ms（平時負載的 %d 倍）"
+L.EXPORT_WORST_NOMULT          = "最差插件：%s  -  %d ms"
+L.EXPORT_TOP_HEADER            = "主要插件來源："
+L.EXPORT_TOP_LINE              = "  - %s  -  卡頓 %d 次，峰值 %d ms"
+L.EXPORT_CAUSES_HEADER         = "遊戲原因（不是插件）："
+L.EXPORT_CAUSE_LINE            = "  - %s：%d"
+L.EXPORT_BASELINE              = "典型幀時間：%d ms"
+L.EXPORT_BASELINE_WARMING      = "典型幀時間：仍在測量。"
+
+-- == Advice Panel ==
+L.PANEL_REPORT_HEADER          = "可分享的報告（Ctrl+C 複製）"
+L.ADVISE_WHY_HEADER            = "為什麼會卡頓？"
+L.ADVISE_VERDICT_NONE          = "尚未紀錄到卡頓。玩一陣子後再回來看看。"
+L.ADVISE_VERDICT_GAME          = "大部分卡頓來自遊戲本身，而不是插件（%d/%d）。"
+L.ADVISE_VERDICT_ADDON         = "大部分卡頓來自你的插件（%d/%d）。罪魁禍首請見右側報告。"
+L.ADVISE_WHERE                 = "主要發生在：%s。"
+L.ADVISE_PAT_COMBAT            = "戰鬥中"
+L.ADVISE_PAT_TRAVEL            = "移動中"
+L.ADVISE_PAT_ZONE              = "在%s"
+L.ADVISE_CAUSE_HEADER          = "原因"
+L.ADVISE_TRY_HEADER            = "可以嘗試"
+L.ADVISE_RAID_NOTE             = "你的尖峰集中在團隊副本中，因此下面顯示的是團隊副本圖形設定。"
+L.ADVISE_SETTINGS_OK           = "你的圖形設定已經相當保守。剩餘的尖峰可能來自硬體、驅動程式或資源載入 - 不是這裡能調整的設定。"
+L.ADVISE_SETTINGS_HEADER       = "相關設定"
+L.ADVISE_SLIDER                = "降低「%s」 - 目前 %s（預設 %s）"
+L.ADVISE_TOGGLE                = "關閉「%s」（目前開啟）"
+L.ADVISE_SETTING_LINE          = "%s：%s（預設 %s）"
+L.ADVISE_CHANGE_WHERE          = "在遊戲選單中修改：系統 > 圖形（及進階）。"
+L.ADVISE_AIO                   = "你也裝了 Advanced Interface Options - 輸入 /aio 可瀏覽完整的 CVar 清單。"
+
+L.ADVISE_TIP_COMBAT_FX         = "戰鬥會載入法術和粒子特效。下面的設定最能減少這些負擔。"
+L.ADVISE_TIP_SCENE             = "大型拉怪和人群會一次載入大量模型。粒子密度和視野距離最有效。"
+L.ADVISE_TIP_STREAMING         = "移動時遊戲會從硬碟載入世界。固態硬碟幫助最大；降低視野距離可以減少一次載入的量。"
+L.ADVISE_TIP_SUSTAINED         = "你的畫面普遍偏慢，而不只是偶發尖峰。降低最吃效能的設定，並關閉背景程式（瀏覽器、Discord 覆蓋層）。"
+L.ADVISE_TIP_ENGINE            = "這些是遊戲載入模型或特效時的零星單幀。通常屬於正常；下面的設定可以降低出現頻率。"
+L.ADVISE_TIP_GC                = "頻繁的記憶體清理通常代表有插件在浪費記憶體。請查看報告中的主要插件來源。"
+L.ADVISE_TIP_LOADING           = "載入時的尖峰屬於正常。高速固態硬碟可以縮短它們；其他不需調整。"
+
+-- == Units and shared fragments ==
+L.UNIT_KB                      = "%d KB"
+L.UNIT_MB                      = "%.1f MB"
+L.LIST_SEP                     = "、"
+L.DUR_HM                       = "%d小時%d分鐘"
+L.DUR_M                        = "%d分鐘"
+L.DUR_S                        = "%d秒"
+
+-- == Allocation buckets ==
+L.ALLOC_NONE                   = "幾乎沒有配置記憶體"
+L.ALLOC_SMALL                  = "配置了少量記憶體"
+L.ALLOC_MEDIUM                 = "配置了幾 MB"
+L.ALLOC_LARGE                  = "配置了大量記憶體"
+
+-- == Export Report: detail ==
+L.EXPORT_CLIENT                = "用戶端 %s（版本號 %s）"
+L.EXPORT_CLIENT_FLAVOR         = "用戶端 %s %s（版本號 %s）"
+L.EXPORT_SPAN                  = "統計時長 %s  -  約每分鐘 %.1f 次。"
+L.EXPORT_THROTTLED             = "另有 %s 未計入上方：幀數被限制（視窗在背景或設定了 FPS 上限），因此沒有測量。"
+L.EXPORT_BASELINE_CAP          = "注意：你的幀數被限制在 %d（%s）。這就是這裡的下限，下面任何圖形設定都無法提高它 - 請直接修改該上限。"
+L.EXPORT_CHRONIC_HEADER        = "插件持續負載（每一幀都有，無論是否卡頓）："
+L.EXPORT_CHRONIC_TOTAL         = "  所有插件合計：約佔每幀 %.2f ms。"
+L.EXPORT_CHRONIC_LINE          = "  - %s：%.2f ms/幀"
+L.EXPORT_TOP_LINE_VER          = "  - %s（%s）  -  卡頓 %d 次，峰值 %d ms"
+L.EXPORT_D_WHERE               = "      位置：%s"
+L.EXPORT_D_CTX                 = "%s x%d"
+L.EXPORT_D_SHARE               = "      最嚴重時佔整幀的 %d%%"
+L.EXPORT_D_SHARE_ALL           = "      最嚴重時幾乎佔滿整幀"
+L.EXPORT_D_LIBRARY             = "      這是共用函式庫插件包 - 負載屬於呼叫它的插件，而遊戲不允許我們辨識是哪一個"
+L.EXPORT_D_LIBRARY_HOST        = "      這是共用函式庫插件包（隨 %s 附帶）- 負載屬於呼叫它的插件"
+L.EXPORT_D_MULT                = "      峰值為平時負載的 %d 倍"
+L.EXPORT_D_ALLOC               = "      該幀配置了 %s"
+L.EXPORT_D_PERIOD              = "      規律節奏：約每 %d 秒一次（疑似計時器）"
+L.EXPORT_D_OVER                = "      遊戲本身的登入期間計數  -  超過 100 ms 的幀：%d，超過 500 ms：%d"
+L.EXPORT_D_OVER_NOTE           = "      （用戶端統計整個登入期間，包括 StutterAlert 排除在外的載入畫面）"
+L.EXPORT_D_CO                  = "      也曾與 %s 同時出現尖峰（x%d）- 可能是同一個觸發原因"
+L.EXPORT_D_VER_SPAN            = "      紀錄跨越版本 %s 至 %s"
+L.EXPORT_D_VER_NOW             = "      紀錄於 %s；你現在使用的是 %s"
+L.EXPORT_D_MEM                 = "      記憶體使用量：%s"
+L.EXPORT_D_MEM_GROW            = "      記憶體使用量：%s（自上次檢查增加了 %s）"
+L.EXPORT_D_SIG                 = "      %d/%d 次有相同規律：%s"
+L.EXPORT_D_SIG_ALL             = "      所有卡頓都有相同規律：%s"
+L.EXPORT_SIG_COMBAT            = "戰鬥中"
+L.EXPORT_SIG_CALM              = "非戰鬥"
+L.EXPORT_SIG_EVENT             = "由 %s 觸發"
+
+-- == Export Report: events ==
+L.EXPORT_D_EV_PEAK             = "      該幀的事件：%s"
+L.EXPORT_D_EV_ITEM             = "%s x%d"
+L.EXPORT_D_EV_COMMON           = "      最常見的事件（%d/%d）：%s"
+L.EXPORT_D_EV_PREFIX           = "      插件通訊：前綴為 %s 的訊息（x%d）"
+L.EXPORT_D_EV_BURST            = "      該幀的其他事件：%d  -  事件爆發"
+L.EXPORT_D_EV_NONE             = "      該幀沒有觸發任何事件 - 工作來自 OnUpdate 或計時器"
+
+-- == CVar display names (the game's own options wording) ==
+L.CVAR_MAX_FPS                 = "前景最大 FPS"
+L.CVAR_MAX_FPS_BK              = "背景最大 FPS"
+L.CVAR_VIEW_DISTANCE           = "視野距離"
+L.CVAR_ENV_DETAIL              = "環境細節"
+L.CVAR_GROUND_CLUTTER          = "地面雜物"
+L.CVAR_SHADOW                  = "陰影品質"
+L.CVAR_LIQUID                  = "液體細節"
+L.CVAR_SUNSHAFTS               = "陽光效果"
+L.CVAR_PARTICLE                = "粒子密度"
+L.CVAR_SSAO                    = "環境光遮蔽"
+L.CVAR_DEPTH                   = "景深效果"
+L.CVAR_TEXTURE_RES             = "材質解析度"
+L.CVAR_PROJECTED               = "投影材質"
+L.CVAR_SPELL_DENSITY           = "法術密度"
+
+-- == Client / Flavor Names ==
+L.FLAVOR_RETAIL                = "正式版"
+L.FLAVOR_MISTS                 = "潘達利亞之謎經典版"
+L.FLAVOR_CATA                  = "浩劫與重生經典版"
+L.FLAVOR_WRATH                 = "巫妖王之怒經典版"
+L.FLAVOR_TBC                   = "燃燒的遠征經典版"
+L.FLAVOR_CLASSIC_ERA           = "經典時代"

@@ -1,0 +1,262 @@
+if GetLocale() ~= "deDE" then return end
+
+local _, ns = ...
+local L = ns.L
+
+-- German. Rules and argument notes are in enUS.lua.
+
+-- == General ==
+L.UNKNOWN_SOURCE               = "Unbekannt"
+L.TITLE_VERSION                = "%s v%s"
+
+-- == Context Labels ==
+L.CTX_CITY                     = "Stadt"
+L.CTX_WITH_COMBAT              = "%s (im Kampf)"
+L.CTX_DUNGEON                  = "Dungeon / M+"
+L.CTX_DUNGEON_PLAIN            = "Dungeon"
+L.CTX_PVP                      = "PvP"
+L.CTX_RAID                     = "Schlachtzug"
+L.CTX_SCENARIO                 = "Szenario"
+L.CTX_WORLD                    = "Offene Welt"
+
+-- == Cause Definitions ==
+L.DEF_ADDON                    = "Dieses Addon hat zu viel gearbeitet, während das Spiel ein einzelnes Frame gezeichnet hat."
+L.DEF_ENGINE                   = "Ein einzelnes langsames Frame des Spiels selbst, oft beim Laden eines Modells oder Zaubereffekts. Nicht deine UI."
+L.DEF_GC                       = "Das Spiel hat kurz pausiert, um temporären Speicher aufzuräumen, den deine Addons angelegt haben (Garbage Collection). Klein und gelegentlich ist normal."
+L.DEF_LOADING                  = "Du hast gerade die Zone gewechselt oder bist an einen neuen Ort gekommen, und das Spiel hat ihn nachgeladen."
+L.DEF_SUSTAINED                = "Deine Frames sind schon eine Weile langsam, nicht nur dieses eine. Das deutet auf Grafikeinstellungen oder deinen PC hin, nicht auf deine Addons."
+L.DEF_UNCLEAR                  = "Dieses Frame hat zu lange gedauert, aber wir konnten es weder deinen Addons noch einer klaren Ursache im Spiel zuordnen."
+
+-- == Overlay Headlines ==
+L.HEADLINE_ENGINE              = "Engine-Spitze"
+L.HEADLINE_ENGINE_TIP          = "Spiel-Engine: meist nichts zu tun. Wiederholt es sich an einer Stelle, lädt das Spiel dort Daten nach."
+L.HEADLINE_GC                  = "Speicherbereinigung"
+L.HEADLINE_GC_TIP              = "Speicherbereinigung: meist nichts. Passiert es ständig, arbeitet ein Addon womöglich verschwenderisch - sieh unter Top-Quellen nach."
+L.HEADLINE_LOADING             = "Zonenladen"
+L.HEADLINE_LOADING_TIP         = "Ladebereich: das ist normal. Mit WoW auf einer schnellen SSD werden diese kürzer."
+L.HEADLINE_SUSTAINED           = "Anhaltende Verlangsamung"
+L.HEADLINE_SUSTAINED_TIP       = "Anhaltende Verlangsamung: Schatten, Sichtweite oder Effekte senken und Hintergrundprogramme schließen."
+L.HEADLINE_UNCLEAR             = "Ursache unklar"
+L.HEADLINE_UNCLEAR_TIP         = "Quelle unklar: noch nichts zu ändern. Achte in Neueste und Top auf ein Muster."
+
+-- == Menu Options ==
+L.MENU_BANNERS                 = "Pop-up-Banner"
+L.MENU_BANNERS_ALL             = "Alle (Ruckler live + Pull-Zusammenfassungen)"
+L.MENU_BANNERS_OFF             = "Aus (nur Symbol und Tooltip)"
+L.MENU_BANNERS_SUMMARY         = "Nur Pull-Zusammenfassungen"
+L.MENU_CLEAR_HIST              = "Ruckler-Verlauf löschen"
+L.MENU_GROWTH_AUTO             = "Automatisch (intelligentes Andocken)"
+L.MENU_GROWTH_DIR              = "Wachstumsrichtung der Banner"
+L.MENU_GROWTH_LD               = "Nach links und unten"
+L.MENU_GROWTH_LU               = "Nach links und oben"
+L.MENU_GROWTH_RD               = "Nach rechts und unten"
+L.MENU_GROWTH_RU               = "Nach rechts und oben"
+L.MENU_LOCK                    = "Position sperren"
+L.MENU_RESET                   = "Position auf Menü zurücksetzen"
+L.MENU_SIZE                    = "Symbolgröße"
+L.MENU_SIZE_DEFAULT            = "Standard (Menügröße)"
+L.MENU_SIZE_M                  = "Mittel (64x64)"
+L.MENU_SIZE_S                  = "Klein (32x32)"
+L.PREVIEW_MODE                 = "Vorschaumodus"
+
+-- == Severity Levels ==
+L.SEV_CALM                     = "Ruhig"
+L.SEV_CRITICAL                 = "Kritisch"
+L.SEV_ELEVATED                 = "Erhöht"
+
+-- == Slash Commands ==
+L.SLASH_BANNERS                = "Pop-up-Banner: %s"
+L.SLASH_BANNERS_ALL            = "alle (Ruckler live und Pull-Zusammenfassungen)"
+L.SLASH_BANNERS_OFF            = "aus - Symbolfarbe und Tooltip funktionieren weiterhin"
+L.SLASH_BANNERS_SUMMARY        = "nur Pull-Zusammenfassungen"
+L.SLASH_DISABLED               = "Überwachung deaktiviert."
+L.SLASH_ENABLED                = "Überwachung aktiviert."
+L.SLASH_LOCKED                 = "Symbol gesperrt."
+L.SLASH_RESET                  = "Symbol wieder unter die Minikarte gesetzt."
+L.SLASH_UNLOCKED               = "Symbol entsperrt - zieh es, wohin du willst."
+L.SLASH_USAGE_BANNERS          = "/sa banners all|summary|off - welche Pop-up-Banner erscheinen"
+L.SLASH_USAGE_HEADER           = "StutterAlert-Befehle:"
+L.SLASH_USAGE_LOCK             = "/sa lock - Symbol an seinem Platz sperren"
+L.SLASH_USAGE_REPORT           = "/sa report - vollständigen Bericht und Tipps öffnen"
+L.SLASH_USAGE_RESET            = "/sa reset - Symbol wieder unter die Minikarte setzen"
+L.SLASH_USAGE_TOGGLE           = "/sa toggle - Überwachung ein- oder ausschalten"
+L.SLASH_USAGE_UNLOCK           = "/sa unlock - entsperren, um das Symbol zu verschieben"
+
+-- == Post-pull Summary ==
+L.SUMMARY_PULL                 = "Letzter Pull  -  Ruckler: %d (Addons %d, Spiel %d)"
+L.SUMMARY_PULL_CLEAN           = "Letzter Pull: kein Ruckeln. Flüssig."
+
+-- == Tooltips ==
+L.TT_ACTION_ADDON              = "- Addon-Ruckler: Wiederholungstäter aktualisieren, anders einstellen oder deaktivieren."
+L.TT_ACTION_ENGINE             = "- Spiel-/Engine-Ruckler: meist einmalig, wenn das Spiel ein Modell oder einen Effekt lädt. Wiederholt es sich an einer Stelle, senke deine Grafikeinstellungen."
+L.TT_ACTION_HEADER             = "So verbesserst du die Leistung:"
+L.TT_CTX_COMBAT                = "im Kampf"
+L.TT_CTX_ENEMIES               = "Gegner: %d"
+L.TT_CTX_LATENCY               = "Welt %d ms"
+L.TT_CTX_PREFIX                = "Dabei: %s"
+L.TT_HINT_BANNERS_OFF          = "Pop-up-Banner sind reduziert. Die Überwachung läuft weiter - Rechtsklick zum Ändern."
+L.TT_HINT_CLEAR                = "Umschalt+Linksklick, um den Verlauf zu löschen"
+L.TT_HINT_LOCKED               = "Mit /sa unlock entsperren, um es zu verschieben."
+L.TT_HINT_MENU                 = "Rechtsklick für das Menü"
+L.TT_HINT_UNLOCKED             = "Ziehen zum Verschieben. Mit /sa lock sperren."
+L.TT_HITCH_EXPLAIN             = "Ein Ruckler ist ein einzelnes Frame, dessen Darstellung zu lange gedauert hat - das sichtbare Ruckeln."
+L.TT_RECENT_HEADER             = "Neueste Ruckler"
+L.TT_RECENT_NONE               = "Noch keine Ruckler aufgezeichnet."
+L.TT_RECENT_RIGHT              = "%d ms  -  %s  -  %s"
+L.TT_RECENT_RIGHT_MULT         = "%d ms  -  %dx üblich  -  %s"
+L.TT_SEVERITY                  = "Schweregrad: %s"
+L.TT_THROTTLED                 = "Überwachung pausiert - Bildrate ist begrenzt"
+L.TT_THROTTLED_CVAR            = "Jedes Frame landet genau auf deinem Limit für %s, also ist hier nichts ein Ruckler. Die Erkennung setzt von selbst wieder ein."
+L.TT_THROTTLED_WHY             = "Jedes Frame ist gleich lang - das ist eine Bildratenbegrenzung, kein Ruckler. Die Erkennung setzt von selbst wieder ein."
+L.TT_TIME_HOUR                 = "vor %d Std."
+L.TT_TIME_MIN                  = "vor %d Min."
+L.TT_TIME_SEC                  = "vor %d Sek."
+L.TT_TOP_HEADER                = "Top-Ruckelquellen (seit dem letzten Löschen)"
+L.TT_TOP_RIGHT                 = "Ruckler: %d  -  Spitze %d ms  -  %s"
+
+-- == Granular Game Causes ==
+L.HEADLINE_SCENE               = "Volle Szene"
+L.HEADLINE_SCENE_TIP           = "Volle Szene: normal bei großen Pulls oder vollen Knotenpunkten, wenn das Spiel Modelle und Effekte lädt. Sichtweite und Effektdichte senken hilft."
+L.DEF_SCENE                    = "Viele Einheiten sind gleichzeitig erschienen, und das Spiel hat ihre Modelle und Effekte in einem Frame geladen. Häufig bei großen Pulls oder beim Betreten einer Menge. Nicht deine Addons."
+L.HEADLINE_COMBAT_FX           = "Kampfeffekte"
+L.HEADLINE_COMBAT_FX_TIP       = "Kampfeffekte: Zaubergrafiken und Partikel, die mitten im Kampf laden. Zauberdichte, Partikeldichte und projizierte Texturen senken hilft."
+L.DEF_COMBAT_FX                = "Ein Zaubereffekt, ein Partikelausbruch oder eine projizierte Textur wurde im Kampf geladen. Häufig bei Bossen und kleinen Gruppen. Nicht deine Addons."
+L.HEADLINE_STREAMING           = "Welt-Streaming"
+L.HEADLINE_STREAMING_TIP       = "Welt-Streaming: das Spiel lädt Gelände, während du reist. Eine schnelle SSD hilft am meisten; eine geringere Sichtweite lindert es."
+L.DEF_STREAMING                = "Das Spiel hat Gelände und Texturen nachgeladen, als du neues Gebiet betreten hast. Häufig beim Fliegen oder Reiten. Nicht deine Addons."
+
+-- == Toast Banners ==
+L.TOAST_ONE                    = "%s  -  %d ms"
+L.TOAST_MANY                   = "%s  x%d  -  Spitze %d ms"
+
+-- == Last Pulls (tooltip) ==
+L.TT_PULLS_HEADER              = "Letzte 5 Pulls (diese Sitzung)"
+L.TT_PULLS_NONE                = "In dieser Sitzung noch keine Pulls abgeschlossen."
+L.TT_PULL_CLEAN                = "Sauber - kein Ruckeln"
+L.TT_PULL_LINE                 = "Ruckler: %d (Spiel %d, Addons %d)  -  schlimmstes %d ms"
+
+-- == Post-pull Summary (additional) ==
+L.SUMMARY_PULL_WORST           = "Letzter Pull  -  Ruckler: %d, am schlimmsten %s %d ms (Spiel: %d)"
+
+-- == Tooltip hint (additional) ==
+L.TT_HINT_EXPORT               = "Linksklick für den vollständigen Bericht und Tipps"
+
+-- == Export Report ==
+L.EXPORT_SCOPE                 = "Die Zahlen unten umfassen alles seit dem letzten Löschen des Verlaufs."
+L.EXPORT_TLDR                  = "Aufgezeichnete Ruckler: %d  -  durch Addons: %d, durch das Spiel: %d."
+L.EXPORT_TLDR_CLEAN            = "Keine Ruckler aufgezeichnet. Bisher flüssig."
+L.EXPORT_WORST                 = "Schlimmstes Addon: %s  -  %d ms (%d-mal so teuer wie üblich)"
+L.EXPORT_WORST_NOMULT          = "Schlimmstes Addon: %s  -  %d ms"
+L.EXPORT_TOP_HEADER            = "Top-Addon-Quellen:"
+L.EXPORT_TOP_LINE              = "  - %s  -  Ruckler: %d, Spitze %d ms"
+L.EXPORT_CAUSES_HEADER         = "Ursachen im Spiel (nicht deine Addons):"
+L.EXPORT_CAUSE_LINE            = "  - %s: %d"
+L.EXPORT_BASELINE              = "Typische Frame-Zeit: %d ms"
+L.EXPORT_BASELINE_WARMING      = "Typische Frame-Zeit: wird noch gemessen."
+
+-- == Advice Panel ==
+L.PANEL_REPORT_HEADER          = "Teilbarer Bericht (Strg+C zum Kopieren)"
+L.ADVISE_WHY_HEADER            = "Warum ruckelt es bei mir?"
+L.ADVISE_VERDICT_NONE          = "Noch kein Ruckeln aufgezeichnet. Spiel eine Weile und schau dann wieder hier vorbei."
+L.ADVISE_VERDICT_GAME          = "Das meiste Ruckeln kommt vom Spiel selbst, nicht von deinen Addons (%d von %d)."
+L.ADVISE_VERDICT_ADDON         = "Das meiste Ruckeln kommt von deinen Addons (%d von %d). Die Verursacher stehen im Bericht rechts."
+L.ADVISE_WHERE                 = "Es tritt meist auf: %s."
+L.ADVISE_PAT_COMBAT            = "im Kampf"
+L.ADVISE_PAT_TRAVEL            = "auf Reisen"
+L.ADVISE_PAT_ZONE              = "in %s"
+L.ADVISE_CAUSE_HEADER          = "Was es verursacht"
+L.ADVISE_TRY_HEADER            = "Was du versuchen kannst"
+L.ADVISE_RAID_NOTE             = "Deine Spitzen häufen sich in Schlachtzügen, daher sind die Werte unten deine Schlachtzug-Grafikeinstellungen."
+L.ADVISE_SETTINGS_OK           = "Deine Grafikeinstellungen wirken bereits moderat. Die übrigen Spitzen liegen wahrscheinlich an Hardware, Treibern oder nachgeladenen Daten - nicht an Einstellungen, die du hier ändern kannst."
+L.ADVISE_SETTINGS_HEADER       = "Deine relevanten Einstellungen"
+L.ADVISE_SLIDER                = "%s senken - aktuell %s (Standard %s)"
+L.ADVISE_TOGGLE                = "%s ausschalten (aktuell an)"
+L.ADVISE_SETTING_LINE          = "%s: %s (Standard %s)"
+L.ADVISE_CHANGE_WHERE          = "Das änderst du im Spielmenü: System > Grafik (und Erweitert)."
+L.ADVISE_AIO                   = "Du nutzt auch Advanced Interface Options - gib /aio ein für einen vollständigen CVar-Browser."
+
+L.ADVISE_TIP_COMBAT_FX         = "Im Kampf werden Zauber- und Partikeleffekte geladen. Die Einstellungen unten reduzieren dieses Durcheinander am stärksten."
+L.ADVISE_TIP_SCENE             = "Große Pulls und Menschenmengen laden viele Modelle auf einmal. Partikeldichte und Sichtweite helfen am meisten."
+L.ADVISE_TIP_STREAMING         = "Beim Reisen wird die Welt von der Festplatte geladen. Eine SSD hilft am meisten; senke die Sichtweite, damit das Spiel weniger auf einmal lädt."
+L.ADVISE_TIP_SUSTAINED         = "Deine Frames sind allgemein langsam, nicht nur vereinzelt. Senke die aufwendigsten Einstellungen und schließe Hintergrundprogramme (Browser, Discord-Overlay)."
+L.ADVISE_TIP_ENGINE            = "Das sind vereinzelte Frames, während das Spiel ein Modell oder einen Effekt lädt. Oft normal; die Einstellungen unten machen sie seltener."
+L.ADVISE_TIP_GC                = "Häufige Speicherbereinigungen bedeuten meist ein verschwenderisches Addon. Sieh im Bericht unter Top-Addon-Quellen nach."
+L.ADVISE_TIP_LOADING           = "Ladespitzen sind normal. Eine schnelle SSD verkürzt sie; sonst gibt es nichts zu ändern."
+
+-- == Units and shared fragments ==
+L.UNIT_KB                      = "%d KB"
+L.UNIT_MB                      = "%.1f MB"
+L.LIST_SEP                     = ", "
+L.DUR_HM                       = "%d Std. %d Min."
+L.DUR_M                        = "%d Min."
+L.DUR_S                        = "%d Sek."
+
+-- == Allocation buckets ==
+L.ALLOC_NONE                   = "fast kein Speicher belegt"
+L.ALLOC_SMALL                  = "wenig Speicher belegt"
+L.ALLOC_MEDIUM                 = "einige MB belegt"
+L.ALLOC_LARGE                  = "viel Speicher belegt"
+
+-- == Export Report: detail ==
+L.EXPORT_CLIENT                = "Client %s (Build %s)"
+L.EXPORT_CLIENT_FLAVOR         = "Client %s %s (Build %s)"
+L.EXPORT_SPAN                  = "Gemessen über %s Spielzeit  -  etwa %.1f pro Minute."
+L.EXPORT_THROTTLED             = "Weitere %s sind oben nicht mitgezählt: die Bildrate war begrenzt (Fenster im Hintergrund oder ein festes FPS-Limit), daher wurde nichts gemessen."
+L.EXPORT_BASELINE_CAP          = "Hinweis: deine Bildrate ist auf %d begrenzt (%s). Das ist hier die Untergrenze, und keine Grafikeinstellung unten kann sie anheben - ändere das Limit selbst."
+L.EXPORT_CHRONIC_HEADER        = "Dauerhafte Addon-Kosten (in jedem Frame, mit oder ohne Ruckeln):"
+L.EXPORT_CHRONIC_TOTAL         = "  Alle Addons zusammen: etwa %.2f ms jedes Frames."
+L.EXPORT_CHRONIC_LINE          = "  - %s: %.2f ms/Frame"
+L.EXPORT_TOP_LINE_VER          = "  - %s (%s)  -  Ruckler: %d, Spitze %d ms"
+L.EXPORT_D_WHERE               = "      Wo: %s"
+L.EXPORT_D_CTX                 = "%s x%d"
+L.EXPORT_D_SHARE               = "      Im schlimmsten Fall waren es %d%% des gesamten Frames"
+L.EXPORT_D_SHARE_ALL           = "      Im schlimmsten Fall war es praktisch das gesamte Frame"
+L.EXPORT_D_LIBRARY             = "      Das ist ein geteiltes Bibliothekspaket - die Kosten gehören dem Addon, das es aufgerufen hat, und das lässt uns das Spiel nicht erkennen"
+L.EXPORT_D_LIBRARY_HOST        = "      Das ist ein geteiltes Bibliothekspaket (kommt mit %s) - die Kosten gehören dem Addon, das es aufgerufen hat"
+L.EXPORT_D_MULT                = "      Die Spitze war %d-mal so teuer wie normal"
+L.EXPORT_D_ALLOC               = "      %s in diesem Frame belegt"
+L.EXPORT_D_PERIOD              = "      Regelmäßiger Rhythmus: etwa alle %d s (deutet auf einen Timer hin)"
+L.EXPORT_D_OVER                = "      Eigener Sitzungszähler des Spiels  -  Frames über 100 ms: %d, über 500 ms: %d"
+L.EXPORT_D_OVER_NOTE           = "      (der Client zählt die ganze Sitzung inklusive Ladebildschirmen, die StutterAlert auslässt)"
+L.EXPORT_D_CO                  = "      Ruckelte auch zusammen mit %s (x%d) - wahrscheinlich ein gemeinsamer Auslöser"
+L.EXPORT_D_VER_SPAN            = "      Aufgezeichnet über die Versionen %s bis %s"
+L.EXPORT_D_VER_NOW             = "      Aufgezeichnet mit %s; jetzt nutzt du %s"
+L.EXPORT_D_MEM                 = "      Belegter Speicher: %s"
+L.EXPORT_D_MEM_GROW            = "      Belegter Speicher: %s (seit der letzten Prüfung um %s gewachsen)"
+L.EXPORT_D_SIG                 = "      %d von %d hatten ein gemeinsames Muster: %s"
+L.EXPORT_D_SIG_ALL             = "      Alle Ruckler hatten ein gemeinsames Muster: %s"
+L.EXPORT_SIG_COMBAT            = "im Kampf"
+L.EXPORT_SIG_CALM              = "außerhalb des Kampfes"
+L.EXPORT_SIG_EVENT             = "ausgelöst durch %s"
+
+-- == Export Report: events ==
+L.EXPORT_D_EV_PEAK             = "      Events in diesem Frame: %s"
+L.EXPORT_D_EV_ITEM             = "%s x%d"
+L.EXPORT_D_EV_COMMON           = "      Häufigstes Event (%d von %d): %s"
+L.EXPORT_D_EV_PREFIX           = "      Addon-Verkehr: Nachrichten mit dem Präfix %s (x%d)"
+L.EXPORT_D_EV_BURST            = "      Weitere Events in diesem Frame: %d  -  ein Event-Schwall"
+L.EXPORT_D_EV_NONE             = "      In diesem Frame wurden keine Events ausgelöst - die Arbeit kam aus einem OnUpdate oder einem Timer"
+
+-- == CVar display names (the game's own options wording) ==
+L.CVAR_MAX_FPS                 = "Max. Vordergrund-FPS"
+L.CVAR_MAX_FPS_BK              = "Max. Hintergrund-FPS"
+L.CVAR_VIEW_DISTANCE           = "Sichtweite"
+L.CVAR_ENV_DETAIL              = "Umgebungsdetails"
+L.CVAR_GROUND_CLUTTER          = "Bodenbewuchs"
+L.CVAR_SHADOW                  = "Schattenqualität"
+L.CVAR_LIQUID                  = "Flüssigkeitsdetails"
+L.CVAR_SUNSHAFTS               = "Sonnenstrahlen"
+L.CVAR_PARTICLE                = "Partikeldichte"
+L.CVAR_SSAO                    = "Umgebungsverdeckung"
+L.CVAR_DEPTH                   = "Tiefeneffekte"
+L.CVAR_TEXTURE_RES             = "Texturauflösung"
+L.CVAR_PROJECTED               = "Projizierte Texturen"
+L.CVAR_SPELL_DENSITY           = "Zauberdichte"
+
+-- == Client / Flavor Names ==
+L.FLAVOR_RETAIL                = "Retail"
+L.FLAVOR_MISTS                 = "Mists of Pandaria Classic"
+L.FLAVOR_CATA                  = "Cataclysm Classic"
+L.FLAVOR_WRATH                 = "Wrath of the Lich King Classic"
+L.FLAVOR_TBC                   = "Burning Crusade Classic"
+L.FLAVOR_CLASSIC_ERA           = "Classic Era"

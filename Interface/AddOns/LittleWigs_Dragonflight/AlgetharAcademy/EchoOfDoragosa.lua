@@ -84,7 +84,7 @@ end
 
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{389007, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Wild Energy
+		{389007, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Wild Energy
 		{389011, soundOnAppliedDose = "none"}, -- Overwhelming Power
 		{374350, duration = 6, dispel = "magic", soundOnApplied = "warning", note = CL.bomb}, -- Energy Bomb
 	})

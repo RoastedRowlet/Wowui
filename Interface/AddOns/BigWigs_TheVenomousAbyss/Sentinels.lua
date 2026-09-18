@@ -60,9 +60,9 @@ mod:SetRenames({
 
 mod:SetAuraData({
 	{1284590, soundOnApplied = "warning", soundOnAppliedDose = "none", header = CL.important}, -- Helical Toxins
-	{1296880, soundOnApplied = "warning", mythic = true, note = CL.mythic}, -- Shifting Protovenom
+	{1296880, soundOnApplied = "warning", difficulty = "mythic"}, -- Shifting Protovenom
 	{1288260, soundOnApplied = "warning"}, -- Unstable Miasma
-	{1284471, soundOnApplied = "alarm", header = CL.general}, -- Blighted Blood -- DoT; Drops pool when removed
+	{1284471, soundOnApplied = "alarm", dispel = "magic", header = CL.general}, -- Blighted Blood -- DoT; Drops pool when removed
 	{1284210, soundOnApplied = "underyou"}, -- Blood Venom -- Standing in bad
 	{1284491, soundOnApplied = "none", soundOnAppliedDose = "none", note = CL.tank_debuff}, -- Bloodvenom Injection -- Tank stacks; Drops pool when expires
 	{1288297, soundOnApplied = "none", soundOnAppliedDose = "none"}, -- Clinging Murk -- Soaked Miasma; Drops pool when expires

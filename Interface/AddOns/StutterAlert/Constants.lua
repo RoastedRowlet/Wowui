@@ -68,7 +68,8 @@ function ns.ResolveAddonIcon(name)
         return "|T" .. tex .. ":0|t"
     end
     local atlas = C_AddOns.GetAddOnMetadata(name, "IconAtlas")
-    if atlas and atlas ~= "" and C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas) then
+    if atlas and atlas ~= "" and C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas)
+        and type(CreateAtlasMarkup) == "function" then
         local markup = CreateAtlasMarkup(atlas, 14, 14)
         if markup and markup ~= "" then return markup end
     end
@@ -198,9 +199,15 @@ function ns.FormatKB(kb)
 end
 
 -- Context bucket keys -> locale keys, used for both display and aggregates.
+--
+-- The five-man bucket is the one label that is not true on every client: on
+-- retail it is dominated by Mythic+, which no Classic client has, so naming it
+-- there would describe a game mode the player cannot enter. The `scenario`
+-- bucket needs no such treatment -- it is filled from IsInInstance, so on a
+-- client without scenarios it simply never fires.
 ns.CONTEXT_LABEL = {
     raid     = "CTX_RAID",
-    dungeon  = "CTX_DUNGEON",
+    dungeon  = ns.IsRetail and "CTX_DUNGEON" or "CTX_DUNGEON_PLAIN",
     pvp      = "CTX_PVP",
     city     = "CTX_CITY",
     world    = "CTX_WORLD",

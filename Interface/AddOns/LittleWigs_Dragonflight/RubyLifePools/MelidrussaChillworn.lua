@@ -85,11 +85,11 @@ end
 
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{385518, duration = 4.5, note = CL.debuffTargetedNote:format(mod:SpellName(1307308))}, -- Chillstorm
-		{397077, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1307308))}, -- Chillstorm
-		{372963, note = CL.debuffUnderYouNote}, -- Storm's Eye
-		{373688, duration = 3, soundOnAppliedDose = "none", note = CL.debuffGroupAfterCastNote:format(mod:SpellName(373686))}, -- Frost Overload
-		{384024, duration = 20, soundOnApplied = "warning", note = CL.debuffHitByCastNote:format(mod:SpellName(1307297))}, -- Hailbombs
+		{385518, duration = 4.5, tip = CL.debuffTargetedNote:format(mod:SpellName(1307308))}, -- Chillstorm
+		{397077, tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(1307308))}, -- Chillstorm
+		{372963, tip = CL.debuffUnderYouNote}, -- Storm's Eye
+		{373688, duration = 3, soundOnAppliedDose = "none", difficulty = "mythic", tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(373686))}, -- Frost Overload
+		{384024, duration = 20, soundOnApplied = "warning", tip = CL.debuffHitByCastNote:format(mod:SpellName(1307297))}, -- Hailbombs
 	})
 end
 
@@ -143,7 +143,11 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	local duration = self:RoundNumber(eventInfo.duration, 0)
 	local barInfo
 	if self:Mythic() then
+		-- initial timers and after each Frost Overload: 5s Hailburst, 15s Chillstorm
 		if duration == 5 or (duration == 24 and sharedCount % 2 == 1) then -- Hailburst
+			if duration == 5 then
+				sharedCount = 1
+			end
 			barInfo = self:HailburstTimeline(eventInfo)
 		elseif duration == 15 or (duration == 24 and sharedCount % 2 == 0) then -- Chillstorm
 			barInfo = self:ChillstormTimeline(eventInfo)

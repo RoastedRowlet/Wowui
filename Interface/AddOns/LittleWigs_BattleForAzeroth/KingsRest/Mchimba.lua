@@ -64,10 +64,10 @@ end
 
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{267618, duration = 6, note = CL.debuffDotAfterCastNote:format(mod:SpellName(267618))}, -- Drain Fluids
-		{267626, note = CL.postDebuffNote:format(mod:SpellName(267618))}, -- Desiccation
-		{267874, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Burning Ground
-		{267702, note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(267702))}, -- Entomb
+		{267618, duration = 6, tip = CL.debuffDotAfterCastNote:format(mod:SpellName(267618))}, -- Drain Fluids
+		{267626, tip = CL.postDebuffNote:format(mod:SpellName(267618))}, -- Desiccation
+		{267874, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Burning Ground
+		{267702, tip = CL.debuffPossibleAfterCastNote:format(mod:SpellName(267702))}, -- Entomb
 	})
 end
 

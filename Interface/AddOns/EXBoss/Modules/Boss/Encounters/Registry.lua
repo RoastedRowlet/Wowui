@@ -61,6 +61,18 @@ function Registry:GetAll()
     return self.byEncounterID
 end
 
+-- Ordered encounter-local cards. These are settings declarations, not timeline events.
+function Registry:GetExtras(encounterID)
+    local def = self:Get(encounterID)
+    return type(def) == "table" and type(def.extras) == "table" and def.extras or {}
+end
+
+function Registry:GetExtra(encounterID, key)
+    for _, extra in ipairs(self:GetExtras(encounterID)) do
+        if extra.key == key then return extra end
+    end
+end
+
 function Registry:GetDungeonOptions(dungeonKey)
     local key = tostring(dungeonKey or "")
     if key == "" then

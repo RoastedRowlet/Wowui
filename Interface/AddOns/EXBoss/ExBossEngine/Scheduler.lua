@@ -344,16 +344,6 @@ local function IsEncounterTimelineSource(source)
     return src == nil or src == TIMELINE_SOURCE_ENCOUNTER
 end
 
-local function IsFixedTimeTestOverride(encounterID)
-    local test = ExBoss and ExBoss.TestTimelineForceFixedTime
-    if type(test) ~= "table" or test.active ~= true then
-        return false
-    end
-    local expected = SafeToNumber(test.encounterID)
-    local actual = SafeToNumber(encounterID)
-    return expected ~= nil and actual ~= nil and expected == actual
-end
-
 local function IsTimelineDurationAllowed(duration)
     local d = SafeToNumber(duration)
     return d ~= nil and d >= 0 and d <= TIMELINE_MAX_EVENT_DURATION
@@ -2678,12 +2668,6 @@ end
 
 function Scheduler:GetMode(encounterID)
     local bossDef, resolvedID = ResolveBossDef(encounterID)
-    if IsFixedTimeTestOverride(resolvedID)
-        and type(bossDef) == "table"
-        and type(bossDef.skills) == "table"
-        and #bossDef.skills > 0 then
-        return "fixed"
-    end
     local canFixedTime = CanUseFixedForEncounter(resolvedID, bossDef)
     local canDurationMap = CanUseDurationMapForEncounter(resolvedID)
     local canFixed = canFixedTime or canDurationMap
@@ -3027,20 +3011,14 @@ function Scheduler:_SetupFixedDriver(encounterID, bossDef)
     self._fixedTimeEventToTimer = {}
     TimelineAddedBuffer._timelineAddedPending = {}
 
-    local testFixedTime = IsFixedTimeTestOverride(encounterID)
-        and type(bossDef) == "table"
-        and type(bossDef.skills) == "table"
-        and #bossDef.skills > 0
-    local canFixedTime = CanUseFixedForEncounter(encounterID, bossDef) or testFixedTime
+    local canFixedTime = CanUseFixedForEncounter(encounterID, bossDef)
     local durationRules = FixedAIResolver.GetDurationRulesForEncounter(encounterID)
     local aiStateMachine = FixedAIResolver.GetEncounterAIStateMachine(encounterID)
     local hasDurationRules = (type(durationRules) == "table" and #durationRules > 0)
         or FixedAIResolver.EncounterAIStateMachineHasRules(aiStateMachine)
     local triggerPreset = GetEncounterTriggerPreset(encounterID)
     local requestedDriver = GetFixedDriverOverride(encounterID)
-    if testFixedTime then
-        requestedDriver = FIXED_DRIVER_TIME
-    elseif triggerPreset == TRIGGER_AI then
+    if triggerPreset == TRIGGER_AI then
         requestedDriver = FIXED_DRIVER_AI
     elseif triggerPreset == TRIGGER_TIME then
         requestedDriver = FIXED_DRIVER_TIME

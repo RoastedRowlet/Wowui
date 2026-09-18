@@ -49,7 +49,6 @@ L.custom_select_unit_lieutenant_value3 = L.target_only
 -- Locals
 --
 
-local castsPerUnit = {}
 local STANDARD_LEVEL, LIEUTENANT_LEVEL, BOSS_LEVEL, QUESTION_LEVEL = 90, 91, 92, -1 -- Midnight-specific
 local UNIT_FILTER_ALL, UNIT_FILTER_TARGET_SOUND_ONLY, UNIT_FILTER_TARGET_ONLY = 1, 2, 3
 local STANDARD_FILTER_VALUES = { -- the standard option lists "target only" first (default), so we re-map here
@@ -79,24 +78,14 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
-	self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 	self:RegisterEvent("UNIT_SPELLCAST_START", "UNIT_SPELLCAST")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", "UNIT_SPELLCAST")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST")
 end
 
-function mod:OnBossDisable()
-	castsPerUnit = {}
-end
-
 --------------------------------------------------------------------------------
 -- Cast Alert Handler
 --
-
-function mod:NAME_PLATE_UNIT_REMOVED(_, unit)
-	-- clear the list of seen casts per unit, so when the unit token is reused we won't filter
-	castsPerUnit[unit] = nil
-end
 
 do
 	local function ResolveUnitFilter(self, isLieutenant)
@@ -108,7 +97,7 @@ do
 	end
 
 	function mod:UNIT_SPELLCAST(event, unit, _, spellID, castBarID)
-		local level = BigWigsLoader.UnitLevel(unit)
+		local level = self:UnitLevel(unit)
 		local isLieutenant = level == LIEUTENANT_LEVEL or level == BOSS_LEVEL or level == QUESTION_LEVEL
 		local unitFilterOption = ResolveUnitFilter(self, isLieutenant)
 		if unitFilterOption == UNIT_FILTER_TARGET_ONLY then -- target only
@@ -116,17 +105,9 @@ do
 		else -- only nameplate units (trash mobs)
 			if not unit:find("^nameplate") then return end
 		end
-		local allEventsPlaySounds = unitFilterOption ~= UNIT_FILTER_TARGET_SOUND_ONLY
 
-		-- once per cast (don't alert on SUCCEEDED if we saw the START)
-		if event == "UNIT_SPELLCAST_SUCCEEDED" and castBarID and castsPerUnit[unit] and castsPerUnit[unit][castBarID] then
-			return
-		elseif castBarID then
-			if not castsPerUnit[unit] then
-				castsPerUnit[unit] = {}
-			end
-			castsPerUnit[unit][castBarID] = true
-		end
+		-- filter UNIT_SPELLCAST_SUCCEEDED events for spells with a cast bar
+		if event == "UNIT_SPELLCAST_SUCCEEDED" and castBarID then return end
 
 		-- basic filters
 		if level ~= STANDARD_LEVEL and not isLieutenant then return end -- skip low-level mobs
@@ -134,7 +115,9 @@ do
 		if BigWigsLoader.UnitClassification(unit) ~= "elite" then return end -- elite only
 		if not self:UnitWithinRange(unit, 45) then return end -- range check
 		if self:IsAnyEncounterInProgress() then return end -- don't alert during boss fights
-		if not UnitAffectingCombat(unit) then
+
+		local allEventsPlaySounds = unitFilterOption ~= UNIT_FILTER_TARGET_SOUND_ONLY
+		if not UnitAffectingCombat(unit) then -- don't alert if the unit isn't in combat
 			-- check again on the next frame - some mobs cast immediately on entering combat.
 			self:SimpleTimer(function()
 				if UnitAffectingCombat(unit) then

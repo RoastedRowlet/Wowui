@@ -35,11 +35,11 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-	{473898, duration = 8, note = CL.debuffTankAfterCastNote:format(mod:SpellName(473898))}, -- Legion Strike
-	{1214637, duration = 5, note = CL.debuffTargetedNote:format(mod:SpellName(1214637))}, -- Axe Toss
-	{1214650, soundOnAppliedDose = "none", note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1214637))}, -- Fel Lightning
-	{1295455, duration = 8, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1295453))}, -- Infernal Crush
-	{474234, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Burning Steps
+	{473898, duration = 8, tip = CL.debuffTankAfterCastNote:format(mod:SpellName(473898))}, -- Legion Strike
+	{1214637, duration = 5, tip = CL.debuffTargetedNote:format(mod:SpellName(1214637))}, -- Axe Toss
+	{1214650, soundOnAppliedDose = "none", tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(1214637))}, -- Fel Lightning
+	{1295455, duration = 8, tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(1295453))}, -- Infernal Crush
+	{474234, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Burning Steps
 })
 
 --------------------------------------------------------------------------------

@@ -125,6 +125,7 @@ ExBossVoice\CountdownVoice.lua
 # ExBossVoice\OtherSounds.lua
 Modules\AuraSound\Runtime.lua
 TargetAlert\Runtime.lua
+ExBossTest\TemporaryBossPreview.lua
 
 # ── 6. GUI 层
 Modules\TrashCD\Bootstrap.lua
@@ -134,6 +135,7 @@ Core\ExBoss_ModuleSettingsRouter.lua
 ExBossGUI\SettingsPage\HomePage.lua
 ExBossGUI\SettingsPage\ToolsPage.lua
 ExBossGUI\SettingsPage\BossPage.lua
+ExBossGUI\SettingsPage\BossPage_Extras.lua
 ExBossGUI\SettingsPage\BossPage_DungeonCommon.lua
 ExBossGUI\SettingsPage\GlobalSettingsPage.lua
 ExBossGUI\SettingsPage\GlobalTrashCDPage.lua

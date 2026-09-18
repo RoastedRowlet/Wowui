@@ -343,7 +343,7 @@ local function buildContextLine(r)
         parts[#parts + 1] = format(L.TT_CTX_LATENCY, ctx.latencyWorld)
     end
 
-    return format(L.TT_CTX_PREFIX, table.concat(parts, ", "))
+    return format(L.TT_CTX_PREFIX, table.concat(parts, L.LIST_SEP))
 end
 
 local function showTooltip()
@@ -828,7 +828,7 @@ local function appendDetail(add, name, agg)
         if text then
             if sigN >= (agg.hitches or 0) then
                 sigCoversAll = true
-                add(format(L.EXPORT_D_SIG_ALL, agg.hitches, text))
+                add(format(L.EXPORT_D_SIG_ALL, text))
             else
                 add(format(L.EXPORT_D_SIG, sigN, agg.hitches, text))
             end
@@ -944,8 +944,19 @@ function Overlay:BuildExportReport()
     add(versionedTitle())
 
     -- GetBuildInfo returns version, build, date, tocversion, ...
+    --
+    -- Name the game as well as the version. The same addon now reports from
+    -- retail and from the Classic clients, and a report pasted into a thread
+    -- reads as "5.5.4" to someone who has no reason to know which game that is.
+    -- FLAVOR_KEY is nil on a project we have no name for, and the unnamed line
+    -- below is then exactly what it always was.
     local clientVer, clientBuild = GetBuildInfo()
-    add(format(L.EXPORT_CLIENT, tostring(clientVer), tostring(clientBuild)))
+    if ns.FLAVOR_KEY then
+        add(format(L.EXPORT_CLIENT_FLAVOR, L[ns.FLAVOR_KEY],
+            tostring(clientVer), tostring(clientBuild)))
+    else
+        add(format(L.EXPORT_CLIENT, tostring(clientVer), tostring(clientBuild)))
+    end
     add(L.EXPORT_SCOPE)
     add("")
 
@@ -1017,13 +1028,7 @@ function Overlay:BuildExportReport()
             local title = ns.StripColor(ns.addonTitle[e.name] or e.name)
             local vstr = agg.lastVer or ns.AddonVersion(e.name)
 
-            if e.hitches == 1 then
-                if vstr then
-                    add(format(L.EXPORT_TOP_LINE_VER_ONE, title, vstr, e.peakMs))
-                else
-                    add(format(L.EXPORT_TOP_LINE_ONE, title, e.peakMs))
-                end
-            elseif vstr then
+            if vstr then
                 add(format(L.EXPORT_TOP_LINE_VER, title, vstr, e.hitches, e.peakMs))
             else
                 add(format(L.EXPORT_TOP_LINE, title, e.hitches, e.peakMs))
@@ -1124,12 +1129,17 @@ function Overlay:ShowExport()
         sep:SetWidth(1)
 
         -- RIGHT column: report header + copy/paste edit box.
+        -- Pinned on both sides so it wraps inside the column, and the scroll
+        -- frame hangs off its bottom. The column is ~245 units wide; unpinned,
+        -- a longer translation ran straight off the panel's right edge.
         local rhead = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         rhead:SetPoint("TOPLEFT", LEFT_RIGHT + 16, -46)
+        rhead:SetPoint("TOPRIGHT", -30, -46)
+        rhead:SetJustifyH("LEFT")
         rhead:SetText(L.PANEL_REPORT_HEADER)
 
         local rsf = CreateFrame("ScrollFrame", "StutterAlertExportScroll", f, "UIPanelScrollFrameTemplate")
-        rsf:SetPoint("TOPLEFT", LEFT_RIGHT + 16, -68)
+        rsf:SetPoint("TOPLEFT", rhead, "BOTTOMLEFT", 0, -8)
         rsf:SetPoint("BOTTOMRIGHT", -30, 14)
 
         local eb = CreateFrame("EditBox", nil, rsf)

@@ -564,7 +564,10 @@ function ExwindTools:BuildStandardTimerBarAlertIconsGroupOptions(schema, opts)
             controlH = 6,
             slotX = { 3, 53, 103, 153 },
             firstY = 0,
-            rowStep = 14,
+            -- 仅收紧额外提示图标设置的行距与底部留白。
+            rowStep = 10,
+            cardBottomInset = 1,
+            visibleBottomSafety = 1,
         },
         fields = {
             { path = Path("show", prefix .. "showIcon"), type = "checkbox", label = L["显示"], row = 1, column = 1 },

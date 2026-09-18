@@ -1,6 +1,6 @@
 ## Interface: 120100
 ## Title: |cFF00FFFFNorthern Sky Raid Tools - UI|r
-## Version: 12.1.21
+## Version: 12.1.23
 ## IconTexture: Interface\AddOns\NorthernSkyRaidTools\Media\NSLogo.blp
 ## Author: Reloe, Rav
 ## LoadOnDemand: 1

@@ -37,10 +37,10 @@ mod:SetRenames({
 
 mod:SetAuraData({
 	{1251568}, -- Drain Soul
-	{1251775, soundOnApplied = "warning", note = CL.other:format(CL.fixate, CL.debuffAddsCast:format(CL.extra:format(mod:SpellName(-33734), CL.add)))}, -- Final Pursuit
-	{1251833, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Soulrot
-	{1252130, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Unmake
-	{1266706, duration = 20, soundOnApplied = "warning", soundOnAppliedDose = "none", note = CL.debuffWalkIntoObjectNote:format(CL.extra:format(mod:SpellName(-33734), CL.add))}, -- Haunting Remains
+	{1251775, soundOnApplied = "warning", note = CL.fixate, tip = CL.debuffAddsCast:format(CL.extra:format(mod:SpellName(-33734), CL.add))}, -- Final Pursuit
+	{1251833, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Soulrot
+	{1252130, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Unmake
+	{1266706, duration = 20, soundOnApplied = "warning", soundOnAppliedDose = "none", tip = CL.debuffWalkIntoObjectNote:format(CL.extra:format(mod:SpellName(-33734), CL.add))}, -- Haunting Remains
 })
 
 --------------------------------------------------------------------------------

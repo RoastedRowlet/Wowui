@@ -23,22 +23,30 @@ mod:SetDefaultLocale({
 local lastText
 
 --------------------------------------------------------------------------------
+-- Renames
+--
+
+mod:SetRenames({
+	[1218508] = {1218508}, -- Disguised
+})
+
+--------------------------------------------------------------------------------
 -- Auras
 --
 
 mod:SetAuraData({
-	{1216300, header = 236073, duration = 8, dispel = "bleed", mechanic = "bleeding", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1216300))}, -- Cutpurse (Row Hooligan)
-	{1216529, header = 252529, duration = 20, soundOnAppliedDose = "none", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1216529))}, -- Shield Bash (Bribed Captain)
-	{1295035, duration = 4, dispel = "bleed", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1295035))}, -- Glaive Toss (Bribed Captain)
-	{1216590, header = 236091, duration = 8, dispel = "poison", soundOnAppliedDose = "none", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1216590))}, -- Heartstop Poison (Street Sneak)
-	{1217633, header = 236902, duration = 15, dispel = "magic", soundOnAppliedDose = "none", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1217633))}, -- Corroding Spittle (Massive Felwyrm)
+	{1216300, header = 236073, duration = 8, dispel = "bleed", mechanic = "bleeding", tip = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1216300))}, -- Cutpurse (Row Hooligan)
+	{1216529, header = 252529, duration = 20, soundOnAppliedDose = "none", tip = CL.debuffTankAfterCastNote:format(mod:SpellName(1216529))}, -- Shield Bash (Bribed Captain)
+	{1295035, duration = 4, dispel = "bleed", tip = CL.debuffTankAfterCastNote:format(mod:SpellName(1295035))}, -- Glaive Toss (Bribed Captain)
+	{1216590, header = 236091, duration = 8, dispel = "poison", soundOnAppliedDose = "none", tip = CL.debuffTankAfterCastNote:format(mod:SpellName(1216590))}, -- Heartstop Poison (Street Sneak)
+	{1217633, header = 236902, duration = 15, dispel = "magic", soundOnAppliedDose = "none", tip = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1217633))}, -- Corroding Spittle (Massive Felwyrm)
 	{1218508, header = 263940, soundOnApplied = "info"}, -- Disguised (Belath Dawnblade)
-	{1311136, header = 236893, duration = 3, dispel = "bleed", soundOnAppliedDose = "none", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1311136))}, -- Sharp Nail (Warehouse Worker)
-	{1217973, header = 235265, duration = 10.1, dispel = "curse", soundOnApplied = "alarm", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1217973))}, -- Curse of Doom (Corrupted Warlock)
-	{1295427, header = 235267, duration = 3, dispel = "bleed", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1295427))}, -- Flay (Wrathguard Flayer)
-	{1218187, header = 235322, duration = 8, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1218187))}, -- Fel Beam (Defiled Golem)
-	{1215985, note = CL.debuffUnderYouNote}, -- Fel Beam (Defiled Golem)
-	{1294870, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Fel-Scarred Earth (Defiled Golem)
+	{1311136, header = 236893, duration = 3, dispel = "bleed", soundOnAppliedDose = "none", tip = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1311136))}, -- Sharp Nail (Warehouse Worker)
+	{1217973, header = 235265, duration = 10.1, dispel = "curse", soundOnApplied = "alarm", tip = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1217973))}, -- Curse of Doom (Corrupted Warlock)
+	{1295427, header = 235267, duration = 3, dispel = "bleed", tip = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1295427))}, -- Flay (Wrathguard Flayer)
+	{1218187, header = 235322, duration = 8, tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(1218187))}, -- Fel Beam (Defiled Golem)
+	{1215985, tip = CL.debuffUnderYouNote}, -- Fel Beam (Defiled Golem)
+	{1294870, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Fel-Scarred Earth (Defiled Golem)
 })
 
 --------------------------------------------------------------------------------
@@ -50,6 +58,7 @@ function mod:GetOptions()
 	return {
 		autotalk,
 		"snitches_interrogated",
+		1218508, -- Disguised
 	}
 end
 
@@ -71,9 +80,11 @@ end
 
 function mod:GOSSIP_SHOW()
 	if self:GetOption(autotalk) then
-		if self:GetGossipID(131567) then -- Disguise (Belath Dawnblade)
+		if self:GetGossipID(131567) then -- Get disguise (Belath Dawnblade)
 			-- 131567:I'm ready for my disguise.
 			self:SelectGossipID(131567)
+			self:PersonalMessage(1218508) -- Disguised
+			self:PlaySound(1218508, "info") -- Disguised
 		elseif self:GetGossipID(131502) then -- Clock in (Selenar Sunshy)
 			-- 131502:<Clock in.>
 			self:SelectGossipID(131502)

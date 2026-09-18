@@ -2,9 +2,22 @@ local _, ns = ...
 local L = ns.L
 
 -- enUS is the base locale and always loads, regardless of client language, so
--- it acts as the fallback set. Future locale files (deDE.lua, frFR.lua, ...)
--- should start with:  if GetLocale() ~= "deDE" then return end
--- and then override only the keys they translate.
+-- it acts as the fallback set. British clients report enUS too, so this file is
+-- what every English-speaking player reads; there is no enGB to write.
+--
+-- Every other locale file starts with:  if GetLocale() ~= "deDE" then return end
+-- then overrides the keys it translates, and is listed in Locales.xml.
+--
+-- Rules for a translation:
+--   * Keep every %d / %s / %.1f in the same number, type and ORDER as here. A
+--     mismatch is a Lua error the moment the line is shown, not a cosmetic slip.
+--     %% is a literal percent sign and takes no argument.
+--   * Never make a word agree with a number. Russian has three plural forms and
+--     Chinese none, so counts are written as "label: %d" or "x%d", which read
+--     correctly for any value in every language.
+--   * Leave in English: slash commands and their arguments (/sa lock,
+--     all|summary|off), event names, "ms", "FPS", and the addon's name.
+--   * Lists are joined with LIST_SEP, so a translation never hardcodes ", ".
 
 -- == General ==
 L.ADDON_TITLE                  = "StutterAlert"
@@ -15,8 +28,13 @@ L.TITLE_VERSION                = "%s v%s"
 
 -- == Context Labels ==
 L.CTX_CITY                     = "City"
-L.CTX_COMBAT_SUFFIX            = "(in combat)"
+-- Format arg: (1) one of the context labels below
+L.CTX_WITH_COMBAT              = "%s (in combat)"
+-- The five-man label has two forms. CTX_DUNGEON is used on retail, where the
+-- bucket is mostly Mythic+; CTX_DUNGEON_PLAIN is used on the Classic clients,
+-- which have no such mode. Constants.lua picks between them.
 L.CTX_DUNGEON                  = "Dungeon / M+"
+L.CTX_DUNGEON_PLAIN            = "Dungeon"
 L.CTX_PVP                      = "PvP"
 L.CTX_RAID                     = "Raid"
 L.CTX_SCENARIO                 = "Scenario"
@@ -31,16 +49,13 @@ L.DEF_SUSTAINED                = "Your frames have been slow for a stretch, not 
 L.DEF_UNCLEAR                  = "This frame ran long, but we couldn't pin it on your addons or a clear game cause."
 
 -- == Overlay Headlines ==
--- Format args: (1) addon title, (2) milliseconds
-L.HEADLINE_ADDON               = "%s  -  %d ms"
+-- Each cause has a short label and a _TIP shown under it in the tooltip.
 L.HEADLINE_ENGINE              = "Engine spike"
 L.HEADLINE_ENGINE_TIP          = "Game engine: usually nothing to do. If it repeats in one spot, the game is streaming assets there."
 L.HEADLINE_GC                  = "Memory cleanup"
 L.HEADLINE_GC_TIP              = "Memory cleanup: usually nothing. If it keeps happening, an addon may be wasteful - check Top Sources."
 L.HEADLINE_LOADING             = "Zone loading"
 L.HEADLINE_LOADING_TIP         = "Loading area: this is normal. Running WoW from a fast SSD makes these shorter."
--- Shown when a frame spiked but addon time was low (not the UI's fault)
-L.HEADLINE_SERVER              = "Server / latency"
 L.HEADLINE_SUSTAINED           = "Sustained slowdown"
 L.HEADLINE_SUSTAINED_TIP       = "Sustained slowdown: lower shadows, view distance, or effects, and close background apps."
 L.HEADLINE_UNCLEAR             = "Cause unclear"
@@ -62,9 +77,9 @@ L.MENU_LOCK                    = "Lock Position"
 L.MENU_RESET                   = "Reset Position to Menu"
 L.MENU_SIZE                    = "Button Size"
 L.MENU_SIZE_DEFAULT            = "Default (Menu Size)"
-L.MENU_SIZE_L                  = "Large (128x128)"
 L.MENU_SIZE_M                  = "Medium (64x64)"
 L.MENU_SIZE_S                  = "Small (32x32)"
+-- The addon's name. Not translated.
 L.MENU_TITLE                   = "StutterAlert"
 L.PREVIEW_MODE                 = "Preview Mode"
 
@@ -74,6 +89,8 @@ L.SEV_CRITICAL                 = "Critical"
 L.SEV_ELEVATED                 = "Elevated"
 
 -- == Slash Commands ==
+-- The command words (/sa, lock, all|summary|off, ...) are what the player types
+-- and what the parser matches, so they stay English in every translation.
 -- Format args: (1) one of the SLASH_BANNERS_* descriptions below
 L.SLASH_BANNERS                = "Pop-up banners: %s"
 L.SLASH_BANNERS_ALL            = "all (live hitches and pull summaries)"
@@ -93,8 +110,8 @@ L.SLASH_USAGE_TOGGLE           = "/sa toggle - turn monitoring on or off"
 L.SLASH_USAGE_UNLOCK           = "/sa unlock - unlock to drag the overlay"
 
 -- == Post-pull Summary ==
--- Format args: (1) hitch count, (2) worst source title, (3) worst ms
-L.SUMMARY_PULL                 = "Last pull: %d hitches  -  %d from addons, %d from the game"
+-- Format args: (1) hitch count, (2) of those from addons, (3) from the game
+L.SUMMARY_PULL                 = "Last pull  -  hitches: %d (addons %d, game %d)"
 L.SUMMARY_PULL_CLEAN           = "Last pull: no stutters. Smooth."
 
 -- == Tooltips ==
@@ -102,8 +119,11 @@ L.TT_ACTION_ADDON              = "- Addon hitches: Update, reconfigure, or disab
 L.TT_ACTION_ENGINE             = "- Game/engine hitches: usually a one-off as the game loads a model or effect. If it repeats in one spot, lower your graphics settings."
 L.TT_ACTION_HEADER             = "How to improve performance:"
 L.TT_CTX_COMBAT                = "in combat"
+-- Format arg: (1) enemy nameplates on screen, always 5 or more
 L.TT_CTX_ENEMIES               = "%d enemies"
+-- Format arg: (1) world latency in ms
 L.TT_CTX_LATENCY               = "world %d ms"
+-- Format arg: (1) the conditions above, joined with LIST_SEP
 L.TT_CTX_PREFIX                = "While this happened: %s"
 L.TT_HINT_BANNERS_OFF          = "Pop-up banners are turned down. Monitoring is still running - right-click to change it."
 L.TT_HINT_CLEAR                = "Shift Left-Click to clear history"
@@ -112,26 +132,26 @@ L.TT_HINT_MENU                 = "Right-Click for menu"
 L.TT_HINT_UNLOCKED             = "Drag to move. Lock with /sa lock."
 L.TT_HITCH_EXPLAIN             = "A 'hitch' is a single frame that took too long to render, causing a visible stutter."
 L.TT_RECENT_HEADER             = "Recent hitches"
--- Format args: (1) addon title or non-addon label, (2) ms, (3) context label
-L.TT_RECENT_LINE               = "%s  -  %d ms  -  %s"
 L.TT_RECENT_NONE               = "No hitches recorded yet."
 -- Format args: (1) ms, (2) context label, (3) time ago string
 L.TT_RECENT_RIGHT              = "%d ms  -  %s  -  %s"
+-- Format args: (1) ms, (2) multiple of the addon's usual cost, (3) time ago string
 L.TT_RECENT_RIGHT_MULT         = "%d ms  -  %dx usual  -  %s"
+-- Format arg: (1) one of the SEV_* labels
 L.TT_SEVERITY                  = "Severity: %s"
 L.TT_THROTTLED                 = "Monitoring paused - frame rate is capped"
 -- Format args: (1) the readable name of the setting that confirmed the cap
 L.TT_THROTTLED_CVAR            = "Every frame is landing exactly on your %s limit, so nothing here is a stutter. Detection resumes on its own."
 L.TT_THROTTLED_WHY             = "Every frame is the same length, which is a frame rate limit rather than a stutter. Detection resumes on its own."
+-- Format arg: (1) hours / minutes / seconds. Abbreviated: the tooltip is narrow.
 L.TT_TIME_HOUR                 = "%dh ago"
 L.TT_TIME_MIN                  = "%dm ago"
 L.TT_TIME_SEC                  = "%ds ago"
+-- The addon's name. Not translated.
 L.TT_TITLE                     = "StutterAlert"
 L.TT_TOP_HEADER                = "Top stutter sources (since last cleared)"
--- Format args: (1) addon title, (2) hitch count, (3) peak ms
-L.TT_TOP_LINE                  = "%s  -  %d hitches, peak %d ms"
 -- Format args: (1) hitch count, (2) peak ms, (3) time ago string
-L.TT_TOP_RIGHT                 = "%d hitches  -  %d ms peak  -  %s"
+L.TT_TOP_RIGHT                 = "hitches: %d  -  peak %d ms  -  %s"
 
 -- == Granular Game Causes ==
 L.HEADLINE_SCENE               = "Busy scene"
@@ -145,13 +165,6 @@ L.HEADLINE_STREAMING           = "World streaming"
 L.HEADLINE_STREAMING_TIP       = "World streaming: the game is loading terrain as you travel. A fast SSD helps most; lower View Distance to ease it."
 L.DEF_STREAMING                = "The game streamed in terrain and textures as you moved into new ground. Common while flying or riding. Not your addons."
 
--- == Granular Banner Line ==
--- Format args: (1) cause label, (2) milliseconds [, (3) evidence token]
-L.HEADLINE_GAME_LINE           = "%s  -  %d ms"
-L.HEADLINE_GAME_LINE_EV        = "%s  -  %d ms  -  %s"
-L.EV_ENEMIES                   = "%d nearby"
-L.EV_FPS                       = "%d FPS"
-
 -- == Toast Banners ==
 -- Single banner. Format args: (1) source name, (2) milliseconds
 L.TOAST_ONE                    = "%s  -  %d ms"
@@ -163,35 +176,41 @@ L.TT_PULLS_HEADER              = "Last 5 pulls (this session)"
 L.TT_PULLS_NONE                = "No pulls completed yet this session."
 L.TT_PULL_CLEAN                = "Clean - no stutters"
 -- Format args: (1) total hitches, (2) game-caused, (3) addon-caused, (4) worst frame ms
-L.TT_PULL_LINE                 = "%d hitches  -  %d game, %d addon  -  worst %d ms"
+L.TT_PULL_LINE                 = "hitches: %d (game %d, addons %d)  -  worst %d ms"
 
 -- == Post-pull Summary (additional) ==
 -- Format args: (1) total hitches, (2) worst source title, (3) worst ms, (4) game-caused count
-L.SUMMARY_PULL_WORST           = "Last pull: %d hitches  -  worst %s %d ms (%d from the game)"
+L.SUMMARY_PULL_WORST           = "Last pull  -  hitches: %d, worst %s %d ms (game: %d)"
 
 -- == Tooltip hint (additional) ==
 L.TT_HINT_EXPORT               = "Left-Click for the full report and advice"
 
 -- == Export Report ==
-L.EXPORT_VERSION               = "Version %s"
+-- The report is translated like everything else. Addon names, versions, event
+-- names and numbers pass through untouched, so an author reading a report in
+-- another language can still act on it.
 L.EXPORT_SCOPE                 = "Figures below cover everything since history was last cleared."
-L.EXPORT_TLDR                  = "%d hitches recorded  -  %d from addons, %d from the game."
+-- Format args: (1) total hitches, (2) from addons, (3) from the game
+L.EXPORT_TLDR                  = "Hitches recorded: %d  -  from addons: %d, from the game: %d."
 L.EXPORT_TLDR_CLEAN            = "No hitches recorded. Smooth so far."
 -- Format args: (1) addon title, (2) ms, (3) multiple of its usual cost
 L.EXPORT_WORST                 = "Worst addon: %s  -  %d ms (%dx its usual cost)"
+-- Format args: (1) addon title, (2) ms
 L.EXPORT_WORST_NOMULT          = "Worst addon: %s  -  %d ms"
 L.EXPORT_TOP_HEADER            = "Top addon sources:"
 -- Format args: (1) addon title, (2) hitch count, (3) peak ms
-L.EXPORT_TOP_LINE              = "  - %s: %d hitches, peak %d ms"
+L.EXPORT_TOP_LINE              = "  - %s  -  hitches: %d, peak %d ms"
 L.EXPORT_CAUSES_HEADER         = "Game causes (not your addons):"
 -- Format args: (1) cause label, (2) count
 L.EXPORT_CAUSE_LINE            = "  - %s: %d"
+-- Format arg: (1) ms
 L.EXPORT_BASELINE              = "Typical frame time: %d ms"
 L.EXPORT_BASELINE_WARMING      = "Typical frame time: still measuring."
+-- Deliberately a single space: a blank closing line. Leave it untranslated.
 L.EXPORT_FOOTER                = " "
-L.EXPORT_COMBAT                = "Report available once you leave combat."
 
 -- == Advice Panel ==
+-- Use the key names printed on this language's keyboards (German: Strg+C).
 L.PANEL_REPORT_HEADER          = "Shareable report (Ctrl+C to copy)"
 L.ADVISE_WHY_HEADER            = "Why am I stuttering?"
 L.ADVISE_VERDICT_NONE          = "No stutters recorded yet. Play for a bit, then check back here."
@@ -199,8 +218,8 @@ L.ADVISE_VERDICT_NONE          = "No stutters recorded yet. Play for a bit, then
 L.ADVISE_VERDICT_GAME          = "Most of your stutters come from the game itself, not your addons (%d of %d)."
 -- Format args: (1) addon hitch count, (2) total
 L.ADVISE_VERDICT_ADDON         = "Most of your stutters come from your addons (%d of %d). See the report on the right for the culprits."
--- Format arg: (1) comma-joined pattern, e.g. "in combat, Dungeon / M+"
-L.ADVISE_WHERE                 = "They mostly happen: %s."
+-- Format arg: (1) patterns joined with LIST_SEP, e.g. "in combat, Dungeon / M+"
+L.ADVISE_WHERE                = "They mostly happen: %s."
 L.ADVISE_PAT_COMBAT            = "in combat"
 L.ADVISE_PAT_TRAVEL            = "while travelling"
 -- Format arg: (1) zone name
@@ -249,8 +268,12 @@ L.ALLOC_MEDIUM                 = "allocating a few MB"
 L.ALLOC_LARGE                  = "allocating a lot of memory"
 
 -- == Export Report: detail ==
+-- Used only on a client whose project we have no name for.
 -- Format args: (1) client version, (2) build number
 L.EXPORT_CLIENT                = "Client %s (build %s)"
+-- The normal client line, naming the game so a pasted report is unambiguous.
+-- Format args: (1) game name, (2) client version, (3) build number
+L.EXPORT_CLIENT_FLAVOR         = "Client %s %s (build %s)"
 -- Turns a raw hitch count into a rate. Format args: (1) duration, (2) per minute
 L.EXPORT_SPAN                  = "Measured across %s of play  -  about %.1f a minute."
 -- Format args: (1) duration string
@@ -263,17 +286,14 @@ L.EXPORT_CHRONIC_TOTAL         = "  All addons together: about %.2f ms of every 
 -- Format args: (1) addon title, (2) ms per frame
 L.EXPORT_CHRONIC_LINE          = "  - %s: %.2f ms/frame"
 -- Format args: (1) addon title, (2) version, (3) hitch count, (4) peak ms
-L.EXPORT_TOP_LINE_VER          = "  - %s (%s): %d hitches, peak %d ms"
--- Singular forms, so a single hitch never reads as "1 hitches".
--- Format args: (1) addon title, (2) peak ms
-L.EXPORT_TOP_LINE_ONE          = "  - %s: 1 hitch, peak %d ms"
--- Format args: (1) addon title, (2) version, (3) peak ms
-L.EXPORT_TOP_LINE_VER_ONE      = "  - %s (%s): 1 hitch, peak %d ms"
--- Format arg: (1) comma-joined "Context xN" list
+L.EXPORT_TOP_LINE_VER          = "  - %s (%s)  -  hitches: %d, peak %d ms"
+-- The detail lines below are indented six spaces, under their EXPORT_TOP_LINE.
+-- Keep the indent.
+-- Format arg: (1) "Context xN" items joined with LIST_SEP
 L.EXPORT_D_WHERE               = "      Where: %s"
 -- Format args: (1) context label, (2) count
 L.EXPORT_D_CTX                 = "%s x%d"
--- Format arg: (1) percent of the frame taken by this addon
+-- Format arg: (1) percent of the frame taken by this addon. %% is a literal %.
 L.EXPORT_D_SHARE               = "      At its worst it was %d%% of the whole frame"
 -- Used when the addon's measured time meets or exceeds the measured frame length.
 L.EXPORT_D_SHARE_ALL           = "      At its worst it accounted for essentially the whole frame"
@@ -286,11 +306,10 @@ L.EXPORT_D_MULT                = "      Peak was %dx its normal cost"
 -- Format arg: (1) formatted size
 L.EXPORT_D_ALLOC               = "      Allocated %s on that frame"
 -- Format arg: (1) seconds
-L.EXPORT_D_PERIOD              = "      Regular rhythm: roughly every %d seconds (suggests a timer)"
--- Counts use "xN" notation so no phrasing has to agree with a number.
+L.EXPORT_D_PERIOD              = "      Regular rhythm: roughly every %d s (suggests a timer)"
 -- This is the CLIENT's own counter, not ours, which is why it can exceed the
 -- peak StutterAlert recorded. Format args: (1) times over 100 ms, (2) over 500 ms
-L.EXPORT_D_OVER                = "      Game's own session counter: %d frames over 100 ms, %d over 500 ms"
+L.EXPORT_D_OVER                = "      Game's own session counter  -  frames over 100 ms: %d, over 500 ms: %d"
 -- Shown when that counter is far above our own hitch count, which otherwise
 -- reads as a contradiction.
 L.EXPORT_D_OVER_NOTE           = "      (the client counts the whole session including loading screens, which StutterAlert excludes)"
@@ -306,8 +325,9 @@ L.EXPORT_D_MEM                 = "      Memory in use: %s"
 L.EXPORT_D_MEM_GROW            = "      Memory in use: %s (grew %s since the last check)"
 -- Format args: (1) matching hitches, (2) total hitches, (3) joined pattern
 L.EXPORT_D_SIG                 = "      %d of %d shared one pattern: %s"
--- Used when every hitch matched. Format args: (1) hitch count, (2) joined pattern
-L.EXPORT_D_SIG_ALL             = "      All %d shared one pattern: %s"
+-- Used when every hitch matched, which can be a single one, so no count.
+-- Format arg: (1) joined pattern
+L.EXPORT_D_SIG_ALL             = "      Every hitch shared one pattern: %s"
 L.EXPORT_SIG_COMBAT            = "in combat"
 L.EXPORT_SIG_CALM              = "out of combat"
 -- Event names are technical identifiers and stay untranslated on purpose:
@@ -315,20 +335,23 @@ L.EXPORT_SIG_CALM              = "out of combat"
 L.EXPORT_SIG_EVENT             = "triggered by %s"
 
 -- == Export Report: events ==
--- Format arg: (1) comma-joined "EVENT xN" list
+-- Format arg: (1) "EVENT xN" items joined with LIST_SEP
 L.EXPORT_D_EV_PEAK             = "      Events on that frame: %s"
 -- Format args: (1) event name, (2) count
 L.EXPORT_D_EV_ITEM             = "%s x%d"
 -- Format args: (1) hitches it fired on, (2) total hitches, (3) event name
-L.EXPORT_D_EV_COMMON           = "      Fired on %d of %d hitches: %s"
+L.EXPORT_D_EV_COMMON           = "      Most common event (%d of %d): %s"
 -- Format args: (1) addon message prefix, (2) count
 L.EXPORT_D_EV_PREFIX           = "      Addon traffic: messages tagged %s (x%d)"
 -- Format arg: (1) how many further events fired past the per-frame cap
-L.EXPORT_D_EV_BURST            = "      Plus %d more events on that frame - an event burst"
+L.EXPORT_D_EV_BURST            = "      Further events on that frame: %d  -  an event burst"
 -- No events at all means the work was not a reaction to one.
 L.EXPORT_D_EV_NONE             = "      No events fired on that frame - the work came from an OnUpdate or a timer"
 
--- CVar display names (the human label for each graphics console variable)
+-- CVar display names (the human label for each graphics console variable).
+-- The advice sends the player looking for these in the options menu, so use
+-- the game's own wording for this language, not a fresh translation. The same
+-- goes for the menu path in ADVISE_CHANGE_WHERE.
 L.CVAR_MAX_FPS                 = "Max Foreground FPS"
 L.CVAR_MAX_FPS_BK              = "Max Background FPS"
 L.CVAR_VIEW_DISTANCE           = "View Distance"
@@ -343,3 +366,15 @@ L.CVAR_DEPTH                   = "Depth Effects"
 L.CVAR_TEXTURE_RES             = "Texture Resolution"
 L.CVAR_PROJECTED               = "Projected Textures"
 L.CVAR_SPELL_DENSITY           = "Spell Density"
+
+-- == Client / Flavor Names ==
+-- Shown in the pasted report's client line so a reader can tell which game the
+-- report came from. Flavor.lua maps WOW_PROJECT_ID to one of these keys, and
+-- leaves the key unset for a project it has no name for. Use Blizzard's own
+-- name for each game in this language.
+L.FLAVOR_RETAIL                = "Retail"
+L.FLAVOR_MISTS                 = "Mists of Pandaria Classic"
+L.FLAVOR_CATA                  = "Cataclysm Classic"
+L.FLAVOR_WRATH                 = "Wrath of the Lich King Classic"
+L.FLAVOR_TBC                   = "Burning Crusade Classic"
+L.FLAVOR_CLASSIC_ERA           = "Classic Era"

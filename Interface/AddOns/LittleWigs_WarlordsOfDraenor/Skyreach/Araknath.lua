@@ -71,7 +71,7 @@ if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
 		{154150, duration = 12, soundOnApplied = "alert", note = CL.beam}, -- Light Ray
 		{1279002, duration = 20, soundOnApplied = "warning", soundOnAppliedDose = "none"}, -- Blast Wave
-		{154132, duration = 60, soundOnApplied = "warning", soundOnAppliedDose = "none", note = CL.other:format(CL.tank_frontal, CL.debuffFailureNote)}, -- Fiery Smash
+		{154132, duration = 60, soundOnApplied = "warning", soundOnAppliedDose = "none", note = CL.tank_frontal, tip = CL.debuffFailureNote}, -- Fiery Smash
 	})
 end
 

@@ -21,7 +21,6 @@ local overviewSection
 local barModeDropdown
 local bossAlertsEnabledMplusCheck
 local bossAlertsEnabledRaidCheck
-local autoDisableCAAInBossCheck
 local encounterWarningsEnabledCheck
 local encounterTimelineDisabledCheck
 local voiceSection
@@ -236,11 +235,6 @@ local function EnsureGeneralDB()
         g.bossAlertsEnabledRaid = (g.bossAlertsEnabledRaid == true)
     end
     g.barDisplayMode = NormalizeBarDisplayMode(g.barDisplayMode)
-    if g.autoDisableCAAInBoss == nil then
-        g.autoDisableCAAInBoss = false
-    else
-        g.autoDisableCAAInBoss = (g.autoDisableCAAInBoss == true)
-    end
     if g.hideTankBossAlertsForDps == nil then
         g.hideTankBossAlertsForDps = true
     else
@@ -389,9 +383,6 @@ local function RefreshGeneralControls()
     if Page.hideTankBossAlertsForHealCheck and Page.hideTankBossAlertsForHealCheck.SetChecked then
         Page.hideTankBossAlertsForHealCheck:SetChecked(g.hideTankBossAlertsForHeal == true)
     end
-    if autoDisableCAAInBossCheck and autoDisableCAAInBossCheck.SetChecked then
-        autoDisableCAAInBossCheck:SetChecked(g.autoDisableCAAInBoss == true)
-    end
     if encounterWarningsEnabledCheck and encounterWarningsEnabledCheck.SetChecked then
         encounterWarningsEnabledCheck:SetChecked(IsEncounterWarningsEnabled())
     end
@@ -498,23 +489,6 @@ local function CreateOverviewSection(parent, anchor, exui)
             end
         )
         bossAlertsEnabledRaidCheck:SetPoint("TOPLEFT", 10, -106)
-    end
-
-    if exui and exui.CreateCheckbox then
-        autoDisableCAAInBossCheck = exui:CreateCheckbox(
-            overviewSection,
-            L["首领战时自动关闭战斗音频预警"],
-            EnsureGeneralDB().autoDisableCAAInBoss == true,
-            function(checked)
-                local g = EnsureGeneralDB()
-                g.autoDisableCAAInBoss = (checked == true)
-                RefreshGeneralControls()
-                if ExBoss and ExBoss.ApplyBossAutoCAASetting then
-                    ExBoss.ApplyBossAutoCAASetting()
-                end
-            end
-        )
-        autoDisableCAAInBossCheck:SetPoint("TOPLEFT", 10, -140)
     end
 
     CreateBossTankFilterChecks(overviewSection, exui)

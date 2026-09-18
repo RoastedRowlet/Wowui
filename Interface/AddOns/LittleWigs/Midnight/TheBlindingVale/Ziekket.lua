@@ -35,10 +35,10 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-	{1247052, duration = 12, soundOnApplied = "info", soundOnAppliedDose = "info", note = CL.debuffWalkIntoObjectNote:format(CL.orbs)}, -- Lightbloom's Might
-	{1247746, duration = 10, dispel = "bleed", mechanic = "bleeding", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1247685))}, -- Thornspike
-	{1246751, soundOnApplied = "alarm", note = CL.debuffHitByCastNote:format(mod:SpellName(1246607))}, -- Concentrated Lightbeam
-	{1246753, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Lightsap
+	{1247052, duration = 12, soundOnApplied = "info", soundOnAppliedDose = "info", tip = CL.debuffWalkIntoObjectNote:format(CL.orbs)}, -- Lightbloom's Might
+	{1247746, duration = 10, dispel = "bleed", mechanic = "bleeding", tip = CL.debuffTankAfterCastNote:format(mod:SpellName(1247685))}, -- Thornspike
+	{1246751, soundOnApplied = "alarm", tip = CL.debuffHitByCastNote:format(mod:SpellName(1246607))}, -- Concentrated Lightbeam
+	{1246753, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Lightsap
 })
 
 --------------------------------------------------------------------------------

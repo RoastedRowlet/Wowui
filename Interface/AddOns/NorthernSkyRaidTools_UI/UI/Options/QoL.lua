@@ -52,6 +52,123 @@ local function BuildGuildRankOptions(settingKey)
     return options
 end
 
+local function BuildBreakTimerSoundOptions()
+    local options = {}
+    for _, name in ipairs(NSI:GetOrderedSoundList()) do
+        options[#options + 1] = {
+            label = name,
+            value = name,
+            onclick = function()
+                NSRT.BreakTimer.Sound = name
+                PlaySoundFile(NSI.LSM:Fetch("sound", name), "Master")
+            end,
+        }
+    end
+    return options
+end
+
+function NSI:ToggleBreakTimerSettingsWindow(frame)
+    if not frame then return end
+    if frame.SettingsWindow then
+        frame.SettingsWindow:SetShown(not frame.SettingsWindow:IsShown())
+        return
+    end
+
+    local settings = NSRT.BreakTimer
+    local window = CreateFrame("Frame", "NSRTBreakTimerSettings", frame, "BackdropTemplate")
+    window:SetFrameStrata("DIALOG")
+    window:SetFrameLevel(frame:GetFrameLevel() + 10)
+    window:SetSize(frame:GetWidth() + 16, 100)
+    window:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\Buttons\\WHITE8x8",
+        edgeSize = 1,
+    })
+    window:SetBackdropColor(0.05, 0.05, 0.08, 0.97)
+    window:SetBackdropBorderColor(0, 1, 1, 0.9)
+    window:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", -8, -11)
+
+    local title = window:CreateFontString(nil, "OVERLAY")
+    NSI:SetUIFont(title, 11, "")
+    title:SetTextColor(0, 1, 1, 0.85)
+    title:SetText(NSI:Loc("Break Timer"))
+    title:SetPoint("TOPLEFT", window, "TOPLEFT", 8, -7)
+
+    local closeButton = CreateFrame("Button", nil, window)
+    closeButton:SetSize(16, 16)
+    closeButton:SetPoint("TOPRIGHT", window, "TOPRIGHT", -3, -3)
+    closeButton:SetNormalFontObject("GameFontNormalSmall")
+    closeButton:SetText("×")
+    closeButton:GetFontString():SetTextColor(0.7, 0.7, 0.7)
+    closeButton:SetScript("OnEnter", function(button) button:GetFontString():SetTextColor(1, 0.3, 0.3) end)
+    closeButton:SetScript("OnLeave", function(button) button:GetFontString():SetTextColor(0.7, 0.7, 0.7) end)
+    closeButton:SetScript("OnClick", function() window:Hide() end)
+
+    local function RefreshDisplay()
+        NSI:RefreshBreakTimerDisplay()
+    end
+
+    local definitions = {
+        { Type = "Button", label = "Reset Position",
+            func = function()
+                settings.Anchor = "CENTER"
+                settings.relativeTo = "CENTER"
+                settings.xOffset = 0
+                settings.yOffset = 200
+                RefreshDisplay()
+            end },
+        { Type = "Slider", label = "Bar Width", min = 100, max = 600,
+            get = function() return settings.Width end,
+            set = function(_, value) settings.Width = value; RefreshDisplay() end },
+        { Type = "Slider", label = "Bar Height", min = 10, max = 80,
+            get = function() return settings.Height end,
+            set = function(_, value) settings.Height = value; RefreshDisplay() end },
+        { Type = "Dropdown", label = "Break Timer Font",
+            get = function() return settings.Font or "Expressway" end,
+            set = function(_, value) settings.Font = value; RefreshDisplay() end,
+            values = function()
+                local values = {}
+                for _, name in ipairs(NSI.LSM:List("font")) do
+                    values[#values + 1] = { label = name, value = name }
+                end
+                return values
+            end },
+        { Type = "Slider", label = "Break Timer Font Size", min = 5, max = 70,
+            get = function() return settings.FontSize end,
+            set = function(_, value) settings.FontSize = value; RefreshDisplay() end },
+        { Type = "Dropdown", label = "Bar Texture",
+            get = function() return settings.Texture end,
+            set = function(_, value) settings.Texture = value; RefreshDisplay() end,
+            values = function()
+                local values = {}
+                for _, name in ipairs(NSI.LSM:List("statusbar")) do
+                    values[#values + 1] = { label = name, value = name }
+                end
+                return values
+            end },
+        { Type = "Color", label = "Bar Color",
+            get = function() return unpack(settings.barColors) end,
+            set = function(_, r, g, b, a) settings.barColors = {r, g, b, a}; RefreshDisplay() end },
+        { Type = "Color", label = "Break Timer Text Color",
+            get = function() return unpack(settings.textColors) end,
+            set = function(_, r, g, b, a) settings.textColors = {r, g, b, a}; RefreshDisplay() end },
+        { Type = "Checkbox", label = "Show Break Meme",
+            get = function() return settings.ShowMeme end,
+            set = function(_, value) settings.ShowMeme = value; RefreshDisplay() end },
+        { Type = "Slider", label = "Meme Size", min = 32, max = 256,
+            get = function() return settings.MemeSize end,
+            set = function(_, value) settings.MemeSize = value; RefreshDisplay() end },
+    }
+
+    local content = CreateFrame("Frame", nil, window)
+    content:SetPoint("TOPLEFT", window, "TOPLEFT", 8, -28)
+    content:SetWidth(window:GetWidth() - 16)
+    local contentHeight = NSI.UI.Components.BuildWidgets(content, definitions, content:GetWidth(), "NSRTBreakTimerSettings")
+    content:SetHeight(contentHeight)
+    window:SetHeight(contentHeight + 36)
+    frame.SettingsWindow = window
+end
+
 local function BuildQoLOptions()
     return {
         {
@@ -302,7 +419,7 @@ local function BuildQoLOptions()
             type = "button",
             name = "Invite Guild Members",
             desc =
-            "Invite all online guild members at or above the selected Guild Invite Rank who aren't already in your group.",
+            "Invite all online guild members at or above the selected Guild Invite Rank who aren't already in your group, and convert your party into a raid group.",
             func = function(self)
                 NSI:InviteOnlineGuildMembers()
             end,
@@ -412,6 +529,81 @@ local function BuildQoLOptions()
                 NSI:UpdateRaidBuffFrame()
             end,
             nocombat = true,
+        },
+        {
+            type = "breakline",
+        },
+        {
+            type = "label",
+            get = function() return "Break Timer" end,
+            text_template = DF:GetTemplate("font", "ORANGE_FONT_TEMPLATE")
+        },
+        {
+            type = "label",
+            get = function() return "Started with /ns break <minutes>" end,
+            text_template = DF:GetTemplate("font", "ORANGE_FONT_TEMPLATE"),
+        },
+        {
+            type = "toggle",
+            boxfirst = true,
+            name = "Show Break Timer",
+            desc = "Whether you want to see the break timer bar when someone starts a break.",
+            get = function() return NSRT.BreakTimer.enabled end,
+            set = function(self, fixedparam, value)
+                NSRT.BreakTimer.enabled = value
+                if value and NSI.ActiveBreak then
+                    NSI:ShowBreakTimerFrame()
+                else
+                    NSI:HideBreakTimerFrame()
+                end
+            end,
+        },
+        {
+            type = "button",
+            name = "Preview/Unlock",
+            desc = "Preview and Move the Break Timer bar.",
+            func = function(self)
+                NSI:SetBreakTimerPreview(not NSI.IsBreakTimerPreview)
+            end,
+            spacement = true
+        },
+        {
+            type = "toggle",
+            boxfirst = true,
+            name = "Break Timer Sound",
+            desc = "Plays a sound when the break starts, during the last minute and when it is over.",
+            get = function() return NSRT.BreakTimer.PlaySound end,
+            set = function(self, fixedparam, value)
+                NSRT.BreakTimer.PlaySound = value
+            end,
+        },
+        {
+            type = "select",
+            name = "Break Sound",
+            desc = "Sound played by the break timer.",
+            get = function() return NSRT.BreakTimer.Sound end,
+            set = function() end,
+            values = BuildBreakTimerSoundOptions,
+        },
+        {
+            type = "toggle",
+            boxfirst = true,
+            name = "Print Remaining Break Time",
+            desc = "Prints remaining break time in chat at 10, 5, 2, and 1 minutes, plus 30 and 10 seconds.",
+            get = function() return NSRT.BreakTimer.AnnounceChat end,
+            set = function(self, fixedparam, value)
+                NSRT.BreakTimer.AnnounceChat = value
+            end,
+        },
+        {
+            type = "toggle",
+            boxfirst = true,
+            name = "Announce Break in Chat",
+            desc = "Sends a raid warning when you start a break, one minute before it ends and when it is over, so people without NSRT know about it too. Only applies to breaks you start yourself.",
+            get = function() return NSRT.BreakTimer.SendRaidWarning end,
+            set = function(self, fixedparam, value)
+                NSRT.BreakTimer.SendRaidWarning = value
+            end,
         },
     }
 end

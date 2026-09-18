@@ -86,8 +86,8 @@ end
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
 		{245742, duration = 5, dispel = "bleed", mechanic = "bleeding", soundOnApplied = "alert", note = CL.bleed}, -- Shadow Pounce
-		{246026, duration = 15, soundOnApplied = "alarm", note = CL.debuffWalkIntoObjectNote:format(mod:SpellName(246026))}, -- Void Bomb
-		{1263523, duration = 8, soundOnApplied = "info", note = CL.debuffDotAfterCastNote:format(CL.extra:format(mod:SpellName(1263523), CL.explosion))}, -- Overload
+		{246026, duration = 15, soundOnApplied = "alarm", tip = CL.debuffWalkIntoObjectNote:format(mod:SpellName(246026))}, -- Void Bomb
+		{1263523, duration = 8, soundOnApplied = "info", tip = CL.debuffDotAfterCastNote:format(CL.extra:format(mod:SpellName(1263523), CL.explosion))}, -- Overload
 	})
 end
 

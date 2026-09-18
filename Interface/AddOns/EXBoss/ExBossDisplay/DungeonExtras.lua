@@ -99,10 +99,24 @@ local anchorController, anchorOptions = EXUI:CreateStandardModuleAnchor({
     anchorPoint = "CENTER", relativePoint = "CENTER", clampedToScreen = false, frameStrata = "DIALOG",
 })
 function Mod:GetStandardAnchorGroupOptions() return anchorOptions end
+local panelDragging = false
+function Mod:StartPanelDrag()
+    if panelDragging or self:IsWorldEditing() then return end
+    local anchor = self:GetAnchor()
+    panelDragging = true
+    anchor:StartMoving()
+end
+function Mod:StopPanelDrag()
+    if not panelDragging then return end
+    panelDragging = false
+    anchorController:GetFrame():StopMovingOrSizing()
+    anchorController:SavePosition()
+    anchorController:ApplyPosition()
+end
 function Mod:GetAnchor()
     local anchor = anchorController:Ensure()
     anchor:SetSize(DB().timerGroup.width, DB().timerGroup.height)
-    anchorController:ApplyPosition()
+    if not panelDragging then anchorController:ApplyPosition() end
     -- 空血量列表不能隐藏共用锚点上的风火图。
     anchor:Show()
     return anchor

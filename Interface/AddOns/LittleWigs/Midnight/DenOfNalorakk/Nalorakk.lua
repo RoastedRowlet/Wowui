@@ -33,10 +33,10 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-	{1242869, duration = 4, note = CL.debuffTargetedNote:format(mod:SpellName(1242860))}, -- Echoing Maul
-	{1243590, duration = 5, soundOnApplied = "alarm", soundOnAppliedDose = "none", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1243569))}, -- Overwhelming Onslaught
-	{1255577, duration = 12, soundOnApplied = "alarm", soundOnAppliedDose = "alarm", note = CL.debuffUnderYouNote}, -- Spectral Slash
-	{1262253, duration = 30, mechanic = "infected", soundOnApplied = "alarm", soundOnAppliedDose = "alarm", note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1262253))}, -- Demoralizing Scream
+	{1242869, duration = 4, tip = CL.debuffTargetedNote:format(mod:SpellName(1242860))}, -- Echoing Maul
+	{1243590, duration = 5, soundOnApplied = "alarm", soundOnAppliedDose = "none", tip = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1243569))}, -- Overwhelming Onslaught
+	{1255577, duration = 12, soundOnApplied = "alarm", soundOnAppliedDose = "alarm", tip = CL.debuffUnderYouNote}, -- Spectral Slash
+	{1262253, duration = 30, mechanic = "infected", soundOnApplied = "alarm", soundOnAppliedDose = "alarm", tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(1262253))}, -- Demoralizing Scream
 	{1261781, soundOnApplied = "info"}, -- Defensive Stance
 })
 
@@ -192,9 +192,10 @@ function mod:EchoingMaulTimeline(eventInfo) -- Echoing Maul
 	return {
 		msg = barText,
 		key = 1242860,
-		callback = function()
-			self:Error("Echoing Maul now has a callback")
-		end,
+		--callback = function()
+			-- there is sometimes a callback but it's late
+			--self:Error("Echoing Maul now has a callback")
+		--end,
 		cancelCallback = function()
 			if timer then
 				self:CancelTimer(timer)

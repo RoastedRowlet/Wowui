@@ -400,10 +400,12 @@ BigWigs:AddSounds("Lithiel Cinderfury", {
 })
 
 BigWigs:AddColors("Murder Row Trash", {
+	[1218508] = "blue",
 	["snitches_interrogated"] = "green",
 })
 
 BigWigs:AddSounds("Murder Row Trash", {
+	[1218508] = "info",
 	["snitches_interrogated"] = "info",
 })
 

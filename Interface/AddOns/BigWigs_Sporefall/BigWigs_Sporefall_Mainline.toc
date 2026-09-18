@@ -13,7 +13,7 @@
 ## Title-zhTW: BigWigs [|cffeda55fSporefall|r]
 ## Notes: BigWigs Sporefall Modules
 ## Notes-deDE: BigWigs Sporenfall Module
-## Notes-esES: BigWigs Sporefall Modules
+## Notes-esES: Módulos de BigWigs para Sporefall
 ## Notes-esMX: BigWigs Sporefall Modules
 ## Notes-frFR: BigWigs Sporefall Modules
 ## Notes-itIT: BigWigs Sporefall Modules
@@ -23,7 +23,7 @@
 ## Notes-zhCN: BigWigs 孢陨幽境模块
 ## Notes-zhTW: BigWigs Sporefall Modules
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v424.7
+## Version: v424.8
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs

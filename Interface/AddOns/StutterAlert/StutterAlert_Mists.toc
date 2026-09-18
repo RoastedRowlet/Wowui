@@ -1,0 +1,39 @@
+## Interface: 50504
+## Title: StutterAlert
+## Notes: Auto detect micro stutters, FPS lag spikes, and frame drops to find the exact addons causing performance issues
+## Notes-deDE: Erkennt Mikroruckler, FPS-Einbrüche und Frame-Drops automatisch und findet genau die Addons, die Leistungsprobleme verursachen
+## Notes-esES: Detecta automáticamente microtirones, caídas de FPS y pérdidas de fotogramas para encontrar los addons exactos que causan problemas de rendimiento
+## Notes-esMX: Detecta automáticamente microtirones, caídas de FPS y pérdidas de fotogramas para encontrar los addons exactos que causan problemas de rendimiento
+## Notes-frFR: Détecte automatiquement les micro-saccades, les chutes d'IPS et les pertes d'images pour trouver les addons précis qui causent des problèmes de performances
+## Notes-itIT: Rileva automaticamente micro-scatti, cali di FPS e perdite di fotogrammi per trovare gli addon esatti che causano problemi di prestazioni
+## Notes-ptBR: Detecta automaticamente microtravadas, quedas de FPS e perdas de quadros para encontrar os addons exatos que causam problemas de desempenho
+## Notes-ruRU: Автоматически обнаруживает микрофризы, просадки FPS и пропуски кадров и находит аддоны, вызывающие проблемы с производительностью
+## Notes-koKR: 미세 끊김, FPS 급락, 프레임 드랍을 자동으로 감지해 성능 문제를 일으키는 애드온을 정확히 찾아냅니다
+## Notes-zhCN: 自动检测微卡顿、帧数骤降和掉帧，精确找出导致性能问题的插件
+## Notes-zhTW: 自動偵測微卡頓、幀數驟降和掉幀，精確找出導致效能問題的插件
+## Author: Osiris the Kiwi / Discord: osirisnz
+## Version: 1.0.6
+## SavedVariables: StutterAlertDB
+## Category: Development Tools
+## X-License: All Rights Reserved
+## IconTexture: Interface\AddOns\StutterAlert\Media\saicon
+
+# --- Load order matters ---
+# Locale scaffolding first so the L table exists before anything reads it.
+Locale.lua
+Locales\Locales.xml
+
+# Which client this is. Loads before anything that picks a string by flavor.
+Flavor.lua
+
+# Core systems.
+Constants.lua
+Database.lua
+Detector.lua
+Advisor.lua
+
+# UI.
+Overlay.lua
+
+# Wiring / events / slash commands (last, once everything is defined).
+Init.lua

@@ -50,6 +50,24 @@ end
 -- Metadata per CVar. kind "slider": a higher number costs more, so we suggest
 -- lowering it when it's above its default. kind "toggle": non-zero == on/costly,
 -- so we suggest turning it off when it's on.
+--
+-- Three of these do not exist on any Classic client, verified on MoP 5.5.4,
+-- BC Anniversary 2.5.6 and Era 1.15.9 on 2026-09-07: graphicsViewDistance,
+-- graphicsDepthEffects and graphicsSpellDensity. They stay in the table because
+-- readCVar returns nil for an unknown name and they drop out on their own.
+--
+-- DO NOT "fix" that by pointing them at the legacy console variables. The old
+-- names do exist there -- farclip, particleDensity, shadowMode, ssao, sunShafts,
+-- waterDetail, projectedTextures, groundEffectDensity -- but they are a
+-- different kind of value and isElevated() cannot read them. The graphics*
+-- family are PRESET-level settings whose default tracks the quality preset the
+-- player chose; the legacy names are RAW engine values whose default is a
+-- hardcoded baseline, almost always 0. Measured side by side on one 2.5.6
+-- client: graphicsShadowQuality = 3 (default 3), while shadowMode = 3 (default
+-- 0). Reading the legacy name makes "value > default" true for a setting sitting
+-- exactly where its preset put it, so every Classic player would be told to
+-- lower nearly everything. farclip fails the other way: its default IS the
+-- maximum, so it can never test elevated and would only ever add a dead row.
 local CVAR = {
     graphicsViewDistance      = { labelKey = "CVAR_VIEW_DISTANCE",  kind = "slider" },
     graphicsEnvironmentDetail = { labelKey = "CVAR_ENV_DETAIL",     kind = "slider" },
@@ -85,6 +103,25 @@ local ADVICE = {
     HEADLINE_GC        = {},
 }
 
+-- Reserves, consulted ONLY to replace an entry that does not exist on this
+-- client -- one for one, never as an addition.
+--
+-- On retail all twelve console variables exist, nothing is ever absent, and not
+-- a single line below is reached: retail advice is byte-for-byte what it was.
+-- On the Classic clients graphicsViewDistance alone is missing from six of the
+-- seven causes, which would leave HEADLINE_LOADING and HEADLINE_UNCLEAR
+-- offering one suggestion each. These restore the coverage using variables
+-- those clients actually have.
+local ADVICE_BACKFILL = {
+    HEADLINE_COMBAT_FX = { "graphicsShadowQuality", "graphicsSunshafts" },
+    HEADLINE_SCENE     = { "graphicsGroundClutter", "graphicsShadowQuality" },
+    HEADLINE_STREAMING = { "graphicsShadowQuality", "graphicsLiquidDetail" },
+    HEADLINE_SUSTAINED = { "graphicsEnvironmentDetail", "graphicsParticleDensity" },
+    HEADLINE_ENGINE    = { "graphicsEnvironmentDetail", "graphicsShadowQuality" },
+    HEADLINE_LOADING   = { "graphicsEnvironmentDetail", "graphicsGroundClutter" },
+    HEADLINE_UNCLEAR   = { "graphicsShadowQuality", "graphicsEnvironmentDetail" },
+}
+
 -- Plain-language intro tip per cause (non-setting advice).
 local TIP = {
     HEADLINE_COMBAT_FX = "ADVISE_TIP_COMBAT_FX",
@@ -108,6 +145,40 @@ local function resolve(base, preferRaid)
     local v, d = readCVar(base)
     if v ~= nil then return base, v, d end
     return nil
+end
+
+-- The advice list for a cause, with anything this client does not have swapped
+-- out for a reserve. Existence is tested through resolve(), which is the same
+-- probe the advice itself uses, so a variable can never be suggested here and
+-- then fail to read a few lines later.
+local function effectiveAdvice(cause, preferRaid)
+    local primary = ADVICE[cause] or ADVICE.HEADLINE_ENGINE
+    local out, seen, absent = {}, {}, 0
+
+    for i = 1, #primary do
+        local base = primary[i]
+        if resolve(base, preferRaid) then
+            out[#out + 1] = base
+            seen[base] = true
+        else
+            absent = absent + 1
+        end
+    end
+
+    local reserves = ADVICE_BACKFILL[cause]
+    if reserves then
+        for i = 1, #reserves do
+            if absent <= 0 then break end
+            local base = reserves[i]
+            if not seen[base] and resolve(base, preferRaid) then
+                out[#out + 1] = base
+                seen[base] = true
+                absent = absent - 1
+            end
+        end
+    end
+
+    return out
 end
 
 local function isElevated(meta, value, default)
@@ -183,7 +254,7 @@ function Advisor:BuildAdviceText()
     if a.movingFrac >= 0.5 then parts[#parts + 1] = L.ADVISE_PAT_TRAVEL end
     if a.topCtx then parts[#parts + 1] = L[ns.CONTEXT_LABEL[a.topCtx] or "CTX_WORLD"] end
     if a.topZone and a.zoneFrac >= 0.25 then parts[#parts + 1] = format(L.ADVISE_PAT_ZONE, a.topZone) end
-    if #parts > 0 then add(format(L.ADVISE_WHERE, concat(parts, ", "))) end
+    if #parts > 0 then add(format(L.ADVISE_WHERE, concat(parts, L.LIST_SEP))) end
     add("")
 
     -- What's causing them (cause breakdown, biggest first).
@@ -205,7 +276,7 @@ function Advisor:BuildAdviceText()
     if tipKey then add(L[tipKey]) end
     if a.raidDominant then add(col(MUTE, L.ADVISE_RAID_NOTE)) end
 
-    local list = ADVICE[cause] or ADVICE.HEADLINE_ENGINE
+    local list = effectiveAdvice(cause, a.raidDominant)
     local suggested = false
     for i = 1, #list do
         local base = list[i]

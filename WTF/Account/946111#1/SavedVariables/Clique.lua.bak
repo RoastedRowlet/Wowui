@@ -9,10 +9,10 @@ CliqueDB3 = {
 ["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Zappyxatu - Stormrage"] = {
-["spec2_profileKey"] = "Zappyxatu - Stormrage",
-["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["specswap"] = false,
+["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["spec3_profileKey"] = "Zappyxatu - Stormrage",
+["spec2_profileKey"] = "Zappyxatu - Stormrage",
 },
 ["Madmareep - Stormrage"] = {
 ["spec1_profileKey"] = "Madmareep - Stormrage",
@@ -343,12 +343,12 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["icon"] = 132212,
+["type"] = "menu",
 ["key"] = "SHIFT-BUTTON2",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 132212,
-["type"] = "menu",
 },
 {
 ["type"] = "menu",

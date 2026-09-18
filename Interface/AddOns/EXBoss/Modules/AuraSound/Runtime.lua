@@ -10,6 +10,13 @@ local AuraSound = ExBoss.AuraSound
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 
+-- 这个总开关按插件加载时的保存值锁定本次会话；设置页明确要求重载后生效，
+-- 因此当前会话中改勾选状态不会注册或移除任何 AuraSound。
+local registrationDisabledForSession = type(EXBOSS12S2) == "table"
+    and type(EXBOSS12S2.voice) == "table"
+    and type(EXBOSS12S2.voice.global) == "table"
+    and EXBOSS12S2.voice.global.disableAuraSoundRegistration == true
+
 local active = {} -- [actionID .. "\31" .. unitToken] = { auraSoundID = number, fingerprint = string }
 local refreshPending = false
 local lastError = nil
@@ -233,6 +240,12 @@ function AuraSound:RefreshActiveRegistrations()
         refreshPending = not cleared
         if cleared then lastError = nil end
         return cleared
+    end
+
+    if registrationDisabledForSession then
+        refreshPending = false
+        lastError = nil
+        return true
     end
 
     local allowed = CanRegisterNow()

@@ -7,6 +7,32 @@ end
 
 -- English placeholder generated 2026-08-21 22:59
 -- added 2026-08-25 localized gap fill
+-- added 2026-09-11 existing L translations
+L["副本额外设置"] = "Impostazioni aggiuntive delle spedizioni"
+L["单位名称"] = "Nome dell'unità"
+L["血量百分比"] = "Percentuale di salute"
+L["血量条预览"] = "Anteprima della barra della salute"
+L["开怪倒数与数字语音。"] = "Conto alla rovescia prima del combattimento e numeri vocali."
+L["统一副本额外提示的位置与开关；血量条共用下方外观设置，风火图保留原有样式。"] = "Gestisce posizione e attivazione degli avvisi aggiuntivi delle spedizioni; le barre della salute condividono le impostazioni grafiche qui sotto, mentre il diagramma vento/fuoco mantiene lo stile originale."
+L["启用副本额外提示"] = "Abilita avvisi aggiuntivi delle spedizioni"
+L["红玉新生法池：尾王风火图"] = "Pozze della Vita di Rubino: diagramma vento/fuoco del boss finale"
+L["毒牙祭坛：指定小怪血量"] = "Altare delle Zanne: salute dei nemici selezionati"
+L["血量条随剩余血量染色"] = "Colora le barre in base alla salute rimanente"
+L["已接管的副本提示"] = "Avvisi delle spedizioni gestiti"
+L["统一锚点"] = "Ancoraggio condiviso"
+L["血量条排列"] = "Disposizione delle barre della salute"
+L["血量条外观"] = "Aspetto delle barre della salute"
+L["Wago API 不可用"] = "API Wago non disponibile"
+L["Wago API 导入失败："] = "Importazione tramite API Wago non riuscita: "
+L["Wago API 导入成功，正在重载界面"] = "Importazione tramite API Wago riuscita. Ricaricamento dell'interfaccia."
+L["Wago API 导入成功"] = "Importazione tramite API Wago riuscita"
+L["测试：通过 Wago API 导入"] = "Test: importa tramite API Wago"
+L["请选择 Author 配置并输入新名称"] = "Seleziona un profilo Author e inserisci un nuovo nome"
+L["复制失败：未返回新配置"] = "Copia non riuscita: nessun nuovo profilo restituito"
+L["已复制为新配置："] = "Copiato in un nuovo profilo: "
+L["这里只管理 Author。输入新名称后可复制为独立配置；User 覆盖始终绑定 Author。"] = "Qui si gestiscono solo i profili Author. Inserisci un nuovo nome per creare una copia indipendente; le modifiche User restano associate al relativo Author."
+L["复制配置"] = "Copia profilo"
+
 L["%d 个 action"] = "%d azioni"
 L["%s · 分类管理"] = "%s · Gestione categorie"
 L["● 当前筛选"] = "● Filtro attuale"
@@ -2003,3 +2029,4 @@ L["这里只管理 Author。User 覆盖始终绑定 Author，不可独立选择�
 L["选择 Author 配置"] = "Seleziona Configurazione Autore"
 L["Author 名称"] = "Nome Autore"
 L["保留的用户覆盖"] = "Sovrascrittura Utente Preservata"
+L["关闭光环语音注册（重载后生效）"] = "Disattiva la registrazione vocale delle aure (effettivo dopo il ricaricamento)"

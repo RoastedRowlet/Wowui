@@ -10,12 +10,6 @@ end
 
 ExBoss._initLoaded = true
 
-local _autoCAAWasForced = false
-local _autoCAAPrevValue = nil
-local _autoCAAVolumeMuted = false
-local _autoCAAPrevVolumes = {}
-local _autoCAACurrentEncounterID = nil
-
 local function EnsureGeneralDB()
     EXBOSS12S2 = EXBOSS12S2 or {}
     EXBOSS12S2.ui = EXBOSS12S2.ui or {}
@@ -35,11 +29,6 @@ local function EnsureGeneralDB()
         g.disableEXBossInRaid = (g.bossAlertsEnabledRaid ~= true)
     else
         g.disableEXBossInRaid = (g.disableEXBossInRaid == true)
-    end
-    if g.autoDisableCAAInBoss == nil then
-        g.autoDisableCAAInBoss = false
-    else
-        g.autoDisableCAAInBoss = (g.autoDisableCAAInBoss == true)
     end
     if g.hideTankBossAlertsForDps == nil then
         g.hideTankBossAlertsForDps = true
@@ -69,9 +58,8 @@ local function EnsureGeneralDB()
     return g
 end
 
--- This is the same scene decision used by Scheduler.  Keep the encounter
--- entrypoint and the Combat Audio Alert side effect behind it too, so a
--- disabled raid scene does not leave an EXBoss-owned side effect behind.
+-- This is the same scene decision used by Scheduler. Keep the encounter
+-- entrypoint behind it so disabled scenes do not start EXBoss scheduling.
 local function IsCurrentBossSceneEnabled()
     local bossCfg = ExBoss and ExBoss.BossConfig
     if bossCfg and type(bossCfg.IsCurrentSceneEnabled) == "function" then
@@ -90,55 +78,6 @@ local function IsCurrentBossSceneEnabled()
         return g.bossAlertsEnabledMplus ~= false
     end
     return true
-end
-
-local function IsFixedTimelineEncounterForCAA(encounterID)
-    local id = tonumber(encounterID)
-    local fixed = _G.EXBOSS_FIXED_TIMELINE_ENCOUNTERS
-    if type(fixed) ~= "table" then
-        return false, "no fixed table"
-    end
-    if id and fixed[id] == true then
-        return true, "fixed=true(id)"
-    end
-    if encounterID ~= nil and fixed[encounterID] == true then
-        return true, "fixed=true(raw)"
-    end
-    return false, "fixed=false"
-end
-
-local function ReadCAAEnabled()
-    local ok, value
-    if C_CVar and C_CVar.GetCVar then
-        ok, value = pcall(C_CVar.GetCVar, "CAAEnabled")
-    end
-    if (not ok or value == nil) and type(GetCVar) == "function" then
-        ok, value = pcall(GetCVar, "CAAEnabled")
-    end
-    if not ok then return nil end
-    if value == nil then return nil end
-    local s = tostring(value)
-    if s == "" then return nil end
-    return s
-end
-
-local function WriteCAAEnabled(value)
-    local s = tostring(value or "")
-    if s == "" then return false end
-    local ok = false
-    if C_CVar and C_CVar.SetCVar then
-        ok = pcall(C_CVar.SetCVar, "CAAEnabled", s)
-        if ok then
-            return true
-        end
-    end
-    if type(SetCVar) == "function" then
-        ok = pcall(SetCVar, "CAAEnabled", s)
-        if ok then
-            return true
-        end
-    end
-    return false
 end
 
 local function ReadGenericCVar(name)
@@ -236,148 +175,6 @@ local function ScheduleAllProtectedEncounterCVarRepairs()
     ScheduleProtectedEncounterCVarRepair("encounterWarningsEnabled")
     ScheduleProtectedEncounterCVarRepair("encounterTimelineEnabled")
     ScheduleProtectedEncounterCVarRepair("Sound_EnableEncounterWarningsSounds")
-end
-
-local function GetCAACategoryRange()
-    local minValue, maxValue = 0, 8
-    local meta = Enum and Enum.CombatAudioAlertCategoryMeta
-    if type(meta) == "table" then
-        minValue = tonumber(meta.MinValue) or minValue
-        maxValue = tonumber(meta.MaxValue) or maxValue
-    end
-    return minValue, maxValue
-end
-
-local function CanUseCAAApi()
-    return C_CombatAudioAlert
-        and type(C_CombatAudioAlert.GetCategoryVolume) == "function"
-        and type(C_CombatAudioAlert.SetCategoryVolume) == "function"
-end
-
-local function MuteCAAByCategoryVolumes()
-    if _autoCAAVolumeMuted then
-        return true
-    end
-    if not CanUseCAAApi() then
-        return false
-    end
-
-    wipe(_autoCAAPrevVolumes)
-    local minValue, maxValue = GetCAACategoryRange()
-    for category = minValue, maxValue do
-        local okGet, vol = pcall(C_CombatAudioAlert.GetCategoryVolume, category)
-        if okGet and tonumber(vol) ~= nil then
-            _autoCAAPrevVolumes[category] = tonumber(vol)
-        end
-        pcall(C_CombatAudioAlert.SetCategoryVolume, category, 0)
-    end
-    _autoCAAVolumeMuted = true
-    return true
-end
-
-local function RestoreCAAByCategoryVolumes()
-    if not _autoCAAVolumeMuted then
-        return true
-    end
-    if not CanUseCAAApi() then
-        return false
-    end
-
-    local minValue, maxValue = GetCAACategoryRange()
-    for category = minValue, maxValue do
-        local restoreVol = tonumber(_autoCAAPrevVolumes[category])
-        if restoreVol == nil then
-            local okGet, currentVol = pcall(C_CombatAudioAlert.GetCategoryVolume, category)
-            if okGet and tonumber(currentVol) ~= nil then
-                restoreVol = tonumber(currentVol)
-            else
-                restoreVol = 100
-            end
-        end
-        pcall(C_CombatAudioAlert.SetCategoryVolume, category, restoreVol)
-    end
-    wipe(_autoCAAPrevVolumes)
-    _autoCAAVolumeMuted = false
-    return true
-end
-
-function ExBoss.ApplyBossAutoCAASetting(forceIsBossEncounter)
-    local g = EnsureGeneralDB()
-    local enabled = (g.autoDisableCAAInBoss == true)
-    if not IsCurrentBossSceneEnabled() then
-        enabled = false
-    end
-    local isBoss = (forceIsBossEncounter == true)
-    if forceIsBossEncounter == nil and ExwindTools and ExwindTools.State then
-        isBoss = (ExwindTools.State.IsBossEncounter == true)
-    end
-    local shouldMuteBecauseFixed = false
-    local muteReason = "n/a"
-    if isBoss then
-        shouldMuteBecauseFixed, muteReason = IsFixedTimelineEncounterForCAA(_autoCAACurrentEncounterID)
-    end
-
-    if not enabled then
-        if _autoCAAVolumeMuted then
-            RestoreCAAByCategoryVolumes()
-            _autoCAAWasForced = false
-            _autoCAAPrevValue = nil
-        elseif _autoCAAWasForced then
-            WriteCAAEnabled(_autoCAAPrevValue or "1")
-            _autoCAAWasForced = false
-            _autoCAAPrevValue = nil
-        end
-        return
-    end
-
-    if isBoss and not shouldMuteBecauseFixed then
-        if _autoCAAVolumeMuted then
-            RestoreCAAByCategoryVolumes()
-            _autoCAAWasForced = false
-            _autoCAAPrevValue = nil
-        elseif _autoCAAWasForced then
-            WriteCAAEnabled(_autoCAAPrevValue or "1")
-            _autoCAAWasForced = false
-            _autoCAAPrevValue = nil
-        end
-        return
-    end
-
-    if isBoss then
-        local muted = MuteCAAByCategoryVolumes()
-        if muted then
-            _autoCAAWasForced = true
-            return
-        end
-        if not _autoCAAWasForced then
-            _autoCAAPrevValue = ReadCAAEnabled()
-        end
-        WriteCAAEnabled("0")
-        _autoCAAWasForced = true
-    else
-        if _autoCAAVolumeMuted then
-            RestoreCAAByCategoryVolumes()
-            _autoCAAWasForced = false
-            _autoCAAPrevValue = nil
-        elseif _autoCAAWasForced then
-            WriteCAAEnabled(_autoCAAPrevValue or "1")
-            _autoCAAWasForced = false
-            _autoCAAPrevValue = nil
-        end
-    end
-end
-
-if ExwindTools and ExwindTools.WatchState then
-    ExwindTools:WatchState("IsBossEncounter", "ExBoss_AutoCAA_Toggle", function(newValue)
-        if ExBoss and ExBoss.ApplyBossAutoCAASetting then
-            ExBoss.ApplyBossAutoCAASetting(newValue == true)
-        end
-    end)
-    C_Timer.After(0.2, function()
-        if ExBoss and ExBoss.ApplyBossAutoCAASetting then
-            ExBoss.ApplyBossAutoCAASetting()
-        end
-    end)
 end
 
 -- ── ADDON_LOADED：初始化 DB ───────────────────────────────────
@@ -615,10 +412,6 @@ ExwindTools:RegisterEvent("ENCOUNTER_START", "ExBoss_Init_EncStart", function(_,
         end
         return
     end
-    _autoCAACurrentEncounterID = tonumber(encounterID) or encounterID
-    if ExBoss and ExBoss.ApplyBossAutoCAASetting then
-        ExBoss.ApplyBossAutoCAASetting(true)
-    end
     if ExBoss.Timeline and ExBoss.Timeline.Scheduler and ExBoss.Timeline.Scheduler.HandleEncounterStart then
         ExBoss.Timeline.Scheduler:HandleEncounterStart(encounterID, "exwind")
         return
@@ -630,10 +423,6 @@ end)
 
 -- ── ENCOUNTER_END：停止计时引擎 ──────────────────────────────
 ExwindTools:RegisterEvent("ENCOUNTER_END", "ExBoss_Init_EncEnd", function()
-    _autoCAACurrentEncounterID = nil
-    if ExBoss and ExBoss.ApplyBossAutoCAASetting then
-        ExBoss.ApplyBossAutoCAASetting(false)
-    end
     if ExBoss.Timeline and ExBoss.Timeline.Scheduler and ExBoss.Timeline.Scheduler.HandleEncounterEnd then
         ExBoss.Timeline.Scheduler:HandleEncounterEnd("exwind")
         return

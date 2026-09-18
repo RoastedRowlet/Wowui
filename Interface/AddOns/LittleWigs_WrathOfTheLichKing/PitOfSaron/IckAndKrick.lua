@@ -72,11 +72,11 @@ end
 
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{1264186, dispel = "curse", mechanic = "snared", soundOnApplied = "alert", note = CL.debuffAddsCast:format(CL.extra:format(mod:SpellName(1264259), CL.adds))}, -- Shadowbind
-		{1264246, duration = 12, note = CL.debuffDotAfterCastNote:format(mod:SpellName(1264027))}, -- Shade Shift
-		{1264299, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Blight
-		{1280616, duration = 15, soundOnApplied = "warning", note = CL.other:format(CL.fixate, CL.preDebuffNote)}, -- Lumbering Fixation
-		{1264453, duration = 5, note = CL.other:format(CL.fixate, CL.mainDebuffNote)}, -- Lumbering Fixation
+		{1264186, dispel = "curse", mechanic = "snared", soundOnApplied = "alert", tip = CL.debuffAddsCast:format(CL.extra:format(mod:SpellName(1264259), CL.adds))}, -- Shadowbind
+		{1264246, duration = 12, tip = CL.debuffDotAfterCastNote:format(mod:SpellName(1264027))}, -- Shade Shift
+		{1264299, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Blight
+		{1280616, duration = 15, soundOnApplied = "warning", note = CL.fixate, tip = CL.preDebuffNote}, -- Lumbering Fixation
+		{1264453, duration = 5, note = CL.fixate, tip = CL.mainDebuffNote}, -- Lumbering Fixation
 	})
 end
 

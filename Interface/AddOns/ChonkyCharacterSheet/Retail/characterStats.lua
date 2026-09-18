@@ -2869,7 +2869,10 @@ function module:Initialize(onlyStyle)
         CharacterStatsPane.ItemLevelCategory:SetPoint("TOP", CharacterStatsPane, "TOP", -3, -7000)
         CharacterStatsPane.ClassBackground:SetAlpha(0)
         CharacterStatsPane:UnregisterAllEvents()
-
+		if PaperDollSidebarTabs ~= nil and PaperDollSidebarTabs.DecorLeft ~= nil then
+				PaperDollSidebarTabs.DecorLeft:Hide()
+				PaperDollSidebarTabs.DecorRight:Hide()
+		end
         -------------------------------------------------
         -- Scroll Frame
         -------------------------------------------------

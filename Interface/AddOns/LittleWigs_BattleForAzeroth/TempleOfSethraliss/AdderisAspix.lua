@@ -90,11 +90,11 @@ end
 
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{1288457, duration = 4, note = CL.debuffDotAfterCastNote:format(mod:SpellName(1288457))}, -- Gust
-		{1289059, duration = 4, note = CL.debuffTargetedNote:format(mod:SpellName(1289059))}, -- Gale Force
-		{1288874, duration = 5, soundOnRemoved = "alarm", note = CL.debuffTargetedNote:format(mod:SpellName(1311805))}, -- Tempest Winds
-		{1288885, duration = 4, mechanic = "silenced", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1311805))}, -- Tempest Winds
-		{1288074, duration = 4.5, soundOnRemoved = "alarm", note = CL.debuffTargetedNote:format(mod:SpellName(1288049))}, -- Thunder and Lightning
+		{1288457, duration = 4, tip = CL.debuffDotAfterCastNote:format(mod:SpellName(1288457))}, -- Gust
+		{1289059, duration = 4, tip = CL.debuffTargetedNote:format(mod:SpellName(1289059))}, -- Gale Force
+		{1288874, duration = 5, soundOnRemoved = "alarm", tip = CL.debuffTargetedNote:format(mod:SpellName(1311805))}, -- Tempest Winds
+		{1288885, duration = 4, mechanic = "silenced", tip = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1311805))}, -- Tempest Winds
+		{1288074, duration = 4.5, soundOnRemoved = "alarm", tip = CL.debuffTargetedNote:format(mod:SpellName(1288049))}, -- Thunder and Lightning
 	})
 end
 

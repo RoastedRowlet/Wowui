@@ -34,8 +34,8 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-	{1228198, duration = 30, dispel = "magic", soundOnApplied = "alert", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1228198))}, -- Corroding Spittle
-	{1253813, soundOnApplied = "underyou", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1253811))}, -- Fel Spray
+	{1228198, duration = 30, dispel = "magic", soundOnApplied = "alert", tip = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1228198))}, -- Corroding Spittle
+	{1253813, soundOnApplied = "underyou", tip = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1253811))}, -- Fel Spray
 })
 
 --------------------------------------------------------------------------------

@@ -72,8 +72,8 @@ end
 
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{244588, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Void Sludge
-		{244599, duration = 10, soundOnApplied = "warning", soundOnAppliedDose = "none", note = CL.other:format(CL.adds, CL.debuffFailureMoveFromExplosionNote)}, -- Dark Expulsion
+		{244588, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Void Sludge
+		{244599, duration = 10, soundOnApplied = "warning", soundOnAppliedDose = "none", note = CL.adds, tip = CL.debuffFailureMoveFromExplosionNote}, -- Dark Expulsion
 	})
 end
 

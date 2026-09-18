@@ -135,11 +135,11 @@ end
 
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{381515, duration = 30, dispel = "magic", soundOnAppliedDose = "none", note = CL.debuffTankAfterCastNote:format(mod:SpellName(381512))}, -- Stormslam
-		{381518, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(381517))}, -- Winds of Change
-		{381862, duration = 6, note = CL.debuffDotAfterCastNote:format(mod:SpellName(381862))}, -- Inferno Spit
-		{384773, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Flaming Embers
-		{381526, soundOnApplied = "alarm", note = CL.debuffHitByCastNote:format(mod:SpellName(381525))}, -- Roaring Firebreath
+		{381515, duration = 30, dispel = "magic", soundOnAppliedDose = "none", tip = CL.debuffTankAfterCastNote:format(mod:SpellName(381512))}, -- Stormslam
+		{381518, tip = CL.debuffGroupAfterCastNote:format(mod:SpellName(381517))}, -- Winds of Change
+		{381862, duration = 6, tip = CL.debuffDotAfterCastNote:format(mod:SpellName(381862))}, -- Inferno Spit
+		{384773, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Flaming Embers
+		{381526, soundOnApplied = "alarm", tip = CL.debuffHitByCastNote:format(mod:SpellName(381525))}, -- Roaring Firebreath
 	})
 end
 

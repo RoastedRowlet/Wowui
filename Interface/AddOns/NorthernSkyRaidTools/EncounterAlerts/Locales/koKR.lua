@@ -186,7 +186,6 @@ L[3455] = {
     ["Soaks"]       = {group = "바쉬니크", name = "바닥 맞기", text = "바닥 맞기"},
     ["Waves"]       = {group = "바쉬니크", name = "물결", text = "물결"},
     ["WaveSpread"] = {group = "바쉬니크", name = "물결 산개", text = "미리 산개"},
-    ["WavesLine"] = {group = "바쉬니크", name = "물결 선", text = ""},
 }
 
 -- The Lost Explorers (3497)
@@ -217,7 +216,6 @@ L[3420] = {
     ["SerpentsFury"] = {group = "스조라크", name = "뱀의 격노", text = "뭉치기"},
     ["WindsHelper"] = {group = "스조라크", name = "바람 기믹 헬퍼"},
     ["VenomousSurgeTargets"] = {group = "스조라크", name = "디버프 대상"},
-    ["MarkerMap"] = {group = "스조라크", name = "징표 맵"},
 }
 
 -- The Twin Fangs (3421)
@@ -235,7 +233,7 @@ L[3421] = {
     ["WatchSpawns"] = {group = "쌍둥이 송곳니", name = "밀려남", text = "밀려남"},
     ["Knock"]       = {group = "쌍둥이 송곳니", name = "넉백", text = "넉백"},
     ["DebuffOverview"] = {group = "쌍둥이 송곳니", name = "영원의 맹독 현황", text = "영원의 맹독 현황"},
-    -- ["InterruptWhisperAlert"] = {group = "Twin Fangs", name = "Interrupt Whisper Alert", text = "Your Interrupt"},
+    ["InterruptWhisperAlert"] = {group = "쌍둥이 송곳니", name = "차단 귓속말 알림", text = "차단"},
 }
 
 -- The Coiled Altar (3429)
@@ -268,8 +266,9 @@ L[3429] = {
 L[3492] = {
     ["HitKnock"]            = {group = "울라텍", name = "어미의 분노", text = "공격+넉백"},
     ["Waves"]               = {group = "울라텍", name = "부식의 파도", text = "파도"},
-    ["DamageAmpIn"]         = {group = "울라텍", name = "맹독의 심장", text = "곧 약화"},
-    ["DamageAmp"]           = {group = "울라텍", name = "맹독의 심장", text = "약화됨"},
+    -- ["DragOut"]             = {group = "Ula'tek", name = "Drag out", text = "Drag out"},
+    ["DamageAmpIn"]         = {group = "울라텍", name = "곧 약화", text = "곧 약화"},
+    ["DamageAmp"]           = {group = "울라텍", name = "약화 타이머", text = "약화됨"},
     ["PlatformBreak"]       = {group = "울라텍", name = "사냥감 포위", text = "바닥 꺼짐"},
     ["Debuffs"]             = {group = "울라텍", name = "뱀의 물어뜯기", text = "디버프"},
     ["Eggs"]                = {group = "울라텍", name = "알", text = "알"},
@@ -277,6 +276,8 @@ L[3492] = {
     ["AddSoak"]             = {group = "울라텍", name = "쫄 맞기", text = "쫄 맞기"},
     ["Adds"]                = {group = "울라텍", name = "3페 쫄", text = "쫄"},
     ["BossSpawn"]           = {group = "울라텍", name = "보스 등장", text = "보스 등장"},
+    -- ["FirstBreak"]          = {group = "Ula'tek", name = "First Break", text = "First Break"},
+    -- ["SecondBreak"]         = {group = "Ula'tek", name = "Second Break", text = "Second Break"},
     ["Sweep"]               = {group = "울라텍", name = "휩쓸기", text = "휩쓸기"},
     ["Soak"]                = {group = "울라텍", name = "바닥 맞기", text = "맞기"},
     ["TransitionSoakFirst"] = {group = "울라텍", name = "1조 맞기", text = "1조 맞기"},
@@ -285,8 +286,8 @@ L[3492] = {
     ["WrongTarget"] = {group = "울라텍", name = "타겟 잘못 잡음", text = "타겟 잘못 잡음"},
     ["WaveDirection"] = {group = "울라텍", name = "파도 방향 디스플레이", text = ""},
     ["WaveDirectionPrompt"] = {group = "울라텍", name = "파도 방향 입력", text = "방향 입력"},
-    ["WaveLines"] = {group = "울라텍", name = "3페 파도 선", text = ""},
     ["InterruptAssignments"] = {group = "울라텍", name = "차단 배정", text = "차단"},
     ["TransitionPatternSoaks"] = {group = "울라텍", name = "사이페 바닥 맞기", text = "맞기"},
-    ["TransitionPatternArrow"] = {group = "울라텍", name = "사이페 화살표", text = ""},
+    -- ["PrePot"] = {group = "Ula'tek", name = "Pre-Pot", text = "Pre-Pot"},
+    -- ["AutoRelease"] = {group = "Ula'tek", name = "Auto Release", text = "Auto Release"},
 }

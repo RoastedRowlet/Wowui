@@ -246,7 +246,7 @@ function ns.ContextLabelFor(rec)
     local key = (rec and rec.ctxKey) or "world"
     local label = L[ns.CONTEXT_LABEL[key] or "CTX_WORLD"]
     if rec and rec.ctx and rec.ctx.inCombat then
-        label = label .. " " .. L.CTX_COMBAT_SUFFIX
+        label = format(L.CTX_WITH_COMBAT, label)
     end
     return label
 end

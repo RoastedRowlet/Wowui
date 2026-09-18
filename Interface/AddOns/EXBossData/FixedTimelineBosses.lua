@@ -212,7 +212,7 @@ local encounterTriggers = {
 
     [3202] = {
         trigger = TRIGGER_AI, -- [兹欧凯特] 0727更新
-        strictDurationMatch = true,
+        -- strictDurationMatch = true,
         durationRules = {
             { time = 26, eventID = 190, sync = true },
             { time = 4,  eventID = 189, sync = true },

@@ -1039,6 +1039,12 @@ local function CreateArcAuraFrame(arcID, config)
     frame:SetMovable(true)
     frame:EnableMouse(true)
     frame:RegisterForDrag("LeftButton")
+    -- WIRE-ONCE LAW: construction runs on frame REUSE too (orphaned named
+    -- frames fall through into this block), and the SetScripts below REPLACE
+    -- any CDMGroups free-drag handlers the old frame carried - clear the free
+    -- path's wire-once flag so SetupFreeIconDrag re-wires instead of trusting
+    -- a stale "already wired".
+    frame._cdmgFreeDragScriptsWired = nil
     frame:SetScript("OnDragStart", function(self)
         if self._isDraggable then
             self:StartMoving()
@@ -1446,6 +1452,14 @@ function ArcAuras.DestroyFrame(arcID)
         frame:SetScript("OnDragStart", nil)
         frame:SetScript("OnDragStop", nil)
         frame:SetScript("OnUpdate", nil)
+        -- WIRE-ONCE LAW (2026-09-04): the free-drag scripts are installed
+        -- once behind _cdmgFreeDragScriptsWired — clearing the scripts
+        -- WITHOUT the flag leaves a REUSED named frame (CreateArcAuraFrame
+        -- reuses orphans; totems destroy/recreate on every spec change)
+        -- claiming "already wired" with no drag scripts installed = a
+        -- permanently undraggable free icon (the 2026-09-14 totem slots
+        -- report). This was the missing FIFTH script-clearing site.
+        frame._cdmgFreeDragScriptsWired = nil
     end
     
     -- ═══════════════════════════════════════════════════════════════════════════
@@ -2967,6 +2981,9 @@ function ArcAuras.ApplySettingsToFrame(arcID, frame)
     -- Check if Masque is globally enabled - skip ArcUI visuals even if frame not yet registered
     -- This prevents visual conflicts during zone load when frames are updated before Masque registration
     local masqueActive = ns.Masque and ns.Masque.IsEnabled and ns.Masque.IsEnabled()
+    -- AURA ICONS: Masque support is parked (2026-09-11) — never registered,
+    -- so ArcUI never yields their visuals to Masque either
+    if frame._arcIsAuraIcon then masqueActive = false end
     
     -- ═══════════════════════════════════════════════════════════════════════════
     -- MASQUE RE-SKIN: When Masque is active, it calculates Icon insets based on
@@ -3476,6 +3493,17 @@ function ArcAuras.AddTrackedItem(config)
         isAutoTrackSlot = config.isAutoTrackSlot or false,
         hideWhenUnequipped = config.hideWhenUnequipped or false,
     }
+
+    -- NEW-ICON DEFAULT (Arc's call 2026-09-14): an EXPLICIT user add loads
+    -- only on the spec it was created on (allowCopy = options Add popup,
+    -- isUserAdd = drag-drop widget). Automatic callers (auto-track trinket
+    -- slots, equip scans) set neither and keep the all-specs default -
+    -- gear icons re-added by sweeps must not be pinned to whatever spec
+    -- the sweep happened to run on.
+    if config.allowCopy or config.isUserAdd then
+        local curSpec = GetSpecialization and GetSpecialization()
+        if curSpec then entry.showOnSpecs = { curSpec } end
+    end
     
     -- Save to database
     db.trackedItems[arcID] = entry
@@ -5221,36 +5249,49 @@ function ArcAuras.RefreshMasqueState()
     local masqueEnabled = ns.Masque and ns.Masque.IsEnabled and ns.Masque.IsEnabled()
     
     for arcID, frame in pairs(ArcAuras.frames) do
-        if masqueEnabled then
-            -- Masque is now enabled - register via unified system if not already
-            if not frame._arcMasqueAdded then
-                if ns.Masque and ns.Masque.AddFrame then
-                    ns.Masque.AddFrame(frame, "ArcAuras", arcID)
-                    frame._arcMasqueSkinW = frame:GetWidth()
-                    frame._arcMasqueSkinH = frame:GetHeight()
-                end
-            end
-            -- Reset icon texture to default 1:1 for Masque to control
-            if frame.Icon and frame.Icon.SetTexCoord then
-                frame.Icon:SetTexCoord(0, 1, 0, 1)
+        -- AURA ICONS: never Masque-registered (parked - ArcUI keeps full
+        -- visual control, ghost included; the AddFrame chokepoint refuses
+        -- them too) and their texcoords are NEVER reset here - the ghost's
+        -- zoom belongs to AuraIcons.ApplySettings, which also runs any
+        -- leftover-registration cleanup.
+        local isAuraIcon = frame._arcIsAuraIcon
+            or (type(arcID) == "string" and arcID:match("^arc_aura_") ~= nil)
+        if isAuraIcon then
+            if ns.AuraIcons and ns.AuraIcons.ApplySettings then
+                ns.AuraIcons.ApplySettings(arcID)
             end
         else
-            -- Masque is now disabled - unregister via unified system
-            if frame._arcMasqueAdded then
-                if ns.Masque and ns.Masque.RemoveFrame then
-                    ns.Masque.RemoveFrame(frame)
+            if masqueEnabled then
+                -- Masque is now enabled - register via unified system if not already
+                if not frame._arcMasqueAdded then
+                    if ns.Masque and ns.Masque.AddFrame then
+                        ns.Masque.AddFrame(frame, "ArcAuras", arcID)
+                        frame._arcMasqueSkinW = frame:GetWidth()
+                        frame._arcMasqueSkinH = frame:GetHeight()
+                    end
                 end
-                frame._arcMasqueSkinW = nil
-                frame._arcMasqueSkinH = nil
-                -- Reset icon texture to default
+                -- Reset icon texture to default 1:1 for Masque to control
                 if frame.Icon and frame.Icon.SetTexCoord then
                     frame.Icon:SetTexCoord(0, 1, 0, 1)
                 end
+            else
+                -- Masque is now disabled - unregister via unified system
+                if frame._arcMasqueAdded then
+                    if ns.Masque and ns.Masque.RemoveFrame then
+                        ns.Masque.RemoveFrame(frame)
+                    end
+                    frame._arcMasqueSkinW = nil
+                    frame._arcMasqueSkinH = nil
+                    -- Reset icon texture to default
+                    if frame.Icon and frame.Icon.SetTexCoord then
+                        frame.Icon:SetTexCoord(0, 1, 0, 1)
+                    end
+                end
             end
+
+            -- Refresh settings regardless
+            ArcAuras.RefreshFrameSettings(arcID)
         end
-        
-        -- Refresh settings regardless
-        ArcAuras.RefreshFrameSettings(arcID)
     end
 end
 

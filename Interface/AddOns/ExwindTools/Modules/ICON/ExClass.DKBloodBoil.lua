@@ -14,17 +14,8 @@ local DEATH_KNIGHT_CLASS_ID = 6
 local TRACKED_COOLDOWN_SPELL_ID = 1265982
 local ICON_SPELL_ID = 50842
 local DISPLAY_DURATION_SECONDS = 3
-local RUNTIME_ITEM_ID = "dk-blood-boil:runtime"
+local RUNTIME_ITEM_ID = "dk-blood-boil-normal:runtime"
 local RefreshActiveSurfaces
-
--- 模块加载发生在 Tools 存储注册之后，因此可以使用现有入口登记职业分类。
--- 这不会改写冻结的 Core 静态 ModuleList。
-ExwindTools:RegisterExternalModule({
-    Key = MODULE_KEY,
-    Name = L["DK血沸监控"],
-    Desc = L["血沸冷却更新时显示 3 秒倒数图标。"],
-    Category = 6,
-})
 
 local MODULE_SPEC = {
     RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
@@ -199,7 +190,7 @@ local MODULE_SPEC = {
         },
         groups = { { key = "settings", order = 1 } },
         static = {
-            { h = 8, key = "header", label = L["DK血沸监控"], labelSize = 25, type = "header", w = 200, x = 1, y = 1 },
+            { h = 8, key = "header", label = L["DK血沸普通版"], labelSize = 25, type = "header", w = 200, x = 1, y = 1 },
             {
                 h = 8,
                 key = "description",

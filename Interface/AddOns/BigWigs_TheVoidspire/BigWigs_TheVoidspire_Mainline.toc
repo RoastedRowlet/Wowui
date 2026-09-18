@@ -13,7 +13,7 @@
 ## Title-zhTW: BigWigs [|cffeda55f虛無之尖|r]
 ## Notes: BigWigs The Voidspire Modules
 ## Notes-deDE: BigWigs Die Leerenspitze Module
-## Notes-esES: BigWigs The Voidspire Modules
+## Notes-esES: Módulos de BigWigs para la Aguja del Vacío
 ## Notes-esMX: BigWigs The Voidspire Modules
 ## Notes-frFR: BigWigs The Voidspire Modules
 ## Notes-itIT: BigWigs The Voidspire Modules
@@ -23,7 +23,7 @@
 ## Notes-zhCN: BigWigs 虚影尖塔模块
 ## Notes-zhTW: BigWigs 虛無之尖模組
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v424.7
+## Version: v424.8
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs
