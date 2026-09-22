@@ -1,6 +1,50 @@
 
 SimulationCraftDB = {
 ["char"] = {
+["Zappyxatu - Stormrage"] = {
+["bonusRolls"] = {
+{
+["ts"] = 1787927220,
+["currency"] = 3418,
+["source"] = 278286,
+["context"] = 5,
+["keyLevel"] = 2,
+["spec"] = 263,
+["season"] = 37,
+["itemId"] = 270924,
+},
+{
+["ts"] = 1788293700,
+["currency"] = 3418,
+["source"] = 278286,
+["context"] = 5,
+["keyLevel"] = 2,
+["spec"] = 263,
+["season"] = 37,
+["itemId"] = 270164,
+},
+{
+["ts"] = 1788900960,
+["currency"] = 3418,
+["source"] = 278284,
+["context"] = 5,
+["keyLevel"] = 4,
+["spec"] = 264,
+["season"] = 37,
+["itemId"] = 268265,
+},
+{
+["currency"] = 3418,
+["ts"] = 1789504920,
+["source"] = 278284,
+["season"] = 37,
+["keyLevel"] = 4,
+["spec"] = 264,
+["context"] = 5,
+["itemId"] = 271876,
+},
+},
+},
 ["Barelynoer - Area 52"] = {
 ["bonusRolls"] = {
 {
@@ -56,50 +100,6 @@ SimulationCraftDB = {
 ["spec"] = 105,
 ["season"] = 37,
 ["itemId"] = 268240,
-},
-},
-},
-["Zappyxatu - Stormrage"] = {
-["bonusRolls"] = {
-{
-["ts"] = 1787927220,
-["currency"] = 3418,
-["source"] = 278286,
-["context"] = 5,
-["keyLevel"] = 2,
-["spec"] = 263,
-["season"] = 37,
-["itemId"] = 270924,
-},
-{
-["ts"] = 1788293700,
-["currency"] = 3418,
-["source"] = 278286,
-["context"] = 5,
-["keyLevel"] = 2,
-["spec"] = 263,
-["season"] = 37,
-["itemId"] = 270164,
-},
-{
-["ts"] = 1788900960,
-["currency"] = 3418,
-["source"] = 278284,
-["context"] = 5,
-["keyLevel"] = 4,
-["spec"] = 264,
-["season"] = 37,
-["itemId"] = 268265,
-},
-{
-["currency"] = 3418,
-["ts"] = 1789504920,
-["source"] = 278284,
-["season"] = 37,
-["keyLevel"] = 4,
-["spec"] = 264,
-["context"] = 5,
-["itemId"] = 271876,
 },
 },
 },

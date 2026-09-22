@@ -12,18 +12,14 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Madmareep-stormrage"
+RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Deathcaptain-dalvengyr"] = true,
-["us-Top-lethon"] = true,
-["us-Invaderass-sargeras"] = true,
-["us-Moliog-shattered-hand"] = true,
-["us-Nembaele-demon-soul"] = true,
-["us-Rhshanks-stormrage"] = true,
-["us-Erianas-demon-soul"] = true,
-["us-Hashalina-wyrmrest-accord"] = true,
-["us-Necrovoid-shadowmoon"] = true,
-["us-Madmareep-stormrage"] = true,
+["us-Boggerdog-stormrage"] = true,
+["us-Bitterchill-stormrage"] = true,
+["us-Soulxknight-stormrage"] = true,
+["us-Worganlock-stormrage"] = true,
+["us-Lycân-stormrage"] = true,
+["us-Cellestyne-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

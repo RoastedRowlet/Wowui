@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Kargath',name='US',type='subscribers',zone=53,date='2026-09-15',data={Dr='Drob:BAEANQAECgQIBAAAAA==.Drocket:BAEANQAECgEIAQAAAA==.',Ic='Icéehawt:BAEANQAECgMIAwABNQADCgUIBQABAAAAAA==.',Ig='Ignignokt:BAEANQAECgYIDwAAAA==.',Ly='Lyse:BAEANQADCggIEgAAAA==.',Vi='Vilebloom:BAEANQADCgMIAwABNQADCgcIEgABAAAAAA==.Vilewyrm:BAEANQADCgcIEgAAAA==.',Vo='Voidmulan:BAEANQADCgUIBQAAAA==.',},}
+local lookup = {'Unknown-Unknown','Hunter-BeastMastery',}
+local provider = {region='US',realm='Kargath',name='US',type='subscribers',zone=53,date='2026-09-22',data={Al='Alomeo:BAEANQADCgYJCwAAAA==.',Dr='Drob:BAEANQAECgUJCAAAAA==.Drocket:BAEANQAECgUJBgAAAA==.',Ic='Icéehawt:BAEANQAECgMIBgABNQADCgUIBQABAAAAAA==.',Ig='Ignignokt:BAEBNQAECoEWAAICAAgKOSVODQA6AwiODQAABABjAHUNAAAEAGEAfw0AAAQAXwCpDQAABABhAFwNAAACAGIAXQ0AAAEAXwBlDQAAAQBaADMNAAACAFkAAgAICjklTg0AOgMIjg0AAAQAYwB1DQAABABhAH8NAAAEAF8AqQ0AAAQAYQBcDQAAAgBiAF0NAAABAF8AZQ0AAAEAWgAzDQAAAgBZAAAA.',Ly='Lyse:BAEANQAECgIJAgAAAA==.',Vi='Vilebloom:BAEANQAECgMIAwAAAA==.Vilewyrm:BAEANQADCgcIEgABNQAECgMIAwABAAAAAA==.',Vo='Voidmulan:BAEANQADCgUIBQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -11,86 +11,11 @@ BigWigs3DB = {
 ["Minimeditite - Area 52"] = "Default",
 },
 ["namespaces"] = {
-["BigWigs_Bosses_Saprish"] = {
+["BigWigs_Bosses_Echo of Doragosa"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
-[1263523] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[-2516] = true,
-[-1004] = true,
-[1049] = true,
-[-323] = true,
-[1050] = true,
-[-2529] = true,
-[1065] = true,
-},
-},
-},
-["BigWigs_Plugins_Auras"] = {
-["global"] = {
-["showHelpTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["player"] = {
-["disabled"] = true,
-},
-},
-},
-},
-["BigWigs_Bosses_Ick & Krick"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1264336] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_Timeline"] = {
-["profiles"] = {
-["Default"] = {
-["blizzTimeline"] = true,
-},
-},
-},
-["BigWigs_Bosses_Vexamus"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[386173] = 3129591,
-},
-},
-},
-},
-["BigWigs_Bosses_Zuraal"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1263399] = 3129591,
-},
-},
-},
-},
-["MythicPlus"] = {
-["global"] = {
-["showViewerTeleportTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["viewerPosition"] = {
-"TOPLEFT",
-"TOPLEFT",
-13,
--156,
+[388822] = 3129591,
 },
 },
 },
@@ -121,6 +46,90 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[-2516] = true,
+[-1004] = true,
+[1049] = true,
+[-323] = true,
+[1050] = true,
+[-2529] = true,
+[1065] = true,
+},
+},
+},
+["MythicPlus"] = {
+["global"] = {
+["showViewerTeleportTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["viewerPosition"] = {
+"TOPLEFT",
+"TOPLEFT",
+13,
+-156,
+},
+},
+},
+},
+["BigWigs_Plugins_Auras"] = {
+["global"] = {
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["disabled"] = true,
+},
+},
+},
+},
+["BigWigs_Bosses_Crawth"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[377004] = 3129591,
+},
+},
+},
+},
+["BigWigs_Plugins_Timeline"] = {
+["profiles"] = {
+["Default"] = {
+["blizzTimeline"] = true,
+},
+},
+},
+["BigWigs_Bosses_Saprish"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263523] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Vexamus"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[386173] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Zuraal"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263399] = 3129591,
+},
+},
+},
+},
 ["BigWigs_Plugins_Sounds"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -137,28 +146,10 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1264756] = 3129591,
-},
-},
-},
-},
-["BigWigs_Bosses_Crawth"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[377004] = 3129591,
-},
-},
-},
-},
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
+["emphasize"] = false,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -166,7 +157,7 @@ BigWigs3DB = {
 21,
 },
 ["visibleBarLimit"] = 1,
-["emphasize"] = false,
+["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -185,11 +176,20 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Echo of Doragosa"] = {
+["BigWigs_Bosses_Ick & Krick"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
-[388822] = 3129591,
+[1264336] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1264756] = 3129591,
 },
 },
 },
@@ -197,11 +197,11 @@ BigWigs3DB = {
 },
 ["myKeystones"] = {
 ["Player-60-0F7B1446"] = {
-["playerRating"] = 863,
+["playerRating"] = 1269,
 ["specId"] = 256,
-["keyMap"] = 584,
+["keyMap"] = 587,
 ["name"] = "Madmareep",
-["keyLevel"] = 7,
+["keyLevel"] = 6,
 ["realm"] = "Stormrage",
 },
 ["Player-60-0F7B141D"] = {
@@ -212,24 +212,8 @@ BigWigs3DB = {
 ["keyLevel"] = 0,
 ["realm"] = "Stormrage",
 },
-["Player-3676-0DF7D3EF"] = {
-["playerRating"] = 992,
-["specId"] = 1473,
-["keyMap"] = 0,
-["name"] = "Barelynoer",
-["keyLevel"] = 0,
-["realm"] = "Area 52",
 },
-["Player-60-0F85ABEF"] = {
-["playerRating"] = 3038,
-["specId"] = 104,
-["keyMap"] = 0,
-["name"] = "Lonelylitten",
-["keyLevel"] = 0,
-["realm"] = "Stormrage",
-},
-},
-["prevWeeklyReset"] = 1789484400,
+["prevWeeklyReset"] = 1790089200,
 ["profiles"] = {
 ["Default"] = {
 },

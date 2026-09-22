@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Frostwolf',name='US',type='subscribers',zone=53,date='2026-09-15',data={Cr='Crazywar:BAEANQADCgYIDAAAAA==.',Li='Lizzieag:BAEANQADCgYICwABNQAECgYIEAABAAAAAA==.',Lo='Locknlizzie:BAEANQAECgYIEAAAAA==.',Ma='Magnanimity:BAEANQAECgEIAQABNQAECgQIBQABAAAAAA==.',St='Strizzle:BAEANQAECgUICgAAAA==.',Ud='Uddermishap:BAEANQADCgYIBgABNQAECgQIBQABAAAAAA==.Uddertrouble:BAEANQAECgQIBQAAAA==.',},}
+local lookup = {'Hunter-BeastMastery','Unknown-Unknown',}
+local provider = {region='US',realm='Frostwolf',name='US',type='subscribers',zone=53,date='2026-09-22',data={Cr='Crazywar:BAEANQADCgYIDAAAAA==.',Li='Lizzieag:BAEANQADCgYICwABNQAECgcIGAABAKgRAA==.',Lo='Locknlizzie:BAEBNQAECoEYAAIBAAcKqBEgWgDgAQeODQAABgArAHUNAAAFADEAfw0AAAQAMACpDQAAAgBCAFwNAAACACAAXQ0AAAEAGAAzDQAABAAyAAEABwqoESBaAOABB44NAAAGACsAdQ0AAAUAMQB/DQAABAAwAKkNAAACAEIAXA0AAAIAIABdDQAAAQAYADMNAAAEADIAAAA=.',Ma='Magnanimity:BAEANQAECgEIAQABNQAECgQICQACAAAAAA==.',St='Strizzle:BAEANQAECgYJEAAAAA==.',Ud='Uddermishap:BAEANQADCgYIBgABNQAECgQICQACAAAAAA==.Uddertrouble:BAEANQAECgQICQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Uther',name='US',type='subscribers',zone=53,date='2026-09-15',data={Ga='Galvanize:BAEANQAECgcIEwAAAA==.',Go='Gorlokk:BAEANQADCgEIAQABNQADCgQIBAABAAAAAA==.',Re='Reeses:BAEANQADCgQIBAAAAA==.',Ta='Taproot:BAEANQADCgcIDgABNQAECgcIEwABAAAAAA==.',},}
+local lookup = {'Mage-Arcane','Unknown-Unknown',}
+local provider = {region='US',realm='Uther',name='US',type='subscribers',zone=53,date='2026-09-22',data={Ce='Ceremony:BAEANQADCgUJBQABNQAECggIHwABAGkSAA==.',Ga='Galvanize:BAEBNQAECoEfAAIBAAgKaRKcegAlAgiODQAABQA+AHUNAAAEADYAfw0AAAQASgCpDQAABAAgAFwNAAAEACMAXQ0AAAMAGgBlDQAAAgAJADMNAAAFAFEAAQAICmkSnHoAJQIIjg0AAAUAPgB1DQAABAA2AH8NAAAEAEoAqQ0AAAQAIABcDQAABAAjAF0NAAADABoAZQ0AAAIACQAzDQAABQBRAAAA.',Go='Gorlokk:BAEANQADCgEIAQABNQADCgQIBAACAAAAAA==.',Re='Reeses:BAEANQADCgQIBAAAAA==.',Ta='Taproot:BAEANQADCgcJDgABNQAECggIHwABAGkSAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

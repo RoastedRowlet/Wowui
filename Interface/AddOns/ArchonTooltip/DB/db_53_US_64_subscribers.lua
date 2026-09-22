@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='Deathwing',name='US',type='subscribers',zone=53,date='2026-09-15',data={Am='Amzey:BAEANQAECgcIEwAAAA==.',Gn='Gnxrr:BAEANQAECggIEgAAAA==.',Xi='Xiaozhi:BAEANQAECgEIAQAAAA==.',},}
+local lookup = {'Mage-Arcane','Monk-Windwalker',}
+local provider = {region='US',realm='Deathwing',name='US',type='subscribers',zone=53,date='2026-09-22',data={Am='Amzey:BAEBNQAECoEeAAIBAAkK5x2kJAAmAwmODQAABQBQAHUNAAAFAFsAfw0AAAQAWgCpDQAABABMAFwNAAADAFwAXQ0AAAMASABlDQAAAQBJAKQNAAABABMAMw0AAAQAXAABAAkK5x2kJAAmAwmODQAABQBQAHUNAAAFAFsAfw0AAAQAWgCpDQAABABMAFwNAAADAFwAXQ0AAAMASABlDQAAAQBJAKQNAAABABMAMw0AAAQAXAAAAA==.',Gn='Gnxrr:BAEBNQAECoEaAAICAAkKGiPxAgCPAwmODQAABABfAHUNAAAFAFoAfw0AAAMAYQCpDQAAAwBUAFwNAAADAFYAXQ0AAAMAXQBlDQAAAgBNAKQNAAACAFoAMw0AAAEAXAACAAkKGiPxAgCPAwmODQAABABfAHUNAAAFAFoAfw0AAAMAYQCpDQAAAwBUAFwNAAADAFYAXQ0AAAMAXQBlDQAAAgBNAKQNAAACAFoAMw0AAAEAXAAAAA==.',Xi='Xiaozhi:BAEANQAECgMJBAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='GrizzlyHills',name='US',type='subscribers',zone=53,date='2026-09-15',data={Fi='Fizehbubbleh:BAEANQADCgYIBgABNQADCgcICgABAAAAAA==.Fizehtotems:BAEANQADCgcICgAAAA==.',My='Mynamefizz:BAEANQAECgIIAgABNQADCgcICgABAAAAAA==.',Wh='Whodisnotfiz:BAEANQADCgQIBAABNQADCgcICgABAAAAAA==.',Ze='Zeekielle:BAEANQAECgYIDwABNQAECggICwABAAAAAA==.',},}
+local lookup = {'Unknown-Unknown','DemonHunter-Havoc',}
+local provider = {region='US',realm='GrizzlyHills',name='US',type='subscribers',zone=53,date='2026-09-22',data={Fi='Fizehbubbleh:BAEANQADCgYIBgABNQAECgEJAQABAAAAAA==.Fizehtotems:BAEANQAECgEJAQAAAA==.',My='Mynamefizz:BAEANQAECgIIAgABNQAECgEJAQABAAAAAA==.',Wh='Whodisnotfiz:BAEANQADCgQIBAABNQAECgEJAQABAAAAAA==.',Ze='Zeekielle:BAEBNQAECoEXAAICAAgKpAtQJwDUAQiODQAAAwAeAHUNAAAEABsAfw0AAAQAKACpDQAABAAuAFwNAAADACIAXQ0AAAMAGQBlDQAAAQAPADMNAAABABIAAgAICqQLUCcA1AEIjg0AAAMAHgB1DQAABAAbAH8NAAAEACgAqQ0AAAQALgBcDQAAAwAiAF0NAAADABkAZQ0AAAEADwAzDQAAAQASAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

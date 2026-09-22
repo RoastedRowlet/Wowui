@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Warlock-Destruction','Warlock-Demonology','Unknown-Unknown',}
-local provider = {region='US',realm='Shadowsong',name='US',type='subscribers',zone=53,date='2026-09-15',data={Co='Corbis:BAEANQAECgQIBgAAAA==.',Do='Downbeatxo:BAECNQAFFIEFAAMBAAQJMAw8BgCsAASODQAAAQArAHUNAAABADIAqQ0AAAIAFAAzDQAAAQAKAAEAAgnZDTwGAKwAAnUNAAABADIAqQ0AAAIAFAACAAIJhgqnDwCbAAKODQAAAQArADMNAAABAAoANQAECoEdAAMCAAkJoiDVDgDqAgACAAgJdSDVDgDqAgABAAQJJhpxIAA2AQAAAA==.',Fr='Froey:BAEANQAECgMIAwAAAA==.',Ge='Genovese:BAEANQADCgYIDAABNQAECgQIBgADAAAAAA==.',},}
+local provider = {region='US',realm='Shadowsong',name='US',type='subscribers',zone=53,date='2026-09-22',data={Co='Corbis:BAEANQAECgUJCwAAAA==.',Do='Downbeatxo:BAECNQAFFIEKAAMBAAUKLBJzBgC1AAWODQAAAgBFAHUNAAACADIAfw0AAAEADACpDQAAAwBFADMNAAACAB4AAgADCrcO6Q4A5gADjg0AAAIARQB/DQAAAQAMADMNAAACAB4AAQACCl0XcwYAtQACdQ0AAAIAMgCpDQAAAwBFADUABAqBIAADAgAJCkUhXhcA3AIAAgAICiwhXhcA3AIAAQAECiYaDiQALAEAAAA=.',Fr='Froey:BAEANQAECgMIAwAAAA==.',Ge='Genovese:BAEANQADCgYJDAABNQAECgUJCwADAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -343,6 +343,14 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["key"] = "SHIFT-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 132212,
+["type"] = "menu",
+},
+{
 ["type"] = "menu",
 ["key"] = "CTRL-BUTTON2",
 ["sets"] = {
@@ -359,14 +367,6 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
-["icon"] = 132212,
-["type"] = "menu",
-["key"] = "SHIFT-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["type"] = "target",
 ["key"] = "CTRL-BUTTON1",
 ["sets"] = {
@@ -374,6 +374,15 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
+},
+{
+["spell"] = "Riptide",
+["key"] = "BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 252995,
+["type"] = "spell",
 },
 {
 ["spell"] = "Purify Spirit",
@@ -391,15 +400,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 136077,
-["type"] = "spell",
-},
-{
-["spell"] = "Riptide",
-["key"] = "BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 252995,
 ["type"] = "spell",
 },
 {

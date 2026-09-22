@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Smolderthorn',name='US',type='subscribers',zone=53,date='2026-09-15',data={Ka='Kassanndra:BAEANQAECggICAAAAA==.',Lu='Lumistress:BAEANQAECgcIDwABNQAECggICAABAAAAAA==.',Ny='Nyquil:BAEANQAECggICAABNQAECggICAABAAAAAA==.',Ra='Ragnarock:BAEANQADCggICAABNQAECggICAABAAAAAA==.',},}
+local lookup = {'Paladin-Retribution',}
+local provider = {region='US',realm='Smolderthorn',name='US',type='subscribers',zone=53,date='2026-09-22',data={Ka='Kassanndra:BAEANQAECggJCAABNQAECggJGAABAMYUAA==.',Lu='Lumistress:BAEBNQAECoEYAAIBAAgKxhTsTAAhAgiODQAABABHAHUNAAAEAFsAfw0AAAMAPQCpDQAAAwBFAFwNAAADABIAXQ0AAAIADgBlDQAAAwAdADMNAAACAEUAAQAICsYU7EwAIQIIjg0AAAQARwB1DQAABABbAH8NAAADAD0AqQ0AAAMARQBcDQAAAwASAF0NAAACAA4AZQ0AAAMAHQAzDQAAAgBFAAAA.',Ny='Nyquil:BAEANQAECggICAABNQAECggJGAABAMYUAA==.',Ra='Ragnarock:BAEANQADCggIDwABNQAECggJGAABAMYUAA==.',Vi='Vindictress:BAEANQAECggIBQABNQAECggJGAABAMYUAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown','Warrior-Arms',}
-local provider = {region='US',realm='Boulderfist',name='US',type='subscribers',zone=53,date='2026-09-15',data={An='Angechi:BAEANQADCgIIAgABNQAECgcIEgABAAAAAA==.',Be='Benlian:BAEANQAECgcIEgAAAA==.',Sp='Spaghet:BAEANQAECgIIAgABNQAECgkJGwACAAkYAA==.',},}
+local lookup = {'DeathKnight-Blood','Warrior-Arms',}
+local provider = {region='US',realm='Boulderfist',name='US',type='subscribers',zone=53,date='2026-09-22',data={An='Angechi:BAEANQADCgIJAgABNQAECggJHQABAN4HAA==.',Be='Benlian:BAEBNQAECoEdAAIBAAgK3geURgBsAQiODQAABQAIAHUNAAAEABMAfw0AAAQABQCpDQAABAA5AFwNAAADABEAXQ0AAAMAFwBlDQAAAgASADMNAAAEAAsAAQAICt4HlEYAbAEIjg0AAAUACAB1DQAABAATAH8NAAAEAAUAqQ0AAAQAOQBcDQAAAwARAF0NAAADABcAZQ0AAAIAEgAzDQAABAALAAAA.',El='Ellunaris:BAEANQADCgUJBQABNQAECggJHQABAN4HAA==.',Sp='Spaghet:BAEANQAECgIIAwABNQAFFAMIBQACAG8UAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

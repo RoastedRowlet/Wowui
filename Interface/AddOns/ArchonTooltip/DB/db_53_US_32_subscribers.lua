@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Shaman-Restoration','Shaman-Elemental','Unknown-Unknown',}
-local provider = {region='US',realm='Blackhand',name='US',type='subscribers',zone=53,date='2026-09-15',data={Di='Dienne:BAEANQAECgEIAQAAAA==.',Pe='Peachshock:BAECNQAFFIEIAAIBAAUJBRJfAgC9AQWODQAAAgA0AHUNAAABABQAfw0AAAEAWgCpDQAAAgAsADMNAAACABYAAQAFCQUSXwIAvQEFjg0AAAIANAB1DQAAAQAUAH8NAAABAFoAqQ0AAAIALAAzDQAAAgAWADUABAqBGwADAQAJCdAlfAEAuQMAAQAJCdAlfAEAuQMAAgAECeEfpE4AbgEAAAA=.',Xi='Xiaomao:BAEANQADCgcIBwABNQAECgEIAQADAAAAAA==.',},}
+local provider = {region='US',realm='Blackhand',name='US',type='subscribers',zone=53,date='2026-09-22',data={Di='Dienne:BAEANQAECgEIAQAAAA==.',Pe='Peachshock:BAECNQAFFIEOAAIBAAYKlBevAQApAgaODQAAAwBcAHUNAAACAC0Afw0AAAIAWgCpDQAAAwBLAFwNAAABACMAMw0AAAMAFgABAAYKlBevAQApAgaODQAAAwBcAHUNAAACAC0Afw0AAAIAWgCpDQAAAwBLAFwNAAABACMAMw0AAAMAFgA1AAQKgR4AAwEACQrQJfsCAKIDAAEACQrQJfsCAKIDAAIABAroHwNmAGMBAAAA.',Xi='Xiaomao:BAEANQADCgcIBwABNQAECgEIAQADAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

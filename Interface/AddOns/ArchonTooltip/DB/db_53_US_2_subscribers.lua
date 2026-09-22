@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Hunter-BeastMastery','Unknown-Unknown','DemonHunter-Havoc','DemonHunter-Vengeance','DemonHunter-Devourer','Druid-Restoration',}
-local provider = {region='US',realm='AeriePeak',name='US',type='subscribers',zone=53,date='2026-09-15',data={An='Annasthesia:BAEANQADCggIEwAAAA==.',As='Astrada:BAEANQADCggICAABNQAECgkJGwABAC0dAA==.',Be='Bellion:BAEANQAECgUICQAAAA==.',Co='Corrupten:BAEANQADCgQIBAABNQAECgcIEQACAAAAAA==.',Fi='Findula:BAEANQADCgUICAAAAA==.',Fu='Fuzzyjager:BAEANQADCgcIEgAAAA==.',Hy='Hyphie:BAEANQAECgIIAgAAAA==.',Lu='Lucive:BAEANQADCgIIAgABNQAECgMIBAACAAAAAA==.',Ra='Rafikiblade:BAECNQAFFIEIAAMDAAUJBRjMAgBpAQWODQAAAgBHAHUNAAACADQAfw0AAAEAOQCpDQAAAgAwADMNAAABAE0AAwAECX8WzAIAaQEEjg0AAAIARwB1DQAAAgA0AH8NAAABADkAqQ0AAAEAMAAEAAIJnBfjAACmAAKpDQAAAQArADMNAAABAE0ANQAECoEpAAMDAAkJYCQnAQDWAwADAAkJYCQnAQDWAwAFAAkJQSCZCwDgAgAAAA==.Rafikizilla:BAEANQADCgEIAQABNQAFFAUICAADAAUYAA==.',Sa='Saosen:BAEANQAECgMIBAAAAA==.',Sl='Slavonk:BAEANQADCggICAABNQAECgkJHQAGADkgAA==.',},}
+local lookup = {'Rogue-Subtlety','Unknown-Unknown','DemonHunter-Vengeance','DemonHunter-Havoc','DemonHunter-Devourer','Druid-Restoration',}
+local provider = {region='US',realm='AeriePeak',name='US',type='subscribers',zone=53,date='2026-09-22',data={An='Annasthesia:BAEANQAECgMJAwAAAA==.',As='Astrada:BAEANQAECgYIBgAAAA==.',Be='Bellion:BAEANQAECgYIDwAAAA==.',Co='Corrupten:BAEANQADCgQIBAABNQAECgkJFwABAE8YAA==.',Fi='Findula:BAEANQADCgYJDgAAAA==.',Fu='Fuzzyjager:BAEANQAECgEIAQAAAA==.',Hy='Hyphie:BAEANQAECgQIBgAAAA==.',Lu='Lucive:BAEANQADCgIJAgABNQAECgUJCQACAAAAAA==.',Ra='Rafikiblade:BAECNQAFFIEOAAMDAAYKEByVAABZAQaODQAAAwBJAHUNAAADAEoAfw0AAAIAOQCpDQAAAwBIAFwNAAABAEsAMw0AAAIATQAEAAUK4xchAwC0AQWODQAAAgBHAHUNAAACADQAfw0AAAIAOQCpDQAAAQAwAFwNAAABAEsAAwAECicdlQAAWQEEjg0AAAEASQB1DQAAAQBKAKkNAAACAEgAMw0AAAIATQA1AAQKgSwABAQACQqrJXICALkDAAQACQpgJHICALkDAAUACQpBIOYOAMgCAAMAAwrYJEENAEcBAAAA.Rafikizilla:BAEANQADCgEIAQABNQAFFAYIDgADABAcAA==.',Sa='Saosen:BAEANQAECgUJCQAAAA==.',Sl='Slavonk:BAEANQADCggICAABNQAFFAMIBQAGAPAWAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

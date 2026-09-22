@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Hellscream',name='US',type='subscribers',zone=53,date='2026-09-15',data={Ar='Arrowhoof:BAEANQADCggIDQAAAA==.',Bu='Butterdtoast:BAEANQAECgMIAwAAAA==.',Ma='Maisrii:BAEANQADCgcIDQAAAA==.',Pl='Ploppstein:BAEANQAECgQIBgAAAA==.',Ro='Roseclaw:BAEANQADCgcIDAABNQAECgYIDAABAAAAAA==.Roseclawed:BAEANQAECgYIDAAAAA==.',Sk='Sko:BAEANQAECgcIEAAAAA==.',Sp='Splithoofe:BAEANQADCgEIAQABNQADCggIDQABAAAAAA==.',Sq='Squrrlydan:BAEANQAECgQIBAAAAA==.',},}
+local lookup = {'Unknown-Unknown','Paladin-Holy','Paladin-Retribution',}
+local provider = {region='US',realm='Hellscream',name='US',type='subscribers',zone=53,date='2026-09-22',data={Ar='Arrowhoof:BAEANQAECgMIAwAAAA==.',Bu='Butterdtoast:BAEANQAECgUJCAAAAA==.',Ma='Maisrii:BAEANQAECgQIBQAAAA==.',Pl='Ploppstein:BAEANQAECgUICwAAAA==.',Ro='Roseclaw:BAEANQADCggJDQABNQAECgcIEwABAAAAAA==.Roseclawed:BAEANQAECgcIEwAAAA==.',Sk='Sko:BAEBNQAECoEZAAMCAAgK/BlGIQCRAgiODQAABQBSAHUNAAAEAFEAfw0AAAQAXwCpDQAABABfAFwNAAACADEAXQ0AAAIANABlDQAAAgAdADMNAAACAC0AAgAICvwZRiEAkQIIjg0AAAQAUgB1DQAAAwBRAH8NAAADAF8AqQ0AAAMAXwBcDQAAAgAxAF0NAAACADQAZQ0AAAEAHQAzDQAAAQAtAAMABgoeCgKmAB0BBo4NAAABABUAdQ0AAAEAAwB/DQAAAQAWAKkNAAABADEAZQ0AAAEAIAAzDQAAAQAZAAE1AAMKBwkJAAEAAAAA.Skolivia:BAEANQADCgcJCQAAAA==.',Sp='Splithoofe:BAEANQADCgEIAQABNQAECgMIAwABAAAAAA==.',Sq='Squrrlydan:BAEANQAECgQJBAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

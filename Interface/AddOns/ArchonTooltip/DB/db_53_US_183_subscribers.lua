@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Saurfang',name='US',type='subscribers',zone=53,date='2026-09-15',data={Dr='Dracarsynimz:BAEANQAECgYIIQAAAQ==.',Ja='Jamitydk:BAEANQAECgUICwAAAA==.',La='Lagior:BAEANQAECgQICgAAAA==.',Lu='Lugunar:BAEANQADCgcIBwABNQAECgQICgABAAAAAA==.',Ma='Magicae:BAEANQAECgYIDwABNQADCgMIAwABAAAAAA==.',Na='Navimie:BAEANQAECgQIBgAAAA==.',Pa='Palarsynimz:BAEANQADCggIEAABNQAECgYIIQABAAAAAA==.',Um='Umbrasanctum:BAEANQADCgMIAwAAAA==.',},}
+local provider = {region='US',realm='Saurfang',name='US',type='subscribers',zone=53,date='2026-09-22',data={Dr='Dracarsynimz:BAEANQAECgYIIQAAAQ==.',Ja='Jamitydk:BAEANQAECgcIEgAAAA==.',La='Lagior:BAEANQAECgYIEAAAAA==.',Lu='Lugunar:BAEANQADCgcIBwABNQAECgYIEAABAAAAAA==.',Ma='Magicae:BAEANQAECgcJEQABNQADCgUJCwABAAAAAA==.',Na='Navimie:BAEANQAECgYIDAAAAA==.',Pa='Palarsynimz:BAEANQADCggIEAABNQAECgYIIQABAAAAAA==.',Um='Umbrasanctum:BAEANQADCgUJCwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

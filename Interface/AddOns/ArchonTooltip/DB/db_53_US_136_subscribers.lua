@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Korgath',name='US',type='subscribers',zone=53,date='2026-09-15',data={Le='Lexistarr:BAEANQAECgQIBAAAAA==.',Lo='Lockimar:BAEANQAECgcIEQAAAA==.',Ra='Raihnese:BAEANQAECgQIBAAAAA==.',To='Tonktotem:BAEANQADCgEIAQABNQAECgQIBQABAAAAAA==.',Yo='Yourgothgf:BAEANQAECgQIBQAAAA==.',},}
+local lookup = {'Warlock-Demonology','Warlock-Destruction','Warlock-Affliction','Unknown-Unknown',}
+local provider = {region='US',realm='Korgath',name='US',type='subscribers',zone=53,date='2026-09-22',data={Le='Lexistarr:BAEANQAECgQIBQAAAA==.',Lo='Lockimar:BAEBNQAECoEVAAQBAAgKvAvvVwDEAQiODQAABAAgAHUNAAAEADcAfw0AAAQAIwCpDQAAAwAPAFwNAAACACsAXQ0AAAIACABlDQAAAQAIADMNAAABACcAAQAICrwL71cAxAEIjg0AAAMAIAB1DQAAAwA3AH8NAAADACMAqQ0AAAIADwBcDQAAAgArAF0NAAABAAgAZQ0AAAEACAAzDQAAAQAnAAIABArTBYE2AMQABI4NAAABAAkAfw0AAAEAIwCpDQAAAQAIAF0NAAABAAUAAwABClQPziIANQABdQ0AAAEAJwAAAA==.',Ra='Raihnese:BAEANQAECgUJCQAAAA==.',To='Tonktotem:BAEANQADCgEIAQABNQAECgYJCwAEAAAAAA==.',Yo='Yourgothgf:BAEANQAECgYJCwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

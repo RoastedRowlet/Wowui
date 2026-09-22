@@ -1,6 +1,40 @@
 
 SimulationCraftDB = {
 ["char"] = {
+["Lonelylitten - Stormrage"] = {
+["bonusRolls"] = {
+{
+["ts"] = 1787873280,
+["currency"] = 3418,
+["source"] = 278285,
+["context"] = 5,
+["keyLevel"] = 1,
+["spec"] = 105,
+["season"] = 37,
+["itemId"] = 268235,
+},
+{
+["ts"] = 1788297300,
+["currency"] = 3418,
+["source"] = 278285,
+["context"] = 5,
+["keyLevel"] = 1,
+["spec"] = 105,
+["season"] = 37,
+["itemId"] = 268248,
+},
+{
+["currency"] = 3418,
+["ts"] = 1788869220,
+["source"] = 278285,
+["season"] = 37,
+["keyLevel"] = 1,
+["spec"] = 105,
+["context"] = 5,
+["itemId"] = 268240,
+},
+},
+},
 ["Zappyxatu - Stormrage"] = {
 ["bonusRolls"] = {
 {
@@ -66,40 +100,6 @@ SimulationCraftDB = {
 ["spec"] = 1473,
 ["season"] = 34,
 ["itemId"] = 250144,
-},
-},
-},
-["Lonelylitten - Stormrage"] = {
-["bonusRolls"] = {
-{
-["ts"] = 1787873280,
-["currency"] = 3418,
-["source"] = 278285,
-["context"] = 5,
-["keyLevel"] = 1,
-["spec"] = 105,
-["season"] = 37,
-["itemId"] = 268235,
-},
-{
-["ts"] = 1788297300,
-["currency"] = 3418,
-["source"] = 278285,
-["context"] = 5,
-["keyLevel"] = 1,
-["spec"] = 105,
-["season"] = 37,
-["itemId"] = 268248,
-},
-{
-["currency"] = 3418,
-["ts"] = 1788869220,
-["source"] = 278285,
-["season"] = 37,
-["keyLevel"] = 1,
-["spec"] = 105,
-["context"] = 5,
-["itemId"] = 268240,
 },
 },
 },
