@@ -3,2306 +3,6 @@ Blizzard_Console_SavedVars = {
 ["version"] = 3,
 ["messageHistory"] = {
 {
-"Resetting",
-0,
-},
-{
-"Initializing",
-0,
-},
-{
-"Attempting logon host=\"us.actual.battle.net\" port=\"1119\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"Front connected connectionId=\"1\" title_id=\"5730135\" platform=\"Wn64\" locale=\"enUS\" usedToken=\"true\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"OnSendLogon result=\"0\"",
-0,
-},
-{
-"Logon complete result=\"0\" numGameAccounts=\"1\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"B code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"BG code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
-0,
-},
-{
-"BGS_ code=\"ERROR_OK (0)\" name=\"WoW1\" numGameAccounts=\"1\" numGameAccountNames=\"0\"",
-0,
-},
-{
-"BGS_ACCO code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Updated game account list. accountList=\"!WoW1||\"",
-0,
-},
-{
-"Logon complete.",
-0,
-},
-{
-"Reconnect token saved;  creationTime=\"1789953549\" expirationTime=\"1789967949\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Requesting realm list ticket",
-0,
-},
-{
-"Received realm list ticket code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received sub region list code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Requesting last played chars numSubRegions=\"4\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"0\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"1\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"2\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1789940458\" numRegions=\"4\" numRegionsWithData=\"3\" realmPermissions=\"3\" licensesCount=\"1\" realmEntry=\"{\"wowRealmAddress\":16908298,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":68914,\"versionMinor\":1,\"versionRevision\":0},\"cfgRealmsID\":60,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Stormrage\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
-0,
-},
-{
-"Realm list ready.",
-0,
-},
-{
-"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"16908298\" lastActiveTime=\"1789940458\"",
-0,
-},
-{
-"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-2-10\"",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"202329654565300\" nowNs=\"202329670460200\"",
-0,
-},
-{
-"OnRealmJoin code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Connecting conn=\"(enum)0\" connPtr=\"0000021e85ed4a30\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Received AuthedToWoW result=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Screen invalid. Changing from=\"login\" to=\"charselect\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"login\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Connected to Back. Disconnecting from Front.",
-0,
-},
-{
-"Front disconnecting connectionId=\"1\"",
-0,
-},
-{
-"Disconnecting from authentication server.",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"Session with Battle.net established.",
-0,
-},
-{
-"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 71 entitlements.",
-0,
-},
-{
-"Front disconnected connectionId=\"1\" result=\"1016\"",
-0,
-},
-{
-"Disconnected from authentication server.",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Suspend()",
-0,
-},
-{
-"LimitedLuaResources: Reset Timer",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021f04c78fd0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000008000",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000021",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x000000c000",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x000000c400",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x000000c410",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000023",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x000008c410",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x000008c410",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000023",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:19",
-0,
-},
-{
-"Gamespeed set from 0.017 to 0.017",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021e85eb2470\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000021f04c78fd0\" state=\"(enum)6\"",
-0,
-},
-{
-"[Airlock] Received PreloadMap Destination MapID:3077, Current MapID:0, PreviousTransitionID:-1, Position (5509.27, -13142.8, 42.066)",
-0,
-},
-{
-"[Airlock] Preload initiated for map 3077, with already loaded cosmetic parent 0",
-0,
-},
-{
-"[Airlock] Cancel Preload of cosmetic child with MapID:3077",
-0,
-},
-{
-"[Airlock] Received PreloadMap Destination MapID:3077, Current MapID:0, PreviousTransitionID:-1, Position (5511.61, -13147.9, 42.7103)",
-0,
-},
-{
-"[Airlock] Preload initiated for map 3077, with already loaded cosmetic parent 0",
-0,
-},
-{
-"[Airlock] Cancel Preload of cosmetic child with MapID:3077",
-0,
-},
-{
-"[Airlock] Cancel Preload of cosmetic child with MapID:3077",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021f0ba6f570\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000021e85eb2470\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Successfully instantiated mirrored storage object",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021f05d98e00\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000021f0ba6f570\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021e85e10410\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000021f05d98e00\" state=\"(enum)6\"",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:21",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:21",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021f076f85b0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000021e85e10410\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:21",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:21",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Completed challenge mode mapID 1762, level 4, time 1294024",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021e85ea8de0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000021f076f85b0\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"00000220077309b0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000021e85ea8de0\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021f04c764b0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"00000220077309b0\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021e85e0bc70\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000021f04c764b0\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:48",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:48",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:48",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:48",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021f0c4d7bd0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000021e85e0bc70\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"LimitedLuaResources: Reset Timer",
-0,
-},
-{
-"LimitedLuaResources: Reset All",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"204136419597200\" nowNs=\"204136423106100\"",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:48",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 18:48",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Completed challenge mode mapID 2923, level 6, time 1148800",
-0,
-},
-{
-"Added house xp xp=\"30\"",
-0,
-},
-{
-"Successfully instantiated mirrored storage object",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"0000021f05da3de0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000021f0c4d7bd0\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Successfully instantiated mirrored storage object",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"205929506916400\" nowNs=\"205929510780800\"",
-0,
-},
-{
-"DBCache::CancelCallback ignored",
-0,
-},
-{
-"DBCache::CancelCallback ignored",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Multithreaded rendering enabled.",
-0,
-},
-{
-"Multithreaded BeginDraw enabled.",
-0,
-},
-{
-"Multithread shadows changed to 1.",
-0,
-},
-{
-"Multithreaded prepass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded alpha M2 pass enabled.",
-0,
-},
-{
-"Multithreaded opaque WMO pass enabled.",
-0,
-},
-{
-"Multithreaded terrain pass enabled.",
-0,
-},
-{
-"Multithreaded volumetric fog enabled.",
-0,
-},
-{
-"Multithreaded Refraction Pass enabled.",
-0,
-},
-{
-"Multithreaded miscellaneous passes enabled.",
-0,
-},
-{
-"Multithreaded decal passes disabled.",
-0,
-},
-{
-"Multithreaded outline passes enabled.",
-0,
-},
-{
-"Multithreaded lightshaft passes enabled.",
-0,
-},
-{
-"Use trigger on BeginDrawComplete enabled.",
-4,
-},
-{
-"Multithreaded alpha pass enabled.",
-0,
-},
-{
-"Multithreaded daynight update enabled.",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Reflection downscale changed to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"Particulate volumes disabled.",
-0,
-},
-{
-"Projected textures enabled.",
-0,
-},
-{
-"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
-0,
-},
-{
-"Shadow texture size changed to 1024.",
-0,
-},
-{
-"Soft shadows changed to 0.",
-0,
-},
-{
-"Shadow cascade blending changed to 0",
-0,
-},
-{
-"Number of shadow cascades changed to 1",
-0,
-},
-{
-"Shadow RT mode changed to 0 (Disabled)",
-0,
-},
-{
-"maxLightCount must be in range 0 to 32.",
-0,
-},
-{
-"CVar 'maxLightCount' failed validation for its initial value.",
-0,
-},
-{
-"Clustered shading disabled.",
-0,
-},
-{
-"Not forcing clustered shading.",
-0,
-},
-{
-"SSAO mode set to 0",
-0,
-},
-{
-"SSAO type set to 0",
-0,
-},
-{
-"Depth Based Opacity Disabled",
-0,
-},
-{
-"SkyCloudLOD set to 0",
-0,
-},
-{
-"Texture filtering mode updated.",
-0,
-},
-{
-"Terrain mip level changed to 0.",
-0,
-},
-{
-"Outline mode changed to 0",
-0,
-},
-{
-"Physics interaction level changed to 2",
-0,
-},
-{
-"Render scale changed to 1",
-0,
-},
-{
-"Resample quality changed to 3",
-0,
-},
-{
-"MSAA set to 2 color samples, 2 coverage samples",
-0,
-},
-{
-"MSAA for alpha-test enabled.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsWorldGeo' failed validation for its initial value.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsParticles' failed validation for its initial value.",
-0,
-},
-{
-"VALAR mode changed to 0",
-0,
-},
-{
-"lodObjectSizeScale cannot be changed.",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"dynamicLod enabled",
-0,
-},
-{
-"World preload object sort enabled.",
-0,
-},
-{
-"World load object sort enabled.",
-0,
-},
-{
-"World preload non critical enabled.",
-0,
-},
-{
-"World preload high res textures enabled.",
-0,
-},
-{
-"FFX: Color Blind Test Mode Disabled",
-0,
-},
-{
-"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"ChromaEffects disabled",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"Startup()",
-0,
-},
-{
-"Resume()",
-0,
-},
-{
-"Screen invalid. Changing from=\"none\" to=\"login\"",
-0,
-},
-{
-"Switching to screen=\"AccountLogin\" (from \"none\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Overlay is disabled.  Only internal builds and public China builds have it.",
-4,
-},
-{
-"Starting login launcherPortal=\"us.actual.battle.net\" loginPortal=\"us.actual.battle.net:1119\"",
-0,
-},
-{
-"Resetting",
-0,
-},
-{
-"Initializing",
-0,
-},
-{
-"Attempting logon host=\"us.actual.battle.net\" port=\"1119\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"Front connected connectionId=\"1\" title_id=\"5730135\" platform=\"Wn64\" locale=\"enUS\" usedToken=\"true\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"OnSendLogon result=\"0\"",
-0,
-},
-{
-"Logon complete result=\"0\" numGameAccounts=\"1\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"B code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"BG code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
-0,
-},
-{
-"BGS_ code=\"ERROR_OK (0)\" name=\"WoW1\" numGameAccounts=\"1\" numGameAccountNames=\"0\"",
-0,
-},
-{
-"BGS_ACCO code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Updated game account list. accountList=\"!WoW1||\"",
-0,
-},
-{
-"Logon complete.",
-0,
-},
-{
-"Reconnect token saved;  creationTime=\"1789961946\" expirationTime=\"1789976346\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Requesting realm list ticket",
-0,
-},
-{
-"Received realm list ticket code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received sub region list code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Requesting last played chars numSubRegions=\"4\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"0\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"1\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"2\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1789957493\" numRegions=\"4\" numRegionsWithData=\"3\" realmPermissions=\"3\" licensesCount=\"1\" realmEntry=\"{\"wowRealmAddress\":16908298,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":68914,\"versionMinor\":1,\"versionRevision\":0},\"cfgRealmsID\":60,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Stormrage\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
-0,
-},
-{
-"Realm list ready.",
-0,
-},
-{
-"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"16908298\" lastActiveTime=\"1789957493\"",
-0,
-},
-{
-"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-2-10\"",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"210727224628400\" nowNs=\"210727240484700\"",
-0,
-},
-{
-"OnRealmJoin code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Connecting conn=\"(enum)0\" connPtr=\"000001d170c35790\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Received AuthedToWoW result=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Screen invalid. Changing from=\"login\" to=\"charselect\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"login\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Connected to Back. Disconnecting from Front.",
-0,
-},
-{
-"Front disconnecting connectionId=\"1\"",
-0,
-},
-{
-"Disconnecting from authentication server.",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"Session with Battle.net established.",
-0,
-},
-{
-"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 71 entitlements.",
-0,
-},
-{
-"Front disconnected connectionId=\"1\" result=\"1016\"",
-0,
-},
-{
-"Disconnected from authentication server.",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Suspend()",
-0,
-},
-{
-"LimitedLuaResources: Reset Timer",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d173878b10\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000008000",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000021",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x000000c000",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x000000c400",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x000000c410",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000023",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x000008c410",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x000008c410",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000023",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:39",
-0,
-},
-{
-"Gamespeed set from 0.017 to 0.017",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d171dc8dc0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001d173878b10\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Login failed due to challenge URL timeout.",
-0,
-},
-{
-"Fatal error while logging in result=\"2147483973\"",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d39c3f1250\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001d171dc8dc0\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d11ec15650\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001d39c3f1250\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d171dd7d60\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001d11ec15650\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d171dbb410\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001d171dd7d60\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d2b3b51d60\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001d171dbb410\" state=\"(enum)6\"",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:50",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:50",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:50",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:50",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:51",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:51",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d1739c3f40\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001d2b3b51d60\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:53",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:53",
-0,
-},
-{
-"Successfully instantiated mirrored storage object",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d17388bb90\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001d1739c3f40\" state=\"(enum)6\"",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d2b3b77860\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001d17388bb90\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:56",
-0,
-},
-{
-"Time set to 9/20/2026 (Sun) 20:56",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"212526986303300\" nowNs=\"212526990271800\"",
-0,
-},
-{
-"Completed challenge mode mapID 2859, level 8, time 2045947",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001d174b294e0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001d2b3b77860\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Multithreaded rendering enabled.",
-0,
-},
-{
-"Multithreaded BeginDraw enabled.",
-0,
-},
-{
-"Multithread shadows changed to 1.",
-0,
-},
-{
-"Multithreaded prepass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded alpha M2 pass enabled.",
-0,
-},
-{
-"Multithreaded opaque WMO pass enabled.",
-0,
-},
-{
-"Multithreaded terrain pass enabled.",
-0,
-},
-{
-"Multithreaded volumetric fog enabled.",
-0,
-},
-{
-"Multithreaded Refraction Pass enabled.",
-0,
-},
-{
-"Multithreaded miscellaneous passes enabled.",
-0,
-},
-{
-"Multithreaded decal passes disabled.",
-0,
-},
-{
-"Multithreaded outline passes enabled.",
-0,
-},
-{
-"Multithreaded lightshaft passes enabled.",
-0,
-},
-{
-"Use trigger on BeginDrawComplete enabled.",
-4,
-},
-{
-"Multithreaded alpha pass enabled.",
-0,
-},
-{
-"Multithreaded daynight update enabled.",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Reflection downscale changed to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"Particulate volumes disabled.",
-0,
-},
-{
-"Projected textures enabled.",
-0,
-},
-{
-"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
-0,
-},
-{
-"Shadow texture size changed to 1024.",
-0,
-},
-{
-"Soft shadows changed to 0.",
-0,
-},
-{
-"Shadow cascade blending changed to 0",
-0,
-},
-{
-"Number of shadow cascades changed to 1",
-0,
-},
-{
-"Shadow RT mode changed to 0 (Disabled)",
-0,
-},
-{
-"maxLightCount must be in range 0 to 32.",
-0,
-},
-{
-"CVar 'maxLightCount' failed validation for its initial value.",
-0,
-},
-{
-"Clustered shading disabled.",
-0,
-},
-{
-"Not forcing clustered shading.",
-0,
-},
-{
-"SSAO mode set to 0",
-0,
-},
-{
-"SSAO type set to 0",
-0,
-},
-{
-"Depth Based Opacity Disabled",
-0,
-},
-{
-"SkyCloudLOD set to 0",
-0,
-},
-{
-"Texture filtering mode updated.",
-0,
-},
-{
-"Terrain mip level changed to 0.",
-0,
-},
-{
-"Outline mode changed to 0",
-0,
-},
-{
-"Physics interaction level changed to 2",
-0,
-},
-{
-"Render scale changed to 1",
-0,
-},
-{
-"Resample quality changed to 3",
-0,
-},
-{
-"MSAA set to 2 color samples, 2 coverage samples",
-0,
-},
-{
-"MSAA for alpha-test enabled.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsWorldGeo' failed validation for its initial value.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsParticles' failed validation for its initial value.",
-0,
-},
-{
-"VALAR mode changed to 0",
-0,
-},
-{
-"lodObjectSizeScale cannot be changed.",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"dynamicLod enabled",
-0,
-},
-{
-"World preload object sort enabled.",
-0,
-},
-{
-"World load object sort enabled.",
-0,
-},
-{
-"World preload non critical enabled.",
-0,
-},
-{
-"World preload high res textures enabled.",
-0,
-},
-{
-"FFX: Color Blind Test Mode Disabled",
-0,
-},
-{
-"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"ChromaEffects disabled",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"Startup()",
-0,
-},
-{
-"Resume()",
-0,
-},
-{
-"Screen invalid. Changing from=\"none\" to=\"login\"",
-0,
-},
-{
-"Switching to screen=\"AccountLogin\" (from \"none\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Overlay is disabled.  Only internal builds and public China builds have it.",
-4,
-},
-{
-"Starting login launcherPortal=\"us.actual.battle.net\" loginPortal=\"us.actual.battle.net:1119\"",
-0,
-},
-{
-"Resetting",
-0,
-},
-{
-"Initializing",
-0,
-},
-{
-"Attempting logon host=\"us.actual.battle.net\" port=\"1119\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"Front connected connectionId=\"1\" title_id=\"5730135\" platform=\"Wn64\" locale=\"enUS\" usedToken=\"true\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"OnSendLogon result=\"0\"",
-0,
-},
-{
-"Logon complete result=\"0\" numGameAccounts=\"1\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"B code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
-0,
-},
-{
-"BGS_ code=\"ERROR_OK (0)\" name=\"WoW1\" numGameAccounts=\"1\" numGameAccountNames=\"0\"",
-0,
-},
-{
-"BG code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"BGS_ACCO code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Updated game account list. accountList=\"!WoW1||\"",
-0,
-},
-{
-"Logon complete.",
-0,
-},
-{
-"Reconnect token saved;  creationTime=\"1790035145\" expirationTime=\"1790049545\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Requesting realm list ticket",
-0,
-},
-{
-"Received realm list ticket code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received sub region list code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Requesting last played chars numSubRegions=\"4\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"0\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"1\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"2\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1789965194\" numRegions=\"4\" numRegionsWithData=\"3\" realmPermissions=\"3\" licensesCount=\"1\" realmEntry=\"{\"wowRealmAddress\":16908298,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":68914,\"versionMinor\":1,\"versionRevision\":0},\"cfgRealmsID\":60,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Stormrage\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
-0,
-},
-{
-"Realm list ready.",
-0,
-},
-{
-"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"16908298\" lastActiveTime=\"1789965194\"",
-0,
-},
-{
-"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-2-10\"",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"283932894190800\" nowNs=\"283932909937300\"",
-0,
-},
-{
-"OnRealmJoin code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Connecting conn=\"(enum)0\" connPtr=\"0000020d00c657b0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Connecting conn=\"(enum)2\" connPtr=\"0000020c93b5d040\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Received AuthedToWoW result=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Screen invalid. Changing from=\"login\" to=\"charselect\"",
-0,
-},
-{
-"KillConnection conn=\"0000020d00c657b0\" state=\"(enum)6\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"login\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Connected to Back. Disconnecting from Front.",
-0,
-},
-{
-"Front disconnecting connectionId=\"1\"",
-0,
-},
-{
-"Disconnecting from authentication server.",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"Session with Battle.net established.",
-0,
-},
-{
-"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 71 entitlements.",
-0,
-},
-{
-"Front disconnected connectionId=\"1\" result=\"1016\"",
-0,
-},
-{
-"Disconnected from authentication server.",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"285732693845900\" nowNs=\"285732709566000\"",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"287532803306800\" nowNs=\"287532819030400\"",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"289332679581000\" nowNs=\"289332695164700\"",
-0,
-},
-{
-"Session with Battle.net destroyed.",
-0,
-},
-{
-"Disconnected from WoW previouslyConnected=\"true\"",
-0,
-},
-{
-"Screen invalid. Changing from=\"charselect\" to=\"login\"",
-0,
-},
-{
-"Switching to screen=\"AccountLogin\" (from \"charselect\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Multithreaded rendering enabled.",
-0,
-},
-{
-"Multithreaded BeginDraw enabled.",
-0,
-},
-{
-"Multithread shadows changed to 1.",
-0,
-},
-{
-"Multithreaded prepass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded alpha M2 pass enabled.",
-0,
-},
-{
-"Multithreaded opaque WMO pass enabled.",
-0,
-},
-{
-"Multithreaded terrain pass enabled.",
-0,
-},
-{
-"Multithreaded volumetric fog enabled.",
-0,
-},
-{
-"Multithreaded Refraction Pass enabled.",
-0,
-},
-{
-"Multithreaded miscellaneous passes enabled.",
-0,
-},
-{
-"Multithreaded decal passes disabled.",
-0,
-},
-{
-"Multithreaded outline passes enabled.",
-0,
-},
-{
-"Multithreaded lightshaft passes enabled.",
-0,
-},
-{
-"Use trigger on BeginDrawComplete enabled.",
-4,
-},
-{
-"Multithreaded alpha pass enabled.",
-0,
-},
-{
-"Multithreaded daynight update enabled.",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
 "Reflection mode changed to 0",
 0,
 },
@@ -4356,6 +2056,1974 @@ Blizzard_Console_SavedVars = {
 },
 {
 "Sending ping results from timeout timeoutNs=\"7343884352500\" nowNs=\"7343884867400\"",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Multithreaded rendering enabled.",
+0,
+},
+{
+"Multithreaded BeginDraw enabled.",
+0,
+},
+{
+"Multithread shadows changed to 1.",
+0,
+},
+{
+"Multithreaded prepass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded alpha M2 pass enabled.",
+0,
+},
+{
+"Multithreaded opaque WMO pass enabled.",
+0,
+},
+{
+"Multithreaded terrain pass enabled.",
+0,
+},
+{
+"Multithreaded volumetric fog enabled.",
+0,
+},
+{
+"Multithreaded Refraction Pass enabled.",
+0,
+},
+{
+"Multithreaded miscellaneous passes enabled.",
+0,
+},
+{
+"Multithreaded decal passes disabled.",
+0,
+},
+{
+"Multithreaded outline passes enabled.",
+0,
+},
+{
+"Multithreaded lightshaft passes enabled.",
+0,
+},
+{
+"Use trigger on BeginDrawComplete enabled.",
+4,
+},
+{
+"Multithreaded alpha pass enabled.",
+0,
+},
+{
+"Multithreaded daynight update enabled.",
+0,
+},
+{
+"Water detail changed to 0",
+0,
+},
+{
+"Ripple detail changed to 0",
+0,
+},
+{
+"Reflection mode changed to 0",
+0,
+},
+{
+"Reflection downscale changed to 0",
+0,
+},
+{
+"Sunshafts quality changed to 0",
+0,
+},
+{
+"Refraction mode changed to 0",
+0,
+},
+{
+"Volume fog disabled.",
+0,
+},
+{
+"Particulate volumes disabled.",
+0,
+},
+{
+"Projected textures enabled.",
+0,
+},
+{
+"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
+0,
+},
+{
+"Shadow texture size changed to 1024.",
+0,
+},
+{
+"Soft shadows changed to 0.",
+0,
+},
+{
+"Shadow cascade blending changed to 0",
+0,
+},
+{
+"Number of shadow cascades changed to 1",
+0,
+},
+{
+"Shadow RT mode changed to 0 (Disabled)",
+0,
+},
+{
+"maxLightCount must be in range 0 to 32.",
+0,
+},
+{
+"CVar 'maxLightCount' failed validation for its initial value.",
+0,
+},
+{
+"Clustered shading disabled.",
+0,
+},
+{
+"Not forcing clustered shading.",
+0,
+},
+{
+"SSAO mode set to 0",
+0,
+},
+{
+"SSAO type set to 0",
+0,
+},
+{
+"Depth Based Opacity Disabled",
+0,
+},
+{
+"SkyCloudLOD set to 0",
+0,
+},
+{
+"Texture filtering mode updated.",
+0,
+},
+{
+"Terrain mip level changed to 0.",
+0,
+},
+{
+"Outline mode changed to 0",
+0,
+},
+{
+"Physics interaction level changed to 2",
+0,
+},
+{
+"Render scale changed to 1",
+0,
+},
+{
+"Resample quality changed to 3",
+0,
+},
+{
+"MSAA set to 2 color samples, 2 coverage samples",
+0,
+},
+{
+"MSAA for alpha-test enabled.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsWorldGeo' failed validation for its initial value.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsParticles' failed validation for its initial value.",
+0,
+},
+{
+"VALAR mode changed to 0",
+0,
+},
+{
+"lodObjectSizeScale cannot be changed.",
+0,
+},
+{
+"Volume fog disabled.",
+0,
+},
+{
+"dynamicLod enabled",
+0,
+},
+{
+"World preload object sort enabled.",
+0,
+},
+{
+"World load object sort enabled.",
+0,
+},
+{
+"World preload non critical enabled.",
+0,
+},
+{
+"World preload high res textures enabled.",
+0,
+},
+{
+"FFX: Color Blind Test Mode Disabled",
+0,
+},
+{
+"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"ChromaEffects disabled",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"Startup()",
+0,
+},
+{
+"Resume()",
+0,
+},
+{
+"Screen invalid. Changing from=\"none\" to=\"login\"",
+0,
+},
+{
+"Switching to screen=\"AccountLogin\" (from \"none\")",
+0,
+},
+{
+"From EnsureValidScreen",
+0,
+},
+{
+"Overlay is disabled.  Only internal builds and public China builds have it.",
+4,
+},
+{
+"Starting login launcherPortal=\"us.actual.battle.net\" loginPortal=\"us.actual.battle.net:1119\"",
+0,
+},
+{
+"Resetting",
+0,
+},
+{
+"Initializing",
+0,
+},
+{
+"Attempting logon host=\"us.actual.battle.net\" port=\"1119\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"Front connected connectionId=\"1\" title_id=\"5730135\" platform=\"Wn64\" locale=\"enUS\" usedToken=\"true\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"OnSendLogon result=\"0\"",
+0,
+},
+{
+"Logon complete result=\"0\" numGameAccounts=\"1\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"B code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
+0,
+},
+{
+"BGS_ACCO code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"BGS_ code=\"ERROR_OK (0)\" name=\"WoW1\" numGameAccounts=\"1\" numGameAccountNames=\"0\"",
+0,
+},
+{
+"BG code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Updated game account list. accountList=\"!WoW1||\"",
+0,
+},
+{
+"Logon complete.",
+0,
+},
+{
+"Reconnect token saved;  creationTime=\"1790112245\" expirationTime=\"1790126645\"",
+0,
+},
+{
+"Waiting for realm list.",
+0,
+},
+{
+"Requesting realm list ticket",
+0,
+},
+{
+"Received realm list ticket code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Waiting for realm list.",
+0,
+},
+{
+"Received sub region list code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Requesting last played chars numSubRegions=\"4\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"0\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1790100469\" numRegions=\"4\" numRegionsWithData=\"1\" realmPermissions=\"3\" licensesCount=\"1\" realmEntry=\"{\"wowRealmAddress\":16908298,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":68914,\"versionMinor\":1,\"versionRevision\":0},\"cfgRealmsID\":60,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Stormrage\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"2\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"3\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Realm list ready.",
+0,
+},
+{
+"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"16908298\" lastActiveTime=\"1790100469\"",
+0,
+},
+{
+"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-2-10\"",
+0,
+},
+{
+"Sending ping results from timeout timeoutNs=\"19456889633700\" nowNs=\"19456905863600\"",
+0,
+},
+{
+"OnRealmJoin code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Connecting conn=\"(enum)0\" connPtr=\"000001706a126a10\" protocol=\"(enum)0\"",
+0,
+},
+{
+"Received AuthedToWoW result=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Screen invalid. Changing from=\"login\" to=\"charselect\"",
+0,
+},
+{
+"Switching to screen=\"CharacterSelect\" (from \"login\")",
+0,
+},
+{
+"From EnsureValidScreen",
+0,
+},
+{
+"Connected to Back. Disconnecting from Front.",
+0,
+},
+{
+"Front disconnecting connectionId=\"1\"",
+0,
+},
+{
+"Disconnecting from authentication server.",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"Session with Battle.net established.",
+0,
+},
+{
+"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 71 entitlements.",
+0,
+},
+{
+"Front disconnected connectionId=\"1\" result=\"1016\"",
+0,
+},
+{
+"Disconnected from authentication server.",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Suspend()",
+0,
+},
+{
+"LimitedLuaResources: Reset Timer",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000001708c25d8c0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000001",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000008001",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c001",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c003",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c403",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000061",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000069",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000006d",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c423",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000e423",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000e433",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000006f",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000e433",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000006f",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 14:24",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000001708e9bb130\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000001708c25d8c0\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Successfully instantiated mirrored storage object",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000171e6807d50\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000001708e9bb130\" state=\"(enum)6\"",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000171a10e09c0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"00000171e6807d50\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"Sending ping results from timeout timeoutNs=\"21256720448400\" nowNs=\"21256720475500\"",
+0,
+},
+{
+"Completed challenge mode mapID 2825, level 19, time 1764055",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"LimitedLuaResources: Reset Timer",
+0,
+},
+{
+"LimitedLuaResources: Reset All",
+0,
+},
+{
+"Successfully instantiated mirrored storage object",
+0,
+},
+{
+"KillConnection conn=\"00000171a10e09c0\" state=\"(enum)7\"",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"LimitedLuaResources: Reset Timer",
+0,
+},
+{
+"Resume()",
+0,
+},
+{
+"Screen invalid. Changing from=\"none\" to=\"charselect\"",
+0,
+},
+{
+"Switching to screen=\"CharacterSelect\" (from \"none\")",
+0,
+},
+{
+"From EnsureValidScreen",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Suspend()",
+0,
+},
+{
+"LimitedLuaResources: Reset Timer",
+0,
+},
+{
+"Attempted to register existing command: SetDifficulty",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000172cd253680\" protocol=\"(enum)0\"",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000008000",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c000",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c400",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c410",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000023",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000008c410",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000008c410",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000023",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:05",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000001708236f860\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"00000172cd253680\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000001726257cb10\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000001708236f860\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000001706a215c90\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000001726257cb10\" state=\"(enum)6\"",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:09",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:09",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:09",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:09",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000001708236ac40\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000001706a215c90\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000171d771f580\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000001708236ac40\" state=\"(enum)6\"",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000171d770a130\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"00000171d771f580\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:10",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:10",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:10",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:10",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:10",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:10",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:12",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:12",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"Sending ping results from timeout timeoutNs=\"23056640213700\" nowNs=\"23056640771800\"",
+0,
+},
+{
+"Completed challenge mode mapID 2825, level 10, time 1275074",
+0,
+},
+{
+"Added house xp xp=\"50\"",
+0,
+},
+{
+"Successfully instantiated mirrored storage object",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000171a17d60e0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"00000171d770a130\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Multithreaded rendering enabled.",
+0,
+},
+{
+"Multithreaded BeginDraw enabled.",
+0,
+},
+{
+"Multithread shadows changed to 1.",
+0,
+},
+{
+"Multithreaded prepass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded alpha M2 pass enabled.",
+0,
+},
+{
+"Multithreaded opaque WMO pass enabled.",
+0,
+},
+{
+"Multithreaded terrain pass enabled.",
+0,
+},
+{
+"Multithreaded volumetric fog enabled.",
+0,
+},
+{
+"Multithreaded Refraction Pass enabled.",
+0,
+},
+{
+"Multithreaded miscellaneous passes enabled.",
+0,
+},
+{
+"Multithreaded decal passes disabled.",
+0,
+},
+{
+"Multithreaded outline passes enabled.",
+0,
+},
+{
+"Multithreaded lightshaft passes enabled.",
+0,
+},
+{
+"Use trigger on BeginDrawComplete enabled.",
+4,
+},
+{
+"Multithreaded alpha pass enabled.",
+0,
+},
+{
+"Multithreaded daynight update enabled.",
+0,
+},
+{
+"Water detail changed to 0",
+0,
+},
+{
+"Ripple detail changed to 0",
+0,
+},
+{
+"Reflection mode changed to 0",
+0,
+},
+{
+"Reflection downscale changed to 0",
+0,
+},
+{
+"Sunshafts quality changed to 0",
+0,
+},
+{
+"Refraction mode changed to 0",
+0,
+},
+{
+"Volume fog disabled.",
+0,
+},
+{
+"Particulate volumes disabled.",
+0,
+},
+{
+"Projected textures enabled.",
+0,
+},
+{
+"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
+0,
+},
+{
+"Shadow texture size changed to 1024.",
+0,
+},
+{
+"Soft shadows changed to 0.",
+0,
+},
+{
+"Shadow cascade blending changed to 0",
+0,
+},
+{
+"Number of shadow cascades changed to 1",
+0,
+},
+{
+"Shadow RT mode changed to 0 (Disabled)",
+0,
+},
+{
+"maxLightCount must be in range 0 to 32.",
+0,
+},
+{
+"CVar 'maxLightCount' failed validation for its initial value.",
+0,
+},
+{
+"Clustered shading disabled.",
+0,
+},
+{
+"Not forcing clustered shading.",
+0,
+},
+{
+"SSAO mode set to 0",
+0,
+},
+{
+"SSAO type set to 0",
+0,
+},
+{
+"Depth Based Opacity Disabled",
+0,
+},
+{
+"SkyCloudLOD set to 0",
+0,
+},
+{
+"Texture filtering mode updated.",
+0,
+},
+{
+"Terrain mip level changed to 0.",
+0,
+},
+{
+"Outline mode changed to 0",
+0,
+},
+{
+"Physics interaction level changed to 2",
+0,
+},
+{
+"Render scale changed to 1",
+0,
+},
+{
+"Resample quality changed to 3",
+0,
+},
+{
+"MSAA set to 2 color samples, 2 coverage samples",
+0,
+},
+{
+"MSAA for alpha-test enabled.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsWorldGeo' failed validation for its initial value.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsParticles' failed validation for its initial value.",
+0,
+},
+{
+"VALAR mode changed to 0",
+0,
+},
+{
+"lodObjectSizeScale cannot be changed.",
+0,
+},
+{
+"Volume fog disabled.",
+0,
+},
+{
+"dynamicLod enabled",
+0,
+},
+{
+"World preload object sort enabled.",
+0,
+},
+{
+"World load object sort enabled.",
+0,
+},
+{
+"World preload non critical enabled.",
+0,
+},
+{
+"World preload high res textures enabled.",
+0,
+},
+{
+"FFX: Color Blind Test Mode Disabled",
+0,
+},
+{
+"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"ChromaEffects disabled",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"Startup()",
+0,
+},
+{
+"Resume()",
+0,
+},
+{
+"Screen invalid. Changing from=\"none\" to=\"login\"",
+0,
+},
+{
+"Switching to screen=\"AccountLogin\" (from \"none\")",
+0,
+},
+{
+"From EnsureValidScreen",
+0,
+},
+{
+"Overlay is disabled.  Only internal builds and public China builds have it.",
+4,
+},
+{
+"Starting login launcherPortal=\"us.actual.battle.net\" loginPortal=\"us.actual.battle.net:1119\"",
+0,
+},
+{
+"Resetting",
+0,
+},
+{
+"Initializing",
+0,
+},
+{
+"Attempting logon host=\"us.actual.battle.net\" port=\"1119\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"Front connected connectionId=\"1\" title_id=\"5730135\" platform=\"Wn64\" locale=\"enUS\" usedToken=\"true\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"OnSendLogon result=\"0\"",
+0,
+},
+{
+"Logon complete result=\"0\" numGameAccounts=\"1\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"B code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
+0,
+},
+{
+"BGS_ code=\"ERROR_OK (0)\" name=\"WoW1\" numGameAccounts=\"1\" numGameAccountNames=\"0\"",
+0,
+},
+{
+"BG code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"BGS_ACCO code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Updated game account list. accountList=\"!WoW1||\"",
+0,
+},
+{
+"Logon complete.",
+0,
+},
+{
+"Reconnect token saved;  creationTime=\"1790117430\" expirationTime=\"1790131830\"",
+0,
+},
+{
+"Waiting for realm list.",
+0,
+},
+{
+"Requesting realm list ticket",
+0,
+},
+{
+"Received realm list ticket code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Waiting for realm list.",
+0,
+},
+{
+"Received sub region list code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Requesting last played chars numSubRegions=\"4\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"0\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"1\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"4\" numRegionsWithData=\"2\" realmPermissions=\"0\" licensesCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1790116774\" numRegions=\"4\" numRegionsWithData=\"3\" realmPermissions=\"3\" licensesCount=\"1\" realmEntry=\"{\"wowRealmAddress\":16908298,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":68914,\"versionMinor\":1,\"versionRevision\":0},\"cfgRealmsID\":60,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Stormrage\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
+0,
+},
+{
+"Realm list ready.",
+0,
+},
+{
+"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"16908298\" lastActiveTime=\"1790116774\"",
+0,
+},
+{
+"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-2-10\"",
+0,
+},
+{
+"Sending ping results from timeout timeoutNs=\"692042383800\" nowNs=\"692058358900\"",
+0,
+},
+{
+"OnRealmJoin code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Connecting conn=\"(enum)0\" connPtr=\"0000029458d601c0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"Received AuthedToWoW result=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Screen invalid. Changing from=\"login\" to=\"charselect\"",
+0,
+},
+{
+"Connecting conn=\"(enum)2\" connPtr=\"000002944245f870\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000029458d601c0\" state=\"(enum)6\"",
+0,
+},
+{
+"Switching to screen=\"CharacterSelect\" (from \"login\")",
+0,
+},
+{
+"From EnsureValidScreen",
+0,
+},
+{
+"Connected to Back. Disconnecting from Front.",
+0,
+},
+{
+"Front disconnecting connectionId=\"1\"",
+0,
+},
+{
+"Disconnecting from authentication server.",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"Session with Battle.net established.",
+0,
+},
+{
+"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 71 entitlements.",
+0,
+},
+{
+"Front disconnected connectionId=\"1\" result=\"1016\"",
+0,
+},
+{
+"Disconnected from authentication server.",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Suspend()",
+0,
+},
+{
+"LimitedLuaResources: Reset Timer",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000002948ab32450\" protocol=\"(enum)0\"",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000008000",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c000",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c400",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c410",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000023",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000008c410",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000008c410",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000023",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:51",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000029498bef860\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000002948ab32450\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Successfully instantiated mirrored storage object",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000029484a388f0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000029498bef860\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000029484a439c0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000029484a388f0\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000296c2ccca40\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000029484a439c0\" state=\"(enum)6\"",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000029543c648c0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"00000296c2ccca40\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:54",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:54",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:55",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:55",
+0,
+},
+{
+"Successfully instantiated mirrored storage object",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:55",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:55",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:55",
+0,
+},
+{
+"Time set to 9/22/2026 (Tue) 15:55",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000029511bb2450\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000029543c648c0\" state=\"(enum)6\"",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000002948936ddb0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000029511bb2450\" state=\"(enum)6\"",
+0,
+},
+{
+"KillConnection conn=\"000002948936ddb0\" state=\"(enum)7\"",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"LimitedLuaResources: Reset Timer",
+0,
+},
+{
+"Resume()",
+0,
+},
+{
+"Screen invalid. Changing from=\"none\" to=\"charselect\"",
+0,
+},
+{
+"Switching to screen=\"CharacterSelect\" (from \"none\")",
+0,
+},
+{
+"From EnsureValidScreen",
 0,
 },
 },

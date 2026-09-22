@@ -1,6 +1,30 @@
 
 SimulationCraftDB = {
 ["char"] = {
+["Barelynoer - Area 52"] = {
+["bonusRolls"] = {
+{
+["ts"] = 1784761320,
+["currency"] = 3418,
+["source"] = 268471,
+["context"] = 16,
+["keyLevel"] = 22,
+["spec"] = 1473,
+["season"] = 34,
+["itemId"] = 251097,
+},
+{
+["ts"] = 1785242040,
+["currency"] = 3418,
+["source"] = 268471,
+["context"] = 16,
+["keyLevel"] = 20,
+["spec"] = 1473,
+["season"] = 34,
+["itemId"] = 250144,
+},
+},
+},
 ["Lonelylitten - Stormrage"] = {
 ["bonusRolls"] = {
 {
@@ -76,30 +100,6 @@ SimulationCraftDB = {
 ["spec"] = 264,
 ["season"] = 37,
 ["itemId"] = 271876,
-},
-},
-},
-["Barelynoer - Area 52"] = {
-["bonusRolls"] = {
-{
-["ts"] = 1784761320,
-["currency"] = 3418,
-["source"] = 268471,
-["context"] = 16,
-["keyLevel"] = 22,
-["spec"] = 1473,
-["season"] = 34,
-["itemId"] = 251097,
-},
-{
-["ts"] = 1785242040,
-["currency"] = 3418,
-["source"] = 268471,
-["context"] = 16,
-["keyLevel"] = 20,
-["spec"] = 1473,
-["season"] = 34,
-["itemId"] = 250144,
 },
 },
 },

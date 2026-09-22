@@ -68,9 +68,9 @@ SilvermoonLapCounterDB = {
 },
 ["Madmareep-Stormrage"] = {
 ["bestLapTime"] = 6.907000000006519,
-["lastLapDate"] = "2026-09-20 16:04",
-["lapCount"] = 3,
-["lastLapTime"] = 10.47399999998743,
+["lastLapDate"] = "2026-09-22 18:07",
+["lapCount"] = 5,
+["lastLapTime"] = 7.422000000002299,
 ["firstLapDate"] = "2026-09-20 16:03",
 ["class"] = "PRIEST",
 ["bestLapDate"] = "2026-09-20 16:03",

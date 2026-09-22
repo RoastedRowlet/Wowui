@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
 ["lastSanitation"] = 3,
-["session"] = 1241,
+["session"] = 1245,
 ["errors"] = {
 {
 ["message"] = "...s/AdvancedFocusCastBar/AdvancedFocusCastBarMixin.lua:1861: bad argument #1 to 'SetAlpha' (Usage: self:SetAlpha(alpha))",
@@ -1884,14 +1884,6 @@ BugGrabberDB = {
 ["counter"] = 2,
 },
 {
-["message"] = "LittleWigs: \"Xathuux the Annihilator\" timeline issue. Show the devs a screenshot of the messages in your chat, NOT this error message.",
-["time"] = 1789589638,
-["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"\"Xathuux the Annihilator\" timeline issue. Show the devs a screenshot of the messages in your chat, NOT this error message.\"\nnoPrint=true\nisLittleWigs=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
-["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:399: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:737: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:2111: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:2111>\n",
-["session"] = 1204,
-["counter"] = 3,
-},
-{
 ["message"] = "LittleWigs: Echoing Maul now has a callback",
 ["time"] = 1789600304,
 ["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"Echoing Maul now has a callback\"\nnoPrint=nil\nisLittleWigs=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
@@ -1980,20 +1972,28 @@ BugGrabberDB = {
 ["counter"] = 4,
 },
 {
-["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'RaiderIO' tried to call the protected function 'RaiderIO_ProfileTooltipAnchor:EnableMouse()'.",
-["time"] = 1789938904,
-["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"RaiderIO\"\naddonFunc=\"RaiderIO_ProfileTooltipAnchor:EnableMouse()\"\nname=\"RaiderIO\"\nbadAddons=<table>{\n RaiderIO=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
-["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:554: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:538: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:538>\n[C]: in function 'EnableMouse'\n[Interface/AddOns/RaiderIO/core.lua]:8381: in function <Interface/AddOns/RaiderIO/core.lua:8380>\n[Interface/AddOns/RaiderIO/core.lua]:8397: in function <Interface/AddOns/RaiderIO/core.lua:8389>\n[tail call]: ?\n[C]: ?\n[C]: in function 'Show'\n[Interface/AddOns/Blizzard_SharedXMLGame/Tooltip/TooltipDataHandler.lua]:300: in function <...lizzard_SharedXMLGame/Tooltip/TooltipDataHandler.lua:245>\n[C]: in function 'securecallfunction'\n[Interface/AddOns/Blizzard_SharedXMLGame/Tooltip/TooltipDataHandler.lua]:242: in function 'ProcessInfo'\n[Interface/AddOns/Blizzard_GameTooltip/Mainline/GameTooltip.lua]:1011: in function 'SetWorldCursor'\n[Interface/AddOns/Blizzard_Game/Mainline/EventImplementation.lua]:880: in function 'HandleWorldCursorTooltipUpdate'\n[Interface/AddOns/Blizzard_Game/Mainline/EventRouting.lua]:117: in function 'handler'\n[Interface/AddOns/Blizzard_Game/Shared/EventRouting.lua]:7: in function <...terface/AddOns/Blizzard_Game/Shared/EventRouting.lua:4>\n",
-["session"] = 1234,
-["counter"] = 16,
-},
-{
 ["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'CraftScan' tried to call the protected function 'JoinChannelByName()'.",
 ["time"] = 1789955413,
 ["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"CraftScan\"\naddonFunc=\"JoinChannelByName()\"\nname=\"CraftScan\"\nbadAddons=<table>{\n CraftScan=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
 ["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:554: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:538: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:538>\n[C]: in function 'JoinChannelByName'\n[Interface/AddOns/CraftScan/Utils/Comm.lua]:49: in function <Interface/AddOns/CraftScan/Utils/Comm.lua:48>\n",
 ["session"] = 1237,
 ["counter"] = 35,
+},
+{
+["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'RaiderIO' tried to call the protected function 'RaiderIO_ProfileTooltipAnchor:EnableMouse()'.",
+["time"] = 1790095634,
+["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"RaiderIO\"\naddonFunc=\"RaiderIO_ProfileTooltipAnchor:EnableMouse()\"\nname=\"RaiderIO\"\nbadAddons=<table>{\n RaiderIO=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
+["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:554: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:538: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:538>\n[C]: in function 'EnableMouse'\n[Interface/AddOns/RaiderIO/core.lua]:8381: in function <Interface/AddOns/RaiderIO/core.lua:8380>\n[Interface/AddOns/RaiderIO/core.lua]:8397: in function <Interface/AddOns/RaiderIO/core.lua:8389>\n[tail call]: ?\n[C]: ?\n",
+["session"] = 1242,
+["counter"] = 17,
+},
+{
+["message"] = "LittleWigs: \"Xathuux the Annihilator\" timeline issue. Show the devs a screenshot of the messages in your chat, NOT this error message.",
+["time"] = 1790096469,
+["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"\"Xathuux the Annihilator\" timeline issue. Show the devs a screenshot of the messages in your chat, NOT this error message.\"\nnoPrint=true\nisLittleWigs=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
+["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:392: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:739: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:2149: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:2149>\n",
+["session"] = 1242,
+["counter"] = 4,
 },
 },
 }
