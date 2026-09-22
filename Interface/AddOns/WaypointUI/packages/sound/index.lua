@@ -24,6 +24,15 @@ function Sound.PlaySound(layer, soundID, force)
     PlaySound(soundID, "SFX")
 end
 
+function Sound.PlaySoundWithFileMap(layer, soundID, map, force)
+    local soundFile = map[soundID]
+    if soundFile ~= nil then
+        Sound.PlaySoundFile(layer, soundFile, force)
+    else
+        Sound.PlaySound(layer, soundID, force)
+    end
+end
+
 function Sound.Enable(layer)
     layers[layer] = true
 end

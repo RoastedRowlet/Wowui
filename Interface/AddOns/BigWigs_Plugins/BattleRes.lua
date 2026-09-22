@@ -2,11 +2,7 @@
 -- Module Declaration
 --
 
-if BigWigsLoader.isVanilla or BigWigsLoader.isTBC or BigWigsLoader.isWrath or BigWigsLoader.isCata then
-	return
-end
-
-local plugin, L = BigWigs:NewPlugin("BattleRes")
+local plugin, L = BigWigs:NewPlugin("BattleRes") -- Retail & Mists only module
 if not plugin then return end
 
 --------------------------------------------------------------------------------
@@ -513,7 +509,7 @@ do
 		return plugin.db.profile.disabled or plugin.db.profile.position[5] == plugin.defaultDB.position[5]
 	end
 
-	BigWigsAPI.RegisterToolOptions("BattleRes", {
+	BigWigsAPI.RegisterToolOptions("BattleRes", function() return {
 		type = "group",
 		childGroups = "tab",
 		order = 3,
@@ -1285,7 +1281,7 @@ do
 				},
 			},
 		},
-	})
+	} end)
 end
 
 --------------------------------------------------------------------------------

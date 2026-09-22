@@ -16,8 +16,8 @@ local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 env.NAME = "Waypoint UI"
 env.LOGO = Path.Root .. "\\Art\\Icons\\Logo"
 env.LOGO_ALT = Path.Root .. "\\Art\\Icons\\Logo-White"
-env.VERSION_STRING = "1.7.1"
-env.VERSION_NUMBER = 010701
+env.VERSION_STRING = "1.7.2"
+env.VERSION_NUMBER = 010702
 env.DEBUG_MODE = false
 
 
@@ -43,6 +43,11 @@ do
     }
 
     Enum.Sound = {
+        FileMap           = {
+            [89712] = Path.Root .. "\\Sound\\SPELL_PR_Artifact_LightsWrath_Cast_05.ogg",
+            [17318] = Path.Root .. "\\Sound\\LFG_DungeonReady.ogg",
+            [13827] = Path.Root .. "\\Sound\\Glyph_MajorCreate.ogg"
+        },
         WaypointShow      = SOUNDKIT.UI_RUNECARVING_OPEN_MAIN_WINDOW,
         PinpointShow      = SOUNDKIT.UI_RUNECARVING_CLOSE_MAIN_WINDOW,
         NewUserNavigation = 89712,

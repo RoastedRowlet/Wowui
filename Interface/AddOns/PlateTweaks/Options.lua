@@ -6479,6 +6479,48 @@ function NS.BuildThreatBand(sec, content)
     "Blinks the plate for a second and a half the moment a mob comes off you.\n\nA colour tells you what is true now; by the time you notice it changed, the moment a taunt was for has passed. Costs no extra draw slot -- it is the same colour, announcing itself.")
   band:Add(flashRow)
 
+  -- The border's shape: thickness, which way it grows, and the gap to the bar.
+  --
+  -- Every other border in the addon -- a rule's, target/focus's -- has these
+  -- three, and the engine has read them off this module since it was written.
+  -- Nothing here set them, so a threat border was two pixels hard against the
+  -- bar with no way to say otherwise. Module-wide, like target/focus: one
+  -- geometry, three colours.
+  local borderRow = Flex.Box(content, { dir = "row", align = "center", gap = UI.COL_GAP,
+    height = UI.CTRL_ROW_H })
+  band.thickLabel = Dim(content, "Border thickness")
+  borderRow:Add(Flex.Item(band.thickLabel, { width = UI.LABEL_W, shrink = 0, clipText = true }))
+  band.thickness = Slider(content, UI.SLIDER_SM, 1, 8, 7,
+    function() return NS.ThreatBorderConfig().thickness or 2 end,
+    function(v)
+      NS.ThreatBorderConfig().thickness = v
+      Structural()
+    end)
+  borderRow:Add(Flex.Item(band.thickness, { width = UI.SLIDER_SM, shrink = 0 }))
+  band.growLabel = Dim(content, "Grows")
+  borderRow:Add(Flex.Item(band.growLabel, { width = UI.LABEL_XS, shrink = 0, clipText = true }))
+  -- growDrop, not grow: Flex reads `grow` off a node.
+  band.growDrop = Dropdown(content, UI.DROP_SM_W, {
+    { text = "Outward", value = "OUT" },
+    { text = "Inward", value = "IN" },
+  },
+    function() return NS.ThreatBorderConfig().grow or "OUT" end,
+    function(value)
+      NS.ThreatBorderConfig().grow = value
+      Structural()
+    end)
+  borderRow:Add(Flex.Item(band.growDrop, { width = UI.DROP_SM_W, shrink = 0 }))
+  band.padLabel = Dim(content, "Gap")
+  borderRow:Add(Flex.Item(band.padLabel, { width = UI.LABEL_XS, shrink = 0, clipText = true }))
+  band.padding = Slider(content, UI.SLIDER_SM, 0, 12, 13,
+    function() return NS.ThreatBorderConfig().padding or 0 end,
+    function(v)
+      NS.ThreatBorderConfig().padding = v
+      Structural()
+    end)
+  borderRow:Add(Flex.Item(band.padding, { width = UI.SLIDER_SM, shrink = 0 }))
+  band:Add(borderRow)
+
   band.note = Dim(content,
     "Only ever coloured while you are in combat -- out of combat every plate reports the same state. The border half costs no draw slots.")
   band:Add(NS.FlexNote(content, band.note, 0))
@@ -8372,6 +8414,9 @@ local function RenderRuleSection(sec, list, rowPool, condPool, isBorder, getList
       NS.FlexMoveAfter(sec.rowsNode, sec.threatBand, row)
       sec.threatBand.roleDrop.Refresh()
       sec.threatBand.flash.Refresh()
+      sec.threatBand.thickness.Refresh()
+      sec.threatBand.growDrop.Refresh()
+      sec.threatBand.padding.Refresh()
       -- Rebound every render: the order follows the role, and the role can
       -- change under a rebuild.
       sec.threatBand.zoneDrop.Refresh()

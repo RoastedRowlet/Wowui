@@ -1,0 +1,28 @@
+## Interface: 120100
+## Title: PI Helper
+## Notes: Glows raid DPS frames for Power Infusion. Hides after PI until cooldown minus grace.|nSlash commands: /pih /pihelper|nActivates on Priests by default.
+## Author: squided
+## Version: 1.7.0
+## SavedVariables: PIHelperDB
+## IconTexture: Interface/Icons/spell_holy_powerinfusion
+## Category: Combat
+## AllowLoadGameType: mainline
+## AddonCompartmentFunc: PIHelper_OnAddonCompartmentClick
+## OptionalDeps: ElvUI, Grid2, DandersFrames, EllesmereUI, EllesmereUIRaidFrames, BuzzardFrames, VuhDo, Michs_RaidFrames, Cell, LibStub, LibSharedMedia-3.0, SharedMedia
+
+Constants.lua
+Core.lua
+Debug.lua
+Glow.lua
+Frames.lua
+Tracker.lua
+Whispers.lua
+Alerts.lua
+FocusReminder.lua
+Sounds.lua
+Minimap.lua
+OptionsWidgets.lua
+OptionsTracking.lua
+OptionsWhispers.lua
+Profiles.lua
+Options.lua

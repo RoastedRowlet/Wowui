@@ -3,6 +3,12 @@
 All notable changes to PlateTweaks are recorded here. No file like this
 existed before 1.8.4, so history prior to that release is not reconstructed.
 
+## 1.11.3
+
+### Added
+
+- Threat border thickness, growth direction and gap, in the threat editor.
+
 ## 1.11.2
 
 ### Fixed

@@ -37,8 +37,8 @@ LittleWigs_Dragonflight: enabled
 BigWigs_TheDreamrift: enabled
 BigWigs_MarchOnQuelDanas: enabled
 Syndicator: enabled
-EllesmereUIMythicTimer: disabled
-EllesmereUIQuestTracker: disabled
+EllesmereUIMythicTimer: enabled
+EllesmereUIQuestTracker: enabled
 EllesmereUIFriends: disabled
 EllesmereUIChat: enabled
 M33kAurasCompanion: enabled
@@ -55,3 +55,4 @@ EllesmereUIAuraBuffReminders: enabled
 EllesmereUIRaidFrames: enabled
 BigWigs_TheVenomousAbyss: enabled
 BigWigs_MidnightLairs: enabled
+LittleWigs_Cataclysm: enabled

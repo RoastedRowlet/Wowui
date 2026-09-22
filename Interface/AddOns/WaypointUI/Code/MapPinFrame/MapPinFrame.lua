@@ -353,7 +353,7 @@ do --Map Pin Template
     function MapPinFrameMixin:SuppressWorldMapCtrlClick(button)
         if button ~= "LeftButton" then return end
         if not IsControlKeyDown() then return end
-        if not IsPathfindingEnabled() then return end
+        if not IsPathfindingEnabled() and not MapPin.IsCustomMapPinsEnabled() then return end
         if self.displayLayer ~= MapPinFrame_Preload.Enum.DisplayLayer.WorldMap then return end
 
         MapPinFrame:SuppressNextWorldMapCtrlClick()
@@ -389,13 +389,14 @@ do --Map Pin Template
             end
 
             self:RefreshActive()
+            PlaySound(self.active and SOUNDKIT.UI_MAP_WAYPOINT_SUPER_TRACK_ON or SOUNDKIT.UI_MAP_WAYPOINT_SUPER_TRACK_OFF)
             return
         end
 
         if self.isPathStepWaypoint then
             self:HideTooltip()
             Navigation_DataProvider:AbortPathfindingFromPathStepWaypoint()
-            PlaySound(SOUNDKIT.UI_MAP_WAYPOINT_REMOVE)
+            PlaySound(IsControlKeyDown() and SOUNDKIT.UI_MAP_WAYPOINT_REMOVE or SOUNDKIT.UI_MAP_WAYPOINT_SUPER_TRACK_OFF)
             return
         end
 
@@ -421,10 +422,13 @@ do --Map Pin Template
                 local userNavigation = MapPin.GetUserNavigation()
                 SetUserNavigationTracking(not (userNavigation and userNavigation.superTracked == true))
                 self:RefreshActive()
+                PlaySound(self.active and SOUNDKIT.UI_MAP_WAYPOINT_SUPER_TRACK_ON or SOUNDKIT.UI_MAP_WAYPOINT_SUPER_TRACK_OFF)
                 return
             end
 
-            MapPin.NewUserNavigationFromPin(self.pinID)
+            if MapPin.NewUserNavigationFromPin(self.pinID, true) then
+                PlaySound(SOUNDKIT.UI_MAP_WAYPOINT_SUPER_TRACK_ON)
+            end
         end
     end
 

@@ -1,5 +1,0 @@
-<Bindings>
-    <Binding name="COMPASSHUD_SUPERTRACK" category="CompassHUD">
-        CompassHUD.SupertrackMinimapIcon(self);
-    </Binding>
-</Bindings>

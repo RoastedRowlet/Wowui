@@ -34,7 +34,7 @@ EllesmereUICooldownManager: enabled
 EllesmereUIDamageMeters: enabled
 EllesmereUIFriends: enabled
 EllesmereUIMinimap: enabled
-EllesmereUIMythicTimer: disabled
+EllesmereUIMythicTimer: enabled
 EllesmereUINameplates: enabled
 EllesmereUIQoL: enabled
 EllesmereUIQuestTracker: enabled

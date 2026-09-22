@@ -893,7 +893,7 @@ do -- Schema
                                     widgetType        = Settings_Enum.WidgetType.Button,
                                     widgetButton_text = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_PREVIEW"],
                                     set               = function()
-                                        Sound.PlaySound("Preview", Config.DBGlobal:GetVariable("AudioProximitySound"))
+                                        Sound.PlaySoundWithFileMap("Preview", Config.DBGlobal:GetVariable("AudioProximitySound"), env.Enum.Sound.FileMap)
                                     end
                                 },
                                 {
@@ -946,7 +946,7 @@ do -- Schema
                                     widgetType        = Settings_Enum.WidgetType.Button,
                                     widgetButton_text = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_PREVIEW"],
                                     set               = function()
-                                        Sound.PlaySound("Preview", Config.DBGlobal:GetVariable("AudioProximityLeavingSound"))
+                                        Sound.PlaySoundWithFileMap("Preview", Config.DBGlobal:GetVariable("AudioProximityLeavingSound"), env.Enum.Sound.FileMap)
                                     end
                                 },
                                 {
@@ -1002,8 +1002,7 @@ do -- Schema
                                     widgetType        = Settings_Enum.WidgetType.Button,
                                     widgetButton_text = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_PREVIEW"],
                                     set               = function()
-                                        Sound.PlaySound("Preview",
-                                            Config.DBGlobal:GetVariable("AudioCustomShowWaypoint"))
+                                        Sound.PlaySoundWithFileMap("Preview", Config.DBGlobal:GetVariable("AudioCustomShowWaypoint"), env.Enum.Sound.FileMap)
                                     end
                                 },
                                 {
@@ -1049,8 +1048,7 @@ do -- Schema
                                     widgetButton_text           = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_PREVIEW"],
                                     widgetButton_refreshOnClick = true,
                                     set                         = function()
-                                        Sound.PlaySound("Preview",
-                                            Config.DBGlobal:GetVariable("AudioCustomShowPinpoint"))
+                                        Sound.PlaySoundWithFileMap("Preview", Config.DBGlobal:GetVariable("AudioCustomShowPinpoint"), env.Enum.Sound.FileMap)
                                     end
                                 },
                                 {
@@ -1066,8 +1064,7 @@ do -- Schema
                                     widgetButton_text           = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_RESET"],
                                     widgetButton_refreshOnClick = true,
                                     set                         = function()
-                                        Config.DBGlobal:ResetVariable(
-                                            "AudioCustomShowPinpoint")
+                                        Config.DBGlobal:ResetVariable("AudioCustomShowPinpoint")
                                     end
                                 }
                             }
@@ -1096,8 +1093,7 @@ do -- Schema
                                     widgetButton_text           = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_PREVIEW"],
                                     widgetButton_refreshOnClick = true,
                                     set                         = function()
-                                        Sound.PlaySound("Preview",
-                                            Config.DBGlobal:GetVariable("AudioCustomNewUserNavigation"))
+                                        Sound.PlaySoundWithFileMap("Preview", Config.DBGlobal:GetVariable("AudioCustomNewUserNavigation"), env.Enum.Sound.FileMap)
                                     end
                                 },
                                 {
@@ -1113,8 +1109,7 @@ do -- Schema
                                     widgetButton_text           = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_RESET"],
                                     widgetButton_refreshOnClick = true,
                                     set                         = function()
-                                        Config.DBGlobal:ResetVariable(
-                                            "AudioCustomNewUserNavigation")
+                                        Config.DBGlobal:ResetVariable("AudioCustomNewUserNavigation")
                                     end
                                 }
                             }

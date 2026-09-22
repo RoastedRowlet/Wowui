@@ -38,7 +38,7 @@ BigWigs_TheDreamrift: enabled
 BigWigs_MarchOnQuelDanas: enabled
 Baganator: disabled
 Syndicator: disabled
-EllesmereUIMythicTimer: disabled
+EllesmereUIMythicTimer: enabled
 EllesmereUIQuestTracker: enabled
 EllesmereUIFriends: enabled
 EllesmereUIChat: enabled
@@ -78,9 +78,9 @@ GroupfinderFlags: enabled
 idTip: enabled
 LifebloomAlert: enabled
 LightDamage: enabled
-LittleWigs_BattleForAzeroth: disabled
+LittleWigs_BattleForAzeroth: enabled
 LittleWigs_BurningCrusade: disabled
-LittleWigs_Cataclysm: disabled
+LittleWigs_Cataclysm: enabled
 LittleWigs_Classic: disabled
 LittleWigs_MistsOfPandaria: disabled
 LittleWigs_Shadowlands: disabled

@@ -211,6 +211,11 @@ L.autotalk_boss_desc = "보스 전투 시작 NPC 대화를 자동 선택합니�
 L.autotalk_generic_desc = "던전 다음 단계 진행에 필요한 NPC 대화를 자동 선택합니다."
 L.autotalk_notice = "NPC %s와 자동으로 상호 작용합니다."
 
+-- Auto Player Choice
+L.autoPlayerChoice = "자동 플레이어 선택"
+L.autoPlayerChoice_delve_power_desc = "구렁에서 몹이 떨군 플레이어 추가 능력을 자동으로 선택합니다."
+L.autoPlayerChoice_notice = "자동 선택 중: %s"
+
 -- GUI notes
 L.intermissionOnly = "사잇단계 전용" -- A note to explain that a specific ability only happens during the intermission stage of a boss fight
 L.stage1Only = "1단계 전용" -- A note to explain that a specific ability only happens during stage 1 of a boss fight

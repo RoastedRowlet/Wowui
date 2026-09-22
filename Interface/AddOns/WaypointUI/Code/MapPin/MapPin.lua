@@ -286,7 +286,7 @@ do
             end
         end
 
-        Sound.PlaySound("Main", soundID)
+        Sound.PlaySoundWithFileMap("Main", soundID, env.Enum.Sound.FileMap)
     end
 
     function MapPinUtil.ResolveMapPosition(mapID, x, y)

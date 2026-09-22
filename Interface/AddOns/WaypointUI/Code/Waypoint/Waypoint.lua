@@ -1031,13 +1031,13 @@ do -- Proximity Audio
         if distance > proximityDistance * 2 then
             hasPlayed = false
         elseif not hasPlayed and distance < proximityDistance and Config.DBGlobal:GetVariable("AudioGlobal") and Config.DBGlobal:GetVariable("AudioProximity") and not Waypoint_Director.IsSuperTrackedTargetIgnored() then
-            Sound.PlaySound("Main", Config.DBGlobal:GetVariable("AudioProximitySound"))
+            Sound.PlaySoundWithFileMap("Main", Config.DBGlobal:GetVariable("AudioProximitySound"), env.Enum.Sound.FileMap)
             hasPlayed = true
         end
 
         local leavingDistance = Config.DBGlobal:GetVariable("AudioProximityLeavingDistance")
         if wasInsideLeavingDistance and distance > leavingDistance and Config.DBGlobal:GetVariable("AudioGlobal") and Config.DBGlobal:GetVariable("AudioProximity") and not Waypoint_Director.IsSuperTrackedTargetIgnored() then
-            Sound.PlaySound("Main", Config.DBGlobal:GetVariable("AudioProximityLeavingSound"))
+            Sound.PlaySoundWithFileMap("Main", Config.DBGlobal:GetVariable("AudioProximityLeavingSound"), env.Enum.Sound.FileMap)
         end
         wasInsideLeavingDistance = distance <= leavingDistance
     end

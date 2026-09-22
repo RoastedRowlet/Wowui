@@ -211,6 +211,11 @@ L.autotalk_boss_desc = "自动选择NPC对话选项以开启首领战。"
 L.autotalk_generic_desc = "自动选择NPC对话选项以进入下一阶段。"
 L.autotalk_notice = "自动与NPC %s 交互。"
 
+-- Auto Player Choice
+L.autoPlayerChoice = "玩家自动选择"
+L.autoPlayerChoice_delve_power_desc = "当地下堡中的生物掉落玩家强化道具时，自动进行选择。"
+L.autoPlayerChoice_notice = "自动选择：%s"
+
 -- GUI notes
 L.intermissionOnly = "仅转阶段" -- A note to explain that a specific ability only happens during the intermission stage of a boss fight
 L.stage1Only = "仅第一阶段" -- A note to explain that a specific ability only happens during stage 1 of a boss fight 同步GlobalStrings-CN本地化翻译

@@ -5,6 +5,7 @@ local WoWClient_Keybind = env.modules:Import("packages\\wow-client\\keybind")
 local WoWClient = env.modules:New("packages\\wow-client")
 
 WoWClient.IS_RETAIL = WoWClient_Versioning.IS_RETAIL
+WoWClient.IS_FOREVER = WoWClient_Versioning.IS_FOREVER
 WoWClient.IS_CLASSIC_ERA = WoWClient_Versioning.IS_CLASSIC_ERA
 WoWClient.IS_CLASSIC_TBC = WoWClient_Versioning.IS_CLASSIC_TBC
 WoWClient.IS_CLASSIC_MISTS = WoWClient_Versioning.IS_CLASSIC_MISTS

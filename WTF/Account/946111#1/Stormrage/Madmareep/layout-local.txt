@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 120
+FrameLevel: 138
 Anchor: LEFT
 X: 44
 Y: -235
@@ -27,3 +27,17 @@ X: -73
 Y: -118
 W: 1105
 H: 658
+Frame: MRTCombatTimer
+FrameLevel: 1
+Anchor: CENTER
+X: -236
+Y: -123
+W: 77
+H: 27
+Frame: PlayerSpellsFrame
+FrameLevel: 1
+Anchor: TOPLEFT
+X: 53
+Y: -42
+W: 1618
+H: 883

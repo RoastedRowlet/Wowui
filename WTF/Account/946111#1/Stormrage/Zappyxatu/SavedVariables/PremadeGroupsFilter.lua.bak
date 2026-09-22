@@ -57,7 +57,7 @@ PremadeGroupsFilterState = {
 ["dungeon3"] = false,
 ["dungeon8"] = false,
 ["dungeon2"] = false,
-["dungeon1"] = true,
+["dungeon1"] = false,
 ["dungeon7"] = false,
 },
 },

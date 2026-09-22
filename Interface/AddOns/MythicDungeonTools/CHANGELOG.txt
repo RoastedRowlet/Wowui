@@ -1,4 +1,3 @@
-## 6.2.16 (2026-09-08)
+## 6.2.18 (2026-09-21)
 
-- Added a missing Lightgorged Lasher and corrected a Lasher's position in The Blinding Vale.
-- Added missing translations for The Blinding Vale enemies and Thundering Totem in King's Rest.
+- Corrected positions of G62 and a Devouring Brutalizer in Voidscar Arena.

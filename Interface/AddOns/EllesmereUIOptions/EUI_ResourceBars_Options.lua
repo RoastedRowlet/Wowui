@@ -12,6 +12,7 @@ local abs = math.abs
 local PAGE_DISPLAY   = "Class, Power and Health Bars"
 local PAGE_CASTBAR   = "Cast Bar"
 local PAGE_GCD       = "GCD Bar"
+local PAGE_SWING     = "Swing Timer"   -- WoW Forever only (C_SwingTimer)
 local PAGE_TOTEM     = "Totem Bar"
 local PAGE_UNLOCK    = "Unlock Mode"
 
@@ -566,7 +567,62 @@ initFrame:SetScript("OnEvent", function(self)
             end
             pc._barBorderFrame:SetFrameLevel(sp.borderBehind and math.max(0, pc:GetFrameLevel() - 1) or (pc:GetFrameLevel() + 2))
 
-            if sp.borderOnPips and not isBar then
+            if EllesmereUI.BlizzStyle.Get("resourcebars") then
+                -- Blizzard Style: the stock bar frame (the same atlas and
+                -- overhang the live bars use) instead of the full-bar border.
+                pc._barBorderFrame:Hide()
+                local bbg = pc._blizzBarBg
+                if not bbg then
+                    bbg = pc:CreateTexture(nil, "BACKGROUND", nil, -2)
+                    if C_Texture.GetAtlasInfo("UI-HUD-CoolDownManager-Bar-BG") then bbg:SetAtlas("UI-HUD-CoolDownManager-Bar-BG") end
+                    UnsnapTex(bbg)
+                    pc._blizzBarBg = bbg
+                end
+                bbg:ClearAllPoints()
+                bbg:SetPoint("TOPLEFT", pc, "TOPLEFT", -2, 3)
+                bbg:SetPoint("BOTTOMRIGHT", pc, "BOTTOMRIGHT", 6, -7)
+                bbg:Show()
+                -- The stock fill art's footprint masks a bar-type fill and
+                -- backing inside the frame's rim, as on the live bars.
+                local bm = pc._blizzBarMask
+                if not bm and C_Texture.GetAtlasInfo("UI-HUD-CoolDownManager-Bar") then
+                    bm = pc:CreateMaskTexture()
+                    bm:SetAtlas("UI-HUD-CoolDownManager-Bar")
+                    bm:SetAllPoints(pc)
+                    pc._blizzBarMask = bm
+                end
+                if pc._barFill and pc._blizzMaskedFill ~= pc._barFill then
+                    pc._barFill:AddMaskTexture(bm); pc._blizzMaskedFill = pc._barFill
+                end
+                if pc._barBg and pc._blizzMaskedBg ~= pc._barBg then
+                    pc._barBg:AddMaskTexture(bm); pc._blizzMaskedBg = pc._barBg
+                end
+                -- The inner bevel the live rows carry: on the container itself
+                -- for a bar-type (its fill is a texture here), on an overlay
+                -- above the pips otherwise; pip textures take the mask so the
+                -- end pips round off with the frame (the preview is horizontal).
+                local shade = pc._blizzShadeFrame
+                if isBar then
+                    ns.ERB_BlizzBarShadow(pc, bm)
+                    if shade then shade:Hide() end
+                else
+                    if pc._blizzShadow then for i = 1, 4 do pc._blizzShadow[i]:Hide() end end
+                    if not shade then
+                        shade = CreateFrame("Frame", nil, pc)
+                        shade:SetAllPoints(pc)
+                        pc._blizzShadeFrame = shade
+                    end
+                    shade:SetFrameLevel(pc:GetFrameLevel() + 8)
+                    shade:Show()
+                    ns.ERB_BlizzBarShadow(shade, bm)
+                    local pvPips = _previewFrames.pips
+                    if pvPips then
+                        for i = 1, #pvPips do
+                            ns.ERB_MaskTex(pvPips[i]._bg, bm); ns.ERB_MaskTex(pvPips[i]._fill, bm)
+                        end
+                    end
+                end
+            elseif sp.borderOnPips and not isBar then
                 pc._barBorderFrame:Hide()
             else
                 EllesmereUI.ApplyBorderStyle(pc._barBorderFrame, sp.borderSize or 1,
@@ -586,6 +642,8 @@ initFrame:SetScript("OnEvent", function(self)
                 pc._pipBarBg:SetAllPoints(pc)
                 pc._pipBarBg:SetColorTexture(sp.barBgR or 0, sp.barBgG or 0, sp.barBgB or 0, sp.barBgA or 0.5)
                 pc._pipBarBg:Show()
+                -- Blizzard Style: the backdrop takes the row's bar-shape mask.
+                if pc._blizzBarMask then ns.ERB_MaskTex(pc._pipBarBg, pc._blizzBarMask) end
             elseif pc._pipBarBg then
                 pc._pipBarBg:Hide()
             end
@@ -1837,7 +1895,11 @@ initFrame:SetScript("OnEvent", function(self)
         end
         local function SpecName_L(specID)
             if specID == 0 then return "All Specs" end
-            local _, name, _, _, _, _, className = GetSpecializationInfoByID(specID)
+            -- The by-id lookup has no namespaced form and is absent on WoW Forever.
+            local _, name, className
+            if GetSpecializationInfoByID then
+                _, name, _, _, _, _, className = GetSpecializationInfoByID(specID)
+            end
             if name and className then return name .. " " .. className end
             return name or ("Spec " .. specID)
         end
@@ -1987,7 +2049,8 @@ initFrame:SetScript("OnEvent", function(self)
             local healers, tanks, dps = {}, {}, {}
             for _, cls in ipairs(classList) do
                 items[#items + 1] = { isHeader = true, label = cls.className }
-                local numSpecs = GetNumSpecializationsForClassID(cls.classID) or 0
+                -- No per-class spec API on WoW Forever: the list stays at its headers.
+                local numSpecs = GetNumSpecializationsForClassID and GetNumSpecializationsForClassID(cls.classID) or 0
                 for specIndex = 1, numSpecs do
                     local specID, specName, _, _, role = GetSpecializationInfoForClassID(cls.classID, specIndex)
                     if specID and specName then
@@ -2208,8 +2271,8 @@ initFrame:SetScript("OnEvent", function(self)
                 -- start ON (warn when low), builders (rage/runic/fury) OFF (warn when high). Only when
                 -- the entry covers the current spec, the one whose power type we can read.
                 if cfg.showPartialCog then
-                    local curIdx = GetSpecialization()
-                    local curSpecID = curIdx and C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo(curIdx)
+                    local curIdx = C_SpecializationInfo.GetSpecialization()
+                    local curSpecID = curIdx and C_SpecializationInfo.GetSpecializationInfo(curIdx)
                     if curSpecID then
                         for _, sid in ipairs(ids) do
                             if sid == curSpecID then
@@ -2712,7 +2775,7 @@ initFrame:SetScript("OnEvent", function(self)
                         local classFile
                         if firstSID == 0 then
                             local _, cf = UnitClass("player"); classFile = cf
-                        elseif firstSID then
+                        elseif firstSID and GetSpecializationInfoByID then
                             local _, _, _, _, _, cf = GetSpecializationInfoByID(firstSID); classFile = cf
                         end
                         local cc = classFile and CLASS_COLORS_L[classFile]
@@ -2943,6 +3006,7 @@ initFrame:SetScript("OnEvent", function(self)
 
         local hdr
         hdr, h = W:SectionHeader(parent, "HEALTH BAR", y);  y = y - h
+        y = EllesmereUI.BlizzStyle.Note(parent, y, "resourcebars")
 
         -- Advanced: Synced/Re-sync toggle; controls always built, overlaid when synced (built at the end) so the section height stays constant.
         local _advTop = y  -- content top; also used by the Simple override overlay
@@ -3086,7 +3150,7 @@ initFrame:SetScript("OnEvent", function(self)
             local texValues, texOrder = EllesmereUI.GetBorderTextureDropdown()
             local hpBsRow
             hpBsRow, h = W:DualRow(parent, y,
-                { type="dropdown", text="Border Style",
+                EllesmereUI.BlizzStyle.Gate("resourcebars", { type="dropdown", text="Border Style",
                   disabled = healthOff,
                   disabledTooltip = "Health Bar",
                   values=texValues, order=texOrder,
@@ -3100,8 +3164,8 @@ initFrame:SetScript("OnEvent", function(self)
                       local defSz = EllesmereUI.GetBorderDefaultSize("resourcebars", v)
                       if defSz then c.borderSize = defSz end
                       RebuildHealth(); EllesmereUI:RefreshPage()
-                  end },
-                { type = "slider", text = "Border Size",
+                  end }),
+                EllesmereUI.BlizzStyle.Gate("resourcebars", { type = "slider", text = "Border Size",
                   min = 0, max = 4, step = 1,
                   disabled = healthOff,
                   disabledTooltip = "Health Bar",
@@ -3110,7 +3174,7 @@ initFrame:SetScript("OnEvent", function(self)
                       local c = cfg(); if not c then return end
                       c.borderSize = v; RebuildHealth()
                       EllesmereUI:RefreshPage()
-                  end });  y = y - h
+                  end }));  y = y - h
             if not EllesmereUI._prebuilding then
                 local rgn = hpBsRow._rightRegion
                 local ctrl = rgn._control
@@ -3855,7 +3919,7 @@ initFrame:SetScript("OnEvent", function(self)
             local texValues, texOrder = EllesmereUI.GetBorderTextureDropdown()
             local pwrBsRow
             pwrBsRow, h = W:DualRow(parent, y,
-                { type="dropdown", text="Border Style",
+                EllesmereUI.BlizzStyle.Gate("resourcebars", { type="dropdown", text="Border Style",
                   disabled = powerOff,
                   disabledTooltip = powerDisTip,
                   values=texValues, order=texOrder,
@@ -3869,8 +3933,8 @@ initFrame:SetScript("OnEvent", function(self)
                       local defSz = EllesmereUI.GetBorderDefaultSize("resourcebars", v)
                       if defSz then c.borderSize = defSz end
                       RebuildPower(); EllesmereUI:RefreshPage()
-                  end },
-                { type = "slider", text = "Border Size",
+                  end }),
+                EllesmereUI.BlizzStyle.Gate("resourcebars", { type = "slider", text = "Border Size",
                   min = 0, max = 4, step = 1,
                   disabled = powerOff,
                   disabledTooltip = powerDisTip,
@@ -3879,7 +3943,7 @@ initFrame:SetScript("OnEvent", function(self)
                       local c = cfg(); if not c then return end
                       c.borderSize = v; RebuildPower()
                       EllesmereUI:RefreshPage()
-                  end });  y = y - h
+                  end }));  y = y - h
             if not EllesmereUI._prebuilding then
                 local rgn = pwrBsRow._rightRegion
                 local ctrl = rgn._control
@@ -4528,8 +4592,8 @@ initFrame:SetScript("OnEvent", function(self)
                 if ctx.advanced then return ctx.specID == 104 end
                 local _, cf = UnitClass("player")
                 if cf ~= "DRUID" then return false end
-                local s = GetSpecialization()
-                local sid = s and GetSpecializationInfo(s)
+                local s = C_SpecializationInfo.GetSpecialization()
+                local sid = s and C_SpecializationInfo.GetSpecializationInfo(s)
                 return sid == 104
             end
             if _IsGuardianDruid() then
@@ -4558,8 +4622,8 @@ initFrame:SetScript("OnEvent", function(self)
                 if ctx.advanced then return ctx.specID == 73 end
                 local _, cf = UnitClass("player")
                 if cf ~= "WARRIOR" then return false end
-                local s = GetSpecialization()
-                local sid = s and GetSpecializationInfo(s)
+                local s = C_SpecializationInfo.GetSpecialization()
+                local sid = s and C_SpecializationInfo.GetSpecializationInfo(s)
                 return sid == 73
             end
             if _IsProtWarrior() then
@@ -4604,8 +4668,8 @@ initFrame:SetScript("OnEvent", function(self)
                 if ctx.advanced then return ctx.specID == 71 end
                 local _, cf = UnitClass("player")
                 if cf ~= "WARRIOR" then return false end
-                local s = GetSpecialization()
-                local sid = s and GetSpecializationInfo(s)
+                local s = C_SpecializationInfo.GetSpecialization()
+                local sid = s and C_SpecializationInfo.GetSpecializationInfo(s)
                 return sid == 71
             end
             if _IsArmsWarrior() then
@@ -4780,7 +4844,7 @@ initFrame:SetScript("OnEvent", function(self)
             local texValues, texOrder = EllesmereUI.GetBorderTextureDropdown()
             local classBsRow
             classBsRow, h = W:DualRow(parent, y,
-                { type="dropdown", text="Border Style",
+                EllesmereUI.BlizzStyle.Gate("resourcebars", { type="dropdown", text="Border Style",
                   disabled = classOff,
                   disabledTooltip = "Class Resource",
                   values=texValues, order=texOrder,
@@ -4794,8 +4858,8 @@ initFrame:SetScript("OnEvent", function(self)
                       local defSz = EllesmereUI.GetBorderDefaultSize("resourcebars", v)
                       if defSz then c.borderSize = defSz end
                       RebuildClass(); EllesmereUI:RefreshPage()
-                  end },
-                { type = "slider", text = "Border Size",
+                  end }),
+                EllesmereUI.BlizzStyle.Gate("resourcebars", { type = "slider", text = "Border Size",
                   min = 0, max = 4, step = 1,
                   disabled = classOff,
                   disabledTooltip = "Class Resource",
@@ -4804,7 +4868,7 @@ initFrame:SetScript("OnEvent", function(self)
                       local c = cfg(); if not c then return end
                       c.borderSize = v; RebuildClass()
                       EllesmereUI:RefreshPage()
-                  end });  y = y - h
+                  end }));  y = y - h
             if not ctx.advanced and ctx.syncRows then ctx.syncRows.classBorder = classBsRow._rightRegion end
             if not EllesmereUI._prebuilding then
                 local rgn = classBsRow._rightRegion
@@ -5627,7 +5691,8 @@ initFrame:SetScript("OnEvent", function(self)
                 local healers, tanks, dps = {}, {}, {}
                 for _, cls in ipairs(classList) do
                     items[#items + 1] = { isHeader = true, label = cls.className }
-                    local numSpecs = GetNumSpecializationsForClassID(cls.classID) or 0
+                    -- No per-class spec API on WoW Forever: the list stays at its headers.
+                    local numSpecs = GetNumSpecializationsForClassID and GetNumSpecializationsForClassID(cls.classID) or 0
                     for specIndex = 1, numSpecs do
                         local specID, specName, _, _, role = GetSpecializationInfoForClassID(cls.classID, specIndex)
                         if specID and specName then
@@ -5882,7 +5947,7 @@ initFrame:SetScript("OnEvent", function(self)
 						-- Focus, so it starts ON (warn when low); builders (Maelstrom/Insanity/Astral) start OFF.
 						-- Only when the entry covers the current spec (resource readable).
 						if isBar then
-							local curIdx = GetSpecialization()
+							local curIdx = C_SpecializationInfo.GetSpecialization()
 							local curSpecID = curIdx and C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo(curIdx)
 							if curSpecID then
 								for _, sid in ipairs(ids) do
@@ -6633,7 +6698,7 @@ initFrame:SetScript("OnEvent", function(self)
 					local talentClassOK = true
 					if allowTalent then
 						local specID = advSingle and ctx.specID or (ent.specIDs and ent.specIDs[1])
-						if specID and specID ~= 0 then
+						if specID and specID ~= 0 and GetSpecializationInfoByID then
 							local _, _, _, _, _, classFile = GetSpecializationInfoByID(specID)
 							local _, playerClass = UnitClass("player")
 							talentClassOK = (classFile == playerClass)
@@ -6863,7 +6928,7 @@ initFrame:SetScript("OnEvent", function(self)
                         if firstSID == 0 then
                             local _, cf = UnitClass("player")
                             classFile = cf
-                        elseif firstSID then
+                        elseif firstSID and GetSpecializationInfoByID then
                             local _, _, _, _, _, cf = GetSpecializationInfoByID(firstSID)
                             classFile = cf
                         end
@@ -7139,7 +7204,7 @@ initFrame:SetScript("OnEvent", function(self)
                 -- Enhance 5-bar applies to Enhancement (specID 263) only. Advanced gates on the configured spec, Simple on the active spec
                 local function _enhSpecOK()
                     if ctx.advanced then return ctx.specID == 263 end
-                    return GetSpecialization() == 2
+                    return C_SpecializationInfo.GetSpecialization() == 2
                 end
                 local enhRow
                 enhRow, h = W:DualRow(parent, y,
@@ -8156,6 +8221,67 @@ initFrame:SetScript("OnEvent", function(self)
         return _castBarIconPool[_castBarIconIdx]
     end
 
+    -- Blizzard Style chrome on the preview mock, mirroring the live bar's
+    -- ns.ERB_ApplyBlizzCastChrome: the stock frame art round the bar and,
+    -- with Spell Text on, the stock text box under it with the spell name
+    -- inside. Regions are created once; off the style both hide. On ns
+    -- (no new upvalue for the updater below).
+    function ns.ERB_CastPreviewBlizzChrome(pf, cb, barW, blizz)
+        if not blizz then
+            if pf.blizzFrame then pf.blizzFrame:Hide() end
+            if pf.blizzTextBox then pf.blizzTextBox:Hide() end
+            return
+        end
+        if not pf.blizzFrame then
+            local af = CreateFrame("Frame", nil, pf.container)
+            af:SetAllPoints(pf.container)
+            af:SetFrameLevel(pf.container:GetFrameLevel() + 6)
+            pf.blizzArt = af
+            local fr = af:CreateTexture(nil, "OVERLAY", nil, 2)
+            if fr.SetSnapToPixelGrid then fr:SetSnapToPixelGrid(false); fr:SetTexelSnappingBias(0) end
+            pf.blizzFrame = fr
+            local tb = pf.barFrame:CreateTexture(nil, "BACKGROUND", nil, -1)
+            if tb.SetSnapToPixelGrid then tb:SetSnapToPixelGrid(false); tb:SetTexelSnappingBias(0) end
+            pf.blizzTextBox = tb
+        end
+        local fr, tb = pf.blizzFrame, pf.blizzTextBox
+        local frameAtlas = ns.ERB_BlizzAtlas("frame")
+        if frameAtlas then
+            fr:SetAtlas(frameAtlas)
+            fr:ClearAllPoints()
+            fr:SetPoint("TOPLEFT", pf.barFrame, "TOPLEFT", -2, 2)
+            fr:SetPoint("BOTTOMRIGHT", pf.barFrame, "BOTTOMRIGHT", 2, -2)
+            fr:Show()
+        else
+            fr:Hide()
+        end
+        local boxAtlas = cb.showSpellText and ns.ERB_BlizzAtlas("textbox")
+        if boxAtlas then
+            tb:SetAtlas(boxAtlas)
+            tb:ClearAllPoints()
+            tb:SetPoint("TOPLEFT", pf.barFrame, "BOTTOMLEFT", 0, 3)
+            tb:SetPoint("BOTTOMRIGHT", pf.barFrame, "BOTTOMRIGHT", 0, -13)
+            tb:Show()
+            local nameText = pf.spellText
+            local side = cb.spellTextSide or "left"
+            local x, y = cb.spellTextX or 0, cb.spellTextY or 0
+            nameText:ClearAllPoints()
+            if side == "right" then
+                nameText:SetJustifyH("RIGHT")
+                nameText:SetPoint("RIGHT", tb, "RIGHT", -8 + x, y)
+            elseif side == "center" then
+                nameText:SetJustifyH("CENTER")
+                nameText:SetPoint("CENTER", tb, "CENTER", x, y)
+            else
+                nameText:SetJustifyH("LEFT")
+                nameText:SetPoint("LEFT", tb, "LEFT", 8 + x, y)
+            end
+            nameText:SetWidth(math.max(10, (barW or cb.width or 220) - 16))
+        else
+            tb:Hide()
+        end
+    end
+
     local function UpdateCastBarPreview()
         local p = DB()
         if not p then return end
@@ -8163,6 +8289,11 @@ initFrame:SetScript("OnEvent", function(self)
         local pf = _castBarPreviewFrames
 
         if not pf.bar then return end
+        -- Blizzard Style (latched per session, like the live bar): the stock
+        -- art on the same mock -- the icon spanning the text box, no EUI
+        -- border, stock background, fill and pip, frame art and the spell
+        -- name inside the text box. Everything else stays the EUI mock.
+        local blizz = (ns.ERB_CastBlizz and ns.ERB_CastBlizz()) or false
 
         -- Snap helper: round to the preview container's physical pixel grid
         local cScale = pf.container:GetEffectiveScale()
@@ -8176,7 +8307,7 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Container size: icon (hxh) + bar (only when icon shown)
         local hasIcon = cb.showIcon ~= false
-        local iconW = hasIcon and Snap(h) or 0
+        local iconW = hasIcon and Snap(blizz and ns.ERB_CastIconW(cb) or h) or 0
         pf.container:SetSize(w + iconW, h)
 
         -- Scale down to fit when the cast bar is wider than the panel
@@ -8198,7 +8329,18 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Background
         local texKey = cb.texture
-        if texKey == "blizzard" then
+        if blizz then
+            local bgAtlas = ns.ERB_BlizzAtlas("bg")
+            if bgAtlas then
+                pf.bg:SetAtlas(bgAtlas)
+            else
+                pf.bg:SetTexture(nil)
+                pf.bg:SetColorTexture(0, 0, 0, 0.7)
+            end
+            pf.bg:ClearAllPoints()
+            pf.bg:SetPoint("TOPLEFT", pf.barFrame, "TOPLEFT", -1, 1)
+            pf.bg:SetPoint("BOTTOMRIGHT", pf.barFrame, "BOTTOMRIGHT", 1, -1)
+        elseif texKey == "blizzard" then
             pf.bg:SetAtlas("UI-CastingBar-Background", true)
             pf.bg:ClearAllPoints()
             pf.bg:SetAllPoints(pf.barFrame)
@@ -8212,7 +8354,7 @@ initFrame:SetScript("OnEvent", function(self)
         -- Border wraps container (bar + icon) - PP or textured via ApplyBorderStyle
         if pf.container._border then
             pf.container._border:SetFrameLevel(cb.borderBehind and math.max(0, pf.container:GetFrameLevel() - 1) or (pf.container:GetFrameLevel() + 5))
-            EllesmereUI.ApplyBorderStyle(pf.container._border, cb.borderSize or 0,
+            EllesmereUI.ApplyBorderStyle(pf.container._border, blizz and 0 or (cb.borderSize or 0),
                 cb.borderR or 0, cb.borderG or 0, cb.borderB or 0, cb.borderA or 1,
                 cb.borderTexture or "solid", cb.borderTextureOffset, cb.borderTextureOffsetY,
                 cb.borderTextureShiftX, cb.borderTextureShiftY)
@@ -8226,7 +8368,10 @@ initFrame:SetScript("OnEvent", function(self)
         -- Bar texture
         local texLookup = _G._ERB_CastBarTextures or {}
         local texPath = texLookup[texKey]
-        if texKey == "blizzard" then
+        if blizz then
+            pf.bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8x8")
+            pf.bar:GetStatusBarTexture():SetAtlas(ns.ERB_BlizzAtlas("cast") or "UI-CastingBar-Fill")
+        elseif texKey == "blizzard" then
             pf.bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8x8")
             pf.bar:GetStatusBarTexture():SetAtlas("UI-CastingBar-Fill", true)
         elseif texPath then
@@ -8244,14 +8389,17 @@ initFrame:SetScript("OnEvent", function(self)
             if cc then fR, fG, fB = cc.r, cc.g, cc.b end
         end
         local fillOp = (cb.fillOpacity or 100) / 100
-        if cb.gradientEnabled then
+        if blizz then
+            -- The stock fill art is pre-coloured; the live bar skips its colour pass too.
+            fillTex:SetVertexColor(1, 1, 1, 1)
+        elseif cb.gradientEnabled then
             local dir = cb.gradientDir or "HORIZONTAL"
             fillTex:SetGradient(dir, CreateColor(fR, fG, fB, fA * fillOp), CreateColor(cb.gradientR, cb.gradientG, cb.gradientB, cb.gradientA * fillOp))
         else
             fillTex:SetVertexColor(fR, fG, fB, fA * fillOp)
         end
         -- Mirror the live bar's Fill Opacity bg behavior: below 100 the bg covers only the empty portion so the translucent fill shows what's behind the bar; at 100 it spans the whole bar frame.
-        if texKey ~= "blizzard" then
+        if texKey ~= "blizzard" and not blizz then
             pf.bg:ClearAllPoints()
             if (cb.fillOpacity or 100) < 100 then
                 pf.bg:SetPoint("TOPLEFT", fillTex, "TOPRIGHT", 0, 0)
@@ -8261,7 +8409,16 @@ initFrame:SetScript("OnEvent", function(self)
             end
         end
 
-        -- Spark
+        -- Spark: under the style the stock pip replaces the spark art (once,
+        -- drawn plain; the EUI spark art is additive).
+        if blizz and not pf.blizzSpark then
+            local pip = ns.ERB_BlizzAtlas("spark")
+            if pip then
+                pf.blizzSpark = true
+                pf.spark:SetAtlas(pip)
+                pf.spark:SetBlendMode("BLEND")
+            end
+        end
         if cb.showSpark then
             pf.spark:SetSize(8, h)
             pf.spark:ClearAllPoints()
@@ -8273,8 +8430,13 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Icon: left or right side of container, full size
         do
-            local iSize = Snap(h)
+            -- Under the style the icon also spans the text box (the live
+            -- bar's ns.ERB_CastIconW) and shows the full spell art.
+            local iSize = Snap(blizz and ns.ERB_CastIconW(cb) or h)
             pf.iconFrame:SetSize(iSize, iSize)
+            if pf.icon then
+                if blizz then pf.icon:SetTexCoord(0, 1, 0, 1) else pf.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+            end
             pf.iconFrame:ClearAllPoints()
             if iconOnRight then
                 pf.iconFrame:SetPoint("TOPRIGHT", pf.container, "TOPRIGHT", 0, 0)
@@ -8337,20 +8499,26 @@ initFrame:SetScript("OnEvent", function(self)
         -- Spell name text
         if cb.showSpellText then
             SetPVFont(pf.spellText, FONT_PATH, cb.spellTextSize or 11)
-            local pt, xb, jh = ns.GetCastTextAnchor(cbSpellSide, cb.showTimer and cbDurSide == cbSpellSide, cbTimerW)
-            pf.spellText:ClearAllPoints()
-            pf.spellText:SetJustifyH(jh)
-            pf.spellText:SetPoint(pt, pf.bar, pt, xb + (cb.spellTextX or 0), cb.spellTextY or 0)
-            if cbSpellSide == "center" then
-                pf.spellText:SetWidth(cbBarW - 8 - (cb.showTimer and 2 * cbTimerW or 0))
-            elseif cbBarW > 0 then
-                pf.spellText:SetWidth(cbBarW - 8 - (cb.showTimer and cbTimerW or 0))
+            if blizz and ns.ERB_BlizzAtlas("textbox") then
+                -- Placed inside the stock text box by the chrome pass below.
+            else
+                local pt, xb, jh = ns.GetCastTextAnchor(cbSpellSide, cb.showTimer and cbDurSide == cbSpellSide, cbTimerW)
+                pf.spellText:ClearAllPoints()
+                pf.spellText:SetJustifyH(jh)
+                pf.spellText:SetPoint(pt, pf.bar, pt, xb + (cb.spellTextX or 0), cb.spellTextY or 0)
+                if cbSpellSide == "center" then
+                    pf.spellText:SetWidth(cbBarW - 8 - (cb.showTimer and 2 * cbTimerW or 0))
+                elseif cbBarW > 0 then
+                    pf.spellText:SetWidth(cbBarW - 8 - (cb.showTimer and cbTimerW or 0))
+                end
             end
             pf.spellText:SetText(EllesmereUI.L("Spell Name"))
             pf.spellText:Show()
         else
             pf.spellText:Hide()
         end
+        -- Blizzard Style chrome: frame art, and the text box with the spell name in it.
+        ns.ERB_CastPreviewBlizzChrome(pf, cb, cbBarW, blizz)
         -- Re-flow so a live JustifyH change takes effect on already-rendered text.
         ns.ReflowFontString(pf.timerText)
         ns.ReflowFontString(pf.spellText)
@@ -8750,13 +8918,14 @@ initFrame:SetScript("OnEvent", function(self)
 
         local displaySection
         displaySection, h = W:SectionHeader(parent, "DISPLAY", y);  y = y - h
+        y = EllesmereUI.BlizzStyle.Note(parent, y, "castbar")
 
         -- Row: Cast Bar Border Style dropdown (+ inline offset cog)
         do
             local texValues, texOrder = EllesmereUI.GetBorderTextureDropdown()
             local cbBsRow
             cbBsRow, h = W:DualRow(parent, y,
-                { type="dropdown", text="Border Style",
+                EllesmereUI.BlizzStyle.Gate("castbar", { type="dropdown", text="Border Style",
                   disabled = castOff,
                   disabledTooltip = "Player Cast Bar",
                   values=texValues, order=texOrder,
@@ -8770,8 +8939,8 @@ initFrame:SetScript("OnEvent", function(self)
                       local defSz = EllesmereUI.GetBorderDefaultSize("resourcebars", v)
                       if defSz then p.castBar.borderSize = defSz end
                       RefreshCast(); EllesmereUI:RefreshPage()
-                  end },
-                { type = "slider", text = "Border Size",
+                  end }),
+                EllesmereUI.BlizzStyle.Gate("castbar", { type = "slider", text = "Border Size",
                   min = 0, max = 4, step = 1,
                   disabled = castOff,
                   disabledTooltip = "Player Cast Bar",
@@ -8781,7 +8950,7 @@ initFrame:SetScript("OnEvent", function(self)
                   setValue = function(v)
                       local p = DB(); if not p then return end
                       p.castBar.borderSize = v; RefreshCast(); EllesmereUI:RefreshPage()
-                  end });  y = y - h
+                  end }));  y = y - h
             -- Inline border color swatch on Border slider (right region)
             if not EllesmereUI._prebuilding then
                 local rgn = cbBsRow._rightRegion
@@ -8806,12 +8975,16 @@ initFrame:SetScript("OnEvent", function(self)
                 borderSwatchBlock:SetFrameLevel(borderSwatch:GetFrameLevel() + 10)
                 borderSwatchBlock:EnableMouse(true)
                 borderSwatchBlock:SetScript("OnEnter", function()
-                    EllesmereUI.ShowWidgetTooltip(borderSwatch, EllesmereUI.DisabledTooltip("This option requires a Border Size above 0."))
+                    if EllesmereUI.BlizzStyle.Get("castbar") then
+                        EllesmereUI.ShowWidgetTooltip(borderSwatch, EllesmereUI.DisabledTooltip("Blizzard Style", "disabled"))
+                    else
+                        EllesmereUI.ShowWidgetTooltip(borderSwatch, EllesmereUI.DisabledTooltip("This option requires a Border Size above 0."))
+                    end
                 end)
                 borderSwatchBlock:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
                 local function UpdateBorderSwatchState()
                     local p = DB()
-                    local noBorder = not p or (p.castBar.borderSize or 0) == 0
+                    local noBorder = not p or (p.castBar.borderSize or 0) == 0 or EllesmereUI.BlizzStyle.Get("castbar")
                     if noBorder then borderSwatch:SetAlpha(0.3); borderSwatchBlock:Show()
                     else borderSwatch:SetAlpha(1); borderSwatchBlock:Hide() end
                 end
@@ -8883,7 +9056,7 @@ initFrame:SetScript("OnEvent", function(self)
                 local function UpdateCogVis()
                     local p = DB()
                     local tex = p and p.castBar.borderTexture or "solid"
-                    if tex == "solid" then cogBtn:Hide() else cogBtn:Show() end
+                    if tex == "solid" or EllesmereUI.BlizzStyle.Get("castbar") then cogBtn:Hide() else cogBtn:Show() end
                 end
                 EllesmereUI.RegisterWidgetRefresh(UpdateCogVis)
                 UpdateCogVis()
@@ -8902,7 +9075,7 @@ initFrame:SetScript("OnEvent", function(self)
                   local p = DB(); if not p then return end
                   p.castBar.fillOpacity = v; RefreshCast()
               end },
-            { type = "slider", text = "Background", min = 0, max = 100, step = 1,
+            EllesmereUI.BlizzStyle.Gate("castbar", { type = "slider", text = "Background", min = 0, max = 100, step = 1,
               disabled = castOff,
               disabledTooltip = "Player Cast Bar",
               getValue = function()
@@ -8911,9 +9084,11 @@ initFrame:SetScript("OnEvent", function(self)
               setValue = function(v)
                   local p = DB(); if not p then return end
                   p.castBar.bgA = v / 100; RefreshCast()
-              end }
+              end })
         );  y = y - h
-        -- Fill Color inline swatches: gradient end / custom / class
+        -- Fill Color inline swatches: gradient end / custom / class. Blizzard Style
+        -- keeps the stock fill art, so the colour swatches are inert there.
+        local castFillBlizz = EllesmereUI.BlizzStyle.Get("castbar")
         EllesmereUI.BuildInlineSwatches(castColorRow._leftRegion, {
                   { tooltip = "Gradient End Color", hasAlpha = true,
                     disabled = function()
@@ -8922,6 +9097,7 @@ initFrame:SetScript("OnEvent", function(self)
                         return not p.castBar.gradientEnabled
                     end,
                     disabledTooltip = function()
+                        if castFillBlizz then return "This option requires Blizzard Style to be disabled" end
                         local p = DB()
                         if not p or not p.castBar.enabled then return "Player Cast Bar" end
                         return "Gradient"
@@ -8982,7 +9158,11 @@ initFrame:SetScript("OnEvent", function(self)
                         local p = DB()
                         return (not p or p.castBar.classColored == true) and 1 or 0.3
                     end },
-        }, { disabled = castOff, disabledTooltip = "Player Cast Bar" })
+        }, { disabled = function() return castFillBlizz or castOff() end,
+             disabledTooltip = function()
+                 if castFillBlizz then return "This option requires Blizzard Style to be disabled" end
+                 return "Player Cast Bar"
+             end })
         -- Inline cog on Fill Color for gradient settings
         if not EllesmereUI._prebuilding then
             local rgn = castColorRow._leftRegion
@@ -9012,12 +9192,16 @@ initFrame:SetScript("OnEvent", function(self)
             cogDis:SetFrameLevel(cogBtn:GetFrameLevel() + 5)
             cogDis:EnableMouse(true)
             cogDis:SetScript("OnEnter", function()
-                EllesmereUI.ShowWidgetTooltip(cogBtn, EllesmereUI.DisabledTooltip("Player Cast Bar"))
+                if castFillBlizz then
+                    EllesmereUI.ShowWidgetTooltip(cogBtn, EllesmereUI.DisabledTooltip("Blizzard Style", "disabled"))
+                else
+                    EllesmereUI.ShowWidgetTooltip(cogBtn, EllesmereUI.DisabledTooltip("Player Cast Bar"))
+                end
             end)
             cogDis:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
             local function UpdateCogDisGrad()
                 local p = DB()
-                if p and not p.castBar.enabled then cogDis:Show() else cogDis:Hide() end
+                if castFillBlizz or (p and not p.castBar.enabled) then cogDis:Show() else cogDis:Hide() end
             end
             cogBtn:HookScript("OnShow", UpdateCogDisGrad)
             EllesmereUI.RegisterWidgetRefresh(UpdateCogDisGrad)
@@ -9043,7 +9227,10 @@ initFrame:SetScript("OnEvent", function(self)
             PP.Point(bgSwatch, "RIGHT", ctrl, "LEFT", -8, 0)
             local function UpdateBgSwatch()
                 local p = DB()
-                if not p or not p.castBar.enabled then
+                if castFillBlizz then
+                    bgSwatch:SetAlpha(0.15); bgSwatch:Disable()
+                    bgSwatch._disabledTooltip = "This option requires Blizzard Style to be disabled"
+                elseif not p or not p.castBar.enabled then
                     bgSwatch:SetAlpha(0.15); bgSwatch:Disable()
                     bgSwatch._disabledTooltip = "Player Cast Bar"
                 else
@@ -9059,7 +9246,7 @@ initFrame:SetScript("OnEvent", function(self)
         -- Row 3: Bar Texture | Spell Text (cog RESIZE: text size + x/y)
         local textRow
         textRow, h = W:DualRow(parent, y,
-            { type = "dropdown", text = "Bar Texture",
+            EllesmereUI.BlizzStyle.Gate("castbar", { type = "dropdown", text = "Bar Texture",
               disabled = castOff,
               disabledTooltip = "Player Cast Bar",
               values = texValues, order = texOrder,
@@ -9067,7 +9254,7 @@ initFrame:SetScript("OnEvent", function(self)
               setValue = function(v)
                   local p = DB(); if not p then return end
                   p.castBar.texture = v; RefreshCast()
-              end },
+              end }),
             { type = "dropdown", text = "Spell Text",
               disabled = castOff,
               disabledTooltip = "Player Cast Bar",
@@ -10092,11 +10279,483 @@ initFrame:SetScript("OnEvent", function(self)
         return math.abs(y)
     end
 
+    -- Swing Timer page (WoW Forever only: the page exists only where the client
+    -- has C_SwingTimer; see EUI_ResourceBars_SwingTimer.lua). Same widget set as
+    -- the GCD Bar page, plus the row/text/range rows the swing timer adds.
+    local function BuildSwingTimerPage(pageName, parent, yOffset)
+        local W = EllesmereUI.Widgets
+        local y = yOffset
+        local _, h
+
+        parent._showRowDivider = true
+
+        if EllesmereUI.AppendSharedMediaTextures then
+            EllesmereUI.AppendSharedMediaTextures(
+                _G._ERB_BarTextureNames or {},
+                _G._ERB_BarTextureOrder or {},
+                nil,
+                _G._ERB_BarTextures
+            )
+        end
+        local texValues, texOrder = {}, {}
+        do
+            local texNames = _G._ERB_BarTextureNames or {}
+            local texOrder2 = _G._ERB_BarTextureOrder or {}
+            local texLookup = _G._ERB_BarTextures or {}
+            for _, key in ipairs(texOrder2) do
+                if key ~= "---" then texValues[key] = texNames[key] or key end
+                texOrder[#texOrder + 1] = key
+            end
+            texValues._menuOpts = { itemHeight = 28, background = function(key) return texLookup[key] end }
+        end
+
+        local ST_TIP = "Swing Timer"
+        local stOff = function() local p = DB(); return p and not p.swingTimer.enabled end
+
+        local function RefreshST()
+            if _G._ERB_Apply then _G._ERB_Apply() end
+            if EllesmereUI.NotifyElementResized then
+                EllesmereUI.NotifyElementResized("ERB_SwingTimer")
+            end
+        end
+
+        local _sec
+        _sec, h = W:SectionHeader(parent, "LAYOUT", y);  y = y - h
+
+        local sStrataValues = EllesmereUI.FRAME_STRATA_LABELS
+        local sStrataOrder = EllesmereUI.FRAME_STRATA_ORDER_BASE
+
+        -- Row: Enable Swing Timer (+ position cog) | Frame Strata
+        local enableRow
+        enableRow, h = W:DualRow(parent, y,
+            { type = "toggle", text = "Enable Swing Timer",
+              tooltip = "One bar per weapon that can swing, each filling over the time to the next auto attack.",
+              getValue = function() local p = DB(); return p and p.swingTimer.enabled end,
+              setValue = function(v)
+                  local p = DB(); if not p then return end
+                  p.swingTimer.enabled = v; RefreshST(); EllesmereUI:RefreshPage()
+              end },
+            { type = "dropdown", text = "Frame Strata",
+              tooltip = "Controls the order that overlapping elements display in. Set higher to show above other elements.",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              values = sStrataValues, order = sStrataOrder,
+              getValue = function() local p = DB(); return p and p.swingTimer.frameStrata or "MEDIUM" end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.frameStrata = v; RefreshST() end }
+        );  y = y - h
+        -- Inline position cog (X/Y + unlock) on Enable, as on the GCD Bar page
+        if not EllesmereUI._prebuilding then
+            local rgn = enableRow._leftRegion
+            local _, cogShow = EllesmereUI.BuildCogPopup({
+                title = "Swing Timer Position",
+                rows = {
+                    { type = "slider", label = "X Offset", min = -600, max = 600, step = 1,
+                      get = function()
+                          local p = DB(); if not p then return 0 end
+                          local g = p.swingTimer
+                          if g.unlockPos and g.unlockPos.point then return g.unlockPos.x or 0 end
+                          return g.anchorX or 0
+                      end,
+                      set = function(v)
+                          local p = DB(); if not p then return end
+                          local g = p.swingTimer
+                          if g.unlockPos and g.unlockPos.point then g.unlockPos.x = v else g.anchorX = v end
+                          RefreshST()
+                      end },
+                    { type = "slider", label = "Y Offset", min = -600, max = 600, step = 1,
+                      get = function()
+                          local p = DB(); if not p then return 0 end
+                          local g = p.swingTimer
+                          if g.unlockPos and g.unlockPos.point then return g.unlockPos.y or 0 end
+                          return g.anchorY or -130
+                      end,
+                      set = function(v)
+                          local p = DB(); if not p then return end
+                          local g = p.swingTimer
+                          if g.unlockPos and g.unlockPos.point then g.unlockPos.y = v else g.anchorY = v end
+                          RefreshST()
+                      end },
+                },
+                footer = { unlockKey = "ERB_SwingTimer" },
+            })
+            local cogBtn = MakeCogBtn(rgn, cogShow, nil, EllesmereUI.DIRECTIONS_ICON)
+            local cogDis = CreateFrame("Frame", nil, rgn)
+            cogDis:SetAllPoints(cogBtn)
+            cogDis:SetFrameLevel(cogBtn:GetFrameLevel() + 5)
+            cogDis:EnableMouse(true)
+            cogDis:SetScript("OnEnter", function()
+                EllesmereUI.ShowWidgetTooltip(cogBtn, EllesmereUI.DisabledTooltip(ST_TIP))
+            end)
+            cogDis:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+            local function UpdateCogDis()
+                local p = DB()
+                if p and not p.swingTimer.enabled then cogDis:Show() else cogDis:Hide() end
+            end
+            cogBtn:HookScript("OnShow", UpdateCogDis)
+            EllesmereUI.RegisterWidgetRefresh(UpdateCogDis)
+            UpdateCogDis()
+        end
+
+        -- Row: Row Height | Width. Height is per row; the mover reports the whole stack.
+        local shDis, shTip, shRaw = EllesmereUI.MatchGuard("ERB_SwingTimer", "Height", stOff, ST_TIP)
+        local swDis, swTip, swRaw = EllesmereUI.MatchGuard("ERB_SwingTimer", "Width", stOff, ST_TIP)
+        _, h = W:DualRow(parent, y,
+            { type = "slider", text = "Row Height", min = 1, max = 60, step = 1,
+              tooltip = "Height of each weapon row.",
+              disabled = shDis, disabledTooltip = shTip, rawTooltip = shRaw,
+              getValue = function() local p = DB(); return p and p.swingTimer.height or 12 end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.height = v; RefreshST() end },
+            { type = "slider", text = "Width", min = 50, max = 800, step = 1,
+              disabled = swDis, disabledTooltip = swTip, rawTooltip = swRaw,
+              getValue = function() local p = DB(); return p and p.swingTimer.width or 220 end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.width = v; RefreshST() end }
+        );  y = y - h
+
+        -- Row: Row Spacing | Text Size
+        _, h = W:DualRow(parent, y,
+            { type = "slider", pixel = true, text = "Row Spacing", min = 0, max = 20, step = 1,
+              tooltip = "Gap between the weapon rows.",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return p and p.swingTimer.rowSpacing or 2 end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.rowSpacing = v; RefreshST() end },
+            { type = "slider", text = "Text Size", min = 6, max = 24, step = 1,
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return p and p.swingTimer.textSize or 11 end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.textSize = v; RefreshST() end }
+        );  y = y - h
+
+        -- Row: Visibility (shared checklist) | Hide When Idle (+ idle fill cog)
+        local stShowRow
+        stShowRow, h = EllesmereUI.BuildVisibilityRow(W, parent, y,
+            { getStore = function() local p = DB(); return p and p.swingTimer end,
+              legacyKey = "visibility",
+              caps = { partyIncludesRaid = false, luaDragonriding = true },
+              disabledFn = stOff, disabledTooltip = ST_TIP,
+              onChanged = function() RefreshST() end,
+              onOptionChanged = function() RefreshST() end },
+            { type = "toggle", text = "Hide When Idle",
+              tooltip = "Hide the bar while no swing is running.",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return p and p.swingTimer.hideWhenIdle end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.hideWhenIdle = v; RefreshST() end }
+        );  y = y - h
+        if not EllesmereUI._prebuilding then
+            local _, idleCogShow = EllesmereUI.BuildCogPopup({
+                title = "Idle Rows",
+                rows = {
+                    { type = "toggle", label = "Show Fill Color When Idle",
+                      tooltip = "Show an idle row full of its fill color instead of the background color.",
+                      get = function() local p = DB(); return (p and p.swingTimer.idleShowFill) == true end,
+                      set = function(v)
+                          local p = DB(); if not p then return end
+                          if v then p.swingTimer.idleShowFill = true else p.swingTimer.idleShowFill = nil end
+                          RefreshST()
+                      end },
+                },
+            })
+            MakeCogBtn(stShowRow._rightRegion, idleCogShow)
+        end
+
+        _, h = W:Spacer(parent, y, 16);  y = y - h
+
+        _sec, h = W:SectionHeader(parent, "DISPLAY", y);  y = y - h
+
+        -- Row: Border Style | Border Size (+ inline color swatch + offset cog)
+        do
+            local btValues, btOrder = EllesmereUI.GetBorderTextureDropdown()
+            local bsRow
+            bsRow, h = W:DualRow(parent, y,
+                { type="dropdown", text="Border Style",
+                  disabled = stOff, disabledTooltip = ST_TIP,
+                  values=btValues, order=btOrder,
+                  getValue=function() local p = DB(); return p and p.swingTimer.borderTexture or "solid" end,
+                  setValue=function(v)
+                      local p = DB(); if not p then return end
+                      local g = p.swingTimer
+                      g.borderTexture = v; g.borderTextureOffset = nil; g.borderTextureOffsetY = nil; g.borderTextureShiftX = nil; g.borderTextureShiftY = nil
+                      local _bcol, _bbehind = EllesmereUI.GetBorderStyleSelectDefaults(v)
+                      g.borderR = _bcol.r; g.borderG = _bcol.g; g.borderB = _bcol.b; g.borderA = 1
+                      g.borderBehind = _bbehind
+                      local defSz = EllesmereUI.GetBorderDefaultSize("resourcebars", v)
+                      if defSz then g.borderSize = defSz end
+                      RefreshST(); EllesmereUI:RefreshPage()
+                  end },
+                { type = "slider", text = "Border Size", min = 0, max = 4, step = 1,
+                  disabled = stOff, disabledTooltip = ST_TIP,
+                  getValue = function() local p = DB(); return p and (p.swingTimer.borderSize or 0) or 0 end,
+                  setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.borderSize = v; RefreshST(); EllesmereUI:RefreshPage() end });  y = y - h
+            do
+                local rgn = bsRow._rightRegion
+                local ctrl = rgn._control
+                local swatch, updateSwatch = EllesmereUI.BuildColorSwatch(
+                    rgn, bsRow:GetFrameLevel() + 3,
+                    function()
+                        local p = DB()
+                        return (p and p.swingTimer.borderR or 0), (p and p.swingTimer.borderG or 0),
+                               (p and p.swingTimer.borderB or 0), (p and p.swingTimer.borderA or 1)
+                    end,
+                    function(r, g, b, a)
+                        local p = DB(); if not p then return end
+                        p.swingTimer.borderR, p.swingTimer.borderG, p.swingTimer.borderB, p.swingTimer.borderA = r, g, b, a
+                        RefreshST(); EllesmereUI:RefreshPage()
+                    end, true, 20)
+                PP.Point(swatch, "RIGHT", ctrl, "LEFT", -8, 0)
+                local block = CreateFrame("Frame", nil, swatch)
+                block:SetAllPoints()
+                block:SetFrameLevel(swatch:GetFrameLevel() + 10)
+                block:EnableMouse(true)
+                block:SetScript("OnEnter", function()
+                    EllesmereUI.ShowWidgetTooltip(swatch, EllesmereUI.DisabledTooltip("This option requires a Border Size above 0."))
+                end)
+                block:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                local function UpdateSwatchState()
+                    local p = DB()
+                    local noBorder = not p or (p.swingTimer.borderSize or 0) == 0
+                    if noBorder then swatch:SetAlpha(0.3); block:Show() else swatch:SetAlpha(1); block:Hide() end
+                end
+                EllesmereUI.RegisterWidgetRefresh(function() updateSwatch(); UpdateSwatchState() end)
+                UpdateSwatchState()
+            end
+            if not EllesmereUI._prebuilding then
+                local rgn = bsRow._leftRegion
+                local _, cogShow = EllesmereUI.BuildCogPopup({
+                    title = "Border Offset",
+                    rows = {
+                        { type = "slider", label = "Offset X", min = -10, max = 10, step = 1,
+                          get = function() local p = DB(); if not p then return 0 end; local v = p.swingTimer.borderTextureOffset; if v then return v end; local dox = EllesmereUI.GetBorderDefaults("resourcebars", p.swingTimer.borderTexture or "solid", p.swingTimer.borderSize or 0); return dox end,
+                          set = function(v) local p = DB(); if not p then return end; p.swingTimer.borderTextureOffset = v; RefreshST(); EllesmereUI:RefreshPage() end },
+                        { type = "slider", label = "Offset Y", min = -10, max = 10, step = 1,
+                          get = function() local p = DB(); if not p then return 0 end; local v = p.swingTimer.borderTextureOffsetY; if v then return v end; local _, doy = EllesmereUI.GetBorderDefaults("resourcebars", p.swingTimer.borderTexture or "solid", p.swingTimer.borderSize or 0); return doy end,
+                          set = function(v) local p = DB(); if not p then return end; p.swingTimer.borderTextureOffsetY = v; RefreshST(); EllesmereUI:RefreshPage() end },
+                        { type = "slider", label = "Shift X", min = -10, max = 10, step = 1,
+                          get = function() local p = DB(); if not p then return 0 end; local v = p.swingTimer.borderTextureShiftX; if v then return v end; local _, _, dsx = EllesmereUI.GetBorderDefaults("resourcebars", p.swingTimer.borderTexture or "solid", p.swingTimer.borderSize or 0); return dsx end,
+                          set = function(v) local p = DB(); if not p then return end; p.swingTimer.borderTextureShiftX = v == 0 and nil or v; RefreshST(); EllesmereUI:RefreshPage() end },
+                        { type = "slider", label = "Shift Y", min = -10, max = 10, step = 1,
+                          get = function() local p = DB(); if not p then return 0 end; local v = p.swingTimer.borderTextureShiftY; if v then return v end; local _, _, _, dsy = EllesmereUI.GetBorderDefaults("resourcebars", p.swingTimer.borderTexture or "solid", p.swingTimer.borderSize or 0); return dsy end,
+                          set = function(v) local p = DB(); if not p then return end; p.swingTimer.borderTextureShiftY = v == 0 and nil or v; RefreshST(); EllesmereUI:RefreshPage() end },
+                        { type = "toggle", label = "Show Behind",
+                          get = function() local p = DB(); return p and p.swingTimer.borderBehind or false end,
+                          set = function(v) local p = DB(); if not p then return end; p.swingTimer.borderBehind = v == false and nil or v; RefreshST(); EllesmereUI:RefreshPage() end },
+                    },
+                })
+                local cogBtn = MakeCogBtn(rgn, cogShow, nil, EllesmereUI.DIRECTIONS_ICON)
+                local function UpdateCogVis()
+                    local p = DB()
+                    local tex = p and p.swingTimer.borderTexture or "solid"
+                    if tex == "solid" then cogBtn:Hide() else cogBtn:Show() end
+                end
+                EllesmereUI.RegisterWidgetRefresh(UpdateCogVis)
+                UpdateCogVis()
+            end
+        end
+
+        -- Row: Color (gradient end / Main Hand / Off Hand / Ranged / class + gradient cog) | Background (+ bg swatch)
+        local function RowSwatch(prefix, tip)
+            return { tooltip = tip, hasAlpha = true,
+                getValue = function()
+                    local p = DB(); if not p then return 1, 1, 1, 1 end
+                    local g = p.swingTimer
+                    return g[prefix .. "R"], g[prefix .. "G"], g[prefix .. "B"], g[prefix .. "A"]
+                end,
+                setValue = function(r, gg, b, a)
+                    local p = DB(); if not p then return end
+                    local g = p.swingTimer
+                    g[prefix .. "R"], g[prefix .. "G"], g[prefix .. "B"], g[prefix .. "A"] = r, gg, b, a
+                    if g.classColored then g.classColored = false end
+                    RefreshST(); EllesmereUI:RefreshPage()
+                end,
+                onClick = function(self)
+                    local p = DB(); if not p then return end
+                    if p.swingTimer.classColored then p.swingTimer.classColored = false; RefreshST(); EllesmereUI:RefreshPage(); return end
+                    if self._eabOrigClick then self._eabOrigClick(self) end
+                end,
+                refreshAlpha = function() local p = DB(); return (p and not p.swingTimer.classColored) and 1 or 0.3 end }
+        end
+        local colorRow
+        colorRow, h = W:DualRow(parent, y,
+            { type = "multiSwatch", text = "Color",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              swatches = {
+                  { tooltip = "Gradient End Color", hasAlpha = true,
+                    getValue = function() local p = DB(); if not p then return 0.20, 0.20, 0.80, 1 end; return p.swingTimer.gradientR, p.swingTimer.gradientG, p.swingTimer.gradientB, p.swingTimer.gradientA end,
+                    setValue = function(r, g, b, a) local p = DB(); if not p then return end; p.swingTimer.gradientR, p.swingTimer.gradientG, p.swingTimer.gradientB, p.swingTimer.gradientA = r, g, b, a; RefreshST() end },
+                  RowSwatch("mh", "Main Hand Color"),
+                  RowSwatch("oh", "Off Hand Color"),
+                  RowSwatch("r",  "Ranged Color"),
+                  { tooltip = "Class Colored",
+                    getValue = function() local _, classFile = UnitClass("player"); local cc = classFile and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classFile]; if cc then return cc.r, cc.g, cc.b, 1 end; return 1, 0.70, 0, 1 end,
+                    setValue = function() end,
+                    onClick = function() local p = DB(); if not p then return end; p.swingTimer.classColored = true; RefreshST(); EllesmereUI:RefreshPage() end,
+                    refreshAlpha = function() local p = DB(); return (not p or p.swingTimer.classColored == true) and 1 or 0.3 end },
+              } },
+            { type = "slider", text = "Background", min = 0, max = 100, step = 1,
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return math.floor(((p and p.swingTimer.bgA or 0.7) * 100) + 0.5) end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.bgA = v / 100; RefreshST() end }
+        );  y = y - h
+        if not EllesmereUI._prebuilding then
+            local rgn = colorRow._leftRegion
+            local _, cogShow = EllesmereUI.BuildCogPopup({
+                title = "Gradient Settings",
+                rows = {
+                    { type = "toggle", label = "Enable Gradient",
+                      get = function() local p = DB(); return p and p.swingTimer.gradientEnabled end,
+                      set = function(v) local p = DB(); if not p then return end; p.swingTimer.gradientEnabled = v; RefreshST(); EllesmereUI:RefreshPage() end },
+                    { type = "dropdown", label = "Gradient Direction",
+                      values = { HORIZONTAL = "Horizontal", VERTICAL = "Vertical" }, order = { "HORIZONTAL", "VERTICAL" },
+                      get = function() local p = DB(); return p and p.swingTimer.gradientDir or "HORIZONTAL" end,
+                      set = function(v) local p = DB(); if not p then return end; p.swingTimer.gradientDir = v; RefreshST() end },
+                },
+            })
+            local cogBtn = MakeCogBtn(rgn, cogShow)
+            local cogDis = CreateFrame("Frame", nil, rgn)
+            cogDis:SetAllPoints(cogBtn)
+            cogDis:SetFrameLevel(cogBtn:GetFrameLevel() + 5)
+            cogDis:EnableMouse(true)
+            cogDis:SetScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(cogBtn, EllesmereUI.DisabledTooltip(ST_TIP)) end)
+            cogDis:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+            local function UpdateCogDisGrad() local p = DB(); if p and not p.swingTimer.enabled then cogDis:Show() else cogDis:Hide() end end
+            cogBtn:HookScript("OnShow", UpdateCogDisGrad)
+            EllesmereUI.RegisterWidgetRefresh(UpdateCogDisGrad)
+            UpdateCogDisGrad()
+        end
+        do
+            local swatch = colorRow._leftRegion._control
+            local function UpdateGradientSwatch()
+                local p = DB()
+                if not p or not p.swingTimer.enabled then swatch:SetAlpha(0.15); swatch:Disable(); swatch._disabledTooltip = ST_TIP
+                elseif not p.swingTimer.gradientEnabled then swatch:SetAlpha(0.15); swatch:Disable(); swatch._disabledTooltip = "Gradient"
+                else swatch:SetAlpha(1); swatch:Enable(); swatch._disabledTooltip = nil end
+            end
+            UpdateGradientSwatch()
+            EllesmereUI.RegisterWidgetRefresh(UpdateGradientSwatch)
+        end
+        if not EllesmereUI._prebuilding then
+            local rgn = colorRow._rightRegion
+            local ctrl = rgn._control
+            local bgSwatch, bgUpdateSwatch = EllesmereUI.BuildColorSwatch(
+                rgn, colorRow:GetFrameLevel() + 3,
+                function() local p = DB(); return (p and p.swingTimer.bgR or 0), (p and p.swingTimer.bgG or 0), (p and p.swingTimer.bgB or 0) end,
+                function(r, g, b) local p = DB(); if not p then return end; p.swingTimer.bgR, p.swingTimer.bgG, p.swingTimer.bgB = r, g, b; RefreshST() end,
+                nil, 20)
+            PP.Point(bgSwatch, "RIGHT", ctrl, "LEFT", -8, 0)
+            local function UpdateBgSwatch()
+                local p = DB()
+                if not p or not p.swingTimer.enabled then bgSwatch:SetAlpha(0.15); bgSwatch:Disable(); bgSwatch._disabledTooltip = ST_TIP
+                else bgSwatch:SetAlpha(1); bgSwatch:Enable(); bgSwatch._disabledTooltip = nil end
+                bgUpdateSwatch()
+            end
+            UpdateBgSwatch()
+            EllesmereUI.RegisterWidgetRefresh(UpdateBgSwatch)
+        end
+
+        -- Row: Bar Texture | Show Spark
+        _, h = W:DualRow(parent, y,
+            { type = "dropdown", text = "Bar Texture",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              values = texValues, order = texOrder,
+              getValue = function() local p = DB(); return p and p.swingTimer.texture or "none" end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.texture = v; RefreshST() end },
+            { type = "toggle", text = "Show Spark",
+              tooltip = "Show a small glowing spark that moves along the leading edge of the fill.",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return p and p.swingTimer.showSpark end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.showSpark = v; RefreshST() end }
+        );  y = y - h
+
+        -- Row: Deplete Fill | Range Check (+ out-of-range alpha cog)
+        local rangeRow
+        rangeRow, h = W:DualRow(parent, y,
+            { type = "toggle", text = "Deplete Fill",
+              tooltip = "Start each row full and drain it as the swing timer elapses, instead of filling it up.",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return p and p.swingTimer.depleteFill end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.depleteFill = v; RefreshST() end },
+            { type = "toggle", text = "Range Check",
+              tooltip = "Dim a row and paint its text red while the current target is out of that weapon's auto attack range.",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return p and p.swingTimer.rangeCheck ~= false end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.rangeCheck = v; RefreshST() end }
+        );  y = y - h
+        if not EllesmereUI._prebuilding then
+            local _, rangeCogShow = EllesmereUI.BuildCogPopup({
+                title = "Range Check",
+                rows = {
+                    { type = "slider", label = "Out of Range Opacity", min = 0, max = 100, step = 1,
+                      tooltip = "Opacity of a row whose target is out of range.",
+                      get = function() local p = DB(); return math.floor(((p and p.swingTimer.outOfRangeAlpha or 0.4) * 100) + 0.5) end,
+                      set = function(v) local p = DB(); if not p then return end; p.swingTimer.outOfRangeAlpha = v / 100; RefreshST() end },
+                },
+            })
+            MakeCogBtn(rangeRow._rightRegion, rangeCogShow)
+        end
+
+        -- Row: Show Time | Show Weapon Label
+        _, h = W:DualRow(parent, y,
+            { type = "toggle", text = "Show Time",
+              tooltip = "Show the seconds left to the next swing on each row.",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return p and p.swingTimer.showTime ~= false end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.showTime = v; RefreshST() end },
+            { type = "toggle", text = "Show Weapon Label",
+              tooltip = "Tag each row with its weapon slot: MH (Main Hand), OH (Off Hand), R (Ranged).",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return p and p.swingTimer.showLabel ~= false end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.showLabel = v; RefreshST() end }
+        );  y = y - h
+
+        -- Per-row toggles (a row also needs a weapon in the slot).
+        local function RowToggle(label, key, tip)
+            return { type = "toggle", text = label, tooltip = tip,
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return p and p.swingTimer[key] ~= false end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer[key] = v; RefreshST() end }
+        end
+        -- Row: Main Hand | Off Hand
+        _, h = W:DualRow(parent, y,
+            RowToggle("Main Hand", "showMH", "Show the Main Hand row."),
+            RowToggle("Off Hand", "showOH", "Show the Off Hand row while an off-hand weapon is equipped.")
+        );  y = y - h
+
+        -- Row: Ranged | Highlight Queued Attacks (+ inline queue colour swatch)
+        local queueRow
+        queueRow, h = W:DualRow(parent, y,
+            RowToggle("Ranged", "showR", "Show the Ranged row while a ranged weapon is equipped."),
+            { type = "toggle", text = "Highlight Queued Attacks",
+              tooltip = "While an on-next-swing attack is queued (Heroic Strike, Cleave, Maul), the Main Hand and Off Hand rows take the queue color and show the attack's name.",
+              disabled = stOff, disabledTooltip = ST_TIP,
+              getValue = function() local p = DB(); return p and p.swingTimer.queueHighlight ~= false end,
+              setValue = function(v) local p = DB(); if not p then return end; p.swingTimer.queueHighlight = v; RefreshST(); EllesmereUI:RefreshPage() end }
+        );  y = y - h
+        if not EllesmereUI._prebuilding then
+            local rgn = queueRow._rightRegion
+            local ctrl = rgn._control
+            local qSwatch, qUpdateSwatch = EllesmereUI.BuildColorSwatch(
+                rgn, queueRow:GetFrameLevel() + 3,
+                function() local p = DB(); return (p and p.swingTimer.queueR or 1), (p and p.swingTimer.queueG or 0.70), (p and p.swingTimer.queueB or 0.20), (p and p.swingTimer.queueA or 1) end,
+                function(r, g, b, a) local p = DB(); if not p then return end; p.swingTimer.queueR, p.swingTimer.queueG, p.swingTimer.queueB, p.swingTimer.queueA = r, g, b, a; RefreshST() end,
+                true, 20)
+            PP.Point(qSwatch, "RIGHT", ctrl, "LEFT", -8, 0)
+            local function UpdateQueueSwatch()
+                local p = DB()
+                if not p or not p.swingTimer.enabled then qSwatch:SetAlpha(0.15); qSwatch:Disable(); qSwatch._disabledTooltip = ST_TIP
+                elseif p.swingTimer.queueHighlight == false then qSwatch:SetAlpha(0.15); qSwatch:Disable(); qSwatch._disabledTooltip = "Highlight Queued Attacks"
+                else qSwatch:SetAlpha(1); qSwatch:Enable(); qSwatch._disabledTooltip = nil end
+                qUpdateSwatch()
+            end
+            UpdateQueueSwatch()
+            EllesmereUI.RegisterWidgetRefresh(UpdateQueueSwatch)
+        end
+
+        return math.abs(y)
+    end
+
     -- Register the module
     EllesmereUI:RegisterModule("EllesmereUIResourceBars", {
         title       = "Resource Bars",
         description = "Custom class resource, health, and mana bar display.",
-        pages       = { PAGE_DISPLAY, PAGE_CASTBAR, PAGE_GCD, PAGE_TOTEM },
+        pages       = C_SwingTimer
+            and { PAGE_DISPLAY, PAGE_CASTBAR, PAGE_GCD, PAGE_SWING, PAGE_TOTEM }
+            or  { PAGE_DISPLAY, PAGE_CASTBAR, PAGE_GCD, PAGE_TOTEM },
         buildPage   = function(pageName, parent, yOffset)
             if pageName == PAGE_DISPLAY then
                 return BuildBarDisplayPage(pageName, parent, yOffset)
@@ -10104,6 +10763,8 @@ initFrame:SetScript("OnEvent", function(self)
                 return BuildCastBarPage(pageName, parent, yOffset)
             elseif pageName == PAGE_GCD then
                 return BuildGCDBarPage(pageName, parent, yOffset)
+            elseif pageName == PAGE_SWING then
+                return BuildSwingTimerPage(pageName, parent, yOffset)
             elseif pageName == PAGE_TOTEM then
                 return BuildTotemBarPage(pageName, parent, yOffset)
             end

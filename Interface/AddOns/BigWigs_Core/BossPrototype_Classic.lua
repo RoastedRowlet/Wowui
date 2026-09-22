@@ -39,6 +39,8 @@ end or isRetail and C_EncounterJournal.GetSectionInfo or function(key)
 end
 local UnitPosition, UnitIsConnected, UnitInPartyIsAI, UnitClass, UnitTokenFromGUID = UnitPosition, UnitIsConnected, UnitInPartyIsAI, UnitClass, loader.UnitTokenFromGUID
 local GetSpellName, GetSpellTexture, GetTime = loader.GetSpellName, loader.GetSpellTexture, GetTime
+local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor -- XXX [Mainline:✓ MoP:✗ Wrath:✗ Vanilla:✗]
+local UnitSpellTargetName, UnitSpellTargetClass = UnitSpellTargetName, UnitSpellTargetClass
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 local EJ_GetEncounterInfo = (isCata or isMists) and function(key)
 	return EJ_GetEncounterInfo(key) or BigWigsAPI:GetLocale("BigWigs: Encounters")[key]
@@ -285,7 +287,7 @@ local bossNames = setmetatable({}, {__index =
 --- Register the module to enable on mob id.
 -- @number ... Any number of mob ids
 function boss:RegisterEnableMob(...)
-	core:RegisterEnableMob(self.moduleName, ...)
+	self._enableMobsTemp = {...}
 end
 
 --- Check if a specific mob id would enable this module.
@@ -942,6 +944,30 @@ do
 		end
 		return option
 	end
+
+	--- Create a custom auto player choice option
+	-- @bool state Boolean value to represent default state
+	-- @string[opt] choiceType The type of description to use (e.g. "delve_power")
+	-- @string[opt] name A unique name the option should have if you want to create multiple options in one module
+	-- @return an option string to be used in conjunction with :GetOption
+	function boss:AddAutoPlayerChoiceOption(state, choiceType, name)
+		if name and type(name) ~= "string" then
+			core:Error("Invalid auto player choice name: ".. tostring(name))
+		elseif name then
+			name = "_".. name
+		end
+
+		local moduleLocale = moduleLocaleList[self] or self:GetLocale()
+		local option = format(state and "custom_on_autoplayerchoice%s" or "custom_off_autoplayerchoice%s", name or "")
+		if choiceType == "delve_power" then
+			moduleLocale[option] = CL.autoPlayerChoice
+			moduleLocale[option.."_desc"] = CL.autoPlayerChoice_delve_power_desc
+			--moduleLocale[option.."_icon"] = self:GetMenuIcon("SAY")
+		else
+			core:Error("Invalid auto player choice type: ".. tostring(choiceType))
+		end
+		return option
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -1217,6 +1243,18 @@ do
 
 		local soundName = moduleAurasList[self][index].soundOnRemoved
 		return soundName or "None"
+	end
+
+	--- Get the aura sound throttle in seconds, which controls how often the sounds for this aura can play.
+	-- @return number or nil
+	function boss:GetAuraSoundThrottle(spellID)
+		local index = moduleAurasList[self] and moduleAurasList[self].spellIDToIndex[spellID]
+		if not index then
+			error(("Module %q has no aura data for spell ID %q."):format(self.moduleName, tostring(spellID)))
+			return
+		end
+
+		return moduleAurasList[self][index].throttle
 	end
 
 	--- Get the aura duration.
@@ -2976,6 +3014,72 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- Player Choice API
+-- @section player_choice_api
+--
+
+do
+	local GetCurrentPlayerChoiceInfo = C_PlayerChoice and C_PlayerChoice.GetCurrentPlayerChoiceInfo -- XXX [Mainline:✓ MoP:✗ Wrath:✗ Vanilla:✗]
+	--- Request the currently available choice options
+	-- @return table All the choice info in a table
+	function boss:GetPlayerChoiceOptions()
+		local choiceInfo = GetCurrentPlayerChoiceInfo()
+		return choiceInfo
+	end
+end
+
+do
+	local SendPlayerChoiceResponse = C_PlayerChoice and C_PlayerChoice.SendPlayerChoiceResponse -- XXX [Mainline:✓ MoP:✗ Wrath:✗ Vanilla:✗]
+	local OnUIClosed = C_PlayerChoice and C_PlayerChoice.OnUIClosed
+	--- Select a specific player choice button
+	-- @param choiceInfo The table provided by :GetPlayerChoiceOptions()
+	-- @number choiceNumber The number of the specific choice you want
+	-- @number buttonNumber Which specific button (within the choice you want) should be selected
+	function boss:SelectPlayerChoiceButton(choiceInfo, choiceNumber, buttonNumber)
+		local button = choiceInfo and choiceInfo.options and choiceInfo.options[choiceNumber] and choiceInfo.options[choiceNumber].buttons and choiceInfo.options[choiceNumber].buttons[buttonNumber]
+		local buttonID = button and button.id
+		if buttonID then
+			local spellID = choiceInfo.options[choiceNumber].spellID
+			if spellID then
+				local spellLink = loader.GetSpellLink(spellID)
+				local linkToUse
+				if type(spellLink) == "string" and spellLink:find("Hspell", nil, true) then
+					linkToUse = spellLink -- Use Blizz link if valid...
+				else -- ...or make our own
+					local spellName = GetSpellName(spellID)
+					linkToUse = ("\124cff71d5ff\124Hspell:%d:0\124h[%s]\124h\124r"):format(spellID, spellName)
+				end
+				core:Print(format(CL.autoPlayerChoice_notice, linkToUse), self.isLittleWigs)
+			else
+				core:Print(format(CL.autoPlayerChoice_notice, choiceInfo.options[choiceNumber].header), self.isLittleWigs)
+			end
+			self:SendMessage("BigWigs_Message", self, nil, choiceInfo.options[choiceNumber].header, "cyan", choiceInfo.options[choiceNumber].choiceArtID, nil, 4)
+			SendPlayerChoiceResponse(buttonID)
+			OnUIClosed()
+		end
+	end
+end
+
+--- Get the current count of player choices
+-- @param choiceInfo The table provided by :GetPlayerChoiceOptions()
+-- @return number The amount of choices that are available to the user
+function boss:GetPlayerChoiceCount(choiceInfo)
+	if choiceInfo and choiceInfo.options then
+		return #choiceInfo.options
+	end
+end
+
+--- Get the current amount of buttons a specific choice has available
+-- @param choiceInfo The table provided by :GetPlayerChoiceOptions()
+-- @number choiceNumber The number of the specific choice you want
+-- @return number The amount of clickable buttons this specific choice has
+function boss:GetPlayerChoiceButtonCount(choiceInfo, choiceNumber)
+	if choiceInfo and choiceInfo.options and choiceInfo.options[choiceNumber] and choiceInfo.options[choiceNumber].buttons then
+		return #choiceInfo.options[choiceNumber].buttons
+	end
+end
+
+-------------------------------------------------------------------------------
 -- Group checking
 -- @section group
 --
@@ -3974,7 +4078,6 @@ end
 
 do
 	local GetPlayerInfoByGUID = GetPlayerInfoByGUID
-	local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor -- XXX [Mainline:✓ MoP:✗ Wrath:✗ Vanilla:✗]
 	--- Temporarily replace the next Blizzard boss message with a TargetMessage
 	-- @param key the option key
 	-- @number duration the duration the block should last
@@ -4098,11 +4201,24 @@ end
 --- Show a message for a secret spellId.
 -- @param key the option key
 -- @string color the message color category
--- @number spellId the secret spellId from which the icon and text are derived.
-function boss:SecretMessage(key, color, spellId)
+-- @number spellId the secret spellId from which the icon and text are derived
+-- @param[opt] unit the casting unit, used to add its target to the message
+function boss:SecretMessage(key, color, spellId, unit)
 	local isEmphasized = self:CheckFlag(key, C.EMPHASIZE)
 	if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
-		self:SendMessage("BigWigs_Message", self, key, GetSpellName(spellId), color, GetSpellTexture(spellId), isEmphasized)
+		local text = GetSpellName(spellId)
+		if unit then
+			local targetName = UnitSpellTargetName(unit)
+			if targetName then
+				local class = classColorMessages and UnitSpellTargetClass(unit)
+				local classColor = class and GetClassColor(class)
+				if classColor then
+					targetName = classColor:WrapTextInColorCode(targetName)
+				end
+				text = CL.other:format(text, targetName)
+			end
+		end
+		self:SendMessage("BigWigs_Message", self, key, text, color, GetSpellTexture(spellId), isEmphasized)
 	end
 end
 

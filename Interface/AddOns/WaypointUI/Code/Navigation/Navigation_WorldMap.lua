@@ -31,6 +31,7 @@ local ClearUserWaypoint = C_Map.ClearUserWaypoint
 local GetBestMapForUnit = C_Map.GetBestMapForUnit
 local HasUserWaypoint = C_Map.HasUserWaypoint
 local GetTitleForQuestID = C_QuestLog.GetTitleForQuestID
+local PlaySound = PlaySound
 local wipe = wipe
 
 
@@ -821,21 +822,26 @@ end
 
 local function OnCanvasClick(mapCanvas, button, cursorX, cursorY)
     if button == "LeftButton" and IsControlKeyDown() then
-        if not WorldMapUtil.IsPathfindingEnabled() then return false end
+        local isPathfindingEnabled = WorldMapUtil.IsPathfindingEnabled()
+        if not isPathfindingEnabled and not MapPin.IsCustomMapPinsEnabled() then return false end
         if MapPinFrame:ConsumeWorldMapPinCtrlClick() then return true end
 
         local mapID = mapCanvas:GetMapID()
         local x, y = mapCanvas:GetNormalizedCursorPosition()
         if not mapID or x == nil or y == nil then return false end
 
-        return MapPin.NewTemporaryWaypoint({
+        local userNavigation = MapPin.NewTemporaryWaypoint({
             mapID                    = mapID,
             x                        = x,
             y                        = y,
             coordinatesAreNormalized = true,
-            superTracked             = true,
+            superTracked             = isPathfindingEnabled or Config.DBGlobal:GetVariable("AutoTrackPlacedPinEnabled") == true,
             syncNativeWaypoint       = true
-        }) ~= nil
+        })
+        if not userNavigation then return false end
+
+        PlaySound(SOUNDKIT.UI_MAP_WAYPOINT_CONTROL_CLICK)
+        return true
     end
 
     return false
