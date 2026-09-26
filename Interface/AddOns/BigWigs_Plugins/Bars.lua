@@ -201,8 +201,7 @@ do
 		end
 		activeFrameNormal = nil
 		if db.normalPosition[5] ~= plugin.defaultDB.normalPosition[5] then
-			local frame = _G[db.normalPosition[5]]
-			if type(frame) ~= "table" or type(frame.GetObjectType) ~= "function" or type(frame.IsForbidden) ~= "function" or frame:IsForbidden() then
+			if not BigWigsAPI.IsValidFrame(db.normalPosition[5]) then
 				db.normalPosition[1] = plugin.defaultDB.normalPosition[1]
 				db.normalPosition[2] = plugin.defaultDB.normalPosition[2]
 				db.normalPosition[3] = plugin.defaultDB.normalPosition[3]
@@ -210,22 +209,21 @@ do
 				db.normalPosition[5] = plugin.defaultDB.normalPosition[5]
 				db.normalCopyCustomAnchorWidth = plugin.defaultDB.normalCopyCustomAnchorWidth
 				db.normalWidth = plugin.defaultDB.normalWidth
-			else
-				if db.normalCopyCustomAnchorWidth and type(frame.GetWidth) == "function" and type(frame:GetWidth()) == "number" then
-					activeFrameNormal = frame
-					if not hookedFrameNormal[frame] then
-						hookedFrameNormal[frame] = true
-						normalAnchor.HookScript(frame, "OnSizeChanged", HookScriptNormal)
-					end
-
-					local width = frame:GetWidth()
-					if width < minBarWidth then
-						width = minBarWidth
-					elseif width > maxBarWidth then
-						width = maxBarWidth
-					end
-					db.normalWidth = width
+			elseif db.normalCopyCustomAnchorWidth then
+				local frame = _G[db.normalPosition[5]]
+				activeFrameNormal = frame
+				if not hookedFrameNormal[frame] then
+					hookedFrameNormal[frame] = true
+					normalAnchor.HookScript(frame, "OnSizeChanged", HookScriptNormal)
 				end
+
+				local width = frame:GetWidth()
+				if width < minBarWidth then
+					width = minBarWidth
+				elseif width > maxBarWidth then
+					width = maxBarWidth
+				end
+				db.normalWidth = width
 			end
 		else
 			if db.normalCopyCustomAnchorWidth then
@@ -255,8 +253,7 @@ do
 		end
 		activeFrameExp = nil
 		if db.expPosition[5] ~= plugin.defaultDB.expPosition[5] then
-			local frame = _G[db.expPosition[5]]
-			if type(frame) ~= "table" or type(frame.GetObjectType) ~= "function" or type(frame.IsForbidden) ~= "function" or frame:IsForbidden() then
+			if not BigWigsAPI.IsValidFrame(db.expPosition[5]) then
 				db.expPosition[1] = plugin.defaultDB.expPosition[1]
 				db.expPosition[2] = plugin.defaultDB.expPosition[2]
 				db.expPosition[3] = plugin.defaultDB.expPosition[3]
@@ -264,22 +261,21 @@ do
 				db.expPosition[5] = plugin.defaultDB.expPosition[5]
 				db.expCopyCustomAnchorWidth = plugin.defaultDB.expCopyCustomAnchorWidth
 				db.expWidth = plugin.defaultDB.expWidth
-			else
-				if db.expCopyCustomAnchorWidth and type(frame.GetWidth) == "function" and type(frame:GetWidth()) == "number" then
-					activeFrameExp = frame
-					if not hookedFrameExp[frame] then
-						hookedFrameExp[frame] = true
-						emphasizeAnchor.HookScript(frame, "OnSizeChanged", HookScriptExp)
-					end
-
-					local width = frame:GetWidth()
-					if width < minBarWidth then
-						width = minBarWidth
-					elseif width > maxBarWidth then
-						width = maxBarWidth
-					end
-					db.expWidth = width
+			elseif db.expCopyCustomAnchorWidth then
+				local frame = _G[db.expPosition[5]]
+				activeFrameExp = frame
+				if not hookedFrameExp[frame] then
+					hookedFrameExp[frame] = true
+					emphasizeAnchor.HookScript(frame, "OnSizeChanged", HookScriptExp)
 				end
+
+				local width = frame:GetWidth()
+				if width < minBarWidth then
+					width = minBarWidth
+				elseif width > maxBarWidth then
+					width = maxBarWidth
+				end
+				db.expWidth = width
 			end
 		else
 			if db.expCopyCustomAnchorWidth then
@@ -999,12 +995,8 @@ do
 									end
 									updateProfile()
 								end,
-								validate = function(_, value)
-									local frame = _G[value]
-									if type(frame) ~= "table" or type(frame.GetObjectType) ~= "function" or type(frame.IsForbidden) ~= "function" or frame:IsForbidden() then
-										return false
-									end
-									return true
+								validate = function(_, frameName)
+									return BigWigsAPI.IsValidFrame(frameName)
 								end,
 								name = L.customAnchorPoint,
 								order = 5,
@@ -1145,12 +1137,8 @@ do
 									end
 									updateProfile()
 								end,
-								validate = function(_, value)
-									local frame = _G[value]
-									if type(frame) ~= "table" or type(frame.GetObjectType) ~= "function" or type(frame.IsForbidden) ~= "function" or frame:IsForbidden() then
-										return false
-									end
-									return true
+								validate = function(_, frameName)
+									return BigWigsAPI.IsValidFrame(frameName)
 								end,
 								name = L.customAnchorPoint,
 								order = 5,

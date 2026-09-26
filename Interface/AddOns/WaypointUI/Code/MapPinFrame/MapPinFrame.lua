@@ -617,7 +617,7 @@ do --Map Pin Template
     end
 
     function MapPinFrameMixin:HideTooltip()
-        GameTooltip:Hide()
+        if GameTooltip:IsOwned(self) then GameTooltip:Hide() end
     end
 
     function MapPinFrameMixin:AttachToMap(mapID, x, y)

@@ -2,7 +2,7 @@ VER 3 0100000000000009 "AS Ascendence" "134400"
 #showtooltip Ascendance
 /cast Ancestral Swiftness
 /use Fleeting Light's Potential
-/use Liquid Luster
+/use item:241309
 /USE 14
 /cast Ascendance
 END

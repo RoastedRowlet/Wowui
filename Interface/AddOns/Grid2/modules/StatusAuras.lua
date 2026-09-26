@@ -1,5 +1,4 @@
 -- buffs and debuffs statuses for midnight
-if Grid2.versionCli<120100 then return end
 
 local Grid2 = Grid2
 
@@ -39,27 +38,6 @@ Grid2.SatedDebuffs = {
 	[71041]  = true, -- Dungeon Deserter
 }
 
---[[
-	if style == Enum.CustomAuraButtonDispelTypeTextureStyle.Border then
-		local showIcon = false;
-		AuraUtil.SetAuraBorderAtlas(texture, auraData.dispelName, showIcon);
-		texture:SetVertexColor(1, 1, 1, 1);
-	elseif style == Enum.CustomAuraButtonDispelTypeTextureStyle.BorderWithIcon then
-		local showIcon = true;
-		AuraUtil.SetAuraBorderAtlas(texture, auraData.dispelName, showIcon);
-		texture:SetVertexColor(1, 1, 1, 1);
-	elseif style == Enum.CustomAuraButtonDispelTypeTextureStyle.Icon then
-		AuraUtil.SetAuraDispelTypeIcon(texture, auraData.dispelName);
-		texture:SetVertexColor(1, 1, 1, 1);
-	elseif style == Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset then
-		AuraUtil.SetAuraBorderColor(texture, auraData.dispelName);
-	elseif style == Enum.CustomAuraButtonDispelTypeTextureStyle.CustomAsset then
-		local customAsset = secretwrap(GetCustomDispelTypeTextureAsset(options, auraData));
-		ApplyDispelTypeTextureAsset(texture, customAsset);
-		texture:SetVertexColor(1, 1, 1, 1);
-	end
---]]
-
 -------------------------------------------------------------------------------
 -- shared methods
 -------------------------------------------------------------------------------
@@ -81,6 +59,10 @@ local function Auras_IsActive()
 	return false
 end
 
+local function Auras_GetBorder()
+	return 0
+end
+
 local function Auras_GetAurasFilter(self)
 	return self.aura_filter
 end
@@ -90,18 +72,6 @@ local function Auras_UpdateDB(self)
 	local typ = dbx.type
 	-- aura filter
 	local filter = CopyTable( self.defaults, CopyTable(dbx.aura_filter or {}) )
-	--[[
-	if typ=='buff' then
-		filter.maxAuras = 1
-		filter.filter=  (dbx.mine==1 and 'HELPFUL|PLAYER') or (dbx.mine==2 and 'HELPFUL|!PLAYER') or 'HELPFUL'
-	elseif typ=='buffs' then
-		filter.maxAuras = filter.maxAuras or math.huge
-		filter.filter=  (dbx.mine==1 and 'HELPFUL|PLAYER') or (dbx.mine==2 and 'HELPFUL|!PLAYER') or 'HELPFUL'
-	else -- mbuffs/mdebuffs
-		filter.maxAuras = filter.maxAuras or math.huge
-		filter.filter = filter.filter or self.defFilter
-	end
-	--]]
 	-- spells table
 	local spells = GetSpellIDsTable(dbx)
 	if spells then
@@ -152,8 +122,9 @@ end
 local function Auras_Create(baseKey, dbx, defaults, status)
 	status = status or Grid2.statusPrototype:new(baseKey)
 	status.isAura = true
-	status.defaults= defaults
+	status.defaults = defaults
 	status.IsActive = Auras_IsActive
+	status.GetBorder = Auras_GetBorder
 	status.UpdateDB = Auras_UpdateDB
 	status.GetAurasFilter = Auras_GetAurasFilter
 	Grid2:RegisterStatus(status, { "icons", "icon", "color", "aura" }, baseKey, dbx)

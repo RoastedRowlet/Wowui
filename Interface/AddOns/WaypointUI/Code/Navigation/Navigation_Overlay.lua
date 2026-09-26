@@ -74,7 +74,7 @@ do --WUINavigationOverlayFrame
     end
 
     function NavigationOverlayFrameMixin:HideTooltip()
-        GameTooltip:Hide()
+        if GameTooltip:IsOwned(self) then GameTooltip:Hide() end
     end
 
     function NavigationOverlayFrameMixin:SetContextIcon(contextIcon)

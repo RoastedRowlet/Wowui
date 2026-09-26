@@ -534,6 +534,31 @@ do
 end
 
 do
+	local bitband, pcall = bit.band, pcall
+	function API.IsValidFrame(frameName)
+		if type(frameName) ~= "string" then return false end
+		local frame = _G[frameName]
+		if type(frame) ~= "table" or type(frame.GetObjectType) ~= "function" or type(frame.IsForbidden) ~= "function" or type(frame.GetWidth) ~= "function" then
+			return false
+		else
+			local success, isForbidden = pcall(frame.IsForbidden, frame)
+			if not success or isForbidden then return false end
+
+			local hasWidthResult, width = pcall(frame.GetWidth, frame)
+			if not hasWidthResult or type(width) ~= "number" then return false end
+		end
+
+		-- Frames with forbidden aspects, Enum.ForbiddenAspect.UntrustedLayoutScriptExecution = 8
+		if type(frame.GetInheritableForbiddenAspects) == "function" then
+			local success, value = pcall(frame.GetInheritableForbiddenAspects, frame, 1)
+			if not success or bitband(value, 8) == 8 then return false end
+		end
+
+		return true
+	end
+end
+
+do
 	local IsKnownFile = C_UIFileAsset.IsKnownFile
 	function API.IsValidMediaPath(mediaPath)
 		if type(mediaPath) ~= "string" then

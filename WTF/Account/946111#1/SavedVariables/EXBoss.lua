@@ -2237,8 +2237,8 @@ EXBOSS12S2 = {
 ["disableEXBossInRaid"] = true,
 },
 ["panel"] = {
-["selectedBossIdx"] = 3,
-["selectedMapID"] = 2923,
+["selectedBossIdx"] = 1,
+["selectedMapID"] = 1877,
 ["selectedSeason"] = "12.1大秘境",
 },
 },
@@ -3519,8 +3519,8 @@ EXBOSS12S2 = {
 },
 ["Changelog"] = {
 ["LastSeenVersion"] = "v26.9.15.1537",
-["LastSeenAt"] = "2026-09-22 18:50:58",
-["LastPopupAt"] = "2026-09-06 18:18:39",
-["LastPopupVersion"] = "v26.9.4.0415",
+["LastSeenAt"] = "2026-09-25 17:54:41",
+["LastPopupAt"] = "2026-09-25 02:38:49",
+["LastPopupVersion"] = "v26.9.15.1537",
 },
 }

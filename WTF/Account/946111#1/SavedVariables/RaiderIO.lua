@@ -14,8 +14,8 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Madmareep-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Dyspell-stormrage"] = true,
-["us-party5-stormrage"] = true,
+["us-Rycät-stormrage"] = true,
+["us-Yqqips-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

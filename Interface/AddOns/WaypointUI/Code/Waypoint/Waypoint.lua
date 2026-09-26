@@ -5,6 +5,7 @@ local Sound = env.modules:Import("packages\\sound")
 local CallbackRegistry = env.modules:Import("packages\\callback-registry")
 local GenericEnum = env.modules:Import("packages\\generic-enum")
 local SavedVariables = env.modules:Import("packages\\saved-variables")
+local WoWClient = env.modules:Import("packages\\wow-client")
 local Utils_Formatting = env.modules:Import("packages\\utils\\formatting")
 local UIAnim = env.modules:Import("packages\\ui-anim")
 local SharedUtil = env.modules:Import("@\\SharedUtil")
@@ -72,7 +73,7 @@ function WaypointMixin:OnUpdate()
         local max = Config.DBGlobal:GetVariable("WaypointScaleMax")
         worldScale = (min == max) and max or GetScaleForDistance(distance, BASE_SCALE_DISTANCE, BASE_SCALE, min, max)
     end
-    local newScale = worldScale * scale
+    local newScale = worldScale * scale * (WoWClient.IS_FOREVER and 0.5 or 1)
 
     if not self.lastScale or abs(self.lastScale - newScale) > 0.0025 then
         self.lastScale = newScale

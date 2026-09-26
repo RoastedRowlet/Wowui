@@ -330,21 +330,19 @@ TalentLoadoutEx = {
 {
 {
 ["icon"] = 134400,
-["pvp2"] = 114,
+["name"] = "Oracle",
 ["text"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMmBmZbmtZmZmxMDAAAAAAAAAgxYZGMzMjNjZGsZamYAmZDDhxsMAjBLAAwYmZGDmBYmZEMD",
-["isInGroup"] = false,
 ["pvp1"] = 100,
 ["pvp3"] = 5640,
-["name"] = "Oracle",
+["pvp2"] = 114,
 },
 {
 ["icon"] = 134400,
-["name"] = "Dung",
+["pvp2"] = 114,
 ["pvp1"] = 100,
-["isInGroup"] = false,
 ["text"] = "CAQAR03Gt7xPmcDNOjs2Zlb3yCDsMzMWYMGzgZzsNzMzMzMDAAAAAAAAAghZZGMzMDGzMYz0MxgZGAEAz2stAGbGAAGzMzYwMYmBzEMD",
 ["pvp3"] = 5640,
-["pvp2"] = 114,
+["name"] = "Dung",
 },
 },
 [3] = {

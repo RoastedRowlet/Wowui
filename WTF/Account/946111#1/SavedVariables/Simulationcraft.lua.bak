@@ -77,6 +77,16 @@ SimulationCraftDB = {
 ["context"] = 5,
 ["itemId"] = 271876,
 },
+{
+["currency"] = 3418,
+["ts"] = 1790109480,
+["source"] = 278284,
+["season"] = 37,
+["keyLevel"] = 4,
+["spec"] = 264,
+["context"] = 5,
+["itemId"] = 271092,
+},
 },
 },
 ["Barelynoer - Area 52"] = {

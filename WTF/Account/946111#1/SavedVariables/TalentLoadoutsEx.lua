@@ -329,17 +329,17 @@ TalentLoadoutEx = {
 ["PRIEST"] = {
 {
 {
+["pvp3"] = 5640,
 ["name"] = "Oracle",
 ["pvp2"] = 114,
-["pvp3"] = 5640,
 ["text"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMmBmZbmtZmZmxMDAAAAAAAAAgxYZGMzMjNjZGsZamYAmZDDhxsMAjBLAAwYmZGDmBYmZEMD",
 ["icon"] = 134400,
 ["pvp1"] = 100,
 },
 {
+["pvp3"] = 5640,
 ["pvp2"] = 114,
 ["name"] = "Dung",
-["pvp3"] = 5640,
 ["pvp1"] = 100,
 ["icon"] = 134400,
 ["text"] = "CAQAR03Gt7xPmcDNOjs2Zlb3yCDsMzMWYMGzgZzsNzMzMzMDAAAAAAAAAghZZGMzMDGzMYz0MxgZGAEAz2stAGbGAAGzMzYwMYmBzEMD",

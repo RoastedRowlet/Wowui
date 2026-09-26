@@ -35,7 +35,7 @@ EXCORE12S2 = {
 ["page"] = "ProfileManager",
 },
 ["boss"] = {
-["tab"] = "boss",
+["tab"] = "trash",
 },
 },
 ["x"] = 71.66790771484375,
@@ -48,14 +48,14 @@ EXCORE12S2 = {
 ["ExwindState"] = {
 ["encounter"] = {
 ["id"] = 0,
-["ts"] = 1790116425,
+["ts"] = 1790373005,
 ["inProgress"] = false,
-["instanceID"] = 2825,
+["instanceID"] = 0,
 },
 ["versaCalibration"] = {
-["zeroValue"] = 114146.1579810332,
-["specID"] = 256,
-["lastDescriptionValue"] = 121312,
+["zeroValue"] = 114146.9844823526,
+["specID"] = 262,
+["lastDescriptionValue"] = 124082,
 ["spellID"] = 1271074,
 },
 },
@@ -68,7 +68,7 @@ EXCORE12S2 = {
 },
 ["Changelog"] = {
 ["LastSeenVersion"] = "v26.9.13.0946",
-["LastSeenAt"] = "2026-09-22 18:05:13",
+["LastSeenAt"] = "2026-09-25 17:49:54",
 ["LastPopupVersion"] = "v26.9.3.1123",
 ["LastPopupAt"] = "2026-09-06 18:18:57",
 },

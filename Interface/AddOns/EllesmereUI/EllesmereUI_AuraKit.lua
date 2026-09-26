@@ -445,10 +445,11 @@ local function ApplyStyleToRegions(button, style)
                     -- where the module's other icons put theirs.
                     local appliedSize = (b.texture and b.texture ~= "" and b.texture ~= "solid")
                         and (b.textureSize or b.size or 1) or (b.size or 1)
+                    -- b.edgePx: the surface's exact size (EllesmereUI.BorderPx), nil = legacy.
                     EllesmereUI.ApplySecretSafeBorderStyle(d.borderHost, d, appliedSize,
                         b[1] or 0, b[2] or 0, b[3] or 0, b[4] or 1,
                         b.texture or "solid", b.offsetX, b.offsetY, b.shiftX, b.shiftY,
-                        b.addonKey or "unitframes", b.sizeKey or b.size or 1, b.edgeScale)
+                        b.addonKey or "unitframes", b.sizeKey or b.size or 1, b.edgeScale, b.edgePx)
                     d.borderMade = true
                 else
                     -- Solid border on the plain PP path. A style that came back
@@ -456,20 +457,31 @@ local function ApplyStyleToRegions(button, style)
                     -- host and may never have built PP strips (the textured lane
                     -- only hides them), so presence is decided by the strips
                     -- themselves, not by borderMade.
-                    local edges = d._secretBorderEdges
-                    if edges then for _, tex in pairs(edges) do tex:Hide() end end
+                    -- A textured exact size registered this host for the UI-scale
+                    -- re-apply: the size-0 solid call unregisters it and hides the
+                    -- edges (the strips and the host are shown again below).
+                    if d._pxsbEdge then
+                        EllesmereUI.ApplySecretSafeBorderStyle(d.borderHost, d, 0, 0, 0, 0, 0, "solid")
+                    else
+                        local edges = d._secretBorderEdges
+                        if edges then for _, tex in pairs(edges) do tex:Hide() end end
+                    end
+                    local solidPx = b.edgePx or b.size or 1
                     if PP.GetBorders(d.borderHost) then
-                        PP.UpdateBorder(d.borderHost, b.size or 1, b[1] or 0, b[2] or 0, b[3] or 0, b[4] or 1)
+                        PP.UpdateBorder(d.borderHost, solidPx, b[1] or 0, b[2] or 0, b[3] or 0, b[4] or 1)
                         PP.ShowBorder(d.borderHost)
                     else
                         PP.CreateBorder(d.borderHost, b[1] or 0, b[2] or 0, b[3] or 0, b[4] or 1,
-                            b.size or 1, "OVERLAY", 7)
+                            solidPx, "OVERLAY", 7)
                     end
                     d.borderMade = true
                 end
             end
             d.borderHost:Show()
         else
+            if d._pxsbEdge then
+                EllesmereUI.ApplySecretSafeBorderStyle(d.borderHost, d, 0, 0, 0, 0, 0, "solid")
+            end
             d.borderHost:Hide()
             if PP then PP:HideMaskedShapeBorder(d.borderHost) end
         end
@@ -812,7 +824,8 @@ local function ApplyStyleToRegions(button, style)
                                 showWhenHelpful = false, showWithoutDispelType = true }
                         else
                             opts = { style = dispelTint, showWhenHarmful = true,
-                                showWhenHelpful = false, customDispelColorMap = style.dispelColorMap }
+                                showWhenHelpful = style.dispelHelpful == true,
+                                customDispelColorMap = style.dispelColorMap }
                         end
                         for i = 1, #dispelTexSet do
                             if not pcall(addFn, button, dispelTexSet[i], opts) then
@@ -1253,14 +1266,6 @@ end)
 function AK.RestyleSoon(styleKey)
     restyleQueue[styleKey] = true
     restyler:Show()
-end
-
--- Module hook: park a style key for the restriction-lift drain WITHOUT
--- queueing it now. For module-side pcall'd button calls that were denied
--- under secrecy -- re-queueing immediately would just spin while the
--- restriction holds; the lift watcher re-runs the key when it can succeed.
-function AK.DeferRestyle(styleKey)
-    if styleKey then deferredRestyles[styleKey] = true end
 end
 
 ------------------------------------------------------------------------------
@@ -1772,10 +1777,6 @@ function AK.RequestContainer(parent, unitToken, spec, callback)
     if callback then callback(container, slotFrames) end
 end
 
-function AK.GetContainerData(container)
-    return containerData[container]
-end
-
 -- Releases a swapped-out container's tracked slot buttons from the restyle registry.
 -- Abandoned containers can never be destroyed (frames are permanent), so without this
 -- every swap leaves zombie buttons that all future Restyle passes keep re-decorating --
@@ -1838,4 +1839,108 @@ function AK.AurasRestricted()
     end
     restrictedStamp = now
     return true
+end
+
+------------------------------------------------------------------------------
+-- Offensive dispel capability: can the PLAYER remove Magic buffs or enrages
+-- from an enemy (purge, spellsteal, soothe, tranquilizing shot). This asks
+-- what the player knows, never what an aura is, so it keeps working in
+-- restricted content. Shared by the nameplate and unit frame purge glows.
+-- Lazy: the watcher frame exists only once a consumer asks or subscribes.
+------------------------------------------------------------------------------
+do
+    -- { spellID, category ("Magic", "Enrage", or "Both"), requiredClass or nil, requiredTalent or nil }
+    local SPELLS = {
+        { 370,    "Magic",  nil       },  -- Purge (Shaman)
+        { 378773, "Magic",  nil       },  -- Greater Purge (Shaman)
+        { 528,    "Magic",  nil       },  -- Dispel Magic (Priest)
+        { 32375,  "Magic",  nil       },  -- Mass Dispel (Priest)
+        { 278326, "Magic",  nil       },  -- Consume Magic (Demon Hunter)
+        { 19505,  "Magic",  "WARLOCK" },  -- Devour Magic (Felhunter)
+        { 19801,  "Both",   nil       },  -- Tranquilizing Shot (Hunter)
+        { 2908,   "Enrage", nil       },  -- Soothe (Druid)
+        { 30449,  "Magic",  nil       },  -- Spellsteal (Mage)
+        { 115078, "Enrage", "MONK", 450432 },  -- Paralysis (w/ Pressure Points talent)
+    }
+    local magic, enrage, built, watcher = false, false, false, nil
+    local listeners = {}
+
+    -- IsSpellKnown answers "does the player have this", which is the question a
+    -- PASSIVE talent needs -- IsSpellInSpellBook says no for one. The globals
+    -- IsPlayerSpell / IsSpellKnown exist only in Blizzard_DeprecatedSpellBook,
+    -- behind the loadDeprecationFallbacks CVar, so they are never used here.
+    local function Knows(spellID, bank)
+        local BANK = Enum and Enum.SpellBookSpellBank
+        if not (C_SpellBook and C_SpellBook.IsSpellKnown and BANK) then return false end
+        local ok, v = pcall(C_SpellBook.IsSpellKnown, spellID, bank or BANK.Player)
+        return ok and v == true
+    end
+    local function InBook(spellID, bank)
+        local BANK = Enum and Enum.SpellBookSpellBank
+        if not (C_SpellBook and BANK) then return false end
+        if not C_SpellBook.IsSpellKnownOrInSpellBook then return Knows(spellID, bank) end
+        local ok, v = pcall(C_SpellBook.IsSpellKnownOrInSpellBook, spellID, bank or BANK.Player)
+        return ok and v == true
+    end
+
+    local function Rebuild()
+        local wasMagic, wasEnrage = magic, enrage
+        magic, enrage = false, false
+        local _, playerClass = UnitClass("player")
+        local BANK = Enum and Enum.SpellBookSpellBank
+        for i = 1, #SPELLS do
+            local e = SPELLS[i]
+            local spellID, cat, reqClass, reqTalent = e[1], e[2], e[3], e[4]
+            if not (reqClass and playerClass ~= reqClass) then
+                local known
+                if reqTalent then
+                    known = Knows(reqTalent)
+                elseif reqClass then
+                    -- Pet bank: true only while that pet is actually out, which
+                    -- is why UNIT_PET is registered below.
+                    known = InBook(spellID, BANK and BANK.Pet)
+                else
+                    known = InBook(spellID)
+                end
+                if known then
+                    if cat == "Magic" or cat == "Both" then magic = true end
+                    if cat == "Enrage" or cat == "Both" then enrage = true end
+                end
+            end
+        end
+        -- The first pass has nothing to compare against, so it never notifies:
+        -- consumers read the capability when they build.
+        if built and (wasMagic ~= magic or wasEnrage ~= enrage) then
+            for i = 1, #listeners do listeners[i]() end
+        end
+        built = true
+    end
+
+    local function Ensure()
+        if watcher then return end
+        watcher = CreateFrame("Frame")
+        watcher:RegisterEvent("SPELLS_CHANGED")
+        watcher:RegisterEvent("UNIT_PET")
+        -- A talent swap does not reliably reach SPELLS_CHANGED first, and without
+        -- these a talent-gated entry is only correct after a /reload.
+        watcher:RegisterEvent("TRAIT_CONFIG_UPDATED")
+        watcher:RegisterEvent("PLAYER_ENTERING_WORLD")
+        watcher:SetScript("OnEvent", function(_, event, unit)
+            if event == "UNIT_PET" and unit ~= "player" then return end
+            Rebuild()
+        end)
+        Rebuild()
+    end
+
+    -- canDispelMagic, canDispelEnrage.
+    function AK.OffensiveDispelTypes()
+        Ensure()
+        return magic, enrage
+    end
+
+    -- fn() runs whenever either answer flips (talents, spec, pet).
+    function AK.OnOffensiveDispelChange(fn)
+        Ensure()
+        listeners[#listeners + 1] = fn
+    end
 end

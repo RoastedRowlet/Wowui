@@ -14,18 +14,18 @@ local strfind = string.find
 
 local BIGWIGS_VERSION = 425
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 1, 16},
+	["LittleWigs"] = {12, 1, 17},
 	["BigWigs_Classic"] = {12, 1, 2},
 	["BigWigs_BurningCrusade"] = {12, 1, 11},
-	["BigWigs_WrathOfTheLichKing"] = {12, 0, 11},
-	["BigWigs_Cataclysm"] = {12, 0, 5},
-	["BigWigs_MistsOfPandaria"] = {12, 0, 9},
-	["BigWigs_WarlordsOfDraenor"] = {12, 0, 3},
-	["BigWigs_Legion"] = {12, 0, 3},
-	["BigWigs_BattleForAzeroth"] = {12, 0, 5},
-	["BigWigs_Shadowlands"] = {12, 0, 4},
-	["BigWigs_Dragonflight"] = {12, 0, 6},
-	["BigWigs_TheWarWithin"] = {12, 0, 4},
+	["BigWigs_WrathOfTheLichKing"] = {12, 1, 0},
+	["BigWigs_Cataclysm"] = {12, 1, 0},
+	["BigWigs_MistsOfPandaria"] = {12, 1, 0},
+	["BigWigs_WarlordsOfDraenor"] = {12, 1, 0},
+	["BigWigs_Legion"] = {12, 1, 0},
+	["BigWigs_BattleForAzeroth"] = {12, 1, 0},
+	["BigWigs_Shadowlands"] = {12, 1, 0},
+	["BigWigs_Dragonflight"] = {12, 1, 0},
+	["BigWigs_TheWarWithin"] = {12, 1, 0},
 }
 local BIGWIGS_RELEASE_STRING
 local versionQueryString, versionResponseString = "Q^%d^%s^%d^%s", "V^%d^%s^%d^%s"
@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "cbfa951" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "b1ebe4c" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -1678,9 +1678,9 @@ end
 --
 
 do
-	local DBMdotRevision = "20260908055539" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
-	local DBMdotDisplayVersion = "12.1.9" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = "20260907000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotRevision = "20260919230059" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotDisplayVersion = "12.1.10" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
+	local DBMdotReleaseRevision = "20260919000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	local protocol = 3
 	local versionPrefix = "V"
 	local PForceDisable = 27

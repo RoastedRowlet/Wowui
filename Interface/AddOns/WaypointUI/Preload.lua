@@ -8,6 +8,7 @@ local SlashCommand = env.modules:Import("packages\\slash-command")
 local Path = env.modules:Import("packages\\path")
 local Utils_InlineIcon = env.modules:Import("packages\\utils\\inline-icon")
 local GenericEnum = env.modules:Import("packages\\generic-enum")
+local WoWClient = env.modules:Import("packages\\wow-client")
 local MapPin = env.modules:Await("@\\MapPin")
 
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
@@ -16,8 +17,8 @@ local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 env.NAME = "Waypoint UI"
 env.LOGO = Path.Root .. "\\Art\\Icons\\Logo"
 env.LOGO_ALT = Path.Root .. "\\Art\\Icons\\Logo-White"
-env.VERSION_STRING = "1.7.2"
-env.VERSION_NUMBER = 010702
+env.VERSION_STRING = "1.7.3"
+env.VERSION_NUMBER = 010703
 env.DEBUG_MODE = false
 
 
@@ -91,7 +92,7 @@ do
         fontPath                                   = nil,
 
         WaypointSystemType                         = 1,
-        DistanceThresholdPinpoint                  = 325,
+        DistanceThresholdPinpoint                  = WoWClient.IS_FOREVER and 100 or 325,
         DistanceThresholdHidden                    = 25,
         AlwaysShow                                 = false,
         RightClickToClear                          = true,

@@ -1,366 +1,182 @@
 # EllesmereUI
 
-## [v9.2.2](https://github.com/EllesmereGaming/EllesmereUI/tree/v9.2.2) (2026-09-21)
-[Full Changelog](https://github.com/EllesmereGaming/EllesmereUI/compare/v9.2.1...v9.2.2) [Previous Releases](https://github.com/EllesmereGaming/EllesmereUI/releases)
+## [v9.2.9](https://github.com/EllesmereGaming/EllesmereUI/tree/v9.2.9) (2026-09-25)
+[Full Changelog](https://github.com/EllesmereGaming/EllesmereUI/compare/v9.2.8...v9.2.9) [Previous Releases](https://github.com/EllesmereGaming/EllesmereUI/releases)
 
-- Release v9.2.2  
-- Merge pull request #2158 from dfrisone/fix/forever-nameplate-class-power  
-    fix(nameplates): make the class resource work on Forever  
-- chore(nameplates): check EllesmereUI.IS\_FOREVER, matching the suite  
-- fix(nameplates): match the options preview to the Forever resource set  
-    The preview keeps its own class map, so on Forever a paladin or warlock still  
-    saw a filled pip preview and a live Size slider for a resource the watcher now  
-    refuses to enable.  
-- fix(nameplates): read Forever combo points from the target  
-    Same fault as the unit frame pips: UnitPower still reports the previous target's  
-    count when PLAYER\_TARGET\_CHANGED fires, so the plate kept the old number until  
-    the next point was built. Traced on 1.60.1: up=3 while gcp=0 on the swap.  
-    GetComboPoints is correct at that instant and is what Blizzard's own classic  
-    ComboFrame reads.  
-- fix(nameplates): raise the Forever class resource default size  
-    The 8x3 base pip at scale 1 is too small to read on that client, where this is  
-    the target-side display rather than a second one alongside the unit frame. The  
-    Size slider still overrides it.  
-- fix(nameplates): make the class resource work on Forever  
-    The nameplate class resource carried the same two Forever faults the unit frame  
-    one did.  
-    Combo points come back secret there, and isSecret was hardcoded to Vengeance  
-    soul fragments, the only resource that is secret on retail, so the pip fill  
-    compared against a secret value and raised. Classify the value instead.  
-    The class map is retail-shaped: its spec-keyed entries never resolve without  
-    specializations, so druids got nothing, and its flat entries name resources  
-    vanilla content does not have, so paladins and warlocks drew pips that can never  
-    fill. Resolve rogue and druid to combo points there and nothing else.  
-    Druid combo points are cat-only for every druid on that client, there being no  
-    specs to tell Feral from Resto, and the form check now reads Blizzard's own  
-    DRUID\_CAT\_FORM rather than a bare 1.  
-- Merge pull request #2152 from svart2521/choose-your-roles-window-not-skinned  
-    Fix: Choose your Roles window not skinned  
-- Merge pull request #2151 from dfrisone/fix/forever-combo-frame-orphan  
-    fix(unitframes): show combo points on Forever  
-- Merge pull request #2150 from thoriphes/feat/swing-timer-resource-bar  
-    resourcebars: Swing Timer as a resource bar (replaces the QoL timer)  
-- chore(locales): regenerate \_keys.txt after merging upstream  
-- Merge remote-tracking branch 'upstream/main' into fix/forever-combo-frame-orphan  
-- fix(unitframes): read Forever combo points from the target  
-    Combo points belong to the target on Forever, and UnitPower still reports the  
-    previous target's count at the moment PLAYER\_TARGET\_CHANGED fires. Traced on  
-    1.60.1 across a target swap:  
-        PLAYER\_TARGET\_CHANGED up=3 gcp=0 token=nil  
-    No power event follows, because the player's own power did not change, so the  
-    refresh added in the previous commit re-read the stale value and the row held  
-    the old count until the next point was built.  
-    GetComboPoints is correct at that instant and is what Blizzard's own classic  
-    ComboFrame reads.  
-- Merge pull request #2149 from thoriphes/feat/unlock-anchor-params  
-    unlock: edit an anchor's points and offsets from the cog menu  
-- Merge pull request #2148 from thoriphes/fix/cdm-picker-empty-list  
-    Cooldown Manager: open the CD/utility spell picker on an empty Blizzard list  
-- Merge pull request #2146 from svart2521/boss-unit-frames-not-showing-correct-class-colouring  
-    Fix: Boss Frame target name not showing class color on live  
-- Merge pull request #2145 from dfrisone/fix/forever-editmode-mainactionbar-taint  
-    Forever: stop the degraded layout reparenting MainActionBar  
-- Merge pull request #2144 from FrancisS/main  
-    Added new split compare option for fastest run.  
-- Merge pull request #2142 from dfrisone/fix/forever-mainbar-keybind-page  
-    Forever: click-route Action Bar 1 keys while paging is frozen  
-- Merge pull request #2141 from svart2521/received-lua-error  
-    Fix: Secret-value taint errors in social tooltip and damage breakdown  
-- Merge pull request #2139 from Thunderz96/fix/forever-power-type  
-    fix(resourcebars): use the live power type on WoW Forever  
-- Merge pull request #2138 from LoChinAn/locale-zhtw-batch-260920  
-    zhTW: translate 139 new keys for WoW Forever, Blizzard Style and Run Summary (supersedes #2047)  
-- Merge pull request #2137 from Crazyyoungs/main  
-    [koKR] Add Korean localization for new UI features  
-- Merge pull request #2135 from denis-makula/fix/unitframes-health-text-centering  
-    fix(unitframes): keep health text centered with clipping  
-- Fix: Choose your Roles window not skinned  
-    Bug:  
-    Issue: SkinApplicationDialog (LFGListApplicationDialog, the "Choose your Roles" sign-up dialog) gated itself on "not EllesmereUIDB.reskinQueuePopup" -- true (skip skinning) whenever the setting is nil, i.e. on any profile where the user never touched that checkbox. But the options panel itself, and every other reskinQueuePopup-gated feature except this one, read the same setting the opposite way (only false disables it, nil/true means enabled) -- so the checkbox shows checked by default while this dialog silently never gets skinned.  
-    Fix: Changed the gate to match the setting's actual default-on behavior, consistent with the options panel and the other queue-popup skinning code.  
-- fix(unitframes): keep Forever combo points on the target when ours are off  
-    Combo points belong to the target on Forever, not the player, so hiding  
-    Blizzard's ComboFrame outright took away a placement the client already offers  
-    through its comboPointLocation cvar.  
-    Suppress it only while our own class resource is drawing, which is what would  
-    otherwise double up; with the resource set to None, ComboFrame stays the display  
-    and is re-anchored onto the EllesmereUI target frame rather than left stranded  
-    at a dead anchor.  
-    Also refresh the pips on PLAYER\_TARGET\_CHANGED. A target swap changes the count  
-    with no power event behind it, so the row could hold a stale number -- Blizzard's  
-    own ComboFrame registers the same event for the same reason.  
-- fix(unitframes): show combo points on Forever  
-    Combo points on WoW Forever rendered as Blizzard's classic ComboFrame floating  
-    in open space. That frame is parented to UIParent and only anchored to  
-    TargetFrame, so replacing the target frame strands the art at a dead anchor  
-    rather than hiding it, and none of the BLIZZARD\_CP\_FRAMES globals the Blizzard  
-    class power style adopts exist on that client, so nothing ever took it over.  
-    Suppress ComboFrame when Blizzard's target frame is not the live one, and give  
-    Forever a class resource that works instead:  
-    - Classify the pip value rather than the resource kind. Only Vengeance soul  
-      fragments were treated as secret, so combo points, which come back secret on  
-      Forever, raised on the `i <= cur` compare.  
-    - Add FOREVER\_CLASS\_POWER. The spec-keyed entries never resolve without  
-      specializations, which left druids with nothing, and the flat entries name  
-      resources vanilla content does not have, which drew paladins and warlocks an  
-      empty five-pip row and shrank the health bar to fit it.  
-    - Gate druid pips on cat form for every druid there, since there are no specs to  
-      tell Guardian and Resto apart, and read DRUID\_CAT\_FORM instead of a literal.  
-    - Grey out the Blizzard style on Forever and migrate profiles already holding  
-      it, along with a one-time move off the "none" default, which nobody chose.  
-    - Seed the class resource in the Forever base layout.  
-- Fix: Boss Frame target name not showing class color on live  
-    Bug:  
-    Issue: Two separate bugs, both regressions from the merged "Name > Target" fix. (1) The v9.2 release squash added an "and not issecretvalue(hex)" guard around ColorMixin:GenerateHexColor's result in TagFns.tgtcol -- GenerateHexColor's hex string can itself be secret, so this guard is what silently broke the class color, rejecting a value that was actually fine to use and falling back to plain reaction color (e.g. friendly green) instead of the target's real class color. Confirmed directly via a SavedVariables capture (genHexOk=true, hexType=string, hexSecret=true) and reproduced/isolated by reinstating the guard on its own. (2) Separately, the "text" painter channel's event list never included UNIT\_TARGET, so a unit's own target changing (a boss getting taunted) triggered no repaint at all -- "Name > Target" content only updated opportunistically whenever an unrelated event (a health/power tick) happened to fire around the same time, leaving it blank until a /reload forced a full repaint.  
-    Fix: Removed the issecretvalue(hex) guard -- a secret hex string still renders correctly through SetFormattedText's arg lane, the same safe channel secret names already use elsewhere in this file, so it never needed to be a plain string to begin with. Added UNIT\_TARGET to the text channel's event list so any unit's own target change repaints immediately (applies to all "Name > Target" users: player/target/focus/boss, not just boss frames).  
-- Always save best run splits so that data is available on toggle.  
-- fix(forever): stop the degraded layout reparenting MainActionBar  
-    HideBlizzardBars spares MainActionBar deliberately: it is Edit Mode  
-    system 0 index 1, it has to stay in Blizzard's parent chain for pet  
-    battle MicroMenu restoration, and an insecure write to it taints the  
-    frame. It is hidden with alpha and an OnShow re-hide instead.  
-    \_DegradedLayoutApply, the no-snippet path, reparents every entry in  
-    STOCK\_BAR\_DISPOSAL, and MainActionBar is the first of them. That taints  
-    it on Forever, where the path is the only one that runs, so Blizzard's  
-    InitSystemAnchors is blocked on SetPointBase every reload and every  
-    /editmode:  
-      AddOn 'EllesmereUIActionBars' tried to call the protected function  
-      'MainActionBar:SetPointBase()'  
-      EditModeManager.lua:1461 in secureexecuterange  
-      EditModeManager.lua:1465 InitSystemAnchors  
-      EditModeManager.lua:1009 UpdateLayoutInfo  
-    Retail never sees it: there the snippet path does the same reparent  
-    inside the restricted environment, untainted.  
-    Skip it here. The other stock bars keep reparenting, which they already  
-    do insecurely in HideBlizzardBars on every client without complaint.  
-- fix(forever): click-route Action Bar 1 keys while paging is frozen  
-    Forever lacks loadstring\_untainted, so SecureSnippetsOK is false and the  
-    MainBar page state driver is never registered. Our bar stays on page 1  
-    for the session. The engine does not: Forever runs vanilla content, so a  
-    warrior has stances, and a stance pages bar 1 through bonusbar.  
-    ACTIONBUTTONn resolves through MainActionBar's actionpage, so the keys  
-    land on slots 73-84 while the icons, mouse clicks and drag targets use  
-    slots 1-12. Measured on a Forever warrior in Battle Stance: euislot 1  
-    holding Charge, blizzslot 73. Rearranging the bar makes it obvious, the  
-    keys keep firing the stance page's untouched default layout: key 2 casts  
-    the Heroic Strike that used to be on button 2, key 3 hits an empty slot  
-    and does nothing.  
-    This is the same show-one/fire-another split the auto-paging opt-outs  
-    just above already handle, so take the same exit. The click route reads  
-    our own static action attribute, so key, icon, click and drag agree.  
-    Scoped to MainBar: bonusbar does not reach bars 2 to 8, and their native  
-    keys resolve correctly today.  
-    Cost: press-and-hold repeat casting on Action Bar 1, on clients with no  
-    snippet compiler. Nothing changes where SNIPPETS\_OK is true.  
-- Not necessary to disable.  
-- Merge branch 'main' of https://github.com/FrancisS/EllesmereUI  
-- Added setting and functionality to display splits from fastest m+ run instead of sum of best splits.  
-- Fix: Secret-value taint errors in social tooltip and damage breakdown  
-    Bug:  
-    Issue: Two repeating Lua errors from secret-value taint: format("%s", ...) rejected a cross-faction BNet friend's secret characterName in the social tooltip, and GetSpellTexture rejected a secret spellID for non-group combat participants in the damage meter breakdown -- both unlike sibling calls in the same files that already tolerate secret arguments.  
-    Fix: Nil out a display-only copy of characterName before the tooltip's format() call (BuildFullName still gets the real value), and skip the icon lookup when spellID is secret, matching the existing GetSpellName guard nearby.  
-- Swing Timer: drive the fill from the engine timer  
-    The QoL timer this bar replaces put its fill on the engine: a per-row  
-    C\_DurationUtil duration object handed to StatusBar:SetTimerDuration, no  
-    Lua per frame. The bar was animating the same fill from a 20 Hz Lua  
-    ticker (the GCD bar's eased SetValue), a cost regression against the  
-    code it removes.  
-    PLAYER\_SWING now re-sets the row's duration object and arms the bar  
-    timer in the direction the row already drew (ElapsedTime fills,  
-    RemainingTime drains for Deplete Fill), with Immediate interpolation so  
-    a restart mid-swing snaps instead of easing back. The ticker keeps only  
-    what the engine timer cannot do: the remaining-time text and the end  
-    edge (idle render, Hide When Idle). Idle, PLAYER\_DEAD, the row toggles  
-    and bar disable park the timer on a finished duration, whose terminal  
-    state is static (the GCD bar's idle recipe), so an idle row costs  
-    nothing.  
-    The top gate now covers the duration and timer APIs alongside  
-    C\_SwingTimer and its enum, with the enum's literal fallback gone.  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- Unlock: review fixes  
-    Closes what a review against CONTRIBUTING and the surrounding code found  
-    in the explicit-anchor branch:  
-    - SetAnchorParams re-derived the offset from raw live rects, bypassing  
-      \_CaptureAnchorOffsets and so keeping the raid container's per-tier  
-      offset in the stored offset (every apply folds it back in). The helper  
-      now takes an optional point pair and every capture goes through it:  
-      the point pick, the screen-anchor set/clear recaptures, and the  
-      post-drag capture no longer computes the side offsets first.  
-    - PropagateAnchorChain's axis gate read the derived side, so a pointed  
-      child hanging off a target corner was skipped on the parent's width  
-      or height change although the corner moves under CENTER growth. The  
-      gate now reads the target point instead when one is stored.  
-    - The pre-load ReapplyOwnAnchor stub placed a pointed record with the  
-      side geometry until the full body reapplied. The point arithmetic  
-      moved ahead of the stub, which now places it the same way.  
-    - The chain cascade after a pick ran on a C\_Timer, unlike the nudge  
-      path; synchronous now, and the anchor-links stamp bumps when the  
-      derived side changes so memoized views re-derive.  
-    - The point list was parented to cogMenu, which reparents its children  
-      to nil on every open; it lives on the mover under unlockFrame like the  
-      screen-edge flyout, with that flyout's colours, font, current-row  
-      orange, click registration and leave-to-close. The value button uses  
-      MakeDropdownArrow instead of a "v" glyph, labels go through Lf, the  
-      offset boxes take the X/Y boxes' numeric setup, and one conversion  
-      serves the box and the nudge sync.  
-    - The read-only X/Y boxes were EnableMouse(false) with an ad hoc grey;  
-      they are disabled the way a matched Width/Height box is, with the  
-      same tooltip shape.  
-    - Picking a point closed and reopened the menu; it rebuilds in place.  
-    - Helpers private to this file carry the underscore the neighbours use,  
-      and the block note says why they sit on EllesmereUI (200-local cap);  
-      the PropagateAnchorChain doc comment is back on its function.  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- Swing Timer: review fixes  
-    Closes what a review against the module's own bars turned up:  
-    - ApplyRowLook read an undefined fillTex when anchoring the spark, so  
-      Show Spark pinned it to the row's right edge instead of the fill's  
-      leading edge. It now fetches the fill texture as the GCD bar does.  
-    - Every value read from the swing API and UnitAttackSpeed (PLAYER\_SWING  
-      and PLAYER\_SWING\_RANGE\_UPDATE arguments, IsTargetWithinSwingRange, the  
-      off-hand and ranged speeds) goes through a Plain() secret-value check  
-      before it is compared, and a non-finite swing duration is ignored --  
-      the guards the Quality of Life timer this bar replaces already had.  
-    - The migration moves under the Registered migrations header with the  
-      rest of the chain, and fills in the QoL defaults (240x18, gap 4,  
-      y -220) for keys the profile store stripped, so a migrated bar keeps  
-      the size and place the user last saw instead of the bar's own  
-      defaults.  
-    - Row Spacing is a pixel slider like the other spacing sliders on the  
-      Resource Bars pages.  
-    - The swing timer's width and height join the MATCH\_OWNED\_FKEYS map so  
-      a live match link is not fought by a stale spec-override copy, as the  
-      GCD bar's are.  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- Fix the Power Bar resource on WoW Forever (hunters use mana)  
-- Cooldown Manager: review fixes  
-    Closes the picker comment's mismatch with the menu it describes: the  
-    entries hidden by the removed gate are Custom Spell ID / Custom Item ID /  
-    Equipment Slot plus the trinket / racial / potion presets, not three  
-    custom entries, and the empty states that reach the gate are named the  
-    way the code sees them (before COOLDOWN\_VIEWER\_DATA\_LOADED, or every  
-    entry set to Not Displayed) so the comment says why the menu must still  
-    build there.  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- Swing Timer: row toggles on two DualRows, not a TripleRow  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- Swing Timer: queued attacks, per-row toggles; replace the QoL timer  
-    The Resource Bars swing timer takes over from the Quality of Life one  
-    (v9.2) and picks up what that one had: on-next-swing attacks (Heroic  
-    Strike / Cleave / Maul) turn the melee rows the queue colour and carry  
-    the attack's name (ACTIONBAR\_UPDATE\_STATE, registered only while the  
-    highlight is on, delta-painted); Main Hand / Off Hand / Ranged rows can  
-    be switched off individually; rows reset on PLAYER\_DEAD.  
-    The QoL files, TOC lines, options page and profile hook go; a profile  
-    migration (swing\_timer\_to\_resource\_bars\_v1) carries an enabled QoL  
-    timer's settings over (size, gap, font size, texture, position, rows,  
-    queue colour; Only Show In Combat -> the In Combat visibility mode).  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- Swing Timer: lay the rows out before styling their borders  
-    The textured border backdrop was first set up on unsized rows and then  
-    kept its dead nine-slice; size and position now come first, as on the  
-    cast and GCD bars.  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- Swing Timer: set the row fonts before the first SetText  
-    A FontString without a font raises "Font not set" on SetText on the  
-    Forever client; the tag and time strings now get the resource-bar font  
-    at creation, ApplyRowLook only re-sizes them.  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- Resource Bars: Swing Timer bar (WoW Forever)  
-    A fifth resource bar for WoW Forever, driven by the client's native swing  
-    timer API (PLAYER\_SWING, C\_SwingTimer range checks). One row per weapon  
-    slot that can swing (Main Hand / Off Hand / Ranged, from UnitAttackSpeed),  
-    stacked in one frame that shrinks to the rows shown. Each row is a  
-    StatusBar with bg, PP border, spark, remaining time and slot tag; fill on  
-    a 20 Hz anim ticker that runs only while a row is live. Out-of-range  
-    target dims the row and paints its text red, mirroring Blizzard's bar.  
-    Shares the Visibility checklist, colour/gradient/texture/border widgets  
-    and the unlock mover with the other bars (element ERB\_SwingTimer, order  
-    508, anchorable). Options page "Swing Timer" under Resource Bars.  
-    Gated on C\_SwingTimer: on retail the file returns at load, the page is  
-    not registered and the hooks are nil. Off by default = no frame, no  
-    events, no ticker.  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- zhTW: translate 103 new keys for WoW Forever, Blizzard Style and Run Summary  
-    Covers everything v9.2 and v9.2.1 added on top of the previous watermark:  
-    the Style page with its per-module Blizzard Style descriptions, the WoW  
-    Forever launch popup, the Mythic+ Run Summary panel and its columns, the  
-    Swing Timer page, the Camp Benefits reminder with the two camp foods, and  
-    the screen-edge anchors in Unlock Mode.  
-    Terms follow the client's own zhTW strings wherever one exists. Blizzard  
-    Style reuses the rendering already fixed by Blizzard Style Action Bars,  
-    Depleted takes Blizzard's own CHALLENGE\_MODE\_KEYSTONE\_DEPLETED wording,  
-    and the two camp foods use their retail item names (275266, 275269).  
-    Tooltips that name another option quote that option's existing rendering,  
-    so Tabs Inside Chat Panel, Show Level, Refresh Rate, Damage Taken and  
-    Interrupts all read the same as the controls they point at.  
-    WoW Forever stays in English: it is the client's product name and has no  
-    official zhTW rendering, the same treatment EllesmereUI itself already  
-    gets.  
-    Also drops eight entries the source no longer looks up. Five were renamed  
-    or reworded upstream and their replacements are already translated (Apply  
-    Visibility to all Frames, Stack Count, Friendly Name Size (Name Only), the  
-    rewritten pull-button countdown tooltip, and the reminder tooltip that  
-    gained augment runes); the other three no longer exist in any form. L() is  
-    an exact table lookup, so none of them could ever be hit again.  
-- Add Korean localization for new UI features  
-    Added new localization strings for UI settings and features related to WoW Forever.  
-- zhTW: translate 36 new keys for chat bubbles and Rotation Assist  
-    Covers the two v9.1.8 additions that shipped untranslated: the Chat Bubbles  
-    page (channel picker, appearance sliders, enable popup and the instance  
-    warning) and the Cooldown Manager's Rotation Assist style row.  
-    Terms follow the client's own zhTW strings wherever one exists, and tooltips  
-    reuse the exact option names the player sees on the same page, including the  
-    existing Party and Raid renderings.  
-    Also replaces the Chat module's searchTerms haystack. Upstream appended the  
-    bubble keywords to it, so the previous key can never be looked up again --  
-    L() is an exact table lookup. The Chinese search words carry over unchanged  
-    plus the new bubble terms.  
-- fix(unitframes): keep health text centered with clipping  
-    Preserve the health bar's logical vertical position while retaining the half-pixel clipping inset. Cancel the clip's top inset after pixel snapping so zero-offset text matches the preview instead of inheriting a downward half-pixel shift.  
-- Cooldown Manager: open the CD/utility spell picker on an empty Blizzard list  
-    ShowSpellPicker returned before building the menu when the bar's Blizzard  
-    CDM set was empty, which also hid the Custom Spell ID / Custom Item /  
-    Equipment Slot entries it hosts - the only way to populate a bar while the  
-    viewer has no data for the spec. The list sections already render nothing  
-    for an empty set, so the gate is dropped.  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- unlock: Offset X/Y boxes in physical pixels  
-    The two Offset boxes showed and took raw UIParent units while every  
-    pixel slider (Button Spacing) and the X/Y Position boxes next to them  
-    show physical pixels; at 1.8 px/unit an Offset of 5 read as a Spacing of  
-    10 within a pixel. Convert with PP.ToPixels / PP.FromPixels so +1 is one  
-    pixel, one nudge, and the numbers agree with the sliders.  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- unlock: keep anchor points across the Exit-without-saving snapshot  
-    The discard snapshot copies anchor records field by field; point/relPoint  
-    were not on the list, so every pointed anchor came back as a side record  
-    carrying point-to-point offsets and jumped on Exit without saving.  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
-- unlock: edit an anchor's points and offsets from the cog menu  
-    An anchored element's cog menu (right-click in Unlock Mode) gets an  
-    Anchor block under the size/position rows: the target it hangs off, a  
-    point dropdown for THIS element, a point dropdown for the target (each  
-    labelled with the element's name and offering the nine frame points),  
-    and Offset X / Offset Y in pixels. Picking a point keeps the element  
-    exactly where it is - the offset is re-derived from live bounds for the  
-    new pair - and a typed offset moves it. "Action Bar 3 point: Bottom  
-    Left, Action Bar 2 point: Bottom Right, 0, 0" reads the way SetPoint  
-    does, which is the vocabulary people already have.  
-    Storage: ai.point / ai.relPoint on the anchor record, both optional. A  
-    record without them reads back as the classic side geometry (child's  
-    near edge on the target's edge, centred across), so nothing changes for  
-    existing anchors, drags, nudges, chains, fallbacks or the Anchor To  
-    picker. With them, ApplyAnchorPosition places the element from the two  
-    points directly and skips the growth-edge pin and edge preservation:  
-    the own point IS the fixed edge, so a resize grows away from it by  
-    construction. ai.side is kept in sync from the pair for the parts of the  
-    system that read it (chain extents, mover captions, fallback picks), and  
-    the post-drag capture stores the offset point to point.  
-    Why not expose side + a cross-axis alignment instead: it was tried  
-    first, and "side" was ambiguous (it is the target's edge, not the  
-    element's), the growth pin fought the cross alignment, and it still  
-    could not say "my bottom-left on your bottom-right" without a hand-  
-    computed offset.  
-    No new top-level locals (the file sits at 196).  
-    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
+- Release v9.2.9  
+- Merge pull request #2213 from cassidymichael/feat/unitframes-power-cost-prediction  
+    feat(unitframes): opt-in spell cost prediction on the player power bar  
+- Merge pull request #2202 from cassidymichael/feat/faction-indicator  
+    feat: faction indicator on unit frames and nameplates  
+- feat: faction indicator on unit frames and nameplates  
+    Opt-in Horde/Alliance indicator for the Player and Target frames and the  
+    nameplates (its own Core Positions slot, or combined with Rare/Quest;  
+    full friendly plates included, name-only plates stay just the name),  
+    with PvP flag handling (dim unflagged, flagged only, ignore), a Players  
+    Only option and seven icon styles. Preview eyes and click-to-jump for  
+    Raid Marker, Leader, Elite and Faction.  
+    Everything defaults to off. The nameplate badge frame and its  
+    UNIT\_FACTION / UNIT\_FLAGS registrations exist only while a faction slot  
+    is set; the unit frame events register only while an indicator is on.  
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>  
+- Merge pull request #2204 from cassidymichael/feat/unitframes-heal-prediction  
+    feat(unitframes): opt-in heal prediction on player, target, focus and boss frames  
+- feat(unitframes): opt-in spell cost prediction on the player power bar  
+    While a spell with a cast time is cast, the mana it will cost shows as  
+    a colored segment at the end of the player's power bar, like Blizzard's  
+    player frame. A StatusBar anchored to the fill's leading edge fills back  
+    over it, laid out on each cast start (texture, fill direction, Blizzard  
+    Style mask); max power and the cost from C\_Spell.GetSpellPowerCost only  
+    reach SetMinMaxValues/SetValue (secret-safe). The cast is matched by  
+    castGUID, so instants cast during it leave it alone. Mana only.  
+    Options in the Player Power Bar section: Spell Cost Prediction toggle  
+    with a preview eyeball, and Spell Cost Color (default: Blizzard's  
+    POWERBAR\_PREDICTION\_COLOR\_MANA). Off by default: the segment and the  
+    cast-event listener are created only when it is turned on.  
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>  
+- Merge pull request #2186 from dfrisone/fix/chat-undocked-buttonframe-fade  
+    fix(chat): keep the button frame hidden on undocked chat windows  
+- Merge pull request #2201 from cassidymichael/feat/unitframes-buff-dispel-borders  
+    feat(unitframes): opt-in dispel type borders on target, focus and boss buffs  
+- Merge pull request #2203 from cassidymichael/feat/level-difficulty-color  
+    feat: color level text by difficulty on unit frames and nameplates  
+- Merge pull request #2211 from dfrisone/fix/forever-cdm-spec-key  
+    Fix(Cooldown Manager): resolve the spec through C\_SpecializationInfo  
+- Merge pull request #2210 from dfrisone/feat/quest-tracker-delves  
+    Add a Dungeons condition to the Where to Show checklist  
+- Merge pull request #2209 from dfrisone/feature/party-mode-spins-visibility  
+    feat(partymode): spinning CDM, data bars, unit frames and resource bars; Party Mode visibility condition  
+- Merge pull request #2207 from dfrisone/forever/threat-meter  
+    Add a threat meter to Quality of Life (WoW Forever only)  
+- Merge pull request #2208 from Barbiero/locale/ptbr-since-928  
+    ptBR: translate raid frame group order, Show In filter, style options and new disabled-option tooltips  
+- Fix(Cooldown Manager): count other classes' specs through C\_SpecializationInfo  
+    GetNumSpecializationsForClassID is another Blizzard\_DeprecatedSpecialization  
+    alias, nil on Forever, so the Sync From source picker listed no specs there.  
+- Fix(Cooldown Manager): resolve the spec through C\_SpecializationInfo  
+    WoW Forever does not load Blizzard\_DeprecatedSpecialization (its TOC allows  
+    only classic and standard, not camelot), so the loose GetSpecialization and  
+    GetSpecializationInfo globals are nil there. The spec key read them behind  
+    an existence guard, so it quietly came back nil: GetBarSpellData returned  
+    nil for every bar and clicking any icon in the options errored at the  
+    unguarded sd.hostedBuffSpellIDs read.  
+    Every Cooldown Manager spec lookup now calls the C\_SpecializationInfo  
+    functions those globals alias on retail, so retail behaviour is unchanged.  
+    This also revives the healer check behind the focus kick context, which was  
+    gated on the missing globals. The options read gains the sd guard its  
+    neighbours already have.  
+- Add a Dungeons condition to the Where to Show checklist  
+    Hide in Instances also covers delves, because delves are scenarios, so  
+    there was no way to hide an element in dungeons and keep it in delves.  
+    Delves are always a party, so the group conditions offer no way around  
+    it either.  
+    The new Dungeons row counts five-player dungeons only, Mythic+ included.  
+    Delves, raids and scenarios do not count, and garrisons are excluded as  
+    they are for Instances. It is a Lua-only axis like Instances, Resting  
+    and In Vehicle, re-evaluated on the zone events Instances already uses,  
+    and off by default.  
+- feat(partymode): spinning CDM, data bars, unit frames and resource bars; Party Mode visibility condition  
+    * Visibility > Party Mode: new Show/Hide lane (visOnlyPartyMode /  
+      visHidePartyMode). Party Mode has no game event, so Start/Stop fire  
+      EllesmereUI.FireVisEdge; modules that evaluate visibility on their own  
+      frames register through EllesmereUI.RegisterVisEdge. An edge that lands  
+      in combat re-fires on PLAYER\_REGEN\_ENABLED so secure bars catch up.  
+    * Spinning Cooldown Manager: icons orbit their bar's centre (or the root  
+      bar of an anchor chain), snap to rest in combat and resume after.  
+    * Shared spin engine, EllesmereUI.PartySpin\_Create, used by:  
+      - Spinning Data Bars: blocks orbit their bar's centre  
+      - Spinning Unit Frames: EUI unit frames orbit the screen centre  
+      - Spinning Resource Bars: pips / runes orbit the class resource bar  
+      - Spinning Power Bars: health and primary power bars orbit the screen centre  
+      Pauses in combat and while Unlock Mode is open. All toggles default off,  
+      each with a speed cog on the Party Mode page.  
+- fix(qol): show Forever threat values without the x100 downscale  
+    Forever's UnitDetailedThreatSituation returns threat in display units (a  
+    couple of hits read 53 in game), not the x100 scale Classic's API uses, so  
+    dividing by 100 showed every value a hundred times too small. Bar lengths,  
+    order, percents and the pull line were unaffected; only the numbers were.  
+- feat(qol): add a threat meter for WoW Forever  
+    A Threat tab under Quality of Life, listed on WoW Forever only, showing  
+    everyone's threat on your target as class-colored bars, highest first. With  
+    a friendly target it shows the mob that target is fighting. Off by default.  
+    Forever hands UnitDetailedThreatSituation over readable  
+    (C\_Secrets.ShouldUnitThreatValuesBeSecret is false there); a value that does  
+    come back secret skips that unit rather than erroring.  
+    Includes a pull aggro bar, a one-shot warning sound at a threshold (quiet  
+    while tanking if chosen), the shared Visibility control, and the usual size,  
+    border, texture, font and color options. Moves and resizes in Unlock Mode.  
+    Updates are event-driven and coalesced to one redraw per 0.2s. The one  
+    exception is following a friendly target's enemy in combat: that mob is only  
+    reachable as targettarget, which UNIT\_THREAT\_LIST\_UPDATE never names, so the  
+    meter re-reads every 0.5s in that case only.  
+- ptBR: translate raid frame Custom Group Order, party frame buff anchors and Name Position, Show In indicator filter, Blizzard Border glow style, Blizzard UI Color, cast bar Inherit texture, Resource Bars style description and the disabled-option tooltips now shown for nameplate, raid frame, damage meter and cooldown manager settings; drop keys for removed strings  
+- feat(unitframes): opt-in heal prediction on player, target, focus and boss frames  
+    Incoming heals drawn past the health fill, like Blizzard's frames: the  
+    player's own heals first, then other players', each in its own color.  
+    Two StatusBars fed by a heal prediction calculator (secret-safe), in the  
+    absorb cluster's missing-health clip, following the fill direction  
+    (reverse and vertical included). An Overheal slider lets them run past  
+    the bar's end by up to 50% of its length: a holder outside the frame's  
+    bar clip, clipping at the allowance, with the calculator clamping to  
+    maximum health.  
+    Options in the Absorbs section, renamed Absorbs and Heals: Heal  
+    Prediction toggle with two color swatches and a preview eyeball,  
+    Prediction Opacity (default 60), Overheal, and Texture (Health Bar, the  
+    default, follows the frame's own health texture; Flat; or any health-bar  
+    texture). Boss Frames use the Target setting, like their absorbs. Off by  
+    default: the bars, the calculator and the UNIT\_HEAL\_PREDICTION listener  
+    are created only when a frame turns it on.  
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>  
+- Merge remote-tracking branch 'upstream/main' into fix/chat-undocked-buttonframe-fade  
+- fix(chat): gate the button-frame alpha re-assert to docked frames  
+    Elle: the watcher still forced this frame's alpha to 0 on every pass,  
+    regardless of dock state, so it kept fighting Blizzard's undocked hover  
+    fade after the last commit. btnFrame's own border/background art is  
+    gone either way, but the minimize button is a child that kept its art  
+    and inherited the fight, which is what still flickered. Undocked  
+    windows now follow Blizzard's own fade untouched; the re-assert only  
+    runs while docked, which is also the only state that needs it.  
+- feat: color level text by difficulty on unit frames and nameplates  
+    Optional level text coloring in Blizzard's difficulty colors (red "??",  
+    gold for units you cannot attack, otherwise the color for the unit's  
+    level against yours), with an Include Friendly option that colors  
+    friendly units by level too. Unit frames: two toggles on the Unit  
+    Frames page, applied to the Level, Level | Name and Name | Level texts.  
+    Nameplates: the same two toggles in the level text slot's cog, which  
+    gains an optional second toggle row. Off by default.  
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>  
+- feat(unitframes): opt-in dispel type borders on target, focus and boss buffs  
+    The debuff Dispel Type Borders ring, now also available on buffs: typed  
+    buffs on Target, Focus and Boss frames get the engine-tinted ring (Magic  
+    blue), untyped buffs none. Off by default; a Dispel Type Borders toggle  
+    in each Buff Settings cog. AuraKit's ring registration takes  
+    showWhenHelpful from the new style.dispelHelpful instead of hardcoding  
+    false.  
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>  
+- fix(chat): restore the minimize button on undocked windows  
+    Leave it alone rather than disabling it. It fades in with btnFrame's  
+    alpha on hover, the same as any other chat window's, since the black  
+    bar behind it -- the reported bug -- is gone regardless: btnFrame's  
+    own border/background textures are what get emptied, and the button  
+    is a separate child object neither of those writes ever reached.  
+- fix(chat): drop dead alpha writes, fix stale comments (review)  
+    The wiped button-frame textures never needed a SetAlpha(0) alongside  
+    SetTexture(""): the texture is gone either way, and Blizzard periodically  
+    resets these regions' own alpha (FCF\_SetWindowAlpha, the tab-menu opacity  
+    slider), so the write was doing nothing. The minimize button does not  
+    need the same texture wipe: nothing re-applies its own alpha, so a single  
+    SetAlpha(0) at skin time holds. Updated SyncChatFrameState's header  
+    comment, which still described the button frame as watcher-hidden.  
+- fix(chat): hide the button frame by its art, not an alpha hook  
+    A SetAlpha post-hook ran inside Blizzard's dock pass and chat fades,  
+    the path this module keeps its code out of; 6.8.3 shipped and removed  
+    the same hook. Blizzard never re-textures the button frame or its  
+    minimize button, so empty their textures once at skin time and disable  
+    the minimize button's mouse. The old lookup of that button used a name  
+    that does not exist, so it stayed clickable on undocked windows.  
+- fix(chat): keep the button frame hidden on undocked chat windows  
+    Blizzard fades an undocked window's button frame in on hover and out to  
+    0.2 alpha, animating it every frame. The state watcher's periodic zero  
+    could not keep up, so the black bar flickered beside a moved chat window  
+    and stayed faintly visible afterwards. Zero every alpha write with a  
+    SetAlpha post-hook, installed once per chat frame.  
