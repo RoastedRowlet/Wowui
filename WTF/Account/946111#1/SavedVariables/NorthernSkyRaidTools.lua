@@ -2712,6 +2712,8 @@ NSRT = {
 ["UnreadyOnCooldown"] = false,
 },
 ["ActivePersonalReminder"] = {
+["Madmareep-Stormrage"] = {
+},
 ["Zappyxatu-Stormrage"] = {
 [3429] = "Ele Altar",
 [3492] = "Ele Ula",
@@ -2750,11 +2752,11 @@ NSRT = {
 1,
 },
 ["ShowBar"] = false,
-["NameFontFlags"] = "OUTLINE",
+["NumberFont"] = "Expressway",
 ["relativeTo"] = "CENTER",
 ["NameAnchor"] = "BOTTOM",
 ["NumberyOffset"] = 0,
-["NameFontSize"] = 30,
+["NameFontFlags"] = "OUTLINE",
 ["NamexOffset"] = 0,
 ["InterruptNowTextColor"] = {
 1,
@@ -2763,19 +2765,19 @@ NSRT = {
 1,
 },
 ["Width"] = 100,
-["NumberFontFlags"] = "OUTLINE",
+["NumberxOffset"] = 0,
 ["InterruptNextTextColor"] = {
 1,
 0,
 0,
 1,
 },
-["NumberFont"] = "Expressway",
+["NumberFontFlags"] = "OUTLINE",
 ["InterruptSound"] = "|cFF4BAAC8Interrupt|r",
 ["Height"] = 100,
 ["NameFont"] = "Expressway",
 ["NameyOffset"] = 10,
-["NumberxOffset"] = 0,
+["NameFontSize"] = 30,
 },
 ["PersonalNotes"] = {
 },
@@ -5552,11 +5554,14 @@ NSRT = {
 ["flask"] = 245929,
 },
 ["Madmareep-Stormrage"] = {
-["food"] = 255845,
 ["flask"] = 245931,
+["food"] = 255845,
+["weapon"] = 243734,
 },
 },
 ["ActivePersonalReminder"] = {
+["Madmareep-Stormrage"] = {
+},
 ["Zappyxatu-Stormrage"] = {
 [3429] = "Ele Altar",
 [3492] = "Ele Ula",
@@ -5605,7 +5610,7 @@ NSRT = {
 1,
 1,
 },
-["NumberxOffset"] = 0,
+["NameFontSize"] = 30,
 ["yOffset"] = 400,
 ["NumberFontSize"] = 60,
 ["InterruptDefaultColor"] = {
@@ -5625,11 +5630,11 @@ NSRT = {
 0,
 1,
 },
-["NameFontSize"] = 30,
+["NameFontFlags"] = "OUTLINE",
 ["relativeTo"] = "CENTER",
 ["InterruptSound"] = "|cFF4BAAC8Interrupt|r",
-["NumberFont"] = "Expressway",
 ["NumberFontFlags"] = "OUTLINE",
+["NumberxOffset"] = 0,
 ["NumberyOffset"] = 0,
 ["InterruptNowTextColor"] = {
 1,
@@ -5638,7 +5643,7 @@ NSRT = {
 1,
 },
 ["Width"] = 100,
-["NameFontFlags"] = "OUTLINE",
+["NumberFont"] = "Expressway",
 ["InterruptNextTextColor"] = {
 1,
 0,
@@ -15786,6 +15791,7 @@ NSRT = {
 },
 ["Madmareep-Stormrage"] = {
 ["flask"] = 245931,
+["weapon"] = 243734,
 ["food"] = 255845,
 },
 },

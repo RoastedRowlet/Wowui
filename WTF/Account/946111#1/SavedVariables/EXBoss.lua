@@ -3519,7 +3519,7 @@ EXBOSS12S2 = {
 },
 ["Changelog"] = {
 ["LastSeenVersion"] = "v26.9.15.1537",
-["LastSeenAt"] = "2026-09-25 17:54:41",
+["LastSeenAt"] = "2026-09-28 19:21:39",
 ["LastPopupAt"] = "2026-09-25 02:38:49",
 ["LastPopupVersion"] = "v26.9.15.1537",
 },

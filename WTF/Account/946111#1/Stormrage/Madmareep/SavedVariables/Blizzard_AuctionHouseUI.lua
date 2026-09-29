@@ -5,7 +5,7 @@ g_auctionHouseFilters = {
 ["filters"] = {
 false,
 false,
-false,
+true,
 false,
 nil,
 true,

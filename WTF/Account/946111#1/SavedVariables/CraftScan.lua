@@ -3699,23 +3699,73 @@ CraftScan_DB = {
 },
 },
 ["listed_orders"] = {
+["Ahokatoa-Stormrage-1229648"] = {
+["customerName"] = "Ahokatoa-Stormrage",
+["responseID"] = 1229648,
+},
 },
 ["analytics"] = {
 },
 ["customers"] = {
-["Phantumdeath-Stormrage"] = {
-["responses"] = {
-[2906] = {
-},
-},
-["guid"] = "Player-60-0EDECD91",
-},
 ["Bluesbro-Stormrage"] = {
 ["responses"] = {
 [2909] = {
 },
 },
 ["guid"] = "Player-60-0E30EA71",
+},
+["Ahokatoa-Stormrage"] = {
+["chat_history"] = {
+{
+["message"] = "lfc |cnIQ4:|Hitem:237846::::::::90:250::13:1:3524:6:40:2737:38:8:46:274476:47:245876:48:245786:49:-2147480202:::::|h[Blood Knight's Warblade |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r 331",
+},
+},
+["responses"] = {
+[1229648] = {
+["alt_craft"] = true,
+["crafterFullName"] = "Lonelylitten-Stormrage",
+["professionID"] = 2907,
+["recipeID"] = 1229648,
+["crafterName"] = "Lonelylitten",
+["message"] = {
+"My alt, Lonelylitten, can craft |cnIQ4:|Hitem:237846::::::::90:256:::::::::|h[Blood Knight's Warblade]|h|r. Let me know if you send an order so I can log over.",
+},
+["less_granular"] = {
+2907,
+},
+["responseID"] = 1229648,
+["time"] = 1790645422,
+["professionName"] = "Blacksmithing",
+["itemID"] = 237846,
+["parentProfID"] = 164,
+},
+[2907] = {
+["alt_craft"] = true,
+["crafterFullName"] = "Lonelylitten-Stormrage",
+["professionID"] = 2907,
+["recipeID"] = 1229648,
+["crafterName"] = "Lonelylitten",
+["message"] = {
+"My alt, Lonelylitten, can craft |cnIQ4:|Hitem:237846::::::::90:256:::::::::|h[Blood Knight's Warblade]|h|r. Let me know if you send an order so I can log over.",
+},
+["less_granular"] = {
+2907,
+},
+["responseID"] = 1229648,
+["time"] = 1790645422,
+["professionName"] = "Blacksmithing",
+["itemID"] = 237846,
+["parentProfID"] = 164,
+},
+},
+["guid"] = "Player-60-0FAE40D2",
+},
+["Phantumdeath-Stormrage"] = {
+["responses"] = {
+[2906] = {
+},
+},
+["guid"] = "Player-60-0EDECD91",
 },
 },
 },

@@ -1,13 +1,21 @@
 # BigWigs
 
-## [v425.7](https://github.com/BigWigsMods/BigWigs/tree/v425.7) (2026-09-24)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v425.6...v425.7) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v426](https://github.com/BigWigsMods/BigWigs/tree/v426) (2026-09-27)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v425.7...v426) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
+- Core/BossPrototype: Protect `:MobId()` from secrets, closes #2808  
 - Bump version  
-- Cleanups  
-- Plugins/Bars: Cleanups  
-- API: Improve `IsValidFrame`  
-- Plugins/BossBlock: Add more talking heads  
-- Tools/Keystones: Rename the shortened version of Kings' Rest from "Rest" to "Kings"  
-- Plugins/Bars: Swap to using `IsValidFrame` for anchor validation  
-- API: Add `IsValidFrame`  
+- TheVenomousAbyss/Sentinels: Cleanups  
+- Core/BossPrototype: Add `SetInfoTimerBar`  
+- Plugins/InfoBox: Add timer bar support  
+- TheVenomousAbyss/Sentinels: Locale updates  
+- Locales: Add more common locale  
+- TheVenomousAbyss/Ulatek: Mark as using range checks  
+- TheVenomousAbyss/Sentinels: Add rangecheck infobox  
+- Core/BossPrototype: Add `SetUsesRangeChecks`, `IsUsingRangeChecks` and `GetUnitMinMaxRange`  
+- TheVenomousAbyss/Ulatek: Update Serpent's Bite Aura Data  
+- Core/BossPrototype: Update range data  
+- TheVenomousAbyss/Nekzali: Fix phase check  
+- Core: Enable plugins prior to sending the options ready callback  
+- Options: Tweak  
+- Options: Possible fix for repo users  

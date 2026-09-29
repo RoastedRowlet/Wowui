@@ -1,6 +1,74 @@
 
 SimulationCraftDB = {
 ["char"] = {
+["Madmareep - Stormrage"] = {
+["bonusRolls"] = {
+{
+["ts"] = 1790535060,
+["currency"] = 3418,
+["source"] = 278285,
+["context"] = 5,
+["keyLevel"] = 1,
+["spec"] = 256,
+["season"] = 37,
+["itemId"] = 268203,
+},
+},
+},
+["Zappyxatu - Stormrage"] = {
+["bonusRolls"] = {
+{
+["currency"] = 3418,
+["ts"] = 1787927220,
+["source"] = 278286,
+["season"] = 37,
+["keyLevel"] = 2,
+["spec"] = 263,
+["context"] = 5,
+["itemId"] = 270924,
+},
+{
+["currency"] = 3418,
+["ts"] = 1788293700,
+["source"] = 278286,
+["season"] = 37,
+["keyLevel"] = 2,
+["spec"] = 263,
+["context"] = 5,
+["itemId"] = 270164,
+},
+{
+["currency"] = 3418,
+["ts"] = 1788900960,
+["source"] = 278284,
+["season"] = 37,
+["keyLevel"] = 4,
+["spec"] = 264,
+["context"] = 5,
+["itemId"] = 268265,
+},
+{
+["ts"] = 1789504920,
+["currency"] = 3418,
+["source"] = 278284,
+["context"] = 5,
+["keyLevel"] = 4,
+["spec"] = 264,
+["season"] = 37,
+["itemId"] = 271876,
+},
+{
+["ts"] = 1790109480,
+["currency"] = 3418,
+["source"] = 278284,
+["context"] = 5,
+["keyLevel"] = 4,
+["spec"] = 264,
+["season"] = 37,
+["itemId"] = 271092,
+},
+},
+},
 ["Barelynoer - Area 52"] = {
 ["bonusRolls"] = {
 {
@@ -59,60 +127,6 @@ SimulationCraftDB = {
 },
 },
 },
-["Zappyxatu - Stormrage"] = {
-["bonusRolls"] = {
-{
-["currency"] = 3418,
-["ts"] = 1787927220,
-["source"] = 278286,
-["season"] = 37,
-["keyLevel"] = 2,
-["spec"] = 263,
-["context"] = 5,
-["itemId"] = 270924,
-},
-{
-["currency"] = 3418,
-["ts"] = 1788293700,
-["source"] = 278286,
-["season"] = 37,
-["keyLevel"] = 2,
-["spec"] = 263,
-["context"] = 5,
-["itemId"] = 270164,
-},
-{
-["currency"] = 3418,
-["ts"] = 1788900960,
-["source"] = 278284,
-["season"] = 37,
-["keyLevel"] = 4,
-["spec"] = 264,
-["context"] = 5,
-["itemId"] = 268265,
-},
-{
-["ts"] = 1789504920,
-["currency"] = 3418,
-["source"] = 278284,
-["context"] = 5,
-["keyLevel"] = 4,
-["spec"] = 264,
-["season"] = 37,
-["itemId"] = 271876,
-},
-{
-["ts"] = 1790109480,
-["currency"] = 3418,
-["source"] = 278284,
-["context"] = 5,
-["keyLevel"] = 4,
-["spec"] = 264,
-["season"] = 37,
-["itemId"] = 271092,
-},
-},
-},
 },
 ["profileKeys"] = {
 ["Taurostotem - Area 52"] = "Taurostotem - Area 52",
@@ -148,14 +162,14 @@ SimulationCraftDB = {
 },
 },
 ["Lonelylitten - Stormrage"] = {
-["minimap"] = {
-["minimapPos"] = 225.6023459701718,
-},
 ["frame"] = {
 ["ofsx"] = -276.667724609375,
 ["ofsy"] = 12.50020217895508,
 ["point"] = "RIGHT",
 ["relativePoint"] = "RIGHT",
+},
+["minimap"] = {
+["minimapPos"] = 225.6023459701718,
 },
 },
 ["Madmareep - Stormrage"] = {

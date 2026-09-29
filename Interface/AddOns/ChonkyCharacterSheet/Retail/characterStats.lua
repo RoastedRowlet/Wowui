@@ -2571,7 +2571,7 @@ UpdateAllStats = function(parent)
 end
 
 -- Make this into a minimal scroll bar; like blizzard's since that is what we are mimic'ing.
-local function SetupScrollBar()
+function CCS.SetupScrollBar()
     local sb = _G["CCS_stat_sfScrollBar"]
     if not sb then return end
 
@@ -2739,7 +2739,7 @@ local function CreateStatsScrollBar(scrollFrame)
     scrollFrame.scrollBar = sb
 
     -- Apply minimal skin
-    SetupScrollBar()
+    CCS.SetupScrollBar()
 
     return sb
 end

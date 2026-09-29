@@ -3,38 +3,38 @@ TalentLoadoutEx = {
 ["SHAMAN"] = {
 {
 {
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMLzMzYssYajZmlxyMmZMsMLzMLDjZmFAghBwMjhhB",
 ["name"] = "Den",
+["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMLzMzYssYajZmlxyMmZMsMLzMLDjZmFAghBwMjhhB",
 ["icon"] = 134400,
 },
 {
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsMzMjx2ipNmZMWmZmZMsMLDLmZYmtBAMMAmZMMMA",
 ["name"] = "Altar WCL",
+["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsMzMjx2ipNmZMWmZmZMsMLDLmZYmtBAMMAmZMMMA",
 ["icon"] = 134400,
 },
 {
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZw2CthZMzyMzMzDMsMLzMLDjZmFAgZAwMjhhB",
 ["name"] = "Ula ",
+["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZw2CthZMzyMzMzDMsMLzMLDjZmFAgZAwMjhhB",
 ["icon"] = 134400,
 },
 {
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZZZMmhBAAAAsYmNYADY2YCMLAwsMzMjx2iJMzsMWmZmZMmFLjZZYMzsMAghBwMjhZ8BA",
 ["name"] = "Explo",
+["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZZZMmhBAAAAsYmNYADY2YCMLAwsMzMjx2iJMzsMWmZmZMmFLjZZYMzsMAghBwMjhZ8BA",
 ["icon"] = 134400,
 },
 {
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZGjlZMz8ADLzyMzywYmZBAYYAMzYYYA",
 ["name"] = "Top M+",
+["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZGjlZMz8ADLzyMzywYmZBAYYAMzYYYA",
 ["icon"] = 134400,
 },
 {
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMmZmZZbZMMjBAAAAsYmNYADY2YCZWAgZZmZGjtFTYmZZsMzMzYYZWmxiZGmZZAADAMzYYYA",
 ["name"] = "Raid",
+["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMmZmZZbZMMjBAAAAsYmNYADY2YCZWAgZZmZGjtFTYmZZsMzMzYYZWmxiZGmZZAADAMzYYYA",
 ["icon"] = 134400,
 },
 {
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZZZMmhBAAAAsYmNYADY2YCZWAgZbmZGjtFTbMzYsMzMzYYxyMzyMGzMLAADDgZGDDD",
 ["name"] = "M+",
+["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZZZMmhBAAAAsYmNYADY2YCZWAgZbmZGjtFTbMzYsMzMzYYxyMzyMGzMLAADDgZGDDD",
 ["icon"] = 134400,
 },
 },
@@ -329,17 +329,28 @@ TalentLoadoutEx = {
 ["PRIEST"] = {
 {
 {
+["icon"] = 134400,
+["name"] = "Nez",
+["text"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyMzMYmHwgZbmZmZmZAAAAAAAAAAYGWmBzMzwMmZATz0MDmZAAAmtZbDM2MAAMGzMGMDmZwIYA",
+["isInGroup"] = false,
+["pvp1"] = 100,
 ["pvp3"] = 5640,
-["name"] = "Oracle",
 ["pvp2"] = 114,
+},
+{
+["pvp3"] = 5640,
+["pvp2"] = 114,
+["name"] = "Oracle",
+["isInGroup"] = false,
 ["text"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMmBmZbmtZmZmxMDAAAAAAAAAgxYZGMzMjNjZGsZamYAmZDDhxsMAjBLAAwYmZGDmBYmZEMD",
 ["icon"] = 134400,
 ["pvp1"] = 100,
 },
 {
 ["pvp3"] = 5640,
-["pvp2"] = 114,
 ["name"] = "Dung",
+["pvp2"] = 114,
+["isInGroup"] = false,
 ["pvp1"] = 100,
 ["icon"] = 134400,
 ["text"] = "CAQAR03Gt7xPmcDNOjs2Zlb3yCDsMzMWYMGzgZzsNzMzMzMDAAAAAAAAAghZZGMzMDGzMYz0MxgZGAEAz2stAGbGAAGzMzYwMYmBzEMD",

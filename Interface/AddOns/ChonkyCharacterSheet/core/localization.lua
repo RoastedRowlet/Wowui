@@ -22,7 +22,7 @@ local locale = GetLocale()
 ------------------------------------------------------------
 -- Default (enUS)
 ------------------------------------------------------------
-local midnightName = EXPANSION_NAME11 or "Midnight"
+local midnightName = "Midnight"
 local DAM_HEAL = DAMAGE .."/".. (DAMAGE_METER_CATEGORY_HEALING or SHOW_COMBAT_HEALING_TEXT)
 
 local defaultStrings = {

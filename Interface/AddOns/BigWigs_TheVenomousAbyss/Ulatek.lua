@@ -14,6 +14,7 @@ mod:SetBlockedUnitsForWipeHealthCheck({
 })
 mod:SetEncounterID(3492)
 mod:SetRespawnTime(30)
+mod:SetUsesRangeChecks(true)
 mod:UseCustomTimers(true)
 mod:SetStage(1)
 
@@ -129,7 +130,8 @@ mod:SetRenames({
 
 mod:SetAuraData({
 	{1311611, soundOnApplied = "alarm", header = CL.important}, -- Grasping Fangs
-	{1288879, soundOnApplied = "warning"}, -- Serpent's Bite
+	{1293046, soundOnApplied = "warning", note = CL.preDebuffNote}, -- Serpent's Bite Pre-debuff
+	{1288879, soundOnApplied = "none", note = CL.postDebuffNote:format(mod:SpellName(1293046))}, -- Serpent's Bite
 	{1313529, soundOnApplied = "info", note = CL.debuffWalkIntoObjectNote:format(mod:SpellName(1288879))}, -- Ingested Venom
 	{1312967, soundOnApplied = "alarm", soundOnAppliedDose = "none", note = CL.debuffAddsCast:format(mod:SpellName(1313529))}, -- Volatile Purge
 	{1300685}, -- Soul Constrictor

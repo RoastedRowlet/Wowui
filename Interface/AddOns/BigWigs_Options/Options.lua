@@ -374,10 +374,32 @@ do
 	acd:SetDefaultSize("BigWigs", 858, 660)
 	acd:SetDefaultSize("BigWigsTools", 858, 660)
 
-	colorModule = BigWigs:GetPlugin("Colors")
-	soundModule = BigWigs:GetPlugin("Sounds")
-	acr:RegisterOptionsTable("BigWigs: Colors Override", colorModule:SetColorOptions("dummy", "dummy"), true)
-	acr:RegisterOptionsTable("BigWigs: Sounds Override", soundModule:SetSoundOptions("dummy", "dummy"), true)
+	colorModule = BigWigs:GetPlugin("Colors", true)
+	if colorModule then -- This should be fine for LoD users
+		acr:RegisterOptionsTable("BigWigs: Colors Override", colorModule:SetColorOptions("dummy", "dummy"), true)
+	else -- Backup for repo users
+		local tbl = {}
+		loader.RegisterMessage(tbl, "BigWigs_PluginOptionsReady", function(event, pluginName)
+			if pluginName == "Colors" then
+				loader.UnregisterMessage(tbl, event)
+				colorModule = BigWigs:GetPlugin("Colors")
+				acr:RegisterOptionsTable("BigWigs: Colors Override", colorModule:SetColorOptions("dummy", "dummy"), true)
+			end
+		end)
+	end
+	soundModule = BigWigs:GetPlugin("Sounds", true)
+	if soundModule then -- This should be fine for LoD users
+		acr:RegisterOptionsTable("BigWigs: Sounds Override", soundModule:SetSoundOptions("dummy", "dummy"), true)
+	else -- Backup for repo users
+		local tbl = {}
+		loader.RegisterMessage(tbl, "BigWigs_PluginOptionsReady", function(event, pluginName)
+			if pluginName == "Sounds" then
+				loader.UnregisterMessage(tbl, event)
+				soundModule = BigWigs:GetPlugin("Sounds")
+				acr:RegisterOptionsTable("BigWigs: Sounds Override", soundModule:SetSoundOptions("dummy", "dummy"), true)
+			end
+		end)
+	end
 end
 
 local spellDescriptionUpdater = CreateFrame("Frame")

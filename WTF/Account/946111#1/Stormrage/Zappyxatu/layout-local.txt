@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 272
+FrameLevel: 285
 Anchor: LEFT
 X: 44
 Y: -235
@@ -41,6 +41,13 @@ X: 0
 Y: 0
 W: 520
 H: 546
+Frame: EllesmereUIFrame
+FrameLevel: 100
+Anchor: TOPRIGHT
+X: -24
+Y: -56
+W: 1500
+H: 1154
 Frame: MRTCombatTimer
 FrameLevel: 1
 Anchor: CENTER

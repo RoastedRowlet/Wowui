@@ -2712,6 +2712,8 @@ NSRT = {
 ["ShareNickNames"] = 4,
 },
 ["ActivePersonalReminder"] = {
+["Madmareep-Stormrage"] = {
+},
 ["Zappyxatu-Stormrage"] = {
 [3429] = "Ele Altar",
 [3492] = "Ele Ula",
@@ -2740,16 +2742,16 @@ NSRT = {
 1,
 },
 ["NumberRelativeTo"] = "CENTER",
-["NumberFont"] = "Expressway",
+["NumberFontFlags"] = "OUTLINE",
 ["Anchor"] = "CENTER",
 ["NameRelativeTo"] = "TOP",
 ["NameFont"] = "Expressway",
 ["ShowBar"] = false,
-["NumberFontFlags"] = "OUTLINE",
+["NumberxOffset"] = 0,
 ["relativeTo"] = "CENTER",
 ["InterruptSound"] = "|cFF4BAAC8Interrupt|r",
-["NameFontSize"] = 30,
 ["NameFontFlags"] = "OUTLINE",
+["NumberFont"] = "Expressway",
 ["NumberyOffset"] = 0,
 ["InterruptNowTextColor"] = {
 1,
@@ -2758,7 +2760,7 @@ NSRT = {
 1,
 },
 ["Width"] = 100,
-["NumberxOffset"] = 0,
+["NameFontSize"] = 30,
 ["InterruptNextTextColor"] = {
 1,
 0,
@@ -5553,10 +5555,13 @@ NSRT = {
 },
 ["Madmareep-Stormrage"] = {
 ["flask"] = 245931,
+["weapon"] = 243734,
 ["food"] = 255845,
 },
 },
 ["ActivePersonalReminder"] = {
+["Madmareep-Stormrage"] = {
+},
 ["Zappyxatu-Stormrage"] = {
 [3429] = "Ele Altar",
 [3492] = "Ele Ula",
@@ -5630,11 +5635,11 @@ NSRT = {
 0,
 1,
 },
-["NameFontSize"] = 30,
+["NameFontFlags"] = "OUTLINE",
 ["relativeTo"] = "CENTER",
 ["NameAnchor"] = "BOTTOM",
 ["NamexOffset"] = 0,
-["NumberxOffset"] = 0,
+["NameFontSize"] = 30,
 ["NumberyOffset"] = 0,
 ["InterruptNowTextColor"] = {
 1,
@@ -5643,19 +5648,19 @@ NSRT = {
 1,
 },
 ["Width"] = 100,
-["NumberFont"] = "Expressway",
+["NumberFontFlags"] = "OUTLINE",
 ["InterruptNextTextColor"] = {
 1,
 0,
 0,
 1,
 },
-["NameFontFlags"] = "OUTLINE",
+["NumberFont"] = "Expressway",
 ["InterruptSound"] = "|cFF4BAAC8Interrupt|r",
 ["Height"] = 100,
 ["NameFont"] = "Expressway",
 ["ShowBar"] = false,
-["NumberFontFlags"] = "OUTLINE",
+["NumberxOffset"] = 0,
 },
 ["PersonalNotes"] = {
 },
@@ -15785,8 +15790,9 @@ NSRT = {
 ["flask"] = 245929,
 },
 ["Madmareep-Stormrage"] = {
-["food"] = 255845,
 ["flask"] = 245931,
+["food"] = 255845,
+["weapon"] = 243734,
 },
 },
 ["BreakTimer"] = {

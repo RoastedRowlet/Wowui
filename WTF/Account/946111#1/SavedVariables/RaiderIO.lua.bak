@@ -14,24 +14,16 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Nymueht-stormrage"] = true,
-["us-Shoorah-scarlet-crusade"] = true,
-["us-Lunchboxhero-moon-guard"] = true,
-["us-Beefybill-stormrage"] = true,
-["us-Needdk-thrall"] = true,
-["us-Icebender-ragnaros"] = true,
-["us-Vaellín-malganis"] = true,
-["us-Lokdawn-stormrage"] = true,
-["us-Lukathedon-malganis"] = true,
-["us-Smokeknight-burning-blade"] = true,
-["us-Pândemönium-skywall"] = true,
-["us-Aciany-area-52"] = true,
-["us-Spinabenz-stormrage"] = true,
-["us-Gentokukun-illidan"] = true,
-["us-Griseel-drakkari"] = true,
-["us-Notamark-tichondrius"] = true,
-["us-Billybopp-thrall"] = true,
-["us-Bloodheda-illidan"] = true,
+["us-Slithytoves-stormrage"] = true,
+["us-Tlaioc-ragnaros"] = true,
+["us-Hanuxa-ragnaros"] = true,
+["us-Garrgos-ragnaros"] = true,
+["us-Yurneth-stormrage"] = true,
+["us-party4-stormrage"] = true,
+["us-Nhaeros-ragnaros"] = true,
+["us-Vaxt-ragnaros"] = true,
+["us-party3-stormrage"] = true,
+["us-Gasstrap-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

@@ -73,7 +73,6 @@ local function hookfix()
             local point, relativeTo, relativePoint, xOfs, yOfs = PaperDollSidebarTabs:GetPoint(1)
 
             if relativeTo and relativeTo:GetName() ~= "CharacterFrameInsetRight" then
-                print("TEST")
                 PaperDollSidebarTabs:ClearAllPoints()
                 PaperDollSidebarTab1:ClearAllPoints()        
                 PaperDollSidebarTab2:ClearAllPoints()        
@@ -476,11 +475,19 @@ local function ReputationFrame_Update()
                 end
                 
                 if (k2.ReputationBar) then
+
+                    local k2reg = select(5, k2.ReputationBar:GetRegions())
+                    if k2reg ~= nil and k2reg:GetObjectType() == "Texture" then
+                        k2reg:SetTexture("Interface\\Masks\\SquareMask.BLP")
+                    end
+                    
+                    --k2.ReputationBar.LeftTexture:Hide()
                     k2.ReputationBar.LeftTexture:SetTexture("Interface\\Masks\\SquareMask.BLP")
-                    k2.ReputationBar.LeftTexture:SetGradient("Vertical", CreateColor(0, 0, 0, .2), CreateColor(.2, .2, .2, .4)) -- Dark Gray
-                    k2.ReputationBar.LeftTexture:SetAlpha(0.9)
+                    k2.ReputationBar.LeftTexture:SetHeight(k2.ReputationBar:GetHeight())
+                    k2.ReputationBar.LeftTexture:SetGradient("Vertical", CreateColor(0, 0, 0, .4), CreateColor(0, 0, 0, .6)) -- Dark Gray
+                    --k2.ReputationBar.LeftTexture:SetAlpha(0.9)
                     k2.ReputationBar.LeftTexture:SetPoint("RIGHT", k2, "RIGHT")
-                    --k2.ReputationBar:SetPoint("RIGHT", k2, "RIGHT", 0, 0)
+                    k2.ReputationBar:SetPoint("RIGHT", k2, "RIGHT", 0, 0)
                     
                     local hpad = math.min(math.max(210, (option("hpad") or 279)), 279)
                     k2.ReputationBar:SetWidth(140 * hpad / 279 * 2)  
@@ -564,7 +571,7 @@ local function ReputationFrame_Update()
                         
                         barMin = 0
                         k2.ParagonIcon:SetShown(hasRewardPending); 
-                        k2.ReputationBar:SetStatusBarColor(r,g,b)
+                       -- k2.ReputationBar:SetStatusBarColor(r,g,b)
                         if option("showparagonmax") then
                             -- Force a visually full bar
                             k2.ReputationBar:SetMinMaxValues(0, 1)
