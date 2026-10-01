@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Thunderhorn',name='US',type='subscribers',zone=53,date='2026-09-22',data={Ca='Cassiopeía:BAEANQAECgQIBQABNQAECgYJDAABAAAAAA==.',Ra='Raerlynn:BAEANQADCgcJBwABNQAECgQIBgABAAAAAA==.',Sg='Sgathaich:BAEANQAECgQIBgAAAA==.',Si='Siyunkai:BAEANQAECgIIAwAAAA==.',Xi='Xithia:BAEANQAECgIIAgAAAA==.',},}
+local lookup = {'Unknown-Unknown','Mage-Arcane',}
+local provider = {region='US',realm='Thunderhorn',name='US',type='subscribers',zone=53,date='2026-09-29',data={Ca='Cassiopeía:BAEANQAECgQIBQABNQAECggICAABAAAAAA==.',El='Elidoria:BAEBNQAECoEiAAICAAgKvxYbcwBiAgiODQAABQBWAHUNAAAFAFQAfw0AAAUAMwCpDQAABAAgAFwNAAADADwAXQ0AAAIAJQBlDQAABAAzADMNAAAGAD0AAgAICr8WG3MAYgIIjg0AAAUAVgB1DQAABQBUAH8NAAAFADMAqQ0AAAQAIABcDQAAAwA8AF0NAAACACUAZQ0AAAQAMwAzDQAABgA9AAAA.',Ra='Raerlynn:BAEANQADCgcJBwABNQAECgUICwABAAAAAA==.',Sg='Sgathaich:BAEANQAECgQIBgABNQAECgUIBgABAAAAAA==.',Si='Siyunkai:BAEANQAECgIIAwAAAA==.',So='Soggycat:BAEANQADCgEIAQAAAA==.',Xi='Xithia:BAEANQAECgUIBgAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Eredar',name='US',type='subscribers',zone=53,date='2026-09-22',data={Be='Beefsnake:BAEANQAFFAEIAQAAAA==.',Ca='Cail:BAEANQAECgQJBgAAAA==.',Lo='Lomponic:BAEANQAECgYJDwAAAA==.',Sn='Snakes:BAEANQAECggJCQABNQAFFAEIAQABAAAAAA==.',Tu='Tullen:BAEANQAECgUJCwAAAA==.',},}
+local lookup = {'Druid-Balance',}
+local provider = {region='US',realm='Eredar',name='US',type='subscribers',zone=53,date='2026-09-29',data={Be='Beefsnake:BAEBNQAECoEaAAIBAAkKdhKkKgBDAgmODQAABABBAHUNAAADACoAfw0AAAMAQwCpDQAAAwAcAFwNAAABAEgAXQ0AAAEACABlDQAABAAiAKQNAAADABEAMw0AAAQAWAABAAkKdhKkKgBDAgmODQAABABBAHUNAAADACoAfw0AAAMAQwCpDQAAAwAcAFwNAAABAEgAXQ0AAAEACABlDQAABAAiAKQNAAADABEAMw0AAAQAWAAAAA==.',Ca='Cail:BAEANQAECgQICgAAAA==.',Lo='Lomponic:BAEANQAECgcIEAAAAA==.',Sn='Snakes:BAEANQAECggICwABNQAECgkJGgABAHYSAA==.',Tu='Tullen:BAEANQAECgYIEQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

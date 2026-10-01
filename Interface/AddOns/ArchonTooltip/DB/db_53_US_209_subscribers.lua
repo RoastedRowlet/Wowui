@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Monk-Brewmaster','Unknown-Unknown',}
-local provider = {region='US',realm='Suramar',name='US',type='subscribers',zone=53,date='2026-09-22',data={De='Deadincide:BAEANQAECgUICQAAAA==.',Mo='Monkorith:BAECNQAFFIEGAAIBAAQKsgjOAgD5AASODQAAAgAWAHUNAAABADQAfw0AAAEACACpDQAAAgAFAAEABAqyCM4CAPkABI4NAAACABYAdQ0AAAEANAB/DQAAAQAIAKkNAAACAAUANQAECoEbAAIBAAkKGRhYBwBhAgABAAkKGRhYBwBhAgAAAA==.',Qu='Qubit:BAEANQAECgEIAQABNQAECgUICQACAAAAAA==.',Ri='Ripnmaim:BAEANQADCgYIBgABNQAECgUICQACAAAAAA==.',},}
+local provider = {region='US',realm='Suramar',name='US',type='subscribers',zone=53,date='2026-09-29',data={De='Deadincide:BAEANQAECgUIDgAAAA==.',Mo='Monkorith:BAECNQAFFIEJAAIBAAQK2QruAwACAQSODQAAAwAkAHUNAAACADQAfw0AAAEACACpDQAAAwANAAEABArZCu4DAAIBBI4NAAADACQAdQ0AAAIANAB/DQAAAQAIAKkNAAADAA0ANQAECoEbAAIBAAkKGRjACQBCAgABAAkKGRjACQBCAgAAAA==.Monorìth:BAEANQAECgIIAgABNQAFFAQICQABANkKAA==.',Qu='Qubit:BAEANQAECgEIAQABNQAECgUIDgACAAAAAA==.',Ri='Ripnmaim:BAEANQADCgYIBgABNQAECgUIDgACAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

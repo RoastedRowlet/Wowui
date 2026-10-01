@@ -48,14 +48,14 @@ EXCORE12S2 = {
 ["ExwindState"] = {
 ["encounter"] = {
 ["id"] = 0,
-["ts"] = 1790641636,
+["ts"] = 1790869699,
 ["inProgress"] = false,
-["instanceID"] = 2859,
+["instanceID"] = 3004,
 },
 ["versaCalibration"] = {
-["specID"] = 256,
-["zeroValue"] = 114146.7276948835,
-["lastDescriptionValue"] = 120150,
+["specID"] = 105,
+["zeroValue"] = 114146.8565178757,
+["lastDescriptionValue"] = 126090,
 ["spellID"] = 1271074,
 },
 },
@@ -67,15 +67,15 @@ EXCORE12S2 = {
 ["mode"] = "AUTO",
 },
 ["PanelStylePresets"] = {
-["timerbar"] = {
-},
 ["version"] = 1,
 ["icon"] = {
+},
+["timerbar"] = {
 },
 },
 ["Changelog"] = {
 ["LastSeenVersion"] = "v26.9.13.0946",
-["LastSeenAt"] = "2026-09-28 19:21:39",
+["LastSeenAt"] = "2026-10-01 11:32:33",
 ["LastPopupAt"] = "2026-09-06 18:18:57",
 ["LastPopupVersion"] = "v26.9.3.1123",
 },

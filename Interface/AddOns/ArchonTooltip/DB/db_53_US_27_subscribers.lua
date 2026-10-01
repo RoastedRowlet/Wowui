@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='Azuremyst',name='US',type='subscribers',zone=53,date='2026-09-22',data={Dr='Drylo:BAEANQAECggIDwAAAA==.',Mo='Moranta:BAEANQADCgYIBgAAAA==.',},}
+local lookup = {'Evoker-Devastation',}
+local provider = {region='US',realm='Azuremyst',name='US',type='subscribers',zone=53,date='2026-09-29',data={Dr='Drylo:BAEBNQAECoEYAAIBAAcK6SMvCADQAgeODQAABQBaAHUNAAADAFYAfw0AAAQAWgCpDQAABABcAFwNAAABAF4AXQ0AAAIAYAAzDQAABQBcAAEABwrpIy8IANACB44NAAAFAFoAdQ0AAAMAVgB/DQAABABaAKkNAAAEAFwAXA0AAAEAXgBdDQAAAgBgADMNAAAFAFwAAAA=.',Mo='Moranta:BAEANQADCgYIBgAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

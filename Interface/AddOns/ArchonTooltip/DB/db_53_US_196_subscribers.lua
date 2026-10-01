@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown','Mage-Arcane',}
-local provider = {region='US',realm='Silvermoon',name='US',type='subscribers',zone=53,date='2026-09-22',data={Al='Alextros:BAEANQAECgEIAQABNQAECgYJEAABAAAAAA==.',De='Delacour:BAEBNQAECoEYAAICAAgK8hHEdAA1AgiODQAABQBIAHUNAAADACQAfw0AAAMAIwCpDQAABABYAFwNAAABAEcAXQ0AAAIAIABlDQAABAAJAKQNAAACABUAAgAICvIRxHQANQIIjg0AAAUASAB1DQAAAwAkAH8NAAADACMAqQ0AAAQAWABcDQAAAQBHAF0NAAACACAAZQ0AAAQACQCkDQAAAgAVAAE1AAQKBggQAAEAAAAA.',},}
+local lookup = {'Monk-Brewmaster','Mage-Arcane','Priest-Holy',}
+local provider = {region='US',realm='Silvermoon',name='US',type='subscribers',zone=53,date='2026-09-29',data={Al='Alextros:BAEANQAECgEIAQABNQAECggIGgABABYhAA==.',De='Delacour:BAEBNQAECoEeAAICAAgKBhWufQBJAgiODQAABgBRAHUNAAADACQAfw0AAAMAIwCpDQAABQBYAFwNAAACAEcAXQ0AAAMALgBlDQAABQAlAKQNAAADACEAAgAICgYVrn0ASQIIjg0AAAYAUQB1DQAAAwAkAH8NAAADACMAqQ0AAAUAWABcDQAAAgBHAF0NAAADAC4AZQ0AAAUAJQCkDQAAAwAhAAE1AAQKBwgUAAMACxQA.',},}
 provider.parse = parse
 
 local rawData = provider.data

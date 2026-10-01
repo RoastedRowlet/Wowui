@@ -111,6 +111,16 @@ SimulationCraftDB = {
 ["context"] = 5,
 ["itemId"] = 271092,
 },
+{
+["ts"] = 1790715600,
+["currency"] = 3418,
+["source"] = 278290,
+["context"] = 5,
+["keyLevel"] = 4,
+["spec"] = 264,
+["season"] = 37,
+["itemId"] = 270169,
+},
 },
 },
 ["Madmareep - Stormrage"] = {
@@ -124,6 +134,16 @@ SimulationCraftDB = {
 ["spec"] = 256,
 ["context"] = 5,
 ["itemId"] = 268203,
+},
+{
+["currency"] = 3418,
+["ts"] = 1790682960,
+["source"] = 278285,
+["season"] = 37,
+["keyLevel"] = 1,
+["spec"] = 256,
+["context"] = 5,
+["itemId"] = 268218,
 },
 },
 },
@@ -162,14 +182,14 @@ SimulationCraftDB = {
 },
 },
 ["Lonelylitten - Stormrage"] = {
-["minimap"] = {
-["minimapPos"] = 225.6023459701718,
-},
 ["frame"] = {
 ["ofsx"] = -276.667724609375,
 ["ofsy"] = 12.50020217895508,
 ["point"] = "RIGHT",
 ["relativePoint"] = "RIGHT",
+},
+["minimap"] = {
+["minimapPos"] = 225.6023459701718,
 },
 },
 ["Madmareep - Stormrage"] = {

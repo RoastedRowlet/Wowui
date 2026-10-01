@@ -14,16 +14,7 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Slithytoves-stormrage"] = true,
-["us-Tlaioc-ragnaros"] = true,
-["us-Hanuxa-ragnaros"] = true,
-["us-Garrgos-ragnaros"] = true,
-["us-Yurneth-stormrage"] = true,
-["us-party4-stormrage"] = true,
-["us-Nhaeros-ragnaros"] = true,
-["us-Vaxt-ragnaros"] = true,
-["us-party3-stormrage"] = true,
-["us-Gasstrap-area-52"] = true,
+["us-Outran-illidan"] = true,
 }
 RaiderIO_MissingServers = {
 }

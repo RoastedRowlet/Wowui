@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown','Druid-Balance',}
-local provider = {region='US',realm='Fenris',name='US',type='subscribers',zone=53,date='2026-09-22',data={Di='Divinelaw:BAEANQADCgUIBQABNQAECgYIDwABAAAAAA==.',Sa='Sabelea:BAEBNQAFFIEFAAICAAIKEQuDEgCaAAKODQAAAwATAKkNAAACACQAAgACChELgxIAmgACjg0AAAMAEwCpDQAAAgAkAAAA.',Ta='Takhisis:BAEANQAECgYIDwAAAA==.',},}
+local lookup = {'DeathKnight-Blood','Druid-Balance',}
+local provider = {region='US',realm='Fenris',name='US',type='subscribers',zone=53,date='2026-09-29',data={Di='Divinelaw:BAEANQADCgUIBQABNQAECgYIFQABALEdAA==.',Sa='Sabelea:BAECNQAFFIEHAAICAAIKDA10FwCVAAKODQAAAwATAKkNAAAEAC4AAgACCgwNdBcAlQACjg0AAAMAEwCpDQAABAAuADUABAqBFgACAgAJCtYRRTMAAQIAAgAJCtYRRTMAAQIAAAA=.',Ta='Takhisis:BAEBNQAECoEVAAIBAAYKsR07NQD2AQaODQAABQBUAHUNAAAEAFIAfw0AAAMAKQCpDQAABABbAFwNAAADAFUAXQ0AAAIARQABAAYKsR07NQD2AQaODQAABQBUAHUNAAAEAFIAfw0AAAMAKQCpDQAABABbAFwNAAADAFUAXQ0AAAIARQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

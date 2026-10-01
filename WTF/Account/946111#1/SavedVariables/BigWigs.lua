@@ -11,37 +11,20 @@ BigWigs3DB = {
 ["Minimeditite - Area 52"] = "Default",
 },
 ["namespaces"] = {
-["BigWigs_Bosses_Saprish"] = {
+["BigWigs_Bosses_Crawth"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
-[1263523] = 3129591,
+[377004] = 3129591,
 },
 },
 },
 },
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[-2516] = true,
-[-1004] = true,
-[1049] = true,
-[-323] = true,
-[1050] = true,
-[-2529] = true,
-[1065] = true,
-},
-},
-},
-["BigWigs_Plugins_Auras"] = {
-["global"] = {
-["showHelpTip"] = false,
-},
+["BigWigs_Bosses_Echo of Doragosa"] = {
 ["profiles"] = {
 ["Default"] = {
-["player"] = {
-["disabled"] = true,
+["toggles"] = {
+[388822] = 3129591,
 },
 },
 },
@@ -55,27 +38,11 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Plugins_Timeline"] = {
-["profiles"] = {
-["Default"] = {
-["blizzTimeline"] = true,
-},
-},
-},
 ["BigWigs_Bosses_Vexamus"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
 [386173] = 3129591,
-},
-},
-},
-},
-["BigWigs_Bosses_Zuraal"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1263399] = 3129591,
 },
 },
 },
@@ -91,6 +58,15 @@ BigWigs3DB = {
 "TOPLEFT",
 13,
 -156,
+},
+},
+},
+},
+["BigWigs_Bosses_Zuraal"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263399] = 3129591,
 },
 },
 },
@@ -146,19 +122,10 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Crawth"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[377004] = 3129591,
-},
-},
-},
-},
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["emphasize"] = false,
+["normalWidth"] = 120,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -166,7 +133,7 @@ BigWigs3DB = {
 21,
 },
 ["visibleBarLimit"] = 1,
-["normalWidth"] = 120,
+["emphasize"] = false,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -185,11 +152,44 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Echo of Doragosa"] = {
+["BigWigs_Bosses_Saprish"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
-[388822] = 3129591,
+[1263523] = 3129591,
+},
+},
+},
+},
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[-2516] = true,
+[-1004] = true,
+[1049] = true,
+[-323] = true,
+[1050] = true,
+[-2529] = true,
+[1065] = true,
+},
+},
+},
+["BigWigs_Plugins_Timeline"] = {
+["profiles"] = {
+["Default"] = {
+["blizzTimeline"] = true,
+},
+},
+},
+["BigWigs_Plugins_Auras"] = {
+["global"] = {
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["disabled"] = true,
 },
 },
 },
@@ -197,20 +197,28 @@ BigWigs3DB = {
 },
 ["myKeystones"] = {
 ["Player-60-0F7B1446"] = {
-["playerRating"] = 2565,
+["playerRating"] = 2600,
 ["specId"] = 256,
-["keyMap"] = 584,
+["keyMap"] = 587,
 ["name"] = "Madmareep",
 ["keyLevel"] = 11,
 ["realm"] = "Stormrage",
 },
 ["Player-60-0F7B141D"] = {
-["playerRating"] = 3863,
+["playerRating"] = 3884,
 ["specId"] = 262,
-["keyMap"] = 587,
+["keyMap"] = 399,
 ["name"] = "Zappyxatu",
 ["keyLevel"] = 20,
 ["realm"] = "Stormrage",
+},
+["Player-3676-0DF7D3EF"] = {
+["playerRating"] = 992,
+["specId"] = 1473,
+["keyMap"] = 0,
+["name"] = "Barelynoer",
+["keyLevel"] = 0,
+["realm"] = "Area 52",
 },
 ["Player-60-0F85ABEF"] = {
 ["playerRating"] = 3038,
@@ -221,7 +229,7 @@ BigWigs3DB = {
 ["realm"] = "Stormrage",
 },
 },
-["prevWeeklyReset"] = 1790089200,
+["prevWeeklyReset"] = 1790694000,
 ["profiles"] = {
 ["Default"] = {
 },
@@ -579,9 +587,9 @@ BigWigsStatsDB = {
 },
 [2883] = {
 ["heroic"] = {
-["kills"] = 3,
+["kills"] = 4,
 ["fkDuration"] = 410.5499999999884,
-["wipes"] = 2,
+["wipes"] = 5,
 ["fkWipes"] = 2,
 ["best"] = 334.3519999999999,
 ["bestDate"] = "2026/09/22",
@@ -694,12 +702,12 @@ BigWigsStatsDB = {
 ["fkDate"] = "2026/08/23",
 },
 ["heroic"] = {
-["kills"] = 9,
+["kills"] = 12,
 ["fkDate"] = "2026/08/24",
 ["bestDate"] = "2026/09/15",
 ["fkWipes"] = 1,
 ["best"] = 233.4049999999988,
-["wipes"] = 14,
+["wipes"] = 16,
 ["fkDuration"] = 534.4850000000006,
 },
 ["LFR"] = {

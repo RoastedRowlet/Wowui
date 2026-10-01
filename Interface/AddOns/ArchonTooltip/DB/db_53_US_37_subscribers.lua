@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown','Rogue-Subtlety','Rogue-Assassination',}
-local provider = {region='US',realm='Bladefist',name='US',type='subscribers',zone=53,date='2026-09-22',data={Ph='Physics:BAEANQAECggICAABNQAFFAEIAQABAAAAAA==.',Sa='Samwield:BAEBNQAECoEdAAMCAAcK0BqgEgAjAgeODQAABQBUAHUNAAAEAEgAfw0AAAQAQACpDQAABQBQAFwNAAAEAEoAXQ0AAAIALQAzDQAABQA7AAIABwojGqASACMCB44NAAAFAFQAdQ0AAAQASAB/DQAABABAAKkNAAAEAEMAXA0AAAQASgBdDQAAAQAtADMNAAAFADsAAwACCq4Uek8AhwACqQ0AAAEAUABdDQAAAQAZAAAA.',Un='Unholysam:BAEANQADCgUIBQABNQAECgcIHQACANAaAA==.',},}
+local lookup = {'Rogue-Subtlety','Rogue-Assassination',}
+local provider = {region='US',realm='Bladefist',name='US',type='subscribers',zone=53,date='2026-09-29',data={Ph='Physics:BAEANQAFFAIIAgAAAA==.',Sa='Samwield:BAEBNQAECoEkAAMBAAgKpxrUDgBtAgiODQAABgBUAHUNAAAFAEgAfw0AAAUAQACpDQAABgBRAFwNAAAFAFQAXQ0AAAMANgBlDQAAAQAsADMNAAAFADsAAQAICgEa1A4AbQIIjg0AAAYAVAB1DQAABQBIAH8NAAAFAEAAqQ0AAAQAQwBcDQAABQBUAF0NAAACADYAZQ0AAAEALAAzDQAABQA7AAIAAgrpFONeAJoAAqkNAAACAFEAXQ0AAAEAGQAAAA==.',Un='Unholysam:BAEANQADCgUIBQABNQAECggIJAABAKcaAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

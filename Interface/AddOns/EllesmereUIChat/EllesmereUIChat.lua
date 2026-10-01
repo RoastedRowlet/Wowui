@@ -15,8 +15,9 @@ if EUI_CLIENT_BLOCKED then return end -- pre-12.1 client failsafe (EllesmereUI_C
 --    - Copy Chat button + session history (own message store)
 -------------------------------------------------------------------------------
 local addonName, ns = ...
-if not (EllesmereUI and EllesmereUI._ModuleNS) then EUI_CLIENT_BLOCKED = true; return end -- stale-parent guard: a partially updated install (old parent, new child) goes dormant via the line-1 failsafe instead of erroring
+if not (EllesmereUI and EllesmereUI._ModuleNS and EllesmereUI.NewCombatQueue) then EUI_CLIENT_BLOCKED = true; return end -- stale-parent guard: a partially updated install (old parent, new child) goes dormant via the line-1 failsafe instead of erroring
 EllesmereUI._ModuleNS[addonName] = ns  -- LOD options files read this module ns via the registry
+ns.CombatQueue = EllesmereUI.NewCombatQueue(CreateFrame("Frame"))
 local EUI = _G.EllesmereUI
 if not EUI then return end
 
@@ -3235,21 +3236,16 @@ end
 -- CURRENT intended passthrough state whole; the delta gate makes the pass
 -- idempotent (everything that already landed is skipped, only the refused
 -- writes replay). Fires before the visibility dispatcher's deferred
--- refresh, so a post-combat reveal starts from a clean slate. The event is
--- registered only while armed: zero idle cost.
-local _chatPMRegenFrame
-ArmChatPMRegen = function()
-    if not _chatPMRegenFrame then
-        _chatPMRegenFrame = CreateFrame("Frame")
-        _chatPMRegenFrame:SetScript("OnEvent", function(self)
-            self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-            PassthroughFrames(_chatPassthrough)
-            if _chatPassthrough and not _visChatVisible then
-                SetChatStackShown(false)
-            end
-        end)
+-- refresh, so a post-combat reveal starts from a clean slate. Runs through
+-- the module combat queue: zero idle cost.
+local function ChatPMRegenReapply()
+    PassthroughFrames(_chatPassthrough)
+    if _chatPassthrough and not _visChatVisible then
+        SetChatStackShown(false)
     end
-    _chatPMRegenFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+end
+ArmChatPMRegen = function()
+    ns.CombatQueue.Defer("ChatPassthroughReapply", ChatPMRegenReapply)
 end
 
 local function SetChatMousePassthrough(on)
@@ -4469,13 +4465,12 @@ local function SkinChatFrame(cf)
                 HideSidebarIconTooltip(self)
             end)
 
-            local fcLast, fcDirty
+            local fcLast
             local function UpdateFriendsCount()
                 if InCombatLockdown() then
-                    fcDirty = true
+                    ns.CombatQueue.Defer(UpdateFriendsCount, UpdateFriendsCount)
                     return
                 end
-                fcDirty = nil
                 local _, numOnline = BNGetNumFriends()
                 local wowOnline = C_FriendList.GetNumOnlineFriends() or 0
                 local total = numOnline + wowOnline
@@ -4493,22 +4488,15 @@ local function SkinChatFrame(cf)
             fcEvents:RegisterEvent("PLAYER_ENTERING_WORLD")
             fcEvents:RegisterEvent("BN_CONNECTED")
             fcEvents:RegisterEvent("BN_DISCONNECTED")
-            fcEvents:RegisterEvent("PLAYER_REGEN_ENABLED")
             -- Recount inline on the exact edges -- the narrow account
             -- online/offline pair (the same field-proven set the DataBars
             -- micromenu count uses), NOT the BN_FRIEND_INFO_CHANGED presence
             -- firehose, so nothing fires between real login/logout edges.
             -- Two cached count reads plus one compare, no timers, and the
             -- label only rewrites when the number changed. In combat nothing
-            -- recounts at all -- events mark the count dirty and the regen
-            -- edge settles it once.
-            fcEvents:SetScript("OnEvent", function(_, event)
-                if event == "PLAYER_REGEN_ENABLED" then
-                    if fcDirty then UpdateFriendsCount() end
-                    return
-                end
-                UpdateFriendsCount()
-            end)
+            -- recounts at all -- the count defers itself once to the combat
+            -- queue and settles on the regen edge.
+            fcEvents:SetScript("OnEvent", UpdateFriendsCount)
 
             CFD(cf).friendsCount = friendsCount
             -- A count inside its button (the stock QuickJoin plate) is not a
@@ -4881,8 +4869,9 @@ local function SkinChatFrame(cf)
         -- minimize button is left alone: a separate child object, Blizzard
         -- fades it in with btnFrame's alpha on hover the same as any other
         -- chat window, and its own alpha/mouse state were never touched here.
-        for i = 1, select("#", btnFrame:GetRegions()) do
-            local region = select(i, btnFrame:GetRegions())
+        local regions = { btnFrame:GetRegions() }
+        for i = 1, #regions do
+            local region = regions[i]
             if region:IsObjectType("Texture") then region:SetTexture("") end
         end
     end
@@ -4913,8 +4902,9 @@ local function SkinChatFrame(cf)
             resizeBtn:SetPoint("BOTTOMRIGHT", cf, "BOTTOMRIGHT", -2, 2)
             resizeBtn:SetFrameStrata("HIGH")
             if resizeBtn.GetRegions then
-                for ri = 1, select("#", resizeBtn:GetRegions()) do
-                    local region = select(ri, resizeBtn:GetRegions())
+                local regions = { resizeBtn:GetRegions() }
+                for ri = 1, #regions do
+                    local region = regions[ri]
                     if region and region:IsObjectType("Texture") then
                         region:SetTexture("Interface\\AddOns\\EllesmereUI\\media\\icons\\resize_element.png")
                         region:SetDesaturated(true)
@@ -4970,8 +4960,9 @@ local function SkinChatFrame(cf)
     -- Forever strips it (its bronze frames are ours).
     local stockArt = ns.ChatStockArt()
     if cf.GetRegions and not stockArt then
-        for i = 1, select("#", cf:GetRegions()) do
-            local region = select(i, cf:GetRegions())
+        local regions = { cf:GetRegions() }
+        for i = 1, #regions do
+            local region = regions[i]
             if region and region:IsObjectType("Texture") and not region._euiOwned then
                 region:SetTexture("")
                 region:SetAtlas("")
@@ -4982,8 +4973,9 @@ local function SkinChatFrame(cf)
     if cf.Background and not stockArt then
         cf.Background:SetAlpha(0)
         if cf.Background.GetRegions then
-            for i = 1, select("#", cf.Background:GetRegions()) do
-                local region = select(i, cf.Background:GetRegions())
+            local regions = { cf.Background:GetRegions() }
+            for i = 1, #regions do
+                local region = regions[i]
                 if region and region:IsObjectType("Texture") then
                     region:SetAlpha(0)
                 end
@@ -5004,8 +4996,9 @@ local function SkinChatFrame(cf)
             local fv = ns.ChatForever()
 
             if qbf.GetRegions then
-                for i = 1, select("#", qbf:GetRegions()) do
-                    local region = select(i, qbf:GetRegions())
+                local regions = { qbf:GetRegions() }
+                for i = 1, #regions do
+                    local region = regions[i]
                     if region and region:IsObjectType("Texture") then
                         region:SetAlpha(0)
                     end
@@ -5057,13 +5050,15 @@ local function SkinChatFrame(cf)
                 end
             end
             if qbf.GetChildren then
-                for i = 1, select("#", qbf:GetChildren()) do
-                    local btn = select(i, qbf:GetChildren())
+                local children = { qbf:GetChildren() }
+                for i = 1, #children do
+                    local btn = children[i]
                     if btn and btn:IsObjectType("CheckButton") or (btn and btn:IsObjectType("Button")) then
                         clFilterBtns[#clFilterBtns + 1] = btn
                         if btn.GetRegions then
-                            for j = 1, select("#", btn:GetRegions()) do
-                                local rgn = select(j, btn:GetRegions())
+                            local regions = { btn:GetRegions() }
+                            for j = 1, #regions do
+                                local rgn = regions[j]
                                 if rgn and rgn:IsObjectType("Texture") then
                                     rgn:SetAlpha(0)
                                 end
@@ -5570,12 +5565,47 @@ initFrame:SetScript("OnEvent", function(self)
             ECHAT.WHISPER_SOUND_NAMES = WHISPER_SOUND_NAMES
             ECHAT.WHISPER_SOUND_ORDER = WHISPER_SOUND_ORDER
 
+            -- "none" (the stored default) keeps Blizzard's own whisper sound;
+            -- "mute" silences it and plays nothing; any sound replaces it.
+            WHISPER_SOUND_NAMES.none = "Blizzard Default"
+            WHISPER_SOUND_NAMES.mute = "None"
+            table.insert(WHISPER_SOUND_ORDER, 2, "mute")
+
             -- Append SharedMedia sounds
             EllesmereUI.AppendSharedMediaSounds(
                 WHISPER_SOUND_PATHS,
                 WHISPER_SOUND_NAMES,
                 WHISPER_SOUND_ORDER
             )
+
+            -- Blizzard's whisper sound (SOUNDKIT.TELL_MESSAGE plays this one
+            -- file), muted while a non-default choice is set. A mute outlives
+            -- /reload and relog (not a client restart), so the account-wide
+            -- chatTellMuted flag remembers that the mute is ours: a character
+            -- on Blizzard Default unmutes only a mute we made, never another
+            -- addon's. Runs at init, from the setting and from
+            -- _ECHAT_RefreshAll (profile swaps, imports, spec overrides).
+            local TELL_SOUND_FILE = 567421
+            local _tellMuted = false
+            function ECHAT.ApplyWhisperMute()
+                if not MuteSoundFile then return end
+                local cfg = ECHAT.DB()
+                local key = cfg and cfg.whisperSoundKey
+                local want = key ~= nil and key ~= "none"
+                local db = EllesmereUIDB
+                if want then
+                    if not _tellMuted then
+                        MuteSoundFile(TELL_SOUND_FILE)
+                        _tellMuted = true
+                        if db then db.chatTellMuted = true end
+                    end
+                elseif _tellMuted or (db and db.chatTellMuted) then
+                    UnmuteSoundFile(TELL_SOUND_FILE)
+                    _tellMuted = false
+                    if db then db.chatTellMuted = nil end
+                end
+            end
+            ECHAT.ApplyWhisperMute()
 
             local _whisperThrottle = 0
             local whisperFrame = CreateFrame("Frame")
@@ -5585,7 +5615,7 @@ initFrame:SetScript("OnEvent", function(self)
                 OnActiveMessage()
                 local cfg = ECHAT.DB()
                 local key = cfg and cfg.whisperSoundKey
-                if not key or key == "none" then return end
+                if not key or key == "none" or key == "mute" then return end
                 local now = GetTime()
                 if now - _whisperThrottle < 5 then return end
                 _whisperThrottle = now
@@ -5608,7 +5638,10 @@ initFrame:SetScript("OnEvent", function(self)
             if over and not _idleMouseOver then
                 _idleMouseOver = true
                 CancelIdleFade()
-            elseif not over and _idleMouseOver then
+            elseif not over and (_idleMouseOver or not (idleTimer or _idleFadeActive)) then
+                -- Also re-arm when nothing is armed: a hover that began while
+                -- faded is cleared by the reveal (ApplyIdleFadeHoverMotion),
+                -- so its leave would otherwise find no edge and no timer.
                 _idleMouseOver = false
                 ECHAT.ResetIdleTimer()
             end
@@ -5853,6 +5886,7 @@ initFrame:SetScript("OnEvent", function(self)
         -- A profile swap or import re-points db.profile, so the bubbles feature has to
         -- re-read enabled/channels and re-assert Blizzard's CVars against the new values.
         if ns.ChatBubbles then ns.ChatBubbles.Refresh() end
+        ECHAT.ApplyWhisperMute()
     end
 
     ---------------------------------------------------------------------------

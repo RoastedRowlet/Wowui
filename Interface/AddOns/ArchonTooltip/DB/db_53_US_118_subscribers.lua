@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DemonHunter-Vengeance',}
-local provider = {region='US',realm='Haomarush',name='US',type='subscribers',zone=53,date='2026-09-22',data={Sc='Scorewin:BAEBNQAECoEbAAIBAAgKoh++AgDbAgiODQAABQBTAHUNAAAEAFYAfw0AAAQATACpDQAAAwBaAFwNAAADAE8AXQ0AAAMARwBlDQAAAQBYADMNAAAEAEYAAQAICqIfvgIA2wIIjg0AAAUAUwB1DQAABABWAH8NAAAEAEwAqQ0AAAMAWgBcDQAAAwBPAF0NAAADAEcAZQ0AAAEAWAAzDQAABABGAAAA.',},}
+local provider = {region='US',realm='Haomarush',name='US',type='subscribers',zone=53,date='2026-09-29',data={Sc='Scorewin:BAEBNQAECoEiAAIBAAgKxx+TAwDYAgiODQAABgBTAHUNAAAFAFYAfw0AAAUATACpDQAABABaAFwNAAAEAFIAXQ0AAAQARwBlDQAAAgBYADMNAAAEAEYAAQAICscfkwMA2AIIjg0AAAYAUwB1DQAABQBWAH8NAAAFAEwAqQ0AAAQAWgBcDQAABABSAF0NAAAEAEcAZQ0AAAIAWAAzDQAABABGAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

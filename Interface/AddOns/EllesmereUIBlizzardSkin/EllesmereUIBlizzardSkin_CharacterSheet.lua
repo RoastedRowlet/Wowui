@@ -429,6 +429,8 @@ do
             showAdjustedStats            = false,
             showManaStat                 = false,
             showCharSheetDurability      = false,
+            charSheetSeasonPanel         = true,
+            charSheetHideSlotFlyoutArrows = false,
             charSheetDurabilityLocation  = "model",
             charSheetDurabilityShowLabel = true,
         }
@@ -495,8 +497,9 @@ local function PreSkinCharacterSheet()
             CharacterModelScene.ControlFrame:EnableMouse(false)
         end
     end
-    for i = 1, select("#", frame:GetRegions()) do
-        local region = select(i, frame:GetRegions())
+    local regions = { frame:GetRegions() }
+    for i = 1, #regions do
+        local region = regions[i]
         if region and region:IsObjectType("Texture") then
             region:SetAlpha(0)
         end
@@ -901,8 +904,9 @@ local function SkinCharacterSheet()
         local tab = _G["CharacterFrameTab" .. i]
         if tab and not ns.CharSheetStock() then
             charTabs[#charTabs + 1] = tab
-            for j = 1, select("#", tab:GetRegions()) do
-                local region = select(j, tab:GetRegions())
+            local regions = { tab:GetRegions() }
+            for j = 1, #regions do
+                local region = regions[j]
                 if region and region:IsObjectType("Texture") then
                     region:SetTexture("")
                     if region.SetAtlas then region:SetAtlas("") end
@@ -1470,8 +1474,11 @@ local function SkinCharacterSheet()
         if not footerLabel then return end
         footerLabel:ClearAllPoints()
         local socketPanel = _G.EUI_CharSheet_SocketPanel
+        local seasonPanel = _G.EUI_CharSheet_SeasonPanel
         if socketPanel and socketPanel:IsShown() then
             footerLabel:SetPoint("RIGHT", socketPanel, "LEFT", -8, 0)
+        elseif seasonPanel and seasonPanel:IsShown() then
+            footerLabel:SetPoint("RIGHT", seasonPanel, "LEFT", -8, 0)
         else
             footerLabel:SetPoint("RIGHT", frame, "BOTTOMRIGHT", -10, 6)
         end
@@ -4344,6 +4351,39 @@ local function ApplyCharSheetCalcTab()
     end
 end
 
+-- Blizzard shows these popout buttons on the Equipment tab. Alpha only hides
+-- their artwork; native click handlers and modified-hover flyouts stay intact.
+-- Show/Hide and arrow reversal do not reset alpha, so no hooks are needed.
+local slotFlyoutArrowsHidden = false
+function EllesmereUI._refreshCharSheetSlotFlyoutArrows()
+    local hide = not EllesmereUI.IS_FOREVER and EllesmereUIDB
+        and EllesmereUIDB.charSheetHideSlotFlyoutArrows == true
+        and EllesmereUIDB.themedCharacterSheet ~= false
+        and not EllesmereUI.BlizzWindowSkinsKilled()
+    if not hide and not slotFlyoutArrowsHidden then return end
+
+    for _, slotName in ipairs(EUI_ALL_SLOTS) do
+        local slot = _G[slotName]
+        local button = slot and slot.popoutButton
+        if button then
+            if hide then
+                local data = GetFFD(button)
+                if data.slotFlyoutAlpha == nil then
+                    data.slotFlyoutAlpha = button:GetAlpha()
+                end
+                button:SetAlpha(0)
+            else
+                local data = FFD[button]
+                if data and data.slotFlyoutAlpha ~= nil then
+                    button:SetAlpha(data.slotFlyoutAlpha)
+                    data.slotFlyoutAlpha = nil
+                end
+            end
+        end
+    end
+    slotFlyoutArrowsHidden = hide
+end
+
 -- Entry point: apply the themed character sheet.
 local function ApplyThemedCharacterSheet()
     -- WoW Forever: the full makeover stands down; the EllesmereUI look and
@@ -4373,6 +4413,7 @@ if EllesmereUI then
         -- makeover, the equipment-set watcher) runs; see the Forever file.
         if EllesmereUI.IS_FOREVER then return end
         if CharacterFrame then
+            EllesmereUI._refreshCharSheetSlotFlyoutArrows()
             -- Pre-skin runs early, while CharacterFrame is still hidden; running it
             -- mid-OnShow breaks the Rep/Currency ScrollBox data render.
             local sheetOn = not EllesmereUIDB or (EllesmereUIDB.themedCharacterSheet ~= false and not EllesmereUI.BlizzWindowSkinsKilled())

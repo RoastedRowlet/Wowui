@@ -51,6 +51,9 @@ local function InitSaved()
     -- Auto-detect: BUTTON* keys use AnyDown, keyboard keys use AnyUp.
     -- Only set this if sv.useClickDown is explicitly true/false from a prior /wmcclickedge command.
     -- Leave nil to keep auto mode.
+
+    -- Feature toggle: when false, world marker keybinds are disabled entirely
+    if sv.worldEnabled == nil then sv.worldEnabled = true end
 end
 
 -- Secure world marker cycler button
@@ -138,6 +141,10 @@ local function UpdateBindings()
     ClearOverrideBindings(bindingsFrame)
 
     local sv = SV()
+
+    -- If world markers are disabled, leave bindings cleared
+    if sv and sv.worldEnabled == false then return end
+
     local cycleFullKey = ""
     local clearFullKey = ""
 
@@ -237,6 +244,18 @@ end
 function WorldMarkerCyclerAPI.GetCustomCycleMarkers()
     local sv = SV()
     return sv and sv.customCycleMarkers or {}
+end
+
+-- Feature enable/disable toggle
+function WorldMarkerCyclerAPI.SetWorldEnabled(enabled)
+    EnsureSV()
+    SV().worldEnabled = enabled and true or false
+    UpdateBindings()
+end
+
+function WorldMarkerCyclerAPI.GetWorldEnabled()
+    local sv = SV()
+    return sv and sv.worldEnabled ~= false
 end
 
 -- Toggle click edge for users who bind to a mouse button (AnyDown) vs keyboard (AnyUp)

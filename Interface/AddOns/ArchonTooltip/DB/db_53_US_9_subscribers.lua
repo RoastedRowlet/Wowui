@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Paladin-Protection','Paladin-Retribution','Unknown-Unknown',}
-local provider = {region='US',realm='AlteracMountains',name='US',type='subscribers',zone=53,date='2026-09-22',data={Ka='Kain:BAECNQAFFIEKAAIBAAUKOx5JAQDgAQWODQAAAwBVAHUNAAACAF0Afw0AAAEAKACpDQAAAwBhADMNAAABAEYAAQAFCjseSQEA4AEFjg0AAAMAVQB1DQAAAgBdAH8NAAABACgAqQ0AAAMAYQAzDQAAAQBGADUABAqBHgADAQAJCn0ldwEAswMAAQAJCn0ldwEAswMAAgABCjgKZicBMAAAAAA=.',So='Solanthion:BAEANQADCgcIBwABNQAECgIIAgADAAAAAA==.',},}
+local provider = {region='US',realm='AlteracMountains',name='US',type='subscribers',zone=53,date='2026-09-29',data={Ka='Kain:BAECNQAFFIEQAAIBAAYKAyD/AAA0AgaODQAABABeAHUNAAADAF0Afw0AAAIALACpDQAABABjAFwNAAABAFgAMw0AAAIARgABAAYKAyD/AAA0AgaODQAABABeAHUNAAADAF0Afw0AAAIALACpDQAABABjAFwNAAABAFgAMw0AAAIARgA1AAQKgSAAAwEACQoZJgQCAJ8DAAEACQoZJgQCAJ8DAAIAAQo4CjpSATAAAAAA.',So='Solanthion:BAEANQADCgcIBwABNQAECgUIBwADAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

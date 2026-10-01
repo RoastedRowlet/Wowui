@@ -1409,8 +1409,8 @@ initFrame:SetScript("OnEvent", function(self)
         -- (preview icon) doesn't pollute the shared tables.
         local whisperSoundValues = {}
         local whisperSoundPaths = ECHAT.WHISPER_SOUND_PATHS or {}
-        local whisperSoundNames = ECHAT.WHISPER_SOUND_NAMES or { none = "None" }
-        local whisperSoundOrder = ECHAT.WHISPER_SOUND_ORDER or { "none" }
+        local whisperSoundNames = ECHAT.WHISPER_SOUND_NAMES or { none = "Blizzard Default", mute = "None" }
+        local whisperSoundOrder = ECHAT.WHISPER_SOUND_ORDER or { "none", "mute" }
         for k, v in pairs(whisperSoundNames) do whisperSoundValues[k] = v end
         whisperSoundValues._menuOpts = {
             itemHeight = 26,
@@ -1419,11 +1419,11 @@ initFrame:SetScript("OnEvent", function(self)
             iconAtlas = function(key)
                 if key == "none" then return nil end
                 if not whisperSoundPaths[key] then return nil end
-                return "common-icon-sound"
+                return EllesmereUI.SOUND_ICON_ATLAS
             end,
             iconPressedAtlas = function(key)
-                if key == "none" then return nil end
-                return "common-icon-sound-pressed"
+                if not whisperSoundPaths[key] then return nil end
+                return EllesmereUI.SOUND_ICON_PRESSED_ATLAS
             end,
             iconOnClick = function(key)
                 local path = whisperSoundPaths[key]
@@ -1447,9 +1447,13 @@ initFrame:SetScript("OnEvent", function(self)
         extrasBorderRow, h = W:DualRow(parent, y,
             hideBordersCfg,
             { type="dropdown", text="Whisper Sound",
+              tooltip="Blizzard Default keeps the game's whisper sound. Any other sound replaces it, and None plays no sound.",
               values=whisperSoundValues, order=whisperSoundOrder,
               getValue=function() return Cfg("whisperSoundKey") or "none" end,
-              setValue=function(v) Set("whisperSoundKey", v) end })
+              setValue=function(v)
+                  Set("whisperSoundKey", v)
+                  ECHAT.ApplyWhisperMute()
+              end })
         if not EllesmereUI._prebuilding then
             local rgn = extrasBorderRow._leftRegion
             local ctrl = rgn._control

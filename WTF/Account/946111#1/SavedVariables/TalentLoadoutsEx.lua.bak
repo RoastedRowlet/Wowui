@@ -99,46 +99,9 @@ TalentLoadoutEx = {
 ["SHAMAN"] = {
 {
 {
-["name"] = "Den",
-["isInGroup"] = false,
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMLzMzYssYajZmlxyMmZMsMLzMLDjZmFAghBwMjhhB",
 ["icon"] = 134400,
-},
-{
-["name"] = "Altar WCL",
-["isInGroup"] = false,
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsMzMjx2ipNmZMWmZmZMsMLDLmZYmtBAMMAmZMMMA",
-["icon"] = 134400,
-},
-{
-["name"] = "Ula ",
-["isInGroup"] = false,
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZw2CthZMzyMzMzDMsMLzMLDjZmFAgZAwMjhhB",
-["icon"] = 134400,
-},
-{
-["name"] = "Explo",
-["isInGroup"] = false,
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZZZMmhBAAAAsYmNYADY2YCMLAwsMzMjx2iJMzsMWmZmZMmFLjZZYMzsMAghBwMjhZ8BA",
-["icon"] = 134400,
-},
-{
-["name"] = "Top M+",
-["isInGroup"] = false,
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZGjlZMz8ADLzyMzywYmZBAYYAMzYYYA",
-["icon"] = 134400,
-},
-{
-["name"] = "Raid",
-["isInGroup"] = false,
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMmZmZZbZMMjBAAAAsYmNYADY2YCZWAgZZmZGjtFTYmZZsMzMzYYZWmxiZGmZZAADAMzYYYA",
-["icon"] = 134400,
-},
-{
-["name"] = "M+",
-["isInGroup"] = false,
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZZZMmhBAAAAsYmNYADY2YCZWAgZbmZGjtFTbMzYsMzMzYYxyMzyMGzMLAADDgZGDDD",
-["icon"] = 134400,
+["name"] = "Dungeons",
+["isExpanded"] = true,
 },
 },
 [3] = {
@@ -345,19 +308,19 @@ TalentLoadoutEx = {
 },
 {
 ["icon"] = 134400,
-["pvp2"] = 114,
+["name"] = "Oracle",
 ["text"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMmBmZbmtZmZmxMDAAAAAAAAAgxYZGMzMjNjZGsZamYAmZDDhxsMAjBLAAwYmZGDmBYmZEMD",
 ["pvp1"] = 100,
 ["pvp3"] = 5640,
-["name"] = "Oracle",
+["pvp2"] = 114,
 },
 {
 ["icon"] = 134400,
-["name"] = "Dung",
+["pvp2"] = 114,
 ["pvp1"] = 100,
 ["text"] = "CAQAR03Gt7xPmcDNOjs2Zlb3yCDsMzMWYMGzgZzsNzMzMzMDAAAAAAAAAghZZGMzMDGzMYz0MxgZGAEAz2stAGbGAAGzMzYwMYmBzEMD",
 ["pvp3"] = 5640,
-["pvp2"] = 114,
+["name"] = "Dung",
 },
 },
 [3] = {

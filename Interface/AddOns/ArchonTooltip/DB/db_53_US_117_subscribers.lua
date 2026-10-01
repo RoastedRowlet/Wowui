@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Druid-Balance','Unknown-Unknown',}
-local provider = {region='US',realm='Hakkar',name='US',type='subscribers',zone=53,date='2026-09-22',data={Ha='Hailey:BAEANQAECgYJDgABNQAECgkJGgABAL0lAA==.',Km='Kmarte:BAEANQAECgQJCQABNQAECgYJDAACAAAAAA==.Kmartt:BAEANQAECgYJDAAAAA==.',Tr='Tralis:BAEANQADCggIDgAAAA==.',Yo='Yogsothoth:BAEANQAECgcIEwAAAA==.',},}
+local lookup = {'Unknown-Unknown','Hunter-BeastMastery',}
+local provider = {region='US',realm='Hakkar',name='US',type='subscribers',zone=53,date='2026-09-29',data={Km='Kmarte:BAEANQAECgQICQABNQAECgcIDQABAAAAAA==.Kmartt:BAEANQAECgcIDQAAAA==.',Sw='Swurve:BAEANQAECgQIBAAAAA==.',Tr='Tralis:BAEANQADCggIDgAAAA==.',Yo='Yogsothoth:BAEBNQAECoEbAAICAAkKNxp4HQDtAgmODQAABgBeAHUNAAAGAFIAfw0AAAMAOwCpDQAABABHAFwNAAACADAAXQ0AAAEAOABlDQAAAQANAKQNAAACAFsAMw0AAAIAVQACAAkKNxp4HQDtAgmODQAABgBeAHUNAAAGAFIAfw0AAAMAOwCpDQAABABHAFwNAAACADAAXQ0AAAEAOABlDQAAAQANAKQNAAACAFsAMw0AAAIAVQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

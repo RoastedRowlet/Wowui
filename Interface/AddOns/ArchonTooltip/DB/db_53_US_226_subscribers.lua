@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Turalyon',name='US',type='subscribers',zone=53,date='2026-09-22',data={Be='Beârback:BAEANQAECggJCwAAAA==.',Cy='Cybrhexx:BAEANQADCgcIBgABNQAECgYIEQABAAAAAA==.',Si='Sintaro:BAEANQAECgYICAAAAA==.',},}
+local lookup = {'Paladin-Retribution',}
+local provider = {region='US',realm='Turalyon',name='US',type='subscribers',zone=53,date='2026-09-29',data={Be='Beârback:BAEANQAECggIEAAAAA==.',Cy='Cybrhexx:BAEANQADCgcIBgABNQAECgkKGQABAOQJAA==.',He='Hekus:BAEANQADCggICAABNQAECgkJHAABAA0VAA==.',Si='Sintaro:BAEANQAECgYICAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

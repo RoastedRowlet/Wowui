@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Druid-Guardian',}
-local provider = {region='US',realm='TwistingNether',name='US',type='subscribers',zone=53,date='2026-09-22',data={Sj='Sjaridin:BAEANQADCgcIBwABNQAECgkJHgABADMIAA==.',Su='Sule:BAEANQAECgYJEAAAAA==.',},}
+local provider = {region='US',realm='TwistingNether',name='US',type='subscribers',zone=53,date='2026-09-29',data={Sj='Sjaridin:BAEANQADCgcIBwABNQAFFAMIBQABAHQAAA==.',Su='Sule:BAEANQAECgYJEAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

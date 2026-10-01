@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Warlock-Affliction',}
-local provider = {region='US',realm='ShadowCouncil',name='US',type='subscribers',zone=53,date='2026-09-22',data={Re='Reldarus:BAEANQAECgYIBwAAAA==.',Su='Suffocation:BAEANQAECgYIBgABNQAFFAYIEQABAOwgAA==.',},}
+local lookup = {'Priest-Shadow','Warlock-Destruction',}
+local provider = {region='US',realm='ShadowCouncil',name='US',type='subscribers',zone=53,date='2026-09-29',data={Re='Reldarus:BAEANQAECgYIDQAAAA==.',So='Somdot:BAEBNQAECoEgAAIBAAgKLh1xDwDKAgiODQAABgBcAHUNAAAFAFMAfw0AAAUAXgCpDQAABQBYAFwNAAADAC0AXQ0AAAQAWgBlDQAAAgAiADMNAAACAEUAAQAICi4dcQ8AygIIjg0AAAYAXAB1DQAABQBTAH8NAAAFAF4AqQ0AAAUAWABcDQAAAwAtAF0NAAAEAFoAZQ0AAAIAIgAzDQAAAgBFAAAA.',Su='Suffocation:BAEANQAECgYIBgABNQAFFAcIFwACAEkiAA==.',['Sø']='Sømdøt:BAEANQAECggIDAABNQAECggIIAABAC4dAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

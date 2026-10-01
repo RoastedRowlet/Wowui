@@ -12,23 +12,19 @@ RaiderIO_Config = {
 ["point"] = "TOPLEFT",
 },
 }
-RaiderIO_LastCharacter = "us-Madmareep-stormrage"
+RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Alnallion-area-52"] = true,
-["us-Sovaa-tichondrius"] = true,
-["us-Swampmagic-stormrage"] = true,
-["us-Aixev-bonechewer"] = true,
-["us-Beatdigger-stormrage"] = true,
-["us-Mythicmage-stormrage"] = true,
-["us-Darkaeris-stormrage"] = true,
-["us-Watershoes-stormrage"] = true,
-["us-Hunterpumper-stormrage"] = true,
-["us-Bògga-tichondrius"] = true,
-["us-Firethroat-archimonde"] = true,
-["us-Yâbbâ-tichondrius"] = true,
-["us-Einlegesohle-stormrage"] = true,
-["us-Nirvahna-stormrage"] = true,
-["us-Wtfrogue-tichondrius"] = true,
+["us-Merihhim-stormrage"] = true,
+["us-Razdornbirt-tichondrius"] = true,
+["us-Athune-gorgonnash"] = true,
+["us-Holystone-altar-of-storms"] = true,
+["us-Khaesyll-barthilas"] = true,
+["us-Madamblue-stormrage"] = true,
+["us-Rentwazkalmi-tichondrius"] = true,
+["us-Lemonator-stormrage"] = true,
+["us-Greysenn-stormrage"] = true,
+["us-Kathenoth-nagrand"] = true,
+["us-Zheofist-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

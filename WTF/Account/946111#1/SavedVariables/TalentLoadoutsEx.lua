@@ -3,39 +3,9 @@ TalentLoadoutEx = {
 ["SHAMAN"] = {
 {
 {
-["name"] = "Den",
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMLzMzYssYajZmlxyMmZMsMLzMLDjZmFAghBwMjhhB",
+["isExpanded"] = true,
 ["icon"] = 134400,
-},
-{
-["name"] = "Altar WCL",
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsMzMjx2ipNmZMWmZmZMsMLDLmZYmtBAMMAmZMMMA",
-["icon"] = 134400,
-},
-{
-["name"] = "Ula ",
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZw2CthZMzyMzMzDMsMLzMLDjZmFAgZAwMjhhB",
-["icon"] = 134400,
-},
-{
-["name"] = "Explo",
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZZZMmhBAAAAsYmNYADY2YCMLAwsMzMjx2iJMzsMWmZmZMmFLjZZYMzsMAghBwMjhZ8BA",
-["icon"] = 134400,
-},
-{
-["name"] = "Top M+",
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZGjlZMz8ADLzyMzywYmZBAYYAMzYYYA",
-["icon"] = 134400,
-},
-{
-["name"] = "Raid",
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMmZmZZbZMMjBAAAAsYmNYADY2YCZWAgZZmZGjtFTYmZZsMzMzYYZWmxiZGmZZAADAMzYYYA",
-["icon"] = 134400,
-},
-{
-["name"] = "M+",
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZZZMmhBAAAAsYmNYADY2YCZWAgZbmZGjtFTbMzYsMzMzYYxyMzyMGzMLAADDgZGDDD",
-["icon"] = 134400,
+["name"] = "Dungeons",
 },
 },
 [3] = {
@@ -187,6 +157,7 @@ TalentLoadoutEx = {
 {
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWmZxMzYjlZWGjZGLYYAGbbzMYMbDgJAAAALmZmZGsZgxMAAmZgBA",
 ["pvp2"] = 3058,
+["isInGroup"] = false,
 ["pvp1"] = 180,
 ["icon"] = 134400,
 ["name"] = "First boss",
@@ -194,6 +165,7 @@ TalentLoadoutEx = {
 {
 ["pvp1"] = 180,
 ["name"] = "Keeper Pad",
+["isInGroup"] = false,
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsNmZmBDzY2mZZsNMjtZWmxYmZYDDDwAstN2w0MzyAAAAgNmZmZwmxMGzAYmBAGA",
 ["icon"] = 134400,
 ["pvp2"] = 3058,
@@ -201,6 +173,7 @@ TalentLoadoutEx = {
 {
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZswyMLjxMjNMAYstNzgxsNCMBAAAYhZmZGsZMjxAAwMDWGA",
 ["pvp2"] = 3058,
+["isInGroup"] = false,
 ["pvp1"] = 180,
 ["icon"] = 134400,
 ["name"] = "Wowhead M+",
@@ -208,6 +181,7 @@ TalentLoadoutEx = {
 {
 ["text"] = "CYGADBD3hSPCL9Y9gz68WcKvMAAAAAAAAAAAAAAAAAWoMbNMmZgHwsMzMzMLMYMmZZmFzMjFWmZZMmZshBAjttZGMmtRgJAAAALMzMzgNjZMGAAmZwyA",
 ["pvp2"] = 3058,
+["isInGroup"] = false,
 ["pvp1"] = 180,
 ["icon"] = 134400,
 ["name"] = "Compend M+",
@@ -230,30 +204,35 @@ TalentLoadoutEx = {
 {
 {
 ["name"] = "Wizard WS",
+["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbzMYMbMb2mBAAAAAAAAAALGa2mhpZAMLmZmZWMMAAAAAYADYGAAEAAwsNzWz2Mb2YMzMMzsBaGAgZGAGA",
 },
 {
 ["name"] = "Crazy Cow",
+["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbDPAjZxMb2mBAAAAAAAAAALDa2mhpZYgZxMzMzihxAAAAAYAAzAAgAAAmtZ2a2mZzGjZGMzsAaGAgZGAGA",
 },
 {
 ["name"] = "Theory",
+["isInGroup"] = false,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbzMGmZjZz2MAAAAAAAAAAYZQz2MMNDDMLzMzMzihxAAAAAYAAzAstNWw0MzyAAY2mZrZbmNLMmZwMAaGAMzMzAwA",
 ["icon"] = 134400,
 ["pvp1"] = 697,
 },
 {
 ["name"] = "wowhead raid",
+["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMjxMLzMjZmxsNMYmNjNmBAAAAAAAAAALDa2YMNzY4BMLzMzMDDzAAAAAAAAAAIAAgZbmlmtZ2sxYmZYmBGNDAwMDADA",
 },
 {
 ["name"] = "wowhead",
+["isInGroup"] = false,
 ["text"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzsMsZbGAAAAAAAAAAsMoZzw0MjZwsYmZmZZGegZAAAAAAAwAAQAAAz2MbNbzsYjxMDMzCoZAAmZAYA",
 ["icon"] = 134400,
 ["pvp1"] = 697,
@@ -332,25 +311,22 @@ TalentLoadoutEx = {
 ["icon"] = 134400,
 ["name"] = "Nez",
 ["text"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyMzMYmHwgZbmZmZmZAAAAAAAAAAYGWmBzMzwMmZATz0MDmZAAAmtZbDM2MAAMGzMGMDmZwIYA",
-["isInGroup"] = false,
 ["pvp1"] = 100,
 ["pvp3"] = 5640,
 ["pvp2"] = 114,
 },
 {
 ["pvp3"] = 5640,
-["pvp2"] = 114,
 ["name"] = "Oracle",
-["isInGroup"] = false,
+["pvp2"] = 114,
 ["text"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMmBmZbmtZmZmxMDAAAAAAAAAgxYZGMzMjNjZGsZamYAmZDDhxsMAjBLAAwYmZGDmBYmZEMD",
 ["icon"] = 134400,
 ["pvp1"] = 100,
 },
 {
 ["pvp3"] = 5640,
-["name"] = "Dung",
 ["pvp2"] = 114,
-["isInGroup"] = false,
+["name"] = "Dung",
 ["pvp1"] = 100,
 ["icon"] = 134400,
 ["text"] = "CAQAR03Gt7xPmcDNOjs2Zlb3yCDsMzMWYMGzgZzsNzMzMzMDAAAAAAAAAghZZGMzMDGzMYz0MxgZGAEAz2stAGbGAAGzMzYwMYmBzEMD",

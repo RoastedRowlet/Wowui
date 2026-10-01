@@ -158,7 +158,7 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
+["emphasize"] = false,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -166,7 +166,7 @@ BigWigs3DB = {
 21,
 },
 ["visibleBarLimit"] = 1,
-["emphasize"] = false,
+["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -197,20 +197,28 @@ BigWigs3DB = {
 },
 ["myKeystones"] = {
 ["Player-60-0F7B1446"] = {
-["playerRating"] = 2565,
+["playerRating"] = 2600,
 ["specId"] = 256,
-["keyMap"] = 250,
+["keyMap"] = 587,
 ["name"] = "Madmareep",
-["keyLevel"] = 10,
+["keyLevel"] = 11,
 ["realm"] = "Stormrage",
 },
 ["Player-60-0F7B141D"] = {
-["playerRating"] = 3863,
+["playerRating"] = 3884,
 ["specId"] = 262,
-["keyMap"] = 587,
+["keyMap"] = 399,
 ["name"] = "Zappyxatu",
 ["keyLevel"] = 20,
 ["realm"] = "Stormrage",
+},
+["Player-3676-0DF7D3EF"] = {
+["playerRating"] = 992,
+["specId"] = 1473,
+["keyMap"] = 0,
+["name"] = "Barelynoer",
+["keyLevel"] = 0,
+["realm"] = "Area 52",
 },
 ["Player-60-0F85ABEF"] = {
 ["playerRating"] = 3038,
@@ -221,7 +229,7 @@ BigWigs3DB = {
 ["realm"] = "Stormrage",
 },
 },
-["prevWeeklyReset"] = 1790089200,
+["prevWeeklyReset"] = 1790694000,
 ["profiles"] = {
 ["Default"] = {
 },
@@ -581,12 +589,12 @@ BigWigsStatsDB = {
 },
 [2883] = {
 ["heroic"] = {
-["kills"] = 3,
+["kills"] = 4,
 ["fkDate"] = "2026/09/08",
 ["bestDate"] = "2026/09/22",
 ["fkWipes"] = 2,
 ["best"] = 334.3519999999999,
-["wipes"] = 2,
+["wipes"] = 5,
 ["fkDuration"] = 410.5499999999884,
 },
 },
@@ -638,9 +646,9 @@ BigWigsStatsDB = {
 ["fkDuration"] = 369.376,
 },
 ["heroic"] = {
-["kills"] = 9,
+["kills"] = 11,
 ["fkDuration"] = 534.4850000000006,
-["wipes"] = 14,
+["wipes"] = 16,
 ["fkWipes"] = 1,
 ["best"] = 233.4049999999988,
 ["bestDate"] = "2026/09/15",

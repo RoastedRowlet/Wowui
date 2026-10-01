@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm="Jubei'Thos",name='US',type='subscribers',zone=53,date='2026-09-22',data={Fo='Foxe:BAEANQADCgMIAwABNQAECgQICgABAAAAAA==.',Lu='Lukie:BAEANQAECgIIAgAAAA==.',Ra='Raxe:BAEANQAECgQICgAAAA==.',Xe='Xenarn:BAEANQAECgQICgAAAA==.',},}
+local lookup = {'Warrior-Protection','Monk-Brewmaster',}
+local provider = {region='US',realm="Jubei'Thos",name='US',type='subscribers',zone=53,date='2026-09-29',data={Fo='Foxe:BAEANQADCgMIAwABNQAECgUIFAABAFckAA==.',Lu='Lukie:BAEANQAECgIIAgAAAA==.',Ra='Raxe:BAEBNQAECoEUAAIBAAUKVyTeDAARAgWODQAABgBbAHUNAAAEAF8Afw0AAAQAYQCpDQAABABWAFwNAAACAF4AAQAFClck3gwAEQIFjg0AAAYAWwB1DQAABABfAH8NAAAEAGEAqQ0AAAQAVgBcDQAAAgBeAAAA.',Xe='Xenarn:BAEBNQAECoEUAAICAAUKVA7xGAABAQWODQAABgAsAHUNAAAEACMAfw0AAAQAKACpDQAABAAmAFwNAAACABkAAgAFClQO8RgAAQEFjg0AAAYALAB1DQAABAAjAH8NAAAEACgAqQ0AAAQAJgBcDQAAAgAZAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

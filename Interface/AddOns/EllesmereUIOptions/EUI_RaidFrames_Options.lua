@@ -9,6 +9,9 @@ local ADDON_NAME = "EllesmereUIRaidFrames"
 local ns = EllesmereUI._ModuleNS[ADDON_NAME]  -- module namespace (published by the module at its load)
 if not ns then return end  -- module disabled: no options page
 
+-- WoW Forever: the preview's numbers follow the live frames (EllesmereUI_NumberFormat.lua).
+local AbbreviateNumbers = (EllesmereUI.IS_FOREVER and EllesmereUI.ForeverAbbreviateNumbers) or AbbreviateNumbers
+
 local PAGE_MAIN = "Frames"
 local PAGE_PARTY = "Party"
 local PAGE_BUFFS = "Buff Manager"
@@ -658,6 +661,57 @@ initFrame:SetScript("OnEvent", function(self)
         return SGet(key)
     end
 
+    -- WoW Forever: the Missing Buffs icons' glow (prefix keys missingBuffsGlow*)
+    -- as a shared glow descriptor over a read/write pair -- the page's context-
+    -- aware SVal/SWrite in the indicator's cog, the raid keys on Global
+    -- Settings > Glows (built outside any tab, so never through the tab context).
+    local MissingGlowDesc
+    if EllesmereUI.IS_FOREVER then
+        local GK = EllesmereUI.Glows.PrefixKeys("missingBuffsGlow")
+        function MissingGlowDesc(read, write)
+            return {
+                host = "icon", excludes = { [4] = true },
+                caps = { mode = true, params = true, bg = true },
+                defaultColor = EllesmereUI.Glows.DEFAULT_COLOR,
+                onChange = ReloadAndUpdate,
+                disabled = function() return read("showMissingBuffs", true) == false end,
+                disabledTooltip = "Missing Buffs",
+                get = function(f)
+                    if f == "style" then return read(GK.type, 2)
+                    elseif f == "mode" then return read(GK.mode, "default")
+                    elseif f == "color" then return read(GK.r), read(GK.g), read(GK.b)
+                    elseif f == "lines" then return read(GK.lines)
+                    elseif f == "thickness" then return read(GK.th)
+                    elseif f == "speed" then return read(GK.speed)
+                    elseif f == "bg" then return read(GK.bg) == true
+                    elseif f == "bgColor" then return read(GK.bgR), read(GK.bgG), read(GK.bgB)
+                    end
+                end,
+                set = function(f, a, b, c)
+                    if f == "style" then write(GK.type, a)
+                    elseif f == "mode" then write(GK.mode, a)
+                    elseif f == "color" then write(GK.r, a); write(GK.g, b); write(GK.b, c)
+                    elseif f == "lines" then write(GK.lines, a)
+                    elseif f == "thickness" then write(GK.th, a)
+                    elseif f == "speed" then write(GK.speed, a)
+                    elseif f == "bg" then write(GK.bg, a and true or nil)
+                    elseif f == "bgColor" then write(GK.bgR, a); write(GK.bgG, b); write(GK.bgB, c)
+                    end
+                end,
+            }
+        end
+        EllesmereUI.GlowOptions.RegisterSite({ id = "rf_missing_buffs", label = "Missing Buffs Glow",
+            group = "module", module = "EllesmereUIRaidFrames", page = PAGE_MAIN,
+            section = "INDICATORS", highlight = "Missing Buffs",
+            desc = MissingGlowDesc(
+                function(key, default)
+                    local v = db.profile[key]
+                    if v == nil then return default end
+                    return v
+                end,
+                function(key, v) db.profile[key] = v end) })
+    end
+
     ---------------------------------------------------------------------------
     --  Shared "Sort By" control: Group/Role radio + drag-to-reorder role rows,
     --  installed into a DualRow half-region (replaces its placeholder dropdown);
@@ -1287,7 +1341,6 @@ initFrame:SetScript("OnEvent", function(self)
                 wipe(ns._healthAnimState)
 
                 local frames = ns.PvActiveFrames()
-                local s = (ns.PvEffectiveProfile and ns.PvEffectiveProfile()) or db.profile
                 for i = 1, 20 do
                     local f = frames[i]
                     if f and f._health then
@@ -1306,8 +1359,9 @@ initFrame:SetScript("OnEvent", function(self)
                 ns._healthAnimTicker = C_Timer.NewTicker(0.1, function()
                     if not ns._healthAnimActive then return end
                     -- Real preview contract: ticks must render effective-overlay values only, never the panel view's swapped values.
-                    local s = (ns.PvEffectiveProfile and ns.PvEffectiveProfile()) or db.profile
+                    local s = ns.PvSettings()
                     local smooth = s.smoothBars
+                    local invert = ns.RF_IsInvertedFill(s)
 
                     for i, st in ipairs(ns._healthAnimState) do
                         local f = st.frame
@@ -1321,10 +1375,11 @@ initFrame:SetScript("OnEvent", function(self)
                                 st.current = st.target
                                 st.target = 15 + math.random(85)
 
+                                local barPct = invert and (100 - st.current) or st.current
                                 if smooth and smoothInterp then
-                                    f._health:SetValue(st.current, smoothInterp)
+                                    f._health:SetValue(barPct, smoothInterp)
                                 else
-                                    f._health:SetValue(st.current)
+                                    f._health:SetValue(barPct)
                                 end
 
                                 if f._healthText then
@@ -1544,6 +1599,10 @@ initFrame:SetScript("OnEvent", function(self)
                       get=function() return SVal("healthVerticalFill", false) end,
                       -- RefreshPage re-labels Absorbs Placement for the new axis; cog popups bake labels in on first build.
                       set=function(v) SSet("healthVerticalFill", v); EllesmereUI:RefreshPage() end }),
+                    ns.RF_PartyKitGate({ type="toggle", label="Fill Missing Health",
+                      tooltip="The bar fills with missing health, growing as the unit takes damage.",
+                      get=function() return SVal("healthInvertFill", false) end,
+                      set=function(v) SSet("healthInvertFill", v) end }),
                 },
             })
         end
@@ -2396,6 +2455,8 @@ initFrame:SetScript("OnEvent", function(self)
                                 else
                                     f._power:SetValue(st.current)
                                 end
+                                -- Power Text follows the animated value (ApplyPreviewData sets f._pwtMode; nil = hidden).
+                                if f._pwtMode then ns.RF_PowerTextInto(f._powerText, f._pwtMode, st.current, nil, nil, f._pwtPer) end
                             end
                         end
                     end
@@ -2849,6 +2910,116 @@ initFrame:SetScript("OnEvent", function(self)
         end
         end   -- close Health Text dependent-row gate
 
+        -- Power Text (+ Custom/Class/Accent/Power swatches) | Power Text Size (+ position cog). Shows only on frames whose power bar shows, so everything greys while no role shows one.
+        do
+            local function PTOff() return IsPowerOff() or SVal("powerTextMode", "none") == "none" end
+            local function PTReq() return IsPowerOff() and "Show Power Bar For" or "Power Text" end
+            row, h = W:DualRow(parent, y,
+                { type="dropdown", text="Power Text",
+                  values={ ["none"]="None", ["percent"]="Percent", ["percentNoSign"]="Percent (No Sign)",
+                           ["number"]="Number", ["numberPercent"]="Number | Percent", ["percentNumber"]="Percent | Number" },
+                  order={ "none", "percent", "percentNoSign", "number", "numberPercent", "percentNumber" },
+                  disabled=IsPowerOff,
+                  disabledTooltip="Show Power Bar For",
+                  getValue=function() return SVal("powerTextMode", "none") end,
+                  setValue=function(v) SSet("powerTextMode", v); EllesmereUI:RefreshPage() end },
+                { type="slider", text="Power Text Size", min=6, max=26, step=1,
+                  disabled=PTOff,
+                  disabledTooltip=PTReq,
+                  getValue=function() return SVal("powerTextSize", 8) end,
+                  setValue=function(v) SSet("powerTextSize", v) end });  y = y - h
+            -- Swatches: Custom is added FIRST so the _lastInline chain places it next to the dropdown; Power (leftmost) shows the player's power color and is not editable. Each dims and blocks while Power Text is None or power is off.
+            if not EllesmereUI._prebuilding then
+                local rgn = row._leftRegion
+                local function AddPTSwatch(getColor, setColor, mode, opensPicker, tooltip)
+                    local sw, updateSw = EllesmereUI.BuildColorSwatch(
+                        rgn, row:GetFrameLevel() + 3, getColor, setColor, false, 20)
+                    sw:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+                    rgn._lastInline = sw
+                    -- Preserve the picker-opening click, then switch mode on click (same technique as the Health Text swatches).
+                    sw._eabOrigClick = sw:GetScript("OnClick")
+                    sw:SetScript("OnClick", function(self)
+                        if SVal("powerTextColorMode", "custom") ~= mode then
+                            SSet("powerTextColorMode", mode)
+                            EllesmereUI:RefreshPage()
+                            return
+                        end
+                        if opensPicker and self._eabOrigClick then self._eabOrigClick(self) end
+                    end)
+                    sw:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(sw, tooltip) end)
+                    sw:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                    local block = CreateFrame("Frame", nil, sw)
+                    block:SetAllPoints(); block:SetFrameLevel(sw:GetFrameLevel() + 10); block:EnableMouse(true)
+                    block:SetScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(sw, EllesmereUI.DisabledTooltip(PTReq())) end)
+                    block:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                    local function vis()
+                        updateSw()
+                        if PTOff() then
+                            sw:SetAlpha(0.3); block:Show()
+                        else
+                            sw:SetAlpha(SVal("powerTextColorMode", "custom") == mode and 1 or 0.3); block:Hide()
+                        end
+                    end
+                    EllesmereUI.RegisterWidgetRefresh(vis)
+                    vis()
+                end
+                -- Custom (rightmost): editable, opens the picker when active.
+                AddPTSwatch(
+                    function()
+                        local c = SGet("powerTextCustomColor")
+                        if c then return c.r, c.g, c.b, 1 end
+                        return 1, 1, 1, 1
+                    end,
+                    function(r, g, b)
+                        SWrite("powerTextCustomColor", { r=r, g=g, b=b })
+                        ReloadAndUpdate()
+                    end, "custom", true, "Custom Color")
+                AddPTSwatch(
+                    function()
+                        local _, ct = UnitClass("player")
+                        if ct and RAID_CLASS_COLORS[ct] then
+                            local cc = RAID_CLASS_COLORS[ct]
+                            return cc.r, cc.g, cc.b, 1
+                        end
+                        return 1, 1, 1, 1
+                    end,
+                    function() end, "class", false, "Class Color")
+                AddPTSwatch(
+                    function()
+                        local r, g, b = EllesmereUI.ResolveActiveAccent()
+                        return r or 1, g or 1, b or 1, 1
+                    end,
+                    function() end, "accent", false, "Accent Color")
+                -- Power (leftmost): each frame's own power-type color at runtime.
+                AddPTSwatch(
+                    function()
+                        local _, pToken = UnitPowerType("player")
+                        local info = EllesmereUI.GetPowerColor(pToken or "MANA")
+                        if info then return info.r, info.g, info.b, 1 end
+                        return 0, 0.5, 1, 1
+                    end,
+                    function() end, "power", false, "Power Colored Text")
+            end
+            -- Position + offset cog on the Power Text Size slider.
+            EllesmereUI.BuildInlineCog(row._rightRegion, {
+                icon = EllesmereUI.DIRECTIONS_ICON,
+                disabled = PTOff,
+                disabledTooltip = PTReq,
+                title = "Power Text Position",
+                rows = {
+                    { type="dropdown", label="Position", values=namePositionValues, order=namePositionOrder,
+                      get=function() return SVal("powerTextPosition", "bottom") end,
+                      set=function(v) SSet("powerTextPosition", v) end },
+                    { type="slider", label="Offset X", min=-150, max=150, step=1,
+                      get=function() return SVal("powerTextOffsetX", 0) end,
+                      set=function(v) SSet("powerTextOffsetX", v) end },
+                    { type="slider", label="Offset Y", min=-75, max=75, step=1,
+                      get=function() return SVal("powerTextOffsetY", 0) end,
+                      set=function(v) SSet("powerTextOffsetY", v) end },
+                },
+            })
+        end
+
         -- Heal Absorb Text (+swatches) | Heal Absorb Text Position (+offset cog); Heal Absorb Text Size row is 1:1 with Health Text. Shows the heal-absorb shield amount (short/full), hidden at zero.
         row, h = W:DualRow(parent, y,
             { type="dropdown", text="Heal Absorb Text",
@@ -3026,6 +3197,70 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUI.HideWidgetTooltip()
             end)
         end  -- close do (indicators eyeball)
+
+        -- WoW Forever: Missing Buffs, first in the section (runtime in
+        -- EUI_RaidFrames_ForeverMissingBuffs.lua). The raid marker row's
+        -- shape: Position (None turns it off) | Size, offsets in the cog.
+        if EllesmereUI.IS_FOREVER then
+            local mbPositionValues = {
+                none        = "None",
+                topleft     = "Top Left",
+                top         = "Top",
+                topright    = "Top Right",
+                left        = "Left",
+                center      = "Center",
+                right       = "Right",
+                bottomleft  = "Bottom Left",
+                bottom      = "Bottom",
+                bottomright = "Bottom Right",
+            }
+            local mbPositionOrder = { "none", "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
+            local mbRow
+            mbRow, h = W:DualRow(parent, y,
+                { type="dropdown", text="Missing Buffs", values=mbPositionValues, order=mbPositionOrder,
+                  tooltip="Shows Fortitude, Mark of the Wild or Spirit on a member who is missing it, while someone in your group can cast it.",
+                  getValue=function()
+                      if not SVal("showMissingBuffs", true) then return "none" end
+                      return SVal("missingBuffsPosition", "top")
+                  end,
+                  setValue=function(v)
+                      if v == "none" then
+                          SSet("showMissingBuffs", false)
+                      else
+                          SWrite("showMissingBuffs", true)
+                          SSet("missingBuffsPosition", v)
+                      end
+                      EllesmereUI:RefreshPage()
+                  end },
+                { type="slider", text="Missing Buffs Size", min=8, max=40, step=1,
+                  disabled=function() return not SVal("showMissingBuffs", true) end,
+                  disabledTooltip="Missing Buffs",
+                  getValue=function() return SVal("missingBuffsSize", 22) end,
+                  setValue=function(v) SSet("missingBuffsSize", v) end });  y = y - h
+            do
+                local rgn = mbRow._leftRegion
+                local rows = {
+                    { type="slider", label="Offset X", min=-50, max=50, step=1,
+                      get=function() return SVal("missingBuffsOffsetX", 0) end,
+                      set=function(v) SSet("missingBuffsOffsetX", v) end },
+                    { type="slider", label="Offset Y", min=-50, max=50, step=1,
+                      get=function() return SVal("missingBuffsOffsetY", 0) end,
+                      set=function(v) SSet("missingBuffsOffsetY", v) end },
+                }
+                -- The icons' glow: the shared glow controls (also listed on
+                -- Global Settings > Glows); the Pixel Glow rows show only
+                -- while Pixel Glow is picked.
+                for _, r in ipairs(EllesmereUI.GlowOptions.PopupRows(MissingGlowDesc(SVal, SWrite), "Glow", true)) do
+                    rows[#rows + 1] = r
+                end
+                EllesmereUI.BuildInlineCog(rgn, {
+                    title = "Missing Buffs",
+                    rows = rows,
+                    disabled = function() return not SVal("showMissingBuffs", true) end,
+                    disabledTooltip = "Missing Buffs",
+                })
+            end
+        end
 
         local RI_STYLES = ns.ROLE_ICON_STYLES
         -- Effective role: the player's spec wins over a stale assigned role
@@ -3823,7 +4058,10 @@ initFrame:SetScript("OnEvent", function(self)
               order={ "center", "left", "right" },
               getValue=function() return SVal("topNameBarTextAlign", "center") end,
               setValue=function(v) SSet("topNameBarTextAlign", v) end },
-            { type="label", text="" });  y = y - h
+            { type="toggle", text="Show on Bottom",
+              tooltip="Places the bar at the bottom of the frame instead of the top.",
+              getValue=function() return SVal("topNameBarBottom", false) end,
+              setValue=function(v) SSet("topNameBarBottom", v) end });  y = y - h
         -- Custom rightmost (opens picker), class leftmost. Clicking switches topNameBarTextColorMode; the inactive one dims. Custom is added FIRST so it sits next to the dropdown.
         if not EllesmereUI._prebuilding then
             local rgn = tnbRow3._leftRegion
@@ -5475,6 +5713,10 @@ initFrame:SetScript("OnEvent", function(self)
                       tooltip="Collapse subgroups that have no members so the remaining groups close ranks. For example, if only groups 1, 2, 3 and 6 have players, they show with no gaps instead of leaving empty space where groups 4 and 5 would be. Real raid frames only.",
                       get=function() return SVal("hideEmptyGroups", true) end,
                       set=function(v) SSet("hideEmptyGroups", v) end },
+                    { type="toggle", label="Hide Groups 5-8 in Mythic Raid",
+                      tooltip="Mythic raids allow only 20 players (groups 1-4), so hide groups 5-8 while inside one. Groups 1-4 still follow Show Groups, and Show Groups applies as normal everywhere else.",
+                      get=function() return SVal("mythicRaidHideGroups", false) end,
+                      set=function(v) SSet("mythicRaidHideGroups", v) end },
                     { type="toggle", label="Exclude Hidden from Size",
                       tooltip="When using custom raid sizes, don't count members in hidden groups toward the raid-size breakpoint. For example, if you hide groups 7 and 8, a full 40-man raid is sized as if it were 24-man instead of jumping to the 30-man frame size. Has no effect unless you have custom raid sizes set up.",
                       get=function() return SVal("excludeHiddenGroupsFromSize", true) end,
@@ -6671,6 +6913,8 @@ initFrame:SetScript("OnEvent", function(self)
                 local mode = db.profile.previewMode or "overlay"
                 if mode ~= "none" and ns.ShowPartyPreview then ns.ShowPartyPreview() end
             elseif page == PAGE_BUFFS then
+                -- Panel opening on Buffs counts as entering it (WoW Forever: All Specs).
+                ns.BM_EnterAllSpecs()
                 if not ns._bmRoot then
                     C_Timer.After(0, function()
                         if EllesmereUI:GetActiveModule() == "EllesmereUIRaidFrames" then
@@ -6771,6 +7015,8 @@ initFrame:SetScript("OnEvent", function(self)
         local origSelectPage = EllesmereUI.SelectPage
         EllesmereUI.SelectPage = function(self, pageName, ...)
             _partyCtx = (pageName == PAGE_PARTY)
+            -- Entering Buffs from another page (not a rebuild while on it): WoW Forever opens it on All Specs.
+            if pageName == PAGE_BUFFS and EllesmereUI:GetActivePage() ~= PAGE_BUFFS then ns.BM_EnterAllSpecs() end
             -- Party tab excludes synced sections from inline search; cleared on every other page (any module) so the hook can never leak.
             EllesmereUI._searchExcludeSection = (pageName == PAGE_PARTY) and ns._PartySearchExclude or nil
             EllesmereUI._onInlineSearch = (pageName == PAGE_PARTY) and ns._PartySearchOverlaySync or nil

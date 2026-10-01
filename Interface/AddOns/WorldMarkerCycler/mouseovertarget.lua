@@ -1,7 +1,9 @@
 -- ======================================================
 -- WorldMarkerCycler - Mouseover Target Marker Cycler
 -- File: mouseovertarget.lua
--- Uses Blizzard secure /tm command for @mouseover
+-- Places icons on your mouseover (living enemy) or else your target, using the
+-- secure "raidtarget" button action (no slash text, so client language and
+-- keyboard layout don't matter). /wmcmarkmode macro restores the old /tm macro.
 -- ======================================================
 
 
@@ -41,6 +43,13 @@ local function InitSaved()
     if sv.clearKey == nil then sv.clearKey = "" end
     if sv.clearModifier == nil then sv.clearModifier = "" end
 
+    -- Feature toggle: when false, mouseover marker keybinds are disabled entirely
+    if sv.enabled == nil then sv.enabled = true end
+
+    -- "action" = secure raid-target action (locale/keyboard independent, default)
+    -- "macro"  = old /tm macro text (fallback, /wmcmarkmode macro)
+    if sv.markMode ~= "macro" then sv.markMode = "action" end
+
     -- Robust orderList initialization: must be a table of 8 numbers
     local function isValidOrderList(tbl)
         if type(tbl) ~= "table" or #tbl ~= 8 then return false end
@@ -65,8 +74,10 @@ local cycleBtn = CreateFrame(
     UIParent,
     "SecureActionButtonTemplate"
 )
-cycleBtn:SetAttribute("type", "macro")
-cycleBtn:SetAttribute("macrotext", "")
+cycleBtn:SetAttribute("type", "raidtarget")
+cycleBtn:SetAttribute("action", "set")
+cycleBtn:SetAttribute("unit", "mouseover")
+cycleBtn:SetAttribute("wmc-mode", "action")
 -- IMPORTANT: register only ONE click edge.
 -- Registering both "AnyUp" and "AnyDown" makes a single keypress fire the
 -- PreClick snippet TWICE, so the cycle index advances by 2 and you only ever
@@ -74,11 +85,18 @@ cycleBtn:SetAttribute("macrotext", "")
 cycleBtn:RegisterForClicks("AnyUp")
 
 local function ApplyCycleClickEdge()
+    if InCombatLockdown() then return end
     local sv = SV()
-    if sv and sv.useClickDown == true then
+    -- This module's own setting wins. If it has none, follow the ground
+    -- cycler's "Click edge" setting (/wmcclickedge), so one setting fixes all.
+    local forced = sv and sv.useClickDown
+    if forced == nil and type(_G.WMC_Saved) == "table" then
+        forced = _G.WMC_Saved.useClickDown
+    end
+    if forced == true then
         cycleBtn:RegisterForClicks("AnyDown")
         return
-    elseif sv and sv.useClickDown == false then
+    elseif forced == false then
         cycleBtn:RegisterForClicks("AnyUp")
         return
     end
@@ -101,8 +119,10 @@ local clearBtn = CreateFrame(
     UIParent,
     "SecureActionButtonTemplate"
 )
-clearBtn:SetAttribute("type", "macro")
-clearBtn:SetAttribute("macrotext", "")
+clearBtn:SetAttribute("type", "raidtarget")
+clearBtn:SetAttribute("action", "clear")
+clearBtn:SetAttribute("unit", "mouseover")
+clearBtn:SetAttribute("wmc-mode", "action")
 clearBtn:RegisterForClicks("AnyUp", "AnyDown")
 -- Clearing restarts the cycle at the first marker in the order (matches Core.lua)
 clearBtn:SetScript("PostClick", function()
@@ -119,6 +139,10 @@ end)
 -- Order" box in the options window). There is no separate order editor for
 -- this cycler, so mirroring is what keeps all three consistent - previously
 -- this module silently kept its own hardcoded 8,7,6,5,4,3,2,1 list.
+-- World marker number (/wm) -> raid target icon number (/tm)
+-- 1 Square->6, 2 Triangle->4, 3 Diamond->3, 4 Cross->7, 5 Star->1, 6 Circle->2, 7 Moon->5, 8 Skull->8
+local WORLD_TO_RAID_TARGET = { 6, 4, 3, 7, 1, 2, 5, 8 }
+
 local function SyncOrderFromWorld()
     local w = _G.WMC_Saved
     if type(w) ~= "table" then return false end
@@ -127,7 +151,10 @@ local function SyncOrderFromWorld()
     if type(list) ~= "table" or #list == 0 then return false end
     local copy = {}
     for i, id in ipairs(list) do
-        if type(id) == "number" then copy[#copy + 1] = id end
+        -- WMC_Saved uses WORLD marker numbers (/wm: 1 Square .. 8 Skull) but /tm and the
+        -- "raidtarget" action use RAID TARGET numbers (1 Star .. 8 Skull). Convert so the
+        -- target/mouseover cycle places the same icons, in the same order, as the menu shows.
+        if type(id) == "number" then copy[#copy + 1] = WORLD_TO_RAID_TARGET[id] or id end
     end
     if #copy == 0 then return false end
     EnsureSV()
@@ -157,26 +184,54 @@ SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
         i = (i % #order) + 1
         marker = order[i] or 1
     end
-    self:SetAttribute(
-        "macrotext",
-        "/tm [@mouseover,harm,nodead][] " .. marker
-    )
+    if self:GetAttribute("wmc-mode") == "macro" then
+        self:SetAttribute("type", "macro")
+        self:SetAttribute("macrotext", "/tm [@mouseover,harm,nodead][] " .. marker)
+    else
+        -- Same rule as the old macro: living enemy under the cursor, else your target
+        local unit = SecureCmdOptionParse("[@mouseover,harm,nodead] mouseover; target")
+        self:SetAttribute("type", "raidtarget")
+        self:SetAttribute("action", "set")
+        self:SetAttribute("unit", unit or "target")
+        self:SetAttribute("marker", marker)
+    end
 ]=])
 
--- Clear mouseover marker
-clearBtn:SetAttribute("macrotext", "/tm [@mouseover,harm,nodead][] 0")
+SecureHandlerWrapScript(clearBtn, "PreClick", clearBtn, [=[
+    if self:GetAttribute("wmc-mode") == "macro" then
+        self:SetAttribute("type", "macro")
+        self:SetAttribute("macrotext", "/tm [@mouseover,harm,nodead][] 0")
+    else
+        local unit = SecureCmdOptionParse("[@mouseover,harm,nodead] mouseover; target")
+        self:SetAttribute("type", "raidtarget")
+        self:SetAttribute("action", "clear")
+        self:SetAttribute("unit", unit or "target")
+    end
+]=])
 
 -- =========================
 -- Key Bindings
 -- =========================
 local bindingsFrame = CreateFrame("Frame", "WMC_MouseoverMarkerBindings")
 
+local function ApplyMarkMode()
+    if InCombatLockdown() then return end
+    local sv = SV()
+    local mode = (sv and sv.markMode == "macro") and "macro" or "action"
+    cycleBtn:SetAttribute("wmc-mode", mode)
+    clearBtn:SetAttribute("wmc-mode", mode)
+end
+
 local function UpdateBindings()
     ApplyCycleClickEdge()  -- keep the click edge matched to the bound key
+    ApplyMarkMode()
     ClearOverrideBindings(bindingsFrame)
 
     local sv = SV()
     if not sv then return end
+
+    -- If mouseover markers are disabled, leave bindings cleared
+    if sv.enabled == false then return end
 
     local cycleKey = (sv.placeModifier or "") .. (sv.placeKey or "")
     local clearKey = (sv.clearModifier or "") .. (sv.clearKey or "")
@@ -200,6 +255,22 @@ local function UpdateBindings()
     end
 end
 
+-- When the ground cycler's click edge changes (options window or
+-- /wmcclickedge), re-apply ours too since we follow it by default.
+local HookGroundClickEdge_done = false
+local function HookGroundClickEdge()
+    if HookGroundClickEdge_done then return end
+    HookGroundClickEdge_done = true
+    local function reapply() ApplyCycleClickEdge() end
+    if SlashCmdList and SlashCmdList["WMCCLICKEDGE"] then
+        hooksecurefunc(SlashCmdList, "WMCCLICKEDGE", reapply)
+    end
+    local core = _G.WorldMarkerCyclerAPI
+    if core and core.SetUseClickDown then
+        hooksecurefunc(core, "SetUseClickDown", reapply)
+    end
+end
+
 -- =========================
 -- Event Loader
 -- =========================
@@ -210,6 +281,7 @@ loader:RegisterEvent("PLAYER_LOGIN")
 loader:SetScript("OnEvent", function(_, event, addon)
     if event == "ADDON_LOADED" and addon == ADDON_NAME then
         InitSaved()
+        HookGroundClickEdge()
         SyncOrderFromWorld()
         BuildOrderTable()
         UpdateBindings()
@@ -226,6 +298,17 @@ end)
 -- Public API
 -- =========================
 WorldMarkerCyclerMouseoverAPI = WorldMarkerCyclerMouseoverAPI or {}
+
+function WorldMarkerCyclerMouseoverAPI.SetEnabled(enabled)
+    EnsureSV()
+    SV().enabled = enabled and true or false
+    UpdateBindings()
+end
+
+function WorldMarkerCyclerMouseoverAPI.GetEnabled()
+    local sv = SV()
+    return sv and sv.enabled ~= false
+end
 
 function WorldMarkerCyclerMouseoverAPI.SetPlaceKey(mod, key)
     EnsureSV()
@@ -289,10 +372,10 @@ SlashCmdList["WMCMOUSEOVERADD"] = function(msg)
         return
     end
     rest = rest or ""
-    local mods, key = rest:match("^([%w%-]+)%s+([%w%p]+)$")
+    local mods, key = rest:match("^([%w%-]+)%s+(%S+)$")
     if not key then
         -- Try to parse as just key (no modifier)
-        key = rest:match("^%s*([%w%p]+)%s*$")
+        key = rest:match("^%s*(%S+)%s*$")
         mods = ""
     end
     mods = mods or ""
@@ -300,7 +383,7 @@ SlashCmdList["WMCMOUSEOVERADD"] = function(msg)
     -- Locale-agnostic modifier parsing
     local upmods = mods:upper()
     local modstr = ""
-    if upmods:find("CTRL%-") or upmods:find("CTR%-%") then modstr = modstr.."CTRL-"; mods = mods:gsub("[Cc][Tt][Rr][Ll]?%-", "") end
+    if upmods:find("CTRL%-") or upmods:find("CTR%-") then modstr = modstr.."CTRL-"; mods = mods:gsub("[Cc][Tt][Rr][Ll]?%-", "") end
     if upmods:find("ALT%-") then modstr = modstr.."ALT-"; mods = mods:gsub("[Aa][Ll][Tt]%-", "") end
     if upmods:find("SHIFT%-") or upmods:find("MAJ%-") then modstr = modstr.."SHIFT-"; mods = mods:gsub("[Ss][Hh][Ii][Ff][Tt]%-", ""):gsub("[Mm][Aa][Jj]%-", "") end
     -- Store raw key name for binding API; use GetBindingText only for display
@@ -319,6 +402,17 @@ end
 
 -- Expose UpdateBindings for UI
 WorldMarkerCyclerMouseoverAPI.UpdateBindings = UpdateBindings
+
+function WorldMarkerCyclerMouseoverAPI.SetMarkMode(mode)
+    EnsureSV()
+    SV().markMode = (mode == "macro") and "macro" or "action"
+    ApplyMarkMode()
+end
+
+function WorldMarkerCyclerMouseoverAPI.GetMarkMode()
+    local sv = SV()
+    return (sv and sv.markMode == "macro") and "macro" or "action"
+end
 
 -- Re-read the shared order (called by the options window when you edit it)
 WorldMarkerCyclerMouseoverAPI.SyncOrderFromWorld = function()

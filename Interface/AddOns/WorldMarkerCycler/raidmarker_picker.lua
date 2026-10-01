@@ -53,6 +53,9 @@ local function InitSaved()
     if sv.openModifier == nil then sv.openModifier = "" end
     if sv.countdownSeconds == nil then sv.countdownSeconds = 10 end
     if sv.rows == nil then sv.rows = 1 end
+
+    -- Feature toggle: when false, raid picker keybind is disabled entirely
+    if sv.enabled == nil then sv.enabled = true end
 end
 
 -- =========================
@@ -477,6 +480,8 @@ end)
 local function UpdatePickerBindings()
     ClearOverrideBindings(pickerBindingsFrame)
     local sv = SV()
+    -- If raid picker is disabled, leave bindings cleared
+    if sv and sv.enabled == false then return end
     if sv and sv.openKey and sv.openKey ~= "" then
         local fullKey = (sv.openModifier or "") .. sv.openKey
         SetOverrideBindingClick(pickerBindingsFrame, true, fullKey, "WMC_RaidPickerToggleButton")
@@ -522,6 +527,17 @@ end
 
 function WorldMarkerCyclerRaidPickerAPI.ToggleLock()
     ToggleLock()
+end
+
+function WorldMarkerCyclerRaidPickerAPI.SetEnabled(enabled)
+    EnsureSV()
+    SV().enabled = enabled and true or false
+    UpdatePickerBindings()
+end
+
+function WorldMarkerCyclerRaidPickerAPI.GetEnabled()
+    local sv = SV()
+    return sv and sv.enabled ~= false
 end
 
 function WorldMarkerCyclerRaidPickerAPI.SetOpenKey(mod, key)

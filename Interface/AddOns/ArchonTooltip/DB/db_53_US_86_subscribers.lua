@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm="Eldre'Thalas",name='US',type='subscribers',zone=53,date='2026-09-22',data={['Cõ']='Cõrpses:BAEANQAECgYIDQABNQAECgEJAQABAAAAAA==.',De='Delilia:BAEANQAECggIBQABNQAECggIEAABAAAAAA==.',Ko='Kona:BAEANQAECgEJAQAAAA==.',Me='Medanii:BAEANQAECgYJDwAAAA==.',Oj='Ojore:BAEANQAECgQJBgAAAA==.',Sk='Skâld:BAEANQADCgYICwAAAA==.',},}
+local lookup = {'Unknown-Unknown','Priest-Discipline','Priest-Holy','Priest-Shadow',}
+local provider = {region='US',realm="Eldre'Thalas",name='US',type='subscribers',zone=53,date='2026-09-29',data={['Cõ']='Cõrpses:BAEANQAECgYIDQABNQAECgUIBgABAAAAAA==.',De='Delilia:BAEANQAECggIBQABNQAECggIEAABAAAAAA==.',Ko='Kona:BAEANQAECgUIBgAAAA==.',Me='Medanii:BAEBNQAECoEaAAQCAAgKwg5UCgBzAQiODQAABAAwAHUNAAAEADIAfw0AAAQAJwCpDQAABAAhAFwNAAADABkAXQ0AAAIACABlDQAAAQAMADMNAAAEAFMAAgAGClUSVAoAcwEGjg0AAAMAMAB1DQAAAwAyAH8NAAADACcAqQ0AAAMAIQBcDQAAAgAZADMNAAAEAFMAAwAECjgF1J0AxwAEjg0AAAEAGwB1DQAAAQAFAF0NAAABAAgAZQ0AAAEADAAEAAQKFwrHRAC4AAR/DQAAAQAvAKkNAAABABIAXA0AAAEAIwBdDQAAAQACAAAA.',Oj='Ojore:BAEANQAECgUICwAAAA==.',Sk='Skâld:BAEANQADCgYICwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

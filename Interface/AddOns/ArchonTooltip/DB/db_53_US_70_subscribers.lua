@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='Doomhammer',name='US',type='subscribers',zone=53,date='2026-09-22',data={Ne='Nerissa:BAEANQAECggICAAAAA==.',Sh='Shamanstein:BAEANQADCggJDwAAAA==.',Sm='Smâlls:BAEANQAECgIJAgAAAA==.',Vi='Viirnald:BAEANQADCgYIBgAAAA==.',},}
+local lookup = {'Mage-Arcane','Paladin-Retribution',}
+local provider = {region='US',realm='Doomhammer',name='US',type='subscribers',zone=53,date='2026-09-29',data={De='Demonicfyre:BAEBNQAECoEbAAIBAAkKvxwMRgDVAgmODQAABABBAHUNAAADAEwAfw0AAAMAUwCpDQAABABXAFwNAAACAEAAXQ0AAAIALwBlDQAAAwBhAKQNAAAEAD8AMw0AAAIATAABAAkKvxwMRgDVAgmODQAABABBAHUNAAADAEwAfw0AAAMAUwCpDQAABABXAFwNAAACAEAAXQ0AAAIALwBlDQAAAwBhAKQNAAAEAD8AMw0AAAIATAAAAA==.Demonstein:BAEANQAECgUIBQABNQAFFAUIDAACAM8YAA==.',Ne='Nerissa:BAEANQAECggICAAAAA==.',Sh='Shamanstein:BAEANQADCggJDwABNQAFFAUIDAACAM8YAA==.',Sm='Smâlls:BAEANQAECgQIBgAAAA==.',Vi='Viirnald:BAEANQADCgcIDQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data
