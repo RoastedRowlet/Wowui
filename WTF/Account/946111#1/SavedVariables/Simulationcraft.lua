@@ -1,30 +1,6 @@
 
 SimulationCraftDB = {
 ["char"] = {
-["Barelynoer - Area 52"] = {
-["bonusRolls"] = {
-{
-["currency"] = 3418,
-["ts"] = 1784761320,
-["source"] = 268471,
-["season"] = 34,
-["keyLevel"] = 22,
-["spec"] = 1473,
-["context"] = 16,
-["itemId"] = 251097,
-},
-{
-["currency"] = 3418,
-["ts"] = 1785242040,
-["source"] = 268471,
-["season"] = 34,
-["keyLevel"] = 20,
-["spec"] = 1473,
-["context"] = 16,
-["itemId"] = 250144,
-},
-},
-},
 ["Lonelylitten - Stormrage"] = {
 ["bonusRolls"] = {
 {
@@ -66,6 +42,54 @@ SimulationCraftDB = {
 ["spec"] = 105,
 ["context"] = 5,
 ["itemId"] = 268203,
+},
+},
+},
+["Barelynoer - Area 52"] = {
+["bonusRolls"] = {
+{
+["currency"] = 3418,
+["ts"] = 1784761320,
+["source"] = 268471,
+["season"] = 34,
+["keyLevel"] = 22,
+["spec"] = 1473,
+["context"] = 16,
+["itemId"] = 251097,
+},
+{
+["currency"] = 3418,
+["ts"] = 1785242040,
+["source"] = 268471,
+["season"] = 34,
+["keyLevel"] = 20,
+["spec"] = 1473,
+["context"] = 16,
+["itemId"] = 250144,
+},
+},
+},
+["Madmareep - Stormrage"] = {
+["bonusRolls"] = {
+{
+["currency"] = 3418,
+["ts"] = 1790535060,
+["source"] = 278285,
+["season"] = 37,
+["keyLevel"] = 1,
+["spec"] = 256,
+["context"] = 5,
+["itemId"] = 268203,
+},
+{
+["currency"] = 3418,
+["ts"] = 1790682960,
+["source"] = 278285,
+["season"] = 37,
+["keyLevel"] = 1,
+["spec"] = 256,
+["context"] = 5,
+["itemId"] = 268218,
 },
 },
 },
@@ -130,30 +154,6 @@ SimulationCraftDB = {
 ["spec"] = 264,
 ["season"] = 37,
 ["itemId"] = 270169,
-},
-},
-},
-["Madmareep - Stormrage"] = {
-["bonusRolls"] = {
-{
-["currency"] = 3418,
-["ts"] = 1790535060,
-["source"] = 278285,
-["season"] = 37,
-["keyLevel"] = 1,
-["spec"] = 256,
-["context"] = 5,
-["itemId"] = 268203,
-},
-{
-["currency"] = 3418,
-["ts"] = 1790682960,
-["source"] = 278285,
-["season"] = 37,
-["keyLevel"] = 1,
-["spec"] = 256,
-["context"] = 5,
-["itemId"] = 268218,
 },
 },
 },

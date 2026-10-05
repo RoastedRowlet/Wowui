@@ -10,7 +10,7 @@ PremadeGroupsFilterSettings = {
 ["groupAge"] = false,
 ["ratingInfo"] = true,
 ["specIcon"] = false,
-["dialogMovable"] = false,
+["cancelOldestApp"] = false,
 ["leaderCrown"] = false,
 ["compactListEntries"] = false,
 ["version"] = 3,
@@ -18,5 +18,5 @@ PremadeGroupsFilterSettings = {
 ["classCircle"] = false,
 ["persistSignUpNote"] = true,
 ["skipSignUpDialog"] = false,
-["cancelOldestApp"] = false,
+["dialogMovable"] = false,
 }

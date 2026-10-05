@@ -12,18 +12,25 @@ RaiderIO_Config = {
 ["point"] = "TOPLEFT",
 },
 }
-RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
+RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Nikotar-area-52"] = true,
-["us-Ärtemís-area-52"] = true,
-["us-Huckosis-area-52"] = true,
-["us-Anissaria-area-52"] = true,
-["us-Demonvisl-area-52"] = true,
-["us-Dreamss-area-52"] = true,
-["us-Aurorasec-area-52"] = true,
-["us-Dárkràngér-area-52"] = true,
-["us-Arbin-area-52"] = true,
-["us-Muushoots-area-52"] = true,
+["us-Saluthe-stormrage"] = true,
+["us-Baxn-stormrage"] = true,
+["us-Aybruhh-tichondrius"] = true,
+["us-Felodran-stormrage"] = true,
+["us-Teerfe-stormrage"] = true,
+["us-Lmdrake-malganis"] = true,
+["us-Zephîro-stormrage"] = true,
+["us-Drudic-thrall"] = true,
+["us-Ulrek-stormrage"] = true,
+["us-Craftedonly-stormrage"] = true,
+["us-Mollify-stormrage"] = true,
+["us-Lambton-stormrage"] = true,
+["us-Wotano-stormrage"] = true,
+["us-Billymayss-stormrage"] = true,
+["us-Streetcorn-zuljin"] = true,
+["us-Eleonöra-stormrage"] = true,
+["us-Ämisea-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }
