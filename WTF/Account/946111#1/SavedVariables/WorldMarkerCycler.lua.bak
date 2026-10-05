@@ -4,13 +4,9 @@ WMC_Saved = {
 ["customCycleEnabled"] = false,
 ["clearModifier"] = "CTRL-",
 ["clearKey"] = "B",
-["placeModifier"] = "SHIFT-",
-["customCycleMarkers"] = {
-2,
-3,
-4,
-8,
-},
+["worldEnabled"] = true,
+["setupPopupDismissed"] = true,
+["useClickDown"] = true,
 ["orderList"] = {
 6,
 4,
@@ -21,16 +17,20 @@ WMC_Saved = {
 5,
 8,
 },
-["useClickDown"] = true,
-["setupPopupDismissed"] = true,
-["worldEnabled"] = true,
+["customCycleMarkers"] = {
+2,
+3,
+4,
+8,
+},
+["placeModifier"] = "SHIFT-",
 }
 WMC_TargetSaved = {
 ["enabled"] = true,
 ["placeKey"] = "",
-["markMode"] = "action",
-["clearModifier"] = "",
 ["clearKey"] = "",
+["clearModifier"] = "",
+["markMode"] = "action",
 ["orderList"] = {
 2,
 7,
@@ -46,9 +46,9 @@ WMC_TargetSaved = {
 WMC_MouseoverSaved = {
 ["enabled"] = true,
 ["placeKey"] = "",
-["markMode"] = "action",
-["clearModifier"] = "",
 ["clearKey"] = "",
+["clearModifier"] = "",
+["markMode"] = "action",
 ["orderList"] = {
 2,
 7,
@@ -69,7 +69,7 @@ WMC_RaidPickerSaved = {
 ["countdownSeconds"] = 10,
 ["posX"] = 0,
 ["locked"] = true,
-["rows"] = 1,
-["posAnchor"] = "CENTER",
 ["posY"] = 200,
+["posAnchor"] = "CENTER",
+["rows"] = 1,
 }
