@@ -12,8 +12,12 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
+RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
+["us-Mordekin-stormrage"] = true,
+["us-party5-stormrage"] = true,
+["us-Libiee-icecrown"] = true,
+["us-Archadius-malygos"] = true,
 }
 RaiderIO_MissingServers = {
 }

@@ -12,8 +12,18 @@ RaiderIO_Config = {
 ["point"] = "TOPLEFT",
 },
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
+["us-Nikotar-area-52"] = true,
+["us-Ärtemís-area-52"] = true,
+["us-Huckosis-area-52"] = true,
+["us-Anissaria-area-52"] = true,
+["us-Demonvisl-area-52"] = true,
+["us-Dreamss-area-52"] = true,
+["us-Aurorasec-area-52"] = true,
+["us-Dárkràngér-area-52"] = true,
+["us-Arbin-area-52"] = true,
+["us-Muushoots-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }
