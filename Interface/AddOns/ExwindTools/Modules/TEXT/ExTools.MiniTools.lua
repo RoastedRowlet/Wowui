@@ -1,11 +1,15 @@
 -- [[ 小工具箱 (MiniTools) ]]
 -- { Key = "ExTools.MiniTools", Name = "小工具箱", Desc = "汇集各种简单实用的功能 tweaks。", Category = 4 }
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 local EXDB = _G.EXDB
 if not ExwindTools or not ExwindTools.UI then return end
 local EXUI = ExwindTools.UI
 local EXWIND_MODULE_KEY = "ExTools.MiniTools"
+
 local L = (ExwindTools and ExwindTools.L) or setmetatable({}, { __index = function(_, key) return key end })
 local MiniToolsRefreshCallbacks = {}
 local function RegisterMiniToolsRefresh(callback)
@@ -16,9 +20,13 @@ end
 local UIParent = _G.UIParent
 
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 -- ========================================================================
 -- 1. [ShowMapInfo] 地图ID + 鼠标坐标 + 玩家坐标
 -- ========================================================================
+-- [卡片迁移边界：自定义/外部 UI] 本文件中的地图、商人、宏等 Frame/hook 都不是设置页 Grid；其运行时锚点、控件顺序与业务回调禁止修改。
 local function Init_ShowMapInfo()
     local db = ExwindTools:GetModuleDB("ExTools.MiniTools")
     local ANCHOR_MAP = {
@@ -323,6 +331,7 @@ local function Init_BulkBuy()
         end
 
         local ok = ApplyBulkBuyBackdrop(Frame)
+        EXUI:ApplyDialogStyle(Frame, Frame.Title)
         bulkBuySkinApplied = ok == true
         return bulkBuySkinApplied
     end
@@ -343,7 +352,11 @@ local function Init_BulkBuy()
     Frame:SetFrameStrata("DIALOG")
 
     -- 关闭按钮
-    Frame.CloseBtn = CreateFrame("Button", nil, Frame, "UIPanelCloseButton")
+    Frame.CloseBtn = EXUI:CreatePicButton(Frame, 24, 24,
+        "Interface\\Buttons\\UI-Panel-CloseButton-Up",
+        "Interface\\Buttons\\UI-Panel-CloseButton-Down",
+        "Interface\\Buttons\\UI-Panel-CloseButton-Highlight",
+        function() Frame:Hide() end, true)
     Frame.CloseBtn:SetPoint("TOPRIGHT", -5, -5)
 
     -- 标题
@@ -420,18 +433,6 @@ local function Init_BulkBuy()
         Frame:Show()
     end
 
-    -- 确认框
-    StaticPopupDialogs["EXWIND_BULK_BUY_CONFIRM"] = {
-        text = L["此次购买将花费 %s\n确认购买 %s 吗？"],
-        button1 = YES,
-        button2 = NO,
-        OnAccept = function(self) self.data.callback() end,
-        timeout = 0,
-        whileDead = true,
-        hideOnEscape = true,
-        preferredIndex = 3,
-    }
-
     local function BuyBatch(index, remaining, callback)
         if remaining <= 0 then
             if callback then callback() end
@@ -491,7 +492,17 @@ local function Init_BulkBuy()
                 local priceStr = GetMoneyString(totalCopper, true)
                 local itemLink = GetMerchantItemLink(currentIndex) or L["物品"]
                 local descStr = string.format(L["%d 个 %s"], amount, itemLink)
-                StaticPopup_Show("EXWIND_BULK_BUY_CONFIRM", priceStr, descStr, { callback = ExecuteBuy })
+                EXUI:ShowDialog({
+                    sourceAddon = "ExwindTools", sourceModule = L["批量购买"],
+                    id = "EXWIND_BULK_BUY_CONFIRM",
+                    text = string.format(L["此次购买将花费 %s\n确认购买 %s 吗？"], priceStr, descStr),
+                    buttons = {
+                        { id = "cancel", text = NO, variant = "secondary" },
+                        { id = "confirm", text = YES, variant = "primary", onClick = ExecuteBuy },
+                    },
+                    cancelButton = "cancel",
+                    defaultButton = "confirm",
+                })
                 return
             end
         end
@@ -509,23 +520,18 @@ local function Init_BulkBuy()
         end
     end)
 
-    Frame.BuyBtn = CreateFrame("Button", nil, Frame, "UIPanelButtonTemplate")
-    Frame.BuyBtn:SetSize(160, 40)
+    Frame.BuyBtn = EXUI:CreateButton(Frame, 160, 40, L["购买"], DoBuyCheck,
+        { variant = "primary", compact = true })
     Frame.BuyBtn:SetPoint("BOTTOM", 0, 92)
-    Frame.BuyBtn:SetText(L["购买"])
-    Frame.BuyBtn:SetScript("OnClick", DoBuyCheck)
     Frame.Input:SetScript("OnEnterPressed", DoBuyCheck)
 
     -- 快捷按钮
     Frame.QuickButtons = {}
     local function AddQuickBtn(label, val, x, y, width)
-        local btn = CreateFrame("Button", nil, Frame, "UIPanelButtonTemplate")
-        btn:SetSize(width or 60, 22)
-        btn:SetPoint("TOPLEFT", Frame.Input, "BOTTOMLEFT", x, y)
-        btn:SetText(label)
-        btn:SetScript("OnClick", function()
+        local btn = EXUI:CreateButton(Frame, width or 60, 22, label, function()
             Frame.Input:SetNumber(val); Frame.Input:HighlightText()
-        end)
+        end, { compact = true })
+        btn:SetPoint("TOPLEFT", Frame.Input, "BOTTOMLEFT", x, y)
         table.insert(Frame.QuickButtons, btn)
     end
     local y1, y2, w = -10, -40, 60
@@ -562,37 +568,7 @@ end
 -- 6. [ResetDMG] 进本重置伤害统计
 -- ========================================================================
 local function Init_ResetDamageMeter()
-    -- 不使用 StaticPopup：它是暴雪共享的全局弹窗系统。进本状态回调中向其中
-    -- 插入插件弹窗，可能使同一时段的受保护 UI（例如公会权限页）继承污染上下文。
-    local dialog = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
-    dialog:SetSize(360, 150)
-    dialog:SetPoint("CENTER", UIParent, "CENTER", 0, 120)
-    dialog:SetFrameStrata("DIALOG")
-    dialog:EnableMouse(true)
-    dialog:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        tile = true,
-        tileSize = 32,
-        edgeSize = 1,
-        insets = { left = 0, right = 0, top = 0, bottom = 0 },
-    })
-    dialog:SetBackdropColor(0, 0, 0, 0.95)
-    dialog:SetBackdropBorderColor(0, 0, 0, 1)
-    dialog:Hide()
-
-    local message = dialog:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-    message:SetPoint("TOPLEFT", 28, -30)
-    message:SetPoint("TOPRIGHT", -28, -30)
-    message:SetJustifyH("CENTER")
-    message:SetWordWrap(true)
-    message:SetText(L["检测到进入副本，是否重置伤害统计数据？"])
-
-    local acceptButton = CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
-    acceptButton:SetSize(110, 26)
-    acceptButton:SetPoint("BOTTOM", dialog, "BOTTOM", -62, 24)
-    acceptButton:SetText(_G.YES)
-    acceptButton:SetScript("OnClick", function()
+    local function ConfirmReset()
         local CDM = _G.C_DamageMeter
         if CDM and CDM.ResetAllCombatSessions then
             CDM.ResetAllCombatSessions()
@@ -600,16 +576,7 @@ local function Init_ResetDamageMeter()
         else
             print("|cffff0000[ExwindTools] " .. L["错误: C_DamageMeter.ResetAllCombatSessions API 不存在"] .. "|r")
         end
-        dialog:Hide()
-    end)
-
-    local cancelButton = CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
-    cancelButton:SetSize(110, 26)
-    cancelButton:SetPoint("BOTTOM", dialog, "BOTTOM", 62, 24)
-    cancelButton:SetText(_G.NO)
-    cancelButton:SetScript("OnClick", function()
-        dialog:Hide()
-    end)
+    end
 
     -- [关键修复] 记录初始真实状态
     -- 如果初始化时已经在副本里(lastInInstance=true)，那么 State 初始化同步带来的 false->true 变化将被忽略
@@ -618,9 +585,19 @@ local function Init_ResetDamageMeter()
     ExwindTools:WatchState("InInstance", "ExTools_Mini_ResetDMG", function(inInstance)
         -- 仅当真正从野外(last=false)变为副本(curr=true)时触发
         if inInstance and lastInInstance == false then
-            dialog:Show()
+            EXUI:ShowDialog({
+                sourceAddon = "ExwindTools", sourceModule = L["伤害统计"],
+                id = "EXTOOLS_RESET_DAMAGE_METER",
+                text = L["检测到进入副本，是否重置伤害统计数据？"],
+                danger = true,
+                buttons = {
+                    { id = "cancel", text = _G.NO, variant = "secondary" },
+                    { id = "confirm", text = _G.YES, variant = "dangerSolid", onClick = ConfirmReset },
+                },
+                cancelButton = "cancel",
+            })
         elseif not inInstance then
-            dialog:Hide()
+            EXUI:HideDialog("EXTOOLS_RESET_DAMAGE_METER")
         end
         lastInInstance = inInstance
     end)
@@ -1558,6 +1535,9 @@ end
 -- ========================================================================
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EXWIND_DEFAULTS = {
     --
     ShowMapInfo = true,
@@ -1620,6 +1600,9 @@ local EXWIND_DEFAULTS = {
 local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, EXWIND_DEFAULTS)
 
 -- 初始化逻辑
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 local function SafeInit(func, name)
     local ok, err = pcall(func)
     if not ok then
@@ -1640,6 +1623,9 @@ if EX_DB.EJTooltip then SafeInit(Init_EJTooltip, "EJTooltip") end
 if EX_DB.MerchantExpansion then SafeInit(Init_MerchantExpansion, "MerchantExpansion") end
 SafeInit(Init_MacroEnhancement, "MacroEnhancement")
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 local function RefreshActiveSurfaces()
     for _, refresh in ipairs(MiniToolsRefreshCallbacks) do refresh() end
 end
@@ -1649,54 +1635,107 @@ EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = 
 -- ========================================================================
 -- Grid 布局
 -- ========================================================================
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
 local function EX_RegisterLayout()
+    -- [声明迁移边界：设置页] 仅把原多功能设置项改为 typed sections；fontgroup 仍整体引用。
+    -- 各业务 key/type/顺序、商人/宏界面 hook、购买确认和战斗记录回调禁止修改。
     local layout = {
-        { key = "head", type = "header", x = 1, y = 1, w = 193, h = 8, label = L["小工具箱 (Mini Tools)"], labelSize = 25 },
-        { key = "h_map", type = "header", x = 1, y = 9, w = 200, h = 8, label = L["地图"], labelSize = 20 },
-        { key = "ShowMapInfo", type = "checkbox", x = 1, y = 17, w = 100, h = 8, label = L["启用：世界地图显示坐标信息"], labelSize = 18 },
-        { key = "MapInfoHideMapID", type = "checkbox", x = 1, y = 26, w = 65, h = 8, label = L["不显示地图ID"] },
-        { key = "MapInfoAnchor", type = "dropdown", x = 103, y = 20, w = 56, h = 8, label = L["显示位置"], items = { "左下", "左上", "右下", "右上", "中下" } },
-        { key = "MapInfoFont", type = "fontgroup", x = 1, y = 35, w = 200, h = 50, label = L["字体设置"] },
-        { key = "h_del", type = "header", x = 2, y = 86, w = 200, h = 5, label = L["小功能"], labelSize = 20 },
-        { key = "AutoDelete", type = "checkbox", x = 1, y = 93, w = 95, h = 6, label = L["启用: 删除物品时自动填写 'DELETE'"] },
-        { key = "AutoSellJunk", type = "checkbox", x = 1, y = 100, w = 95, h = 6, label = L["启用: 打开商人时自动出售灰色物品"] },
-        { key = "AutoInsertKeystone", type = "checkbox", x = 101, y = 107, w = 95, h = 6, label = L["打开大秘境面板自动插入钥石"] },
-        { key = "h_acl", type = "header", x = 1, y = 122, w = 200, h = 6, label = L["自动战斗记录"], labelSize = 18 },
-        { key = "AutoCombatLog", type = "checkbox", x = 1, y = 129, w = 120, h = 6, label = L["启用模块 (总开关)"] },
-        { key = "lbl_dungeon", type = "description", x = 1, y = 136, w = 79, h = 3, label = L["|cffffd1005人地下城|r"] },
-        { key = "ACL_DungeonNormal", type = "checkbox", x = 26, y = 140, w = 20, h = 6, label = L["普通"] },
-        { key = "ACL_DungeonHeroic", type = "checkbox", x = 51, y = 140, w = 20, h = 6, label = L["英雄"] },
-        { key = "ACL_DungeonMythic", type = "checkbox", x = 76, y = 140, w = 20, h = 6, label = L["史诗"] },
-        { key = "ACL_DungeonChallenge", type = "checkbox", x = 101, y = 140, w = 24, h = 6, label = L["大秘境"] },
-        { key = "ACL_DungeonFollower", type = "checkbox", x = 1, y = 140, w = 20, h = 6, label = L["追随者"] },
-        { key = "lbl_raid", type = "description", x = 1, y = 147, w = 40, h = 3, label = L["|cffffd100团队副本|r"] },
-        { key = "ACL_RaidLFR", type = "checkbox", x = 1, y = 150, w = 19, h = 6, label = L["随机"] },
-        { key = "ACL_RaidNormal", type = "checkbox", x = 26, y = 150, w = 20, h = 6, label = L["普通"] },
-        { key = "ACL_RaidHeroic", type = "checkbox", x = 51, y = 150, w = 20, h = 6, label = L["英雄"] },
-        { key = "ACL_RaidMythic", type = "checkbox", x = 76, y = 150, w = 24, h = 6, label = L["史诗"] },
-        { key = "BulkBuy", type = "checkbox", x = 1, y = 107, w = 60, h = 6, label = L["启用: Shift+点击 接管商人物品购买"] },
-        { key = "BulkBuy_WarnThreshold", type = "input", x = 83, y = 107, w = 13, h = 6, label = L["需要确认金额"], labelPos = "left" },
-        { key = "AutoResetDamageMeter", type = "checkbox", x = 1, y = 114, w = 95, h = 6, label = L["启用: 进入副本时弹出重置伤害统计确认框"] },
-        { key = "h_btag", type = "header", x = 1, y = 160, w = 192, h = 7, label = L["修改战网名称"], labelSize = 20 },
-        { key = "HideBattleTag", type = "checkbox", x = 1, y = 168, w = 119, h = 7, label = L["启用: 修改战网名称 |cffff0c08(需要 /rl 生效)|r"] },
-        { key = "BattleTagText", type = "input", x = 1, y = 180, w = 80, h = 6, label = L["输入名称 (留空则隐藏)"] },
-        { key = "h_repair", type = "header", x = 1, y = 190, w = 200, h = 8, label = L["自动修理"], labelSize = 20 },
-        { key = "AutoRepair", type = "checkbox", x = 1, y = 198, w = 120, h = 6, label = L["启用：打开商人时自动修理全部装备"] },
-        { key = "AutoRepair_UseGuildBank", type = "checkbox", x = 1, y = 204, w = 120, h = 6, label = L["优先使用公会银行修理（公会银行余额不足则自费）"] },
-        { key = "AutoRepair_ShowMessage", type = "checkbox", x = 1, y = 210, w = 120, h = 6, label = L["修理后在聊天框显示花费提示"] },
-        { key = "EJTooltip", type = "checkbox", x = 101, y = 99, w = 95, h = 6, label = L["启用:地下城手侧显示法术Tooltip"] },
-        { key = "h_merch", type = "header", x = 1, y = 220, w = 200, h = 6, label = L["商人界面增强"], labelSize = 20 },
-        { key = "MerchantExpansion", type = "checkbox", x = 1, y = 229, w = 66, h = 6, label = L["启用：商人界面加宽 (不改动高度)"] },
-        { key = "MerchantColumns", type = "dropdown", x = 1, y = 240, w = 60, h = 8, label = L["显示列数"], items = { "2", "3", "4", "5" } },
-        { key = "MacroEnhancement", type = "checkbox", x = 101, y = 93, w = 95, h = 6, label = L["启用:宏界面增强|cffff1f13(注意 功能测试中!!!)|r"] },
+        version = 1,
+        sections = {
+            {
+                kind = "settings", id = "map", title = L["地图"],
+                items = {
+                    { key = "ShowMapInfo", type = "switch", label = L["启用：世界地图显示坐标信息"] },
+                    { key = "MapInfoHideMapID", type = "switch", label = L["不显示地图ID"] },
+                    {
+                        key = "MapInfoAnchor", type = "select", label = L["显示位置"],
+                        options = {
+                            { value = "左下", label = L["左下"] },
+                            { value = "左上", label = L["左上"] },
+                            { value = "右下", label = L["右下"] },
+                            { value = "右上", label = L["右上"] },
+                            { value = "中下", label = L["中下"] },
+                        },
+                    },
+                },
+            },
+            {
+                kind = "composite", id = "map_font", title = L["字体设置"],
+                component = "fontgroup", key = "MapInfoFont",
+            },
+            {
+                kind = "settings", id = "utilities", title = L["小功能"],
+                items = {
+                    { key = "AutoDelete", type = "switch", label = L["启用: 删除物品时自动填写 'DELETE'"] },
+                    { key = "MacroEnhancement", type = "switch", label = L["启用:宏界面增强|cffff1f13(注意 功能测试中!!!)|r"] },
+                    { key = "AutoSellJunk", type = "switch", label = L["启用: 打开商人时自动出售灰色物品"] },
+                    { key = "EJTooltip", type = "switch", label = L["启用:地下城手侧显示法术Tooltip"] },
+                    { key = "BulkBuy", type = "switch", label = L["启用: Shift+点击 接管商人物品购买"] },
+                    { key = "BulkBuy_WarnThreshold", type = "input", label = L["需要确认金额"] },
+                    { key = "AutoInsertKeystone", type = "switch", label = L["打开大秘境面板自动插入钥石"] },
+                    { key = "AutoResetDamageMeter", type = "switch", label = L["启用: 进入副本时弹出重置伤害统计确认框"] },
+                },
+            },
+            {
+                kind = "settings", id = "combat_log", title = L["自动战斗记录"],
+                items = {
+                    { key = "AutoCombatLog", type = "switch", label = L["启用模块 (总开关)"] },
+                    {
+                        label = L["|cffffd1005人地下城|r"],
+                        controls = {
+                            { key = "ACL_DungeonFollower", type = "switch", label = L["追随者"], presentation = "card" },
+                            { key = "ACL_DungeonNormal", type = "switch", label = L["普通"], presentation = "card" },
+                            { key = "ACL_DungeonHeroic", type = "switch", label = L["英雄"], presentation = "card" },
+                            { key = "ACL_DungeonMythic", type = "switch", label = L["史诗"], presentation = "card" },
+                            { key = "ACL_DungeonChallenge", type = "switch", label = L["大秘境"], presentation = "card" },
+                        },
+                    },
+                    {
+                        label = L["|cffffd100团队副本|r"],
+                        controls = {
+                            { key = "ACL_RaidLFR", type = "switch", label = L["随机"], presentation = "card" },
+                            { key = "ACL_RaidNormal", type = "switch", label = L["普通"], presentation = "card" },
+                            { key = "ACL_RaidHeroic", type = "switch", label = L["英雄"], presentation = "card" },
+                            { key = "ACL_RaidMythic", type = "switch", label = L["史诗"], presentation = "card" },
+                        },
+                    },
+                },
+            },
+            {
+                kind = "settings", id = "battle_tag", title = L["修改战网名称"],
+                items = {
+                    { key = "HideBattleTag", type = "switch", label = L["启用: 修改战网名称 |cffff0c08(需要 /rl 生效)|r"] },
+                    { key = "BattleTagText", type = "input", label = L["输入名称 (留空则隐藏)"] },
+                },
+            },
+            {
+                kind = "settings", id = "repair", title = L["自动修理"],
+                items = {
+                    { key = "AutoRepair", type = "switch", label = L["启用：打开商人时自动修理全部装备"] },
+                    { key = "AutoRepair_UseGuildBank", type = "switch", label = L["优先使用公会银行修理（公会银行余额不足则自费）"] },
+                    { key = "AutoRepair_ShowMessage", type = "switch", label = L["修理后在聊天框显示花费提示"] },
+                },
+            },
+            {
+                kind = "settings", id = "merchant", title = L["商人界面增强"],
+                items = {
+                    { key = "MerchantExpansion", type = "switch", label = L["启用：商人界面加宽 (不改动高度)"] },
+                    {
+                        key = "MerchantColumns", type = "select", label = L["显示列数"],
+                        options = {
+                            { value = "2", label = "2" },
+                            { value = "3", label = "3" },
+                            { value = "4", label = "4" },
+                            { value = "5", label = "5" },
+                        },
+                    },
+                },
+            },
+        },
     }
-
-
-
-
-
-
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
 end
 
 EX_RegisterLayout()

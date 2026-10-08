@@ -1661,31 +1661,34 @@ local function TimerDB()
     return tdb
 end
 
-local function NormalizeBarDisplayMode(mode)
-    local m = tostring(mode or ""):lower()
-    if m == "timer" or m == "bun" or m == "both" or m == "none" then
-        return m
-    end
-    return "bun"
-end
-
-local function GetBarDisplayMode()
-    EXBOSS12S2 = EXBOSS12S2 or {}
-    EXBOSS12S2.ui = EXBOSS12S2.ui or {}
-    EXBOSS12S2.ui.general = EXBOSS12S2.ui.general or {}
-    local g = EXBOSS12S2.ui.general
-    g.barDisplayMode = NormalizeBarDisplayMode(g.barDisplayMode)
-    return g.barDisplayMode
-end
-
 local function IsTimerBarEnabledByGlobal()
-    local mode = GetBarDisplayMode()
-    return mode == "both" or mode == "timer"
+    return ExBoss.DisplayPolicy.IsTimelineBarEnabled("timer")
 end
 
 local function IsBunBarEnabledByGlobal()
-    local mode = GetBarDisplayMode()
-    return mode == "both" or mode == "bun"
+    return ExBoss.DisplayPolicy.IsTimelineBarEnabled("bun")
+end
+
+function Scheduler:RefreshTimelineBars()
+    for _, entry in ipairs({
+        { kind = "bun", shown = "bunBarShown", module = ExBoss.UI.BunBar },
+        { kind = "timer", shown = "timerBarShown", module = ExBoss.UI.TimerBar },
+    }) do
+        if not ExBoss.DisplayPolicy.IsTimelineBarEnabled(entry.kind) then
+            entry.module:ReleaseAll()
+            for _, timer in pairs(self._active) do
+                timer[entry.shown] = false
+            end
+        end
+    end
+end
+
+local function CanShowTimelineBar(timer)
+    -- Finished boss timers can remain active only for pending voice work;
+    -- reopening a bar must not resurrect those casts. Trash ready retention
+    -- remains eligible through its existing business state.
+    return timer.castFired ~= true
+        or (timer.trashKeepTimerBarAfterReadyEnabled == true and timer.trashReadyAt ~= nil)
 end
 
 local function IsTimerAllowedOnBarBySource(timer, barKind)
@@ -2260,6 +2263,11 @@ local function GetFixedVoiceTriggerBaseTime(timer, trigger)
         return tonumber(timer.castTime)
     end
     if trigger == 2 then
+        -- 名称播报与数字播报分别启用。数字关闭但名称开启时，名称直接以
+        -- castTime 为基准；最终触发时间在下方明确减 5 秒。
+        if timer.countdownPlayName == true and timer.countdownVoiceEnabled ~= true then
+            return tonumber(timer.castTime)
+        end
         if timer.preAlertEnabled == false then
             return nil
         end
@@ -2275,6 +2283,9 @@ local function GetFixedVoiceTriggerFireTime(timer, trigger)
     end
 
     if tonumber(trigger) == 2 and type(timer) == "table" and timer.countdownPlayName == true then
+        if timer.countdownVoiceEnabled ~= true then
+            return baseTime - 5
+        end
         return baseTime - 1
     end
 
@@ -5162,6 +5173,7 @@ function Scheduler:_OnUpdate(elapsed)
 
         if action ~= "remove" then
             if not timer.bunBarShown and timer.showBunBar and IsBunBarEnabledByGlobal()
+                and CanShowTimelineBar(timer)
                 and IsTimerAllowedOnBarBySource(timer, "bun")
                 and now >= (timer.castTime - ResolveBunBarLeadTime()) then
                 timer.bunBarShown = true
@@ -5171,6 +5183,7 @@ function Scheduler:_OnUpdate(elapsed)
             end
 
             if not timer.timerBarShown and timer.showTimerBar and IsTimerBarEnabledByGlobal()
+                and CanShowTimelineBar(timer)
                 and IsTimerAllowedOnBarBySource(timer, "timer")
                 and ShouldShowTimerBarNow(timer, now) then
                 timer.timerBarShown = true

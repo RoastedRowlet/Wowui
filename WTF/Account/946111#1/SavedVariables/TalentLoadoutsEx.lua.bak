@@ -3,9 +3,9 @@ TalentLoadoutEx = {
 ["SHAMAN"] = {
 {
 {
+["isExpanded"] = true,
 ["icon"] = 134400,
 ["name"] = "Dungeons",
-["isExpanded"] = true,
 },
 {
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYssYajZmtxyMPwMjhFLzMLDjZmFAghBwMjhhB",
@@ -28,8 +28,13 @@ TalentLoadoutEx = {
 ["icon"] = 134400,
 },
 {
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZGjlZegZGjZxyMzywYmZBAYYAMzYYYA",
+["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMLzMzYstYajZGjlZMzMjZxyMzywYmZBAYAgZGDDD",
 ["name"] = "Murder",
+["icon"] = 134400,
+},
+{
+["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMLzMzYstYajZGjlZmZGDLWmZWGGzMLAADDgZGDDD",
+["name"] = "KR",
 ["icon"] = 134400,
 },
 },
@@ -180,36 +185,32 @@ TalentLoadoutEx = {
 ["DRUID"] = {
 {
 {
-["name"] = "First boss",
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWmZxMzYjlZWGjZGLYYAGbbzMYMbDgJAAAALmZmZGsZgxMAAmZgBA",
-["isInGroup"] = false,
+["pvp2"] = 3058,
 ["pvp1"] = 180,
 ["icon"] = 134400,
-["pvp2"] = 3058,
+["name"] = "First boss",
 },
 {
-["pvp2"] = 3058,
 ["pvp1"] = 180,
-["isInGroup"] = false,
+["name"] = "Keeper Pad",
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsNmZmBDzY2mZZsNMjtZWmxYmZYDDDwAstN2w0MzyAAAAgNmZmZwmxMGzAYmBAGA",
 ["icon"] = 134400,
-["name"] = "Keeper Pad",
+["pvp2"] = 3058,
 },
 {
-["name"] = "Wowhead M+",
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZswyMLjxMjNMAYstNzgxsNCMBAAAYhZmZGsZMjxAAwMDWGA",
-["isInGroup"] = false,
+["pvp2"] = 3058,
 ["pvp1"] = 180,
 ["icon"] = 134400,
-["pvp2"] = 3058,
+["name"] = "Wowhead M+",
 },
 {
-["name"] = "Compend M+",
 ["text"] = "CYGADBD3hSPCL9Y9gz68WcKvMAAAAAAAAAAAAAAAAAWoMbNMmZgHwsMzMzMLMYMmZZmFzMjFWmZZMmZshBAjttZGMmtRgJAAAALMzMzgNjZMGAAmZwyA",
-["isInGroup"] = false,
+["pvp2"] = 3058,
 ["pvp1"] = 180,
 ["icon"] = 134400,
-["pvp2"] = 3058,
+["name"] = "Compend M+",
 },
 },
 {
@@ -229,35 +230,30 @@ TalentLoadoutEx = {
 {
 {
 ["name"] = "Wizard WS",
-["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbzMYMbMb2mBAAAAAAAAAALGa2mhpZAMLmZmZWMMAAAAAYADYGAAEAAwsNzWz2Mb2YMzMMzsBaGAgZGAGA",
 },
 {
 ["name"] = "Crazy Cow",
-["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbDPAjZxMb2mBAAAAAAAAAALDa2mhpZYgZxMzMzihxAAAAAYAAzAAgAAAmtZ2a2mZzGjZGMzsAaGAgZGAGA",
 },
 {
 ["name"] = "Theory",
-["isInGroup"] = false,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbzMGmZjZz2MAAAAAAAAAAYZQz2MMNDDMLzMzMzihxAAAAAYAAzAstNWw0MzyAAY2mZrZbmNLMmZwMAaGAMzMzAwA",
 ["icon"] = 134400,
 ["pvp1"] = 697,
 },
 {
 ["name"] = "wowhead raid",
-["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMjxMLzMjZmxsNMYmNjNmBAAAAAAAAAALDa2YMNzY4BMLzMzMDDzAAAAAAAAAAIAAgZbmlmtZ2sxYmZYmBGNDAwMDADA",
 },
 {
 ["name"] = "wowhead",
-["isInGroup"] = false,
 ["text"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzsMsZbGAAAAAAAAAAsMoZzw0MjZwsYmZmZZGegZAAAAAAAwAAQAAAz2MbNbzsYjxMDMzCoZAAmZAYA",
 ["icon"] = 134400,
 ["pvp1"] = 697,

@@ -21,21 +21,36 @@ local GRID_COLS = 200
 local MAX_COUNTDOWN_DIGIT = tonumber(Runtime.GetMaxCountdownDigit and Runtime:GetMaxCountdownDigit()) or 5
 
 local SOURCE_ITEMS = {
-    { L["语音包"], "pack" },
-    { L["LSM音效"], "lsm" },
+    { value = "pack", label = L["语音包"] },
+    { value = "lsm", label = L["LSM音效"] },
 }
 
+-- [卡片/Grid 迁移边界：数字语音]
+-- 允许：只按共享规范调整开怪倒数与数字语音两组的 x/y/w/h、外层卡片和可见高度。
+-- 禁止：修改 digit key 生成规则、数字业务顺序、Runtime↔页面 DB 投影、试听回调或来源显隐逻辑。
 local LAYOUT = {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["语音设置"], labelSize = 24 },
-    { key = "header_pull", type = "header", x = 1, y = 11, w = 200, h = 5, label = L["开怪倒数"], labelSize = 20 },
-    { key = "pullCountdownEnabled",      type = "checkbox", x = 4, y = 20, w = 70, h = 5, label = L["启用开怪倒数"] },
-    { key = "pullCountdownVoiceEnabled", type = "checkbox", x = 4, y = 27, w = 70, h = 5, label = L["为开怪倒数播放语音"] },
-    { key = "header_digits", type = "header", x = 1, y = 37, w = 200, h = 5, label = L["数字语音"], labelSize = 20 },
+    version = 1,
+    title = L["语音设置"],
+    sections = {
+        { kind = "settings", id = "pull-countdown", title = L["开怪倒数"], items = {
+            { key = "pullCountdownEnabled", type = "switch", label = L["启用开怪倒数"] },
+            { key = "pullCountdownVoiceEnabled", type = "switch", label = L["为开怪倒数播放语音"] },
+        } },
+        { kind = "table", id = "digit-voice", title = L["数字语音"],
+            columns = {
+                { title = L["启用"] }, { title = L["数字"] }, { title = L["来源"] },
+                { title = L["音效选择"] }, { title = L["试听"] },
+            },
+            supportsAdd = false, records = {},
+        },
+    },
 }
 
 local root
 local scrollFrame
 local scrollChild
+local cardSession
+local renderTicket = 0
 
 local function DeepCopy(v)
     if type(v) ~= "table" then
@@ -65,50 +80,19 @@ local function ApplyDefaults(dst, defaults)
 end
 
 local function BuildLayout()
-    local rows = DeepCopy(LAYOUT)
-    local baseY = 47
+    -- 保留原数字顺序、key和原工厂语义；每行只声明一次。
+    local layout = DeepCopy(LAYOUT)
+    local rows = layout.sections[2].records
     for i = 1, MAX_COUNTDOWN_DIGIT do
-        rows[#rows + 1] = {
-            key = "digitEnabled" .. tostring(i),
-            type = "checkbox",
-            x = 4,
-            y = baseY + ((i - 1) * 8),
-            w = 28,
-            h = 5,
-            label = string.format(L["数字 %d"], i),
-        }
-        rows[#rows + 1] = {
-            key = "digitSource" .. tostring(i),
-            type = "dropdown",
-            x = 40,
-            y = baseY + ((i - 1) * 8),
-            w = 38,
-            h = 5,
-            label = L["来源"],
-            items = SOURCE_ITEMS,
-            labelPos = "left",
-        }
-        rows[#rows + 1] = {
-            key = "digitLSM" .. tostring(i),
-            type = "lsm_sound",
-            x = 88,
-            y = baseY + ((i - 1) * 8),
-            w = 72,
-            h = 5,
-            label = L["LSM音效"],
-            labelPos = "left",
-        }
-        rows[#rows + 1] = {
-            key = "preview" .. tostring(i),
-            type = "button",
-            x = 168,
-            y = baseY + ((i - 1) * 8),
-            w = 24,
-            h = 5,
-            label = L["试听"],
-        }
+        rows[#rows + 1] = { cells = {
+            { key = "digitEnabled" .. tostring(i), type = "switch", label = string.format(L["数字 %d"], i) },
+            { text = string.format(L["数字 %d"], i) },
+            { key = "digitSource" .. tostring(i), type = "select", label = L["来源"], options = SOURCE_ITEMS },
+            { key = "digitLSM" .. tostring(i), type = "select", media = "sound", label = L["LSM音效"] },
+            { key = "preview" .. tostring(i), type = "button", label = L["试听"] },
+        } }
     end
-    return rows
+    return layout
 end
 
 local function NormalizeDigitSource(value)
@@ -156,8 +140,19 @@ local function SyncPageDBToRuntimeDB()
 end
 
 local function GetEditorWidgets()
-    local state = Grid.ContainerStates and Grid.ContainerStates[scrollChild] or nil
-    return state and state.widgets or {}
+    -- state.widgets 的 digit* key 是显隐与试听的稳定入口，迁移后必须保留 key 查找语义。
+    local widgets = {}
+    if not (scrollChild and Grid.FindMountedWidget) then
+        return widgets
+    end
+    for i = 1, MAX_COUNTDOWN_DIGIT do
+        local suffix = tostring(i)
+        widgets["digitEnabled" .. suffix] = Grid:FindMountedWidget(scrollChild, "digitEnabled" .. suffix)
+        widgets["digitSource" .. suffix] = Grid:FindMountedWidget(scrollChild, "digitSource" .. suffix)
+        widgets["digitLSM" .. suffix] = Grid:FindMountedWidget(scrollChild, "digitLSM" .. suffix)
+        widgets["preview" .. suffix] = Grid:FindMountedWidget(scrollChild, "preview" .. suffix)
+    end
+    return widgets
 end
 
 local function SetWidgetShown(widget, shown)
@@ -200,6 +195,8 @@ local function RegisterLayout()
     ExwindTools:RegisterModuleLayout(MODULE_KEY, BuildLayout())
 end
 
+-- [混合函数边界] Page:Render 内只可调整 Scroll/Grid 几何；投影复制、RegisterModuleLayout、WatchState 与 ActivePage 注册禁止修改。
+-- Page:Hide 只隐藏 ScrollFrame；从设置目录离开时 ActivePageFrame/CurrentModule 由 GlobalSettingsPage 清理，不能误写为本页 OnHide 释放。
 function Page:Render(contentFrame)
     if not contentFrame then
         return
@@ -207,6 +204,8 @@ function Page:Render(contentFrame)
 
     CopyRuntimeDBToPageDB()
     RegisterLayout()
+    renderTicket = renderTicket + 1
+    local ticket = renderTicket
 
     if not scrollFrame then
         scrollFrame = CreateFrame("ScrollFrame", "ExBoss_CountdownVoiceSettingsScroll", contentFrame, "ScrollFrameTemplate")
@@ -223,37 +222,53 @@ function Page:Render(contentFrame)
     scrollFrame:SetParent(contentFrame)
     scrollFrame:ClearAllPoints()
     scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4)
-    scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -24, 4)
+    scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
     scrollFrame:SetVerticalScroll(0)
+    -- Page:Hide retains the mounted GUI session. Do not expose that previous
+    -- lease for one frame while the deferred width pass is still rebuilding it.
+    scrollChild:Hide()
+    if cardSession and type(cardSession.Release) == "function" then
+        cardSession:Release()
+        cardSession = nil
+    end
     scrollFrame:Show()
 
     C_Timer.After(0, function()
-        if not (scrollFrame and scrollFrame:IsShown() and scrollChild) then
+        if ticket ~= renderTicket or not (scrollFrame and scrollFrame:IsShown() and scrollChild) then
             return
         end
         local width = contentFrame:GetWidth()
         if width < 100 then
             width = 820
         end
-        scrollChild:SetWidth(width - 16)
-        scrollChild:SetHeight(980)
-        scrollChild:SetParent(scrollFrame)
-        scrollChild:ClearAllPoints()
-        scrollChild:SetPoint("TOPLEFT", 0, 0)
-        scrollChild:Show()
-        if ExwindTools.UI then
-            ExwindTools.UI.ActivePageFrame = scrollChild
-            ExwindTools.UI.CurrentModule = MODULE_KEY
+        local mounted, failure = pcall(function()
+            scrollChild:SetWidth(width - 16)
+            scrollChild:SetHeight(980)
+            scrollChild:SetParent(scrollFrame)
+            scrollChild:ClearAllPoints()
+            scrollChild:SetPoint("TOPLEFT", 0, 0)
+            if ExwindTools.UI then
+                ExwindTools.UI.ActivePageFrame = scrollChild
+                ExwindTools.UI.CurrentModule = MODULE_KEY
+            end
+            cardSession = Grid:MountCards(scrollChild, BuildLayout(), {
+                pageId = MODULE_KEY,
+                regionId = "countdown-voice",
+                config = GetPageDB(),
+                moduleKey = MODULE_KEY,
+                scrollFrame = scrollFrame,
+            })
+            RefreshDynamicWidgets()
+        end)
+        if ticket == renderTicket and scrollFrame:IsShown() then
+            scrollChild:Show()
         end
-        if Grid.SetContainerCols then
-            Grid:SetContainerCols(scrollChild, GRID_COLS)
-        end
-        Grid:Render(scrollChild, BuildLayout(), GetPageDB(), MODULE_KEY)
-        RefreshDynamicWidgets()
+        if not mounted then error(failure, 0) end
     end)
 end
 
 function Page:Hide()
+    renderTicket = renderTicket + 1
     if scrollFrame then
         scrollFrame:Hide()
     end

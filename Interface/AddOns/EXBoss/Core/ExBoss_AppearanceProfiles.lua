@@ -113,7 +113,11 @@ local function SyncGeneralCVarsIntoExport(general)
         general.encounterWarningsEnabled = warnings ~= "0"
     end
     local timeline = ReadCVarValue("encounterTimelineEnabled")
-    if timeline ~= nil then
+    -- 团本例外生效时 CVar 的 1 是场景覆盖的结果，不是用户的全局选择；照原样
+    -- 反推会把已保存的「关闭暴雪原生计时条」写回成未关闭。
+    local raidTimelineOverride = general.enableBlizzardTimelineInRaid == true
+        and select(2, GetInstanceInfo()) == "raid"
+    if timeline ~= nil and not raidTimelineOverride then
         general.disableBlizzardEncounterTimeline = timeline == "0"
     end
     return general
@@ -125,7 +129,8 @@ local function ApplyGeneralCVarsFromImport(general)
         WriteCVarValue("encounterWarningsEnabled", general.encounterWarningsEnabled ~= false and "1" or "0")
     end
     if general.disableBlizzardEncounterTimeline ~= nil then
-        WriteCVarValue("encounterTimelineEnabled", general.disableBlizzardEncounterTimeline == true and "0" or "1")
+        WriteCVarValue("encounterTimelineEnabled",
+            ExBoss.DisplayPolicy.ShouldEnableBlizzardEncounterTimeline(general) and "1" or "0")
     end
 end
 
@@ -480,6 +485,18 @@ local function ApplyAppearance(appearance)
     local spec, specReason = AppearanceSpec()
     if not spec then return false, specReason end
 
+    -- Convert the already-prepared payload, preserving the saved profile and
+    -- all of its other fields.  An old profile's enum remains authoritative
+    -- for that profile; a profile with timelineBars keeps its newer choice.
+    local general = prepared.root.settings and prepared.root.settings["ui.general"]
+    if type(general) == "table" and (general.barDisplayMode ~= nil or general.timelineBars ~= nil) then
+        ExBoss.DisplayPolicy.InitializeTimelineBars(general)
+    end
+    local legacyGeneral = prepared.root.uiGeneral
+    if type(legacyGeneral) == "table" and (legacyGeneral.barDisplayMode ~= nil or legacyGeneral.timelineBars ~= nil) then
+        ExBoss.DisplayPolicy.InitializeTimelineBars(legacyGeneral)
+    end
+
     for _, key in ipairs(spec.moduleKeys) do
         local source = prepared.modules[key]
         local target = root.ModuleDB[key]
@@ -628,6 +645,13 @@ function Profiles:GetActiveProfileID()
     return store and store.activeProfileID or nil
 end
 
+function Profiles:GetDefaultProfileID()
+    local store = EnsureStore()
+    if not store then return nil end
+    local id = Trim(store.defaultProfileID)
+    return type(store.profiles[id]) == "table" and id or store.activeProfileID
+end
+
 function Profiles:GetActiveProfileName()
     local store = EnsureStore()
     local profile = store and store.profiles[store.activeProfileID] or nil
@@ -644,6 +668,37 @@ function Profiles:IsProfileNameAvailable(name, exceptID)
             return false
         end
     end
+    return true
+end
+
+function Profiles:RenameProfile(profileID, name)
+    local id, requested = Trim(profileID), Trim(name)
+    local store, reason = EnsureStore()
+    if not store then return false, reason end
+    if type(store.profiles[id]) ~= "table" then return false, "appearance profile not found" end
+    if requested == "" then return false, "appearance profile name is empty" end
+    if #requested > 80 then return false, "appearance profile name is too long" end
+    if not self:IsProfileNameAvailable(requested, id) then
+        return false, "appearance profile name already exists"
+    end
+    store.profiles[id].name = requested
+    return true
+end
+
+function Profiles:DeleteProfile(profileID)
+    local id = Trim(profileID)
+    local store, reason = EnsureStore()
+    if not store then return false, reason end
+    if type(store.profiles[id]) ~= "table" then return false, "appearance profile not found" end
+    if id == "default" then return false, "default appearance profile cannot be deleted" end
+    if id == store.activeProfileID then return false, "active appearance profile cannot be deleted" end
+    if id == self:GetDefaultProfileID() then return false, "default selection cannot be deleted" end
+    local boss = ExBoss and ExBoss.BossConfig
+    if boss and type(boss.IsProfileReferenced) == "function"
+        and boss:IsProfileReferenced("appearance", id) then
+        return false, "appearance profile is referenced by a specialization rule"
+    end
+    store.profiles[id] = nil
     return true
 end
 
@@ -773,7 +828,7 @@ function Profiles:ImportDecodedProfile(decoded)
     return self:ImportProfilePayload(decoded)
 end
 
-function Profiles:ActivateProfile(profileID)
+function Profiles:ActivateProfile(profileID, automatic)
     local id = Trim(profileID)
     local store, storeReason = EnsureStore()
     if not store then
@@ -788,6 +843,7 @@ function Profiles:ActivateProfile(profileID)
         return false, reason
     end
     if id == store.activeProfileID then
+        if automatic ~= true then store.defaultProfileID = id end
         return true, false
     end
     local saved, saveReason = SaveActiveProfile()
@@ -798,6 +854,34 @@ function Profiles:ActivateProfile(profileID)
     if not applied then
         return false, applyReason
     end
+    if automatic == true and store.defaultProfileID == nil then
+        store.defaultProfileID = store.activeProfileID
+    end
     store.activeProfileID = id
+    if automatic ~= true then store.defaultProfileID = id end
+    local ui = ExwindTools and ExwindTools.UI
+    ui:NotifyModuleValueChanged("ExBoss.GeneralOverview", "ui.general.timelineBars", "committed")
+    -- Reapply only modules included in this appearance.  BatchEdit owns the
+    -- Boss override editor, while GeneralOverview's controller also fills
+    -- missing root defaults; neither belongs in this refresh path.
+    local spec = AppearanceSpec()
+    if spec and ui and type(ui.NotifyModuleValueChanged) == "function" then
+        for _, key in ipairs(spec.moduleKeys) do
+            if key ~= "ExBoss.BatchEdit" and key ~= "ExBoss.GeneralOverview"
+                and type(profile.appearance.modules[key]) == "table"
+                and ui.ModuleValueControllers and ui.ModuleValueControllers[key] then
+                ui:NotifyModuleValueChanged(key, "*", "committed")
+            end
+        end
+        local bun = ExBoss and ExBoss.UI and ExBoss.UI.BunBar
+        if type(profile.appearance.modules["ExBoss.BunBar"]) == "table"
+            and bun and type(bun.RefreshVisuals) == "function" then
+            bun:RefreshVisuals({ rebuildPanelPreview = true })
+        end
+    end
     return true, true
+end
+
+function Profiles:SetDefaultProfile(profileID)
+    return self:ActivateProfile(profileID)
 end

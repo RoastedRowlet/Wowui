@@ -28,8 +28,25 @@ WMC_Saved = {
 WMC_TargetSaved = {
 ["enabled"] = true,
 ["placeKey"] = "",
-["clearKey"] = "",
+["customCycleEnabled"] = false,
 ["clearModifier"] = "",
+["clearKey"] = "",
+["cycleOrder"] = {
+6,
+4,
+3,
+7,
+1,
+2,
+5,
+8,
+},
+["customCycleMarkers"] = {
+2,
+3,
+4,
+8,
+},
 ["markMode"] = "action",
 ["orderList"] = {
 2,
@@ -46,8 +63,25 @@ WMC_TargetSaved = {
 WMC_MouseoverSaved = {
 ["enabled"] = true,
 ["placeKey"] = "",
-["clearKey"] = "",
+["customCycleEnabled"] = false,
 ["clearModifier"] = "",
+["clearKey"] = "",
+["cycleOrder"] = {
+6,
+4,
+3,
+7,
+1,
+2,
+5,
+8,
+},
+["customCycleMarkers"] = {
+2,
+3,
+4,
+8,
+},
 ["markMode"] = "action",
 ["orderList"] = {
 2,

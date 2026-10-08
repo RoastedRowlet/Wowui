@@ -228,9 +228,11 @@ local function ApplySemanticItems(widget)
     widget.semanticItemOffsets = {}
 
     local style = widget.style or DEFAULT_LAYOUT_STYLE
+    local absolute = style.mode == "ABSOLUTE"
     local direction = NormalizeDirection(StyleValue(style, "direction"), style.allowedDirections)
     local spacing = NumberOr(StyleValue(style, "spacing"), DEFAULT_LAYOUT_STYLE.spacing)
     local maxVisible = math.max(1, math.floor(NumberOr(StyleValue(style, "maxVisible"), DEFAULT_LAYOUT_STYLE.maxVisible)))
+    if absolute then maxVisible = #widget.items end
     local itemWidth = math.max(1, NumberOr(widget.itemWidth or StyleValue(style, "itemWidth"), DEFAULT_LAYOUT_STYLE.itemWidth))
     local itemHeight = math.max(1, NumberOr(widget.itemHeight or StyleValue(style, "itemHeight"), DEFAULT_LAYOUT_STYLE.itemHeight))
     local overlay = direction == "OVERLAY"
@@ -259,7 +261,10 @@ local function ApplySemanticItems(widget)
                     and (visibleCount - (plannedVisible + 1) * 0.5) * step
                     or (visibleCount - 1) * step
                 local x, y = 0, 0
-                if overlay then
+                if absolute then
+                    local position = assert(style.positions[item.id], "absolute item position is missing")
+                    x, y = position.x, position.y
+                elseif overlay then
                     x, y = 0, 0
                 elseif direction == "RIGHT" then
                     x = offset
@@ -280,10 +285,12 @@ local function ApplySemanticItems(widget)
                 -- 声明式选择框必须复用布局器本次实际采用的偏移，不能在外部
                 -- 再复制 direction/spacing 公式或读取屏幕坐标。
                 widget.semanticItemOffsets[item] = { x = x, y = y }
-                minX = minX and math.min(minX, x - itemWidth * 0.5) or x - itemWidth * 0.5
-                maxX = maxX and math.max(maxX, x + itemWidth * 0.5) or x + itemWidth * 0.5
-                minY = minY and math.min(minY, y - itemHeight * 0.5) or y - itemHeight * 0.5
-                maxY = maxY and math.max(maxY, y + itemHeight * 0.5) or y + itemHeight * 0.5
+                local boundsX = x + (absolute and item.localOffset and item.localOffset.x or 0)
+                local boundsY = y + (absolute and item.localOffset and item.localOffset.y or 0)
+                minX = minX and math.min(minX, boundsX - itemWidth * 0.5) or boundsX - itemWidth * 0.5
+                maxX = maxX and math.max(maxX, boundsX + itemWidth * 0.5) or boundsX + itemWidth * 0.5
+                minY = minY and math.min(minY, boundsY - itemHeight * 0.5) or boundsY - itemHeight * 0.5
+                maxY = maxY and math.max(maxY, boundsY + itemHeight * 0.5) or boundsY + itemHeight * 0.5
             else
                 root:Hide()
             end
@@ -304,11 +311,11 @@ local function ApplySemanticItems(widget)
     -- 非居中方向保存的是首项语义原点；CENTER_* 保存的是整组语义中心，二者
     -- 均保持 0,0。设置面板没有世界 XY 概念，非居中方向仅在显式 contentCenter
     -- 时才把完整样本组居中在 preview dock。
-    local contentCenter = StyleValue(style, "contentCenter") == true
+    local contentCenter = not absolute and StyleValue(style, "contentCenter") == true
     widget:SetPoint("CENTER", parent, "CENTER",
         contentCenter and -semanticBounds.anchorOffsetX or 0,
         contentCenter and -semanticBounds.anchorOffsetY or 0)
-    widget.direction, widget.mode = direction, "SEMANTIC"
+    widget.direction, widget.mode = direction, absolute and "ABSOLUTE" or "SEMANTIC"
     widget.visibleCount = visibleCount
     widget.layoutWidth, widget.layoutHeight = layoutWidth, layoutHeight
     widget.effectiveSpacing = effectiveSpacing
@@ -318,9 +325,110 @@ local function ApplySemanticItems(widget)
     return widget
 end
 
-local function WidgetLayoutApplyStyle(widget, style)
+local function WidgetLayoutApplyStyle(widget, style, deferLayout)
     widget.style = style or DEFAULT_LAYOUT_STYLE
+    if deferLayout then return widget end
     return ApplyWidgetLayout(widget)
+end
+
+-- Collection-owned geometry plans contain only copied layout declarations and
+-- identities. Preparing never touches a Frame or invokes an owner callback.
+local function OrdinaryNumber(value)
+    return not (issecretvalue and issecretvalue(value)) and type(value) == "number"
+        and value == value and value > -math.huge and value < math.huge
+end
+
+local function CopyGeometryLayout(layout)
+    local copy = {}
+    for key, value in pairs(layout or {}) do
+        if key ~= "positions" and key ~= "itemIDs" then copy[key] = value end
+    end
+    if layout and layout.mode == "ABSOLUTE" then
+        copy.itemIDs, copy.positions = {}, {}
+        for index, id in ipairs(layout.itemIDs) do
+            copy.itemIDs[index] = id
+            local p = layout.positions[id]
+            copy.positions[id] = { x = p.x, y = p.y }
+        end
+    end
+    return copy
+end
+
+local function ResolveGeometryItems(widget, collection, items, layout)
+    if not layout or layout.mode ~= "ABSOLUTE" then return items, layout end
+    if type(layout.itemIDs) ~= "table" or type(layout.positions) ~= "table" then
+        error("ABSOLUTE layout requires itemIDs and positions", 3)
+    end
+    local available, selected, seen = {}, {}, {}
+    for _, item in ipairs(items) do available[item.id] = item end
+    for index, id in ipairs(layout.itemIDs) do
+        if type(id) ~= "string" or seen[id] or not available[id] then
+            error("ABSOLUTE layout requires unique materialized item IDs", 3)
+        end
+        local p = layout.positions[id]
+        if type(p) ~= "table" or not OrdinaryNumber(p.x) or not OrdinaryNumber(p.y) then
+            error("ABSOLUTE positions must be ordinary finite coordinates", 3)
+        end
+        seen[id], selected[index] = true, available[id]
+    end
+    for id in pairs(layout.positions) do
+        if not seen[id] then error("ABSOLUTE positions must match itemIDs", 3) end
+    end
+    for key in pairs(layout.itemIDs) do
+        if type(key) ~= "number" or key % 1 ~= 0 or key < 1 or key > #selected then
+            error("ABSOLUTE itemIDs must be a dense array", 3)
+        end
+    end
+    return selected, CopyGeometryLayout(layout)
+end
+
+local function PrepareItemGeometry(widget, collection, geometry, layout)
+    if collection.released then return nil, "COLLECTION_RELEASED" end
+    if type(geometry) ~= "table" or type(layout) ~= "table" then
+        error("PrepareCurrentGeometry requires geometry and layout tables", 3)
+    end
+    local prepared = CopyGeometryLayout({})
+    for key, value in pairs(layout) do prepared[key] = value end
+    if layout.mode == "ABSOLUTE" then prepared.positions = geometry end
+    local items = {}
+    if layout.mode == "ABSOLUTE" then
+        if type(layout.itemIDs) ~= "table" then error("ABSOLUTE requires itemIDs", 3) end
+        for _, id in ipairs(layout.itemIDs) do
+            local item = collection.itemsByID[id]
+            if not item or not item.root or not item.bodyWidth then return nil, "WORLD_STRUCTURE_CHANGED" end
+            items[#items + 1] = item
+        end
+    else
+        if next(geometry) ~= nil then
+            return nil, "geometry coordinates require ABSOLUTE layout"
+        end
+        for index, item in ipairs(collection.contentItems or collection.currentItems or {}) do items[index] = item end
+    end
+    local width, height
+    for _, item in ipairs(items) do
+        if not item.root or not OrdinaryNumber(item.bodyWidth) or not OrdinaryNumber(item.bodyHeight)
+            or item.bodyWidth <= 0 or item.bodyHeight <= 0 then return nil, "WORLD_STRUCTURE_CHANGED" end
+        if width and (width ~= item.bodyWidth or height ~= item.bodyHeight) then
+            return nil, "collection requires uniform body geometry"
+        end
+        width, height = item.bodyWidth, item.bodyHeight
+    end
+    items, prepared = ResolveGeometryItems(widget, collection, items, prepared)
+    return { collection = collection, revision = collection.geometryRevision or 0,
+        items = items, layout = CopyGeometryLayout(prepared) }
+end
+
+local function ApplyItemGeometry(widget, collection, plan)
+    if type(plan) ~= "table" or plan.collection ~= collection then error("geometry plan owner mismatch", 3) end
+    if collection.released or plan.revision ~= (collection.geometryRevision or 0) or plan.applied then
+        return false, "WORLD_STRUCTURE_CHANGED"
+    end
+    for _, item in ipairs(plan.items) do
+        if collection.itemsByID[item.id] ~= item or not item.root then return false, "WORLD_STRUCTURE_CHANGED" end
+    end
+    plan.applied = true
+    collection:SetItems(plan.items, plan.layout, true)
+    return true
 end
 
 local function WidgetLayoutSetItems(widget, items, itemWidth, itemHeight)
@@ -382,6 +490,9 @@ EXFactory:InitPool(WIDGET_LAYOUT_POOL, "Frame", nil, function(widget)
     widget.ApplyStyle = WidgetLayoutApplyStyle
     widget.SetItems = WidgetLayoutSetItems
     widget.SetSemanticItems = WidgetLayoutSetSemanticItems
+    widget.ResolveGeometryItems = ResolveGeometryItems
+    widget.PrepareItemGeometry = PrepareItemGeometry
+    widget.ApplyItemGeometry = ApplyItemGeometry
     widget.Clear = WidgetLayoutClear
     widget.GetBounds = WidgetLayoutGetBounds
     widget.GetSemanticBounds = WidgetLayoutGetSemanticBounds

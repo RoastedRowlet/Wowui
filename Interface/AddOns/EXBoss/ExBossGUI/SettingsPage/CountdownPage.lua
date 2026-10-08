@@ -54,31 +54,42 @@ end
 local COMMON_OPTS = {
     bindRoot = true,
     poolType = "CountdownModuleCommonSettingsGroup",
-    fixedLayout = { logicalWidth = 200, controlW = 46, controlH = 6, slotX = { 3, 53, 103, 153 }, firstY = 0, rowStep = 14 },
     fields = {
-        { path = "enabled", type = "checkbox", label = L["启用"], row = 1 },
-        { path = "showDecimal", type = "checkbox", label = L["显示小数点"], row = 1 },
-        { path = "stackMax_1205", type = "slider", label = L["最大条数"], min = 1, max = 3, step = 1, row = 2 },
-        { path = "stackGap", type = "slider", label = L["上下间距"], min = 0, max = 20, step = 1, row = 2 },
-        { path = "growDir", type = "dropdown", label = L["生长方向"], items = { { L["向上生长"], "UP" }, { L["向下生长"], "DOWN" } }, row = 2 },
-        { key = "test", type = "button", label = L["测试倒计时"], onClick = TestCountdown, row = 2 },
+        { path = "enabled", type = "checkbox", label = L["启用"] },
+        { path = "showDecimal", type = "checkbox", label = L["显示小数点"] },
+        { path = "stackMax_1205", type = "slider", label = L["最大条数"], min = 1, max = 3, step = 1 },
+        { path = "stackGap", type = "slider", label = L["上下间距"], min = 0, max = 20, step = 1 },
+        { path = "growDir", type = "dropdown", label = L["生长方向"], items = { { L["向上生长"], "UP" }, { L["向下生长"], "DOWN" } } },
+        { key = "test", type = "button", label = L["测试倒计时"], onClick = TestCountdown },
     },
 }
 
+-- [卡片/Grid 迁移边界：Countdown 设置页]
+-- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
+-- 禁止：修改 key/type/path/opts、测试回调、Secret-safe 固定样本、预览或释放合同。
+-- modulecommonsettings/anchorgroup/icongroup/fontgroup 必须整体引用；旧背景/标题项不自动拥有相邻控件。
 local LAYOUT = {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["屏幕倒计时"], labelSize = 25 },
-    { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 10, w = 200, h = 64, label = L["模块通用设置"], opts = COMMON_OPTS },
-    { key = "anchor", type = "anchorgroup", x = 1, y = 77, w = 200, h = 25, measure = true, label = L["锚点设置"], opts = ANCHOR_OPTS },
-    { key = "icon", type = "icongroup", x = 1, y = 105, w = 200, h = 50, label = L["图标外观"] },
-    { key = "font_text", type = "fontgroup", x = 1, y = 158, w = 200, h = 50, label = L["提示文字"], labelSize = 20 },
-    { key = "font_time", type = "fontgroup", x = 1, y = 211, w = 200, h = 50, label = L["倒计时数字"], labelSize = 20 },
+    version = 1,
+    title = L["屏幕倒计时"],
+    sections = {
+        { kind = "composite", id = "module-common", title = L["通用设置"],
+            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
+        { kind = "composite", id = "anchor", title = L["锚点设置"],
+            component = "anchorgroup", key = "anchor", opts = ANCHOR_OPTS },
+        { kind = "composite", id = "icon", title = L["外观"],
+            component = "icongroup", key = "icon" },
+        { kind = "composite", id = "text-font", title = L["提示文字"],
+            component = "fontgroup", key = "font_text" },
+        { kind = "composite", id = "time-font", title = L["倒计时数字"],
+            component = "fontgroup", key = "font_time" },
+    },
 }
 
 ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
 
 local function RebindCountdownModuleCommon(grid, container, db)
-    local state = grid and grid.ContainerStates and grid.ContainerStates[container]
-    local common = state and state.widgets and state.widgets.moduleCommon
+    -- state.widgets.moduleCommon 是稳定组合控件入口，迁移后必须保留 key 查找语义。
+    local common = grid and grid.FindMountedWidget and grid:FindMountedWidget(container, "moduleCommon")
     if common and type(common.RebindDB) == "function" then common:RebindDB(db) end
 end
 
@@ -94,6 +105,7 @@ local function ReleaseStandardPreview()
     GetCountdown():ReleasePanelPreview()
 end
 
+-- [生命周期边界] StandardModulePage 继续拥有 Scroll、Watch、预览与 release；布局迁移只改声明几何。
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,

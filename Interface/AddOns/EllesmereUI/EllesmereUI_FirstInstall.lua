@@ -71,7 +71,7 @@ local GROUPS = {
     {
         header = "UI Reskin Addons",
         entries = {
-            { label = "Blizz UI Enhanced", addon = "EllesmereUIBlizzardSkin" },
+            { label = "Blizzard Skins+", addon = "EllesmereUIBlizzardSkin" },
             { label = "Friends List",      addon = "EllesmereUIFriends" },
             { label = "Damage Meters",     addon = "EllesmereUIDamageMeters" },
             { label = "Chat",              addon = "EllesmereUIChat" },
@@ -164,7 +164,7 @@ local function ShowFirstInstallPopup()
             PP.Point(card, "CENTER", popup, "TOP", (i - 2) * (CARD_W + CARD_GAP), MIDLINE)
             local cbg = card:CreateTexture(nil, "BACKGROUND")
             cbg:SetAllPoints()
-            cbg:SetColorTexture(0.12, 0.13, 0.15, 1)
+            cbg:SetColorTexture(0.121, 0.113, 0.106, 1)
 
             -- Green top accent (the suite's hero-card signature).
             local accent = card:CreateTexture(nil, "ARTWORK")
@@ -379,7 +379,7 @@ local function ShowFirstInstallPopup()
     PP.Point(doneBtn, "BOTTOM", popup, "BOTTOM", 0, 38)
     local doneBg = doneBtn:CreateTexture(nil, "BACKGROUND")
     doneBg:SetAllPoints()
-    doneBg:SetColorTexture(0.06, 0.08, 0.10, 0.92)
+    doneBg:SetColorTexture(0.077, 0.068, 0.058, 0.92)
     local doneBrd = MakeBorder(doneBtn, EG.r, EG.g, EG.b, 0.9, PP)
     local doneLbl = doneBtn:CreateFontString(nil, "OVERLAY")
     doneLbl:SetFont(FONT, 16, "")
@@ -438,9 +438,9 @@ local function ShowFirstInstallPopup()
         if not EllesmereUIDB then EllesmereUIDB = {} end
         EllesmereUIDB.firstInstallPopupShown = true
         EllesmereUIDB.bagsUserChosen = true
-        -- WoW Forever: the base-layout seed's stamp is still set unless a
-        -- look was settled while this popup was up (an import, a Style page
-        -- change).
+        -- WoW Forever: the stamp the loader below set at ADDON_LOADED is still
+        -- set unless a look was settled while this popup was up (an import, a
+        -- Style page change).
         local lookOpen = EllesmereUIDB.styleChoicePending
         -- The style picker (EllesmereUI_StyleChoicePopup.lua) follows on the
         -- next login, after this popup's reload; on WoW Forever only while
@@ -579,12 +579,10 @@ loader:SetScript("OnEvent", function(self, event, addonName)
         if addonName ~= "EllesmereUI" then return end
         self:UnregisterEvent("ADDON_LOADED")
         _showPopupOnLogin = ComputeShowOnLogin()
-        -- WoW Forever: a fresh install starts from the base layout, seeded
-        -- before any module opens its profile (EllesmereUI_ForeverLayout.lua).
-        if _showPopupOnLogin and EllesmereUI.SeedForeverBaseLayout then
-            EllesmereUI.SeedForeverBaseLayout()
-            -- The style picker (WoW Forever by default there) is due even if
-            -- this session ends before the module picker's reload.
+        -- WoW Forever: the style picker (WoW Forever by default there) is due
+        -- even if this session ends before the module picker's reload.
+        if _showPopupOnLogin and EllesmereUI.IS_FOREVER then
+            if not EllesmereUIDB then EllesmereUIDB = {} end
             EllesmereUIDB.styleChoicePending = true
         end
         if _showPopupOnLogin then

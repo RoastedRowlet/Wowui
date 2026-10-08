@@ -123,8 +123,8 @@ ExwindTools.ModuleList = {
     { Key = "ExM+Info.MythicIcon", Name = L["大米分数/点击传送"], Desc = L["大秘境图标/分数/点击传送等增强。"], Category = 2 },
     { Key = "ExM+Info.TeleMsg", Name = L["大米传送喊话"], Desc = L["大秘境传送相关聊天喊话/提示。"], Category = 2 },
     { Key = "ExM+Info.SpellInfo", Name = L["大米法术查询"], Desc = L["法术信息查询与提示增强。"], Category = 2, HideCfg = true },
-    { Key = "ExM+Info.Tooltip", Name = L["大米最佳记录(鼠标提示)"], Desc = L["大秘境相关 Tooltip/交互增强。"], Category = 2, HideCfg = true },
-    { Key = "ExM+Info.RunHistory", Name = L["大米赛季记录"], Desc = L["记录/展示大秘境赛季历史数据。"], Category = 2, HideCfg = true },
+    { Key = "ExM+Info.Tooltip", Name = L["大米最佳记录(鼠标提示)"], Desc = L["大秘境相关 Tooltip/交互增强。"], Category = 2 },
+    { Key = "ExM+Info.RunHistory", Name = L["大米赛季记录"], Desc = L["记录/展示大秘境赛季历史数据。"], Category = 2 },
     { Key = "ExM+InfoMythicFrame", Name = L["大秘境统计面板"], Desc = L["大秘境统计面板与展示。"], Category = 2, HideCfg = true },
     { Key = "ExM+InfoSpellData", Name = L["法术数据 (内部)"], Desc = L["内部数据/法术资料库。"], Category = 2, HideCfg = true },
     { Key = "ExM+.MythicDamage", Name = L["大秘境伤害计算"], Desc = L["独立UI，根据层数计算法术实际伤害。"], Category = 2 },
@@ -994,18 +994,12 @@ local function ShowMissingExwindToolsWarning()
         return false
     end
 
-    if not StaticPopupDialogs["EXWINDTOOLS_MISSING_WARNING"] then
-        StaticPopupDialogs["EXWINDTOOLS_MISSING_WARNING"] = {
-            text = "%s",
-            button1 = L["确定"],
-            timeout = 0,
-            whileDead = true,
-            hideOnEscape = true,
-            preferredIndex = 3,
-        }
-    end
-
-    StaticPopup_Show("EXWINDTOOLS_MISSING_WARNING", message)
+    ExwindTools.UI:ShowDialog({
+        sourceAddon = "ExwindCore", sourceModule = "ExwindTools",
+        id = "EXWINDTOOLS_MISSING_WARNING", title = L["提示"], text = message,
+        cancelButton = "close", defaultButton = "close",
+        buttons = { { id = "close", text = L["确定"], variant = "primary" } },
+    })
     ExwindTools:Print(message)
     return true
 end

@@ -1,10 +1,18 @@
 --@curseforge-project-slug: libspecialization@
 local wowID = WOW_PROJECT_ID
-local cataWowID = 14
-local mistsWowID = 19
-if wowID ~= 1 and wowID ~= cataWowID and wowID ~= mistsWowID then return end -- Retail, Cata, Mists
+local isRetail = wowID == 1
+local isCata = wowID == 14
+local isMists = wowID == 19
+local isForever = false
+do
+	local _, _, _, version = GetBuildInfo()
+	if version > 16000 and version < 20000 then
+		isForever = true
+	end
+end
+if not isRetail and not isCata and not isMists and not isForever then return end -- Retail, Cata, Mists, Forever
 
-local LS, oldminor = LibStub:NewLibrary("LibSpecialization", 24)
+local LS, oldminor = LibStub:NewLibrary("LibSpecialization", 28)
 if not LS then return end -- No upgrade needed
 
 LS.callbackMapGroup = LS.callbackMapGroup or {}
@@ -13,7 +21,7 @@ LS.callbackMapPlayerSpecChange = LS.callbackMapPlayerSpecChange or {}
 LS.frame = LS.frame or CreateFrame("Frame")
 
 -- Positions of roles
-local positionTable = wowID == cataWowID and {
+local positionTable = isCata and {
 	-- Death Knight
 	[398] = "MELEE", -- Blood (Tank)
 	[399] = "MELEE", -- Frost (DPS)
@@ -75,7 +83,7 @@ local positionTable = wowID == cataWowID and {
 	-- Hunter
 	[253] = "RANGED", -- Beast Mastery
 	[254] = "RANGED", -- Marksmanship
-	[255] = wowID == mistsWowID and "RANGED" or "MELEE", -- Survival [Ranged on Mists, Melee on Retail]
+	[255] = isMists and "RANGED" or "MELEE", -- Survival [Ranged on Mists, Melee on Retail]
 	-- Mage
 	[62] = "RANGED", -- Arcane
 	[63] = "RANGED", -- Fire
@@ -85,7 +93,7 @@ local positionTable = wowID == cataWowID and {
 	[269] = "MELEE", -- Windwalker (DPS)
 	[270] = "MELEE", -- Mistweaver (Heal)
 	-- Paladin
-	[65] = wowID == mistsWowID and "RANGED" or "MELEE", -- Holy (Heal) [Ranged on Mists, Melee on Retail]
+	[65] = isMists and "RANGED" or "MELEE", -- Holy (Heal) [Ranged on Mists, Melee on Retail]
 	[66] = "MELEE", -- Protection (Tank)
 	[70] = "MELEE", -- Retribution (DPS)
 	-- Priest
@@ -110,7 +118,7 @@ local positionTable = wowID == cataWowID and {
 	[73] = "MELEE", -- Protection (Tank)
 }
 -- Player roles
-local roleTable = wowID == cataWowID and {
+local roleTable = isCata and {
 	-- Death Knight
 	[398] = "TANK", -- Blood (Tank)
 	[399] = "DAMAGER", -- Frost (DPS)
@@ -207,7 +215,18 @@ local roleTable = wowID == cataWowID and {
 	[73] = "TANK", -- Protection (Tank)
 }
 -- Starter specs
-local starterSpecs = {
+local starterSpecs = isCata and {
+} or isForever and {
+	[1482] = true, -- Mage
+	[1484] = true, -- Druid
+	[1485] = true, -- Hunter
+	[1486] = true, -- Paladin
+	[1487] = true, -- Priest
+	[1488] = true, -- Rogue
+	[1489] = true, -- Shaman
+	[1490] = true, -- Warlock
+	[1491] = true, -- Warrior
+} or { -- Retail & Mists
 	[1444] = true, -- Shaman
 	[1446] = true, -- Warrior
 	[1447] = true, -- Druid
@@ -300,7 +319,7 @@ function LS.UnregisterPlayerSpecChange(addon)
 end
 
 local GetInfo
-if wowID == cataWowID then
+if isCata then
 	function GetInfo()
 		local specIndex = GetPrimaryTalentTree()
 		if specIndex then
@@ -314,12 +333,12 @@ if wowID == cataWowID then
 					end
 					return specId, role, position
 				else
-					geterrorhandler()(format("LibSpecialization: Unknown specId %q", specId))
+					geterrorhandler()(format("LibSpecialization: Unknown spec ID %q", specId))
 				end
 			end
 		end
 	end
-elseif wowID == mistsWowID then
+elseif isMists then
 	local GetSpecialization, GetSpecializationInfo = C_SpecializationInfo.GetSpecialization, C_SpecializationInfo.GetSpecializationInfo
 	local GetTalentInfo, GetGlyphSocketInfo = C_SpecializationInfo.GetTalentInfo, GetGlyphSocketInfo
 	local SerializeJSON = C_EncodingUtil.SerializeJSON
@@ -359,7 +378,7 @@ elseif wowID == mistsWowID then
 					local talentsAndGlyphsJSON = SerializeJSON(storageTable)
 					return specId, role, position, talentsAndGlyphsJSON
 				elseif not starterSpecs[specId] then
-					geterrorhandler()(format("LibSpecialization: Unknown specId %q", specId))
+					geterrorhandler()(format("LibSpecialization: Unknown spec ID %q", specId))
 				end
 			end
 		end
@@ -384,7 +403,7 @@ else
 					end
 					return specId, role, position
 				elseif not starterSpecs[specId] then
-					geterrorhandler()(format("LibSpecialization: Unknown specId %q", specId))
+					geterrorhandler()(format("LibSpecialization: Unknown spec ID %q", specId))
 				end
 			end
 		end
@@ -398,6 +417,45 @@ local SendAddonMessage = C_ChatInfo.SendAddonMessage
 local IsInGroup = IsInGroup
 local CTimerNewTimer = C_Timer.NewTimer
 local next, securecallfunction = next, securecallfunction
+local RequestGroupSpecialization
+do
+	local prev = 0
+	local timer = nil
+	local InChatMessagingLockdown = C_ChatInfo.InChatMessagingLockdown or function() end
+	function RequestGroupSpecialization()
+		local specId, role, position, talentString = GetInfo()
+		if specId then
+			for _,func in next, callbackMapGroup do
+				securecallfunction(func, specId, role, position, pName, talentString) -- This allows us to show our own spec info when not grouped
+			end
+		end
+
+		if IsInGroup() then
+			if InChatMessagingLockdown() then
+				LS.frame:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
+				return
+			end
+
+			local t = GetTime()
+			if t-prev > throttleTimer then
+				if timer then
+					timer:Cancel()
+					timer = nil
+				end
+				prev = t
+				if IsInGroup(2) then
+					SendAddonMessage("LibSpec", "R", "INSTANCE_CHAT")
+				end
+				if IsInGroup(1) then
+					SendAddonMessage("LibSpec", "R", "RAID")
+				end
+			elseif not timer then
+				timer = CTimerNewTimer((throttleTimer+0.1)-(t-prev), RequestGroupSpecialization)
+			end
+		end
+	end
+end
+
 do
 	local currentSpecId, currentTalentString, currentRole = 0, nil, nil
 
@@ -405,29 +463,37 @@ do
 	do
 		local timerInstance = nil
 		local function SendToInstance()
-			timerInstance = nil
+			if timerInstance then
+				timerInstance:Cancel()
+				timerInstance = nil
+			end
 			if IsInGroup(2) then
 				if currentRole then -- Cataclysm Feral Druids
 					local result = SendAddonMessage("LibSpec", format("%d,,%s", currentSpecId, currentRole), "INSTANCE_CHAT")
-					if result == 9 then
+					if result == 3 or result == 8 or result == 9 then -- AddonMessageThrottle, ChannelThrottle, GeneralError
 						timerInstance = CTimerNewTimer(throttleTimer, SendToInstance)
 					end
 				else
 					local result = SendAddonMessage("LibSpec", format("%d,%s", currentSpecId, currentTalentString or ""), "INSTANCE_CHAT")
-					if result == 9 then
+					if result == 3 or result == 8 or result == 9 then -- AddonMessageThrottle, ChannelThrottle, GeneralError
 						timerInstance = CTimerNewTimer(throttleTimer, SendToInstance)
 					end
 				end
 			end
 		end
+		local prev = 0
 		function PrepareForInstance()
 			local specId, role, _, talentString = GetInfo()
 			if specId then
 				currentSpecId = specId
 				currentTalentString = talentString
 				currentRole = specId == 750 and role or nil -- Cataclysm Feral Druids
-				if not timerInstance then
-					timerInstance = CTimerNewTimer(throttleTimer, SendToInstance)
+				local t = GetTime()
+				if t-prev > throttleTimer then
+					prev = t
+					SendToInstance()
+				elseif not timerInstance then
+					timerInstance = CTimerNewTimer((throttleTimer+0.1)-(t-prev), SendToInstance)
 				end
 			end
 		end
@@ -437,29 +503,37 @@ do
 	do
 		local timerGroup = nil
 		local function SendToGroup()
-			timerGroup = nil
+			if timerGroup then
+				timerGroup:Cancel()
+				timerGroup = nil
+			end
 			if IsInGroup(1) then
 				if currentRole then -- Cataclysm Feral Druids
 					local result = SendAddonMessage("LibSpec", format("%d,,%s", currentSpecId, currentRole), "RAID") -- RAID auto downgrades to PARTY as needed
-					if result == 9 then
+					if result == 3 or result == 8 or result == 9 then -- AddonMessageThrottle, ChannelThrottle, GeneralError
 						timerGroup = CTimerNewTimer(throttleTimer, SendToGroup)
 					end
 				else
 					local result = SendAddonMessage("LibSpec", format("%d,%s", currentSpecId, currentTalentString or ""), "RAID") -- RAID auto downgrades to PARTY as needed
-					if result == 9 then
+					if result == 3 or result == 8 or result == 9 then -- AddonMessageThrottle, ChannelThrottle, GeneralError
 						timerGroup = CTimerNewTimer(throttleTimer, SendToGroup)
 					end
 				end
 			end
 		end
+		local prev = 0
 		function PrepareForGroup()
 			local specId, role, _, talentString = GetInfo()
 			if specId then
 				currentSpecId = specId
 				currentTalentString = talentString
 				currentRole = specId == 750 and role or nil -- Cataclysm Feral Druids
-				if not timerGroup then
-					timerGroup = CTimerNewTimer(throttleTimer, SendToGroup)
+				local t = GetTime()
+				if t-prev > throttleTimer then
+					prev = t
+					SendToGroup()
+				elseif not timerGroup then
+					timerGroup = CTimerNewTimer((throttleTimer+0.1)-(t-prev), SendToGroup)
 				end
 			end
 		end
@@ -468,7 +542,6 @@ do
 	local PrepareForGuild
 	do
 		local guildTimer = nil
-		local prev = 0
 		local function SendToGuild()
 			if guildTimer then
 				guildTimer:Cancel()
@@ -477,31 +550,30 @@ do
 			if IsInGuild() then
 				if currentRole then -- Cataclysm Feral Druids
 					local result = SendAddonMessage("LibSpec", format("%d,,%s", currentSpecId, currentRole), "GUILD")
-					if result == 9 then
+					if result == 3 or result == 8 or result == 9 then -- AddonMessageThrottle, ChannelThrottle, GeneralError
 						guildTimer = CTimerNewTimer(throttleTimer, SendToGuild)
 					end
 				else
 					local result = SendAddonMessage("LibSpec", format("%d,%s", currentSpecId, currentTalentString or ""), "GUILD")
-					if result == 9 then
+					if result == 3 or result == 8 or result == 9 then -- AddonMessageThrottle, ChannelThrottle, GeneralError
 						guildTimer = CTimerNewTimer(throttleTimer, SendToGuild)
 					end
 				end
 			end
 		end
+		local prev = 0
 		function PrepareForGuild()
 			local specId, role, _, talentString = GetInfo()
 			if specId then
 				currentSpecId = specId
 				currentTalentString = talentString
 				currentRole = specId == 750 and role or nil -- Cataclysm Feral Druids
-				if not guildTimer then
-					local t = GetTime()
-					if t-prev > throttleTimer then
-						prev = t
-						SendToGuild()
-					else
-						guildTimer = CTimerNewTimer(throttleTimer-(t-prev), SendToGuild)
-					end
+				local t = GetTime()
+				if t-prev > throttleTimer then
+					prev = t
+					SendToGuild()
+				elseif not guildTimer then
+					guildTimer = CTimerNewTimer((throttleTimer+0.1)-(t-prev), SendToGuild)
 				end
 			end
 		end
@@ -515,11 +587,10 @@ do
 	}
 	local tonumber, strmatch = tonumber, string.match
 	local Ambiguate = Ambiguate
-	local issecretvalue = issecretvalue or function() return false end
 	local C_ClassTalents_GetActiveConfigID = C_ClassTalents and C_ClassTalents.GetActiveConfigID
-	LS.frame:SetScript("OnEvent", function(_, event, prefix, msg, channel, sender)
+	LS.frame:SetScript("OnEvent", function(self, event, prefix, msg, channel, sender)
 		if event == "CHAT_MSG_ADDON" then
-			if not issecretvalue(msg) and prefix == "LibSpec" and approved[channel] then -- Only approved channels
+			if prefix == "LibSpec" and approved[channel] then -- Only approved channels
 				if msg == "R" then
 					if channel == "GUILD" then
 						PrepareForGuild()
@@ -555,8 +626,6 @@ do
 					end
 				end
 			end
-		elseif event == "GROUP_FORMED" then -- Join new group
-			LS.RequestGroupSpecialization()
 		elseif event == "PLAYER_TALENT_UPDATE" or event == "PLAYER_SPECIALIZATION_CHANGED" or ((event == "ACTIVE_COMBAT_CONFIG_CHANGED" or event == "TRAIT_CONFIG_UPDATED") and prefix == C_ClassTalents_GetActiveConfigID()) then
 			for _,func in next, LS.callbackMapPlayerSpecChange do
 				securecallfunction(func) -- Notify when the player has changed their spec
@@ -576,15 +645,26 @@ do
 					end
 				end
 			end
+		elseif event == "GROUP_FORMED" then -- Join new group
+			RequestGroupSpecialization()
 		elseif event == "PLAYER_LOGIN" then
-			LS.RequestGroupSpecialization()
+			RequestGroupSpecialization()
+			-- Calling this again will schedule a delayed request. We want to do this in case we logged into an active encounter, but InChatMessagingLockdown didn't signal this in the first check.
+			RequestGroupSpecialization()
+		elseif event == "ADDON_RESTRICTION_STATE_CHANGED" then
+			if prefix == 5 and msg == 0 then -- [prefix=restrictionType] 5=Chat restriction, [msg=state] 0=Inactive
+				self:UnregisterEvent(event)
+				RequestGroupSpecialization()
+				-- Calling this again will schedule a delayed request. We want to do this in case we requested group data a millisecond too early, and not everyone in the group was out of chat lockdown to hear our request.
+				RequestGroupSpecialization()
+			end
 		end
 	end)
 	LS.frame:RegisterEvent("CHAT_MSG_ADDON")
 	LS.frame:RegisterEvent("GROUP_FORMED")
-	if wowID == cataWowID then
+	if isCata then
 		LS.frame:RegisterEvent("PLAYER_TALENT_UPDATE")
-	elseif wowID == mistsWowID then
+	elseif isMists then
 		LS.frame:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 	else
 		LS.frame:RegisterEvent("ACTIVE_COMBAT_CONFIG_CHANGED")
@@ -594,34 +674,9 @@ do
 end
 
 do
-	local prev = 0
-	local timer = nil
-	function LS.RequestGroupSpecialization() -- Group comms are automatic, you should never need to use this
-		local specId, role, position, talentString = GetInfo()
-		if specId then
-			for _,func in next, callbackMapGroup do
-				securecallfunction(func, specId, role, position, pName, talentString) -- This allows us to show our own spec info when not grouped
-			end
-		end
-
-		if IsInGroup() then
-			local t = GetTime()
-			if t-prev > throttleTimer then
-				if timer then
-					timer:Cancel()
-					timer = nil
-				end
-				prev = t
-				if IsInGroup(2) then
-					SendAddonMessage("LibSpec", "R", "INSTANCE_CHAT")
-				end
-				if IsInGroup(1) then
-					SendAddonMessage("LibSpec", "R", "RAID")
-				end
-			elseif not timer then
-				timer = CTimerNewTimer((throttleTimer+0.1)-(t-prev), LS.RequestGroupSpecialization)
-			end
-		end
+	function LS.RequestGroupSpecialization()
+		-- DEPRECATED. This function was never supposed to be used as this library handles communication automatically.
+		-- Unfortunately bad devs or bad AI started overusing this function, creating a lot of transmission noise on pointless ingame events.
 	end
 end
 
@@ -653,5 +708,5 @@ do
 end
 
 if IsLoggedIn() and not oldminor then -- Player is logged in and library isn't upgrading
-	LS.RequestGroupSpecialization()
+	RequestGroupSpecialization()
 end

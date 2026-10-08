@@ -1,6 +1,9 @@
 -- 距离监视：模块只声明唯一 DB / GUI / Text presentation，并提交中央 Text owner。
 -- Anchor、Runtime、World、Panel、EditMode 与输入事务全部由中央持有。
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools or not ExwindTools.UI then return end
 
@@ -12,11 +15,17 @@ local SAMPLE_RANGE = { min = 15, max = 20 }
 local TEXT_BOUNDS_WIDTH = 240
 local RefreshActiveSurfaces
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local MODULE_SPEC = {
     RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
     moduleKey = MODULE_KEY,
     kind = "text",
     version = 1,
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     anchor = {
         dbPath = "$root", bindRoot = true,
         xKey = "xOffset", yKey = "yOffset", defaultX = 0, defaultY = -85,
@@ -33,6 +42,9 @@ local MODULE_SPEC = {
             },
         },
     },
+    -- =========================================================
+    -- 二、默认配置与配置访问 | Defaults and Configuration Access
+    -- =========================================================
     defaults = {
         root = {
             enabled = true, showText = true, frameScale = 1.0, hideThreshold = 60,
@@ -53,30 +65,52 @@ local MODULE_SPEC = {
             justifyH = "CENTER", justifyV = "MIDDLE", x = 0, y = 0,
         },
     },
+    -- [卡片迁移边界：设置页] 仅可按统一规范调整下列 gui.static/gui.fields 的 x/y/w/h 与卡片分组。
+    -- key/type/opts、DB path、anchor/preview/defaults 及刷新回调均属绑定或业务合同，禁止修改；复合控件必须整体引用，header 本身不等于卡片容器。
+    -- =========================================================
+    -- 三、GUI 声明 | GUI Declarations
+    -- =========================================================
     gui = {
-        static = {
-            { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["距离监视"], labelSize = 25 },
-            { key = "desc", type = "description", x = 1, y = 7, w = 200, h = 8, label = L["实时显示目标距离范围，根据与目标的最小距离自动变色。"] },
-            { key = "sub_general", type = "subheader", x = 1, y = 15, w = 200, h = 8, label = L["基础设置"], labelSize = 20 },
-            { key = "desc_format", type = "description", x = 1, y = 137, w = 200, h = 6, label = L["范围格式需要两个 %d (最小/最大，如%d - %d)，仅最小值格式需要一个 %d+。留空使用默认格式。"] },
-            { key = "sub_colors", type = "subheader", x = 1, y = 144, w = 200, h = 8, label = L["距离颜色设置"], labelSize = 20 },
-        },
-        fields = {
-            { key = "enabled", type = "checkbox", x = 1, y = 24, w = 46, h = 6, label = L["启用"] },
-            { key = "showText", type = "checkbox", x = 51, y = 24, w = 46, h = 6, label = L["显示距离范围"] },
-            { key = "frameScale", type = "slider", x = 1, y = 37, w = 46, h = 6, label = L["缩放"], min = 0.5, max = 3, labelPos = "top" },
-            { key = "hideThreshold", type = "slider", x = 51, y = 37, w = 46, h = 6, label = L["隐藏距离阈值"], min = 5, max = 100, labelPos = "top" },
-            { key = "anchorGroup", type = "anchorgroup", x = 1, y = 47, w = 200, h = 18, label = L["锚点设置"] },
-            { key = "font_text", type = "fontgroup", x = 1, y = 68, w = 200, h = 50, label = L["距离文本"], labelSize = 20 },
-            { key = "rangeFormat", type = "input", x = 1, y = 127, w = 46, h = 6, label = L["范围格式"], labelPos = "top" },
-            { key = "minOnlyFormat", type = "input", x = 51, y = 127, w = 46, h = 6, label = L["仅最小值格式"], labelPos = "top" },
-            { key = "crColor", type = "color", x = 1, y = 157, w = 46, h = 6, label = L["< 5 码"] },
-            { key = "srColor", type = "color", x = 51, y = 157, w = 46, h = 6, label = L[">= 5 码"] },
-            { key = "s10Color", type = "color", x = 101, y = 157, w = 46, h = 6, label = L[">= 10 码"] },
-            { key = "s15Color", type = "color", x = 151, y = 157, w = 46, h = 6, label = L[">= 15 码"] },
-            { key = "mrColor", type = "color", x = 1, y = 168, w = 46, h = 6, label = L[">= 20 码"] },
-            { key = "lrColor", type = "color", x = 51, y = 168, w = 46, h = 6, label = L[">= 30 码"] },
-            { key = "oorColor", type = "color", x = 101, y = 168, w = 46, h = 6, label = L[">= 40 码"] },
+        version = 1,
+        description = L["实时显示目标距离范围，根据与目标的最小距离自动变色。"],
+        sections = {
+            {
+                kind = "settings", id = "general", title = L["基础设置"],
+                items = {
+                    { key = "enabled", type = "switch", label = L["启用"] },
+                    { key = "showText", type = "switch", label = L["显示距离范围"] },
+                    { key = "frameScale", type = "slider", label = L["缩放"], min = 0.5, max = 3 },
+                    { key = "hideThreshold", type = "slider", label = L["隐藏距离阈值"], min = 5, max = 100 },
+                },
+            },
+            {
+                kind = "composite", id = "anchor", title = L["锚点设置"],
+                component = "anchorgroup", key = "anchorGroup",
+            },
+            {
+                kind = "composite", id = "font_text", title = L["距离文本"],
+                component = "fontgroup", key = "font_text",
+            },
+            {
+                kind = "settings", id = "format", title = L["显示格式"],
+                items = {
+                    { key = "rangeFormat", type = "input", label = L["范围格式"] },
+                    { key = "minOnlyFormat", type = "input", label = L["仅最小值格式"] },
+                },
+                footerDescription = { key = "desc_format", type = "description", label = L["范围格式需要两个 %d (最小/最大，如%d - %d)，仅最小值格式需要一个 %d+。留空使用默认格式。"] },
+            },
+            {
+                kind = "settings", id = "colors", title = L["距离颜色设置"],
+                items = {
+                    { key = "crColor", type = "color", label = L["< 5 码"] },
+                    { key = "srColor", type = "color", label = L[">= 5 码"] },
+                    { key = "s10Color", type = "color", label = L[">= 10 码"] },
+                    { key = "s15Color", type = "color", label = L[">= 15 码"] },
+                    { key = "mrColor", type = "color", label = L[">= 20 码"] },
+                    { key = "lrColor", type = "color", label = L[">= 30 码"] },
+                    { key = "oorColor", type = "color", label = L[">= 40 码"] },
+                },
+            },
         },
     },
 }
@@ -93,6 +127,9 @@ end
 
 local function Num(value, fallback) value = tonumber(value); return value or fallback end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function GetRangeColor(minRange)
     local db = DB
     if not minRange then return Num(db.crColorR, .9), Num(db.crColorG, .9), Num(db.crColorB, .9) end
@@ -117,6 +154,9 @@ local function GetFrameScale() return math.max(.5, math.min(3, Num(DB.frameScale
 -- The direct DB style is deliberately never copied or rewritten. x/y are
 -- consumed exactly once by presentation.anchor; TextCollection suppresses only
 -- the second style-position application.
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function BuildPresentation(minRange, maxRange, sample)
     local db = DB
     local shown = sample == true or (db.enabled ~= false and db.showText ~= false and minRange ~= nil)
@@ -153,6 +193,9 @@ local function PublishRuntime()
     central:SetRuntime({ BuildEntry("rangecheck:runtime", minRange, maxRange, false) }, LAYOUT)
 end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function RefreshPresentations()
     PublishPreview()
     PublishRuntime()
@@ -177,11 +220,17 @@ updater:SetScript("OnUpdate", function(_, elapsed)
     if elapsedSinceUpdate >= 0.3 then elapsedSinceUpdate = 0; PublishRuntime() end
 end)
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 ExwindTools:RegisterEvent("PLAYER_TARGET_CHANGED", MODULE_KEY, PublishRuntime)
 ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", MODULE_KEY, function()
     C_Timer.After(0.5, function() RefreshPresentations(); updater:Show() end)
 end)
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 PublishPreview()
 C_Timer.After(1, function() RefreshPresentations(); updater:Show() end)
 ExwindTools:ReportReady(MODULE_KEY)

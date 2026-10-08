@@ -3,6 +3,9 @@
 -- { Key = "ExTools.PveKeystoneInfo", Name = "大米队友钥石", Desc = "在 PVEFrame 上显示玩家与队友钥石信息。", Category = 4 },
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 local EXDB = _G.EXDB
 if not ExwindTools then return end
@@ -10,9 +13,13 @@ local EXUI = ExwindTools.UI
 local L = (ExwindTools and ExwindTools.L) or setmetatable({}, { __index = function(_, key) return key end })
 
 local EXWIND_MODULE_KEY = "ExTools.PveKeystoneInfo"
+
 local PartySync = ExwindTools.PartySync
 local LibOpenRaid = _G.LibStub and _G.LibStub("LibOpenRaid-1.0", true)
 
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EX_DEFAULTS = {
     enabled = false,
     offsetX = 156,
@@ -84,25 +91,54 @@ for _, instance in ipairs(EXDB.InstanceNoteInstanceSource) do
     end
 end
 
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
 local function EX_RegisterLayout()
+    -- [声明迁移边界：设置页] 仅把原设置控件改为 typed sections；三个 fontgroup 仍整体引用。
+    -- key/type、PVE 附着字段、数据请求/刷新/显隐回调禁止修改。
     local layout = {
-        { key = "header", type = "header", x = 1, y = 1, w = 200, h = 8, label = L["大米队友钥石"], labelSize = 25 },
-        { key = "enabled", type = "checkbox", x = 1, y = 11, w = 46, h = 6, label = L["启用模块"] },
-        { key = "side", type = "select", x = 60, y = 20, w = 48, h = 8, label = L["依附侧"] },
-        { key = "offsetX", type = "slider", x = 1, y = 27, w = 46, h = 6, label = L["水平偏移 (X)"], min = -300, max = 300 },
-        { key = "offsetY", type = "slider", x = 51, y = 27, w = 46, h = 6, label = L["垂直偏移 (Y)"], min = -500, max = 500 },
-        { key = "previewMode", type = "checkbox", x = 53, y = 11, w = 46, h = 6, label = L["预览模式"] },
-        { key = "playerFont", type = "fontgroup", x = 1, y = 39, w = 200, h = 50, label = L["玩家文字设置"], labelSize = 20 },
-        { key = "partyNameFont", type = "fontgroup", x = 1, y = 92, w = 200, h = 50, label = L["队友名称设置"], labelSize = 20 },
-        { key = "partyKeyFont", type = "fontgroup", x = 1, y = 147, w = 200, h = 50, label = L["队友钥石设置"], labelSize = 20 },
+        version = 1,
+        sections = {
+            {
+                kind = "settings",
+                id = "common",
+                title = L["通用设置"],
+                items = {
+                    { key = "enabled", type = "switch", label = L["启用模块"] },
+                    { key = "previewMode", type = "switch", label = L["预览模式"] },
+                    {
+                        key = "side", type = "select", label = L["依附侧"],
+                        options = {},
+                    },
+                    { key = "offsetX", type = "slider", label = L["水平偏移 (X)"], min = -300, max = 300 },
+                    { key = "offsetY", type = "slider", label = L["垂直偏移 (Y)"], min = -500, max = 500 },
+                },
+            },
+            {
+                kind = "composite", id = "player_font", title = L["玩家文字设置"],
+                component = "fontgroup", key = "playerFont",
+            },
+            {
+                kind = "composite", id = "party_name_font", title = L["队友名称设置"],
+                component = "fontgroup", key = "partyNameFont",
+            },
+            {
+                kind = "composite", id = "party_key_font", title = L["队友钥石设置"],
+                component = "fontgroup", key = "partyKeyFont",
+            },
+        },
     }
 
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
 end
 EX_RegisterLayout()
 
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function NormalizePlayerName(name)
     if type(name) ~= "string" or name == "" then return nil end
     return _G.Ambiguate(name, "short")
@@ -143,8 +179,10 @@ local function GetOpenRaidKeystone(unit)
     end
 
     local keyLevel = tonumber(keystoneInfo.level) or 0
-    local keyMapID = tonumber(keystoneInfo.challengeMapID) or tonumber(keystoneInfo.mythicPlusMapID) or
-    tonumber(keystoneInfo.mapID) or 0
+    local keyMapID = tonumber(keystoneInfo.challengeMapID) or 0
+    if keyMapID <= 0 then
+        keyMapID = tonumber(keystoneInfo.mythicPlusMapID) or 0
+    end
     return keyLevel, keyMapID, keyLevel > 0 and keyMapID > 0
 end
 
@@ -361,6 +399,9 @@ local function HasRealPartyMembers()
     return false
 end
 
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function UpdatePosition()
     if not infoFrame or not _G.PVEFrame then return end
 
@@ -417,17 +458,21 @@ local function UpdateDisplay()
         ownLevel = previewData.player.keyLevel
         ownMapID = previewData.player.keyMapID
     else
-        if PartySync and not IsAuraSecretsActive() then
-            ownLevel, ownMapID = PartySync:GetKeystone("player")
-        end
+        if not IsAuraSecretsActive() then
+            if PartySync then
+                ownLevel, ownMapID = PartySync:GetKeystone("player")
+            end
 
-        if not HasResolvedKeystoneData(ownLevel, ownMapID) then
-            ownMapID = _G.C_MythicPlus.GetOwnedKeystoneChallengeMapID()
-            ownLevel = _G.C_MythicPlus.GetOwnedKeystoneLevel()
-        end
+            if not HasResolvedKeystoneData(ownLevel, ownMapID) then
+                ownMapID = _G.C_MythicPlus.GetOwnedKeystoneChallengeMapID() or 0
+                ownLevel = _G.C_MythicPlus.GetOwnedKeystoneLevel() or 0
+            end
 
-        if HasResolvedKeystoneData(ownLevel, ownMapID) then
-            StoreKeystoneSnapshot("player", ownLevel, ownMapID)
+            if HasResolvedKeystoneData(ownLevel, ownMapID) then
+                StoreKeystoneSnapshot("player", ownLevel, ownMapID)
+            else
+                lastKnownKeystones.player = nil
+            end
         else
             local ownSnapshot = GetKeystoneSnapshot("player")
             if ownSnapshot then
@@ -462,14 +507,18 @@ local function UpdateDisplay()
                 local member = PartySync and PartySync:GetMember(unit)
                 if PartySync and not auraSecretsActive then
                     keyLevel, keyMapID = PartySync:GetKeystone(unit)
-                    knownKeyState = member and (member.keyTS or 0) > 0 or false
+                    knownKeyState = member and member.sourceKey ~= nil or false
                 end
 
-                if knownKeyState and HasResolvedKeystoneData(keyLevel, keyMapID) then
-                    StoreKeystoneSnapshot(cacheKey, keyLevel, keyMapID)
+                if knownKeyState then
+                    if HasResolvedKeystoneData(keyLevel, keyMapID) then
+                        StoreKeystoneSnapshot(cacheKey, keyLevel, keyMapID)
+                    elseif cacheKey and keyLevel == 0 and keyMapID == 0 then
+                        lastKnownKeystones.party[cacheKey] = nil
+                    end
                 end
 
-                if not HasResolvedKeystoneData(keyLevel, keyMapID) then
+                if not knownKeyState and not HasResolvedKeystoneData(keyLevel, keyMapID) then
                     local openRaidLevel, openRaidMapID, openRaidKnown = GetOpenRaidKeystone(unit)
                     if openRaidKnown then
                         keyLevel = openRaidLevel
@@ -479,7 +528,7 @@ local function UpdateDisplay()
                     end
                 end
 
-                if not HasResolvedKeystoneData(keyLevel, keyMapID) then
+                if not knownKeyState and not HasResolvedKeystoneData(keyLevel, keyMapID) then
                     local snapshot = GetKeystoneSnapshot(cacheKey)
                     if snapshot then
                         keyLevel = snapshot.keyLevel
@@ -549,6 +598,7 @@ local function RequestData()
     end
 end
 
+-- [卡片迁移边界：自定义渲染] 下列 PVE 附着文字区是运行时宿主，不是设置页 Grid；禁止改其锚点、数据顺序、请求与显隐生命周期。
 local function CreateFrameIfNeeded()
     if infoFrame or not _G.PVEFrame then return end
 
@@ -625,6 +675,9 @@ ExwindTools:WatchState("AuraSecretsActive", EXWIND_MODULE_KEY, function()
     end
 end)
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 ExwindTools:RegisterEvent("GROUP_ROSTER_UPDATE", EXWIND_MODULE_KEY, function()
     if infoFrame and infoFrame:IsShown() then
         RequestData()
@@ -658,6 +711,9 @@ ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", EXWIND_MODULE_KEY, function()
     end)
 end)
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 if _G.PVEFrame then
     HookPVE()
 else

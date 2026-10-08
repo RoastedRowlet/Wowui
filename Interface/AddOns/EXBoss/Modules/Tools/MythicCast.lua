@@ -300,9 +300,9 @@ local disabledBossEncounterSet = nil
 
 -- 模块通用卡只包含模块本身的通用业务开关；两个额外材质各自有独立卡片。
 local COMMON_FIELDS = {
-    { path = "enabled", type = "checkbox", label = L["启用"] },
-    { path = "hideLevel91Casts", type = "checkbox", label = L["隐藏 91 级读条"] },
-    { path = "hideLevel92Casts", type = "checkbox", label = L["隐藏 92 级读条"] },
+    { path = "enabled", type = "checkbox", label = L["启用"], presentation = "switch" },
+    { path = "hideLevel91Casts", type = "checkbox", label = L["隐藏 91 级读条"], presentation = "switch" },
+    { path = "hideLevel92Casts", type = "checkbox", label = L["隐藏 92 级读条"], presentation = "switch" },
     { path = "disabledBossEncounterIDs", type = "input", label = L["首领战禁用 ID"] },
     { path = "nonInterruptColor", type = "color", label = L["不可打断颜色"] },
 }
@@ -311,7 +311,7 @@ local COMMON_POOL_TYPE = "MythicCastModuleCommonSettingsGroup"
 local COMMON_OPTS = {
     bindRoot = true,
     poolType = COMMON_POOL_TYPE,
-    columns = 4,
+    presentation = "settings-list",
     fields = COMMON_FIELDS,
 }
 -- 两张额外子元素卡必须复用 TimerBar 的标准控件树；Mythic 仅声明已有 DB 字段
@@ -331,6 +331,7 @@ local RAID_MARKER_EXTRA_OPTS = ExwindTools:BuildStandardTimerBarAlertIconsGroupO
         x = { min = -1000, max = 1000, step = 1 }, y = { min = -1000, max = 1000, step = 1 },
     },
 })
+RAID_MARKER_EXTRA_OPTS.presentation = "settings-list"
 local PLAYER_TARGET_INDICATOR_EXTRA_OPTS = ExwindTools:BuildStandardTimerBarAlertIconsGroupOptions({
     timerBarKey = "timerGroup",
 }, {
@@ -346,6 +347,7 @@ local PLAYER_TARGET_INDICATOR_EXTRA_OPTS = ExwindTools:BuildStandardTimerBarAler
         x = { min = -1000, max = 1000, step = 1 }, y = { min = -1000, max = 1000, step = 1 },
     },
 })
+PLAYER_TARGET_INDICATOR_EXTRA_OPTS.presentation = "settings-list"
 -- 整体位置只有这个标准 Anchor 声明：运行时 AnchorController 和 Grid 的
 -- anchorgroup 必须使用同一次 CreateStandardModuleAnchor 的返回合同，不能各自
 -- 复制 posX/posY 或 frame picker。
@@ -397,26 +399,42 @@ if GridExporter and GridExporter.RegisterExportReference then
     GridExporter:RegisterExportReference(TIMER_BAR_OPTS, "TIMER_BAR_OPTS")
 end
 
+-- [普通 sections 迁移边界：MythicCast 设置页]
+-- 允许：只按共享规范调整纯呈现分区；普通设置分区始终展开。
+-- 禁止：修改业务事件/排序、key/path/opts、StandardConfigBinding、世界/运行时 collection、预览或释放链。
+-- modulecommonsettings/anchorgroup/widgetlayout/timerBarGroup/fontgroup 必须整体引用，不能拆成原子控件重拼。
 local EX_LAYOUT = {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["大米怪物施法"], labelSize = 25 },
-    { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 10, w = 200, h = 30, label = L["模块通用设置"], opts = COMMON_OPTS },
-    { key = "raidMarkerExtra", type = "modulecommonsettings", x = 1, y = 42, w = 200, h = 50, label = L["额外子元素－团队标记"], opts = RAID_MARKER_EXTRA_OPTS },
-    { key = "playerTargetIndicatorExtra", type = "modulecommonsettings", x = 1, y = 94, w = 200, h = 50, label = L["额外子元素－玩家目标提示"], opts = PLAYER_TARGET_INDICATOR_EXTRA_OPTS },
-    { key = "anchor", type = "anchorgroup", x = 1, y = 146, w = 200, h = 20, label = L["锚点设置"], opts = ANCHOR_OPTS },
-    { key = "layout", type = "widgetlayout", x = 1, y = 168, w = 200, h = 23, measure = true, label = L["排列设置"], opts = LAYOUT_OPTS },
-    { key = "timerGroup", type = "timerBarGroup", x = 1, y = 193, w = 200, h = 52, label = L["计时条外观"], opts = TIMER_BAR_OPTS },
-    { key = "font_spell", type = "fontgroup", x = 1, y = 248, w = 200, h = 50, label = L["法术名称"], opts = {
-        offsetMin = FONT_OPTS.offsetMin, offsetMax = FONT_OPTS.offsetMax,
-        shadowOffsetMin = FONT_OPTS.shadowOffsetMin, shadowOffsetMax = FONT_OPTS.shadowOffsetMax,
-    } },
-    { key = "font_target", type = "fontgroup", x = 1, y = 300, w = 200, h = 50, label = L["施法目标"], opts = {
-        offsetMin = FONT_OPTS.offsetMin, offsetMax = FONT_OPTS.offsetMax,
-        shadowOffsetMin = FONT_OPTS.shadowOffsetMin, shadowOffsetMax = FONT_OPTS.shadowOffsetMax,
-    } },
-    { key = "font_timer", type = "fontgroup", x = 1, y = 352, w = 200, h = 50, label = L["时间文字"], opts = {
-        offsetMin = FONT_OPTS.offsetMin, offsetMax = FONT_OPTS.offsetMax,
-        shadowOffsetMin = FONT_OPTS.shadowOffsetMin, shadowOffsetMax = FONT_OPTS.shadowOffsetMax,
-    } },
+    version = 1,
+    title = L["大米怪物施法"],
+    sections = {
+        { kind = "composite", id = "module-common", title = L["通用设置"],
+            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
+        { kind = "composite", id = "layout", title = L["排列设置"],
+            component = "widgetlayout", key = "layout", opts = LAYOUT_OPTS },
+        { kind = "composite", id = "anchor", title = L["锚点设置"],
+            component = "anchorgroup", key = "anchor", opts = ANCHOR_OPTS },
+        { kind = "composite", id = "timer-bar", title = L["计时条外观"],
+            component = "timerbargroup", key = "timerGroup", opts = TIMER_BAR_OPTS },
+        { kind = "composite", id = "raid-marker", title = L["额外子元素－团队标记"],
+            component = "modulecommonsettings", key = "raidMarkerExtra", opts = RAID_MARKER_EXTRA_OPTS },
+        { kind = "composite", id = "player-target", title = L["额外子元素－玩家目标提示"],
+            component = "modulecommonsettings", key = "playerTargetIndicatorExtra", opts = PLAYER_TARGET_INDICATOR_EXTRA_OPTS },
+        { kind = "composite", id = "spell-font", title = L["法术名称"],
+            component = "fontgroup", key = "font_spell", opts = {
+                offsetMin = FONT_OPTS.offsetMin, offsetMax = FONT_OPTS.offsetMax,
+                shadowOffsetMin = FONT_OPTS.shadowOffsetMin, shadowOffsetMax = FONT_OPTS.shadowOffsetMax,
+            } },
+        { kind = "composite", id = "target-font", title = L["施法目标"],
+            component = "fontgroup", key = "font_target", opts = {
+                offsetMin = FONT_OPTS.offsetMin, offsetMax = FONT_OPTS.offsetMax,
+                shadowOffsetMin = FONT_OPTS.shadowOffsetMin, shadowOffsetMax = FONT_OPTS.shadowOffsetMax,
+            } },
+        { kind = "composite", id = "timer-font", title = L["时间文字"],
+            component = "fontgroup", key = "font_timer", opts = {
+                offsetMin = FONT_OPTS.offsetMin, offsetMax = FONT_OPTS.offsetMax,
+                shadowOffsetMin = FONT_OPTS.shadowOffsetMin, shadowOffsetMax = FONT_OPTS.shadowOffsetMax,
+            } },
+    },
 }
 
 
@@ -1240,6 +1258,7 @@ local function ReleaseMythicCastPanelPreview()
     Module:ReleasePanelPreview()
 end
 
+-- [生命周期边界] StandardModulePage 只承接设置页；上方 runtime/world/panel collection 与业务回调均禁止因卡片迁移改动。
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = EXWIND_MODULE_KEY,
     page = GUIPage,

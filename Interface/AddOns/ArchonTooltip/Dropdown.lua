@@ -5,8 +5,8 @@ local validTypes = {
 	ARENAENEMY = true,
 	BN_FRIEND = true,
 	CHAT_ROSTER = true,
-	COMMUNITIES_GUILD_MEMBER = true,
-	COMMUNITIES_WOW_MEMBER = true,
+	COMMUNITIES_GUILD_MEMBER = not Private.IsRetail,
+	COMMUNITIES_WOW_MEMBER = not Private.IsRetail,
 	ENEMY_PLAYER = true,
 	FOCUS = true,
 	FRIEND = true,
@@ -221,10 +221,8 @@ if Menu and Menu.ModifyMenu then
 		end)
 	end
 
-	for tagName in pairs(validTypes) do
-		local enabled = true
-
-		if tagName == "COMMUNITIES_GUILD_MEMBER" and (C_GuildInfo.IsGuildOfficer() or IsGuildLeader()) then
+	for tagName, enabled in pairs(validTypes) do
+		if enabled and tagName == "COMMUNITIES_GUILD_MEMBER" and (C_GuildInfo.IsGuildOfficer() or IsGuildLeader()) then
 			enabled = false
 		end
 
@@ -245,7 +243,7 @@ if Menu and Menu.ModifyMenu then
 
 		local entry = C_LFGList.GetSearchResultInfo(id)
 
-		if entry == nil then
+		if entry == nil or Private.IsSecretValue(entry.leaderName) then
 			return
 		end
 

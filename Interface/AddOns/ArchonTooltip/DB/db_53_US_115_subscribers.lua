@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DeathKnight-Blood',}
-local provider = {region='US',realm='Gundrak',name='US',type='subscribers',zone=53,date='2026-09-29',data={Ex='Exo:BAECNQAFFIELAAIBAAUK7RChCwA6AQWODQAABAAwAHUNAAACAEEAfw0AAAEAHACpDQAAAwApADMNAAABACAAAQAFCu0QoQsAOgEFjg0AAAQAMAB1DQAAAgBBAH8NAAABABwAqQ0AAAMAKQAzDQAAAQAgADUABAqBLQACAQAJCoMihwwALAMAAQAJCoMihwwALAMAAAA=.',},}
+local provider = {region='US',realm='Gundrak',name='US',type='subscribers',zone=53,date='2026-10-06',data={Ex='Exo:BAECNQAFFIEPAAIBAAUKlhMUDgBBAQWODQAABQA5AHUNAAADAEgAfw0AAAIAHACpDQAABAA6ADMNAAABACAAAQAFCpYTFA4AQQEFjg0AAAUAOQB1DQAAAwBIAH8NAAACABwAqQ0AAAQAOgAzDQAAAQAgADUABAqBPQACAQAJCu8iTQoAVQMAAQAJCu8iTQoAVQMAAAA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

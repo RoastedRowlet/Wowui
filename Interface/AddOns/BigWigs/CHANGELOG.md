@@ -1,7 +1,11 @@
 # BigWigs
 
-## [v426.2](https://github.com/BigWigsMods/BigWigs/tree/v426.2) (2026-09-29)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v426.1...v426.2) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v426.3](https://github.com/BigWigsMods/BigWigs/tree/v426.3) (2026-09-30)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v426.2...v426.3) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- Improve support for external plugins with dynamic options  
-- Plugins/Bars: Remove "approximate" bar indicators  
+- Bump version  
+- Plugins/BossBlock: Add more talking heads  
+- MidnightLairs/Nymrissa: Fix rounding error  
+- TheVenomousAbyss/CoiledAltar: Fix Dreadmarch/Unnerving Fixation message  
+- TheVenomousAbyss/Ulatek: offset -> delay (+tweaks)  
+- TheVenomousAbyss/Ulatek: Add last Circling Prey in mythic  

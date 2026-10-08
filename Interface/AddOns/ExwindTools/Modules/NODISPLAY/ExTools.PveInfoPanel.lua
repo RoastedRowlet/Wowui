@@ -3,6 +3,9 @@
 -- { Key = "ExTools.PveInfoPanel", Name = "PVE 扩展面板", Desc = "在副本查找器 (PVEFrame) 侧边显示额外信息挂架。", Category = 4 },
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 local EXDB = _G.EXDB
 if not ExwindTools then return end
@@ -14,21 +17,41 @@ local EXWIND_MODULE_KEY = "ExTools.PveInfoPanel"
 -- =============================================================
 -- 第一部分：Grid 布局定义
 -- =============================================================
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
 local function EX_RegisterLayout()
+    -- [声明迁移边界：设置页] 仅把原设置控件改为唯一 settings 声明。
+    -- key/type、PVE 附着字段与自有侧栏的内容顺序/按钮/显隐回调禁止修改。
     local layout = {
-        { key = "header", type = "header", x = 1, y = 4, w = 188, h = 8, label = L["本周大秘境信息"] },
-        { key = "desc", type = "description", x = 1, y = 12, w = 188, h = 4, label = L["自动依附在 PVE 面板侧边的信息架。"] },
-        { key = "enabled", type = "checkbox", x = 1, y = 20, w = 48, h = 8, label = L["启用模块"] },
-        { key = "side", type = "select", x = 60, y = 20, w = 48, h = 8, label = L["依附侧"], options = { ["LEFT"] = L["左侧"], ["RIGHT"] = L["右侧"] } },
-        { key = "offsetX", type = "slider", x = 1, y = 40, w = 60, h = 8, label = L["水平偏移 (X)"], min = -100, max = 100, step = 1 },
-        { key = "offsetY", type = "slider", x = 72, y = 40, w = 60, h = 8, label = L["垂直偏移 (Y)"], min = -500, max = 500, step = 5 },
+        version = 1,
+        sections = {
+            {
+                kind = "settings",
+                id = "common",
+                title = L["通用设置"],
+                description = L["自动依附在 PVE 面板侧边的信息架。"],
+                items = {
+                    { key = "enabled", type = "switch", label = L["启用模块"] },
+                    { key = "side", type = "select", label = L["依附侧"], options = {
+                        { value = "LEFT", label = L["左侧"] },
+                        { value = "RIGHT", label = L["右侧"] },
+                    } },
+                    { key = "offsetX", type = "slider", label = L["水平偏移 (X)"], min = -100, max = 100, step = 1 },
+                    { key = "offsetY", type = "slider", label = L["垂直偏移 (Y)"], min = -500, max = 500, step = 5 },
+                },
+            },
+        },
     }
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
 end
 EX_RegisterLayout()
 
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, { enabled = true, side = "RIGHT", offsetX = 2, offsetY = 0 })
 local mainFrame
 local FIXED_WIDTH = 260
@@ -38,6 +61,9 @@ local raiderIOHooked
 -- 第二部分：辅助组件 (勋章化 UI 部件)
 -- =============================================================
 
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function CreateSectionTitle(parent, text, yOfs)
     local container = CreateFrame("Frame", nil, parent)
     container:SetSize(FIXED_WIDTH - 15, 14)
@@ -61,7 +87,7 @@ local function CreateSectionTitle(parent, text, yOfs)
 end
 
 local function CreateHeaderIcon(parent, texture, xOfs, labelText, clickFunc)
-    local btn = CreateFrame("Button", nil, parent)
+    local btn = EXUI:CreateButton(parent, 50, 50, "", clickFunc, { compact = true })
     btn:SetSize(50, 50)
     btn:SetPoint("CENTER", parent, "TOP", xOfs, -47)
 
@@ -79,15 +105,16 @@ local function CreateHeaderIcon(parent, texture, xOfs, labelText, clickFunc)
     label:SetPoint("BOTTOM", icon, "BOTTOM", 0, 1)
     label:SetText(labelText)
     label:SetTextColor(1, 0.8, 0)
-    btn:SetScript("OnEnter", function(self)
+    -- OnEnter/OnLeave 槽位上有 Core 的悬停画器（HookScript 接的链），
+    -- SetScript 会把整条链清掉；这里的图标高亮用 HookScript 与画器共存。
+    btn:HookScript("OnEnter", function(self)
         self.icon:SetVertexColor(1, 1, 1)
         self:SetScale(1.05)
     end)
-    btn:SetScript("OnLeave", function(self)
+    btn:HookScript("OnLeave", function(self)
         self.icon:SetVertexColor(0.85, 0.85, 0.85)
         self:SetScale(1.0)
     end)
-    btn:SetScript("OnClick", clickFunc)
     return btn
 end
 
@@ -153,6 +180,9 @@ local function UpdatePosition()
 end
 
 -- [联动 Hook] 确保当 Wind工具箱刷新它的面板时，我们也同步刷新位置
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 local function HookWindUI()
     local wt = _G.WindTools and _G.WindTools[1]
     if wt and wt.GetModule then
@@ -216,6 +246,9 @@ local function GetChallengeModeShortName(challengeModeID)
     return name or tostring(challengeModeID)
 end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function UpdateStats()
     if not mainFrame or not mainFrame:IsShown() then return end
 
@@ -289,6 +322,7 @@ local function ApplyLoadedUIBackdrop(frame)
     return true
 end
 
+-- [卡片迁移边界：自定义渲染] 下列 PVE 侧栏是运行时独立窗口，不是设置页卡片内容；禁止借设置迁移改其固定尺寸、段落顺序、入口按钮或显隐逻辑。
 local function CreateMainFrame()
     if mainFrame then return end
 
@@ -305,7 +339,11 @@ local function CreateMainFrame()
         title:SetTextColor(1, 0.82, 0)
         mainFrame.TitleText = title
 
-        local close = CreateFrame("Button", nil, mainFrame, "UIPanelCloseButton")
+        local close = EXUI:CreatePicButton(mainFrame, 24, 24,
+            "Interface\\Buttons\\UI-Panel-CloseButton-Up",
+            "Interface\\Buttons\\UI-Panel-CloseButton-Down",
+            "Interface\\Buttons\\UI-Panel-CloseButton-Highlight",
+            function() mainFrame:Hide() end, true)
         close:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", -2, -2)
         mainFrame.CloseButton = close
 
@@ -441,6 +479,9 @@ local function RefreshActiveSurfaces()
     RefreshPanelDisplay()
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh — Runtime Subscriptions / 运行时订阅
+-- =========================================================
 EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = RefreshActiveSurfaces })
 
 ExwindTools:RegisterEvent("ITEM_CHANGED", EXWIND_MODULE_KEY, RefreshPanelDisplay)
@@ -454,5 +495,8 @@ ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", EXWIND_MODULE_KEY, function()
     end)
 end)
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 C_Timer.After(1, function() if EX_DB.enabled then CreateMainFrame() end end)
 ExwindTools:ReportReady(EXWIND_MODULE_KEY)

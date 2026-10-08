@@ -16,6 +16,12 @@ function Private.Debug(data)
 	end
 end
 
+---@param value any
+---@return boolean
+function Private.IsSecretValue(value)
+	return issecretvalue ~= nil and issecretvalue(value)
+end
+
 ---@key string
 function Private.Print(key, ...)
 	if Private.IsTestCharacter then

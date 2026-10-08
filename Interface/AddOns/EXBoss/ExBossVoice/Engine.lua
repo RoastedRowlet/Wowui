@@ -694,15 +694,16 @@ local function TryPlaySoundInfo(soundInfo, throttleKey, opts)
         end
     end
     local channel = soundInfo.channel or "Master"
-    local ok = PlaySoundFile and PlaySoundFile(soundInfo.file, channel)
+    local ok, handle
+    if PlaySoundFile then ok, handle = PlaySoundFile(soundInfo.file, channel) end
     if not ok and type(soundInfo.fallbackFile) == "string" and soundInfo.fallbackFile ~= "" then
-        ok = PlaySoundFile and PlaySoundFile(soundInfo.fallbackFile, channel)
+        if PlaySoundFile then ok, handle = PlaySoundFile(soundInfo.fallbackFile, channel) end
     end
     if ok then
         if throttleEnabled then
             _lastPlayTime[tk] = now
         end
-        return true
+        return true, nil, handle
     end
     return false, "PlaySoundFile failed"
 end
@@ -901,10 +902,10 @@ function Engine:TryPlayStandaloneSound(triggerCfg, throttleKey, opts)
     end
     DebugTrashStandaloneVoice(throttleKey, "resolved", sourceDetail)
 
-    local ok, playErr = TryPlaySoundInfo(soundInfo, tostring(throttleKey or "standalone"), opts)
+    local ok, playErr, handle = TryPlaySoundInfo(soundInfo, tostring(throttleKey or "standalone"), opts)
     DebugTrashStandaloneVoice(throttleKey, ok and "queued" or "play-deny",
         sourceDetail .. " err=" .. tostring(playErr or "nil"))
-    return ok, playErr
+    return ok, playErr, handle
 end
 
 function Engine:TryPlayLabel(label, timer, opts)

@@ -3,6 +3,9 @@
 -- { Key = "ExClass.SpellEffectAlpha", Name = "法术触发透明度", Desc = "根据当前专精自动调整法术触发（法术激活叠加）的透明度。", Category = 5 },
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXUI = ExwindTools.UI
@@ -22,6 +25,9 @@ if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 local EXDB = _G.EXDB
 if not EXDB then return end
 
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EXWIND_DEFAULTS = {
     enabled = true,
     globalDefault = 100,
@@ -88,6 +94,9 @@ local ADVANCED_RUNTIME_ENABLED = EX_DB.advancedEnabled ~= false
 -- =============================================================
 -- 第三部分：业务逻辑
 -- =============================================================
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function ApplyEffectAlpha()
     if not EX_DB.enabled then return end
 
@@ -143,6 +152,9 @@ local OVERLAY_IDS_LEFT_RIGHT = {
     1029138, 1029139, 1030393, 2888300, 7549744,
 }
 
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function RegisterEscCloseFrame(name)
     _G.UISpecialFrames = _G.UISpecialFrames or {}
     for i = 1, #_G.UISpecialFrames do
@@ -154,6 +166,7 @@ local function RegisterEscCloseFrame(name)
 end
 
 local OverlayPickerFrame
+-- [卡片迁移边界：自定义渲染] 下列筛选弹窗及其滚动单元格是独立工具窗口，不是设置页卡片；尺寸、单元格顺序、选择/关闭回调与复用方式禁止修改。
 local function EnsureOverlayPickerFrame()
     if OverlayPickerFrame then
         return OverlayPickerFrame
@@ -184,13 +197,18 @@ local function EnsureOverlayPickerFrame()
 
     RegisterEscCloseFrame("ExwindToolsSpellOverlayPickerFrame")
 
-    local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    local close = EXUI:CreatePicButton(frame, 24, 24,
+        "Interface\\Buttons\\UI-Panel-CloseButton-Up",
+        "Interface\\Buttons\\UI-Panel-CloseButton-Down",
+        "Interface\\Buttons\\UI-Panel-CloseButton-Highlight",
+        function() frame:Hide() end, true)
     close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -3, -3)
 
     local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, -14)
     title:SetText(L["法术触发贴图选择器"])
     frame.title = title
+    EXUI:ApplyDialogStyle(frame, title)
 
     local subtitle = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
@@ -201,7 +219,7 @@ local function EnsureOverlayPickerFrame()
     searchLabel:SetPoint("TOPLEFT", frame, "TOPLEFT", 18, -52)
     searchLabel:SetText(L["过滤ID"])
 
-    local searchBox = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
+    local searchBox = EXUI:CreateEditBox(frame, "", 220, 24, nil, {})
     searchBox:SetSize(220, 24)
     searchBox:SetPoint("LEFT", searchLabel, "RIGHT", 8, 0)
     searchBox:SetAutoFocus(false)
@@ -218,8 +236,9 @@ local function EnsureOverlayPickerFrame()
 
     local scroll = CreateFrame("ScrollFrame", nil, frame, "ScrollFrameTemplate")
     scroll:EnableMouseWheel(true)
+    EXUI:ApplyModernScrollFrame(scroll)
     scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", 14, -78)
-    scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -34, 46)
+    scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -18, 46)
     frame.scroll = scroll
 
     local content = CreateFrame("Frame", nil, scroll)
@@ -228,13 +247,10 @@ local function EnsureOverlayPickerFrame()
     frame.content = content
     frame.buttons = {}
 
-    local closeBottom = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    closeBottom:SetSize(120, 24)
-    closeBottom:SetPoint("BOTTOM", frame, "BOTTOM", 0, 12)
-    closeBottom:SetText(L["关闭"])
-    closeBottom:SetScript("OnClick", function()
+    local closeBottom = EXUI:CreateButton(frame, 120, 24, L["关闭"], function()
         frame:Hide()
-    end)
+    end, { compact = true })
+    closeBottom:SetPoint("BOTTOM", frame, "BOTTOM", 0, 12)
     frame.closeBottom = closeBottom
 
     OverlayPickerFrame = frame
@@ -384,6 +400,7 @@ local function TryHideOverlayTestRoot()
     TEST_STATE.root:Hide()
 end
 
+-- [卡片迁移边界：自定义渲染] 下列测试 overlay root/slots 是独立预览表面，不是设置页卡片；层级、槽位顺序、动画、贴图与显隐/回收流程禁止修改。
 local function GetOrCreateOverlayTestRoot()
     if TEST_STATE.root then
         return TEST_STATE.root
@@ -773,6 +790,9 @@ C_Timer.NewTicker(1, function(ticker)
     end
 end, 20)
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 
 -- =============================================================
 -- 第四部分：事件与状态订阅
@@ -854,6 +874,9 @@ ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY,
     end
 end)
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 -- =============================================================
 -- 第六部分：初始化与模块报告
 -- =============================================================
@@ -868,93 +891,353 @@ ExwindTools:ReportReady(EXWIND_MODULE_KEY)
 -- =============================================================
 -- 第六部分：Grid 布局
 -- =============================================================
-function EX_RegisterLayout()
+local function MakeSpecLabel(icon, colorHex, specName)
+    return string.format("|T%d:16:16:0:0|t |cff%s%s|r", icon, colorHex, L[specName])
+end
+
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
+local function EX_RegisterLegacyLayout()
     local currentInfo = GetStatusText()
 
-    local function MakeSpecLabel(icon, colorHex, specName)
-        return string.format("|T%d:16:16:0:0|t |cff%s%s|r", icon, colorHex, L[specName])
-    end
-
-    local layout = {
-        { key = "header", type = "header", x = 8, y = 4, w = 193, h = 12, label = L["法术触发透明度 (SpellActivationOverlay)"], labelSize = 25 },
-        { key = "desc", type = "description", x = 8, y = 16, w = 120, h = 8, label = L["根据当前专精自动调整屏幕中心法术触发特效的透明度。"] },
-        { key = "live_status", type = "description", x = 8, y = 24, w = 120, h = 8, label = GetStatusText() },
-        { key = "ctrl_header", type = "subheader", x = 8, y = 312, w = 193, h = 8, label = L["法术触发特效调整"], labelSize = 22 },
-        { key = "enabled", type = "checkbox", x = 8, y = 44, w = 48, h = 12, label = L["开启功能"] },
-        { key = "globalDefault", type = "slider", x = 100, y = 44, w = 64, h = 12, label = L["全局默认透明度 (%)"], min = 0, max = 100, labelPos = "left" },
-        { key = "h_板甲职业", type = "subheader", x = 8, y = 72, w = 193, h = 4, label = L["板甲职业"] },
-        { key = "250", type = "slider", x = 8, y = 88, w = 64, h = 8, label = MakeSpecLabel(135770, "ff2628", "鲜血"), min = 0, max = 100, parentKey = "specs" },
-        { key = "251", type = "slider", x = 72, y = 88, w = 64, h = 8, label = MakeSpecLabel(135773, "ff2628", "冰霜"), min = 0, max = 100, parentKey = "specs" },
-        { key = "252", type = "slider", x = 136, y = 88, w = 64, h = 8, label = MakeSpecLabel(135775, "ff2628", "邪恶"), min = 0, max = 100, parentKey = "specs" },
-        { key = "71", type = "slider", x = 136, y = 100, w = 64, h = 8, label = MakeSpecLabel(132355, "c69b6d", "武器"), min = 0, max = 100, parentKey = "specs" },
-        { key = "72", type = "slider", x = 72, y = 100, w = 64, h = 8, label = MakeSpecLabel(132347, "c69b6d", "狂怒"), min = 0, max = 100, parentKey = "specs" },
-        { key = "73", type = "slider", x = 8, y = 100, w = 64, h = 8, label = MakeSpecLabel(132341, "c69b6d", "防护"), min = 0, max = 100, parentKey = "specs" },
-        { key = "65", type = "slider", x = 136, y = 112, w = 64, h = 8, label = MakeSpecLabel(135920, "f48cba", "神圣"), min = 0, max = 100, parentKey = "specs" },
-        { key = "66", type = "slider", x = 8, y = 112, w = 64, h = 8, label = MakeSpecLabel(236264, "f48cba", "防护"), min = 0, max = 100, parentKey = "specs" },
-        { key = "70", type = "slider", x = 72, y = 112, w = 64, h = 8, label = MakeSpecLabel(135873, "f48cba", "惩戒"), min = 0, max = 100, parentKey = "specs" },
-        { key = "h_锁甲职业", type = "subheader", x = 8, y = 132, w = 193, h = 4, label = L["锁甲职业"] },
-        { key = "253", type = "slider", x = 136, y = 148, w = 64, h = 8, label = MakeSpecLabel(461112, "aad372", "野兽控制"), min = 0, max = 100, parentKey = "specs" },
-        { key = "254", type = "slider", x = 72, y = 148, w = 64, h = 8, label = MakeSpecLabel(236179, "aad372", "射击"), min = 0, max = 100, parentKey = "specs" },
-        { key = "255", type = "slider", x = 8, y = 148, w = 64, h = 8, label = MakeSpecLabel(461113, "aad372", "生存"), min = 0, max = 100, parentKey = "specs" },
-        { key = "262", type = "slider", x = 8, y = 160, w = 64, h = 8, label = MakeSpecLabel(136048, "0070dd", "元素"), min = 0, max = 100, parentKey = "specs" },
-        { key = "263", type = "slider", x = 72, y = 160, w = 64, h = 8, label = MakeSpecLabel(237581, "0070dd", "增强"), min = 0, max = 100, parentKey = "specs" },
-        { key = "264", type = "slider", x = 136, y = 160, w = 64, h = 8, label = MakeSpecLabel(136052, "0070dd", "恢复"), min = 0, max = 100, parentKey = "specs" },
-        { key = "1467", type = "slider", x = 8, y = 172, w = 64, h = 8, label = MakeSpecLabel(4511811, "33937f", "湮灭"), min = 0, max = 100, parentKey = "specs" },
-        { key = "1468", type = "slider", x = 136, y = 172, w = 64, h = 8, label = MakeSpecLabel(4511812, "33937f", "恩护"), min = 0, max = 100, parentKey = "specs" },
-        { key = "1473", type = "slider", x = 72, y = 172, w = 64, h = 8, label = MakeSpecLabel(5198700, "33937f", "增辉"), min = 0, max = 100, parentKey = "specs" },
-        { key = "h_皮甲职业", type = "subheader", x = 8, y = 188, w = 188, h = 4, label = L["皮甲职业"] },
-        { key = "577", type = "slider", x = 72, y = 204, w = 64, h = 8, label = MakeSpecLabel(1247264, "a330c9", "浩劫"), min = 0, max = 100, parentKey = "specs" },
-        { key = "581", type = "slider", x = 8, y = 204, w = 64, h = 8, label = MakeSpecLabel(1247265, "a330c9", "复仇"), min = 0, max = 100, parentKey = "specs" },
-        { key = "1480", type = "slider", x = 136, y = 204, w = 64, h = 8, label = MakeSpecLabel(7455385, "a330c9", "噬灭"), min = 0, max = 100, parentKey = "specs" },
-        { key = "259", type = "slider", x = 136, y = 216, w = 64, h = 8, label = MakeSpecLabel(236270, "fff468", "奇袭"), min = 0, max = 100, parentKey = "specs" },
-        { key = "260", type = "slider", x = 8, y = 216, w = 64, h = 8, label = MakeSpecLabel(236286, "fff468", "狂徒"), min = 0, max = 100, parentKey = "specs" },
-        { key = "261", type = "slider", x = 72, y = 216, w = 64, h = 8, label = MakeSpecLabel(132320, "fff468", "敏锐"), min = 0, max = 100, parentKey = "specs" },
-        { key = "268", type = "slider", x = 8, y = 228, w = 64, h = 8, label = MakeSpecLabel(608951, "00ff98", "酒仙"), min = 0, max = 100, parentKey = "specs" },
-        { key = "269", type = "slider", x = 72, y = 228, w = 64, h = 8, label = MakeSpecLabel(608953, "00ff98", "踏风"), min = 0, max = 100, parentKey = "specs" },
-        { key = "270", type = "slider", x = 136, y = 228, w = 64, h = 8, label = MakeSpecLabel(608952, "00ff98", "织雾"), min = 0, max = 100, parentKey = "specs" },
-        { key = "102", type = "slider", x = 104, y = 240, w = 48, h = 8, label = MakeSpecLabel(136096, "ff7c0a", "平衡"), min = 0, max = 100, parentKey = "specs" },
-        { key = "103", type = "slider", x = 56, y = 240, w = 48, h = 8, label = MakeSpecLabel(132115, "ff7c0a", "野性"), min = 0, max = 100, parentKey = "specs" },
-        { key = "104", type = "slider", x = 8, y = 240, w = 48, h = 8, label = MakeSpecLabel(132276, "ff7c0a", "守护"), min = 0, max = 100, parentKey = "specs" },
-        { key = "105", type = "slider", x = 152, y = 240, w = 48, h = 8, label = MakeSpecLabel(136041, "ff7c0a", "恢复"), min = 0, max = 100, parentKey = "specs" },
-        { key = "h_布甲职业", type = "subheader", x = 8, y = 260, w = 188, h = 4, label = L["布甲职业"] },
-        { key = "62", type = "slider", x = 136, y = 276, w = 64, h = 8, label = MakeSpecLabel(135932, "3fc7eb", "奥术"), min = 0, max = 100, parentKey = "specs" },
-        { key = "63", type = "slider", x = 72, y = 276, w = 64, h = 8, label = MakeSpecLabel(135810, "3fc7eb", "火焰"), min = 0, max = 100, parentKey = "specs" },
-        { key = "64", type = "slider", x = 8, y = 276, w = 64, h = 8, label = MakeSpecLabel(135846, "3fc7eb", "冰霜"), min = 0, max = 100, parentKey = "specs" },
-        { key = "265", type = "slider", x = 72, y = 288, w = 64, h = 8, label = MakeSpecLabel(136145, "8788ee", "痛苦"), min = 0, max = 100, parentKey = "specs" },
-        { key = "266", type = "slider", x = 136, y = 288, w = 64, h = 8, label = MakeSpecLabel(136172, "8788ee", "恶魔学识"), min = 0, max = 100, parentKey = "specs" },
-        { key = "267", type = "slider", x = 8, y = 288, w = 64, h = 8, label = MakeSpecLabel(136186, "8788ee", "毁灭"), min = 0, max = 100, parentKey = "specs" },
-        { key = "256", type = "slider", x = 8, y = 300, w = 64, h = 8, label = MakeSpecLabel(135940, "ffffff", "戒律"), min = 0, max = 100, parentKey = "specs" },
-        { key = "257", type = "slider", x = 72, y = 300, w = 64, h = 8, label = MakeSpecLabel(237542, "ffffff", "神圣"), min = 0, max = 100, parentKey = "specs" },
-        { key = "258", type = "slider", x = 136, y = 300, w = 64, h = 8, label = MakeSpecLabel(136207, "ffffff", "暗影"), min = 0, max = 100, parentKey = "specs" },
-        { key = "divider_1133", type = "divider", x = 1, y = 36, w = 197, h = 4, label = L["新组件"] },
-        { key = "divider_8665", type = "divider", x = 8, y = 56, w = 193, h = 4, label = L["新组件"] },
-        { key = "divider_9711", type = "divider", x = 8, y = 76, w = 193, h = 4, label = L["新组件"] },
-        { key = "divider_1981", type = "divider", x = 8, y = 136, w = 193, h = 4, label = L["新组件"] },
-        { key = "divider_3851", type = "divider", x = 8, y = 192, w = 193, h = 4, label = L["新组件"] },
-        { key = "divider_5419", type = "divider", x = 8, y = 264, w = 188, h = 4, label = L["新组件"] },
-        { key = "advancedEnabled", type = "checkbox", x = 8, y = 324, w = 60, h = 12, label = L["启用 |cffff173b(为了安全! 需重载后生效)|r"], labelSize = 18 },
-        { key = "btn_test_stop", type = "button", x = 140, y = 324, w = 60, h = 12, label = L["停止测试"] },
-        { key = "btn_test", type = "button", x = 72, y = 324, w = 60, h = 12, label = L["启用测试"], labelSize = 18 },
-        { key = "globalScale", type = "slider", x = 8, y = 372, w = 60, h = 8, label = L["整体缩放"], min = 0.4, max = 2.5, step = 0.05, labelPos = "top" },
-        { key = "offsetX", type = "slider", x = 136, y = 372, w = 60, h = 8, label = L["整体水平(Y) 偏移"], min = -500, max = 500, labelPos = "top" },
-        { key = "offsetY", type = "slider", x = 72, y = 372, w = 60, h = 8, label = L["整体垂直(X)偏移"], min = -500, max = 500, labelPos = "top" },
-        { key = "overlayScale", type = "slider", x = 8, y = 388, w = 60, h = 8, label = L["材质特效缩放"], min = 0.5, max = 3, step = 0.05, labelPos = "top" },
-        { key = "sideSpacing", type = "slider", x = 72, y = 388, w = 60, h = 8, label = L["左右间距调整"], min = -300, max = 300, labelPos = "top" },
-        { key = "vertSpacing", type = "slider", x = 136, y = 388, w = 60, h = 8, label = L["上下间距调整"], min = -300, max = 300, labelPos = "top" },
-        { key = "pulseMagnitude", type = "slider", x = 8, y = 404, w = 60, h = 8, label = L["呼吸动画幅度 (0禁用)"], min = 0, max = 300, labelPos = "top" },
-        { key = "pulseSpeed", type = "slider", x = 72, y = 404, w = 60, h = 8, label = L["呼吸动画速度"], min = 10, max = 500, labelPos = "top" },
-        { key = "fadeSpeed", type = "slider", x = 8, y = 420, w = 60, h = 8, label = L["触发时动画(淡入)速度"], min = 10, max = 500, labelPos = "top" },
-        { key = "fadeOutSpeed", type = "slider", x = 72, y = 420, w = 60, h = 8, label = L["结束时动画(淡出)速度"], min = 10, max = 500, labelPos = "top" },
-        { key = "btn_pick_lr_tex", type = "button", x = 20, y = 352, w = 72, h = 12, label = L["选择左右材质(仅预览用)"] },
-        { key = "btn_pick_tb_tex", type = "button", x = 104, y = 352, w = 68, h = 12, label = L["选择上方测试材质(仅预览用)"] },
-        { key = "desc_layout", type = "description", x = 8, y = 340, w = 192, h = 8, label = "|cffff173b" .. L["注意 : 选择的材质只是方便你调整测试预览而以 所有设置都是通用 "] .. "|r", labelSize = 22 },
-        { key = "divider_7439", type = "divider", x = 1, y = 320, w = 197, h = 4, label = L["新组件"] },
+    -- [声明迁移边界：设置页] 控件只声明一次；专精滑杆紧凑行由 Core 按原 moduleKey/parentKey/key 语义呈现。
+    -- 专精显示顺序、key/type/parentKey、slider 参数、测试按钮、CVar/overlay 回调及动态刷新禁止修改。
+    local liveStatus = { key = "live_status", type = "description", label = GetStatusText() }
+    local commonItems = {
+        { key = "enabled", type = "switch", label = L["开启功能"] },
+        { key = "globalDefault", type = "slider", label = L["全局默认透明度 (%)"], min = 0, max = 100 },
+    }
+    local plateItems = {
+        { key = "250", type = "slider", label = MakeSpecLabel(135770, "ff2628", "鲜血"), min = 0, max = 100, parentKey = "specs" },
+        { key = "251", type = "slider", label = MakeSpecLabel(135773, "ff2628", "冰霜"), min = 0, max = 100, parentKey = "specs" },
+        { key = "252", type = "slider", label = MakeSpecLabel(135775, "ff2628", "邪恶"), min = 0, max = 100, parentKey = "specs" },
+        { key = "73", type = "slider", label = MakeSpecLabel(132341, "c69b6d", "防护"), min = 0, max = 100, parentKey = "specs" },
+        { key = "71", type = "slider", label = MakeSpecLabel(132355, "c69b6d", "武器"), min = 0, max = 100, parentKey = "specs" },
+        { key = "72", type = "slider", label = MakeSpecLabel(132347, "c69b6d", "狂怒"), min = 0, max = 100, parentKey = "specs" },
+        { key = "66", type = "slider", label = MakeSpecLabel(236264, "f48cba", "防护"), min = 0, max = 100, parentKey = "specs" },
+        { key = "70", type = "slider", label = MakeSpecLabel(135873, "f48cba", "惩戒"), min = 0, max = 100, parentKey = "specs" },
+        { key = "65", type = "slider", label = MakeSpecLabel(135920, "f48cba", "神圣"), min = 0, max = 100, parentKey = "specs" },
+    }
+    local mailItems = {
+        { key = "255", type = "slider", label = MakeSpecLabel(461113, "aad372", "生存"), min = 0, max = 100, parentKey = "specs" },
+        { key = "254", type = "slider", label = MakeSpecLabel(236179, "aad372", "射击"), min = 0, max = 100, parentKey = "specs" },
+        { key = "253", type = "slider", label = MakeSpecLabel(461112, "aad372", "野兽控制"), min = 0, max = 100, parentKey = "specs" },
+        { key = "262", type = "slider", label = MakeSpecLabel(136048, "0070dd", "元素"), min = 0, max = 100, parentKey = "specs" },
+        { key = "263", type = "slider", label = MakeSpecLabel(237581, "0070dd", "增强"), min = 0, max = 100, parentKey = "specs" },
+        { key = "264", type = "slider", label = MakeSpecLabel(136052, "0070dd", "恢复"), min = 0, max = 100, parentKey = "specs" },
+        { key = "1467", type = "slider", label = MakeSpecLabel(4511811, "33937f", "湮灭"), min = 0, max = 100, parentKey = "specs" },
+        { key = "1473", type = "slider", label = MakeSpecLabel(5198700, "33937f", "增辉"), min = 0, max = 100, parentKey = "specs" },
+        { key = "1468", type = "slider", label = MakeSpecLabel(4511812, "33937f", "恩护"), min = 0, max = 100, parentKey = "specs" },
+    }
+    local leatherItems = {
+        { key = "581", type = "slider", label = MakeSpecLabel(1247265, "a330c9", "复仇"), min = 0, max = 100, parentKey = "specs" },
+        { key = "577", type = "slider", label = MakeSpecLabel(1247264, "a330c9", "浩劫"), min = 0, max = 100, parentKey = "specs" },
+        { key = "1480", type = "slider", label = MakeSpecLabel(7455385, "a330c9", "噬灭"), min = 0, max = 100, parentKey = "specs" },
+        { key = "260", type = "slider", label = MakeSpecLabel(236286, "fff468", "狂徒"), min = 0, max = 100, parentKey = "specs" },
+        { key = "259", type = "slider", label = MakeSpecLabel(236270, "fff468", "奇袭"), min = 0, max = 100, parentKey = "specs" },
+        { key = "261", type = "slider", label = MakeSpecLabel(132320, "fff468", "敏锐"), min = 0, max = 100, parentKey = "specs" },
+        { key = "268", type = "slider", label = MakeSpecLabel(608951, "00ff98", "酒仙"), min = 0, max = 100, parentKey = "specs" },
+        { key = "269", type = "slider", label = MakeSpecLabel(608953, "00ff98", "踏风"), min = 0, max = 100, parentKey = "specs" },
+        { key = "270", type = "slider", label = MakeSpecLabel(608952, "00ff98", "织雾"), min = 0, max = 100, parentKey = "specs" },
+        { key = "104", type = "slider", label = MakeSpecLabel(132276, "ff7c0a", "守护"), min = 0, max = 100, parentKey = "specs" },
+        { key = "103", type = "slider", label = MakeSpecLabel(132115, "ff7c0a", "野性"), min = 0, max = 100, parentKey = "specs" },
+        { key = "102", type = "slider", label = MakeSpecLabel(136096, "ff7c0a", "平衡"), min = 0, max = 100, parentKey = "specs" },
+        { key = "105", type = "slider", label = MakeSpecLabel(136041, "ff7c0a", "恢复"), min = 0, max = 100, parentKey = "specs" },
+    }
+    local clothItems = {
+        { key = "64", type = "slider", label = MakeSpecLabel(135846, "3fc7eb", "冰霜"), min = 0, max = 100, parentKey = "specs" },
+        { key = "63", type = "slider", label = MakeSpecLabel(135810, "3fc7eb", "火焰"), min = 0, max = 100, parentKey = "specs" },
+        { key = "62", type = "slider", label = MakeSpecLabel(135932, "3fc7eb", "奥术"), min = 0, max = 100, parentKey = "specs" },
+        { key = "267", type = "slider", label = MakeSpecLabel(136186, "8788ee", "毁灭"), min = 0, max = 100, parentKey = "specs" },
+        { key = "265", type = "slider", label = MakeSpecLabel(136145, "8788ee", "痛苦"), min = 0, max = 100, parentKey = "specs" },
+        { key = "266", type = "slider", label = MakeSpecLabel(136172, "8788ee", "恶魔学识"), min = 0, max = 100, parentKey = "specs" },
+        { key = "256", type = "slider", label = MakeSpecLabel(135940, "ffffff", "戒律"), min = 0, max = 100, parentKey = "specs" },
+        { key = "257", type = "slider", label = MakeSpecLabel(237542, "ffffff", "神圣"), min = 0, max = 100, parentKey = "specs" },
+        { key = "258", type = "slider", label = MakeSpecLabel(136207, "ffffff", "暗影"), min = 0, max = 100, parentKey = "specs" },
+    }
+    local advancedDescription = {
+        key = "desc_layout",
+        type = "description",
+        label = "|cffff173b" .. L["注意 : 选择的材质只是方便你调整测试预览而以 所有设置都是通用 "] .. "|r",
+    }
+    local advancedItems = {
+        { key = "advancedEnabled", type = "switch", label = L["启用 |cffff173b(为了安全! 需重载后生效)|r"] },
+        { key = "btn_test_stop", type = "button", label = L["停止测试"] },
+        { key = "btn_test", type = "button", label = L["启用测试"] },
+        { key = "globalScale", type = "slider", label = L["整体缩放"], min = 0.4, max = 2.5, step = 0.05 },
+        { key = "offsetX", type = "slider", label = L["整体水平(Y) 偏移"], min = -500, max = 500 },
+        { key = "offsetY", type = "slider", label = L["整体垂直(X)偏移"], min = -500, max = 500 },
+        { key = "overlayScale", type = "slider", label = L["材质特效缩放"], min = 0.5, max = 3, step = 0.05 },
+        { key = "sideSpacing", type = "slider", label = L["左右间距调整"], min = -300, max = 300 },
+        { key = "vertSpacing", type = "slider", label = L["上下间距调整"], min = -300, max = 300 },
+        { key = "pulseMagnitude", type = "slider", label = L["呼吸动画幅度 (0禁用)"], min = 0, max = 300 },
+        { key = "pulseSpeed", type = "slider", label = L["呼吸动画速度"], min = 10, max = 500 },
+        { key = "fadeSpeed", type = "slider", label = L["触发时动画(淡入)速度"], min = 10, max = 500 },
+        { key = "fadeOutSpeed", type = "slider", label = L["结束时动画(淡出)速度"], min = 10, max = 500 },
+        { key = "btn_pick_lr_tex", type = "button", label = L["选择左右材质(仅预览用)"] },
+        { key = "btn_pick_tb_tex", type = "button", label = L["选择上方测试材质(仅预览用)"] },
     }
 
-
-
+    local layout = {
+        version = 1,
+        description = L["根据当前专精自动调整屏幕中心法术触发特效的透明度。"],
+        sections = {
+            {
+                kind = "settings",
+                id = "overview",
+                title = L["法术触发透明度 (SpellActivationOverlay)"],
+                description = liveStatus,
+                items = {},
+            },
+            { kind = "settings", id = "common", title = L["常用设置"], items = commonItems },
+            { kind = "settings", id = "plate", title = L["板甲职业"], items = plateItems },
+            { kind = "settings", id = "mail", title = L["锁甲职业"], items = mailItems },
+            { kind = "settings", id = "leather", title = L["皮甲职业"], items = leatherItems },
+            { kind = "settings", id = "cloth", title = L["布甲职业"], items = clothItems },
+            {
+                kind = "settings",
+                id = "advanced",
+                title = L["法术触发特效调整"],
+                description = advancedDescription,
+                items = advancedItems,
+            },
+        },
+    }
 
     ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
 end
 
+local SPEC_GROUPS = {
+    plate = {
+        { class = "死亡骑士", specs = { { 250, 135770, "ff2628", "鲜血" }, { 251, 135773, "ff2628", "冰霜" }, { 252, 135775, "ff2628", "邪恶" } } },
+        { class = "战士", specs = { { 73, 132341, "c69b6d", "防护" }, { 71, 132355, "c69b6d", "武器" }, { 72, 132347, "c69b6d", "狂怒" } } },
+        { class = "圣骑士", specs = { { 66, 236264, "f48cba", "防护" }, { 70, 135873, "f48cba", "惩戒" }, { 65, 135920, "f48cba", "神圣" } } },
+    },
+    mail = {
+        { class = "猎人", specs = { { 255, 461113, "aad372", "生存" }, { 254, 236179, "aad372", "射击" }, { 253, 461112, "aad372", "野兽控制" } } },
+        { class = "萨满祭司", specs = { { 262, 136048, "0070dd", "元素" }, { 263, 237581, "0070dd", "增强" }, { 264, 136052, "0070dd", "恢复" } } },
+        { class = "唤魔师", specs = { { 1467, 4511811, "33937f", "湮灭" }, { 1473, 5198700, "33937f", "增辉" }, { 1468, 4511812, "33937f", "恩护" } } },
+    },
+    leather = {
+        { class = "恶魔猎手", specs = { { 581, 1247265, "a330c9", "复仇" }, { 577, 1247264, "a330c9", "浩劫" }, { 1480, 7455385, "a330c9", "噬灭" } } },
+        { class = "潜行者", specs = { { 260, 236286, "fff468", "狂徒" }, { 259, 236270, "fff468", "奇袭" }, { 261, 132320, "fff468", "敏锐" } } },
+        { class = "武僧", specs = { { 268, 608951, "00ff98", "酒仙" }, { 269, 608953, "00ff98", "踏风" }, { 270, 608952, "00ff98", "织雾" } } },
+        { class = "德鲁伊", specs = { { 104, 132276, "ff7c0a", "守护" }, { 103, 132115, "ff7c0a", "野性" }, { 102, 136096, "ff7c0a", "平衡" }, { 105, 136041, "ff7c0a", "恢复" } } },
+    },
+    cloth = {
+        { class = "法师", specs = { { 64, 135846, "3fc7eb", "冰霜" }, { 63, 135810, "3fc7eb", "火焰" }, { 62, 135932, "3fc7eb", "奥术" } } },
+        { class = "术士", specs = { { 267, 136186, "8788ee", "毁灭" }, { 265, 136145, "8788ee", "痛苦" }, { 266, 136172, "8788ee", "恶魔学识" } } },
+        { class = "牧师", specs = { { 256, 135940, "ffffff", "戒律" }, { 257, 237542, "ffffff", "神圣" }, { 258, 136207, "ffffff", "暗影" } } },
+    },
+}
+
+local function BuildSpecCard(id, title, source)
+    local columns = { { width = 104 } }
+    local cells = {
+        { id = id .. ".classCell", kind = "cell", children = {
+            { id = id .. ".className", kind = "text", textSource = "className" },
+        } },
+    }
+    for slot = 1, source == "leather" and 4 or 3 do
+        columns[#columns + 1] = { weight = 1 }
+        cells[#cells + 1] = { id = id .. ".specCell" .. slot, kind = "cell", children = {
+            { id = id .. ".spec" .. slot, kind = "control", ref = "spec" .. slot,
+                controlType = "slider", visible = slot == 4 and "hasFourthSpec" or nil },
+        } }
+    end
+    return {
+        id = id, kind = "card", title = title, children = {
+            { id = id .. ".columns", kind = "columns",
+                columns = columns,
+                children = {
+                    { id = id .. ".rows", kind = "repeat", source = source,
+                        template = { id = id .. ".row", kind = "row", separator = true, children = cells } },
+                },
+            },
+        },
+    }
+end
+
+local function AdvancedSliderRow(id, label, ref, isLast)
+    return { id = id, kind = "row", separator = not isLast, children = {
+        { id = id .. ".labelCell", kind = "cell", children = {
+            { id = id .. ".label", kind = "text", text = label },
+        } },
+        { id = id .. ".controlCell", kind = "cell", children = {
+            { id = id .. ".control", kind = "control", ref = ref, controlType = "slider" },
+        } },
+    } }
+end
+
+local function BuildV2Declaration()
+    return {
+        version = 2,
+        cards = {
+            {
+                id = "alpha.core", kind = "card", title = L["法术触发透明度 (SpellActivationOverlay)"], children = {
+                    { id = "alpha.status", kind = "hint", textSource = "status" },
+                    { id = "alpha.help", kind = "hint", text = L["根据当前专精自动调整屏幕中心法术触发特效的透明度。"] },
+                    { id = "alpha.coreRow", kind = "row", children = {
+                        { id = "alpha.enabled", kind = "control", ref = "enabled", controlType = "checkbox", width = 150 },
+                        { id = "alpha.globalDefault", kind = "control", ref = "globalDefault", controlType = "slider", weight = 1 },
+                    } },
+                },
+            },
+            BuildSpecCard("alpha.plate", L["板甲职业"], "plate"),
+            BuildSpecCard("alpha.mail", L["锁甲职业"], "mail"),
+            BuildSpecCard("alpha.leather", L["皮甲职业"], "leather"),
+            BuildSpecCard("alpha.cloth", L["布甲职业"], "cloth"),
+            {
+                id = "alpha.advanced", kind = "card", title = L["法术触发特效调整"], collapsible = true, children = {
+                    { id = "alpha.advancedWarning", kind = "hint",
+                        text = "|cffff173b" .. L["注意 : 选择的材质只是方便你调整测试预览而以 所有设置都是通用 "] .. "|r" },
+                    { id = "alpha.advancedEnabledRow", kind = "row", separator = true, children = {
+                        { id = "alpha.advancedEnabledLabel", kind = "text",
+                            text = L["启用 |cffff173b(为了安全! 需重载后生效)|r"], width = 220 },
+                        { id = "alpha.advancedEnabled", kind = "control", ref = "advancedEnabled", controlType = "checkbox", weight = 1 },
+                    } },
+                    { id = "alpha.testActions", kind = "row", children = {
+                        { id = "alpha.test", kind = "button", text = L["启用测试"], action = "test", presentation = "primary", width = 120 },
+                        { id = "alpha.testStop", kind = "button", text = L["停止测试"], action = "testStop", width = 120 },
+                    } },
+                    { id = "alpha.advancedSettings", kind = "columns",
+                        columns = { { weight = 3 }, { weight = 1 } }, children = {
+                            AdvancedSliderRow("alpha.globalScaleRow", L["整体缩放"], "globalScale"),
+                            AdvancedSliderRow("alpha.overlayScaleRow", L["材质特效缩放"], "overlayScale"),
+                            AdvancedSliderRow("alpha.offsetXRow", L["整体水平(Y) 偏移"], "offsetX"),
+                            AdvancedSliderRow("alpha.offsetYRow", L["整体垂直(X)偏移"], "offsetY"),
+                            AdvancedSliderRow("alpha.sideSpacingRow", L["左右间距调整"], "sideSpacing"),
+                            AdvancedSliderRow("alpha.vertSpacingRow", L["上下间距调整"], "vertSpacing"),
+                            AdvancedSliderRow("alpha.pulseMagnitudeRow", L["呼吸动画幅度 (0禁用)"], "pulseMagnitude"),
+                            AdvancedSliderRow("alpha.pulseSpeedRow", L["呼吸动画速度"], "pulseSpeed"),
+                            AdvancedSliderRow("alpha.fadeSpeedRow", L["触发时动画(淡入)速度"], "fadeSpeed"),
+                            AdvancedSliderRow("alpha.fadeOutSpeedRow", L["结束时动画(淡出)速度"], "fadeOutSpeed", true),
+                        } },
+                    { id = "alpha.textureActions", kind = "row", children = {
+                        { id = "alpha.pickLR", kind = "button", text = L["选择左右材质(仅预览用)"], action = "pickLR", width = 220 },
+                        { id = "alpha.pickTB", kind = "button", text = L["选择上方测试材质(仅预览用)"], action = "pickTB", width = 220 },
+                    } },
+                },
+            },
+        },
+    }
+end
+
+local function CreateV2Owner()
+    local owner = { controls = {}, components = {}, actions = {}, predicates = {}, sources = {}, texts = {} }
+    local session
+    function owner:AttachSession(value) session = value end
+    local function RefreshPage() if session then session:Refresh() end end
+    local function ReleaseControl(widget)
+        if _G.ExwindGrid and _G.ExwindGrid.ReleaseWidgetInstance then
+            _G.ExwindGrid:ReleaseWidgetInstance(widget)
+        end
+    end
+    local function Commit(binding, value, phase)
+        if binding.read() == value and phase ~= "changing" then
+            RefreshPage()
+            return false
+        end
+        binding.write(value)
+        EXUI:NotifyModuleValueChanged(EXWIND_MODULE_KEY, binding.path,
+            phase == "changing" and "changing" or "committed")
+        if phase ~= "changing" then RefreshPage() end
+        return true
+    end
+    local function RootBinding(key)
+        return { path = key, read = function() return EX_DB[key] end,
+            write = function(value) EX_DB[key] = value end }
+    end
+    local function Checkbox(label, key)
+        return {
+            mount = function(host)
+                return EXUI:CreateCheckbox(host, label, EX_DB[key] == true, function(value)
+                    Commit(RootBinding(key), value == true, "committed")
+                end)
+            end,
+            update = function(widget) widget:SetChecked(EX_DB[key] == true) end,
+            release = ReleaseControl,
+        }
+    end
+    local function Slider(bindingFor, labelFor, minValue, maxValue, stepValue)
+        return {
+            mount = function(host, context)
+                local binding = bindingFor(context.scope)
+                return EXUI:CreateSlider(host, 180, labelFor and labelFor(context.scope) or "", minValue, maxValue,
+                    tonumber(binding.read()) or minValue, stepValue or 1, nil, {
+                        numberInputPosition = labelFor and "title" or nil,
+                        onLive = function(value) Commit(bindingFor(context.scope), value, "changing") end,
+                        onCommit = function(value) Commit(bindingFor(context.scope), value, "committed") end,
+                    })
+            end,
+            update = function(widget, context)
+                local binding = bindingFor(context.scope)
+                if widget.Title then widget.Title:SetText(labelFor and labelFor(context.scope) or "") end
+                local value = tonumber(binding.read()) or minValue
+                if widget.SetEXUIValue then widget:SetEXUIValue(value, "silent") end
+            end,
+            measure = function(widget, context, width)
+                widget:SetWidth(width)
+                return widget:GetHeight()
+            end,
+            release = ReleaseControl,
+        }
+    end
+
+    owner.controls.enabled = Checkbox(L["开启功能"], "enabled")
+    owner.controls.advancedEnabled = Checkbox("", "advancedEnabled")
+    owner.controls.globalDefault = Slider(function() return RootBinding("globalDefault") end,
+        function() return L["全局默认透明度 (%)"] end, 0, 100, 1)
+    for slot = 1, 4 do
+        local specSlot = slot
+        owner.controls["spec" .. specSlot] = Slider(function(scope)
+            local spec = scope.item.specs[specSlot]
+            if not spec then
+                return { path = "specs.__unused", read = function() return 0 end, write = function() end }
+            end
+            return { path = "specs." .. spec[1], read = function() return EX_DB.specs[spec[1]] end,
+                write = function(value) EX_DB.specs[spec[1]] = value end }
+        end, function(scope)
+            local spec = scope.item.specs[specSlot]
+            return spec and MakeSpecLabel(spec[2], spec[3], spec[4]) or ""
+        end, 0, 100, 1)
+    end
+    local advanced = {
+        globalScale = { 0.4, 2.5, 0.05 },
+        overlayScale = { 0.5, 3, 0.05 },
+        offsetX = { -500, 500, 1 },
+        offsetY = { -500, 500, 1 },
+        sideSpacing = { -300, 300, 1 },
+        vertSpacing = { -300, 300, 1 },
+        pulseMagnitude = { 0, 300, 1 },
+        pulseSpeed = { 10, 500, 1 },
+        fadeSpeed = { 10, 500, 1 },
+        fadeOutSpeed = { 10, 500, 1 },
+    }
+    for key, info in pairs(advanced) do
+        local field, settings = key, info
+        owner.controls[field] = Slider(function() return RootBinding(field) end,
+            nil, settings[1], settings[2], settings[3])
+    end
+    owner.sources.plate = function() return SPEC_GROUPS.plate end
+    owner.sources.mail = function() return SPEC_GROUPS.mail end
+    owner.sources.leather = function() return SPEC_GROUPS.leather end
+    owner.sources.cloth = function() return SPEC_GROUPS.cloth end
+    owner.texts.status = function() return GetStatusText() end
+    owner.texts.className = function(scope) return L[scope.item.class] end
+    owner.predicates.hasFourthSpec = function(scope) return scope.item.specs[4] ~= nil end
+    owner.actions.test = function() ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", { key = "btn_test", ts = GetTime() }) end
+    owner.actions.testStop = function() ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", { key = "btn_test_stop", ts = GetTime() }) end
+    owner.actions.pickLR = function() ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", { key = "btn_pick_lr_tex", ts = GetTime() }) end
+    owner.actions.pickTB = function() ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", { key = "btn_pick_tb_tex", ts = GetTime() }) end
+    return owner
+end
+
+local layoutRegistered = false
+function EX_RegisterLayout()
+    if layoutRegistered then return end
+    EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, BuildV2Declaration(), CreateV2Owner)
+    layoutRegistered = true
+end
 EX_RegisterLayout()

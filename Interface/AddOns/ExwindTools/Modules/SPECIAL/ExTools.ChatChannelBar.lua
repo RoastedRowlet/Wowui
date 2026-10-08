@@ -3,6 +3,9 @@
 -- 唯一 Renderer：BuildPresentation -> ApplyPresentation -> IconCollection。
 -- runtime 的频道动作由 Core runtimeAction 承担；world/panel 永不拥有项目输入。
 -- =============================================================
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXUI, L = ExwindTools.UI, ExwindTools.L or setmetatable({}, { __index = function(_, key) return key end })
@@ -10,6 +13,9 @@ local EXWIND_MODULE_KEY = "ExTools.ChatChannelBar"
 
 -- x/y 是频道栏唯一正式的世界锚点资料。面板样本永不读取它们；运行时与
 -- 世界编辑则由同一 AnchorController 读写，不能存在第二套实际位置。
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local DEFAULTS = {
     enabled = true,
     buttonPadding = 3,
@@ -174,81 +180,98 @@ local CHAT_CHANNEL_BAR_ANCHOR_OPTS = {
     onPickFrame = PickChatChannelBarAnchor,
 }
 
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
 local function RegisterLayout()
+    -- [声明迁移边界：设置页] 静态控件、频道记录与两个复合控件各只声明一次。
+    -- CHANNELS 业务顺序、key/type/setKey、命令输入与预览/运行回调禁止修改。
     local layout = {
-        { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["聊天频道快捷栏"], labelSize = 25 },
-        { key = "sub_basic", type = "subheader", x = 1, y = 9, w = 200, h = 6, label = L["通用设置"], labelSize = 20 },
-        { key = "enabled", type = "checkbox", x = 1, y = 17, w = 46, h = 6, label = L["启用"] },
-        { key = "btn_reset_pos", type = "button", x = 51, y = 17, w = 46, h = 6, label = L["重置位置"] },
-        { key = "buttonPadding", type = "slider", x = 1, y = 30, w = 46, h = 6, label = L["按钮间距"], min = 0, max = 20, step = 1 },
-        { key = "buttonSize", type = "slider", x = 51, y = 30, w = 46, h = 6, label = L["按钮大小"], min = 20, max = 50, step = 1 },
-        { key = "x", type = "slider", x = 101, y = 30, w = 46, h = 6, label = "X", min = -1200, max = 1200, step = 1 },
-        { key = "y", type = "slider", x = 151, y = 30, w = 46, h = 6, label = "Y", min = -1000, max = 1000, step = 1 },
-        -- 与 TimerBarPage 相同的标准锚点组：直接绑定 root ModuleDB，选择器
-        -- 调用同一 AnchorController，不能再由散装依附下拉覆盖 picker 的结果。
-        { key = "anchor", type = "anchorgroup", x = 1, y = 40, w = 200, h = 18, measure = true, label = L["锚点设置"], opts = CHAT_CHANNEL_BAR_ANCHOR_OPTS },
-        { key = "channels", type = "header", x = 1, y = 58, w = 200, h = 6, label = L["频道设置"], labelSize = 20 },
-        { key = "channel_world_enabled", type = "checkbox", x = 1, y = 70, w = 46, h = 6, label = L["世"], setKey = "show_world" },
-        { key = "channel_world_name", type = "input", x = 51, y = 70, w = 46, h = 6, label = L["文字"], setKey = "world_name", labelPos = "top" },
-        { key = "channel_world_command", type = "input", x = 101, y = 70, w = 46, h = 6, label = L["频道/命令"], setKey = "world_channel", labelPos = "top" },
-        { key = "world", type = "color", x = 151, y = 70, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_say_enabled", type = "checkbox", x = 1, y = 80, w = 46, h = 6, label = L["说"], setKey = "show_say" },
-        { key = "channel_say_name", type = "input", x = 51, y = 80, w = 46, h = 6, label = L["文字"], setKey = "say_name", labelPos = "top" },
-        { key = "channel_say_command", type = "input", x = 101, y = 80, w = 46, h = 6, label = L["频道/命令"], setKey = "say_channel", labelPos = "top" },
-        { key = "say", type = "color", x = 151, y = 80, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_yell_enabled", type = "checkbox", x = 1, y = 90, w = 46, h = 6, label = L["喊"], setKey = "show_yell" },
-        { key = "channel_yell_name", type = "input", x = 51, y = 90, w = 46, h = 6, label = L["文字"], setKey = "yell_name", labelPos = "top" },
-        { key = "channel_yell_command", type = "input", x = 101, y = 90, w = 46, h = 6, label = L["频道/命令"], setKey = "yell_channel", labelPos = "top" },
-        { key = "yell", type = "color", x = 151, y = 90, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_party_enabled", type = "checkbox", x = 1, y = 100, w = 46, h = 6, label = L["队"], setKey = "show_party" },
-        { key = "channel_party_name", type = "input", x = 51, y = 100, w = 46, h = 6, label = L["文字"], setKey = "party_name", labelPos = "top" },
-        { key = "channel_party_command", type = "input", x = 101, y = 100, w = 46, h = 6, label = L["频道/命令"], setKey = "party_channel", labelPos = "top" },
-        { key = "party", type = "color", x = 151, y = 100, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_guild_enabled", type = "checkbox", x = 1, y = 110, w = 46, h = 6, label = L["会"], setKey = "show_guild" },
-        { key = "channel_guild_name", type = "input", x = 51, y = 110, w = 46, h = 6, label = L["文字"], setKey = "guild_name", labelPos = "top" },
-        { key = "channel_guild_command", type = "input", x = 101, y = 110, w = 46, h = 6, label = L["频道/命令"], setKey = "guild_channel", labelPos = "top" },
-        { key = "guild", type = "color", x = 151, y = 110, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_instance_enabled", type = "checkbox", x = 1, y = 120, w = 46, h = 6, label = L["副"], setKey = "show_instance" },
-        { key = "channel_instance_name", type = "input", x = 51, y = 120, w = 46, h = 6, label = L["文字"], setKey = "instance_name", labelPos = "top" },
-        { key = "channel_instance_command", type = "input", x = 101, y = 120, w = 46, h = 6, label = L["频道/命令"], setKey = "instance_channel", labelPos = "top" },
-        { key = "instance", type = "color", x = 151, y = 120, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_raid_enabled", type = "checkbox", x = 1, y = 130, w = 46, h = 6, label = L["团"], setKey = "show_raid" },
-        { key = "channel_raid_name", type = "input", x = 51, y = 130, w = 46, h = 6, label = L["文字"], setKey = "raid_name", labelPos = "top" },
-        { key = "channel_raid_command", type = "input", x = 101, y = 130, w = 46, h = 6, label = L["频道/命令"], setKey = "raid_channel", labelPos = "top" },
-        { key = "raid", type = "color", x = 151, y = 130, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_roll_enabled", type = "checkbox", x = 1, y = 140, w = 46, h = 6, label = L["骰"], setKey = "show_roll" },
-        { key = "channel_roll_name", type = "input", x = 51, y = 140, w = 46, h = 6, label = L["文字"], setKey = "roll_name", labelPos = "top" },
-        { key = "channel_roll_command", type = "input", x = 101, y = 140, w = 46, h = 6, label = L["频道/命令"], setKey = "roll_channel", labelPos = "top" },
-        { key = "roll", type = "color", x = 151, y = 140, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_rc_enabled", type = "checkbox", x = 1, y = 150, w = 46, h = 6, label = L["确"], setKey = "show_rc" },
-        { key = "channel_rc_name", type = "input", x = 51, y = 150, w = 46, h = 6, label = L["文字"], setKey = "rc_name", labelPos = "top" },
-        { key = "channel_rc_command", type = "input", x = 101, y = 150, w = 46, h = 6, label = L["频道/命令"], setKey = "rc_channel", labelPos = "top" },
-        { key = "rc", type = "color", x = 151, y = 150, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_pull_enabled", type = "checkbox", x = 1, y = 160, w = 46, h = 6, label = L["倒"], setKey = "show_pull" },
-        { key = "channel_pull_name", type = "input", x = 51, y = 160, w = 46, h = 6, label = L["文字"], setKey = "pull_name", labelPos = "top" },
-        { key = "channel_pull_command", type = "input", x = 101, y = 160, w = 46, h = 6, label = L["频道/命令"], setKey = "pull_channel", labelPos = "top" },
-        { key = "pull", type = "color", x = 151, y = 160, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_custom1_enabled", type = "checkbox", x = 1, y = 170, w = 46, h = 6, label = L["自1"], setKey = "show_custom1" },
-        { key = "channel_custom1_name", type = "input", x = 51, y = 170, w = 46, h = 6, label = L["文字"], setKey = "custom1_name", labelPos = "top" },
-        { key = "channel_custom1_command", type = "input", x = 101, y = 170, w = 46, h = 6, label = L["频道/命令"], setKey = "custom1_channel", labelPos = "top" },
-        { key = "custom1", type = "color", x = 151, y = 170, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_custom2_enabled", type = "checkbox", x = 1, y = 180, w = 46, h = 6, label = L["自2"], setKey = "show_custom2" },
-        { key = "channel_custom2_name", type = "input", x = 51, y = 180, w = 46, h = 6, label = L["文字"], setKey = "custom2_name", labelPos = "top" },
-        { key = "channel_custom2_command", type = "input", x = 101, y = 180, w = 46, h = 6, label = L["频道/命令"], setKey = "custom2_channel", labelPos = "top" },
-        { key = "custom2", type = "color", x = 151, y = 180, w = 46, h = 6, label = L["颜色"] },
-        { key = "channel_custom3_enabled", type = "checkbox", x = 1, y = 190, w = 46, h = 6, label = L["自3"], setKey = "show_custom3" },
-        { key = "channel_custom3_name", type = "input", x = 51, y = 190, w = 46, h = 6, label = L["文字"], setKey = "custom3_name", labelPos = "top" },
-        { key = "channel_custom3_command", type = "input", x = 101, y = 190, w = 46, h = 6, label = L["频道/命令"], setKey = "custom3_channel", labelPos = "top" },
-        { key = "custom3", type = "color", x = 151, y = 190, w = 46, h = 6, label = L["颜色"] },
-        { key = "font_style", type = "fontgroup", x = 1, y = 202, w = 200, h = 50, label = L["频道文字"], labelSize = 20,
-          opts = {} },
+        version = 1,
+        sections = {
+            {
+                kind = "settings",
+                id = "common",
+                title = L["通用设置"],
+                items = {
+                    { key = "enabled", type = "switch", label = L["启用"] },
+                    { key = "btn_reset_pos", type = "button", label = L["重置位置"] },
+                    { key = "buttonPadding", type = "slider", label = L["按钮间距"], min = 0, max = 20, step = 1 },
+                    { key = "buttonSize", type = "slider", label = L["按钮大小"], min = 20, max = 50, step = 1 },
+                    { key = "x", type = "slider", label = "X", min = -1200, max = 1200, step = 1 },
+                    { key = "y", type = "slider", label = "Y", min = -1000, max = 1000, step = 1 },
+                },
+            },
+            {
+                kind = "composite",
+                id = "anchor",
+                title = L["锚点设置"],
+                component = "anchorgroup",
+                key = "anchor",
+                opts = CHAT_CHANNEL_BAR_ANCHOR_OPTS,
+            },
+            {
+                kind = "table",
+                id = "channels",
+                title = L["频道设置"],
+                columns = {
+                    { title = L["启用"] },
+                    { title = L["名称"] },
+                    { title = L["文字"] },
+                    { title = L["频道/命令"] },
+                    { title = L["颜色"] },
+                },
+                supportsAdd = false,
+                records = {},
+            },
+            {
+                kind = "composite",
+                id = "font",
+                title = L["频道文字"],
+                component = "fontgroup",
+                key = "font_style",
+                opts = {},
+            },
+        },
     }
+    local records = layout.sections[3].records
+    for _, channel in ipairs(CHANNELS) do
+        local id = channel.id
+        records[#records + 1] = {
+            cells = {
+                {
+                    key = "channel_" .. id .. "_enabled",
+                    type = "switch",
+                    label = channel.name,
+                    setKey = "show_" .. id,
+                },
+                { text = channel.name },
+                {
+                    key = "channel_" .. id .. "_name",
+                    type = "input",
+                    label = L["文字"],
+                    setKey = id .. "_name",
+                },
+                {
+                    key = "channel_" .. id .. "_command",
+                    type = "input",
+                    label = L["频道/命令"],
+                    setKey = id .. "_channel",
+                },
+                { key = id, type = "color", label = L["颜色"] },
+            },
+        }
+    end
+
     ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
 end
 local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY)
 local function DB() return EX_DB end
 local function Trim(value) return string.gsub(tostring(value or ""), "^%s*(.-)%s*$", "%1") end
 
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local anchorFrame, anchorController, runtimeCollection, worldCollection, panelPreview, panelDock
 local worldPreviewActive = false
 EnsureAnchorController = function()
@@ -310,6 +333,9 @@ local function FindSlashHandler(slash)
     return nil
 end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function Execute(channel)
     local raw = Trim(DB()[channel.id .. "_channel"]); if raw == "" then raw = channel.command or "" end
     if channel.isWorld and raw ~= "" and not raw:match("^/") then
@@ -328,7 +354,7 @@ local function Execute(channel)
             local ok = pcall(handler, args or "")
             if ok then return end
         end
-        if _G.UIErrorsFrame then _G.UIErrorsFrame:AddMessage("命令未注册或不能由插件直接执行", 1, .2, .2) end
+        if _G.UIErrorsFrame then _G.UIErrorsFrame:AddMessage(L["命令未注册或不能由插件直接执行"], 1, .2, .2) end
         return
     end
     if _G.ChatFrame_OpenChat then _G.ChatFrame_OpenChat(raw .. " ") end
@@ -337,6 +363,7 @@ local function Label(channel)
     local value = Trim(DB()[channel.id .. "_name"]); if value == "" then return channel.name end
     return value:sub(1, 3)
 end
+-- [卡片迁移边界：自定义渲染] 以下 BuildPresentation→IconCollection 同时服务 Runtime/World/Panel，不是设置页布局；频道顺序、动作和 surface 生命周期禁止修改。
 local function BuildPresentation(sample)
     local db, style = DB(), DB().font_style or DEFAULTS.font_style
     local entries = {}
@@ -431,7 +458,6 @@ local function ApplyPresentation(collection, p)
 end
 local function RenderPanelPresentation(p)
     if not panelPreview then return end
-    if panelDock then panelDock:SetBackdropColor(0.5804, 0.6471, 0.9882, 1) end
     local entries = {}
     for _, entry in ipairs(p.entries) do
         entries[#entries + 1] = { itemID = "channel-" .. entry.channel.id, presentation = BuildItem(entry, p) }
@@ -502,6 +528,9 @@ local function ReapplyExistingSurface(surface, presentation)
     ApplyPresentation(surface, presentation)
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 local function RefreshActiveSurfaces()
     -- X/Y Slider 已写入唯一 ModuleDB 后，必须把同一个 AnchorController 的
     -- 已存在锚点投影到新位置；只重套文字 Item 不会移动整个频道栏。
@@ -530,6 +559,9 @@ local function HandlePreviewIntent(intent)
     return true
 end
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 RegisterLayout()
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 EXUI:RegisterEditableModule({
@@ -551,7 +583,6 @@ ExwindTools:RegisterModulePreview(EXWIND_MODULE_KEY,
     {
         mount = function(dock)
             if panelPreview then panelPreview:Release() end; panelDock = dock
-            panelDock:SetBackdropColor(0.5804, 0.6471, 0.9882, 1)
             panelPreview = EXUI:CreateIconPanelPreview(dock,
                 EXWIND_MODULE_KEY, { onIntent = HandlePreviewIntent }); RenderPanelPresentation(BuildPresentation(true))
         end,

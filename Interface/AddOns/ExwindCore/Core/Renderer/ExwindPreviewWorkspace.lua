@@ -727,8 +727,8 @@ local function CreateInspector(workspace)
     -- 发光两种，而不是把第二种隐藏在不可达的 capabilities 数组里。
     inspector.addButtons = {}
     for index = 1, 3 do
-        local button = CreateFrame("Button", nil, inspector, "UIPanelButtonTemplate")
-        button:SetSize(index <= 2 and 66 or 140, 18)
+        local button = EXUI:CreateButton(inspector, index <= 2 and 66 or 140, 18,
+            "", nil, { compact = true })
         if index == 1 then button:SetPoint("BOTTOMLEFT", 7, 29)
         elseif index == 2 then button:SetPoint("BOTTOMRIGHT", -7, 29)
         else button:SetPoint("BOTTOM", 0, 50) end

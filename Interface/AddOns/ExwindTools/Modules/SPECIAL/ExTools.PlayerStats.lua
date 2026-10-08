@@ -1,12 +1,16 @@
 -- [[ 玩家属性面板 ]]
 -- { Key = "ExTools.PlayerStats", Name = "玩家属性面板", Desc = "在屏幕上显示高度自定义的玩家属性（急速、全能、躲闪等）。", Category = 4 },
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXState = ExwindTools.State
 local L = (ExwindTools and ExwindTools.L) or setmetatable({}, { __index = function(_, key) return key end })
 
 local EXWIND_MODULE_KEY = "ExTools.PlayerStats"
+
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 
 local EXDB = _G.EXDB
@@ -69,6 +73,9 @@ local STAT_PERCENT_FORMATS = {
     [3] = "%.3f%%",
 }
 
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EX_DEFAULTS = {
     root = {
         bgSettings = {
@@ -625,6 +632,8 @@ local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY)
 if not EX_DB.rows or #EX_DB.rows == 0 then
     EX_DB.rows = GetDefaultRows()
 end
+local EXUI = ExwindTools.UI
+local GM = ExwindTools.GUIMetrics
 
 local ApplyPlayerStatsLiveVisual
 local anchorController, anchorFrame
@@ -651,6 +660,9 @@ local PLAYER_STATS_ANCHOR_OPTS = {
     onPickFrame = PickPlayerStatsAnchor,
 }
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local STAT_MAP = {
     ["无"] = "None",
     ["主属性"] = "PStat_Major",
@@ -723,13 +735,219 @@ ExwindTools.GetPlayerStatTree = function()
     }
 end
 
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations — Settings Table Renderer / 设置表格渲染器
+-- =========================================================
+local PLAYER_STATS_ROWS_TABLE = "playerstats_rows_table"
+local PLAYER_STATS_ROW_ACTIONS = "PlayerStatsRowActions"
+local playerStatsFactory = _G.ExwindFactory
+if not playerStatsFactory then error("PlayerStats requires ExwindFactory", 2) end
+if not playerStatsFactory.Pools[PLAYER_STATS_ROW_ACTIONS] then
+    playerStatsFactory:InitCompositePool(PLAYER_STATS_ROW_ACTIONS)
+end
+
+local function ReleasePlayerStatsTableControl(control)
+    if not control then return end
+    if EXUI.RestoreSettingsListControl then EXUI:RestoreSettingsListControl(control) end
+    local factory = _G.ExwindFactory
+    if factory and control._isCompositeHost then
+        factory:ReleaseCompositeHost(control)
+    elseif factory then
+        factory:ReleaseGridWidget(control)
+    else
+        control:Hide()
+        control:SetParent(nil)
+    end
+end
+
+local function ClearPlayerStatsTableRows(controls)
+    for index = #controls.rows, 1, -1 do
+        local record = controls.rows[index]
+        if record.actions then
+            record.actions:SetScript("OnSizeChanged", nil)
+            for _, button in ipairs(record.actionButtons or {}) do
+                ReleasePlayerStatsTableControl(button)
+            end
+            ReleasePlayerStatsTableControl(record.actions)
+        end
+        ReleasePlayerStatsTableControl(record.percent)
+        ReleasePlayerStatsTableControl(record.syncFont)
+        ReleasePlayerStatsTableControl(record.stat)
+        ReleasePlayerStatsTableControl(record.name)
+        ReleasePlayerStatsTableControl(record.enabled)
+        ReleasePlayerStatsTableControl(record.add)
+        controls.rows[index] = nil
+    end
+end
+
+local function CommitPlayerStatsRowValue(rowIndex, field, value)
+    local row = EX_DB.rows[rowIndex]
+    if type(row) ~= "table" or row[field] == value then return false end
+    return EXUI:CommitModuleValue({
+        moduleKey = EXWIND_MODULE_KEY,
+        path = ("rows.%d.%s"):format(rowIndex, field),
+        readValue = function() return row[field] end,
+        writeValue = function(nextValue)
+            if EX_DB.rows[rowIndex] == row then row[field] = nextValue end
+        end,
+    }, value)
+end
+
+local function SelectPlayerStatsRow(rowIndex)
+    if EX_DB.rows[rowIndex] == nil or EX_DB.selectedRow == rowIndex then return end
+    EXUI:CommitModuleValue({
+        moduleKey = EXWIND_MODULE_KEY,
+        path = "selectedRow",
+        readValue = function() return EX_DB.selectedRow end,
+        writeValue = function(nextValue) EX_DB.selectedRow = nextValue end,
+    }, rowIndex)
+end
+
+local function ClickPlayerStatsRowAction(rowIndex, key)
+    if not EX_DB.rows[rowIndex] then return end
+    SelectPlayerStatsRow(rowIndex)
+    ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", {
+        key = key,
+        ts = GetTime(),
+    })
+end
+
+local function CreatePlayerStatsRowActions(host, rowIndex, rowCount)
+    local actions = playerStatsFactory:AcquireCompositeHost(PLAYER_STATS_ROW_ACTIONS, host)
+    actions:SetSize(1, GM.size.buttonHeight * 2 + 4)
+    actions:EnableMouse(false)
+    local buttons = {
+        EXUI:CreateButton(actions, GM.size.buttonHeight, GM.size.buttonHeight, L["选择"], function()
+            SelectPlayerStatsRow(rowIndex)
+        end, { variant = "secondary", compact = true }),
+        EXUI:CreateButton(actions, GM.size.buttonHeight, GM.size.buttonHeight, L["↑"], function()
+            ClickPlayerStatsRowAction(rowIndex, "btn_up")
+        end, { variant = "secondary", compact = true }),
+        EXUI:CreateButton(actions, GM.size.buttonHeight, GM.size.buttonHeight, L["↓"], function()
+            ClickPlayerStatsRowAction(rowIndex, "btn_down")
+        end, { variant = "secondary", compact = true }),
+        EXUI:CreateButton(actions, GM.size.buttonHeight, GM.size.buttonHeight, L["删除"], function()
+            ClickPlayerStatsRowAction(rowIndex, "btn_delete")
+        end, { variant = "danger", compact = true }),
+    }
+    if rowIndex == 1 then buttons[2]:Disable() end
+    if rowIndex == rowCount then buttons[3]:Disable() end
+    if rowCount == 1 then buttons[4]:Disable() end
+    local function LayoutActions(_, width)
+        local gap = 4
+        local buttonWidth = math.max(24, (width - gap) / 2)
+        for index, button in ipairs(buttons) do
+            local position = ({ 1, 3, 4, 2 })[index]
+            button:SetWidth(buttonWidth)
+            button:ClearAllPoints()
+            button:SetPoint("TOPLEFT", actions, "TOPLEFT",
+                ((position - 1) % 2) * (buttonWidth + gap), -math.floor((position - 1) / 2) * (GM.size.buttonHeight + gap))
+        end
+    end
+    actions:SetScript("OnSizeChanged", LayoutActions)
+    LayoutActions(actions, actions:GetWidth())
+    return actions, buttons
+end
+
+local RebuildPlayerStatsRowsTable
+
+RebuildPlayerStatsRowsTable = function(host, context)
+    local controls = host and host._exPlayerStatsRowsTable
+    if not controls then return end
+    context:ReleaseTablePresentation()
+    ClearPlayerStatsTableRows(controls)
+
+    local presentedRecords = {}
+    for index, row in ipairs(EX_DB.rows) do
+        local rowIndex = index
+        local record = {
+            enabled = EXUI:CreateCheckbox(host, "", row.enabled == true, function(checked)
+                CommitPlayerStatsRowValue(rowIndex, "enabled", checked == true)
+            end),
+            name = EXUI:CreateEditBox(host, tostring(row.label or ""), 1, GM.size.inputHeight, nil, {
+                onEditFocusLost = function(text)
+                    CommitPlayerStatsRowValue(rowIndex, "label", text or "")
+                end,
+            }),
+            stat = EXUI:CreateDropdown(host, 1, nil, ExwindTools.GetPlayerStatTree(), row.key, function(value)
+                CommitPlayerStatsRowValue(rowIndex, "key", value)
+            end),
+            syncFont = EXUI:CreateCheckbox(host, L["数值字体跟随名称"], row.syncFont == true, function(checked)
+                CommitPlayerStatsRowValue(rowIndex, "syncFont", checked == true)
+            end),
+            percent = EXUI:CreateCheckbox(host, L["百分比"], row.isPercent == true, function(checked)
+                CommitPlayerStatsRowValue(rowIndex, "isPercent", checked == true)
+            end),
+        }
+        record.actions, record.actionButtons = CreatePlayerStatsRowActions(host, rowIndex, #EX_DB.rows)
+        controls.rows[#controls.rows + 1] = record
+        presentedRecords[#presentedRecords + 1] = {
+            cells = {
+                { widget = record.enabled, type = "switch" },
+                { widget = record.name, type = "input" },
+                { widget = record.stat, type = "select" },
+                { widget = record.syncFont, type = "switch" },
+                { widget = record.percent, type = "switch" },
+                { widget = record.actions, type = "actions" },
+            },
+        }
+    end
+
+    local add = EXUI:CreateButton(host, 1, GM.size.buttonHeight, L["新增"], function()
+        ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", {
+            key = "btn_add",
+            ts = GetTime(),
+        })
+    end, { variant = "primary", compact = true })
+    controls.rows[#controls.rows + 1] = { add = add }
+    context:SetTableControls({
+        add = {
+            cells = {
+                { text = "" },
+                { text = "" },
+                { text = "" },
+                { text = "" },
+                { text = "" },
+                { widget = add, type = "button" },
+            },
+        },
+        records = presentedRecords,
+    })
+end
+
+local playerStatsGrid = ExwindTools.Grid
+if not playerStatsGrid then error("PlayerStats requires ExwindGrid", 2) end
+playerStatsGrid:RegisterTableControls(PLAYER_STATS_ROWS_TABLE, {
+    mount = function(host, context)
+        host._exPlayerStatsRowsTable = { rows = {} }
+        RebuildPlayerStatsRowsTable(host, context)
+    end,
+    update = function(host, context)
+        RebuildPlayerStatsRowsTable(host, context)
+    end,
+    release = function(host)
+        local controls = host._exPlayerStatsRowsTable
+        if controls then ClearPlayerStatsTableRows(controls) end
+        host._exPlayerStatsRowsTable = nil
+    end,
+})
+
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
 local function EX_RegisterLayout()
     local sel = tonumber(EX_DB.selectedRow) or 1
     if sel < 1 then sel = 1 end
     if sel > #EX_DB.rows then sel = #EX_DB.rows end
-    EX_DB.selectedRow = sel
 
     local currentRowPath = "rows." .. sel
+    local currentRow = EX_DB.rows[sel]
+    local currentRowName = currentRow and currentRow.label
+    if type(currentRowName) ~= "string" or currentRowName == "" then
+        currentRowName = L["属性行 "] .. sel
+    else
+        currentRowName = L[currentRowName] or currentRowName
+    end
     local function ApplyLivePreview(value, context)
         if ApplyPlayerStatsLiveVisual then
             ApplyPlayerStatsLiveVisual(value, context)
@@ -740,91 +958,70 @@ local function EX_RegisterLayout()
         x = ApplyLivePreview,
         y = ApplyLivePreview,
     }
+    -- [普通 sections 迁移边界：设置页] 只迁移纯呈现分区；动态行路径与字体组继续引用同一原数据。
+    -- rows.N 动态 path、行增删/排序、属性/职责/场景顺序与 TextList 刷新回调禁止修改；header/subheader 不等于卡片容器。
     local layout = {
-        { key = "header", type = "header", x = 1, y = 4, w = 200, h = 6, label = L["玩家属性面板"], labelSize = 25 },
-        { key = "sub_gen", type = "subheader", x = 1, y = 11, w = 200, h = 6, label = L["通用设置"], labelSize = 20 },
-        { key = "showBg", type = "checkbox", x = 1, y = 20, w = 46, h = 6, label = L["显示背景"] },
-        { key = "showBorder", type = "checkbox", x = 1, y = 33, w = 46, h = 6, label = L["显示边框"] },
-        {
-            key = "bgGroup",
-            type = "TableGroup",
-            x = 1,
-            y = 4,
-            w = 4,
-            h = 4,
-            label = L["--[[ Function ]]"],
-            parentKey = "bgSettings",
-            children = {
-                { key = "texture", type = "lsm_background", x = 51, y = 20, w = 46, h = 6, label = L["背景材质"] },
-                { key = "bgColor", type = "color", x = 101, y = 20, w = 46, h = 6, label = L["背景颜色"] },
-                { key = "borderTexture", type = "lsm_border", x = 51, y = 33, w = 46, h = 6, label = L["边框材质"] },
-                { key = "borderColor", type = "color", x = 101, y = 33, w = 46, h = 6, label = L["边框颜色"] },
-                { key = "edgeSize", type = "slider", x = 51, y = 45, w = 46, h = 6, label = L["边框粗细"], min = 1, max = 32 },
-                { key = "inset", type = "slider", x = 101, y = 45, w = 46, h = 6, label = L["边框内距"], min = 0, max = 16 },
-                { key = "labelAlign", type = "dropdown", x = 1, y = 66, w = 46, h = 6, label = L["标签对齐"], items = "LEFT:左对齐,CENTER:居中,RIGHT:右对齐" },
-                { key = "valueAlign", type = "dropdown", x = 51, y = 66, w = 46, h = 6, label = L["数值对齐"], items = "LEFT:左对齐,CENTER:居中,RIGHT:右对齐" },
-                { key = "rowSpacing", type = "slider", x = 101, y = 80, w = 46, h = 6, label = L["行间距"], min = -10, max = 30 },
-                { key = "labelX", type = "slider", x = 1, y = 80, w = 46, h = 6, label = L["标签全局X"], min = -100, max = 100 },
-                { key = "valueX", type = "slider", x = 51, y = 80, w = 46, h = 6, label = L["数值全局X"], min = -100, max = 100 },
-            }
-        },
-        { key = "sub_row", type = "subheader", x = 1, y = 93, w = 200, h = 8, label = L["属性行管理"], labelSize = 20 },
-        { key = "selectedRow", type = "dropdown", x = 1, y = 108, w = 46, h = 6, label = L["选择要编辑的行"], items = "func:ExwindTools.GetRowItems_PlayerStats" },
-        { key = "btn_up", type = "button", x = 51, y = 108, w = 10, h = 6, label = L["↑"] },
-        { key = "btn_down", type = "button", x = 69, y = 108, w = 10, h = 6, label = L["↓"] },
-        { key = "btn_add", type = "button", x = 101, y = 108, w = 46, h = 6, label = L["新增"] },
-        { key = "btn_delete", type = "button", x = 151, y = 108, w = 46, h = 6, label = L["删除"] },
-        {
-            key = "RowEditor",
-            type = "TableGroup",
-            x = 1,
-            y = 4,
-            w = 4,
-            h = 4,
-            label = L["--[[ Function ]]"],
-            parentKey = "rows." .. sel,
-            children = {
-                { key = "enabled", type = "checkbox", x = 1, y = 120, w = 46, h = 6, label = L["启用此行"] },
-                { key = "label", type = "input", x = 51, y = 120, w = 46, h = 6, label = L["名称"] },
-                { key = "key", type = "dropdown", x = 101, y = 120, w = 46, h = 6, label = L["属性"], items = "func:ExwindTools.GetPlayerStatTree" },
-                { key = "format", type = "slider", x = 166, y = 120, w = 32, h = 6, label = L["小数"], min = 0, max = 3 },
-                { key = "isPercent", type = "checkbox", x = 151, y = 120, w = 10, h = 6, label = L["%"] },
-                { key = "roles", type = "multiselect", x = 1, y = 135, w = 46, h = 6, label = L["显示职责"], items = "TANK,HEALER,DAMAGER" },
-                { key = "scenes", type = "multiselect", x = 51, y = 135, w = 46, h = 6, label = L["显示场景"], items = "副本内,副本外" },
-                { key = "syncFont", type = "checkbox", x = 2, y = 200, w = 64, h = 8, label = L["|cffff0501数值样式同步标题|r"], labelSize = 20 },
-                {
-                    key = "fontLabel",
-                    type = "fontgroup",
-                    x = 1,
-                    y = 146,
-                    w = 200,
-                    h = 50,
-                    label = L["标签样式"],
-                    labelSize = 20,
-                    opts = {}
+        version = 1,
+        sections = {
+            {
+                kind = "settings", id = "common", title = L["通用设置"],
+                items = {
+                    { key = "showBg", type = "switch", label = L["显示背景"] },
+                    { key = "showBorder", type = "switch", label = L["显示边框"] },
+                    { key = "texture", type = "select", media = "background", parentKey = "bgSettings", label = L["背景材质"] },
+                    { key = "bgColor", type = "color", parentKey = "bgSettings", label = L["背景颜色"] },
+                    { key = "borderTexture", type = "select", media = "border", parentKey = "bgSettings", label = L["边框材质"] },
+                    { key = "borderColor", type = "color", parentKey = "bgSettings", label = L["边框颜色"] },
+                    { key = "edgeSize", type = "slider", parentKey = "bgSettings", label = L["边框粗细"], min = 1, max = 32 },
+                    { key = "inset", type = "slider", parentKey = "bgSettings", label = L["边框内距"], min = 0, max = 16 },
+                    { key = "labelAlign", type = "select", parentKey = "bgSettings", label = L["标签对齐"], options = {
+                        { value = "LEFT", label = L["左对齐"] }, { value = "CENTER", label = L["居中"] }, { value = "RIGHT", label = L["右对齐"] },
+                    } },
+                    { key = "valueAlign", type = "select", parentKey = "bgSettings", label = L["数值对齐"], options = {
+                        { value = "LEFT", label = L["左对齐"] }, { value = "CENTER", label = L["居中"] }, { value = "RIGHT", label = L["右对齐"] },
+                    } },
+                    { key = "rowSpacing", type = "slider", parentKey = "bgSettings", label = L["行间距"], min = -10, max = 30 },
+                    { key = "labelX", type = "slider", parentKey = "bgSettings", label = L["标签全局X"], min = -100, max = 100 },
+                    { key = "valueX", type = "slider", parentKey = "bgSettings", label = L["数值全局X"], min = -100, max = 100 },
                 },
-                {
-                    key = "fontValue",
-                    type = "fontgroup",
-                    x = 2,
-                    y = 210,
-                    w = 200,
-                    h = 50,
-                    label = L["数值样式"],
-                    labelSize = 20,
-                    opts = {}
+            },
+            {
+                kind = "table", id = "rows_table", title = L["属性行管理"],
+                key = "rows", controlFactory = PLAYER_STATS_ROWS_TABLE,
+                columns = {
+                    { title = L["启用此行"] },
+                    { title = L["名称"] },
+                    { title = L["属性"] },
+                    { title = L["数值字体跟随名称"] },
+                    { title = L["百分比"] },
+                    { title = L["选择"] .. " / " .. L["删除"] },
                 },
-            }
-        },
-        {
-            key = "pos",
-            type = "anchorgroup",
-            x = 1,
-            y = 322,
-            w = 200,
-            h = 18,
-            label = L["锚点设置"],
-            opts = PLAYER_STATS_ANCHOR_OPTS
+                supportsAdd = true,
+            },
+            {
+                kind = "settings", id = "rows", title = L["选择要编辑的行"] .. ": " .. sel .. ": " .. currentRowName,
+                items = {
+                    { key = "format", type = "slider", parentKey = currentRowPath, label = L["小数"], min = 0, max = 3 },
+                    { key = "roles", type = "select", multiple = true, parentKey = currentRowPath, label = L["显示职责"], options = {
+                        { value = "TANK", label = "TANK" }, { value = "HEALER", label = "HEALER" }, { value = "DAMAGER", label = "DAMAGER" },
+                    } },
+                    { key = "scenes", type = "select", multiple = true, parentKey = currentRowPath, label = L["显示场景"], options = {
+                        { value = "副本内", label = L["副本内"] }, { value = "副本外", label = L["副本外"] },
+                    } },
+                },
+            },
+            {
+                kind = "composite", id = "fontLabel", title = L["标签样式"],
+                component = "fontgroup", key = "fontLabel", parentKey = currentRowPath, opts = { bodyOnly = true },
+            },
+            {
+                kind = "composite", id = "fontValue", title = L["数值样式"],
+                component = "fontgroup", key = "fontValue", parentKey = currentRowPath, opts = { bodyOnly = true },
+            },
+            {
+                kind = "composite", id = "anchor", title = L["锚点设置"],
+                component = "anchorgroup", key = "pos", opts = PLAYER_STATS_ANCHOR_OPTS,
+            },
         },
     }
 
@@ -841,7 +1038,9 @@ EX_RegisterLayout()
 -- 唯一 Renderer：动态双列 TextList。Runtime / World / Panel 只切换 host，
 -- 使用同一个 BuildPresentation -> ApplyPresentation；Panel 不拥有任何局部输入。
 -- =============================================================
-local EXUI = ExwindTools.UI
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local runtimeList, worldList, panelPreview, panelDock
 local worldPreviewActive = false
 local watchedStateKeys = {}
@@ -880,6 +1079,7 @@ local function FormatValue(conf, internalKey, sample)
     return string.format(format, value), false
 end
 
+-- [卡片迁移边界：自定义渲染] 以下动态双列 TextList 同时服务 Runtime/World/Panel，不是设置页布局；rows 顺序、筛选、订阅和列表释放合同禁止修改。
 local function BuildPresentation(sample)
     local rows, primaryStat = {}, EXDB:GetPlayerPrimaryStat() or "属性"
     for index, conf in ipairs(EX_DB.rows) do
@@ -998,7 +1198,6 @@ end
 
 local function RefreshPanelPreview()
     if panelPreview then
-        if panelDock then panelDock:SetBackdropColor(0.5804, 0.6471, 0.9882, 1) end
         local bounds = ApplyPresentation(panelPreview, BuildPresentation(true), "CENTER", panelDock)
         if panelDock then
             panelDock:SetHeight(math.max(220, bounds.height + 28))
@@ -1020,7 +1219,6 @@ end
 local function ShowPanelPreview(dock)
     if panelPreview then panelPreview:Release() end
     panelDock = dock
-    panelDock:SetBackdropColor(0.5804, 0.6471, 0.9882, 1)
     panelPreview = EXUI:CreateTextList(dock, "panel", EXWIND_MODULE_KEY, { onIntent = HandlePanelPreviewIntent })
     RefreshPanelPreview()
 end
@@ -1118,6 +1316,9 @@ end
 
 EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = RefreshActiveSurfaces })
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 SyncStateWatches = function()
     local wanted = {}
     for _, row in ipairs(BuildPresentation(false).rows) do
@@ -1175,6 +1376,8 @@ end)
 ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY, function(info)
     if not info or not info.key then return end
     local selected = tonumber(EX_DB.selectedRow) or 1
+    if selected < 1 then selected = 1 end
+    if selected > #EX_DB.rows then selected = #EX_DB.rows end
     if info.key == "btn_up" and selected > 1 then
         EX_DB.rows[selected], EX_DB.rows[selected - 1] = EX_DB.rows[selected - 1], EX_DB.rows[selected]
         EX_DB.selectedRow = selected - 1

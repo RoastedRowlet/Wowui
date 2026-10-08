@@ -121,7 +121,7 @@ function ExwindTools:StartFramePicker(onConfirm, onCancel)
                     highlightFrame:ClearAllPoints()
                     highlightFrame:SetPoint("TOPLEFT",     focus, "TOPLEFT",     -2,  2)
                     highlightFrame:SetPoint("BOTTOMRIGHT", focus, "BOTTOMRIGHT",  2, -2)
-                    highlightFrame:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 2 })
+                    highlightFrame:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
                     highlightFrame:SetBackdropBorderColor(0, 1, 0, 1)
                     highlightFrame:Show()
                     lastFocus     = focus

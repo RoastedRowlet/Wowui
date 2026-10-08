@@ -20,13 +20,12 @@ local function GetIconAlert()
 end
 
 local ICON_COMMON_FIELDS = {
-    { path = "enabled", type = "checkbox", label = L["启用"], row = 1 },
+    { path = "enabled", type = "checkbox", label = L["启用"] },
 }
 
 local COMMON_OPTS = {
     bindRoot = true,
     poolType = "IconAlertModuleCommonSettingsGroup",
-    fixedLayout = { logicalWidth = 200, controlW = 46, controlH = 6, slotX = { 3, 53, 103, 153 }, firstY = 0, rowStep = 14 },
     fields = ICON_COMMON_FIELDS,
 }
 
@@ -48,16 +47,31 @@ local LAYOUT_OPTS = {
     defaultMaxVisible = 5,
 }
 
+-- [卡片/Grid 迁移边界：IconAlert 设置页]
+-- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
+-- 禁止：修改 key/type/path/opts、允许增长方向、预览、Slider 或释放合同。
+-- modulecommonsettings/anchorgroup/widgetlayout/icongroup/fontgroup/glow_settings 必须整体引用，不能拆开重拼。
 local GRID_LAYOUT = {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["图标设置"], labelSize = 25 },
-    { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 11, w = 200, h = 22, label = L["模块通用设置"], opts = COMMON_OPTS },
-    { key = "anchorGroup", type = "anchorgroup", x = 1, y = 33, w = 200, h = 20, measure = true, label = L["锚点设置"], opts = ANCHOR_OPTS },
-    { key = "layout", type = "widgetlayout", x = 1, y = 55, w = 200, h = 20, measure = true, label = L["排列设置"], opts = LAYOUT_OPTS },
-    { key = "icon", type = "icongroup", x = 1, y = 77, w = 200, h = 50, label = L["图标本体"], labelSize = 20 },
-    { key = "font_text", type = "fontgroup", x = 1, y = 129, w = 200, h = 50, label = L["名称子元素"], labelSize = 20 },
-    { key = "font_time", type = "fontgroup", x = 1, y = 181, w = 200, h = 50, label = L["倒数文本"], labelSize = 20 },
-    { key = "font_stacks", type = "fontgroup", x = 1, y = 233, w = 200, h = 50, label = L["层数文本"], labelSize = 20 },
-    { key = "glow", type = "glow_settings", x = 1, y = 285, w = 200, h = 50, measure = true, label = L["发光子元素"] },
+    version = 1,
+    title = L["图标设置"],
+    sections = {
+        { kind = "composite", id = "module-common", title = L["通用"],
+            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
+        { kind = "composite", id = "layout", title = L["排列设置"],
+            component = "widgetlayout", key = "layout", opts = LAYOUT_OPTS },
+        { kind = "composite", id = "anchor", title = L["锚点"],
+            component = "anchorgroup", key = "anchorGroup", opts = ANCHOR_OPTS },
+        { kind = "composite", id = "icon", title = L["外观"],
+            component = "icongroup", key = "icon" },
+        { kind = "composite", id = "glow", title = L["发光子元素"],
+            component = "glow_settings", key = "glow" },
+        { kind = "composite", id = "name-font", title = L["名称子元素"],
+            component = "fontgroup", key = "font_text" },
+        { kind = "composite", id = "time-font", title = L["倒数文本"],
+            component = "fontgroup", key = "font_time" },
+        { kind = "composite", id = "stacks-font", title = L["层数文本"],
+            component = "fontgroup", key = "font_stacks" },
+    },
 }
 
 ExwindTools:RegisterModuleLayout(MODULE_KEY, GRID_LAYOUT)
@@ -79,6 +93,7 @@ local function ReleaseStandardPreview()
     end
 end
 
+-- [生命周期边界] StandardModulePage 继续拥有 Dock、Scroll、Watch、preview 与 release；布局迁移不得另建生命周期。
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,

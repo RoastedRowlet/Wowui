@@ -4,6 +4,7 @@ ExBoss.UI.Panel.ToolsPage = ExBoss.UI.Panel.ToolsPage or {}
 local Page = ExBoss.UI.Panel.ToolsPage
 local L = ExBoss.L or setmetatable({}, { __index = function(_, key) return key end })
 local EXUI = _G.ExwindTools and _G.ExwindTools.UI
+local GC = _G.ExwindTools and _G.ExwindTools.GUIColors
 
 local selectedKey = "mythiccast"
 local leftRoot
@@ -12,36 +13,37 @@ local listScroll
 local listChild
 local contentHostFrame
 local activeButtons = {}
-local buttonPool = {}
 local resetButton = nil
 local searchBox = nil
 local searchText = ""
-local sidebarDivider = nil
 
--- 确认弹窗（只注册一次）
-if not StaticPopupDialogs["EXBOSS_RESET_TOOL_CONFIRM"] then
-    StaticPopupDialogs["EXBOSS_RESET_TOOL_CONFIRM"] = {
-        text = L["确定要重置「%s」的所有配置吗？\n\n此操作不可撤销。"],
-        button1 = L["确定重置"],
-        button2 = CANCEL,
-        OnAccept = function(_, data)
-            local resetFn = ExBoss.ResetModuleConfig and ExBoss.ResetModuleConfig[data]
-            if resetFn then
-                resetFn()
-                if leftHostFrame and contentHostFrame then
-                    Page:Render(leftHostFrame, contentHostFrame)
+local function ConfirmResetTool(moduleKey, title)
+    EXUI:ShowDialog({
+        sourceAddon = "EXBoss", sourceModule = title,
+        text = string.format(L["确定要重置「%s」的所有配置吗？\n\n此操作不可撤销。"], title),
+        danger = true,
+        buttons = {
+            { id = "cancel", text = CANCEL, variant = "secondary" },
+            { id = "confirm", text = L["确定重置"], variant = "dangerSolid", onClick = function()
+                local resetFn = ExBoss.ResetModuleConfig and ExBoss.ResetModuleConfig[moduleKey]
+                if resetFn then
+                    resetFn()
+                    if leftHostFrame and contentHostFrame then
+                        Page:Render(leftHostFrame, contentHostFrame)
+                    end
                 end
-            end
-        end,
-        timeout = 0,
-        whileDead = true,
-        hideOnEscape = true,
-    }
+            end },
+        },
+        cancelButton = "cancel",
+    })
 end
 
+-- [卡片/Grid 迁移边界：小工具目录]
+-- ITEMS 顺序、key/page/moduleKey 是可达性、重置与导出合同，禁止因视觉迁移改名或重排。
+-- 允许迁移的是导航项、标题与危险动作区外观；真正内容由各 StandardModulePage 自己拥有。
 local ITEMS = {
-    { key = "mythiccast",       titleKey = "大米怪物施法", moduleKey = "ExBoss.Tools.MythicCast" },
-    { key = "interrupttracker", titleKey = "队友打断监控", moduleKey = "ExBoss.Tools.InterruptTracker" },
+    { key = "mythiccast",       titleKey = "大米怪物施法", moduleKey = "ExBoss.Tools.MythicCast", icon = "castle" },
+    { key = "interrupttracker", titleKey = "队友打断监控", moduleKey = "ExBoss.Tools.InterruptTracker", icon = "octagon-x" },
 }
 
 local ITEMS_BY_KEY = {}
@@ -67,6 +69,7 @@ function Page:GetExportModuleKeys()
 end
 
 local function HideEmbeddedPages()
+    -- 切换工具时必须调用旧页 Hide 释放 panel preview；新卡壳不能成为第二个生命周期 owner。
     local pages = {
         ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.MythicCastPage,
         ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.InterruptTrackerPage,
@@ -80,31 +83,19 @@ end
 
 local function ClearButtons()
     for _, button in ipairs(activeButtons) do
-        button:Hide()
-        button:ClearAllPoints()
-        button:SetScript("OnClick", nil)
-        buttonPool[#buttonPool + 1] = button
+        EXUI:ReleaseSidebarNavigationButton(button)
     end
     wipe(activeButtons)
 end
 
 local function AcquireListButton()
-    local button = table.remove(buttonPool)
-    if button then
-        button:SetParent(listChild)
-        return button
-    end
-
+    local button
     if ExBoss.UI and ExBoss.UI.CreateSidebarModuleButton then
         button = ExBoss.UI.CreateSidebarModuleButton(listChild)
+    elseif EXUI and EXUI.CreateSidebarNavigationButton then
+        button = EXUI:CreateSidebarNavigationButton(listChild, "", nil, { level = 1, height = 28 })
     else
-        button = CreateFrame("Button", nil, listChild, "BackdropTemplate")
-        button:SetHeight(28)
-        button.fs = EXUI:CreateVisualFontString(button, EXFONTFRAME, "GameFontHighlightSmall")
-        button.fs:SetPoint("LEFT", 12, 0)
-        button.fs:SetPoint("RIGHT", -8, 0)
-        button.fs:SetJustifyH("LEFT")
-        button.label = button.fs
+        error("ToolsPage sidebar requires the shared navigation button API", 2)
     end
     return button
 end
@@ -128,9 +119,10 @@ local function RefreshList()
 
         if matched then
             local button = AcquireListButton()
+            EXUI:SetSidebarNavigationButtonIcon(button, item.icon)
             local active = item.key == selectedKey
             button:SetPoint("TOPLEFT", listChild, "TOPLEFT", 10, y)
-            button:SetPoint("RIGHT", listChild, "RIGHT", -8, 0)
+            button:SetPoint("RIGHT", listChild, "RIGHT", -22, 0)
             if button.label then
                 button.label:SetText(GetTitle(item))
             else
@@ -139,7 +131,7 @@ local function RefreshList()
             if ExBoss.UI and ExBoss.UI.ApplySidebarModuleButtonState and button.label then
                 ExBoss.UI.ApplySidebarModuleButtonState(button, active, true)
             else
-                button.fs:SetTextColor(active and 1 or 0.88, active and 0.82 or 0.88, active and 0.45 or 0.90, 1)
+                button.fs:SetTextColor(unpack(active and GC.selectedText or GC.text))
             end
             button:SetScript("OnClick", function()
                 selectedKey = item.key
@@ -158,7 +150,7 @@ local function RefreshList()
     if shown == 0 then
         local empty = AcquireListButton()
         empty:SetPoint("TOPLEFT", listChild, "TOPLEFT", 10, y)
-        empty:SetPoint("RIGHT", listChild, "RIGHT", -8, 0)
+        empty:SetPoint("RIGHT", listChild, "RIGHT", -14, 0)
         if empty.label then
             empty.label:SetText(L["没有匹配项"])
         else
@@ -167,7 +159,7 @@ local function RefreshList()
         if ExBoss.UI and ExBoss.UI.ApplySidebarModuleButtonState and empty.label then
             ExBoss.UI.ApplySidebarModuleButtonState(empty, false, false)
         else
-            empty.fs:SetTextColor(0.45, 0.48, 0.55, 1)
+            empty.fs:SetTextColor(unpack(GC.textDisabled))
         end
         empty:SetScript("OnClick", nil)
         empty:Show()
@@ -178,6 +170,7 @@ local function RefreshList()
     listChild:SetHeight(math.max(1, -y + 8))
 end
 
+-- [混合函数边界] EnsureUI 内只可调整搜索/列表/标题/重置按钮的几何与外观；路由、选中态、重置回调和 embedded 页释放禁止修改。
 local function EnsureUI(leftFrame)
     if leftRoot then
         return
@@ -185,12 +178,6 @@ local function EnsureUI(leftFrame)
 
     leftRoot = CreateFrame("Frame", nil, leftFrame)
     leftRoot:SetAllPoints(leftFrame)
-
-    sidebarDivider = EXUI:CreateVisualTexture(leftRoot, EXBORDERFRAME)
-    sidebarDivider:SetWidth(1)
-    sidebarDivider:SetPoint("TOPRIGHT", leftRoot, "TOPRIGHT", -2, -2)
-    sidebarDivider:SetPoint("BOTTOMRIGHT", leftRoot, "BOTTOMRIGHT", -2, 2)
-    sidebarDivider:SetColorTexture(0.12, 0.15, 0.20, 0.9)
 
     if ExBoss.UI and ExBoss.UI.CreateSidebarSearchBox then
         searchBox = ExBoss.UI.CreateSidebarSearchBox(leftRoot, searchText, {
@@ -207,7 +194,7 @@ local function EnsureUI(leftFrame)
                 RefreshList()
             end,
         })
-        searchBox:SetPoint("TOPLEFT", leftRoot, "TOPLEFT", 0, -5)
+        searchBox:SetPoint("TOPLEFT", leftRoot, "TOPLEFT", 10, -5)
         searchBox:SetPoint("TOPRIGHT", leftRoot, "TOPRIGHT", -22, -5)
     end
 
@@ -216,11 +203,14 @@ local function EnsureUI(leftFrame)
         ExBoss.UI.ApplyModernScrollBarSkin(listScroll)
     end
     listScroll:SetPoint("TOPLEFT", leftRoot, "TOPLEFT", 0, -40)
-    listScroll:SetPoint("BOTTOMRIGHT", leftRoot, "BOTTOMRIGHT", -24, 5)
+    listScroll:SetPoint("BOTTOMRIGHT", leftRoot, "BOTTOMRIGHT", -18, 5)
 
     listChild = CreateFrame("Frame", nil, listScroll)
-    listChild:SetSize(340, 1)
+    listChild:SetSize(math.max(1, listScroll:GetWidth()), 1)
     listScroll:SetScrollChild(listChild)
+    listScroll:SetScript("OnSizeChanged", function(_, width)
+        listChild:SetWidth(math.max(1, width))
+    end)
 end
 
 function Page:Render(leftFrame, contentFrame)
@@ -237,24 +227,21 @@ function Page:Render(leftFrame, contentFrame)
     leftRoot:SetAllPoints(leftFrame)
     leftRoot:Show()
 
+    listChild:SetWidth(math.max(1, listScroll:GetWidth()))
     RefreshList()
     HideEmbeddedPages()
 
     -- 重置按钮（悬浮在内容区右上角）
     if not resetButton then
-        resetButton = CreateFrame("Button", nil, contentFrame, "UIPanelButtonTemplate")
-        resetButton:SetSize(100, 22)
-        resetButton:SetText(L["重置配置"])
-        resetButton:GetFontString():SetTextColor(1, 0.5, 0.5)
-        resetButton:SetScript("OnClick", function()
+        resetButton = EXUI:CreateButton(contentFrame, 100, 22, L["重置配置"], function()
             local item = ITEMS_BY_KEY[selectedKey]
             if not item then return end
             local moduleKey = item.moduleKey
             local hasFn = ExBoss.ResetModuleConfig and ExBoss.ResetModuleConfig[moduleKey]
             if hasFn then
-                StaticPopup_Show("EXBOSS_RESET_TOOL_CONFIRM", item.titleKey, nil, moduleKey)
+                ConfirmResetTool(moduleKey, item.titleKey)
             end
-        end)
+        end, { variant = "danger", compact = true })
     end
     resetButton:SetParent(contentFrame)
     resetButton:SetFrameLevel(contentFrame:GetFrameLevel() + 50)

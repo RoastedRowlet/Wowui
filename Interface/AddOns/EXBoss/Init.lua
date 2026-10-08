@@ -55,6 +55,11 @@ local function EnsureGeneralDB()
     else
         g.disableBlizzardEncounterTimeline = (g.disableBlizzardEncounterTimeline == true)
     end
+    if g.enableBlizzardTimelineInRaid == nil then
+        g.enableBlizzardTimelineInRaid = false
+    else
+        g.enableBlizzardTimelineInRaid = (g.enableBlizzardTimelineInRaid == true)
+    end
     return g
 end
 
@@ -135,7 +140,9 @@ local function GetDesiredEncounterCVarValue(name)
         return (g.encounterWarningsEnabled ~= false) and "1" or "0"
     end
     if key == "encounterTimelineEnabled" then
-        return (g.disableBlizzardEncounterTimeline == true) and "0" or "1"
+        -- 团本例外由 DisplayPolicy 统一判断；PLAYER_ENTERING_WORLD 的修复会在
+        -- 进出团本后重新按当前场景应用这个值。
+        return ExBoss.DisplayPolicy.ShouldEnableBlizzardEncounterTimeline(g) and "1" or "0"
     end
     if key == "Sound_EnableEncounterWarningsSounds" then
         return (g.encounterWarningSoundsEnabled ~= false) and "1" or "2"

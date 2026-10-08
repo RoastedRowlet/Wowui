@@ -456,6 +456,26 @@ local function RGBA(color, alphaOverride)
   return color[1], color[2], color[3], alphaOverride or color[4] or 1
 end
 
+-- Drives `onStep(progress)` from 0 to 1 over `duration` seconds on the frame's
+-- OnUpdate, then clears it. Smoothstepped, so a knob eases in and out rather
+-- than snapping. One frame, one animation: a second call restarts it.
+local function Animate(frame, duration, onStep, onDone)
+  frame.ptAnimElapsed = 0
+  frame:SetScript("OnUpdate", function(self, dt)
+    self.ptAnimElapsed = self.ptAnimElapsed + dt
+    local t = math.min(1, self.ptAnimElapsed / duration)
+    onStep(t * t * (3 - 2 * t))   -- smoothstep
+    if t >= 1 then
+      self:SetScript("OnUpdate", nil)
+      if onDone then onDone() end
+    end
+  end)
+end
+
+local function Lerp3(a, b, t)
+  return a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t, a[3] + (b[3] - a[3]) * t
+end
+
 -- Shown in the icon preview only when nothing is tracked yet, so the layout
 -- controls always have something to demonstrate on.
 local SAMPLE_AURAS = { 980, 172, 48181, 589, 34914, 8921 }
@@ -683,6 +703,7 @@ local TIPS = {
 
   -- Aura Icons: filters
   hideBliz      = "Stops Blizzard drawing its own aura row on nameplates, so this addon's icons are the only ones there. Turn it off if you want both.",
+  iconTooltips  = "Show the aura's tooltip when you hover one of these icons.\n\nOff also makes them click-through, which is the usual reason to turn it off: on a small plate an icon's hitbox can take the click you meant for the mob.",
   textPreview   = "Preview only -- shows the timer and stack text on the sample icons. Does not change what is drawn on real plates.",
   iconAdd       = "Adds an aura to the tracked list. Only auras YOU applied are drawn, so tracking someone else's debuff will never show anything.",
 
@@ -890,28 +911,51 @@ local function ToggleSwitch(parent, getValue, setValue)
   t:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
   PixelBorder(t)
 
+  local SW_W, SW_H, KNOB, INSET = 26, 13, 9, 2
   t.knob = t:CreateTexture(nil, "OVERLAY")
-  t.knob:SetSize(9, 9)
+  t.knob:SetSize(KNOB, KNOB)
 
   local accent = { 0.36, 0.78, 0.44 }
   local knobOn = { 0.55, 0.95, 0.62 }
+  local trackOn = { accent[1] * 0.34, accent[2] * 0.34, accent[3] * 0.34 }
+  local trackOff = { 0.12, 0.12, 0.15 }
+  local knobOff = { 0.48, 0.48, 0.54 }
+  local edgeOff = { 0.34, 0.34, 0.40 }
+  local edgeOffHot = { 0.52, 0.52, 0.60 }
   local hovered = false
+  local shown = false   -- what is currently painted, for the animation
 
-  local function Paint()
-    local on = getValue() and true or false
+  -- Paints the switch at `p`, 0 = off and 1 = on. The knob's SIDE carries the
+  -- state as well as the colour does, and both slide together so a click
+  -- reads as a switch being thrown rather than a redraw.
+  local function PaintAt(p)
+    local x = INSET + p * (SW_W - KNOB - INSET * 2)
     t.knob:ClearAllPoints()
-    -- The knob's SIDE carries the state as well as the colour does.
-    t.knob:SetPoint(on and "RIGHT" or "LEFT", on and -2 or 2, 0)
-    if on then
-      t:SetBackdropColor(accent[1] * 0.34, accent[2] * 0.34, accent[3] * 0.34, 1)
-      t:SetBackdropBorderColor(accent[1], accent[2], accent[3], hovered and 1 or 0.85)
-      t.knob:SetColorTexture(knobOn[1], knobOn[2], knobOn[3], 1)
-    else
-      t:SetBackdropColor(0.12, 0.12, 0.15, 1)
-      t:SetBackdropBorderColor(hovered and 0.52 or 0.34, hovered and 0.52 or 0.34,
-        hovered and 0.60 or 0.40, 1)
-      t.knob:SetColorTexture(0.48, 0.48, 0.54, 1)
+    t.knob:SetPoint("LEFT", t, "LEFT", x, 0)
+    t.knob:SetColorTexture(Lerp3(knobOff, knobOn, p))
+    t:SetBackdropColor(Lerp3(trackOff, trackOn, p))
+    local er, eg, eb = Lerp3(hovered and edgeOffHot or edgeOff, accent, p)
+    t:SetBackdropBorderColor(er, eg, eb, (p > 0.5 and not hovered) and 0.85 or 1)
+  end
+
+  -- `animated` slides the knob from where it was painted to where the source
+  -- now says it is; a plain Refresh (rebuild, external change) snaps.
+  local function Paint(animated)
+    local now = getValue() and true or false
+    if now ~= shown then
+      if animated then
+        local from = shown and 1 or 0
+        Animate(t, 0.14, function(p) PaintAt(from + (now and p or -p)) end)
+      else
+        t:SetScript("OnUpdate", nil)
+        PaintAt(now and 1 or 0)
+      end
+    elseif not t:GetScript("OnUpdate") then
+      -- Already heading there: a Refresh from the rebuild a click triggers
+      -- must not cut the slide short. Only repaint when nothing is moving.
+      PaintAt(now and 1 or 0)
     end
+    shown = now
   end
 
   -- Per instance, so a switch can take the colour of whatever it governs.
@@ -919,17 +963,24 @@ local function ToggleSwitch(parent, getValue, setValue)
     accent = colour
     knobOn = { math.min(1, colour[1] * 1.35), math.min(1, colour[2] * 1.35),
                math.min(1, colour[3] * 1.35) }
+    trackOn = { colour[1] * 0.34, colour[2] * 0.34, colour[3] * 0.34 }
     Paint()
   end
 
-  t.Refresh = Paint
-  t:SetScript("OnEnter", function() hovered = true; Paint() end)
-  t:SetScript("OnLeave", function() hovered = false; Paint() end)
+  -- Hover only recolours the edge; never interrupt a slide in progress for it.
+  local function Repaint()
+    if not t:GetScript("OnUpdate") then PaintAt(shown and 1 or 0) end
+  end
+
+  -- Refresh(true) slides; a bare Refresh (rebuild, external change) snaps.
+  t.Refresh = function(animated) Paint(animated == true) end
+  t:SetScript("OnEnter", function() hovered = true; Repaint() end)
+  t:SetScript("OnLeave", function() hovered = false; Repaint() end)
   t:SetScript("OnClick", function()
     -- Same rule as Checkbox: read the source, write its opposite, then show
     -- whatever actually ended up stored.
     setValue(not (getValue() and true or false))
-    Paint()
+    Paint(true)
   end)
   Paint()
   return t
@@ -1191,9 +1242,22 @@ local function Dropdown(parent, width, entries, getValue, setValue, opts)
   blocker:SetAllPoints(UIParent)
   blocker:SetFrameStrata("FULLSCREEN")
   blocker:Hide()
+  -- Any button, on the way down: a right-click or a drag start elsewhere
+  -- should dismiss the list just as a left-click does.
+  blocker:RegisterForClicks("AnyDown")
   blocker:SetScript("OnClick", CloseOpenMenu)
   menu.blocker = blocker
   menu:SetScript("OnHide", function() blocker:Hide() end)
+
+  -- The list is parented to UIParent, so nothing hides it when its owner goes:
+  -- a rail change swaps the page out from under it, a scroll carries the
+  -- control away, a collapsed section hides it. Watch the owner every frame
+  -- while open and follow it down.
+  menu:SetScript("OnUpdate", function(self)
+    if not d:IsVisible() then
+      if openMenu == self then CloseOpenMenu() else self:Hide() end
+    end
+  end)
 
   local function CurrentEntries()
     return type(entries) == "function" and entries() or entries
@@ -1288,6 +1352,10 @@ local function Dropdown(parent, width, entries, getValue, setValue, opts)
       if entry then
         row.value = entry.value
         row.isTitle = entry.isTitle
+        -- A font entry is drawn IN that font, so the list is its own preview.
+        -- Reset on every render: the row is pooled and the last list through
+        -- it may have left a typeface behind.
+        NS.ApplyFont(row.text, entry.font or GUI_FONT, 12, "NONE")
         row.text:SetText(entry.text)
         local picked
         if opts and opts.multi then
@@ -1361,13 +1429,14 @@ local function Dropdown(parent, width, entries, getValue, setValue, opts)
       return
     end
     local current = getValue()
-    local shown, icon
+    local shown, icon, font
     for _, entry in ipairs(CurrentEntries()) do
       if not entry.isTitle and entry.value == current then
-        shown, icon = entry.text, entry.icon
+        shown, icon, font = entry.text, entry.icon, entry.font
         break
       end
     end
+    NS.ApplyFont(d.label, font or GUI_FONT, 12, "NONE")
     d.label:SetText(shown or tostring(current or ""))
     if icon then
       d.icon:SetTexture(icon)
@@ -3518,7 +3587,7 @@ function RebuildRail()
         switch:SetAccent({ RGBA(THEME.headerText) })
         switch:SetScript("OnClick", function(self)
           self.spec.set(not self.spec.get())
-          self.Refresh()
+          self.Refresh(true)
           -- apply, when the module defines one: not everything on this rail
           -- draws on a nameplate, and a rig rebuild for a tooltip setting is
           -- work with no possible effect.
@@ -3579,7 +3648,7 @@ function RebuildRail()
         switch:SetAccent({ 0.34, 0.60, 0.92 })
         switch:SetScript("OnClick", function(self)
           self.spec.set(not self.spec.get())
-          self.Refresh()
+          self.Refresh(true)
           -- apply, when the module defines one: not everything on this rail
           -- draws on a nameplate, and a rig rebuild for a tooltip setting is
           -- work with no possible effect.
@@ -8738,9 +8807,23 @@ local function BuildAuraIconTab()
   head.hideBlizLabel:SetPoint("LEFT", head.hideBliz, "RIGHT", 6, 0)
   Tip(head.hideBliz, "Hide Blizzard's own aura icons", TIPS.hideBliz)
   TipLabel(head.hideBlizLabel, "Hide Blizzard's own aura icons", TIPS.hideBliz)
+  -- Directly under the hide-Blizzard box: both are about how this row behaves
+  -- on a real plate rather than about any one aura.
+  head.tooltips = Checkbox(head,
+    function() return NS.db.icons.tooltips and true or false end,
+    function(v)
+      NS.db.icons.tooltips = v
+      Structural()
+    end)
+  head.tooltips:SetPoint("TOPLEFT", HEAD_PAD, -(6 + ICON_STAGE_H + 28))
+  head.tooltipsLabel = Label(head, "Show tooltips when you hover an icon")
+  head.tooltipsLabel:SetPoint("LEFT", head.tooltips, "RIGHT", 6, 0)
+  Tip(head.tooltips, "Show tooltips on hover", TIPS.iconTooltips)
+  TipLabel(head.tooltipsLabel, "Show tooltips on hover", TIPS.iconTooltips)
+
   head.note = Dim(head, "Preview always shows icons. Turn the module on to draw them on real plates.")
-  -- A line below the two controls, since it explains them both.
-  head.note:SetPoint("TOPLEFT", HEAD_PAD, -(6 + ICON_STAGE_H + 32))
+  -- A line below the three controls, since it explains them all.
+  head.note:SetPoint("TOPLEFT", HEAD_PAD, -(6 + ICON_STAGE_H + 50))
 
   -- Preview-only, and stored with the other UI state rather than the icon
   -- settings: it changes what the preview draws, not what the plates do.
@@ -8755,8 +8838,8 @@ local function BuildAuraIconTab()
   Tip(head.textPreview, "Show timer & stacks in preview", TIPS.textPreview)
   TipLabel(head.textPreviewLabel, "Show timer & stacks in preview", TIPS.textPreview)
 
-  -- Stage, then the control row, then the note beneath it.
-  panel:SetHeadHeight(6 + ICON_STAGE_H + 56)
+  -- Stage, then the two control rows, then the note beneath them.
+  panel:SetHeadHeight(6 + ICON_STAGE_H + 74)
 
   -- Three pages, one per concern, each with its own copy of the head so the
   -- icon preview is present wherever you are changing it. `icons` holds the
@@ -8936,7 +9019,7 @@ local function BuildAuraIconTab()
   local function RefreshFontEntries()
     wipe(fontEntries)
     for _, name in ipairs(NS.FontList()) do
-      table.insert(fontEntries, { text = name, value = name })
+      table.insert(fontEntries, { text = name, value = name, font = name })
     end
     return fontEntries
   end
@@ -9123,6 +9206,7 @@ local function RebuildAuraIconTab()
 
   if panel.head.enable then panel.head.enable:Refresh() end
   panel.head.hideBliz.Refresh()
+  panel.head.tooltips.Refresh()
   -- Each page draws its own stage.
   for _, iconPanel in ipairs(iconPanels or {}) do
     if iconPanel.RefreshPreview then iconPanel.RefreshPreview() end

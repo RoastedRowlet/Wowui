@@ -3,6 +3,9 @@
 -- 不创建独立 Frame、SavedVariables、OnUpdate 或第二套拖拽逻辑。
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools or not ExwindTools.UI then return end
 
@@ -17,6 +20,9 @@ local DISPLAY_DURATION_SECONDS = 3
 local RUNTIME_ITEM_ID = "dk-blood-boil-normal:runtime"
 local RefreshActiveSurfaces
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local MODULE_SPEC = {
     RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
     moduleKey = MODULE_KEY,
@@ -24,6 +30,9 @@ local MODULE_SPEC = {
     version = 2,
     features = { cooldown = true, timeText = true, enabled = true },
     textSlots = { time = L["倒数文字"] },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     anchor = {
         dbPath = "$root",
         bindRoot = true,
@@ -35,6 +44,9 @@ local MODULE_SPEC = {
         initialHeight = 45,
         clampedToScreen = true,
     },
+    -- =========================================================
+    -- 二、默认配置与配置访问 | Defaults and Configuration Access
+    -- =========================================================
     defaults = {
         font_time = {
             a = 1,
@@ -110,6 +122,9 @@ local MODULE_SPEC = {
             y = -49,
         },
     },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     preview = {
         positionGuiKeys = { "font_time" },
         elements = {
@@ -125,80 +140,55 @@ local MODULE_SPEC = {
         },
         sample = { itemID = "dk-blood-boil:preview", remaining = 3, duration = 3 },
     },
+    -- [卡片迁移边界：设置页] 仅可按统一规范调整下列 gui.static/gui.fields 的 x/y/w/h 与卡片分组。
+    -- key/type/opts、DB path、anchor/preview/defaults 及刷新回调均属绑定或业务合同，禁止修改；复合控件必须整体引用，header 本身不等于卡片容器。
+    -- =========================================================
+    -- 三、GUI 声明 | GUI Declarations
+    -- =========================================================
     gui = {
-        fields = {
+        version = 1,
+        description = L["血沸冷却更新时显示 3 秒倒数图标。"],
+        sections = {
             {
-                group = "settings",
-                h = 18,
+                kind = "composite",
+                id = "common",
+                title = L["模块通用设置"],
+                component = "modulecommonsettings",
                 key = "moduleCommon",
-                label = L["模块通用设置"],
-                measure = true,
-                options = {
-                    bindRoot = true,
-                    fields = { { label = L["启用"], path = "enabled", type = "checkbox" } },
-                    fixedLayout = {
-                        controlH = 6,
-                        controlW = 46,
-                        firstY = 0,
-                        logicalWidth = 200,
-                        rowStep = 14,
-                        slotX = { 3, 53, 103, 153 },
-                    },
+                opts = {
+                        bindRoot = true,
+                        presentation = "settings-list",
+                        fields = { { label = L["启用"], path = "enabled", presentation = "switch", type = "checkbox" } },
+                        fixedLayout = {
+                            controlH = 6,
+                            controlW = 46,
+                            firstY = 0,
+                            logicalWidth = 200,
+                            rowStep = 14,
+                            slotX = { 3, 53, 103, 153 },
+                        },
                 },
-                order = 1,
-                type = "modulecommonsettings",
-                w = 200,
-                x = 1,
-                y = 10,
             },
             {
-                group = "settings",
-                h = 20,
+                kind = "composite",
+                id = "anchor",
+                title = L["锚点设置"],
+                component = "anchorgroup",
                 key = "anchor",
-                label = L["锚点设置"],
-                measure = true,
-                order = 2,
-                type = "anchorgroup",
-                w = 200,
-                x = 1,
-                y = 32,
             },
             {
-                group = "settings",
-                h = 50,
+                kind = "composite",
+                id = "icon",
+                title = L["DK血沸图标"],
+                component = "icongroup",
                 key = "icon",
-                label = L["DK血沸图标"],
-                labelSize = 20,
-                order = 3,
-                type = "icongroup",
-                w = 200,
-                x = 1,
-                y = 55,
             },
             {
-                group = "settings",
-                h = 50,
+                kind = "composite",
+                id = "font_time",
+                title = L["倒数文字"],
+                component = "fontgroup",
                 key = "font_time",
-                label = L["倒数文字"],
-                labelSize = 20,
-                order = 4,
-                type = "fontgroup",
-                w = 200,
-                x = 1,
-                y = 108,
-            },
-        },
-        groups = { { key = "settings", order = 1 } },
-        static = {
-            { h = 8, key = "header", label = L["DK血沸普通版"], labelSize = 25, type = "header", w = 200, x = 1, y = 1 },
-            {
-                h = 8,
-                key = "description",
-                label = L["血沸冷却更新时显示 3 秒倒数图标。"],
-                type = "description",
-                w = 197,
-                x = 1,
-                y = 163,
             },
         },
     },
@@ -210,6 +200,9 @@ local central = EXUI:RegisterIconModule(MODULE_SPEC)
 local LAYOUT = DB.layout
 if not ExwindTools:IsModuleEnabled(MODULE_KEY) then return end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local runtimeDuration, displayActive, displayGeneration = nil, false, 0
 
 local function IsEligible()
@@ -238,6 +231,9 @@ local function MakeTextBounds(style)
 end
 
 -- 与噬灭变身计时保持同一份标准 Icon presentation 结构；只替换业务数据。
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function BuildEntry(itemID, cooldown, isPreview)
     local icon = DB.icon or {}
     local width = math.max(1, tonumber(icon.width) or 45)
@@ -251,7 +247,8 @@ local function BuildEntry(itemID, cooldown, isPreview)
             bodySize = { width = width, height = height },
             declaredBounds = { left = -width * .5, right = width * .5, bottom = -height * .5, top = height * .5 },
             semanticBounds = { ["core.time"] = MakeTextBounds(DB.font_time or {}) },
-            interaction = isPreview and EXUI:BuildStandardPreviewInteraction("Icon", DB, MODULE_SPEC.preview.elements) or nil,
+            interaction = isPreview and EXUI:BuildStandardPreviewInteraction("Icon", DB, MODULE_SPEC.preview.elements) or
+                nil,
         },
     }
 end
@@ -267,6 +264,9 @@ end
 
 RefreshPreview()
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function ClearTimer()
     displayGeneration = displayGeneration + 1
     runtimeDuration, displayActive = nil, false
@@ -314,6 +314,9 @@ RefreshActiveSurfaces = function(controller)
     end
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 ExwindTools:RegisterEvent("SPELL_UPDATE_COOLDOWN", MODULE_KEY, function(_, spellID, baseSpellID)
     if spellID == TRACKED_COOLDOWN_SPELL_ID or baseSpellID == TRACKED_COOLDOWN_SPELL_ID then
         StartTimer()
@@ -323,4 +326,7 @@ ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", MODULE_KEY, ClearTimer)
 ExwindTools:WatchState("ClassID", MODULE_KEY, function()
     if not IsEligible() then ClearTimer() end
 end)
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 ExwindTools:ReportReady(MODULE_KEY)

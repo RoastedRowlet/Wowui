@@ -1,6 +1,9 @@
 -- [[ 大米法术百科数据库 (Spell Data) ]]
 -- { Key = "ExM+InfoSpellData", Name = "法术百科数据库", Desc = "存储全量的大米技能机制说明。作为 SpellInfo 的后端数据源。", Category = 2 },
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXState = ExwindTools.State
@@ -10,6 +13,9 @@ local EXWIND_MODULE_KEY = "ExM+InfoSpellData"
 
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 EXSP = EXSP or {}
 
 EXSP.DungeonAbbr = {
@@ -56,7 +62,7 @@ EXSP.TagDefs = {
     --MISC
     aoe                 = { icon = 4630449, name = L["范围伤害"], category = 1 },
     los                 = { icon = 1405818, name = L["卡视野规避"], category = 1 },
-    interrupt           = { icon = "Interface\\AddOns\\ExwindTools\\Textures\\EJ-UI\\EX17.png", name = L["可打断"], category = 2 },
+    interrupt           = { icon = "Interface\\AddOns\\ExwindCore\\Textures\\Images\\ExwindTools\\EJ-UI\\EX17.png", name = L["可打断"], category = 2 },
     noReflect           = { icon = 132361, name = L["无法盾反"], category = 1 },
     alwaysHit           = { icon = 132212, name = L["总是命中(无法闪招)"], category = 1 },
     noBlock             = { icon = 132110, name = L["无法格挡"], category = 1 },
@@ -65,18 +71,18 @@ EXSP.TagDefs = {
     shieldImmunity      = { icon = 132361, name = L["盾反仅免疫伤害"], category = 1 },
 
     --驱散
-    DispelBleed         = { icon = "Interface\\AddOns\\ExwindTools\\Textures\\EJ-UI\\EX5.png", name = L["流血"], category = 2 },
-    DispelCurse         = { icon = "Interface\\AddOns\\ExwindTools\\Textures\\EJ-UI\\EX3.png", name = L["诅咒"], category = 2 },
-    DispelDisease       = { icon = "Interface\\AddOns\\ExwindTools\\Textures\\EJ-UI\\EX6.png", name = L["疾病"], category = 2 },
-    DispelEnrage        = { icon = "Interface\\AddOns\\ExwindTools\\Textures\\EJ-UI\\EX7.png", name = L["激怒"], category = 2 },
-    DispelMagic         = { icon = "Interface\\AddOns\\ExwindTools\\Textures\\EJ-UI\\EX9.png", name = L["魔法"], category = 2 },
-    DispelPoison        = { icon = "Interface\\AddOns\\ExwindTools\\Textures\\EJ-UI\\EX2.png", name = L["中毒"], category = 2 },
+    DispelBleed         = { icon = "Interface\\AddOns\\ExwindCore\\Textures\\Images\\ExwindTools\\EJ-UI\\EX5.png", name = L["流血"], category = 2 },
+    DispelCurse         = { icon = "Interface\\AddOns\\ExwindCore\\Textures\\Images\\ExwindTools\\EJ-UI\\EX3.png", name = L["诅咒"], category = 2 },
+    DispelDisease       = { icon = "Interface\\AddOns\\ExwindCore\\Textures\\Images\\ExwindTools\\EJ-UI\\EX6.png", name = L["疾病"], category = 2 },
+    DispelEnrage        = { icon = "Interface\\AddOns\\ExwindCore\\Textures\\Images\\ExwindTools\\EJ-UI\\EX7.png", name = L["激怒"], category = 2 },
+    DispelMagic         = { icon = "Interface\\AddOns\\ExwindCore\\Textures\\Images\\ExwindTools\\EJ-UI\\EX9.png", name = L["魔法"], category = 2 },
+    DispelPoison        = { icon = "Interface\\AddOns\\ExwindCore\\Textures\\Images\\ExwindTools\\EJ-UI\\EX2.png", name = L["中毒"], category = 2 },
 
     --控制
     MechanicAsleep      = { icon = 136090, name = L["沉睡"], category = 3 },
-    MechanicBleeding    = { icon = "Interface\\AddOns\\ExwindTools\\Textures\\EJ-UI\\EX5.png", name = L["流血"], category = 3 },
+    MechanicBleeding    = { icon = "Interface\\AddOns\\ExwindCore\\Textures\\Images\\ExwindTools\\EJ-UI\\EX5.png", name = L["流血"], category = 3 },
     MechanicDisoriented = { icon = 136175, name = L["迷惑"], category = 3 },
-    MechanicEnraged     = { icon = "Interface\\AddOns\\ExwindTools\\Textures\\EJ-UI\\EX7.png", name = L["激怒"], category = 3 },
+    MechanicEnraged     = { icon = "Interface\\AddOns\\ExwindCore\\Textures\\Images\\ExwindTools\\EJ-UI\\EX7.png", name = L["激怒"], category = 3 },
     MechanicFrozen      = { icon = 135834, name = L["冻结"], category = 3 },
     MechanicPolymorphed = { icon = 136071, name = L["变形"], category = 3 },
     MechanicRooted      = { icon = 135848, name = L["定身"], category = 3 },
@@ -354,4 +360,7 @@ EXSP.Database = {
 
 EXSP.DungeonList = { "塞塔里斯神庙", "夺目谷", "密谋小径", "毒牙祭坛", "红玉新生法池", "纳洛拉克的洞穴", "虚空之痕竞技场", "诸王之眠" }
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 ExwindTools:ReportReady(EXWIND_MODULE_KEY)

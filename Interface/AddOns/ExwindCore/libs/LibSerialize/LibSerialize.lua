@@ -303,7 +303,10 @@ The type byte uses the following formats to implement the above:
     * Followed by the type-dependent payload, including count(s) if needed
 --]]
 
-local MAJOR, MINOR = "LibSerialize", 1
+-- Local writer fix: preserve finite large integers and subnormal numbers.
+-- The LibStub revision changes; existing version-1 streams remain unchanged.
+local MAJOR, MINOR = "LibSerialize", 2
+local SERIALIZATION_VERSION = 1
 local LibSerialize
 if LibStub then
     LibSerialize = LibStub:NewLibrary(MAJOR, MINOR)
@@ -911,7 +914,7 @@ LibSerialize._WriterTable = {
         self:_WriteByte(readerIndexShift * self._ReaderIndex.NIL)
     end,
     ["number"] = function(self, num)
-        if IsFractional(num) then
+        if IsFractional(num) or num > 9007199254740991 or num < -9007199254740991 then
             -- DebugPrint("Serializing float:", num)
             -- Normally a float takes 8 bytes. See if it's cheaper to encode as a string.
             -- If we encode as a string, though, we'll need a byte for its length.
@@ -921,8 +924,11 @@ LibSerialize._WriterTable = {
                 sign = readerIndexShift
                 numAbs = -num
             end
-            local asString = tostring(numAbs)
-            if #asString < 7 and tonumber(asString) == numAbs then
+            -- The legacy binary float encoder flushes tiny subnormals to zero.
+            -- Use the existing numeric decimal tag so old readers retain them.
+            local subnormal = numAbs > 0 and numAbs < 2.2250738585072014e-308
+            local asString = subnormal and string.format("%.17g", numAbs) or tostring(numAbs)
+            if subnormal or (#asString < 7 and tonumber(asString) == numAbs) then
                 self:_WriteByte(sign + readerIndexShift * self._ReaderIndex.NUM_FLOATSTR_POS)
                 self:_WriteByte(#asString, 1)
                 self._writeString(asString)
@@ -1160,7 +1166,7 @@ function LibSerialize:SerializeEx(opts, ...)
     local WriteString, FlushWriter = CreateWriter()
 
     self._writeString = WriteString
-    self:_WriteByte(MINOR)
+    self:_WriteByte(SERIALIZATION_VERSION)
 
     -- Create a combined options table, starting with the defaults
     -- and then overwriting any user-supplied keys.
@@ -1199,7 +1205,7 @@ function LibSerialize:DeserializeValue(input)
     -- Since there's only one compression version currently,
     -- no extra work needs to be done to decode the data.
     local version = self:_ReadByte()
-    assert(version == MINOR)
+    assert(version == SERIALIZATION_VERSION)
 
     -- Since the objects we read may be nil, we need to explicitly
     -- track the number of results and assign by index so that we

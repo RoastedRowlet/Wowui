@@ -56,6 +56,9 @@ do
         boss = { key = "xathuux_the_annihilator", name = "Xathuux the Annihilator", zhCN = "歼灭者萨祖克斯" },
         phaseAlerts = {},
         vulnerability = {},
+        -- [卡片/Grid 迁移边界：3103 encounter extra]
+        -- 仅 layout 的 x/y/w/h 与外层卡片呈现可按共享规范迁移；key/defaults/onChanged 及上方事件业务禁止修改。
+        -- enabled 控件由统一 SettingsCard body 挂载并回收。
         extras = {
             {
                 key = EXTRA_KEY,
@@ -64,10 +67,16 @@ do
                 description = L["提前 4 秒提示易伤，随后显示持续 15 秒的 30% 易伤阶段倒数。"],
                 defaults = { enabled = true },
                 layout = {
-                    { key = "settings", type = "card", x = 1, y = 1, w = 200, h = 14,
-                        label = L["易伤提示"], titleSize = 17, keepBorderVisible = true },
-                    { key = "enabled", type = "checkbox", x = 4, y = 8, w = 70, h = 5,
-                        label = L["启用易伤提示"] },
+                    version = 1,
+                    title = L["易伤提示"],
+                    cards = {
+                        { id = "vulnerability", title = L["易伤提示"], collapsible = true,
+                            placement = { target = "$container", point = "TOPLEFT", relativePoint = "TOPLEFT" },
+                            content = { kind = "grid", items = {
+                                { key = "enabled", type = "checkbox", x = 1, y = 1, w = 70, h = 6,
+                                    label = L["启用易伤提示"] },
+                            } } },
+                    },
                 },
                 onChanged = function(config)
                     if config and config.enabled ~= true then StopVulnerability() end

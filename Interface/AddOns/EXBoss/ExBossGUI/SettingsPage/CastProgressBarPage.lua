@@ -49,33 +49,45 @@ local SLIDER_GROUP_PATHS = {
 local COMMON_OPTS = {
     bindRoot = true,
     poolType = "CastProgressBarModuleCommonSettingsGroup",
-    fixedLayout = { logicalWidth = 200, controlW = 46, controlH = 6, slotX = { 3, 53, 103, 153 }, firstY = 0, rowStep = 14 },
     fields = {
-        { path = "enabled", type = "checkbox", label = L["启用"], row = 1 },
-        { path = "layout.direction", type = "dropdown", label = L["增长方向"], items = { { L["向上"], "UP" }, { L["向下"], "DOWN" } }, row = 1 },
-        { path = "layout.maxVisible", type = "slider", label = L["最大显示"], min = 1, max = 5, step = 1, row = 1 },
-        { path = "layout.spacing", type = "slider", label = L["条目间距"], min = -24, max = 24, step = 1, row = 1 },
-        { path = "timerGroup.progressMode", type = "dropdown", label = L["进度方向"], items = { { L["剩余时间"], "REMAINING" }, { L["已过时间"], "ELAPSED" } }, row = 2 },
-        { path = "timerGroup.iconSide", type = "dropdown", label = L["图标位置"], items = { { L["左侧"], "LEFT" }, { L["右侧"], "RIGHT" }, { L["居中"], "CENTER" } }, row = 2 },
-        { path = "timerGroup.showIcon", type = "checkbox", label = L["显示图标"], row = 2 },
-        { path = "timerGroup.showBorder", type = "checkbox", label = L["显示边框"], row = 2 },
+        { path = "enabled", type = "checkbox", label = L["启用"] },
+        { path = "layout.direction", type = "dropdown", label = L["增长方向"], items = { { L["向上"], "UP" }, { L["向下"], "DOWN" } } },
+        { path = "layout.maxVisible", type = "slider", label = L["最大显示"], min = 1, max = 5, step = 1 },
+        { path = "layout.spacing", type = "slider", label = L["条目间距"], min = -24, max = 24, step = 1 },
+        { path = "timerGroup.progressMode", type = "dropdown", label = L["进度方向"], items = { { L["剩余时间"], "REMAINING" }, { L["已过时间"], "ELAPSED" } } },
+        { path = "timerGroup.iconSide", type = "dropdown", label = L["图标位置"], items = { { L["左侧"], "LEFT" }, { L["右侧"], "RIGHT" }, { L["居中"], "CENTER" } } },
+        { path = "timerGroup.showIcon", type = "checkbox", label = L["显示图标"] },
+        { path = "timerGroup.showBorder", type = "checkbox", label = L["显示边框"] },
     },
 }
 
+-- [卡片/Grid 迁移边界：CastProgressBar 设置页]
+-- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
+-- 禁止：修改 key/type/path/opts、字段业务次序、顶部预览内容、回调或释放链。
+-- modulecommonsettings/anchorgroup/timerBarGroup/fontgroup 必须整体引用；旧背景/标题项不自动拥有相邻控件。
 local GRID_LAYOUT = {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["施法进度条设置"], labelSize = 25 },
-    { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 10, w = 200, h = 48, label = L["模块通用设置"], opts = COMMON_OPTS },
-    { key = "anchor", type = "anchorgroup", x = 1, y = 61, w = 200, h = 20, measure = true, label = L["锚点设置"], opts = ANCHOR_GROUP_OPTS },
-    { key = "timerGroup", type = "timerBarGroup", x = 1, y = 84, w = 200, h = 50, label = L["施法条外观"], labelSize = 20 },
-    { key = "font_spell", type = "fontgroup", x = 1, y = 137, w = 200, h = 50, label = L["法术名称"], labelSize = 20 },
-    { key = "font_timer", type = "fontgroup", x = 1, y = 190, w = 200, h = 50, label = L["时间文本"], labelSize = 20 },
+    version = 1,
+    title = L["施法进度条设置"],
+    sections = {
+        { kind = "composite", id = "module-common", title = L["通用"],
+            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
+        { kind = "composite", id = "anchor", title = L["锚点"],
+            component = "anchorgroup", key = "anchor", opts = ANCHOR_GROUP_OPTS },
+        { kind = "composite", id = "timer-bar", title = L["外观"],
+            component = "timerbargroup", key = "timerGroup" },
+        { kind = "composite", id = "spell-font", title = L["法术名称"],
+            component = "fontgroup", key = "font_spell" },
+        { kind = "composite", id = "timer-font", title = L["时间文本"],
+            component = "fontgroup", key = "font_timer" },
+    },
 }
 
 ExwindTools:RegisterModuleLayout(MODULE_KEY, GRID_LAYOUT)
 
 local function RebindModuleCommon(context)
-    local state = context.grid and context.grid.ContainerStates and context.grid.ContainerStates[context.scrollChild]
-    local common = state and state.widgets and state.widgets.moduleCommon
+    -- state.widgets.moduleCommon 是稳定组合控件入口，迁移后必须保留 key 查找语义。
+    local common = context.grid and context.grid.FindMountedWidget
+        and context.grid:FindMountedWidget(context.scrollChild, "moduleCommon")
     if common and type(common.RebindDB) == "function" then common:RebindDB(context.config) end
 end
 
@@ -100,20 +112,13 @@ local function ReleaseCastProgressPanelPreview()
     end
 end
 
+-- [生命周期边界] StandardModulePage 继续拥有外置 Dock、Scroll、preview 与 release；布局迁移不得改这些回调。
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,
     layout = GRID_LAYOUT,
     getColumns = 200,
     preview = { height = 1, render = RenderCastProgressPanelPreview, refresh = RefreshCastProgressPanelPreview, release = ReleaseCastProgressPanelPreview },
-    previewDock = {
-        dockPolicy = "external-left",
-        anchorResolver = function(contentFrame)
-            local panel = ExBoss.UI and ExBoss.UI.Panel
-            return (panel and panel._frame) or contentFrame:GetParent() or contentFrame
-        end,
-        width = 310, offsetX = -8, offsetY = 0,
-    },
     applyScrollSkin = function(scrollFrame)
         if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then
             ExBoss.UI.ApplyModernScrollBarSkin(scrollFrame)

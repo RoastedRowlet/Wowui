@@ -64,21 +64,15 @@ function NSI:AddToReminder(reminderInfo)
     table.insert(self.ProcessedReminder[info.encID][info.phase], info)
 end
 
-function NSI:CreateReminder(info, preview)
-    info = CopyReminderInfo(info)
-    if preview or not info.encID then
-        info.time = info.dur or 60
-        info.encID = info.encID or 0
+function NSI:CreateReminder(info)
+    if (self:IsUsingTLReminders() and not (info.IsAlert or info.IsAssignment or info.IsPrePull or info.isAnchorPreview)) then
+        return nil
     end
+    info = CopyReminderInfo(info)
+    info.time = info.time or info.dur or 60
+    info.encID = info.encID or 0
     self.ProcessedReminder = self.ProcessedReminder or {}
     self.ProcessedReminder[info.encID] = self.ProcessedReminder[info.encID] or {}
-    if info.IsAssignment and self:IsUsingTLAssignments() and not preview then
-        table.insert(self.TLAlerts, info)
-        return nil
-    end
-    if ((info.IsAlert and self:IsUsingTLAlerts()) or (self:IsUsingTLReminders() and not (info.IsAlert or info.IsAssignment))) and not preview then
-        return nil
-    end
     if info.isTaunt then
         local class = select(3, UnitClass("player"))
         info.spellID = ClassToTauntID[class] or info.spellID
@@ -125,6 +119,12 @@ function NSI:CreateReminder(info, preview)
     info.time = tonumber(info.time)
     info.TTSTimer = tonumber(info.TTSTimer)
     info.countdown = tonumber(info.countdown)
+    info.castDuration = tonumber(info.castDuration)
+    if info.castDuration then
+        info.bossID = info.bossID or "boss1"
+        info.timerVariance = tonumber(info.timerVariance) or 2
+        info.bossEvent = info.bossEvent or "UNIT_SPELLCAST_START"
+    end
     if info.dur > info.time then info.dur = info.time end -- force duration to be equal to time if an alert is set very early into the phase
     if info.TTSTimer > info.time then info.TTSTimer = info.time end -- same for TTSTimer
     if info.countdown and info.countdown > info.time then info.countdown = info.time end -- same for countdown
@@ -173,7 +173,7 @@ function NSI:CreateReminder(info, preview)
     if info.DisplayType == "Icon" and info.HideTimer == nil then info.HideTimer = NSRT.ReminderSettings.IconSettings.HideTimerText end
     info.id = #self.ProcessedReminder[info.encID][info.phase]+1
     info.sticky = info.sticky or NSRT.ReminderSettings[settingsRef[info.DisplayType]].Sticky
-    info.glowColors = info.glowColors or NSRT.ReminderSettings.GlowSettings.colors
+    info.glowColors = info.glowunit and (info.glowColors or NSRT.ReminderSettings.GlowSettings.colors)
     if info.Decimals == nil then info.Decimals = NSRT.ReminderSettings[settingsRef[info.DisplayType]].Decimals end
     if info.DisplayType == "Icon" and info.HideSwipe == nil then info.HideSwipe = NSRT.ReminderSettings.IconSettings.HideSwipe end
     return info
@@ -186,6 +186,8 @@ function NSI:ProcessReminder()
     local addedreminders = {}
     local personalremindertable = {}
     local addedpersonalreminders = {}
+    local addedPrePullReminders = {}
+    self.PrePullReminders = {}
     self.DisplayedReminder = ""
     self.DisplayedPersonalReminder = ""
     self.DisplayedExtraReminder = ""
@@ -266,7 +268,7 @@ function NSI:ProcessReminder()
             end
             local tag = line:match("tag:([^;]+)")
             local DisplayType = line:match("DisplayType:([^;]+)")
-            local time = line:match("time:(%d*%.?%d+)")
+            local time = line:match("time:(%-?%d*%.?%d+)")
             local text = line:match("text:([^;]+)")
             local spellID = line:match("spellid:(%d+)")
             local phase = line:match("ph:(%d*%.?%d+)")
@@ -293,6 +295,8 @@ function NSI:ProcessReminder()
                 local displayLine = line
                 local phaseText = phase
                 phase = phase and tonumber(phase) or 1
+                local timeNum = tonumber(time)
+                if timeNum < 0 then phase = 1 end
                 local key = encID..phase..time..tag..(text or spellID)
                 if (pers or shared) and (spellID or not NSRT.ReminderSettings.OnlySpellReminders) then -- only insert this if it's a spell or user wants to see text-reminders as well
                     -- remove phase as we add it back later
@@ -301,12 +305,12 @@ function NSI:ProcessReminder()
                         displayLine = displayLine:gsub("ph:"..phasePattern, "")
                     end
                     -- convert to MM:SS format
-                    local timeNum = tonumber(time)
                     if timeNum then
-                        local minutes = math.floor(timeNum / 60)
-                        local seconds = math.floor(timeNum % 60)
-                        local timeFormatted = string.format("%d:%02d", minutes, seconds)
-                        displayLine = displayLine:gsub("time:"..time, timeFormatted.." ")
+                        local minutes = math.floor(math.abs(timeNum) / 60)
+                        local seconds = math.floor(math.abs(timeNum) % 60)
+                        local timeFormatted = (timeNum < 0 and "-" or "")..string.format("%d:%02d", minutes, seconds)
+                        local timePattern = timeNum < 0 and ("time:%-"..time:sub(2)) or ("time:"..time)
+                        displayLine = displayLine:gsub(timePattern, timeFormatted.." ")
                     end
                     if text then
                         local displayText = text:gsub("{(%a*%d*)}", function(token) -- convert {star}/{rt1} etc. to raid target icons
@@ -373,6 +377,22 @@ function NSI:ProcessReminder()
                     end
                 end
                 local mematch = TagMatchesPlayer(tag)
+                if timeNum < 0 and (NSRT.ReminderSettings.ShowAllReminders or mematch) and not addedPrePullReminders[key] then
+                    addedPrePullReminders[key] = true
+                    self.PrePullReminders[encID] = self.PrePullReminders[encID] or {}
+                    self.PrePullReminders[encID][#self.PrePullReminders[encID] + 1] = {
+                        time = timeNum,
+                        dur = tonumber(dur),
+                        text = text,
+                        spellID = spellID,
+                        DisplayType = DisplayType,
+                        textColors = colors,
+                        TTS = TTS,
+                        TTSTimer = TTSTimer,
+                        tag = tag,
+                        encID = encID,
+                    }
+                end
                 if NSRT.ReminderSettings.ShowAllReminders or mematch then
                     if not addedpersonalreminders[key] then
                         addedpersonalreminders[key] = true
@@ -381,7 +401,9 @@ function NSI:ProcessReminder()
                                 table.insert(personalremindertable, {str = displayLine, time = tonumber(time), phase = phase})
                             end
                         end
-                        self:AddToReminder({DisplayType = DisplayType, text = text, phase = phase, textColors = colors, countdown = countdown, glowunit = glowunit, sound = sound, time = time, spellID = spellID, dur = dur, TTS = TTS, TTSTimer = TTSTimer, encID = encID})
+                        if timeNum >= 0 then
+                            self:AddToReminder({DisplayType = DisplayType, text = text, phase = phase, textColors = colors, countdown = countdown, glowunit = glowunit, sound = sound, time = time, spellID = spellID, dur = dur, TTS = TTS, TTSTimer = TTSTimer, encID = encID})
+                        end
                     end
                 end
             else
@@ -635,7 +657,8 @@ function NSI:UpdateExistingFrames() -- called when user changes settings to not 
                 frame.PreviewTicker = frame.PreviewTicker + elapsed
                 if frame.PreviewTicker < 0.025 then return end
                 frame.PreviewTicker = 0
-                local elapsedTime = GetTime() - (frame.PreviewStartedAt or GetTime())
+                local now = GetTime()
+                local elapsedTime = now - (frame.PreviewStartedAt or now)
                 for index, row in ipairs(frame.PreviewRows) do
                     local remaining = math.max(0, previewDurations[index] - elapsedTime)
                     row.Bar:SetValue(remaining)
@@ -725,7 +748,12 @@ function NSI:ArrangeStates(DisplayType)
     end
 end
 
+local function GetReminderRemaining(info, now)
+    return (info.totalDuration or info.dur) - (now - info.startTime)
+end
+
 function NSI:SetProperties(F, info, s)
+    local totalDuration = info.totalDuration or info.dur
     F.lastReminderText = nil
     F.lastReminderTimerText = nil
     F.lastReminderDisplayBucket = nil
@@ -782,7 +810,7 @@ function NSI:SetProperties(F, info, s)
             local shouldShow = info.showBackground == nil and s.showBackground or info.showBackground
             F.ring:SetShown(shouldShow)
         end
-        F.Swipe:SetCooldown(info.startTime, info.dur)
+        F.Swipe:SetCooldown(info.startTime, totalDuration)
         F.Swipe:SetSwipeTexture(texture)
         F.Swipe:SetSwipeColor(unpack(info.ringColors or s.ringColors))
     elseif info.DisplayType == "Icon" then
@@ -791,7 +819,7 @@ function NSI:SetProperties(F, info, s)
         if info.HideSwipe then
             if F.Swipe then F.Swipe:SetCooldown(0, 0) end
         else
-            if F.Swipe then F.Swipe:SetCooldown(GetTime(), info.dur) end
+            if F.Swipe then F.Swipe:SetCooldown(info.startTime, totalDuration) end
         end
         if F.TimerText then
             F.TimerText:SetTextColor(1, 1, 0, 1)
@@ -841,7 +869,8 @@ function NSI:SetProperties(F, info, s)
         -- only registered for player so spellID is never secret
         local _, _, spellID = ...
         if (not issecretvalue(info.spellID)) and spellID == info.spellID and self:IsShown() then
-            local rem = info.dur - (GetTime() - info.startTime)
+            local now = GetTime()
+            local rem = GetReminderRemaining(info, now)
             local hideThreshold = NSRT.ReminderSettings.HideThreshold or 5
             if rem and rem <= hideThreshold then
                 F:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
@@ -1284,13 +1313,16 @@ function NSI:ScheduleReminderSoundTimers(info)
         for _, timer in pairs(existingTimers) do
             timer:Cancel()
         end
+        self.ReminderSoundTimers[info] = nil
     end
 
     local timers = {}
-    local remainingDuration = info.dur - (GetTime() - info.startTime)
-    if info.sound or info.TTS then
+    local now = GetTime()
+    local remainingDuration = GetReminderRemaining(info, now)
+    if (info.sound or info.TTS) and not info.SoundPlayed then
         local soundTimer = info.TTSTimer or (info.spellID and NSRT.ReminderSettings.SpellTTSTimer or NSRT.ReminderSettings.TextTTSTimer)
         timers.sound = C_Timer.NewTimer(math.max(remainingDuration - soundTimer - 0.25, 0), function()
+            info.SoundPlayed = true
             self:PlayReminderSound(info)
             timers.sound = nil
             if not timers.countdown then
@@ -1298,8 +1330,9 @@ function NSI:ScheduleReminderSoundTimers(info)
             end
         end)
     end
-    if info.countdown then
+    if info.countdown and not info.CountdownPlayed then
         timers.countdown = C_Timer.NewTimer(math.max(remainingDuration - info.countdown - 0.25, 0), function()
+            info.CountdownPlayed = true
             NSAPI:TTSCountdown(info.countdown)
             timers.countdown = nil
             if not timers.sound then
@@ -1312,17 +1345,32 @@ function NSI:ScheduleReminderSoundTimers(info)
     end
 end
 
-function NSI:DisplayReminder(info, bypass)
+function NSI:DisplayReminder(info, bypass, reschedule)
     local isAllowed = self:CheckReminderLogic(info)
     if not isAllowed and not bypass then return end
+    local isSecretText = info.text and issecretvalue(info.text)
+    if ((info.IsAssignment and self:IsUsingTLAssignments()) or (info.IsAlert and self:IsUsingTLAlerts()) or (info.IsPrePull and self:IsUsingTLReminders())) and (not info.isAnchorPreview) and (not isSecretText) then
+        self:FireCallback("NSRT_ALERT_WOULD_SHOW", info)
+        return
+    end
     local now = GetTime()
     local dur = info.dur or 8
-    info.startTime = now
-    info.dur = dur
-    info.expires = now + dur
-    local rem = info.dur - (now - info.startTime)
+    local totalDuration = info.totalDuration or dur
+    if info.dur == nil then info.dur = dur end
+    if info.totalDuration then
+        info.expires = info.expires or now + dur
+        info.startTime = info.expires - totalDuration
+    else
+        info.startTime = now
+        info.expires = now + dur
+    end
+    local rem = GetReminderRemaining(info, now)
     if rem <= 0 and (info.sticky and rem <= (0-info.sticky)) then
         return
+    end
+    if not reschedule then
+        info.SoundPlayed = nil
+        info.CountdownPlayed = nil
     end
     self:ScheduleReminderSoundTimers(info)
     local remString = self:GetRemainingText(rem, info)
@@ -1345,7 +1393,7 @@ function NSI:DisplayReminder(info, bypass)
         if info.DisplayType == "Bar" then
             F = self:CreateBar(info)
             local text, timerText = self:GetDisplayedText(remString, info, F)
-            F:SetMinMaxValues(0, info.dur)
+            F:SetMinMaxValues(0, totalDuration)
             F:SetValue(0)
             F:Show()
             self:ArrangeStates("Bars")
@@ -1367,8 +1415,8 @@ function NSI:DisplayReminder(info, bypass)
     end
     if info.Ticks then
         for _, tick in ipairs(info.Ticks) do
-            local perc = tick / info.dur
-            self:AddTickToBar(F, perc, info.dur-tick)
+            local perc = tick / totalDuration
+            self:AddTickToBar(F, perc, totalDuration-tick)
         end
     end
     if info.glowunit then
@@ -1382,6 +1430,17 @@ function NSI:DisplayReminder(info, bypass)
     end
     self:FireCallback("NSRT_REMINDER_SHOW", info, F)
     return F
+end
+
+function NSI:HideReminder(info, frame)
+    local isSecretText = info.text and issecretvalue(info.text)
+    if ((info.IsAssignment and self:IsUsingTLAssignments()) or (info.IsAlert and self:IsUsingTLAlerts()) or (info.IsPrePull and self:IsUsingTLReminders())) and (not info.isAnchorPreview) and (not isSecretText) then
+        self:FireCallback("NSRT_ALERT_WOULD_HIDE", info)
+        return
+    end
+    if frame and frame.info == info then
+        frame:Hide()
+    end
 end
 
 function NSI:PreviewReminderCircle(previewKey, duration, ringColors, texture)
@@ -1424,8 +1483,8 @@ end
 
 function NSI:UpdateReminderDisplay(info, F)
     local now = GetTime()
-    local elapsed = now - info.startTime
-    local rem = info.dur - elapsed
+    local rem = GetReminderRemaining(info, now)
+    local displayElapsed = now - info.startTime
     local encId = info.encID or 0
     local phase = info.phase or 0
     if rem <= 0 and (info.sticky and rem <= (0-info.sticky)) then
@@ -1473,7 +1532,7 @@ function NSI:UpdateReminderDisplay(info, F)
         end
         return
     elseif info.DisplayType == "Bar" then
-        if F.SetValue then F:SetValue(elapsed) end
+        if F.SetValue then F:SetValue(displayElapsed) end
         if F.Ticks then
             for _, tick in ipairs(F.Ticks) do
                 if tick.HideTimer and rem <= tick.HideTimer then
@@ -1562,12 +1621,20 @@ function NSI:PlayReminderSound(info, default)
     end
 end
 
+local RegisterBossCastAlertEvents
+local HandleBossCastAlertStart
+
 function NSI:StartReminders(phase, testrun)
     if not testrun then self:LogTimeline("NSRT_PHASE", phase) end
     self:FireCallback("NSRT_PHASE", phase, self.EncounterID, testrun)
     self:HideAllReminders()
     self.AllGlows = {}
     self.ReminderTimer = {}
+    if not testrun and self.EncounterAlertHookEncounterID == self.EncounterID and phase ~= self.EncounterAlertHookPhase then
+        local oldPhase = self.EncounterAlertHookPhase
+        self.EncounterAlertHookPhase = phase
+        self:RunEncounterAlertHooks("onPhaseChange", self.EncounterAlertHookEncounterID, self.EncounterAlertHookDifficulty, oldPhase, phase)
+    end
     if testrun then
         if self:IsUsingTLReminders() then
             print("You have selected to display Reminders through TimelineReminders, thus the test run of NSRT will not display anything.")
@@ -1595,6 +1662,136 @@ function NSI:StartReminders(phase, testrun)
             self:DisplayReminder(info)
         end)
     end
+    RegisterBossCastAlertEvents(self, self.ProcessedReminder[self.EncounterID][phase])
+end
+
+local function ClearBossCastAlertEvents(self)
+    for info, frames in pairs(self.BossCastAlertFrames or {}) do
+        for frameIndex, frame in ipairs(frames) do
+            frame:UnregisterEvent(info.bossEvent)
+            frame:SetScript("OnEvent", nil)
+        end
+    end
+    self.BossCastAlertFrames = {}
+end
+
+RegisterBossCastAlertEvents = function(self, reminders)
+    self.BossCastAlertFrames = {}
+    for index, info in ipairs(reminders) do
+        if info.bossID and info.castDuration then
+            local units = {}
+            if type(info.bossID) == "table" then
+                for unitIndex, unit in ipairs(info.bossID) do
+                    units[unit] = true
+                end
+            else
+                units[info.bossID] = true
+            end
+            self.BossCastAlertFrames[info] = {}
+            for unit in pairs(units) do
+                local registeredUnit = unit
+                local registeredEvent = info.bossEvent
+                local frame = CreateFrame("Frame", nil, self.NSRTFrame)
+                frame:RegisterUnitEvent(registeredEvent, registeredUnit)
+                frame:SetScript("OnEvent", function()
+                    HandleBossCastAlertStart(self, registeredUnit, registeredEvent)
+                end)
+                table.insert(self.BossCastAlertFrames[info], frame)
+            end
+        end
+    end
+end
+
+HandleBossCastAlertStart = function(self, unit, event)
+    local reminders = self.ProcessedReminder and self.ProcessedReminder[self.EncounterID] and self.ProcessedReminder[self.EncounterID][self.Phase]
+    if not reminders then return end
+    local now = GetTime()
+    local phaseElapsed = now - self.PhaseSwapTime
+    local matches = {}
+    for index, info in ipairs(reminders) do
+        local units = type(info.bossID) == "table" and info.bossID or {info.bossID}
+        local listensToUnit = false
+        for unitIndex, alertUnit in ipairs(units) do
+            if alertUnit == unit then
+                listensToUnit = true
+                break
+            end
+        end
+        if listensToUnit and info.bossEvent == event and info.castDuration and not info.BossCastMatched then
+            local expectedStart = info.time - info.castDuration
+            local difference = math.abs(phaseElapsed - expectedStart)
+            if difference <= (info.timerVariance or 0) then
+                local alertID = info.id or info
+                local current = matches[alertID]
+                if not current or difference < current.difference then
+                    matches[alertID] = {info = info, difference = difference, index = index}
+                end
+            end
+        end
+    end
+    for alertID, match in pairs(matches) do
+        local info = match.info
+        local reminderIndex = match.index
+        info.BossCastMatched = true
+        for frameIndex, frame in ipairs(self.BossCastAlertFrames[info] or {}) do
+            frame:UnregisterEvent(info.bossEvent)
+            frame:SetScript("OnEvent", nil)
+        end
+        self.BossCastAlertFrames[info] = nil
+        local targetTime = now + info.castDuration
+        info.time = targetTime - self.PhaseSwapTime
+        if reminderIndex and self.ReminderTimer[reminderIndex] then
+            self.ReminderTimer[reminderIndex]:Cancel()
+            self.ReminderTimer[reminderIndex] = nil
+        end
+        local activeFrame
+        for parentIndex, parentName in ipairs({"ReminderText", "ReminderIcon", "ReminderBar", "ReminderCircle"}) do
+            for frameIndex, frame in ipairs(self[parentName] or {}) do
+                if frame:IsShown() and frame.info == info then
+                    activeFrame = frame
+                    break
+                end
+            end
+            if activeFrame then break end
+        end
+        if activeFrame then
+            info.totalDuration = info.totalDuration or info.dur
+            info.dur = math.max(targetTime - now, 0)
+            info.expires = targetTime
+            info.startTime = targetTime - info.totalDuration
+            self:ScheduleReminderSoundTimers(info)
+            if info.DisplayType == "Bar" and activeFrame.Ticks and info.totalDuration > 0 then
+                local remaining = GetReminderRemaining(info, now)
+                for index, tick in ipairs(info.Ticks or {}) do
+                    local marker = activeFrame.Ticks[index]
+                    if marker then
+                        marker.HideTimer = info.totalDuration - tick
+                        marker:SetShown(remaining > marker.HideTimer)
+                    end
+                end
+            elseif activeFrame.Swipe and (info.DisplayType == "Icon" or info.DisplayType == "Circle") then
+                activeFrame.Swipe:SetCooldown(info.startTime, info.totalDuration)
+            end
+            activeFrame.lastReminderDisplayBucket = nil
+            activeFrame.lastReminderTimerText = nil
+            activeFrame.reminderTimerTextIsRed = nil
+            self:UpdateReminderDisplay(info, activeFrame)
+            self:ArrangeStates(activeFrame.DisplayType)
+        else
+            local displayTime = targetTime - info.dur
+            if displayTime > now then
+                self.ReminderTimer[reminderIndex] = C_Timer.NewTimer(displayTime - now, function()
+                    self:DisplayReminder(info, nil, true)
+                end)
+            else
+                info.totalDuration = info.totalDuration or info.dur
+                info.dur = math.max(targetTime - now, 0)
+                info.expires = targetTime
+                info.startTime = targetTime - info.totalDuration
+                self:DisplayReminder(info, nil, true)
+            end
+        end
+    end
 end
 
 function NSI:CountdownNoteFrame(frame)
@@ -1616,7 +1813,8 @@ function NSI:CountdownNoteFrame(frame)
             local phaseText = line:match(phasePattern)
             local phase = phaseText and tonumber(phaseText) or currentPhase
             currentPhase = phase
-            local minutes, seconds = line:match("(%d+):(%d%d)")
+            local sign, minutes, seconds = line:match("(%-?)(%d+):(%d%d)")
+            local negativeTime = sign == "-"
             lines[#lines + 1] = {
                 text = line,
                 phase = phase,
@@ -1624,20 +1822,33 @@ function NSI:CountdownNoteFrame(frame)
                 minutes = minutes,
                 seconds = seconds,
                 originalTime = minutes and seconds and (minutes * 60) + seconds,
-                timePrefix = minutes and seconds and (minutes..":"..seconds.." "),
+                timePrefix = minutes and seconds and ((negativeTime and "-" or "")..minutes..":"..seconds.." "),
+                isPrePull = negativeTime,
             }
         end
         frame.CountdownLines = lines
         frame.CountdownSourceText = originalText
     end
 
-    local passedTime = GetTime() - self.PhaseSwapTime
-    local currentPhase = self.Phase
+    local passedTime = self.EncounterID and self.PhaseSwapTime and GetTime() - self.PhaseSwapTime or 0
+    local pullRemaining = self.PrePullTimerEndTime and self.PrePullTimerEndTime - GetTime()
+    local currentPhase = self.EncounterID and self.Phase or 1
     local visibleLines = {}
-    for _, entry in ipairs(lines) do
+    for entryIndex, entry in ipairs(lines) do
         if entry.phase >= currentPhase then
             local line = entry.text
-            if entry.phase == currentPhase and not entry.hasPhase and entry.originalTime then
+            if entry.isPrePull then
+                if pullRemaining then
+                    local newTime = pullRemaining - entry.originalTime
+                    if newTime <= 0 then
+                        line = nil
+                    else
+                        local timeFormatted = string.format("%d:%02d", math.floor(newTime / 60), math.floor(newTime % 60))
+                        local timerPrefix = entry.timePrefix:gsub("(%-)", "%%%1")
+                        line = line:gsub(timerPrefix, timeFormatted.." ")
+                    end
+                end
+            elseif entry.phase == currentPhase and not entry.hasPhase and entry.originalTime then
                 local newTime = entry.originalTime - passedTime
                 if newTime <= 0 then
                     line = nil
@@ -1656,9 +1867,102 @@ function NSI:CountdownNoteFrame(frame)
     end
 end
 
+function NSI:HandlePrePullReminders(event, timerType, timeRemaining)
+    if self.PrePullReminderTimers then
+        for timerIndex, timer in ipairs(self.PrePullReminderTimers) do timer:Cancel() end
+    end
+    self.PrePullReminderTimers = {}
+    self.PrePullTimerEndTime = nil
+    self:HideAllReminders()
+    if event == "CANCEL_PLAYER_COUNTDOWN" then
+        for frameIndex, frameName in ipairs({"ReminderFrame", "PersonalReminderFrame"}) do
+            if self[frameName] and self[frameName].UpdateTimer then
+                self[frameName].UpdateTimer:Cancel()
+                self[frameName].UpdateTimer = nil
+                self:CountdownNoteFrame(self[frameName])
+            end
+        end
+        return
+    end
+
+    local pullEncounterID = self:GetEncounterIDFromCurrentZone()
+    if pullEncounterID then self:LoadPersReminder(pullEncounterID) end
+    self:ProcessReminder()
+    self:UpdateReminderFrame(true)
+    self.PrePullTimerEndTime = pullEncounterID and GetTime() + timeRemaining or nil
+    local function SchedulePrePullReminder(reminder, alertTime)
+        local reminderDuration = tonumber(reminder.dur) or (reminder.spellID and NSRT.ReminderSettings.SpellDuration or NSRT.ReminderSettings.TextDuration)
+        local delay = timeRemaining + alertTime - reminderDuration
+        local function ShowPrePullReminder(elapsed)
+            local remaining = timeRemaining + alertTime - elapsed
+            if remaining <= 0 then return end
+            local activeReminder = CopyReminderInfo(reminder)
+            activeReminder.time = remaining
+            activeReminder.dur = math.min(reminderDuration, remaining)
+            activeReminder.encID = reminder.encID
+            activeReminder.phase = 1
+            local info = self:CreateReminder(activeReminder)
+            if info then
+                info.IsPrePull = true
+                self:DisplayReminder(info)
+            end
+        end
+        if delay <= 0 then
+            ShowPrePullReminder(0)
+        else
+            local startedAt = GetTime()
+            local timer = C_Timer.NewTimer(delay, function()
+                ShowPrePullReminder(GetTime() - startedAt)
+            end)
+            self.PrePullReminderTimers[#self.PrePullReminderTimers + 1] = timer
+        end
+    end
+
+    if pullEncounterID then
+        for reminderIndex, reminder in ipairs(self.PrePullReminders[pullEncounterID] or {}) do
+            SchedulePrePullReminder(reminder, reminder.time)
+        end
+        local difficulty = self:DifficultyCheck({14, 15, 16, 220})
+        local diffTable = difficulty and NSRT.EncounterAlerts[pullEncounterID] and NSRT.EncounterAlerts[pullEncounterID][difficulty]
+        for alertKey, alert in pairs(diffTable or {}) do
+            if type(alert) == "table" and alert.enabled and self:EvaluateLoad(alert, pullEncounterID) then
+                if alert.phaseTimers then
+                    for phase, alertTimes in pairs(alert.phaseTimers) do
+                        if tonumber(phase) == 1 then
+                            for alertTimeIndex, alertTime in ipairs(alertTimes) do
+                                if alertTime < 0 then SchedulePrePullReminder(alert, alertTime) end
+                            end
+                        end
+                    end
+                else
+                    local hasPhaseOne = not alert.phase or (type(alert.phase) ~= "table" and tonumber(alert.phase) == 1)
+                    if type(alert.phase) == "table" then
+                        for phaseIndex, phase in ipairs(alert.phase) do
+                            if tonumber(phase) == 1 then hasPhaseOne = true end
+                        end
+                    end
+                    if hasPhaseOne then
+                        for alertTimeIndex, alertTime in ipairs(alert.timers or {}) do
+                            if alertTime < 0 then SchedulePrePullReminder(alert, alertTime) end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    if pullEncounterID and NSRT.ReminderSettings.NoteCountdown then
+        for frameIndex, frameName in ipairs({"ReminderFrame", "PersonalReminderFrame"}) do
+            if self[frameName] and self[frameName]:IsShown() then
+                if self[frameName].UpdateTimer then self[frameName].UpdateTimer:Cancel() end
+                self[frameName].UpdateTimer = C_Timer.NewTicker(1, function() self:CountdownNoteFrame(self[frameName]) end)
+            end
+        end
+    end
+end
+
 function NSI:DelayAllReminders(delay)
     if not self.ReminderTimer then return end
-    for i, v in ipairs(self.ReminderTimer) do
+    for i, v in pairs(self.ReminderTimer) do
         v:Cancel()
     end
     if not self.EncounterID then return end
@@ -1696,6 +2000,7 @@ function NSI:DelayAllReminders(delay)
 end
 
 function NSI:HideAllReminders(FullReset)
+    ClearBossCastAlertEvents(self)
     self.GlowStarted = {}
     if self.ReminderSoundTimers then
         for _, timers in pairs(self.ReminderSoundTimers) do
@@ -1706,7 +2011,7 @@ function NSI:HideAllReminders(FullReset)
         self.ReminderSoundTimers = {}
     end
     if self.ReminderTimer then
-        for i, v in ipairs(self.ReminderTimer) do
+        for i, v in pairs(self.ReminderTimer) do
             v:Cancel()
         end
     end
@@ -1750,6 +2055,7 @@ function NSI:HideAllReminders(FullReset)
     self.CustomEvents = {}
     if self.EncounterAlertStop[self.EncounterID] then self.EncounterAlertStop[self.EncounterID](self) end
     self.EncounterID = nil
+    self.Phase = nil
     self.TestingReminder = false
     self.ProcessedReminder = nil
 end
@@ -1791,8 +2097,14 @@ function NSI:LoadPersReminder(encID)
     local name = self:GetActivePersonalReminders()[encID]
     if not name then return end
     -- Skip if the note for this encounter is already the active personal reminder
-    if self.PersonalReminder ~= NSRT.PersonalReminders[name] then
-        self:SetReminder(name, true)
+    if self.PersonalReminder == NSRT.PersonalReminders[name] then return end
+    self:SetReminder(name, true)
+end
+
+function NSI:GetEncounterIDFromCurrentZone()
+    local currentArea = GetMinimapZoneText()
+    for zoneID, encounterID in pairs(self.PrePullEncounterZones) do
+        if C_Map.GetAreaInfo(zoneID) == currentArea then return encounterID end
     end
 end
 
@@ -2319,7 +2631,6 @@ end
 -- Iterates NSRT.EncounterAlerts[encID][id] and fires all enabled ReloeReminder alerts.
 -- loadConditions role filtering is handled at display time, not here.
 function NSI:FireEncounterAlerts(encID, id)
-    if self:IsUsingTLAlerts() then return end
     if not NSRT.EncounterAlerts or not NSRT.EncounterAlerts[encID] then return end
     local diffTable = NSRT.EncounterAlerts[encID][id]
     if not diffTable then return end
@@ -2543,19 +2854,7 @@ end
 
 function NSI:IsUsingTLAlerts()
     local IsUsingAlerts = NSRT.ReminderSettings.UseTLAlerts and C_AddOns.IsAddOnLoaded("TimelineReminders")
-    if IsUsingAlerts then
-        local version = tonumber(C_AddOns.GetAddOnMetadata("TimelineReminders", "Version"):match("^v(.+)$"))
-        if version and version < 308 then -- outdated version check - only relevant for alerts since assignment use old system and reminders ist just the note.
-            if not self.HasTLWarning then
-                print("|cFF00FFFFNSRT:|r You have selected to use Timeline Reminders for NSRT Alerts but your version of Timeline Reminders is outdated and not compatible. NSRT will display these alerts instead until you update.")
-                self.HasTLWarning = true
-                C_Timer.After(60, function() self.HasTLWarning = nil end)
-            end
-            return false
-        end
-        return true
-    end
-    return false
+    return IsUsingAlerts
 end
 
 function NSI:IsUsingTLAssignments()
@@ -2564,17 +2863,20 @@ end
 
 function NSI:AddRemindersFromTable(Alert, timers)
     if (not timers) or (not Alert) then return end
-    for _, time in ipairs(timers or {}) do
-        Alert.time = time
-        self:AddToReminder(Alert)
+    for timerIndex, time in ipairs(timers or {}) do
+        if time >= 0 then
+            Alert.time = time
+            self:AddToReminder(Alert)
+        end
      end
 end
 
-function NSI:EvaluateLoad(info)
+function NSI:EvaluateLoad(info, encounterID)
     local cond = info.loadConditions
     if not cond then return true end
     if cond.EncounterIDs and next(cond.EncounterIDs) then
-        local encounterMatches = self.EncounterID and (cond.EncounterIDs[self.EncounterID] or cond.EncounterIDs[tostring(self.EncounterID)])
+        encounterID = encounterID or self.EncounterID
+        local encounterMatches = encounterID and (cond.EncounterIDs[encounterID] or cond.EncounterIDs[tostring(encounterID)])
         if not encounterMatches then return false end
     end
     local shouldLoad = true

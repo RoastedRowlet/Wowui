@@ -1416,6 +1416,7 @@ end
 -- Dispatcher 回调接口
 -- =============================================================
 function TimerBar:AddTimer(timer)
+    if not ExBoss.DisplayPolicy.IsTimelineBarEnabled("timer") then return end
     if not anchorFrame then CreateAnchor() end
     if activeBars[timer.id] then return end
 
@@ -1452,6 +1453,7 @@ end
 -- 副本通用机制的独立倒数入口：不接入 Scheduler，因此不会触发普通时间轴回调。
 -- 相同 id 再次调用即原地重置倒数与显示内容。
 function TimerBar:StartExternalTimer(timer)
+    if not ExBoss.DisplayPolicy.IsTimelineBarEnabled("timer") then return false end
     if type(timer) ~= "table" or timer.id == nil then
         return false
     end
@@ -1662,8 +1664,7 @@ end
 -- 只物化 runtime Collection 的完整 Item 树，不建立 timer record，也不进入
 -- activeBars/barList。协调器会同时持有全部预热对象，最后再统一归还底层池。
 function TimerBar:GetPrewarmTargetCount()
-    local db = DB()
-    if db and db.enabled == false then return 0 end
+    if not ExBoss.DisplayPolicy.IsTimelineBarEnabled("timer") then return 0 end
     return GetRuntimeCache().maxBars
 end
 

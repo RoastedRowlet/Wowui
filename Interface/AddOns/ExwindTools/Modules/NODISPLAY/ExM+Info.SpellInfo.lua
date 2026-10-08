@@ -1,6 +1,9 @@
 ﻿-- [[ 大米法术手册 (Spell Info) ]]
 -- { Key = "ExM+Info.SpellInfo", Name = "大米法术手册", Desc = "全能的大秘境怪物与技能百科全书。支持 3D 模型预览及法术数值模拟。", Category = 2 },
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXUI = ExwindTools.UI
@@ -20,128 +23,23 @@ local function EXSP_GetEffectiveLocaleTag()
     return locale == "enGB" and "enUS" or locale
 end
 
---[[ 已废弃：模块内语言表。保留此注释块只用于审计旧改动，运行时不再读取。
-local EXSP_MODULE_LOCALES = {
-    enUS = {
-        ["Exwind 大米法术详细信息"] = "Exwind Mythic Spell Details",
-        ["野兽"] = "Beast", ["龙类"] = "Dragonkin", ["恶魔"] = "Demon", ["元素生物"] = "Elemental", ["巨人"] = "Giant",
-        ["亡灵"] = "Undead", ["人型生物"] = "Humanoid", ["小动物"] = "Critter", ["机械"] = "Mechanical", ["未指定"] = "Unspecified",
-        ["图腾"] = "Totem", ["非战斗宠物"] = "Non-combat Pet", ["气体云雾"] = "Gas Cloud", ["野生宠物"] = "Wild Pet", ["畸变怪"] = "Aberration",
-        ["范围伤害"] = "Area Damage", ["卡视野规避"] = "Avoid with Line of Sight", ["可打断"] = "Interruptible", ["无法盾反"] = "Cannot Spell Reflect",
-        ["总是命中(无法闪招)"] = "Always Hits (Cannot Dodge/Parry)", ["无法格挡"] = "Cannot Block", ["无法躲闪"] = "Cannot Dodge", ["无法招架"] = "Cannot Parry",
-        ["盾反仅免疫伤害"] = "Spell Reflect: Damage Immunity Only", ["流血"] = "Bleed", ["诅咒"] = "Curse", ["疾病"] = "Disease", ["激怒"] = "Enrage",
-        ["魔法"] = "Magic", ["中毒"] = "Poison", ["沉睡"] = "Sleep", ["迷惑"] = "Disoriented", ["冻结"] = "Frozen", ["变形"] = "Polymorph",
-        ["定身"] = "Rooted", ["诱捕"] = "Snared", ["昏迷"] = "Stunned",
-    },
-    zhTW = {
-        ["Exwind 大米法术详细信息"] = "Exwind 大秘法術詳細資訊",
-        ["野兽"] = "野獸", ["龙类"] = "龍類", ["恶魔"] = "惡魔", ["元素生物"] = "元素生物", ["巨人"] = "巨人",
-        ["亡灵"] = "不死族", ["人型生物"] = "人形生物", ["小动物"] = "小動物", ["机械"] = "機械", ["未指定"] = "未指定",
-        ["图腾"] = "圖騰", ["非战斗宠物"] = "非戰鬥寵物", ["气体云雾"] = "氣體雲霧", ["野生宠物"] = "野生寵物", ["畸变怪"] = "畸變體",
-        ["范围伤害"] = "範圍傷害", ["卡视野规避"] = "透過視線規避", ["可打断"] = "可打斷", ["无法盾反"] = "無法法術反射",
-        ["总是命中(无法闪招)"] = "必定命中（無法閃躲／招架）", ["无法格挡"] = "無法格擋", ["无法躲闪"] = "無法閃躲", ["无法招架"] = "無法招架",
-        ["盾反仅免疫伤害"] = "法術反射僅免疫傷害", ["流血"] = "流血", ["诅咒"] = "詛咒", ["疾病"] = "疾病", ["激怒"] = "激怒",
-        ["魔法"] = "魔法", ["中毒"] = "中毒", ["沉睡"] = "沉睡", ["迷惑"] = "困惑", ["冻结"] = "冰凍", ["变形"] = "變形",
-        ["定身"] = "定身", ["诱捕"] = "誘捕", ["昏迷"] = "昏迷",
-    },
-    deDE = {
-        ["Exwind 大米法术详细信息"] = "Exwind: Details zu mythischen Zaubern",
-        ["野兽"] = "Bestie", ["龙类"] = "Drachkin", ["恶魔"] = "Dämon", ["元素生物"] = "Elementar", ["巨人"] = "Riese",
-        ["亡灵"] = "Untoter", ["人型生物"] = "Humanoid", ["小动物"] = "Kleintier", ["机械"] = "Mechanisch", ["未指定"] = "Nicht spezifiziert",
-        ["图腾"] = "Totem", ["非战斗宠物"] = "Nichtkampfbegleiter", ["气体云雾"] = "Gaswolke", ["野生宠物"] = "Wildtier", ["畸变怪"] = "Aberration",
-        ["范围伤害"] = "Flächenschaden", ["卡视野规避"] = "Durch Sichtlinie vermeiden", ["可打断"] = "Unterbrechbar", ["无法盾反"] = "Kann nicht zauberreflektiert werden",
-        ["总是命中(无法闪招)"] = "Trifft immer (nicht ausweichbar/parierbar)", ["无法格挡"] = "Nicht blockbar", ["无法躲闪"] = "Nicht ausweichbar", ["无法招架"] = "Nicht parierbar",
-        ["盾反仅免疫伤害"] = "Zauberreflexion: nur Schadensimmunität", ["流血"] = "Blutung", ["诅咒"] = "Fluch", ["疾病"] = "Krankheit", ["激怒"] = "Raserei",
-        ["魔法"] = "Magie", ["中毒"] = "Gift", ["沉睡"] = "Schlaf", ["迷惑"] = "Desorientiert", ["冻结"] = "Eingefroren", ["变形"] = "Verwandlung",
-        ["定身"] = "Verwurzelt", ["诱捕"] = "Verlangsamt", ["昏迷"] = "Betäubt",
-    },
-    esES = {
-        ["Exwind 大米法术详细信息"] = "Detalles de hechizos míticos de Exwind",
-        ["野兽"] = "Bestia", ["龙类"] = "Dragonante", ["恶魔"] = "Demonio", ["元素生物"] = "Elemental", ["巨人"] = "Gigante",
-        ["亡灵"] = "No-muerto", ["人型生物"] = "Humanoide", ["小动物"] = "Alimaña", ["机械"] = "Mecánico", ["未指定"] = "Sin especificar",
-        ["图腾"] = "Tótem", ["非战斗宠物"] = "Mascota no combatiente", ["气体云雾"] = "Nube de gas", ["野生宠物"] = "Mascota salvaje", ["畸变怪"] = "Aberración",
-        ["范围伤害"] = "Daño de área", ["卡视野规避"] = "Evitable con línea de visión", ["可打断"] = "Interrumpible", ["无法盾反"] = "No se puede reflejar",
-        ["总是命中(无法闪招)"] = "Siempre impacta (no se puede esquivar/parar)", ["无法格挡"] = "No se puede bloquear", ["无法躲闪"] = "No se puede esquivar", ["无法招架"] = "No se puede parar",
-        ["盾反仅免疫伤害"] = "Reflejo de hechizos: solo inmunidad al daño", ["流血"] = "Sangrado", ["诅咒"] = "Maldición", ["疾病"] = "Enfermedad", ["激怒"] = "Enfurecimiento",
-        ["魔法"] = "Magia", ["中毒"] = "Veneno", ["沉睡"] = "Sueño", ["迷惑"] = "Desorientado", ["冻结"] = "Congelado", ["变形"] = "Polimorfia",
-        ["定身"] = "Enraizado", ["诱捕"] = "Ralentizado", ["昏迷"] = "Aturdido",
-    },
-    frFR = {
-        ["Exwind 大米法术详细信息"] = "Détails des sorts mythiques d’Exwind",
-        ["野兽"] = "Bête", ["龙类"] = "Draconien", ["恶魔"] = "Démon", ["元素生物"] = "Élémentaire", ["巨人"] = "Géant",
-        ["亡灵"] = "Mort-vivant", ["人型生物"] = "Humanoïde", ["小动物"] = "Bestiole", ["机械"] = "Mécanique", ["未指定"] = "Non spécifié",
-        ["图腾"] = "Totem", ["非战斗宠物"] = "Familier non-combattant", ["气体云雾"] = "Nuage de gaz", ["野生宠物"] = "Mascotte sauvage", ["畸变怪"] = "Aberration",
-        ["范围伤害"] = "Dégâts de zone", ["卡视野规避"] = "À éviter par ligne de vue", ["可打断"] = "Interruptible", ["无法盾反"] = "Ne peut pas être renvoyé",
-        ["总是命中(无法闪招)"] = "Toujours touche (impossible à esquiver/parrer)", ["无法格挡"] = "Ne peut pas être bloqué", ["无法躲闪"] = "Impossible à esquiver", ["无法招架"] = "Impossible à parer",
-        ["盾反仅免疫伤害"] = "Renvoi des sorts : immunité aux dégâts uniquement", ["流血"] = "Saignement", ["诅咒"] = "Malédiction", ["疾病"] = "Maladie", ["激怒"] = "Enragé",
-        ["魔法"] = "Magie", ["中毒"] = "Poison", ["沉睡"] = "Endormi", ["迷惑"] = "Désorienté", ["冻结"] = "Gelé", ["变形"] = "Métamorphose",
-        ["定身"] = "Immobilisé", ["诱捕"] = "Entravé", ["昏迷"] = "Étourdi",
-    },
-    itIT = {
-        ["Exwind 大米法术详细信息"] = "Dettagli degli incantesimi mitici di Exwind",
-        ["野兽"] = "Bestia", ["龙类"] = "Draconide", ["恶魔"] = "Demone", ["元素生物"] = "Elementale", ["巨人"] = "Gigante",
-        ["亡灵"] = "Non morto", ["人型生物"] = "Umanoide", ["小动物"] = "Animale", ["机械"] = "Meccanico", ["未指定"] = "Non specificato",
-        ["图腾"] = "Totem", ["非战斗宠物"] = "Famiglio non da combattimento", ["气体云雾"] = "Nube di gas", ["野生宠物"] = "Mascotte selvatica", ["畸变怪"] = "Aberrazione",
-        ["范围伤害"] = "Danno ad area", ["卡视野规避"] = "Evitabile con linea di vista", ["可打断"] = "Interrompibile", ["无法盾反"] = "Non riflettibile",
-        ["总是命中(无法闪招)"] = "Colpisce sempre (non schivabile/parabile)", ["无法格挡"] = "Non bloccabile", ["无法躲闪"] = "Non schivabile", ["无法招架"] = "Non parabile",
-        ["盾反仅免疫伤害"] = "Riflessione magica: solo immunità ai danni", ["流血"] = "Sanguinamento", ["诅咒"] = "Maledizione", ["疾病"] = "Malattia", ["激怒"] = "Rabbia",
-        ["魔法"] = "Magia", ["中毒"] = "Veleno", ["沉睡"] = "Sonno", ["迷惑"] = "Disorientato", ["冻结"] = "Congelato", ["变形"] = "Polimorfia",
-        ["定身"] = "Immobilizzato", ["诱捕"] = "Rallentato", ["昏迷"] = "Stordito",
-    },
-    koKR = {
-        ["Exwind 大米法术详细信息"] = "Exwind 신화 주문 상세 정보",
-        ["野兽"] = "야수", ["龙类"] = "용족", ["恶魔"] = "악마", ["元素生物"] = "정령", ["巨人"] = "거인",
-        ["亡灵"] = "언데드", ["人型生物"] = "인간형", ["小动物"] = "동물", ["机械"] = "기계", ["未指定"] = "지정되지 않음",
-        ["图腾"] = "토템", ["非战斗宠物"] = "비전투 애완동물", ["气体云雾"] = "가스 구름", ["野生宠物"] = "야생 애완동물", ["畸变怪"] = "변형체",
-        ["范围伤害"] = "광역 피해", ["卡视野规避"] = "시야 차단으로 회피", ["可打断"] = "차단 가능", ["无法盾反"] = "주문 반사 불가",
-        ["总是命中(无法闪招)"] = "항상 적중 (회피/무기 막기 불가)", ["无法格挡"] = "방패 막기 불가", ["无法躲闪"] = "회피 불가", ["无法招架"] = "무기 막기 불가",
-        ["盾反仅免疫伤害"] = "주문 반사: 피해 면역만", ["流血"] = "출혈", ["诅咒"] = "저주", ["疾病"] = "질병", ["激怒"] = "격노",
-        ["魔法"] = "마법", ["中毒"] = "독", ["沉睡"] = "수면", ["迷惑"] = "방향 감각 상실", ["冻结"] = "빙결", ["变形"] = "변이",
-        ["定身"] = "이동 불가", ["诱捕"] = "감속", ["昏迷"] = "기절",
-    },
-    ptBR = {
-        ["Exwind 大米法术详细信息"] = "Detalhes de feitiços míticos do Exwind",
-        ["野兽"] = "Fera", ["龙类"] = "Dracônico", ["恶魔"] = "Demônio", ["元素生物"] = "Elemental", ["巨人"] = "Gigante",
-        ["亡灵"] = "Morto-vivo", ["人型生物"] = "Humanoide", ["小动物"] = "Criatura", ["机械"] = "Mecânico", ["未指定"] = "Não especificado",
-        ["图腾"] = "Totem", ["非战斗宠物"] = "Ajudante não combatente", ["气体云雾"] = "Nuvem de gás", ["野生宠物"] = "Mascote selvagem", ["畸变怪"] = "Aberração",
-        ["范围伤害"] = "Dano em área", ["卡视野规避"] = "Evitável com linha de visão", ["可打断"] = "Interrompível", ["无法盾反"] = "Não pode ser refletido",
-        ["总是命中(无法闪招)"] = "Sempre acerta (não pode esquivar/aparar)", ["无法格挡"] = "Não pode bloquear", ["无法躲闪"] = "Não pode esquivar", ["无法招架"] = "Não pode aparar",
-        ["盾反仅免疫伤害"] = "Reflexão de feitiço: apenas imunidade a dano", ["流血"] = "Sangramento", ["诅咒"] = "Maldição", ["疾病"] = "Doença", ["激怒"] = "Enfurecido",
-        ["魔法"] = "Magia", ["中毒"] = "Veneno", ["沉睡"] = "Sono", ["迷惑"] = "Desorientado", ["冻结"] = "Congelado", ["变形"] = "Polimorfia",
-        ["定身"] = "Enraizado", ["诱捕"] = "Retardado", ["昏迷"] = "Atordoado",
-    },
-    ruRU = {
-        ["Exwind 大米法术详细信息"] = "Подробности о мифических заклинаниях Exwind",
-        ["野兽"] = "Животное", ["龙类"] = "Дракон", ["恶魔"] = "Демон", ["元素生物"] = "Элементаль", ["巨人"] = "Великан",
-        ["亡灵"] = "Нежить", ["人型生物"] = "Гуманоид", ["小动物"] = "Существо", ["机械"] = "Механизм", ["未指定"] = "Не указано",
-        ["图腾"] = "Тотем", ["非战斗宠物"] = "Не боевой питомец", ["气体云雾"] = "Газовое облако", ["野生宠物"] = "Дикий питомец", ["畸变怪"] = "Аберрация",
-        ["范围伤害"] = "Урон по области", ["卡视野规避"] = "Избегается за линией обзора", ["可打断"] = "Прерываемое", ["无法盾反"] = "Нельзя отразить заклинанием",
-        ["总是命中(无法闪招)"] = "Всегда попадает (нельзя уклониться/парировать)", ["无法格挡"] = "Нельзя блокировать", ["无法躲闪"] = "Нельзя уклониться", ["无法招架"] = "Нельзя парировать",
-        ["盾反仅免疫伤害"] = "Отражение заклинаний: только иммунитет к урону", ["流血"] = "Кровотечение", ["诅咒"] = "Проклятие", ["疾病"] = "Болезнь", ["激怒"] = "Исступление",
-        ["魔法"] = "Магия", ["中毒"] = "Яд", ["沉睡"] = "Сон", ["迷惑"] = "Дезориентация", ["冻结"] = "Заморозка", ["变形"] = "Превращение",
-        ["定身"] = "Обездвиживание", ["诱捕"] = "Замедление", ["昏迷"] = "Оглушение",
-    },
-}
 
-local function EXSP_L(key)
-    local locale = EXSP_GetEffectiveLocaleTag()
-    local localized = EXSP_MODULE_LOCALES[locale] and EXSP_MODULE_LOCALES[locale][key]
-    if not localized and locale == "esMX" then
-        localized = EXSP_MODULE_LOCALES.esES and EXSP_MODULE_LOCALES.esES[key]
-    end
-    if localized and localized ~= "" then
-        return localized
-    end
-    return L[key]
-end
-]]
-
--- 生物类型的原始值来自生成的数据表；显示值统一由共享 Locale 提供。
 local EXSP_CREATURE_TYPE_NAMES = {
-    ["野兽"] = L["野兽"], ["龙类"] = L["龙类"], ["恶魔"] = L["恶魔"], ["元素生物"] = L["元素生物"],
-    ["巨人"] = L["巨人"], ["亡灵"] = L["亡灵"], ["人型生物"] = L["人型生物"], ["小动物"] = L["小动物"],
-    ["机械"] = L["机械"], ["未指定"] = L["未指定"], ["图腾"] = L["图腾"], ["非战斗宠物"] = L["非战斗宠物"],
-    ["气体云雾"] = L["气体云雾"], ["野生宠物"] = L["野生宠物"], ["畸变怪"] = L["畸变怪"],
+    ["野兽"] = L["野兽"],
+    ["龙类"] = L["龙类"],
+    ["恶魔"] = L["恶魔"],
+    ["元素生物"] = L["元素生物"],
+    ["巨人"] = L["巨人"],
+    ["亡灵"] = L["亡灵"],
+    ["人型生物"] = L["人型生物"],
+    ["小动物"] = L["小动物"],
+    ["机械"] = L["机械"],
+    ["未指定"] = L["未指定"],
+    ["图腾"] = L["图腾"],
+    ["非战斗宠物"] = L["非战斗宠物"],
+    ["气体云雾"] = L["气体云雾"],
+    ["野生宠物"] = L["野生宠物"],
+    ["畸变怪"] = L["畸变怪"],
 }
 
 -- 1. 识别 Key
@@ -153,21 +51,47 @@ if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 local EXDB = _G.EXDB
 
 -- =========================================================
--- [v4.2] 注册与配置
+-- 三、GUI 声明 | GUI Declarations
 -- =========================================================
+
 
 -- 1. Grid 布局
 local function EX_RegisterLayout()
+    -- [声明迁移边界：设置页] 仅把原设置控件与说明改为 typed sections；打开按钮仍只负责进入自有手册窗口。
+    -- 跨模块 mythicLevel 绑定、key/type 与按钮回调禁止修改。
     local layout = {
-        { key = "header", type = "header", x = 1, y = 4, w = 188, h = 8, label = L["大米法术手册 (Mythic Spell Guide)"], labelSize = 25 },
-        { key = "desc", type = "description", x = 1, y = 16, w = 188, h = 4, label = L["此模块提供了一个极度详细的地下城百科，涵盖所有层数下的怪物技能数值。"] },
-        { key = "open", type = "button", x = 1, y = 24, w = 60, h = 8, label = L["立即打开手册"] },
-        { key = "sub_sim", type = "subheader", x = 1, y = 36, w = 188, h = 4, label = L["数值模拟 (全局同步)"] },
-        { key = "mythicLevel", type = "slider", x = 1, y = 48, w = 96, h = 8, label = L["模拟层数"], min = 0, max = 30, parentKey = "ExM+.MythicDamage" },
-        { key = "info", type = "description", x = 1, y = 60, w = 188, h = 8, label = "|cff888888" .. L["注：模拟层数与“大秘境伤害计算”模块共享数据。"] .. "|r" },
+        version = 1,
+        sections = {
+            {
+                kind = "settings",
+                id = "guide",
+                title = L["法术手册"],
+                description = {
+                    key = "desc",
+                    type = "description",
+                    label = L["此模块提供了一个极度详细的地下城百科，涵盖所有层数下的怪物技能数值。"],
+                },
+                items = {
+                    { key = "open", type = "button", label = L["立即打开手册"] },
+                },
+            },
+            {
+                kind = "settings",
+                id = "simulation",
+                title = L["数值模拟 (全局同步)"],
+                items = {
+                    { key = "mythicLevel", type = "slider", label = L["模拟层数"], min = 0, max = 30, parentKey = "ExM+.MythicDamage" },
+                },
+                footerDescription = {
+                    key = "info",
+                    type = "description",
+                    label = "|cff888888" .. L["注：模拟层数与“大秘境伤害计算”模块共享数据。"] .. "|r",
+                },
+            },
+        },
     }
 
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
 end
 
 -- 3. 立即注册
@@ -181,8 +105,9 @@ ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY,
 end)
 
 -- =========================================================
--- 核心业务逻辑
+-- 五、业务状态与功能逻辑 | Business State and Logic
 -- =========================================================
+
 
 
 
@@ -207,7 +132,8 @@ local function EXSP_BuildDungeonIconMap()
 
     for _, mapID in ipairs(mapIDs) do
         local mapName, _, _, icon = C_ChallengeMode.GetMapUIInfo(mapID)
-        local meta = EXDB and EXDB.GetInstanceNoteMetaByChallengeModeID and EXDB:GetInstanceNoteMetaByChallengeModeID(mapID)
+        local meta = EXDB and EXDB.GetInstanceNoteMetaByChallengeModeID and
+        EXDB:GetInstanceNoteMetaByChallengeModeID(mapID)
         local internalName = meta and meta.name
         if internalName and internalName ~= "" then
             mapInfoByName[internalName] = {
@@ -416,9 +342,13 @@ EX_FACTORY:InitPool("SpellInfo_SpellFrame", "Frame", "BackdropTemplate", functio
 end)
 
 -------------------------------------------------------------------
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 -- UI 核心
 -------------------------------------------------------------------
 
+-- [卡片迁移边界：自定义渲染] 下列百科窗口、分页、双滚动区及池化内容不属于设置页 Grid；固定视口、数据排序、选择与刷新回调禁止修改。
 function EXSP.CreateMainFrame()
     EXSP.CurrentFont = EXSP_DEFAULT_FONT
 
@@ -472,15 +402,19 @@ function EXSP.CreateMainFrame()
         slider:SetPoint("TOPRIGHT", -55, -20)
 
         EXSP.LevelSlider = slider
-
     end
 
-    local close = CreateFrame("Button", nil, f, "UIPanelCloseButton"); close:SetPoint("TOPRIGHT", 0, 0)
+    local close = EXUI:CreatePicButton(f, 24, 24,
+        "Interface\\Buttons\\UI-Panel-CloseButton-Up",
+        "Interface\\Buttons\\UI-Panel-CloseButton-Down",
+        "Interface\\Buttons\\UI-Panel-CloseButton-Highlight",
+        function() f:Hide() end, true)
+    close:SetPoint("TOPRIGHT", 0, 0)
 
     -- 副本切换图标
     local dungeonIconMap = EXSP_BuildDungeonIconMap()
     for i, name in ipairs(EXSP.DungeonList) do
-        local tab = CreateFrame("Button", nil, f)
+        local tab = EXUI:CreateButton(f, 60, 60, "", nil, { compact = true })
         --@@ 副本图标尺寸 (60x60)
         tab:SetSize(60, 60); tab:SetPoint("TOPLEFT", 25 + (i - 1) * 75, -45)
         local tex = tab:CreateTexture(nil, "ARTWORK"); tex:SetAllPoints(); tex:SetTexCoord(0.08, 0.92, 0.08, 0.92)
@@ -491,13 +425,16 @@ function EXSP.CreateMainFrame()
         --@@ 副本名称字号 (12)
         tab.localizedName = EXSP_GetLocalizedDungeonDisplayName(name)
         sub:SetFont(EXSP.CurrentFont, 12, "OUTLINE"); sub:SetPoint("TOP", tab, "BOTTOM", 0, -2)
-        sub:SetWidth(72); sub:SetJustifyH("CENTER"); sub:SetWordWrap(true); sub:SetText(tab.localizedName); tab.text = sub
-        tab:SetScript("OnEnter", function(self)
+        sub:SetWidth(72); sub:SetJustifyH("CENTER"); sub:SetWordWrap(true); sub:SetText(tab.localizedName); tab.text =
+        sub
+        -- OnEnter/OnLeave 这两个槽位上有 Core 的悬停画器（HookScript 接的链）；
+        -- SetScript 会把整条链一起清掉，所以 tooltip 也用 HookScript 叠加上去。
+        tab:HookScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_TOP")
             GameTooltip:SetText(self.localizedName or name, 1, 0.82, 0)
             GameTooltip:Show()
         end)
-        tab:SetScript("OnLeave", function()
+        tab:HookScript("OnLeave", function()
             GameTooltip:Hide()
         end)
         tab:SetScript("OnClick",
@@ -509,14 +446,15 @@ function EXSP.CreateMainFrame()
     end
 
     -- 搜索框
-    local search = CreateFrame("EditBox", "EXSP_Search", f, "InputBoxTemplate")
+    local search = EXUI:CreateEditBox(f, L["搜索怪物..."], 275, 30, nil, {})
     --@@ 搜索框的宽度 (275)
     search:SetSize(275, 30); search:SetPoint("TOPLEFT", 20, -140); search:SetAutoFocus(false)
     search:SetText(L["搜索怪物..."]); search:SetTextInsets(10, 10, 0, 0)
     search:SetScript("OnTextChanged",
         function(s) if EXSP.CurrentDungeon then EXSP_RefreshMobList(EXSP.CurrentDungeon, s:GetText()) end end)
 
-    local mobSF = CreateFrame("ScrollFrame", nil, f, "ScrollFrameTemplate"); mobSF:EnableMouseWheel(true); mobSF:SetSize(285, 600); mobSF
+    local mobSF = CreateFrame("ScrollFrame", nil, f, "ScrollFrameTemplate"); mobSF:EnableMouseWheel(true); EXUI
+        :ApplyModernScrollFrame(mobSF); mobSF:SetSize(307, 600); mobSF
         :SetPoint("TOPLEFT", 20, -180)
     local mobChild = CreateFrame("Frame", nil, mobSF); mobChild:SetSize(270, 1); mobSF:SetScrollChild(mobChild)
     EXSP.MobScroll = mobSF
@@ -541,7 +479,8 @@ function EXSP.CreateMainFrame()
     infoPanel.IDFootnote = infoPanel:CreateFontString(nil, "OVERLAY"); infoPanel.IDFootnote:SetPoint("TOP",
         infoPanel.CenterInfo, "BOTTOM", 0, -8); infoPanel.IDFootnote:SetJustifyH("CENTER")
 
-    local spellSF = CreateFrame("ScrollFrame", nil, f, "ScrollFrameTemplate"); spellSF:EnableMouseWheel(true); spellSF:SetSize(710, 640); spellSF
+    local spellSF = CreateFrame("ScrollFrame", nil, f, "ScrollFrameTemplate"); spellSF:EnableMouseWheel(true); EXUI
+        :ApplyModernScrollFrame(spellSF); spellSF:SetSize(717, 640); spellSF
         :SetPoint("TOPLEFT", 915, -140)
     local spellChild = CreateFrame("Frame", nil, spellSF); spellChild:SetSize(700, 1); spellSF:SetScrollChild(spellChild)
     EXSP.SpellScroll = spellSF
@@ -628,7 +567,8 @@ function EXSP_RefreshRightPanel(dungeonName, mobName)
     end
 
     --@@ 中间NPC名称字体大小 (52)
-    info.Name:SetFont(font, 52, "OUTLINE"); info.Name:SetTextColor(1, 0.82, 0); info.Name:SetText(EXSP_GetLocalizedMobDisplayName(dungeonName, mobName, data.npcID))
+    info.Name:SetFont(font, 52, "OUTLINE"); info.Name:SetTextColor(1, 0.82, 0); info.Name:SetText(
+    EXSP_GetLocalizedMobDisplayName(dungeonName, mobName, data.npcID))
     --@@ NPC名上下装饰线的宽度偏移 (10)
     local nameWidth = info.Name:GetStringWidth(); info.TopLine:SetWidth(-1); info.BottomLine:SetWidth(nameWidth + 100)
 
@@ -641,7 +581,8 @@ function EXSP_RefreshRightPanel(dungeonName, mobName)
     end
     --@@ NPC名中间(生物类型+等级)字体大小 (24)
     info.CenterInfo:SetFont(font, 24, "OUTLINE")
-    info.CenterInfo:SetText(string.format("|cffffffff%s|r    %sLV.%d%s|r", EXSP_CREATURE_TYPE_NAMES[data.type] or L["未知生物"], lvColor, data.level or 90,
+    info.CenterInfo:SetText(string.format("|cffffffff%s|r    %sLV.%d%s|r",
+        EXSP_CREATURE_TYPE_NAMES[data.type] or L["未知生物"], lvColor, data.level or 90,
         lvSuffix))
     --@@ NPC ID 字体大小 (18)
     info.IDFootnote:SetFont(font, 18, "OUTLINE"); info.IDFootnote:SetText("|cff888888NPCID:" ..
@@ -774,6 +715,9 @@ function EXSP_UpdateSpellItem(parent, spellID, mobData)
 end
 
 -------------------------------------------------------------------
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 -- 事件监听 (已迁移至 ExwindTools 框架)
 -------------------------------------------------------------------
 ExwindTools:RegisterEvent("SPELL_TEXT_UPDATE", EXWIND_MODULE_KEY, function()
@@ -808,5 +752,8 @@ SlashCmdList["EXSP"] = function()
     end
 end
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 -- 报告模块加载完成
 ExwindTools:ReportReady(EXWIND_MODULE_KEY)

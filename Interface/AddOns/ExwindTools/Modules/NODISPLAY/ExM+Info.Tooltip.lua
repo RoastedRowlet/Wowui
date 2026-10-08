@@ -1,6 +1,9 @@
 ﻿-- [[ 大秘境信息增强 (提示) ]]
 -- { Key = "ExM+Info.Tooltip", Name = "大秘境信息增强", Desc = "在挑战面板图标上显示详细的最佳记录、队友信息及传送冷却。", Category = 2 },
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXState = ExwindTools.State
@@ -13,11 +16,17 @@ local EXWIND_MODULE_KEY = "ExM+Info.Tooltip"
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 
 -- 3. 数据初始化
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EXWIND_DEFAULTS = {
     enabled = true,
 }
 local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, EXWIND_DEFAULTS)
 
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
 -- =========================================================
 -- [v4.2] 注册与配置
 -- =========================================================
@@ -26,20 +35,36 @@ local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, EXWIND_DEFAULTS)
 
 -- 2. Grid 布局
 local function EX_RegisterLayout()
+    -- [声明迁移边界：设置页] 仅把原开关改为 settings 声明；纯装饰 divider 不进入新合同。
+    -- key/type 与 PVE Tooltip/传送冷却 hook 禁止修改。
     local layout = {
-        { key = "header", type = "header", x = 8, y = 4, w = 193, h = 8, label = L["大米信息增强 (Mythic Plus Tooltips)"], labelSize = 25 },
-        { key = "desc", type = "description", x = 8, y = 16, w = 193, h = 12, label = L["开启后，鼠标悬停在 PVE 挑战面板的副本图标上时，会显示该副本的详细通关记录、队友专精以及该副本的快捷传送冷却状态。"] },
-        { key = "enabled", type = "checkbox", x = 8, y = 28, w = 52, h = 4, label = L["启用法术提示增强"] },
-        { key = "divider_8437", type = "divider", x = 8, y = 44, w = 193, h = 4, label = "新组件" },
+        version = 1,
+        sections = {
+            {
+                kind = "settings",
+                id = "common",
+                title = L["通用设置"],
+                description = {
+                    key = "desc",
+                    type = "description",
+                    label = L["开启后，鼠标悬停在 PVE 挑战面板的副本图标上时，会显示该副本的详细通关记录、队友专精以及该副本的快捷传送冷却状态。"],
+                },
+                items = {
+                    { key = "enabled", type = "switch", label = L["启用法术提示增强"] },
+                },
+            },
+        },
     }
 
-
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    ExwindTools.UI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
 end
 
 -- 3. 立即注册
 EX_RegisterLayout()
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 -- 5. 业务逻辑实现 (变量前缀: EXMYTOOLTIP)
 local EXMYTOOLTIP = {}
 
@@ -269,7 +294,11 @@ function EXMYTOOLTIP.UpdateTooltip(self)
     GameTooltip:Show()
 end
 
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 -- 挂钩挑战面板图标
+-- [卡片迁移边界：自定义渲染] 下列挑战图标 Tooltip hook 是运行时外部界面接入，不是设置页布局；目标图标顺序、传送冷却内容和事件/定时回调禁止修改。
 function EXMYTOOLTIP.HookDungeonIcons()
     if not ChallengesFrame or not ChallengesFrame.DungeonIcons then return end
     for _, icon in ipairs(ChallengesFrame.DungeonIcons) do
@@ -281,6 +310,9 @@ function EXMYTOOLTIP.HookDungeonIcons()
     end
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 -- 初始化监听
 EXMYTOOLTIP.Frame = CreateFrame("Frame")
 EXMYTOOLTIP.Frame:RegisterEvent("CHALLENGE_MODE_MAPS_UPDATE")
@@ -294,6 +326,9 @@ end
 -- 循环检查挂钩 (处理延迟加载的 UI 元素)
 C_Timer.NewTicker(5, function() EXMYTOOLTIP.HookDungeonIcons() end)
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 -- 初始延迟加载
 C_Timer.After(5, function()
     EXMYTOOLTIP.RequestData()

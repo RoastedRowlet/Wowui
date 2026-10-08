@@ -3,13 +3,35 @@
 -- 请勿手动通过 Git 提交修改此文件中的版本号，除非你是为了测试。
 
 ExBoss_MetaData = {
-    version = "v26.9.15.1537",
+    version = "v26.10.6.1123",
     changelog = {
-        version = "v26.9.15.1537",
-        title = "v26.9.15.1537 更新日志",
-        publishedAt = "2026-09-15 15:37",
+        version = "v26.10.5.2034",
+        title = "v26.10.5.2034 更新日志",
+        publishedAt = "2026-10-05 20:34",
         fontSize = 14,
         content = [[
+@H1@ v26.10.5.2034
+
+@CN@ @H2@ 界面全面改版
+@CN@ - 设置界面整体换新：所有页面改成卡片 / 列表式布局，统一颜色系统、圆角和层次感，滚动条、下拉框、开关、按钮全部换成新版控件
+@CN@ - GRID渲染引擎升级到4.0版本 (5.0版本会在月中左右到来)
+@CN@ - 首页新增致谢与联系方式入口（还在施工中）
+@CN@ - 确认弹窗不再借用暴雪原生弹窗，避免了许多调用链污染问题
+
+@CN@ @H2@ 配置系统
+@CN@ - 新增外观配置方案管理：可以复制/删除外观方案，切换后会提示是否立即重载生效
+@CN@ - 现在可以根据天赋自动切换不同的配置和外观方案
+
+@EN@ @H2@ Complete UI Overhaul
+@EN@ - Redesigned the settings UI: all pages now use card / list layouts with consistent colors, rounded corners, and visual hierarchy. Scrollbars, dropdowns, toggles, and buttons all use new controls
+@EN@ - Upgraded the GRID rendering engine to version 4.0 (version 5.0 is expected around mid-month)
+@EN@ - Added credits and contact links to the home page (still under construction)
+@EN@ - Confirmation dialogs no longer use Blizzard's native popups, avoiding many call-chain taint issues
+
+@EN@ @H2@ Profile System
+@EN@ - Added appearance profile management: duplicate/delete appearance profiles, with a prompt to reload immediately after switching
+@EN@ - Settings and appearance profiles can now switch automatically based on talents
+
 @H1@ v26.9.15.1537
 
 @CN@ @H2@ 通用

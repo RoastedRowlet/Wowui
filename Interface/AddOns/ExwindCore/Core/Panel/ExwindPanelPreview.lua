@@ -1,10 +1,8 @@
 -- =============================================================
 -- ExwindPanelPreview.lua
--- 设置页 PreviewDock 的唯一会话封装。
---
--- 这里不创建第二套视觉树、不解释模块业务，也不拥有 Dock 的页面几何。
--- 它只把同一份 presentation 交给已存在的 Icon/Text/TimerBar Collection，
--- 固定 interactionMode="panel"、contentCenter=true，并统一生命周期。
+-- 设置页顶部预览外壳、背景与 Panel 会话的唯一封装。
+-- 页面只提供宿主，将既有 renderer 挂入公共 canvas；不得另造预览卡片或覆盖背景。
+-- 会话复用 Icon/Text/TimerBar Collection，固定 panel interaction 与生命周期。
 -- =============================================================
 
 local ExwindTools = _G.ExwindTools
@@ -14,6 +12,159 @@ local L = (ExwindTools and ExwindTools.L)
 
 if not ExwindTools or not ExwindTools.UI then return end
 local EXUI = ExwindTools.UI
+local GC = ExwindTools.GUIColors
+if not GC then error("ExwindGUIColor.lua must load before ExwindPanelPreview.lua") end
+
+local GM = ExwindTools.GUIMetrics
+if not GM then error("ExwindGUIMetrics.lua must load before ExwindPanelPreview.lua") end
+
+-- 背景只属于 Core 的当前 GUI 会话；不读取或写入任何模块配置/SavedVariables。
+-- 所有预览卡片共用一份颜色，canvas 与两侧 rail 透明，只由外壳填充一次。
+local previewFill = { GC.panel[1], GC.panel[2], GC.panel[3], 1 }
+local previewShells = setmetatable({}, { __mode = "k" })
+local previewLayout = {
+    shellTop = 6,
+    shellBottom = 8,
+    minimumShellHeight = ExwindTools.PanelTheme.Layout.PREVIEW_DOCK_HEIGHT,
+    shellInset = 10,
+    canvasGap = 8,
+    leftRailWidth = 162,
+    rightRailWidth = 162,
+}
+
+function EXUI:ApplyStandardPreviewShellStyle(shell, useBackdrop)
+    if not shell then error("standard preview requires a shell Frame", 2) end
+    local mode = useBackdrop and "backdrop" or previewShells[shell] or "surface"
+    previewShells[shell] = mode
+    if mode == "backdrop" then
+        -- 既有特殊预览保留原 Backdrop 几何，只共用颜色。
+        shell:SetBackdropColor(unpack(previewFill))
+        shell:SetBackdropBorderColor(unpack(GC.panelBorder))
+    else
+        self:SetControlSurface(shell, GM.radius.popup, previewFill, GC.panelBorder)
+    end
+    if shell._exPreviewBackgroundSwatch then
+        shell._exPreviewBackgroundSwatch:SetVertexColor(unpack(previewFill))
+    end
+end
+
+local function SetPreviewBackground(r, g, b)
+    previewFill[1], previewFill[2], previewFill[3] = r, g, b
+    for shell in pairs(previewShells) do
+        EXUI:ApplyStandardPreviewShellStyle(shell)
+    end
+end
+
+local function OpenPreviewBackgroundPicker()
+    local picker = _G.ColorPickerFrame
+    if not picker then return end
+    local originalR, originalG, originalB = previewFill[1], previewFill[2], previewFill[3]
+    -- 同一个暴雪取色器开启新事务前，结束原事务，避免旧取消回调遗留。
+    if picker:IsShown() then
+        if picker.cancelFunc then picker.cancelFunc(picker.previousValues) end
+        picker:Hide()
+        originalR, originalG, originalB = previewFill[1], previewFill[2], previewFill[3]
+    end
+    picker:SetupColorPickerAndShow({
+        r = originalR,
+        g = originalG,
+        b = originalB,
+        hasOpacity = false,
+        swatchFunc = function()
+            SetPreviewBackground(picker:GetColorRGB())
+        end,
+        cancelFunc = function()
+            SetPreviewBackground(originalR, originalG, originalB)
+        end,
+    })
+end
+
+local function CreatePreviewToolbar(shell)
+    local toolbar = CreateFrame("Frame", nil, shell)
+    toolbar:SetPoint("TOPLEFT", shell, "TOPLEFT", previewLayout.shellInset, -previewLayout.shellTop)
+    toolbar:SetPoint("BOTTOMRIGHT", shell, "BOTTOMRIGHT", -previewLayout.shellInset, previewLayout.shellBottom)
+
+    local label = EXUI:CreateVisualFontString(toolbar, EXFONTFRAME, "GameFontHighlightSmall")
+    label:SetText(L["背景"])
+    label:SetTextColor(unpack(GC.textDim))
+    local button = EXUI:CreateButton(toolbar, 26, 26, "",
+        OpenPreviewBackgroundPicker, { compact = true })
+    button:ClearAllPoints()
+    button:SetPoint("TOPRIGHT", toolbar, "TOPRIGHT", -6, -16)
+    local swatch = EXUI:CreateVisualTexture(button, EXBORDERFRAME)
+    swatch:SetTexture("Interface\\Buttons\\WHITE8X8")
+    swatch:SetPoint("TOPLEFT", button, "TOPLEFT", 4, -4)
+    swatch:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -4, 4)
+    shell._exPreviewBackgroundSwatch = swatch
+    label:SetPoint("TOP", button, "TOP", 0, 15)
+    button:SetScript("OnEnter", function(self)
+        if GameTooltip then
+            GameTooltip:SetOwner(self, "ANCHOR_TOP")
+            GameTooltip:SetText(L["自定义预览背景"])
+            GameTooltip:Show()
+        end
+    end)
+    button:SetScript("OnLeave", function(self)
+        if GameTooltip and GameTooltip:GetOwner() == self then GameTooltip:Hide() end
+    end)
+    EXUI:ApplyStandardPreviewShellStyle(shell)
+    return toolbar
+end
+
+-- 唯一顶部预览工厂：固定外围 GC.panel，整张卡片内部共用 previewFill。
+function EXUI:CreateStandardTopPreview(host)
+    local row = CreateFrame("Frame", nil, host)
+    row:SetFrameLevel((host:GetFrameLevel() or 0) + 1)
+    local background = self:CreateVisualTexture(row, EXBASEFRAME)
+    background:SetAllPoints(row)
+    background:SetColorTexture(unpack(GC.panel))
+
+    local shell = CreateFrame("Frame", nil, row)
+    self:ApplyStandardPreviewShellStyle(shell)
+    local canvas = CreateFrame("Frame", nil, shell)
+    local toolbar = CreatePreviewToolbar(shell)
+    canvas:SetPoint("TOPLEFT", toolbar, "TOPLEFT", previewLayout.leftRailWidth + previewLayout.canvasGap, 0)
+    canvas:SetPoint("TOPRIGHT", toolbar, "TOPRIGHT", -(previewLayout.rightRailWidth + previewLayout.canvasGap), 0)
+    self:SetPanelStylePresetControlsHost(canvas, toolbar, "preview-rail")
+    canvas:SetHeight(self:GetStandardPreviewMinimumCanvasHeight())
+
+    local top = { row = row, shell = shell, canvas = canvas, toolbar = toolbar }
+    function top:SyncHeight()
+        local height = EXUI:GetStandardPreviewShellHeight(self.canvas:GetHeight())
+        self.shell:SetHeight(height)
+        self.row:SetHeight(height)
+        return height
+    end
+    function top:Place(parent, scrollChildWidth, topOffset)
+        local grid = _G.ExwindGrid
+        if not grid or type(grid.ResolveSettingsListWidth) ~= "function" then
+            error("standard top preview requires ExwindGrid:ResolveSettingsListWidth", 2)
+        end
+        local defaults = type(grid.CardLayoutDefaults) == "table" and grid.CardLayoutDefaults or {}
+        local width = tonumber(scrollChildWidth) or tonumber(parent:GetWidth()) or 1
+        local available = math.max(1, width - math.max(0, tonumber(defaults.left) or 0)
+            - math.max(0, tonumber(defaults.right) or 0))
+        self.row:SetParent(parent)
+        self.row:ClearAllPoints()
+        self.row:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, topOffset or 0)
+        self.row:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, topOffset or 0)
+        self.shell:ClearAllPoints()
+        self.shell:SetPoint("TOP", self.row, "TOP", -4, 0)
+        self.shell:SetWidth(grid:ResolveSettingsListWidth(available, 75))
+        self:SyncHeight()
+    end
+    top:SyncHeight()
+    return top
+end
+
+function EXUI:GetStandardPreviewShellHeight(canvasHeight)
+    return math.max(previewLayout.minimumShellHeight,
+        previewLayout.shellTop + canvasHeight + previewLayout.shellBottom)
+end
+
+function EXUI:GetStandardPreviewMinimumCanvasHeight()
+    return previewLayout.minimumShellHeight - previewLayout.shellTop - previewLayout.shellBottom
+end
 
 -- GUI 修改 ModuleDB 后的唯一刷新注册表。注册项只能重套已经存在的
 -- presentation；创建、释放与完整 Render 仍只属于各自正常的生命周期入口。
@@ -285,13 +436,45 @@ local function ResolveBindingDB(source)
     return db
 end
 
-local function RefreshActiveGridControls(moduleKey)
+-- 活动页面必须属于 moduleKey：每张卡片都要有已解析的 moduleKey，且至少有一张是本模块的卡片。
+-- 页面可以另含绑定到其他正式 owner 的共享数据卡（例如 EXBoss 时间轴启用开关绑定
+-- ExBoss.GeneralOverview）；没有本模块卡片的页面（旧页面残留）或未解析 moduleKey 的卡片仍然拒绝。
+local function MountedStatesBelongToModule(mounted, moduleKey)
+    local owned = false
+    for _, entry in ipairs(mounted) do
+        local state = entry.state
+        if type(state) ~= "table" or type(state.moduleKey) ~= "string" or state.moduleKey == "" then
+            return false
+        end
+        if state.moduleKey == moduleKey then owned = true end
+    end
+    return owned
+end
+
+local function ResolveActiveMountedGrid(moduleKey, apiName)
     local Grid = _G.ExwindGrid
     local container = EXUI.ActivePageFrame
-    if not Grid or not container or type(Grid.RefreshContainerControlsFromDB) ~= "function" then
-        error("standard icon interaction has no active Grid container for " .. moduleKey, 3)
+    if not Grid or not container or type(Grid.GetMountedContainerStates) ~= "function" then
+        error((apiName or "standard preview interaction")
+            .. " has no active Grid container for " .. tostring(moduleKey), 3)
     end
-    Grid:RefreshContainerControlsFromDB(container)
+    local mounted, owner = Grid:GetMountedContainerStates(container)
+    if type(mounted) ~= "table" or #mounted == 0 or not owner then
+        error((apiName or "standard preview interaction")
+            .. " cannot validate active Grid for " .. tostring(moduleKey), 3)
+    end
+    if not MountedStatesBelongToModule(mounted, moduleKey) then
+        error((apiName or "standard preview interaction")
+            .. " active Grid module mismatch for " .. tostring(moduleKey), 3)
+    end
+    return Grid, container, mounted, owner
+end
+
+local function RefreshActiveGridControls(moduleKey)
+    local Grid, container = ResolveActiveMountedGrid(moduleKey, "standard icon interaction")
+    if type(Grid.RefreshMountedValues) ~= "function" or not Grid:RefreshMountedValues(container) then
+        error("standard icon interaction cannot refresh active Grid for " .. moduleKey, 3)
+    end
 end
 
 -- Panel 与世界编辑模式共享这一份声明校验。模块不能因为 world adapter
@@ -355,7 +538,8 @@ end
 
 -- Preset 只消费当前 Grid 已经解析完成的真实 DB 表与路径。它不猜 icon、
 -- timerGroup 等业务命名，也不会把 timeline/material/text 误认成可套样式的显示。
-local function ResolvePanelStylePresetBinding(panelPreview, moduleKey, declaredGUIKeys, state, container)
+local function ResolvePanelStylePresetBinding(panelPreview, moduleKey, declaredGUIKeys,
+        mounted, mountedOwner, Grid, container)
     local family, bodyType
     if panelPreview.kind == "Icon" then
         family, bodyType = "icon", "icongroup"
@@ -366,12 +550,14 @@ local function ResolvePanelStylePresetBinding(panelPreview, moduleKey, declaredG
     end
 
     local bodyWidget
-    for _, widget in ipairs(state.instances or {}) do
-        local element = widget and widget._exGridPixelElement
-        if type(element) == "table" and string.lower(tostring(element.type or "")) == bodyType
-            and type(widget._exCompositeDb) == "table" then
-            if bodyWidget then return nil end
-            bodyWidget = widget
+    for _, entry in ipairs(mounted) do
+        for _, widget in ipairs(entry.state.instances or {}) do
+            local element = widget and widget._exGridPixelElement
+            if type(element) == "table" and string.lower(tostring(element.type or "")) == bodyType
+                and type(widget._exCompositeDb) == "table" then
+                if bodyWidget then return nil end
+                bodyWidget = widget
+            end
         end
     end
     if not bodyWidget or bodyWidget._exCompositeDb.width == nil or bodyWidget._exCompositeDb.height == nil then
@@ -386,7 +572,7 @@ local function ResolvePanelStylePresetBinding(panelPreview, moduleKey, declaredG
     local fonts = {}
     for guiKey, declaration in pairs(declaredGUIKeys) do
         local slot = ResolvePanelStyleFontSlot(family, guiKey, declaration.textRole)
-        local widget = slot and state.widgets[guiKey]
+        local widget = slot and Grid:FindMountedWidget(container, guiKey) or nil
         local element = widget and widget._exGridPixelElement
         if slot and not fonts[slot] and type(element) == "table"
             and string.lower(tostring(element.type or "")) == "fontgroup"
@@ -400,7 +586,7 @@ local function ResolvePanelStylePresetBinding(panelPreview, moduleKey, declaredG
         family = family,
         moduleKey = moduleKey,
         container = container,
-        gridState = state,
+        gridOwner = mountedOwner,
         bodyWidget = bodyWidget,
         bodyDB = bodyWidget._exCompositeDb,
         changedPath = bodyPath == "" and "width" or (bodyPath .. ".width"),
@@ -479,13 +665,11 @@ function EXUI:BindStandardPreviewInteractions(panelPreview, options)
             error("GUI position group has no movable standard icon mapping: " .. tostring(guiKey), 2)
         end
     end
-    local Grid, container = _G.ExwindGrid, EXUI.ActivePageFrame
-    local state = Grid and container and Grid.ContainerStates and Grid.ContainerStates[container]
-    if not state or type(state.widgets) ~= "table" then
-        error("standard icon interaction cannot validate active Grid for " .. moduleKey, 2)
-    end
+    local Grid, container, mounted, mountedOwner = ResolveActiveMountedGrid(
+        moduleKey, "standard icon interaction")
     for guiKey in pairs(declaredGUIKeys) do
-        if not state.widgets[guiKey] then
+        local widget, state = Grid:FindMountedWidget(container, guiKey)
+        if not widget or not state or state.moduleKey ~= moduleKey then
             error("standard icon interaction GUI key is not rendered: " .. guiKey, 2)
         end
     end
@@ -497,9 +681,16 @@ function EXUI:BindStandardPreviewInteractions(panelPreview, options)
         panelPreview:SetInteractionSchema(schema, ResolveBindingDB(options.db))
     end
 
-    panelPreview:SetIntentHandler(function(intent)
+    local canvasLease = {}
+    panelPreview._canvasCommitLease = canvasLease
+    local function HandleIntent(intent, canvasTarget)
+        if EXUI.CurrentModule ~= moduleKey or EXUI.ActivePageFrame ~= container
+            or type(Grid.IsMountedOwnerCurrent) ~= "function"
+            or not Grid:IsMountedOwnerCurrent(container, mountedOwner) then
+            error("standard icon preview interaction belongs to a stale Grid mount: " .. moduleKey, 2)
+        end
         if type(intent) ~= "table" then error("standard icon preview received malformed intent", 2) end
-        local declaration = schema[intent.elementID]
+        local declaration = canvasTarget and canvasTarget.declaration or schema[intent.elementID]
         if type(declaration) ~= "table" then
             error("standard icon preview undeclared elementID: " .. tostring(intent.elementID), 2)
         end
@@ -525,7 +716,7 @@ function EXUI:BindStandardPreviewInteractions(panelPreview, options)
             if type(position) ~= "table" or type(position.x) ~= "number" or type(position.y) ~= "number" then
                 error("standard icon preview received malformed position", 2)
             end
-            local db = ResolveBindingDB(options.db)
+            local db = canvasTarget and canvasTarget.db or ResolveBindingDB(options.db)
             local stored = ResolveStoredInteractionPosition(db, declaration, position,
                 "standard icon interaction " .. intent.elementID)
             WriteDBPath(db, declaration.position.x, stored.x, "standard icon interaction " .. intent.elementID)
@@ -537,7 +728,31 @@ function EXUI:BindStandardPreviewInteractions(panelPreview, options)
             return true
         end
         error("standard icon preview unsupported intent: " .. tostring(intent.type), 2)
-    end)
+    end
+    panelPreview:SetIntentHandler(HandleIntent)
+    -- Explicit editor opt-in. Existing consumers retain the handler above.
+    function panelPreview:CaptureCanvasCommit(elementID)
+        local declaration = schema[elementID]
+        if not declaration or declaration.movable ~= true then return nil end
+        local target = { db = ResolveBindingDB(options.db), declaration = {
+            movable = true, position = { x = declaration.position.x, y = declaration.position.y,
+                toStorage = declaration.position.toStorage },
+        } }
+        local function Current()
+            return not self.released and self._canvasCommitLease == canvasLease
+                and EXUI.CurrentModule == moduleKey and EXUI.ActivePageFrame == container
+                and Grid:IsMountedOwnerCurrent(container, mountedOwner)
+        end
+        return {
+            isCurrent = Current,
+            x = ReadDBPath(target.db, declaration.position.x, "Canvas position"),
+            y = ReadDBPath(target.db, declaration.position.y, "Canvas position"),
+            commit = function(position)
+                if not Current() then return false end
+                return HandleIntent({ type="elementMoved", elementID=elementID, position=position }, target)
+            end,
+        }
+    end
     if options.resize ~= nil then
         if type(panelPreview.BindResize) ~= "function" then
             error("standard panel preview does not support resize", 2)
@@ -548,7 +763,8 @@ function EXUI:BindStandardPreviewInteractions(panelPreview, options)
     end
     if type(panelPreview.BindStylePresets) == "function" then
         panelPreview:BindStylePresets(ResolvePanelStylePresetBinding(
-            panelPreview, moduleKey, declaredGUIKeys, state, container))
+            panelPreview, moduleKey, declaredGUIKeys,
+            mounted, mountedOwner, Grid, container))
     end
     return panelPreview
 end
@@ -645,11 +861,13 @@ end
 
 local function RefreshPanelResizeControls(moduleKey)
     local Grid, container = _G.ExwindGrid, EXUI.ActivePageFrame
-    local state = Grid and container and Grid.ContainerStates and Grid.ContainerStates[container]
-    if EXUI.CurrentModule ~= moduleKey or not state or type(state.widgets) ~= "table"
-        or type(Grid.RefreshContainerControlsFromDB) ~= "function" then return false end
-    Grid:RefreshContainerControlsFromDB(container)
-    return true
+    if EXUI.CurrentModule ~= moduleKey or not Grid or not container
+        or type(Grid.GetMountedContainerStates) ~= "function"
+        or type(Grid.RefreshMountedValues) ~= "function" then return false end
+    local mounted, owner = Grid:GetMountedContainerStates(container)
+    if not owner or type(mounted) ~= "table" or #mounted == 0 then return false end
+    if not MountedStatesBelongToModule(mounted, moduleKey) then return false end
+    return Grid:RefreshMountedValues(container) == true
 end
 
 local function CreatePanelResizeTexture(handle, r, g, b, a)
@@ -875,61 +1093,16 @@ local function CreatePanelPresetButton(parent, width, textValue)
     return EXUI:CreateButton(parent, width, 24, textValue)
 end
 
-local function AcquirePanelPresetSidebarTexture(button, key, r, g, b, a)
-    button.__ExwindPanelPresetSidebarTextures = button.__ExwindPanelPresetSidebarTextures or {}
-    local textures = button.__ExwindPanelPresetSidebarTextures
-    local texture = textures[key]
-    if not texture then
-        texture = EXUI:CreateVisualTexture(button, _G.EXBASEFRAME)
-        texture:SetPoint("TOPLEFT", button, "TOPLEFT", 1, -1)
-        texture:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -1, 1)
-        textures[key] = texture
-    end
-    texture:SetColorTexture(r, g, b, a)
-    return texture
-end
-
 local function SetPanelPresetButtonPresentation(button, sidebar, role)
     if not button then return end
-    local fontString = button.GetFontString and button:GetFontString() or nil
-    if sidebar then
-        local normal = AcquirePanelPresetSidebarTexture(button, "normal", 0.055, 0.086, 0.122, 1)
-        local pushed = AcquirePanelPresetSidebarTexture(button, "pushed", 0.102, 0.153, 0.204, 1)
-        local disabled = AcquirePanelPresetSidebarTexture(button, "disabled", 0.039, 0.063, 0.090, 0.75)
-        local highlight = AcquirePanelPresetSidebarTexture(button, "highlight", 0.306, 0.835, 0.914, 0.18)
-        button:SetNormalTexture(normal)
-        button:SetPushedTexture(pushed)
-        button:SetDisabledTexture(disabled)
-        button:SetHighlightTexture(highlight, "ADD")
-        if not button.__ExwindPanelPresetSidebarBorder then
-            local border = CreateFrame("Frame", nil, button, "BackdropTemplate")
-            border:SetAllPoints()
-            border:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-            border:EnableMouse(false)
-            button.__ExwindPanelPresetSidebarBorder = border
-        end
-        local border = button.__ExwindPanelPresetSidebarBorder
-        border:SetBackdropBorderColor(0.141, 0.216, 0.278, 1)
-        border:Show()
-        if fontString then
-            if role == "delete" then
-                fontString:SetTextColor(0.929, 0.349, 0.392, 1)
-            elseif role == "add" then
-                fontString:SetTextColor(0.306, 0.835, 0.914, 1)
-            else
-                fontString:SetTextColor(0.906, 0.941, 0.969, 1)
-            end
-        end
-    else
-        if button.__ExwindPanelPresetSidebarBorder then
-            button.__ExwindPanelPresetSidebarBorder:Hide()
-        end
-        if button.SetNormalAtlas then button:SetNormalAtlas("common-button-tertiary-normal") end
-        if button.SetPushedAtlas then button:SetPushedAtlas("common-button-tertiary-pressed") end
-        if button.SetDisabledAtlas then button:SetDisabledAtlas("common-button-tertiary-disabled") end
-        if button.SetHighlightAtlas then button:SetHighlightAtlas("common-button-tertiary-normal", "ADD") end
-        if fontString then fontString:SetTextColor(1, 0.82, 0, 1) end
+    -- These are settings controls in both placements. Reuse the one EXUI
+    -- button painter instead of reviving a second sidebar/native-atlas skin.
+    button._exButtonVariant = role == "delete" and "danger"
+        or (role == "add" and "primary" or "secondary")
+    if button.__ExwindPanelPresetSidebarBorder then
+        button.__ExwindPanelPresetSidebarBorder:Hide()
     end
+    EXUI:ApplyControlAppearance(button)
 end
 
 local ReleasePanelPresetThumbnail
@@ -938,8 +1111,7 @@ local function CreatePanelPresetThumbnail(parent, width, height)
     local view = CreateFrame("Frame", nil, parent, "BackdropTemplate")
     view:SetSize(width, height)
     view:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-    view:SetBackdropColor(0.20, 0.23, 0.29, 1)
-    view:SetBackdropBorderColor(0.75, 0.82, 0.94, 0.70)
+    EXUI:ApplyStandardPreviewShellStyle(view, true)
     if type(view.SetClipsChildren) == "function" then view:SetClipsChildren(true) end
     local host = CreateFrame("Frame", nil, view)
     host:SetPoint("CENTER", view, "CENTER", 0, 0)
@@ -1127,7 +1299,8 @@ local function PlacePanelStylePresetControls(dock, controls)
     local placement = dock.__ExwindPanelStylePresetPlacement
     local host = placement and placement.host
     if not host or type(host.SetPoint) ~= "function" then host = dock end
-    local mode = placement and placement.mode == "sidebar" and "sidebar" or "inline"
+    local mode = placement and placement.mode
+    if mode ~= "sidebar" and mode ~= "preview-rail" then mode = "inline" end
     controls.host = host
     controls.layoutMode = mode
     controls.bar:SetParent(host)
@@ -1135,8 +1308,27 @@ local function PlacePanelStylePresetControls(dock, controls)
     if mode == "sidebar" then
         controls.bar:SetPoint("TOPLEFT", host, "TOPLEFT", 9, -40)
         controls.bar:SetPoint("TOPRIGHT", host, "TOPRIGHT", -9, -40)
+    elseif mode == "preview-rail" then
+        controls.bar:SetPoint("TOPLEFT", host, "TOPLEFT", 5, -4)
+    elseif host ~= dock then
+        controls.bar:SetPoint("LEFT", host, "LEFT", 0, 0)
     else
         controls.bar:SetPoint("TOPLEFT", dock, "TOPLEFT", 10, -8)
+    end
+end
+
+local function SetPanelStylePresetDropdownSelection(controls, slot)
+    local dropdown = controls and controls.presetDropdown
+    if not dropdown then return end
+    local entry = controls.entriesBySlot and controls.entriesBySlot[slot]
+    if controls.dropdownCustomOnly and entry and not entry.dropdown then entry = nil end
+    dropdown._currentValue = entry and entry.slot or nil
+    local text = entry and entry.label or (controls.dropdownCustomOnly
+        and (L["自定义样式"] or "自定义样式") or (L["选择样式"] or "选择样式"))
+    if dropdown.Text then
+        dropdown.Text:SetText(text)
+    elseif dropdown.SetText then
+        dropdown:SetText(text)
     end
 end
 
@@ -1149,15 +1341,152 @@ local function AcquirePanelStylePresetControls(dock)
 
     controls = {}
     local bar = CreateFrame("Frame", nil, dock)
-    bar:SetSize(1, 24)
+    bar:SetSize(322, 30)
     controls.bar = bar
     controls.buttons = {}
     controls.deleteButtons = {}
-    controls.addButton = CreatePanelPresetButton(bar, 96, L["新增样式"])
+    controls.builtinButtons = {}
+
+    for _, entry in ipairs({
+        { slot = "A", label = "A" },
+        { slot = "B", label = "B" },
+    }) do
+        local slot = entry.slot
+        local button = EXUI:CreateButton(bar, 38, 28, entry.label, nil, { compact = true })
+        button:SetScript("OnClick", function()
+            local owner = controls.owner
+            if not owner then return end
+            owner:HideStylePresetTooltip()
+            if controls.layoutMode == "preview-rail" then
+                owner:OpenStylePresetConfirmation(slot, "apply")
+                return
+            end
+            controls.selectedSlot = slot
+            owner:RefreshStylePresetButtons()
+        end)
+        button:HookScript("OnEnter", function(self)
+            local owner = controls.owner
+            if owner then owner:ShowStylePresetTooltip(self, slot) end
+        end)
+        button:HookScript("OnLeave", function()
+            local owner = controls.owner
+            if owner then owner:HideStylePresetTooltip() end
+        end)
+        button:Hide()
+        controls.builtinButtons[slot] = button
+    end
+
+    controls.presetDropdown = EXUI:CreateDropdown(bar, 116, "", {}, nil, function(slot)
+        local owner = controls.owner
+        if not owner then return end
+        owner:HideStylePresetTooltip()
+        controls.selectedSlot = slot
+        owner:RefreshStylePresetButtons()
+        if controls.layoutMode == "preview-rail" then
+            owner:OpenStylePresetConfirmation(slot, controls.editMode and "delete" or "apply")
+        end
+    end)
+    controls.presetDropdown:SetPoint("LEFT", bar, "LEFT", 0, 0)
+    if controls.presetDropdown.labelText then controls.presetDropdown.labelText:Hide() end
+    controls.presetDropdown:HookScript("OnEnter", function(dropdown)
+        local owner = controls.owner
+        if owner and controls.selectedSlot
+            and (not controls.dropdownCustomOnly or ParseCustomStylePresetID(controls.selectedSlot)) then
+            owner:ShowStylePresetTooltip(dropdown, controls.selectedSlot)
+        end
+    end)
+    controls.presetDropdown:HookScript("OnLeave", function()
+        local owner = controls.owner
+        if owner then owner:HideStylePresetTooltip() end
+    end)
+
+    controls.applyStyleButton = EXUI:CreateButton(bar, 52, 28, L["应用"], nil,
+        { compact = true, variant = "primary" })
+    controls.applyStyleButton:SetPoint("LEFT", controls.presetDropdown, "RIGHT", 6, 0)
+    controls.applyStyleButton:SetScript("OnClick", function()
+        local owner = controls.owner
+        if owner and controls.selectedSlot then
+            owner:OpenStylePresetConfirmation(controls.selectedSlot, "apply")
+        end
+    end)
+
+    controls.addButton = EXUI:CreateButton(bar, 82, 28, "+ " .. (L["新增样式"] or "新增样式"), nil,
+        { compact = true, variant = "primary" })
+    controls.addButton:SetPoint("LEFT", controls.applyStyleButton, "RIGHT", 6, 0)
     controls.addButton:SetScript("OnClick", function()
         local owner = controls.owner
         if owner then owner:OpenAddStylePresetConfirmation() end
     end)
+    controls.addButton:HookScript("OnEnter", function(self)
+        if controls.layoutMode == "preview-rail" and GameTooltip then
+            GameTooltip:SetOwner(self, "ANCHOR_TOP")
+            GameTooltip:SetText(L["新增样式"] or "新增样式")
+            GameTooltip:Show()
+        end
+    end)
+    controls.addButton:HookScript("OnLeave", function(self)
+        if GameTooltip and GameTooltip:GetOwner() == self then GameTooltip:Hide() end
+    end)
+    controls.deleteButton = EXUI:CreateButton(bar, 54, 28, L["删除"], nil,
+        { compact = true, variant = "danger" })
+    controls.deleteButton:SetPoint("LEFT", controls.addButton, "RIGHT", 6, 0)
+    controls.deleteButton:SetScript("OnClick", function()
+        local owner = controls.owner
+        local slot = controls.selectedSlot
+        if owner and ParseCustomStylePresetID(slot) then
+            owner:OpenStylePresetConfirmation(slot, "delete")
+        end
+    end)
+
+    controls.editButton = EXUI:CreateButton(bar, 46, 28, L["编辑"] or "编辑", nil, { compact = true })
+    controls.editButton:SetScript("OnClick", function()
+        local owner = controls.owner
+        if not owner then return end
+        controls.editMode = not controls.editMode
+        owner:HideStylePresetTooltip()
+        owner:RefreshStylePresetButtons()
+    end)
+    controls.editButton:HookScript("OnEnter", function(self)
+        if controls.layoutMode == "preview-rail" and GameTooltip then
+            GameTooltip:SetOwner(self, "ANCHOR_TOP")
+            GameTooltip:SetText(L["编辑"] or "编辑")
+            GameTooltip:Show()
+        end
+    end)
+    controls.editButton:HookScript("OnLeave", function(self)
+        if GameTooltip and GameTooltip:GetOwner() == self then GameTooltip:Hide() end
+    end)
+    controls.editButton:Hide()
+
+    for index = 1, MAX_CUSTOM_STYLE_PRESETS do
+        local customButton = EXUI:CreateButton(bar, 180, 24, "", nil, { compact = true })
+        customButton:SetScript("OnClick", function(self)
+            local owner = controls.owner
+            local slot = self._exPresetSlot
+            if owner and slot then owner:OpenStylePresetConfirmation(slot, "apply") end
+        end)
+        customButton:HookScript("OnEnter", function(self)
+            local owner = controls.owner
+            local slot = self._exPresetSlot
+            if owner and slot then owner:ShowStylePresetTooltip(self, slot) end
+        end)
+        customButton:HookScript("OnLeave", function()
+            local owner = controls.owner
+            if owner then owner:HideStylePresetTooltip() end
+        end)
+        customButton:Hide()
+        controls.buttons[index] = customButton
+
+        local deleteButton = EXUI:CreateButton(bar, 40, 24, L["删除"] or "删除", nil,
+            { compact = true, variant = "danger" })
+        deleteButton:SetScript("OnClick", function(self)
+            local owner = controls.owner
+            local slot = self._exPresetSlot
+            if owner and slot then owner:OpenStylePresetConfirmation(slot, "delete") end
+        end)
+        deleteButton:Hide()
+        controls.deleteButtons[index] = deleteButton
+    end
 
     local confirm = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
     confirm:SetSize(430, 260)
@@ -1167,8 +1496,8 @@ local function AcquirePanelStylePresetControls(dock)
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         edgeSize = 1,
     })
-    confirm:SetBackdropColor(0.10, 0.12, 0.17, 1)
-    confirm:SetBackdropBorderColor(0.35, 0.72, 1.00, 1)
+    confirm:SetBackdropColor(unpack(GC.popup))
+    confirm:SetBackdropBorderColor(unpack(GC.popupBorder))
     confirm:SetFrameStrata("TOOLTIP")
     confirm:SetToplevel(true)
     confirm:EnableMouse(true)
@@ -1179,8 +1508,13 @@ local function AcquirePanelStylePresetControls(dock)
         if not owner or not owner.stylePresetPending then return end
         owner.stylePresetPending = nil
         controls.fontCheck:SetChecked(false)
-        for _, button in ipairs(controls.buttons) do button:Enable() end
+        controls.presetDropdown:Enable()
+        controls.applyStyleButton:Enable()
         controls.addButton:Enable()
+        controls.deleteButton:Enable()
+        controls.editButton:Enable()
+        for _, button in pairs(controls.builtinButtons) do button:Enable() end
+        for _, button in ipairs(controls.buttons) do button:Enable() end
         for _, button in ipairs(controls.deleteButtons) do button:Enable() end
         if owner.RefreshStylePresetButtons then owner:RefreshStylePresetButtons() end
         if frame:IsShown() then frame:Hide() end
@@ -1190,34 +1524,49 @@ local function AcquirePanelStylePresetControls(dock)
 
     local title = confirm:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOP", confirm, "TOP", 0, -14)
+    title:SetTextColor(unpack(GC.text))
     controls.title = title
     local description = confirm:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     description:SetPoint("TOP", title, "BOTTOM", 0, -7)
     description:SetText(L["一次性覆盖当前外观；本体位置与业务设置不会改变。"])
+    description:SetTextColor(unpack(GC.textDim))
     controls.description = description
 
     local confirmPreview = CreatePanelPresetThumbnail(confirm, 390, 120)
     confirmPreview:SetPoint("TOP", confirm, "TOP", 0, -54)
     controls.confirmPreview = confirmPreview
 
-    local fontCheck = CreateFrame("CheckButton", nil, confirm, "UICheckButtonTemplate")
-    fontCheck:SetSize(24, 24)
-    fontCheck:SetPoint("BOTTOMLEFT", confirm, "BOTTOMLEFT", 112, 47)
-    fontCheck:SetScript("OnClick", function()
+    local fontControl = EXUI:CreateCheckbox(confirm, L["同时覆盖字体（LSM）"], false, function()
         local owner = controls.owner
         if owner then owner:RefreshStylePresetConfirmationPreview() end
     end)
+    fontControl:SetSize(230, 28)
+    fontControl:SetPoint("BOTTOMLEFT", confirm, "BOTTOMLEFT", 112, 45)
+    local fontCheck = fontControl.checkbox
     controls.fontCheck = fontCheck
-    local fontLabel = confirm:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    fontLabel:SetPoint("LEFT", fontCheck, "RIGHT", 4, 0)
-    fontLabel:SetText(L["同时覆盖字体（LSM）"])
+    controls.fontControl = fontControl
+    local fontLabel = fontControl.label
     controls.fontLabel = fontLabel
 
     local applyButton = CreatePanelPresetButton(confirm, 92, L["确认应用"])
     applyButton:SetPoint("BOTTOMRIGHT", confirm, "BOTTOM", -5, 10)
     applyButton:SetScript("OnClick", function()
         local owner = controls.owner
-        if owner then owner:ConfirmStylePreset() end
+        if not owner then return end
+        local pending = owner.stylePresetPending
+        local slot = pending and pending.slot
+        local action = pending and pending.action
+        local applied = owner:ConfirmStylePreset()
+        if applied then
+            if action == "delete" then
+                if controls.activeSlot == slot then controls.activeSlot = nil end
+                if controls.selectedSlot == slot then controls.selectedSlot = nil end
+            elseif action == "apply" or action == "add" then
+                controls.activeSlot = slot
+                controls.selectedSlot = slot
+            end
+        end
+        if owner.RefreshStylePresetButtons then owner:RefreshStylePresetButtons() end
     end)
     controls.applyButton = applyButton
     local cancelButton = CreatePanelPresetButton(confirm, 92, L["取消"])
@@ -1231,8 +1580,8 @@ local function AcquirePanelStylePresetControls(dock)
     local tooltip = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
     tooltip:SetSize(360, 154)
     tooltip:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-    tooltip:SetBackdropColor(0.10, 0.12, 0.17, 1)
-    tooltip:SetBackdropBorderColor(0.35, 0.72, 1.00, 1)
+    tooltip:SetBackdropColor(unpack(GC.popup))
+    tooltip:SetBackdropBorderColor(unpack(GC.popupBorder))
     tooltip:SetFrameStrata("TOOLTIP")
     tooltip:SetToplevel(true)
     tooltip:EnableMouse(false)
@@ -1240,6 +1589,7 @@ local function AcquirePanelStylePresetControls(dock)
     controls.tooltip = tooltip
     local tooltipTitle = tooltip:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     tooltipTitle:SetPoint("TOP", tooltip, "TOP", 0, -10)
+    tooltipTitle:SetTextColor(unpack(GC.text))
     controls.tooltipTitle = tooltipTitle
     local tooltipPreview = CreatePanelPresetThumbnail(tooltip, 330, 110)
     tooltipPreview:SetPoint("BOTTOM", tooltip, "BOTTOM", 0, 8)
@@ -1261,7 +1611,7 @@ function EXUI:SetPanelStylePresetControlsHost(dock, host, mode)
     end
     dock.__ExwindPanelStylePresetPlacement = host and {
         host = host,
-        mode = mode == "sidebar" and "sidebar" or "inline",
+        mode = (mode == "sidebar" or mode == "preview-rail") and mode or "inline",
     } or nil
     local controls = dock.__ExwindPanelStylePresetControls
     if not controls then return true end
@@ -1300,109 +1650,151 @@ local function CreatePanelPreview(kind, dock, moduleKey, callbacks, factory)
 
         PlacePanelStylePresetControls(self.dock, controls)
         local sidebar = controls.layoutMode == "sidebar"
+        local previewRail = controls.layoutMode == "preview-rail"
         local entries = {
-            { slot = "A", label = L["样式 A"], custom = false, x = 0, y = 0, width = 82 },
-            { slot = "B", label = L["样式 B"], custom = false, x = 88, y = 0, width = 82 },
+            { slot = "A", label = L["样式 A"], custom = false },
+            { slot = "B", label = L["样式 B"], custom = false },
         }
         local _, customPresets = GetCustomStylePresetStore(descriptor.family)
-        for row, preset in ipairs(customPresets) do
+        for index, preset in ipairs(customPresets) do
             entries[#entries + 1] = {
                 slot = CUSTOM_STYLE_PRESET_PREFIX .. tostring(preset.id),
                 label = L["自定义样式"] .. tostring(preset.id),
                 custom = true,
-                x = 0,
-                y = -row * 30,
-                width = 118,
-                customRow = row,
                 customID = preset.id,
+                dropdown = index > 2,
             }
         end
-
-        for index, entry in ipairs(entries) do
-            local button = controls.buttons[index]
-            if not button then
-                button = CreatePanelPresetButton(controls.bar, 82, entry.label)
-                button:SetScript("OnClick", function(clicked)
-                    local owner = controls.owner
-                    if owner then
-                        owner:HideStylePresetTooltip()
-                        owner:OpenStylePresetConfirmation(clicked.presetSlot, "apply")
-                    end
-                end)
-                button:SetScript("OnEnter", function(clicked)
-                    local owner = controls.owner
-                    if owner then owner:ShowStylePresetTooltip(clicked, clicked.presetSlot) end
-                end)
-                button:SetScript("OnLeave", function()
-                    local owner = controls.owner
-                    if owner then owner:HideStylePresetTooltip() end
-                end)
-                controls.buttons[index] = button
-            end
-            button.presetSlot = entry.slot
-            button.isCustomStylePreset = entry.custom
-            button:SetSize(entry.width, 24)
-            button:SetText(entry.label)
-            SetPanelPresetButtonPresentation(button, sidebar, "preset")
-            button:ClearAllPoints()
-            if sidebar then
-                local y = -(index - 1) * 30
-                button:SetPoint("TOPLEFT", controls.bar, "TOPLEFT", 0, y)
-                button:SetPoint("TOPRIGHT", controls.bar, "TOPRIGHT", entry.custom and -30 or 0, y)
-            else
-                button:SetPoint("TOPLEFT", controls.bar, "TOPLEFT", entry.x, entry.y)
-            end
-            button:SetShown(true)
-
-            if entry.custom then
-                local deleteButton = controls.deleteButtons[entry.customRow]
-                if not deleteButton then
-                    deleteButton = CreatePanelPresetButton(controls.bar, 140, "")
-                    deleteButton:SetScript("OnClick", function(clicked)
-                        local owner = controls.owner
-                        if owner then owner:OpenStylePresetConfirmation(clicked.presetSlot, "delete") end
-                    end)
-                    controls.deleteButtons[entry.customRow] = deleteButton
-                end
-                deleteButton.presetSlot = entry.slot
-                deleteButton:SetText(sidebar and "×" or (L["删除自定义样式"] .. tostring(entry.customID)))
-                SetPanelPresetButtonPresentation(deleteButton, sidebar, "delete")
-                deleteButton:ClearAllPoints()
-                if sidebar then
-                    local y = -(index - 1) * 30
-                    deleteButton:SetSize(24, 24)
-                    deleteButton:SetPoint("TOPRIGHT", controls.bar, "TOPRIGHT", 0, y)
-                else
-                    deleteButton:SetSize(140, 24)
-                    deleteButton:SetPoint("TOPLEFT", controls.bar, "TOPLEFT", 124, entry.y)
-                end
-                deleteButton:Show()
+        local items, entriesBySlot = {}, {}
+        for _, entry in ipairs(entries) do
+            entriesBySlot[entry.slot] = entry
+            if not previewRail or entry.dropdown then
+                items[#items + 1] = { entry.label, entry.slot }
             end
         end
-        for index = #entries + 1, #controls.buttons do
-            controls.buttons[index]:Hide()
-        end
-        for index = #customPresets + 1, #controls.deleteButtons do
-            controls.deleteButtons[index]:Hide()
-        end
+        controls.entriesBySlot = entriesBySlot
+        controls.dropdownCustomOnly = previewRail
+        controls.presetDropdown._items = items
+        if controls.activeSlot and not entriesBySlot[controls.activeSlot] then controls.activeSlot = nil end
+        if controls.selectedSlot and not entriesBySlot[controls.selectedSlot] then controls.selectedSlot = nil end
+        SetPanelStylePresetDropdownSelection(controls, controls.selectedSlot)
 
+        controls.presetDropdown:ClearAllPoints()
+        controls.applyStyleButton:ClearAllPoints()
         controls.addButton:ClearAllPoints()
-        SetPanelPresetButtonPresentation(controls.addButton, sidebar, "add")
-        if sidebar then
-            controls.addButton:SetText("+ " .. L["新增样式"])
-            controls.addButton:SetPoint("TOPLEFT", controls.bar, "TOPLEFT", 0, -#entries * 30)
-            controls.addButton:SetPoint("TOPRIGHT", controls.bar, "TOPRIGHT", 0, -#entries * 30)
-            controls.bar:SetHeight((#entries + 1) * 30)
-        else
-            controls.addButton:SetText(L["新增样式"])
-            controls.addButton:SetPoint("TOPLEFT", controls.bar, "TOPLEFT", 176, 0)
-            controls.bar:SetSize(264, 24 + #customPresets * 30)
+        controls.deleteButton:ClearAllPoints()
+        controls.editButton:ClearAllPoints()
+        for _, button in pairs(controls.builtinButtons) do button:ClearAllPoints() end
+        for index = 1, MAX_CUSTOM_STYLE_PRESETS do
+            controls.buttons[index]:ClearAllPoints()
+            controls.deleteButtons[index]:ClearAllPoints()
         end
+        if previewRail then
+            controls.editMode = controls.editMode == true and #customPresets > 0
+            local columnWidth = 74
+            controls.addButton:SetSize(columnWidth, 24)
+            controls.editButton:SetSize(columnWidth, 24)
+            controls.builtinButtons.A:SetSize(columnWidth, 22)
+            controls.builtinButtons.B:SetSize(columnWidth, 22)
+            controls.addButton:SetPoint("TOPLEFT", controls.bar, "TOPLEFT", 0, 0)
+            controls.editButton:SetPoint("LEFT", controls.addButton, "RIGHT", 4, 0)
+            controls.builtinButtons.A:SetPoint("TOPLEFT", controls.addButton, "BOTTOMLEFT", 0, -4)
+            controls.builtinButtons.B:SetPoint("LEFT", controls.builtinButtons.A, "RIGHT", 4, 0)
+            controls.builtinButtons.A:SetText(L["样式 A"] or "样式 A")
+            controls.builtinButtons.B:SetText(L["样式 B"] or "样式 B")
+
+            controls.bar:SetSize(152, #customPresets > 2 and 110 or (#customPresets > 0 and 78 or 50))
+            for index = 1, MAX_CUSTOM_STYLE_PRESETS do
+                local preset = customPresets[index]
+                local button = controls.buttons[index]
+                local deleteButton = controls.deleteButtons[index]
+                if preset and index <= 2 then
+                    local slot = CUSTOM_STYLE_PRESET_PREFIX .. tostring(preset.id)
+                    button._exPresetSlot = slot
+                    button:SetText(L["自定义样式"] .. tostring(preset.id))
+                    button:SetWidth(74)
+                    if index == 1 then
+                        button:SetPoint("TOPLEFT", controls.builtinButtons.A, "BOTTOMLEFT", 0, -4)
+                    else
+                        button:SetPoint("LEFT", controls.buttons[1], "RIGHT", 4, 0)
+                    end
+                    button._exButtonVariant = controls.activeSlot == slot and "primary" or "secondary"
+                    EXUI:ApplyControlAppearance(button)
+                    button:Show()
+
+                    deleteButton._exPresetSlot = slot
+                    deleteButton:SetSize(20, 20)
+                    deleteButton:SetText("×")
+                    deleteButton:SetPoint("TOPRIGHT", button, "TOPRIGHT", -2, -2)
+                    deleteButton:SetFrameLevel(button:GetFrameLevel() + 1)
+                    deleteButton:SetShown(controls.editMode)
+                else
+                    button._exPresetSlot = nil
+                    button:Hide()
+                    deleteButton._exPresetSlot = nil
+                    deleteButton:Hide()
+                end
+            end
+            if #customPresets > 2 then
+                controls.presetDropdown:SetWidth(152)
+                controls.presetDropdown:SetPoint("TOPLEFT", controls.buttons[1], "BOTTOMLEFT", 0, -4)
+            end
+        elseif sidebar then
+            controls.editMode = false
+            controls.addButton:SetSize(82, 28)
+            controls.presetDropdown:SetPoint("TOPLEFT", controls.bar, "TOPLEFT", 0, 0)
+            controls.presetDropdown:SetPoint("TOPRIGHT", controls.bar, "TOPRIGHT", 0, 0)
+            controls.applyStyleButton:SetPoint("TOPLEFT", controls.presetDropdown, "BOTTOMLEFT", 0, -6)
+            controls.addButton:SetPoint("LEFT", controls.applyStyleButton, "RIGHT", 6, 0)
+            controls.deleteButton:SetPoint("TOPRIGHT", controls.presetDropdown, "BOTTOMRIGHT", 0, -6)
+            controls.bar:SetHeight(66)
+        else
+            controls.editMode = false
+            controls.presetDropdown:SetWidth(116)
+            controls.addButton:SetSize(82, 28)
+            controls.presetDropdown:SetPoint("LEFT", controls.bar, "LEFT", 0, 0)
+            controls.applyStyleButton:SetPoint("LEFT", controls.presetDropdown, "RIGHT", 6, 0)
+            controls.addButton:SetPoint("LEFT", controls.applyStyleButton, "RIGHT", 6, 0)
+            controls.deleteButton:SetPoint("LEFT", controls.addButton, "RIGHT", 6, 0)
+            controls.bar:SetSize(322, 30)
+        end
+        if not previewRail then
+            controls.editButton:Hide()
+            for index = 1, MAX_CUSTOM_STYLE_PRESETS do
+                controls.buttons[index]._exPresetSlot = nil
+                controls.buttons[index]:Hide()
+                controls.deleteButtons[index]._exPresetSlot = nil
+                controls.deleteButtons[index]:Hide()
+            end
+        end
+        for slot, button in pairs(controls.builtinButtons) do
+            button:SetShown(previewRail)
+            button._exButtonVariant = controls.activeSlot == slot and "primary" or "secondary"
+            EXUI:ApplyControlAppearance(button)
+        end
+        controls.presetDropdown:SetShown(not previewRail or #customPresets > 2)
+        controls.applyStyleButton:SetShown(not previewRail)
         controls.addButton:Show()
+        controls.addButton:SetText(previewRail and (L["新增"] or "新增")
+            or ("+ " .. (L["新增样式"] or "新增样式")))
+        controls.addButton._exButtonVariant = previewRail and "secondary" or "primary"
+        EXUI:ApplyControlAppearance(controls.addButton)
+        controls.editButton:SetShown(previewRail)
+        if previewRail then controls.editButton:SetText(L["编辑"] or "编辑") end
+        controls.editButton._exButtonVariant = controls.editMode and "primary" or "secondary"
+        EXUI:ApplyControlAppearance(controls.editButton)
+        controls.deleteButton:SetShown(not previewRail)
+        if controls.selectedSlot then controls.applyStyleButton:Enable() else controls.applyStyleButton:Disable() end
         if #customPresets >= MAX_CUSTOM_STYLE_PRESETS then
             controls.addButton:Disable()
         else
             controls.addButton:Enable()
+        end
+        if previewRail and #customPresets > 0 then controls.editButton:Enable() else controls.editButton:Disable() end
+        if ParseCustomStylePresetID(controls.selectedSlot) then
+            controls.deleteButton:Enable()
+        else
+            controls.deleteButton:Disable()
         end
         return true
     end
@@ -1480,8 +1872,13 @@ local function CreatePanelPreview(kind, dock, moduleKey, callbacks, factory)
         if not controls or controls.owner ~= self then return end
         controls.confirm:Hide()
         controls.fontCheck:SetChecked(false)
-        for _, button in ipairs(controls.buttons) do button:Enable() end
+        controls.presetDropdown:Enable()
+        controls.applyStyleButton:Enable()
         controls.addButton:Enable()
+        controls.deleteButton:Enable()
+        controls.editButton:Enable()
+        for _, button in pairs(controls.builtinButtons) do button:Enable() end
+        for _, button in ipairs(controls.buttons) do button:Enable() end
         for _, button in ipairs(controls.deleteButtons) do button:Enable() end
         controls.fontCheck:Show()
         controls.fontLabel:Show()
@@ -1501,8 +1898,9 @@ local function CreatePanelPreview(kind, dock, moduleKey, callbacks, factory)
             or (descriptor.family == "timerbar" and (self.kind == "TimerBar" or self.kind == "StandardTimerBar")))
         return self.released ~= true and familyMatches and controls and controls.owner == self
             and descriptor.moduleKey == self.moduleKey and EXUI.CurrentModule == self.moduleKey
-            and EXUI.ActivePageFrame == descriptor.container and Grid and Grid.ContainerStates
-            and Grid.ContainerStates[descriptor.container] == descriptor.gridState
+            and EXUI.ActivePageFrame == descriptor.container and Grid
+            and type(Grid.IsMountedOwnerCurrent) == "function"
+            and Grid:IsMountedOwnerCurrent(descriptor.container, descriptor.gridOwner)
             and descriptor.bodyWidget._exCompositeDb == descriptor.bodyDB
     end
 
@@ -1517,7 +1915,8 @@ local function CreatePanelPreview(kind, dock, moduleKey, callbacks, factory)
         if controls.confirm:IsShown() or not preset then return false end
         controls.tooltip:ClearAllPoints()
         controls.tooltip:SetPoint("TOPLEFT", button, "BOTTOMLEFT", 0, -5)
-        controls.tooltipTitle:SetText(tostring(button:GetText() or slot) .. L[" 预览（点击选择）"])
+        local entry = controls.entriesBySlot and controls.entriesBySlot[slot]
+        controls.tooltipTitle:SetText(tostring(entry and entry.label or slot) .. L[" 预览（点击选择）"])
         ApplyPanelPresetThumbnail(controls.tooltipPreview, descriptor.family, slot, descriptor.fonts, false,
             self.moduleKey, self.collection, nil, descriptor.bodyDB)
         controls.tooltip:Show()
@@ -1547,12 +1946,31 @@ local function CreatePanelPreview(kind, dock, moduleKey, callbacks, factory)
         controls.tooltip:Hide()
         controls.fontCheck:SetChecked(false)
         controls.bar:Hide()
+        controls.presetDropdown:Enable()
+        controls.presetDropdown:Hide()
+        controls.applyStyleButton:Enable()
+        controls.applyStyleButton:Hide()
+        controls.deleteButton:Enable()
+        controls.deleteButton:Hide()
+        controls.editButton:Enable()
+        controls.editButton:Hide()
+        controls.editMode = false
+        controls.dropdownCustomOnly = nil
+        controls.activeSlot = nil
+        controls.selectedSlot = nil
+        for _, button in pairs(controls.builtinButtons) do
+            button:Enable()
+            button:Hide()
+        end
         for _, button in ipairs(controls.buttons) do
             button:Enable()
             button:Hide()
         end
         controls.addButton:Hide()
-        for _, button in ipairs(controls.deleteButtons) do button:Hide() end
+        for _, button in ipairs(controls.deleteButtons) do
+            button:Enable()
+            button:Hide()
+        end
     end
 
     function session:BindStylePresets(descriptor)
@@ -1572,6 +1990,9 @@ local function CreatePanelPreview(kind, dock, moduleKey, callbacks, factory)
         self.stylePresetDescriptor = descriptor
         self.stylePresetToken = {}
         self.stylePresetPending = nil
+        controls.activeSlot = nil
+        controls.selectedSlot = nil
+        controls.editMode = false
         controls.bar:SetFrameLevel(self.dock:GetFrameLevel() + 100)
         controls.tooltip:SetFrameLevel(self.dock:GetFrameLevel() + 180)
         controls.confirm:SetFrameLevel(self.dock:GetFrameLevel() + 200)
@@ -1579,7 +2000,11 @@ local function CreatePanelPreview(kind, dock, moduleKey, callbacks, factory)
         controls.tooltip:Hide()
         controls.confirm:Hide()
         controls.bar:Show()
+        controls.presetDropdown:Show()
+        controls.applyStyleButton:Show()
+        controls.applyStyleButton:Disable()
         controls.addButton:Enable()
+        controls.deleteButton:Disable()
         self:RefreshStylePresetButtons()
         return self
     end
@@ -1605,7 +2030,7 @@ local function CreatePanelPreview(kind, dock, moduleKey, callbacks, factory)
             token = self.stylePresetToken,
             moduleKey = self.moduleKey,
             container = descriptor.container,
-            gridState = descriptor.gridState,
+            gridOwner = descriptor.gridOwner,
         }
         local presetName = type(preset.name) == "string" and preset.name or (L["样式 "] .. slot)
         local actionTitle = action == "delete" and L["删除 "] or (action == "add" and L["新增 "] or L["应用 "])
@@ -1618,8 +2043,13 @@ local function CreatePanelPreview(kind, dock, moduleKey, callbacks, factory)
         controls.fontCheck:SetChecked(false)
         controls.fontCheck:SetShown(action == "apply")
         controls.fontLabel:SetShown(action == "apply")
-        for _, button in ipairs(controls.buttons) do button:Disable() end
+        controls.presetDropdown:Disable()
+        controls.applyStyleButton:Disable()
         controls.addButton:Disable()
+        controls.deleteButton:Disable()
+        controls.editButton:Disable()
+        for _, button in pairs(controls.builtinButtons) do button:Disable() end
+        for _, button in ipairs(controls.buttons) do button:Disable() end
         for _, button in ipairs(controls.deleteButtons) do button:Disable() end
         self:RefreshStylePresetConfirmationPreview()
         controls.confirm:Show()
@@ -1634,7 +2064,7 @@ local function CreatePanelPreview(kind, dock, moduleKey, callbacks, factory)
         return self:IsStylePresetSessionCurrent() and type(pending) == "table" and type(descriptor) == "table"
             and pending.token == self.stylePresetToken
             and pending.moduleKey == self.moduleKey and pending.container == descriptor.container
-            and pending.gridState == descriptor.gridState
+            and pending.gridOwner == descriptor.gridOwner
     end
 
     function session:ApplyStylePreset(slot, includeLSMFont)
@@ -2093,11 +2523,11 @@ end
 
 local function SetTimelineOverlayVisual(overlay, visible, dragging)
     if dragging then
-        overlay:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 2 })
+        overlay:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
         overlay:SetBackdropBorderColor(1.00, 0.82, 0.20, 1.00)
         overlay:SetBackdropColor(1.00, 0.72, 0.12, 0.18)
     elseif visible then
-        overlay:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 2 })
+        overlay:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
         overlay:SetBackdropBorderColor(0.32, 0.82, 1.00, 0.95)
         overlay:SetBackdropColor(0.20, 0.65, 1.00, 0.10)
     else
@@ -2695,7 +3125,7 @@ function EXUI:CreateStandardTimelinePanelPreview(dock, moduleKey)
         root:Show()
         -- A declaration may deliberately extend name/alert geometry beyond the
         -- semantic track.  Fit the complete visual union rather than guessing
-        -- with track width, so an external-left dock never cuts off text.
+        -- with track width, so the standard canvas never cuts off text.
         FitTimelineRootToDock(self, timeline, anchor, timelineX, timelineY)
         return self
     end

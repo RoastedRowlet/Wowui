@@ -48,6 +48,36 @@ ExBoss._initLoaded = ExBoss._initLoaded or false
 ExBoss.DisplayPolicy = ExBoss.DisplayPolicy or {}
 local DisplayPolicy = ExBoss.DisplayPolicy
 
+function DisplayPolicy.GetTimelineBars()
+    return _G.EXBOSS12S2.ui.general.timelineBars
+end
+
+function DisplayPolicy.IsTimelineBarEnabled(barKind)
+    return DisplayPolicy.GetTimelineBars()[barKind] == true
+end
+
+-- 暴雪原生计时条的期望状态，是 encounterTimelineEnabled 的唯一决策点。
+-- 用户可能在团本完全不用 EXBoss，那时仍需要原生计时条；团本例外只在全局
+-- 关闭时才有意义，其他场景保持原来的全局选择。general 省略时读当前保存根，
+-- 导入与外观激活传入它们自己那份表。
+function DisplayPolicy.ShouldEnableBlizzardEncounterTimeline(general)
+    if type(general) ~= "table" then
+        local root = _G.EXBOSS12S2
+        general = type(root) == "table" and type(root.ui) == "table" and root.ui.general or nil
+    end
+    if type(general) ~= "table" then
+        return true
+    end
+    if general.disableBlizzardEncounterTimeline ~= true then
+        return true
+    end
+    if general.enableBlizzardTimelineInRaid ~= true then
+        return false
+    end
+    local _, instanceType = GetInstanceInfo()
+    return instanceType == "raid"
+end
+
 local function GetBarSourceSelections(barKind)
     local root = _G.EXBOSS12S2
     local general = type(root) == "table" and type(root.ui) == "table" and type(root.ui.general) == "table"

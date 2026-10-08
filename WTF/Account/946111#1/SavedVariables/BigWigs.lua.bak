@@ -164,12 +164,21 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1243900] = 3129591,
+},
+},
+},
+},
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["emphasize"] = false,
-["visibleBarLimit"] = 1,
 ["normalWidth"] = 120,
+["visibleBarLimit"] = 1,
+["emphasize"] = false,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -185,31 +194,14 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1243900] = 3129591,
-},
-},
-},
-},
 },
 ["myKeystones"] = {
-["Player-60-0F7B1446"] = {
-["playerRating"] = 2600,
-["specId"] = 256,
-["keyMap"] = 250,
-["name"] = "Madmareep",
-["keyLevel"] = 15,
-["realm"] = "Stormrage",
-},
 ["Player-60-0F7B141D"] = {
-["playerRating"] = 3896,
+["playerRating"] = 3898,
 ["specId"] = 262,
-["keyMap"] = 587,
+["keyMap"] = 0,
 ["name"] = "Zappyxatu",
-["keyLevel"] = 20,
+["keyLevel"] = 0,
 ["realm"] = "Stormrage",
 },
 ["Player-3676-0DF7D3EF"] = {
@@ -222,14 +214,14 @@ BigWigs3DB = {
 },
 ["Player-60-0F85ABEF"] = {
 ["playerRating"] = 3123,
-["specId"] = 102,
+["specId"] = 105,
 ["keyMap"] = 0,
 ["name"] = "Lonelylitten",
 ["keyLevel"] = 0,
 ["realm"] = "Stormrage",
 },
 },
-["prevWeeklyReset"] = 1790694000,
+["prevWeeklyReset"] = 1791298800,
 ["profiles"] = {
 ["Default"] = {
 },
@@ -533,7 +525,7 @@ BigWigsStatsDB = {
 [2987] = {
 [2849] = {
 ["heroic"] = {
-["kills"] = 4,
+["kills"] = 5,
 ["fkDuration"] = 449.6009999999951,
 ["wipes"] = 5,
 ["fkWipes"] = 1,
@@ -702,7 +694,7 @@ BigWigsStatsDB = {
 ["fkDate"] = "2026/08/23",
 },
 ["heroic"] = {
-["kills"] = 12,
+["kills"] = 13,
 ["fkDate"] = "2026/08/24",
 ["bestDate"] = "2026/09/15",
 ["fkWipes"] = 1,

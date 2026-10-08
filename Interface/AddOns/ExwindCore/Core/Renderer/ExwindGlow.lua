@@ -394,6 +394,36 @@ function EXUI:ReleaseGlow(target)
     end
 end
 
+-- Collection ItemRoot visual effects are transient.  The caller supplies ordinary
+-- body dimensions; neither the Glow facade nor this path reads protected geometry.
+function EXUI:ApplyCollectionItemVisualEffects(root, effects, width, height, baseScale)
+    if not root then return end
+    effects = type(effects) == "table" and effects or {}
+    local alpha = type(effects.alpha) == "table" and effects.alpha.value or nil
+    local scale = type(effects.scale) == "table" and effects.scale.value or nil
+    root:SetAlpha(alpha == nil and 1 or alpha)
+    root:SetScale((baseScale or 1) * (scale or 1))
+    local glow = effects.glow
+    if type(glow) ~= "table" then self:ReleaseGlow(root); return end
+    local color = type(glow.color) == "table" and glow.color or {}
+    self:ShowGlow(root, {
+        enabled = true, style = glow.style or "EDGE_FLOW",
+        width = width, height = height,
+        offset = glow.offset, frequency = glow.frequency,
+        particles = glow.particles, length = glow.length,
+        thickness = glow.thickness, direction = glow.direction,
+        scale = glow.scale,
+        r = color.r, g = color.g, b = color.b, a = color.a,
+    })
+end
+
+function EXUI:ReleaseCollectionItemVisualEffects(root, baseScale)
+    if not root then return end
+    self:ReleaseGlow(root)
+    root:SetAlpha(1)
+    root:SetScale(baseScale or 1)
+end
+
 --- 将 GlowSettings 的扁平 DB 结构翻译成运行时 Style；保留旧字段后缀以便无迁移读取。
 function EXUI:BuildGlowStyle(db, key, width, height)
     db = type(db) == "table" and db or {}

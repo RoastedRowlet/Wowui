@@ -149,6 +149,7 @@ local function MarkPopupShown()
     db.LastPopupAt = date("%Y-%m-%d %H:%M:%S")
 end
 
+-- [卡片/Grid 迁移边界] EXBoss 只提供更新日志 source/已读回调；窗口与内容布局归共享 ChangelogViewer，本项目不得复制或卡片化该窗口。
 Viewer:RegisterSource("boss", {
     title = "EXBoss",
     GetVersion = GetVersion,

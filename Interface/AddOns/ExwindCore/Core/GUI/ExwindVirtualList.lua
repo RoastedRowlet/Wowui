@@ -42,7 +42,7 @@ function VirtualList:Create(parent, options)
 
     -- A virtual list does not have a ScrollFrame to bind, but its visible
     -- scrollbar should still be the same native thin control as every page.
-    list.scrollBar = CreateFrame("EventFrame", nil, list, "MinimalScrollBar")
+    list.scrollBar = ExwindTools.UI:CreateScrollBar(list)
     list.scrollBar:SetPoint("TOPRIGHT", list, "TOPRIGHT", -2, -4)
     list.scrollBar:SetPoint("BOTTOMRIGHT", list, "BOTTOMRIGHT", -2, 4)
     list.scrollBar:Hide()

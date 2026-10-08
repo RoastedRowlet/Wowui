@@ -98,6 +98,7 @@ local function ApplyTextPresentation(item, presentation)
         if presentation.secretText == true then widget:SetSecretText(presentation.text) else widget:SetText(presentation.text or "") end
     end
     if type(presentation.color) == "table" then widget:SetColor(presentation.color) end
+    if presentation.hasColorComponents == true then widget:SetColorComponents(presentation.colorComponents) end
     local bounds = item.declaredBounds
     if presentation.unboundedWidth == true then
         -- 无界公告仍保留 producer 的固定 declaredBounds：TextCollection 的多行
@@ -119,6 +120,7 @@ end
 
 local function ResetOverlay(overlay, detach)
     if not overlay then return end
+    if overlay._canvasDriver then overlay._canvasDriver:CancelOverlay(overlay) end
     overlay:SetScript("OnUpdate", nil)
     overlay:SetScript("OnMouseDown", nil)
     overlay:SetScript("OnMouseUp", nil)
@@ -143,7 +145,7 @@ local function EnsureInteractionHighlight(overlay)
     if overlay.highlight then return overlay.highlight end
     local highlight = CreateFrame("Frame", nil, overlay, "BackdropTemplate")
     highlight:SetAllPoints(overlay)
-    highlight:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 2 })
+    highlight:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
     highlight:SetBackdropBorderColor(0.32, 0.82, 1.00, 0.95)
     highlight:SetBackdropColor(0.20, 0.65, 1.00, 0.10)
     highlight:Hide()
@@ -213,6 +215,13 @@ local function ConfigurePanelInteraction(collection, item, interaction)
         -- text collections still own their locked semantic layout.
         if button ~= "LeftButton" or interaction.movable ~= true
             or item.presentation.panelAnchorLocked ~= false then return end
+        if collection.canvasEditor then
+            local a = item.anchor or ResolveAnchor(item.presentation)
+            collection.canvasEditor:Begin(self, elementID, function(position)
+                ApplyTransientTextPosition(collection, position)
+            end, {x=a.x or 0,y=a.y or 0})
+            return
+        end
         local scale = (UIParent and UIParent:GetEffectiveScale()) or 1
         if scale <= 0 then scale = 1 end
         local cursorX, cursorY = GetCursorPosition()
@@ -239,6 +248,10 @@ local function ConfigurePanelInteraction(collection, item, interaction)
         end)
     end)
     overlay:SetScript("OnMouseUp", function(self, button)
+        if collection.canvasEditor then
+            if button == "LeftButton" then collection.canvasEditor:Finish(self) end
+            return
+        end
         if button ~= "LeftButton" then return end
         local drag = self._textCollectionDrag
         self:SetScript("OnUpdate", nil)
@@ -360,10 +373,15 @@ function EXUI:CreateTextCollection(parent, interactionMode, moduleKey, callbacks
         item.bodyWidth, item.bodyHeight = baseWidth * item.presentationScale, baseHeight * item.presentationScale
         item.root:SetScale(item.presentationScale)
         item.root:SetSize(baseWidth, baseHeight)
+        if item.visualEffects then
+            EXUI:ApplyCollectionItemVisualEffects(item.root, item.visualEffects,
+                baseWidth, baseHeight, item.presentationScale)
+        end
+        if item._collectionClickSpec then EXUI:ApplyCollectionItemClick(item, item._collectionClickSpec) end
         item.root:Show()
         ConfigurePanelInteraction(self, item, presentation.interaction)
         item.regions:SetConfigContextID(presentation.regionConfigContextID)
-        item.regions:Apply(presentation.regionElements)
+        item.regions:Apply(presentation.regionElements, presentation.elementContent)
         return item
     end
 
@@ -419,6 +437,22 @@ function EXUI:CreateTextCollection(parent, interactionMode, moduleKey, callbacks
     end
     function collection:GetBounds() return self.layout:GetBounds() end
     function collection:GetItems() return self.itemsByID end
+
+    function collection:SetItemVisualEffects(itemID, effects)
+        local item = self.itemsByID[itemID]
+        if not item or not item.root then return false end
+        item.visualEffects = type(effects) == "table" and effects or nil
+        local bounds = item.declaredBounds
+        EXUI:ApplyCollectionItemVisualEffects(item.root, item.visualEffects,
+            bounds.right - bounds.left, bounds.top - bounds.bottom, item.presentationScale)
+        return true
+    end
+
+    function collection:SetItemClickAction(itemID, spec)
+        local item = self.itemsByID[itemID]
+        if not item or not item.root then return false end
+        return EXUI:ApplyCollectionItemClick(item, spec)
+    end
     -- Runtime animations (for example a fading announcement) may adjust the
     -- item's root alpha without reaching through the collection into a private
     -- TextWidget/FontString tree.  The value is visual-only and never changes
@@ -470,12 +504,15 @@ function EXUI:CreateTextCollection(parent, interactionMode, moduleKey, callbacks
             item.alphaAnimation = nil
         end
         self.itemsByID[itemID] = nil
+        EXUI:ReleaseCollectionItemClick(item)
+        EXUI:ReleaseCollectionItemVisualEffects(item.root)
         ResetOverlay(item.interactionOverlay, true)
         if item.regions then item.regions:Release() end
         item.root:SetScale(1)
         item.widget:Release()
         ReleaseItemRoot(item.root)
         item.widget, item.root, item.presentation, item.declaredBounds, item.anchor, item.interactionOverlay, item.regions, item.presentationScale = nil, nil, nil, nil, nil, nil, nil, nil
+        item.visualEffects = nil
     end
     function collection:Release()
         for id in pairs(self.itemsByID) do self:ReleaseItem(id) end

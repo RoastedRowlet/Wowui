@@ -2,6 +2,9 @@
 -- [[ 位移技能CD提示 (No Move Skill Alert) ]]
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 local EXDB = _G.EXDB
 -- 本模块的 Panel/World/Runtime 三宿主全部依赖 EXUI。加载顺序异常时必须整体
@@ -290,62 +293,6 @@ local function AppendSkillConfigLayout(layout, startY)
     end
 end
 
-local function EX_RegisterLayout()
-    local layout = {
-        { key = "header", type = "header", x = 1, y = 1, w = 200, h = 8, label = L["位移技能CD提示"], labelSize = 25 },
-        { key = "enabled", type = "checkbox", x = 1, y = 13, w = 40, h = 8, label = L["启用"] },
-        { key = "header_skill_content", type = "header", x = 1, y = 105, w = 200, h = 8, label = L["显示内容"], labelSize = 20 },
-        { key = "h_MAGE", type = "header", x = 1, y = 115, w = 200, h = 8, label = L["|cff3fc7eb法师设置|r"], labelSize = 20 },
-        { key = "mage_enable", type = "checkbox", x = 1, y = 125, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_displayFormat", type = "description", x = 31, y = 126, w = 46, h = 6, label = L["|T135932:18:18:0:0:64:64:5:59:5:59|t 奥术  |T135810:18:18:0:0:64:64:5:59:5:59|t 火焰  |T135846:18:18:0:0:64:64:5:59:5:59|t 冰霜"] },
-        { key = "displayFormat", type = "input", x = 92, y = 126, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "h_DEATHKNIGHT", type = "header", x = 1, y = 133, w = 200, h = 8, label = L["|cffc41e3a死亡骑士设置|r"], labelSize = 20 },
-        { key = "dk_enable_steed", type = "checkbox", x = 1, y = 143, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_dk_fmt_steed", type = "description", x = 31, y = 145, w = 46, h = 6, label = L["|T135770:18:18:0:0:64:64:5:59:5:59|t 鲜血  |T135773:18:18:0:0:64:64:5:59:5:59|t 冰霜  |T135775:18:18:0:0:64:64:5:59:5:59|t 邪恶"] },
-        { key = "dk_fmt_steed", type = "input", x = 92, y = 146, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "h_ROGUE", type = "header", x = 1, y = 153, w = 216, h = 8, label = L["|cfffff468盗贼设置|r"], labelSize = 20 },
-        { key = "rogue_enable_shadow", type = "checkbox", x = 1, y = 163, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_rogue_fmt_shadow", type = "description", x = 31, y = 163, w = 46, h = 6, label = L["|T236270:18:18:0:0:64:64:5:59:5:59|t 奇袭  |T132320:18:18:0:0:64:64:5:59:5:59|t 敏锐"] },
-        { key = "rogue_fmt_shadow", type = "input", x = 92, y = 164, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "rogue_enable_phantom", type = "checkbox", x = 1, y = 173, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_rogue_fmt_phantom", type = "description", x = 31, y = 174, w = 46, h = 6, label = L["|T236286:18:18:0:0:64:64:5:59:5:59|t 狂徒"] },
-        { key = "rogue_fmt_phantom", type = "input", x = 92, y = 176, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "h_PALADIN", type = "header", x = 1, y = 183, w = 216, h = 8, label = L["|cfff48cba圣骑士设置|r"], labelSize = 20 },
-        { key = "paladin_enable_holy", type = "checkbox", x = 1, y = 193, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_paladin_fmt_holy", type = "description", x = 31, y = 213, w = 46, h = 6, label = L["|T135920:18:18:0:0:64:64:5:59:5:59|t 神圣"] },
-        { key = "paladin_fmt_holy", type = "input", x = 92, y = 193, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "paladin_enable_protection", type = "checkbox", x = 1, y = 203, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_paladin_fmt_protection", type = "description", x = 31, y = 193, w = 46, h = 6, label = L["|T236264:18:18:0:0:64:64:5:59:5:59|t 防护"] },
-        { key = "paladin_fmt_protection", type = "input", x = 92, y = 203, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "paladin_enable_retribution", type = "checkbox", x = 1, y = 213, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_paladin_fmt_retribution", type = "description", x = 31, y = 203, w = 46, h = 6, label = L["|T135873:18:18:0:0:64:64:5:59:5:59|t 惩戒"] },
-        { key = "paladin_fmt_retribution", type = "input", x = 92, y = 213, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "h_DEMONHUNTER", type = "header", x = 1, y = 224, w = 216, h = 8, label = L["|cffa330c9恶魔猎手设置|r"], labelSize = 20 },
-        { key = "dh_enable_havoc", type = "checkbox", x = 1, y = 233, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_dh_fmt_havoc", type = "description", x = 31, y = 243, w = 46, h = 6, label = L["|T1247264:18:18:0:0:64:64:5:59:5:59|t 浩劫"] },
-        { key = "dh_fmt_havoc", type = "input", x = 92, y = 243, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "dh_enable_vengeance", type = "checkbox", x = 1, y = 243, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_dh_fmt_vengeance", type = "description", x = 31, y = 253, w = 46, h = 6, label = L["|T1247265:18:18:0:0:64:64:5:59:5:59|t 复仇"] },
-        { key = "dh_fmt_vengeance", type = "input", x = 92, y = 253, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "dh_enable_devourer", type = "checkbox", x = 1, y = 253, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_dh_fmt_devourer", type = "description", x = 31, y = 233, w = 46, h = 6, label = L["|T7455385:18:18:0:0:64:64:5:59:5:59|t 噬灭"] },
-        { key = "dh_fmt_devourer", type = "input", x = 92, y = 233, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "h_EVOKER", type = "header", x = 1, y = 263, w = 216, h = 8, label = L["|cff33937f唤魔师设置|r"], labelSize = 20 },
-        { key = "evoker_enable_devastation", type = "checkbox", x = 1, y = 273, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_evoker_fmt_devastation", type = "description", x = 31, y = 273, w = 46, h = 6, label = L["|T4511811:18:18:0:0:64:64:5:59:5:59|t 湮灭"] },
-        { key = "evoker_fmt_devastation", type = "input", x = 92, y = 273, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "evoker_enable_preservation", type = "checkbox", x = 1, y = 283, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_evoker_fmt_preservation", type = "description", x = 31, y = 283, w = 46, h = 6, label = L["|T4511812:18:18:0:0:64:64:5:59:5:59|t 恩护"] },
-        { key = "evoker_fmt_preservation", type = "input", x = 92, y = 283, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-        { key = "evoker_enable_augmentation", type = "checkbox", x = 1, y = 293, w = 24, h = 6, label = L["启用"] },
-        { key = "desc_evoker_fmt_augmentation", type = "description", x = 31, y = 293, w = 46, h = 6, label = L["|T5198700:18:18:0:0:64:64:5:59:5:59|t 增辉"] },
-        { key = "evoker_fmt_augmentation", type = "input", x = 92, y = 293, w = 46, h = 6, label = L["显示CD时的内容 (用 %t 代表时间)"], labelPos = "top" },
-    }
-
-    return layout
-end
-local GUI_STATIC  = EX_RegisterLayout()
-
 -- =============================================================
 -- 默认设置
 -- =============================================================
@@ -401,10 +348,16 @@ local EX_DEFAULTS = {
     evoker_fmt_augmentation    = "我没有闪 (%t)",
 }
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local MODULE_SPEC = {
     RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
     moduleKey = MODULE_KEY,
     kind = "text",
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     anchor = {
         dbPath = "font_alert",
         xKey = "x",
@@ -419,27 +372,147 @@ local MODULE_SPEC = {
         -- GUI 位于 font_alert 作用域；直接绑定该表，不能再创建 font_alert.anchorGroup。
         bindRoot = true,
     },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     preview = {
         positionGuiKeys = {},
         elements = {
             ["nomoveskillalert.body"] = { guiKey = "font_alert", movable = false, tooltip = L["位移技能CD提示"] },
         },
     },
+    -- =========================================================
+    -- 二、默认配置与配置访问 | Defaults and Configuration Access
+    -- =========================================================
     defaults = { root = EX_DEFAULTS },
+    -- [卡片迁移边界：设置页] 仅可按统一规范调整下列 gui.static/gui.fields 的 x/y/w/h 与卡片分组。
+    -- 下列声明的职业顺序、key/type/parentKey、DB path、anchor/preview/defaults 与回调均禁止修改；复合控件整体引用。
+    -- =========================================================
+    -- 三、GUI 声明 | GUI Declarations
+    -- =========================================================
     gui = {
-        static = GUI_STATIC,
-        fields = {
-            { key = "font_alert", type = "fontgroup", x = 1, y = 50, w = 200, h = 50, label = L["提示文字"], labelSize = 20 },
+        version = 1,
+        sections = {
             {
-                key = "anchorGroup",
-                parentKey = "font_alert",
-                type = "anchorgroup",
-                x = 1,
-                y = 30,
-                w = 200,
-                h = 18,
-                measure = true,
-                label = L["锚点设置"]
+                kind = "settings", id = "common", title = L["通用设置"],
+                items = {
+                    { key = "enabled", type = "switch", label = L["启用"] },
+                },
+            },
+            {
+                kind = "table", id = "mage", title = L["|cff3fc7eb法师设置|r"],
+                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
+                supportsAdd = false,
+                records = {
+                    { cells = {
+                        { key = "mage_enable", type = "switch" },
+                        { key = "desc_displayFormat", type = "description", label = L["|T135932:18:18:0:0:64:64:5:59:5:59|t 奥术  |T135810:18:18:0:0:64:64:5:59:5:59|t 火焰  |T135846:18:18:0:0:64:64:5:59:5:59|t 冰霜"] },
+                        { key = "displayFormat", type = "input" },
+                    } },
+                },
+            },
+            {
+                kind = "table", id = "deathknight", title = L["|cffc41e3a死亡骑士设置|r"],
+                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
+                supportsAdd = false,
+                records = {
+                    { cells = {
+                        { key = "dk_enable_steed", type = "switch" },
+                        { key = "desc_dk_fmt_steed", type = "description", label = L["|T135770:18:18:0:0:64:64:5:59:5:59|t 鲜血  |T135773:18:18:0:0:64:64:5:59:5:59|t 冰霜  |T135775:18:18:0:0:64:64:5:59:5:59|t 邪恶"] },
+                        { key = "dk_fmt_steed", type = "input" },
+                    } },
+                },
+            },
+            {
+                kind = "table", id = "rogue", title = L["|cfffff468盗贼设置|r"],
+                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
+                supportsAdd = false,
+                records = {
+                    { cells = {
+                        { key = "rogue_enable_shadow", type = "switch" },
+                        { key = "desc_rogue_fmt_shadow", type = "description", label = L["|T236270:18:18:0:0:64:64:5:59:5:59|t 奇袭  |T132320:18:18:0:0:64:64:5:59:5:59|t 敏锐"] },
+                        { key = "rogue_fmt_shadow", type = "input" },
+                    } },
+                    { cells = {
+                        { key = "rogue_enable_phantom", type = "switch" },
+                        { key = "desc_rogue_fmt_phantom", type = "description", label = L["|T236286:18:18:0:0:64:64:5:59:5:59|t 狂徒"] },
+                        { key = "rogue_fmt_phantom", type = "input" },
+                    } },
+                },
+            },
+            {
+                kind = "table", id = "paladin", title = L["|cfff48cba圣骑士设置|r"],
+                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
+                supportsAdd = false,
+                records = {
+                    { cells = {
+                        { key = "paladin_enable_holy", type = "switch" },
+                        { key = "desc_paladin_fmt_holy", type = "description", label = L["|T135920:18:18:0:0:64:64:5:59:5:59|t 神圣"] },
+                        { key = "paladin_fmt_holy", type = "input" },
+                    } },
+                    { cells = {
+                        { key = "paladin_enable_protection", type = "switch" },
+                        { key = "desc_paladin_fmt_protection", type = "description", label = L["|T236264:18:18:0:0:64:64:5:59:5:59|t 防护"] },
+                        { key = "paladin_fmt_protection", type = "input" },
+                    } },
+                    { cells = {
+                        { key = "paladin_enable_retribution", type = "switch" },
+                        { key = "desc_paladin_fmt_retribution", type = "description", label = L["|T135873:18:18:0:0:64:64:5:59:5:59|t 惩戒"] },
+                        { key = "paladin_fmt_retribution", type = "input" },
+                    } },
+                },
+            },
+            {
+                kind = "table", id = "demonhunter", title = L["|cffa330c9恶魔猎手设置|r"],
+                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
+                supportsAdd = false,
+                records = {
+                    { cells = {
+                        { key = "dh_enable_havoc", type = "switch" },
+                        { key = "desc_dh_fmt_havoc", type = "description", label = L["|T1247264:18:18:0:0:64:64:5:59:5:59|t 浩劫"] },
+                        { key = "dh_fmt_havoc", type = "input" },
+                    } },
+                    { cells = {
+                        { key = "dh_enable_vengeance", type = "switch" },
+                        { key = "desc_dh_fmt_vengeance", type = "description", label = L["|T1247265:18:18:0:0:64:64:5:59:5:59|t 复仇"] },
+                        { key = "dh_fmt_vengeance", type = "input" },
+                    } },
+                    { cells = {
+                        { key = "dh_enable_devourer", type = "switch" },
+                        { key = "desc_dh_fmt_devourer", type = "description", label = L["|T7455385:18:18:0:0:64:64:5:59:5:59|t 噬灭"] },
+                        { key = "dh_fmt_devourer", type = "input" },
+                    } },
+                },
+            },
+            {
+                kind = "table", id = "evoker", title = L["|cff33937f唤魔师设置|r"],
+                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
+                supportsAdd = false,
+                records = {
+                    { cells = {
+                        { key = "evoker_enable_devastation", type = "switch" },
+                        { key = "desc_evoker_fmt_devastation", type = "description", label = L["|T4511811:18:18:0:0:64:64:5:59:5:59|t 湮灭"] },
+                        { key = "evoker_fmt_devastation", type = "input" },
+                    } },
+                    { cells = {
+                        { key = "evoker_enable_preservation", type = "switch" },
+                        { key = "desc_evoker_fmt_preservation", type = "description", label = L["|T4511812:18:18:0:0:64:64:5:59:5:59|t 恩护"] },
+                        { key = "evoker_fmt_preservation", type = "input" },
+                    } },
+                    { cells = {
+                        { key = "evoker_enable_augmentation", type = "switch" },
+                        { key = "desc_evoker_fmt_augmentation", type = "description", label = L["|T5198700:18:18:0:0:64:64:5:59:5:59|t 增辉"] },
+                        { key = "evoker_fmt_augmentation", type = "input" },
+                    } },
+                },
+            },
+            {
+                kind = "composite", id = "anchor", title = L["锚点设置"],
+                component = "anchorgroup", key = "anchorGroup", parentKey = "font_alert",
+            },
+            {
+                kind = "composite", id = "font_alert", title = L["提示文字"],
+                component = "fontgroup", key = "font_alert",
             },
         },
     },
@@ -476,6 +549,12 @@ local function BodyBounds()
     return math.max(120, math.floor(size * 12)), math.max(32, math.floor(size + 20))
 end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function BuildPresentation(text, nativeRemainingDuration, nativeRemainingFormat)
     local width, height = BodyBounds()
     local halfWidth, halfHeight = width * 0.5, height * 0.5
@@ -557,6 +636,9 @@ end
 
 RefreshPreview()
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function GetCurrentSpecID()
     local specIndex = GetSpecialization and GetSpecialization()
     if not specIndex then return 0 end
@@ -766,6 +848,9 @@ end
 -- =============================================================
 -- 事件注册
 -- =============================================================
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", MODULE_KEY, function()
     C_Timer.After(1, RefreshActiveSkillData)
 end)
@@ -805,4 +890,7 @@ ExwindTools:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player", MODULE_KEY, 
 end)
 
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 ExwindTools:ReportReady(MODULE_KEY)

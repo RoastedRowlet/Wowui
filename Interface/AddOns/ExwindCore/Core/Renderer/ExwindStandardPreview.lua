@@ -268,8 +268,8 @@ local function ValidateDefinition(definition)
         end
         for index = 2, #(definition.children or {}) do
             local childKind = definition.children[index].kind
-            if childKind ~= "text" and childKind ~= "texture" then
-                Fail("material definition supports only text or texture children after its texture body")
+            if childKind ~= "text" and childKind ~= "texture" and childKind ~= "atlas" then
+                Fail("material definition supports only text, texture or atlas children after its texture body")
             end
         end
         if #(definition.extraChildHosts or {}) ~= 0 or #(definition.collectionDecorations or {}) ~= 0 then
@@ -1405,6 +1405,16 @@ local function ClearPreview(preview, keepSelection)
     if preview.layout then preview.layout:Clear() end
 end
 
+-- Shared pure preflight for a transaction containing several preview layers.
+-- Uses exactly the same snapshot/validation rules as Materialize, without UI.
+function EXUI:ValidateStandardPreviewData(definition, model)
+    local definitionSnapshot = SnapshotPlain(definition, "definition")
+    local modelSnapshot = SnapshotPlain(model, "model")
+    ValidateDefinition(definitionSnapshot)
+    ValidateModel(definitionSnapshot, modelSnapshot)
+    return true
+end
+
 function EXUI:CreateStandardPreview(host, options)
     -- CreateFrame 是全局构造函数，不是 Frame 实例的方法。标准预览宿主必须是
     -- 真正的基础 Frame；仅有同名 GetObjectType 方法的伪表、Texture、FontString
@@ -1612,13 +1622,17 @@ function EXUI:CreateStandardPreview(host, options)
             element.text:SetShown(shown)
             return true
         end
-        if declaration.kind ~= "texture" or not element.region then return false end
+        if (declaration.kind ~= "texture" and declaration.kind ~= "atlas") or not element.region then return false end
         local width = data and data.width or declaration.width or 16
         local height = data and data.height or declaration.height or 16
         element.region:SetSize(width, height)
         ApplyAnchor(element.region, declaration.anchor, item.roots, element.fallback,
             data and data.position or nil)
-        element.region._texture:SetTexture(data and data.texture or nil)
+        if declaration.kind == "atlas" then
+            if shown then element.region._texture:SetAtlas(data.atlas, false) end
+        else
+            element.region._texture:SetTexture(data and data.texture or nil)
+        end
         local color = data and data.color or nil
         if color then
             element.region._texture:SetVertexColor(
@@ -1701,7 +1715,7 @@ function EXUI:CreateStandardPreview(host, options)
                 local oldChild = self.definition.children and self.definition.children[index]
                 local childElement = child and item.elements and item.elements[child.id]
                 if not oldChild or oldChild.id ~= child.id or oldChild.kind ~= child.kind
-                    or not childElement or (child.kind ~= "text" and child.kind ~= "texture") then
+                    or not childElement or (child.kind ~= "text" and child.kind ~= "texture" and child.kind ~= "atlas") then
                     return false
                 end
             end
@@ -1716,6 +1730,7 @@ function EXUI:CreateStandardPreview(host, options)
             local itemWidth = definitionSnapshot.layout and definitionSnapshot.layout.itemWidth or item.widget:GetWidth()
             local itemHeight = definitionSnapshot.layout and definitionSnapshot.layout.itemHeight or item.widget:GetHeight()
             item.root:SetSize(itemWidth, itemHeight)
+            item.root.__EXUIStandardPreviewPosition = modelItem.position
             self.definition, self.model = definitionSnapshot, modelSnapshot
             self.layout:ApplyStyle(definitionSnapshot.layout or DEFAULT_LAYOUT)
             self.layout:SetItems({ item.root }, item.root:GetWidth(), item.root:GetHeight())
@@ -1731,13 +1746,14 @@ function EXUI:CreateStandardPreview(host, options)
             local previous = self.definition.children and self.definition.children[index]
             local element = item.elements and item.elements[declaration.id]
             if not previous or previous.id ~= declaration.id or previous.kind ~= declaration.kind or not element
-                or (declaration.kind ~= "text" and declaration.kind ~= "texture") then
+                or (declaration.kind ~= "text" and declaration.kind ~= "texture" and declaration.kind ~= "atlas") then
                 return false
             end
         end
 
         local name, icon = ResolveContent(modelItem)
-        item.widget:ApplyStyle(StyleForIcon(definitionSnapshot.appearance))
+        local effectiveDefinition = EffectiveDefinition(definitionSnapshot, modelItem)
+        item.widget:ApplyStyle(StyleForIcon(effectiveDefinition.appearance))
         item.widget:SetIcon(icon)
         if modelItem.duration then item.widget:SetStaticCooldown(modelItem.remaining, modelItem.duration) else item.widget:ClearCooldown() end
         local itemWidth = definitionSnapshot.layout and definitionSnapshot.layout.itemWidth or item.widget:GetWidth()
@@ -1745,7 +1761,7 @@ function EXUI:CreateStandardPreview(host, options)
         item.root:SetSize(itemWidth, itemHeight)
         CenterFixedBody(item)
 
-        local iconSpec = FixedSpec(definitionSnapshot, "core.icon", FIXED.icon["core.icon"])
+        local iconSpec = FixedSpec(effectiveDefinition, "core.icon", FIXED.icon["core.icon"])
         local coreIcon = item.elements and item.elements["core.icon"]
         if not coreIcon then return false end
         coreIcon.spec, coreIcon.anchor = iconSpec, iconSpec.anchor
@@ -1754,8 +1770,8 @@ function EXUI:CreateStandardPreview(host, options)
             y = iconSpec.anchor and iconSpec.anchor.y or 0,
         }
         item.widget:SetShown(iconSpec.shown ~= false)
-        local timeSpec = FixedSpec(definitionSnapshot, "core.time", FIXED.icon["core.time"])
-        local stacksSpec = FixedSpec(definitionSnapshot, "core.stacks", FIXED.icon["core.stacks"])
+        local timeSpec = FixedSpec(effectiveDefinition, "core.time", FIXED.icon["core.time"])
+        local stacksSpec = FixedSpec(effectiveDefinition, "core.stacks", FIXED.icon["core.stacks"])
         if not ReapplyFixedText(item, "core.time", timeSpec,
             modelItem.duration and (modelItem.timeText or EXUI:FormatCountdown(modelItem.remaining)) or "",
             modelItem.duration ~= nil and timeSpec.shown ~= false,
@@ -1772,6 +1788,7 @@ function EXUI:CreateStandardPreview(host, options)
             if not ReapplyDeclaredChild(item, declaration, data) then return false end
         end
         ApplyFixedElementAnchors(item)
+        item.root.__EXUIStandardPreviewPosition = modelItem.position
         self.definition, self.model = definitionSnapshot, modelSnapshot
         self.layout:ApplyStyle(definitionSnapshot.layout or DEFAULT_LAYOUT)
         self.layout:SetItems({ item.root }, item.root:GetWidth(), item.root:GetHeight())
@@ -1800,6 +1817,34 @@ function EXUI:CreateStandardPreview(host, options)
         if self.interactionMode ~= "world" then Fail("GetWorldBounds is only valid for world previews") end
         if type(self.worldBounds) ~= "table" then Fail("GetWorldBounds requires prior Materialize") end
         return self.worldBounds
+    end
+
+    -- The edit-session provider assigns stable public element IDs. This
+    -- read-only list exposes materialized world frames without giving the
+    -- preview a second input or persistence path.
+    function preview:ListWorldElements()
+        if self.interactionMode ~= "world" then Fail("ListWorldElements is only valid for world previews") end
+        local listed = {}
+        local function Add(item)
+            for _, element in pairs(item.elements or {}) do
+                local frame = ElementRoot(element)
+                if frame and type(frame.GetRoot) == "function" then frame = frame:GetRoot() end
+                if frame and frame.IsShown and frame:IsShown() then
+                    local spec = element.spec or {}
+                    listed[#listed + 1] = {
+                        itemID = item.itemID, elementID = element.id,
+                        scope = item.isCollection and "collection" or nil,
+                        frame = frame, movable = spec.movable == true,
+                        resizable = spec.resizable == true,
+                        minWidth = spec.minWidth, minHeight = spec.minHeight,
+                        maxWidth = spec.maxWidth, maxHeight = spec.maxHeight,
+                    }
+                end
+            end
+        end
+        for _, item in ipairs(self.items) do Add(item) end
+        if self.collection then Add(self.collection) end
+        return listed
     end
 
     function preview:Unmount()

@@ -126,9 +126,9 @@ anchorController, ANCHOR_OPTS = EXUI:CreateStandardModuleAnchor({
     relativePoint = "CENTER", onCreateFrame = function(_, frame) frame:Hide() end,
 })
 
-local COMMON_OPTS = { bindRoot = true, poolType = "InterruptTrackerModuleCommonSettingsGroup", columns = 3, fields = {
-    { path = "enabled", type = "checkbox", label = L["启用"] },
-    { path = "useClassColorName", type = "checkbox", label = L["名称使用职业颜色"] },
+local COMMON_OPTS = { bindRoot = true, poolType = "InterruptTrackerModuleCommonSettingsGroup", presentation = "settings-list", fields = {
+    { path = "enabled", type = "checkbox", label = L["启用"], presentation = "switch" },
+    { path = "useClassColorName", type = "checkbox", label = L["名称使用职业颜色"], presentation = "switch" },
 } }
 local RAID_MARKER_EXTRA_OPTS = ExwindTools:BuildStandardTimerBarAlertIconsGroupOptions({ timerBarKey = "timerGroup" }, {
     paths = { show = "elements.raidMarker.texture.enabled", width = "elements.raidMarker.texture.width",
@@ -136,16 +136,31 @@ local RAID_MARKER_EXTRA_OPTS = ExwindTools:BuildStandardTimerBarAlertIconsGroupO
     ranges = { width = { min = 8, max = 128, step = 1 }, height = { min = 8, max = 128, step = 1 },
         x = { min = -1000, max = 1000, step = 1 }, y = { min = -1000, max = 1000, step = 1 } },
 })
+RAID_MARKER_EXTRA_OPTS.presentation = "settings-list"
 local LAYOUT_OPTS = { allowedDirections = { "UP", "DOWN" }, includeMaxPerRow = false, maxVisibleMin = 1, maxVisibleMax = 5, defaultMaxVisible = 5 }
+-- [普通 sections 迁移边界：InterruptTracker 设置页]
+-- 允许：只按共享规范调整纯呈现分区；普通设置分区始终展开。
+-- 禁止：修改队伍/施法业务事件与排序、key/path/opts、StandardConfigBinding、collection、预览或释放链。
+-- modulecommonsettings/anchorgroup/widgetlayout/timerBarGroup/fontgroup 必须整体引用，不能拆成原子控件重拼。
 local EX_LAYOUT = {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["打断监控"], labelSize = 25 },
-    { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 10, w = 200, h = 50, label = L["模块通用设置"], opts = COMMON_OPTS },
-    { key = "raidMarkerExtra", type = "modulecommonsettings", x = 1, y = 62, w = 200, h = 50, label = L["额外子元素－团队标记"], opts = RAID_MARKER_EXTRA_OPTS },
-    { key = "anchor", type = "anchorgroup", x = 1, y = 114, w = 200, h = 20, label = L["锚点设置"], opts = ANCHOR_OPTS },
-    { key = "layout", type = "widgetlayout", x = 1, y = 136, w = 200, h = 20, measure = true, label = L["排列设置"], opts = LAYOUT_OPTS },
-    { key = "timerGroup", type = "timerBarGroup", x = 1, y = 158, w = 200, h = 52, label = L["计时条外观"] },
-    { key = "font_spell", type = "fontgroup", x = 1, y = 212, w = 200, h = 50, label = L["玩家名字"] },
-    { key = "font_timer", type = "fontgroup", x = 1, y = 264, w = 200, h = 50, label = L["冷却时间"] },
+    version = 1,
+    title = L["打断监控"],
+    sections = {
+        { kind = "composite", id = "module-common", title = L["通用设置"],
+            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
+        { kind = "composite", id = "layout", title = L["排列设置"],
+            component = "widgetlayout", key = "layout", opts = LAYOUT_OPTS },
+        { kind = "composite", id = "anchor", title = L["锚点设置"],
+            component = "anchorgroup", key = "anchor", opts = ANCHOR_OPTS },
+        { kind = "composite", id = "timer-bar", title = L["计时条外观"],
+            component = "timerbargroup", key = "timerGroup" },
+        { kind = "composite", id = "raid-marker", title = L["额外子元素－团队标记"],
+            component = "modulecommonsettings", key = "raidMarkerExtra", opts = RAID_MARKER_EXTRA_OPTS },
+        { kind = "composite", id = "spell-font", title = L["玩家名字"],
+            component = "fontgroup", key = "font_spell" },
+        { kind = "composite", id = "timer-font", title = L["冷却时间"],
+            component = "fontgroup", key = "font_timer" },
+    },
 }
 ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, EX_LAYOUT)
 
@@ -557,6 +572,7 @@ ExBoss.ResetModuleConfig[EXWIND_MODULE_KEY] = function()
 end
 ExBoss.UI.Panel = ExBoss.UI.Panel or {}; ExBoss.UI.Panel.InterruptTrackerPage = ExBoss.UI.Panel.InterruptTrackerPage or {}
 local GUIPage = ExBoss.UI.Panel.InterruptTrackerPage
+-- [生命周期边界] STANDARD_PAGE 只承接设置页；上方 runtime/world/panel collection 与 WatchState/事件链均禁止改动。
 STANDARD_PAGE = EXUI:CreateStandardModulePage({
     moduleKey = EXWIND_MODULE_KEY, page = GUIPage, binding = STANDARD_CONFIG_BINDING, layout = EX_LAYOUT, getColumns = 200,
     preview = { height = 172, render = function(dock) Module:ShowPanelPreview(dock) end,

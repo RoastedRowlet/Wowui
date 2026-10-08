@@ -1,10 +1,12 @@
-﻿-- [[ 传送喊话模块 ]]
+-- [[ 传送喊话模块 ]]
 -- { Key = "ExM+Info.TeleMsg", Name = "传送喊话", Desc = "在施放副本传送法术时自动在队伍频道喊话。", Category = 2 },
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXUI = ExwindTools.UI
-local EXState = ExwindTools.State
 local L = (ExwindTools and ExwindTools.L) or setmetatable({}, { __index = function(_, key) return key end })
 
 -- 1. 识别 Key
@@ -17,6 +19,9 @@ local EXDB = _G.EXDB
 if not EXDB then return end
 
 -- 3. 数据默认值
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EXWIND_DEFAULTS = {
     teleportShoutText = "[无广告]正在施放%link , 准备传送到\"%name\"",
     shoutTiming = "施法成功", -- 喊话时机: 施法开始 / 施法成功
@@ -25,12 +30,14 @@ local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, EXWIND_DEFAULTS)
 local DEFAULT_MSG = EXWIND_DEFAULTS.teleportShoutText
 
 -- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
+-- =========================================================
 -- [v4.2] 注册与配置
 -- =========================================================
 
 -- Grid 布局
-local function EX_RegisterLayout()
-    -- 1. 预计算预览字符串（逻辑在外部执行，layout只拿结果）
+local function BuildPreviewText()
     local fmt = EX_DB.teleportShoutText or DEFAULT_MSG
     local name = (EXDB.GetLocalizedInstanceNoteName and EXDB:GetLocalizedInstanceNoteName(658)) or L["萨隆矿坑"]
     local link = "|cff71d5ff|Hspell:444222|h[" .. name .. "]|h|r"
@@ -41,44 +48,73 @@ local function EX_RegisterLayout()
     local playerColored = "|c" ..
         ((color and color.GenerateHexColor) and color:GenerateHexColor() or "ffffff") .. UnitName("player") .. "|r"
 
-    local previewText = "\n|cffffd100" ..
-    L["预览:"] .. "|r\n|cffaaaaff[" .. L["队伍"] .. "] [" .. playerColored .. "]: " .. out .. "|r"
+    return "\n|cffffd100" ..
+        L["预览:"] .. "|r\n|cffaaaaff[" .. L["队伍"] .. "] [" .. playerColored .. "]: " .. out .. "|r"
+end
 
-    local layout = {
-        { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["传送喊话"], labelSize = 25 },
-        {
-            key = "descInfo",
-            type = "description",
-            x = 1,
-            y = 11,
-            w = 196,
-            h = 16,
-            label = L["|cffffd100变量说明:|r\
+local function BuildPreviewSection()
+    return {
+        kind = "table", id = "preview", title = L["变量与预览"],
+        columns = { { title = "" } }, supportsAdd = false,
+        records = {
+            { cells = { { text = L["|cffffd100变量说明:|r\
   |cff00ff00%link|r  = 法术链接\
-  |cff00ff00%name|r = 副本名称"],
-            labelSize = 18
+  |cff00ff00%name|r = 副本名称"] } } },
+            { cells = { { text = BuildPreviewText() } } },
         },
-        { key = "shoutTiming", type = "dropdown", x = 1, y = 31, w = 46, h = 6, label = L["喊话时机"], items = "施法开始,施法成功" },
-        { key = "teleportShoutText", type = "input", x = 1, y = 44, w = 200, h = 6, label = L["自定义喊话内容"] },
-        {
-            key = "previewLabel",
-            type = "description",
-            x = 1,
-            y = 52,
-            w = 200,
-            h = 15,
-            label = previewText,
-            labelSize = 18
+    }
+end
+
+local function EX_RegisterLayout()
+    local layout = {
+        version = 1,
+        sections = {
+            {
+                kind = "settings",
+                id = "common",
+                title = L["喊话设置"],
+                items = {
+                    {
+                        key = "shoutTiming", type = "select", label = L["喊话时机"],
+                        options = {
+                            { value = "施法开始", label = L["施法开始"] },
+                            { value = "施法成功", label = L["施法成功"] },
+                        },
+                    },
+                    { key = "reset", type = "button", label = L["恢复默认喊话"] },
+                    { key = "teleportShoutText", type = "input", label = L["自定义喊话内容"],
+                        inputWidthPercent = 200 },
+                },
+            },
+            BuildPreviewSection(),
         },
-        { key = "reset", type = "button", x = 51, y = 31, w = 46, h = 6, label = L["恢复默认喊话"] },
     }
 
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
 end
 
 -- 3. 立即注册
 EX_RegisterLayout()
 
+local function GetVisibleSettingsSession()
+    if EXUI.CurrentPage ~= "ModuleSettings" or EXUI.CurrentModule ~= EXWIND_MODULE_KEY then return nil end
+    local page = EXUI.ActivePageFrame
+    return page and page._exCardSession or nil
+end
+
+local function RefreshVisibleText(resetInput)
+    local session = GetVisibleSettingsSession()
+    if not session then return end
+    if resetInput then
+        local input = session:GetWidget("common", "teleportShoutText")
+        if input then input:SetText(EX_DB.teleportShoutText or DEFAULT_MSG) end
+    end
+    session:ReplaceSettingsSection("preview", BuildPreviewSection())
+end
+
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 -- =========================================================
 -- 业务逻辑
 -- =========================================================
@@ -113,6 +149,9 @@ local function OnSpellSucceeded(event, unit, _, spellID)
     HandleSpellCast(unit, spellID)
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 -- 根据当前设置注册对应的事件，注销另一个
 local function UpdateTelemsgEvent()
     local timing = EX_DB.shoutTiming or EXWIND_DEFAULTS.shoutTiming
@@ -131,32 +170,21 @@ ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY,
     if data.key == "reset" then
         EX_DB.teleportShoutText = DEFAULT_MSG
         EXUI:NotifyModuleValueChanged(EXWIND_MODULE_KEY, "teleportShoutText", "committed")
+        RefreshVisibleText(true)
     end
 end)
 
-local function RefreshActiveSurfaces()
-    -- 当前 Grid 控件已经持有写入后的值；这里只重套现有事件订阅。
-    if not EXState.InInstance then
-        UpdateTelemsgEvent()
-    end
+local function RefreshActiveSurfaces(_, changedPath)
+    UpdateTelemsgEvent()
+    if changedPath == "teleportShoutText" then RefreshVisibleText(false) end
 end
 
 EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = RefreshActiveSurfaces })
 
--- 智能生命周期：在副本外时监听，进本后自动注销
-ExwindTools:WatchState("InInstance", EXWIND_MODULE_KEY, function(inInstance)
-    if inInstance then
-        ExwindTools:UnregisterEvent("UNIT_SPELLCAST_START", EXWIND_MODULE_KEY)
-        ExwindTools:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED", EXWIND_MODULE_KEY)
-    else
-        UpdateTelemsgEvent()
-    end
-end)
-
--- 初始检查
-if not EXState.InInstance then
-    UpdateTelemsgEvent()
-end
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
+UpdateTelemsgEvent()
 
 -- 报告模块加载完成
 ExwindTools:ReportReady(EXWIND_MODULE_KEY)

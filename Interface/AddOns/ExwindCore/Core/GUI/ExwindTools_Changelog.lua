@@ -6,6 +6,7 @@
 
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
+local EXUI = ExwindTools.UI
 
 local L = ExwindTools.L
     or (_G.ExwindLocale and _G.ExwindLocale.GetProxy and _G.ExwindLocale.GetProxy())
@@ -31,11 +32,11 @@ local PANEL_THEME = {
 
 local PANEL_BACKDROP = {
     bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    edgeFile = "Interface\\Buttons\\WHITE8X8",
     tile = true,
     tileSize = 16,
-    edgeSize = 14,
-    insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    edgeSize = 1,
+    insets = { left = 1, right = 1, top = 1, bottom = 1 },
 }
 
 local FONT_PATH = (GameFontNormal and select(1, GameFontNormal:GetFont())) or STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
@@ -263,6 +264,7 @@ local function EnsureViewerFrame()
     local title = viewerFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
     title:SetPoint("TOPLEFT", 20, -15)
     viewerFrame.Title = title
+    EXUI:ApplyDialogStyle(viewerFrame, title)
     local close = CreateFrame("Button", nil, viewerFrame, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", -3, -3)
     close:SetScript("OnClick", function() viewerFrame:Hide() end)
@@ -274,10 +276,9 @@ local function EnsureViewerFrame()
     viewerFrame.TabHost = tabHost
     viewerFrame.TabButtons = {}
 
-    local scrollFrame = CreateFrame("ScrollFrame", nil, viewerFrame, "ScrollFrameTemplate")
-    scrollFrame:EnableMouseWheel(true)
+    local scrollFrame = EXUI:CreateScrollFrame(viewerFrame)
     scrollFrame:SetPoint("TOPLEFT", 18, -82)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -34, 18)
+    scrollFrame:SetPoint("BOTTOMRIGHT", -18, 18)
     viewerFrame.ScrollFrame = scrollFrame
     local scrollChild = CreateFrame("Frame", nil, scrollFrame)
     scrollChild:SetSize(1, 1)

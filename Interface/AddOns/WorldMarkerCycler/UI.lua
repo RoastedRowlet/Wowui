@@ -159,6 +159,9 @@ elseif locale == "koKR" then
     L["Target"] = "대상"
     L["Mouseover"] = "마우스오버"
     L["Cycle Order"] = "순환 순서"
+    L["Ground markers, target and mouseover each have their own cycle order. Pick which one to edit. After a clear, the cycle restarts at slot 1."] = "바닥 징표, 대상, 마우스오버는 각각 자신만의 순환 순서를 가집니다. 편집할 항목을 고르세요. 지운 뒤에는 1번 칸부터 다시 시작합니다."
+    L["Editing:"] = "편집 중:"
+    L["Ground markers"] = "바닥 징표"
     L["Raid Bar"] = "공격대 바"
     L["Help"] = "도움말"
     L["/wmc to open\nESC to close\n\nPreviews use your\nlive settings."] = "/wmc 로 열기\nESC 로 닫기\n\n미리보기는 현재\n설정을 사용합니다."
@@ -219,7 +222,7 @@ elseif locale == "koKR" then
     L["Auto detects keyboard vs mouse.  Up = keyboard keys.  Down = MMO mouse / extra mouse buttons."] = "자동 = 키보드와 마우스를 알아서 구분.  뗄 때 = 키보드 키.  누를 때 = MMO 마우스 / 추가 마우스 버튼."
     L["Puts a raid icon over your current target. Press again on a new target to give it the next icon in your order."] = "현재 대상 위에 공격대 징표를 붙입니다. 새 대상에서 다시 누르면 순서상 다음 징표를 붙입니다."
     L["Enable target marker keybinds"] = "대상 징표 단축키 사용"
-    L["Marks the enemy under your mouse without changing target. With nothing hovered it marks your target instead."] = "대상을 바꾸지 않고 마우스 아래의 적에게 징표를 붙입니다. 마우스 아래에 아무도 없으면 대신 현재 대상에 붙입니다."
+    L["Marks the unit under your mouse (enemy or friendly) without changing target. With nothing hovered it marks your target instead."] = "대상을 바꾸지 않고 마우스 아래의 유닛(적 또는 아군)에게 징표를 붙입니다. 마우스 아래에 아무도 없으면 대신 현재 대상에 붙입니다."
     L["Enable mouseover marker keybinds"] = "마우스오버 징표 단축키 사용"
     L["The order markers are placed in. Shared by ground, target and mouseover cycling. After a clear, the cycle restarts at slot 1."] = "징표가 놓이는 순서입니다. 바닥, 대상, 마우스오버 순환이 함께 사용합니다. 지운 뒤에는 1번 칸부터 다시 시작합니다."
     L["Full order  |cff888888(click two slots to swap them)|r"] = "전체 순서  |cff888888(두 칸을 클릭하면 서로 바뀝니다)|r"
@@ -398,17 +401,40 @@ local function MouseClearKey()  return BindOf(WMC_MouseoverSaved, "clearModifier
 local function PickerKey()      return BindOf(WMC_RaidPickerSaved, "openModifier", "openKey") end
 local function KeyOr(k, fallback) if k == "" then return fallback or "KEY" end return k end
 
-local function FullOrder()
-    local o = WMC_Saved and WMC_Saved.orderList
+-- Each cycler has its own cycle order: "world" (ground markers), "target",
+-- "mouseover". OE.which = the one the Cycle Order page is editing.
+local OE = { which = "world" }
+local function OrderStore(which)
+    which = which or OE.which
+    if which == "target" then
+        WMC_TargetSaved = WMC_TargetSaved or {}
+        return WMC_TargetSaved, "cycleOrder"
+    elseif which == "mouseover" then
+        WMC_MouseoverSaved = WMC_MouseoverSaved or {}
+        return WMC_MouseoverSaved, "cycleOrder"
+    end
+    WMC_Saved = WMC_Saved or {}
+    return WMC_Saved, "orderList"
+end
+local function FullOrder(which)
+    local s, k = OrderStore(which)
+    local o = s[k]
     if type(o) == "table" and #o == 8 then return o end
+    if (which or OE.which) ~= "world" then return FullOrder("world") end
     return DEFAULT_ORDER
 end
-local function ActiveOrder()
-    local s = WMC_Saved
-    if s and s.customCycleEnabled and type(s.customCycleMarkers) == "table" and #s.customCycleMarkers > 0 then
+local function CustomList(which)
+    local s = OrderStore(which)
+    local l = s.customCycleMarkers
+    if type(l) == "table" and #l > 0 then return l end
+    return { 8, 4, 3, 2 }
+end
+local function ActiveOrder(which)
+    local s = OrderStore(which)
+    if s.customCycleEnabled and type(s.customCycleMarkers) == "table" and #s.customCycleMarkers > 0 then
         return s.customCycleMarkers
     end
-    return FullOrder()
+    return FullOrder(which)
 end
 
 local function FeatureOn(which)
@@ -984,7 +1010,7 @@ SCENES.world = {
             ln:SetPoint("LEFT", p.layer, "BOTTOMLEFT", 0, y)
             ln:SetPoint("RIGHT", p.layer, "BOTTOMRIGHT", 0, y)
         end
-        local order = ActiveOrder()
+        local order = ActiveOrder("world")
         p.order = order
         p.n = math.min(#order, 5)
         p.spots = {
@@ -1067,7 +1093,7 @@ SCENES.target = {
     build = BuildPlates,
     refresh = function(p)
         PlacePlates(p)
-        p.order = ActiveOrder()
+        p.order = ActiveOrder("target")
         p.pk = KeyOr(TargetPlaceKey(), "KEY")
         p.ck = KeyOr(TargetClearKey(), "KEY")
         p.t0, p.step = 0.4, 1.6
@@ -1114,7 +1140,7 @@ SCENES.mouseover = {
     build = BuildPlates,
     refresh = function(p)
         PlacePlates(p)
-        p.order = ActiveOrder()
+        p.order = ActiveOrder("mouseover")
         p.pk = KeyOr(MousePlaceKey(), "KEY")
         p.ck = KeyOr(MouseClearKey(), "KEY")
         -- stops: hover plate 1, hover plate 3, empty ground (falls back to target = plate 2)
@@ -1252,7 +1278,7 @@ SCENES.raidbar = {
         else p.clx, p.cly = left + 6 + 8 * 24 + 19, top - 15 end
         p.cdx, p.cdy = p.clx + 19 + 4 + 20 + 8, p.cly
 
-        local o = ActiveOrder()
+        local o = ActiveOrder("world")
         p.pick = { o[1], o[2] or o[1], o[3] or o[1] }
         p.spots = { { p.W * 0.25, p.H * 0.22 }, { p.W * 0.5, p.H * 0.30 }, { p.W * 0.75, p.H * 0.20 } }
         p.step = 1.8
@@ -1365,10 +1391,16 @@ SCENES.order = {
         p.next:SetText(L["NEXT"])
     end,
     refresh = function(p)
-        p.order = ActiveOrder()
+        p.order = ActiveOrder()   -- the cycler being edited
         p.n = math.min(#p.order, 8)
-        p.pk = KeyOr(WorldPlaceKey(), "B")
-        p.ck = KeyOr(WorldClearKey(), "CTRL-B")
+        if OE.which == "target" then
+            p.pk, p.ck = KeyOr(TargetPlaceKey(), "KEY"), KeyOr(TargetClearKey(), "KEY")
+        elseif OE.which == "mouseover" then
+            p.pk, p.ck = KeyOr(MousePlaceKey(), "KEY"), KeyOr(MouseClearKey(), "KEY")
+        else
+            p.pk = KeyOr(WorldPlaceKey(), "B")
+            p.ck = KeyOr(WorldClearKey(), "CTRL-B")
+        end
         local gap = 50
         local left = p.W / 2 - (p.n - 1) * gap / 2
         p.sx = {}
@@ -1629,7 +1661,7 @@ end
 
 BUILD.mouseover = function(child)
     local y = PageHeader(child, "Mouseover Markers",
-        "Marks the enemy under your mouse without changing target. With nothing hovered it marks your target instead.")
+        "Marks the unit under your mouse (enemy or friendly) without changing target. With nothing hovered it marks your target instead.")
     local prev = CreatePreview(child, PAGE_W, 200, "mouseover")
     prev:SetPoint("TOPLEFT", 0, y)
     y = y - 212
@@ -1653,26 +1685,42 @@ BUILD.mouseover = function(child)
 end
 
 local function ApplyOrder(t)
-    WMC_Saved = WMC_Saved or {}
-    WMC_Saved.orderList = t
-    if api and api.SetOrder then api.SetOrder(t) end
+    local s, k = OrderStore()
+    s[k] = t
+    if OE.which == "world" and api and api.SetOrder then api.SetOrder(t) end
     SyncOrders()
     RefreshAll()
 end
 
 local function ApplyCustom(list)
-    WMC_Saved = WMC_Saved or {}
-    WMC_Saved.customCycleMarkers = list
-    if api and api.SetCustomCycleMarkers then api.SetCustomCycleMarkers(list) end
+    local s = OrderStore()
+    s.customCycleMarkers = list
+    if OE.which == "world" and api and api.SetCustomCycleMarkers then api.SetCustomCycleMarkers(list) end
     SyncOrders()
     RefreshAll()
 end
 
 BUILD.order = function(child)
     local y = PageHeader(child, "Cycle Order",
-        "The order markers are placed in. Shared by ground, target and mouseover cycling. After a clear, the cycle restarts at slot 1.")
+        "Ground markers, target and mouseover each have their own cycle order. Pick which one to edit. After a clear, the cycle restarts at slot 1.")
+    -- which cycler this page edits
+    local el = Text(child, "GameFontNormal", "Editing:", C.accent)
+    el:SetPoint("TOPLEFT", 0, y - 4)
+    local pick = W.Segmented(child, {
+            { label = "Ground markers", value = "world" },
+            { label = "Target", value = "target" },
+            { label = "Mouseover", value = "mouseover" },
+        },
+        function() return OE.which end,
+        function(v)
+            OE.which = v
+            if OE.prev then OE.prev.dur = nil end   -- restart the preview with this order
+        end, 130)
+    pick:SetPoint("LEFT", el, "RIGHT", 10, 0)
+    y = y - 32
     local prev = CreatePreview(child, PAGE_W, 150, "order")
     prev:SetPoint("TOPLEFT", 0, y)
+    OE.prev = prev
     y = y - 162
 
     -- full order editor
@@ -1750,11 +1798,11 @@ BUILD.order = function(child)
     local cc = W.Card(child, PAGE_W, 170, "Custom Cycle Mode  |cff888888(only cycle a few markers)|r")
     cc:SetPoint("TOPLEFT", 0, y)
     local sw = W.Switch(cc, "Use a custom subset instead of the full order",
-        function() return WMC_Saved and WMC_Saved.customCycleEnabled or false end,
+        function() return OrderStore().customCycleEnabled and true or false end,
         function(v)
-            WMC_Saved = WMC_Saved or {}
-            WMC_Saved.customCycleEnabled = v
-            if api and api.SetCustomCycleEnabled then api.SetCustomCycleEnabled(v) end
+            local s = OrderStore()
+            s.customCycleEnabled = v and true or false
+            if OE.which == "world" and api and api.SetCustomCycleEnabled then api.SetCustomCycleEnabled(v) end
             SyncOrders()
         end)
     sw:SetPoint("TOPLEFT", 12, -38)
@@ -1770,7 +1818,7 @@ BUILD.order = function(child)
         b.pos:SetPoint("BOTTOMRIGHT", -2, 2)
         b:SetScript("OnClick", function()
             local list = {}
-            local cur = (WMC_Saved and WMC_Saved.customCycleMarkers) or { 8, 4, 3, 2 }
+            local cur = CustomList()
             local found = false
             for _, m in ipairs(cur) do if m == i then found = true else table.insert(list, m) end end
             if not found then table.insert(list, i) end
@@ -1807,8 +1855,8 @@ BUILD.order = function(child)
     status:SetPoint("LEFT", cbox, "RIGHT", 12, 0)
     status:SetWidth(PAGE_W - 250)
     table.insert(refreshers, function()
-        local list = (WMC_Saved and WMC_Saved.customCycleMarkers) or { 8, 4, 3, 2 }
-        local enabled = WMC_Saved and WMC_Saved.customCycleEnabled
+        local list = CustomList()
+        local enabled = OrderStore().customCycleEnabled
         local posOf = {}
         for p2, m in ipairs(list) do posOf[m] = p2 end
         for i = 1, 8 do

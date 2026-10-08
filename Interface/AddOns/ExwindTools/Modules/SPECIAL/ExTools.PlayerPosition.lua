@@ -2,6 +2,9 @@
 -- [[ 玩家角色定位标记 ]]
 -- EXUI 唯一 IconCollection Renderer：运行、世界编辑、设置页预览共用。
 -- =============================================================
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools or not ExwindTools.UI then return end
 local EXUI = ExwindTools.UI
@@ -13,10 +16,13 @@ local VIS_SHOW_IN_COMBAT = "show_in_combat"
 local VIS_SHOW_OUT_OF_COMBAT = "show_out_of_combat"
 local VIS_ONLY_IN_INSTANCE = "only_in_instance"
 
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local VISIBILITY_OPTIONS = {
-    { L["战斗中显示"], VIS_SHOW_IN_COMBAT },
-    { L["战斗外显示"], VIS_SHOW_OUT_OF_COMBAT },
-    { L["仅副本内"], VIS_ONLY_IN_INSTANCE },
+    { value = VIS_SHOW_IN_COMBAT, label = L["战斗中显示"] },
+    { value = VIS_SHOW_OUT_OF_COMBAT, label = L["战斗外显示"] },
+    { value = VIS_ONLY_IN_INSTANCE, label = L["仅副本内"] },
 }
 
 local SPEC_OPTION_DEFS = {
@@ -91,24 +97,16 @@ local PLAYER_POSITION_ANCHOR_OPTS = {
 -- 距离判定仍是本模块既有业务字段；这里只声明它们应由哪一个标准通用卡承载。
 -- 图标的所有视觉尺寸、颜色、裁切、边框等只由后面的 icongroup 写入 DB.icon。
 local COMMON_FIELDS = {
-    { path = "enabled", type = "checkbox", label = L["启用指示器"], row = 1 },
-    { path = "shapeType", type = "dropdown", label = L["图形样式"], row = 1,
+    { path = "enabled", type = "checkbox", label = L["启用指示器"] },
+    { path = "shapeType", type = "dropdown", label = L["图形样式"],
         items = { { L["方块 (Square)"], "SQUARE" }, { L["十字 (Cross)"], "CROSS" },
             { L["圆形 (Circle)"], "CIRCLE" }, { L["圆环 (Ring)"], "RING" }, { L["菱形 (Diamond)"], "DIAMOND" } } },
-    { path = "rangeSpell", type = "input", label = L["距离判定法术(ID)"], row = 2 },
-    { path = "rangeColor", type = "color", label = L["超距颜色"], row = 2 },
+    { path = "rangeSpell", type = "input", label = L["距离判定法术(ID)"] },
+    { path = "rangeColor", type = "color", label = L["超距颜色"] },
 }
 
 local COMMON_OPTS = {
     bindRoot = true,
-    fixedLayout = {
-        logicalWidth = 200,
-        controlW = 46,
-        controlH = 6,
-        slotX = { 3, 53, 103, 153 },
-        firstY = 0,
-        rowStep = 14,
-    },
     fields = COMMON_FIELDS,
 }
 
@@ -126,7 +124,7 @@ local function BuildSpecOptions()
 
     for _, def in ipairs(SPEC_OPTION_DEFS) do
         local value = GetSpecOptionValue(def.specID)
-        options[#options + 1] = { BuildSpecOptionLabel(def), value }
+        options[#options + 1] = { value = value, label = BuildSpecOptionLabel(def) }
     end
 
     return options
@@ -179,18 +177,35 @@ end
 -- =============================================================
 -- 01. 页面：通用设置 → 整体锚点 → 图标本体 → 既有业务筛选
 -- =============================================================
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
 local function EX_RegisterLayout()
+    -- [声明迁移边界：设置页] 三个复合控件与原多选控件各只声明一次。
+    -- key/type/opts、筛选字段、世界/运行/面板 Collection 与回调禁止修改。
     local layout = {
-        { key = "head", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["玩家角色定位标记"], labelSize = 25 },
-        { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 10, w = 200, h = 42, measure = true,
-            label = L["模块通用设置"], opts = COMMON_OPTS },
-        { key = "anchorGroup", type = "anchorgroup", x = 1, y = 55, w = 200, h = 25, measure = true,
-            label = L["锚点设置"], opts = PLAYER_POSITION_ANCHOR_OPTS },
-        { key = "icon", type = "icongroup", x = 1, y = 83, w = 200, h = 50, label = L["图标外观"], labelSize = 20,
-            opts = {} },
-        { key = "h_visibility", type = "subheader", x = 1, y = 136, w = 200, h = 6, label = L["显示场景"], labelSize = 20 },
-        { key = "visibility", type = "multiselect", x = 1, y = 146, w = 96, h = 8, label = L["触发场景"], items = VISIBILITY_OPTIONS },
-        { key = "enabledSpecs", type = "multiselect", x = 101, y = 146, w = 96, h = 8, label = L["启用专精"], items = SPEC_OPTIONS },
+        version = 1,
+        sections = {
+            {
+                kind = "composite", id = "common", title = L["玩家角色定位标记"],
+                component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS,
+            },
+            {
+                kind = "settings", id = "visibility", title = L["显示场景"],
+                items = {
+                    { key = "visibility", type = "select", multiple = true, label = L["触发场景"], options = VISIBILITY_OPTIONS },
+                    { key = "enabledSpecs", type = "select", multiple = true, label = L["启用专精"], options = SPEC_OPTIONS },
+                },
+            },
+            {
+                kind = "composite", id = "anchor", title = L["锚点设置"],
+                component = "anchorgroup", key = "anchorGroup", opts = PLAYER_POSITION_ANCHOR_OPTS,
+            },
+            {
+                kind = "composite", id = "icon", title = L["图标外观"],
+                component = "icongroup", key = "icon", opts = {},
+            },
+        },
     }
 
     ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
@@ -252,12 +267,15 @@ EX_DB.enabledSpecs = NormalizeEnabledSpecsConfig(EX_DB.enabledSpecs)
 -- =============================================================
 
 local TEXTURE_PATHS = {
-    SQUARE = "Interface\\AddOns\\ExwindTools\\Textures\\PlayerPosition\\Square.png",
-    CROSS = "Interface\\AddOns\\ExwindTools\\Textures\\PlayerPosition\\Cross.png",
-    CIRCLE = "Interface\\AddOns\\ExwindTools\\Textures\\PlayerPosition\\Circle.png",
-    RING = "Interface\\AddOns\\ExwindTools\\Textures\\PlayerPosition\\Ring.png",
-    DIAMOND = "Interface\\AddOns\\ExwindTools\\Textures\\PlayerPosition\\Diamond.png",
+    SQUARE = "Interface\\AddOns\\ExwindCore\\Textures\\Materials\\ExwindTools\\PlayerPosition\\Square.png",
+    CROSS = "Interface\\AddOns\\ExwindCore\\Textures\\Materials\\ExwindTools\\PlayerPosition\\Cross.png",
+    CIRCLE = "Interface\\AddOns\\ExwindCore\\Textures\\Materials\\ExwindTools\\PlayerPosition\\Circle.png",
+    RING = "Interface\\AddOns\\ExwindCore\\Textures\\Materials\\ExwindTools\\PlayerPosition\\Ring.png",
+    DIAMOND = "Interface\\AddOns\\ExwindCore\\Textures\\Materials\\ExwindTools\\PlayerPosition\\Diamond.png",
 }
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local anchorFrame, anchorController, runtimeCollection, worldCollection, panelPreview, panelDock
 local worldPreviewActive = false
 local updater, updateElapsed = CreateFrame("Frame", nil, UIParent), 0
@@ -276,6 +294,9 @@ local function GetRangeSpell()
     return spec and spec.RangeSpell or nil
 end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function IsRuntimeVisible()
     local db, state = DB(), ExwindTools.State or {}
     if db.enabled ~= true then return false end
@@ -323,6 +344,7 @@ end
 
 -- Runtime、world-edit、panel 的 Item 都从这个唯一函数取得 presentation。
 -- sample 只决定是否采用静态颜色和强制显示，不会创建另一套预览外观。
+-- [卡片迁移边界：自定义渲染] 以下 presentation/Collection 同时服务 Runtime/World/Panel，不是设置页布局；专精/场景判定、交互和释放合同禁止修改。
 local function BuildPresentation(sample, interactive)
     local db = DB()
     local icon = db.icon or EX_DEFAULTS.icon
@@ -366,15 +388,8 @@ local function RenderCollection(collection, itemID, sample, interactive)
     return true
 end
 
-local function ApplyPreviewDockColor()
-    if panelDock and type(panelDock.SetBackdropColor) == "function" then
-        panelDock:SetBackdropColor(0.5804, 0.6471, 0.9882, 1)
-    end
-end
-
 local function RenderPanelSample()
     if not panelPreview then return end
-    ApplyPreviewDockColor()
     panelPreview:Render({ { itemID = PANEL_ITEM_ID, presentation = BuildPresentation(true, true) } }, SINGLE_ICON_LAYOUT)
     if panelDock then
         local _, height = panelPreview:GetBounds()
@@ -545,7 +560,6 @@ ExwindTools:RegisterModulePreview(EXWIND_MODULE_KEY, {
     mount = function(dock)
         if panelPreview then panelPreview:Release() end
         panelDock = dock
-        ApplyPreviewDockColor()
         panelPreview = EXUI:CreateIconPanelPreview(dock, EXWIND_MODULE_KEY, { onIntent = HandlePreviewIntent })
         RenderPanelSample()
     end,
@@ -562,6 +576,9 @@ ExwindTools:RegisterModulePreview(EXWIND_MODULE_KEY, {
 -- 06. 既有业务 State 更新与提交回读（不改距离/显示判定）
 -- =============================================================
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 updater:Hide()
 updater:SetScript("OnUpdate", function(_, elapsed)
     updateElapsed = updateElapsed + elapsed
@@ -577,6 +594,9 @@ ExwindTools:WatchState("SpecID", EXWIND_MODULE_KEY, function() if not worldPrevi
 ExwindTools:RegisterEvent("PLAYER_TARGET_CHANGED", EXWIND_MODULE_KEY,
     function() if not worldPreviewActive then RenderRuntime() end end)
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 C_Timer.After(1, function()
     EnsureAnchor()
     RefreshVisuals()

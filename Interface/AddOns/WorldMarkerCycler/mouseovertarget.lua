@@ -1,7 +1,7 @@
 -- ======================================================
 -- WorldMarkerCycler - Mouseover Target Marker Cycler
 -- File: mouseovertarget.lua
--- Places icons on your mouseover (living enemy) or else your target, using the
+-- Places icons on the living unit under your mouse (enemy or friendly) or else your target, using the
 -- secure "raidtarget" button action (no slash text, so client language and
 -- keyboard layout don't matter). /wmcmarkmode macro restores the old /tm macro.
 -- ======================================================
@@ -146,8 +146,28 @@ local WORLD_TO_RAID_TARGET = { 6, 4, 3, 7, 1, 2, 5, 8 }
 local function SyncOrderFromWorld()
     local w = _G.WMC_Saved
     if type(w) ~= "table" then return false end
-    -- honour Core.lua's custom-subset mode too
-    local list = (w.customCycleEnabled and w.customCycleMarkers) or w.orderList
+    EnsureSV()
+    local sv = SV()
+    -- This cycler has its OWN cycle order (edited on the Cycle Order page).
+    -- First run: start from the ground-marker settings so nothing changes
+    -- until you edit it.
+    local function valid8(t)
+        if type(t) ~= "table" or #t ~= 8 then return false end
+        for i = 1, 8 do if type(t[i]) ~= "number" or t[i] < 1 or t[i] > 8 then return false end end
+        return true
+    end
+    if not valid8(sv.cycleOrder) then
+        local src = valid8(w.orderList) and w.orderList or { 6, 4, 3, 7, 1, 2, 5, 8 }
+        sv.cycleOrder = {}
+        for i = 1, 8 do sv.cycleOrder[i] = src[i] end
+    end
+    if sv.customCycleEnabled == nil then sv.customCycleEnabled = w.customCycleEnabled and true or false end
+    if type(sv.customCycleMarkers) ~= "table" or #sv.customCycleMarkers == 0 then
+        local src = (type(w.customCycleMarkers) == "table" and #w.customCycleMarkers > 0) and w.customCycleMarkers or { 8, 4, 3, 2 }
+        sv.customCycleMarkers = {}
+        for i, v in ipairs(src) do sv.customCycleMarkers[i] = v end
+    end
+    local list = (sv.customCycleEnabled and sv.customCycleMarkers) or sv.cycleOrder
     if type(list) ~= "table" or #list == 0 then return false end
     local copy = {}
     for i, id in ipairs(list) do
@@ -157,7 +177,6 @@ local function SyncOrderFromWorld()
         if type(id) == "number" then copy[#copy + 1] = WORLD_TO_RAID_TARGET[id] or id end
     end
     if #copy == 0 then return false end
-    EnsureSV()
     SV().orderList = copy
     return true
 end
@@ -186,10 +205,10 @@ SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
     end
     if self:GetAttribute("wmc-mode") == "macro" then
         self:SetAttribute("type", "macro")
-        self:SetAttribute("macrotext", "/tm [@mouseover,harm,nodead][] " .. marker)
+        self:SetAttribute("macrotext", "/tm [@mouseover,exists,nodead][] " .. marker)
     else
-        -- Same rule as the old macro: living enemy under the cursor, else your target
-        local unit = SecureCmdOptionParse("[@mouseover,harm,nodead] mouseover; target")
+        -- Living unit under the cursor (enemy, friendly or neutral), else your target
+        local unit = SecureCmdOptionParse("[@mouseover,exists,nodead] mouseover; target")
         self:SetAttribute("type", "raidtarget")
         self:SetAttribute("action", "set")
         self:SetAttribute("unit", unit or "target")
@@ -200,9 +219,9 @@ SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
 SecureHandlerWrapScript(clearBtn, "PreClick", clearBtn, [=[
     if self:GetAttribute("wmc-mode") == "macro" then
         self:SetAttribute("type", "macro")
-        self:SetAttribute("macrotext", "/tm [@mouseover,harm,nodead][] 0")
+        self:SetAttribute("macrotext", "/tm [@mouseover,exists,nodead][] 0")
     else
-        local unit = SecureCmdOptionParse("[@mouseover,harm,nodead] mouseover; target")
+        local unit = SecureCmdOptionParse("[@mouseover,exists,nodead] mouseover; target")
         self:SetAttribute("type", "raidtarget")
         self:SetAttribute("action", "clear")
         self:SetAttribute("unit", unit or "target")

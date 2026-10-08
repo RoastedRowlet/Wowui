@@ -5,20 +5,16 @@
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXUI = ExwindTools.UI
+local GC = ExwindTools.GUIColors
 
 ExBoss.UI.Panel.ImportExportPage = ExBoss.UI.Panel.ImportExportPage or {}
 local Page = ExBoss.UI.Panel.ImportExportPage
 local L = (ExBoss and ExBoss.L) or setmetatable({}, { __index = function(_, key) return key end })
 
-local BACKDROP = {
-    bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = true, tileSize = 16, edgeSize = 14, insets = { left = 4, right = 4, top = 4, bottom = 4 },
-}
-local BACKDROP_SIMPLE = { bgFile = "Interface\\Buttons\\WHITE8X8" }
 local THEME = {
-    Background = { 0.04, 0.04, 0.05, 0.98 }, Border = { 0.25, 0.25, 0.28, 1 },
-    Primary = { 0.64, 0.19, 0.79 }, Success = { 0.13, 0.77, 0.37 },
-    TextMain = { 0.9, 0.9, 0.9, 1 }, TextSub = { 0.6, 0.6, 0.65, 1 },
+    Background = GC.popup, Border = GC.popupBorder,
+    Primary = GC.accent, Success = { 0.13, 0.77, 0.37 },
+    TextMain = GC.text, TextSub = GC.textDim,
 }
 local ROLE_LABELS = {
     mplus_tank = L["大秘境坦克"], mplus_heal = L["大秘境治疗"], mplus_dps = L["大秘境 DPS"],
@@ -26,39 +22,22 @@ local ROLE_LABELS = {
 }
 local ROLE_ORDER = { "mplus_tank", "mplus_heal", "mplus_dps", "raid_tank", "raid_heal", "raid_dps" }
 
-local scrollFrame, scrollChild, exportPopup, uiBuilt
-local exportNameInput, exportAppearanceCheck, exportAppearanceDropdown, exportMplusCheck, exportRaidCheck, exportStatus
-local importInputBox, importSummary, importStatus, importAppearanceCheck, importLegacyCheck, importSection, importButton, apiImportButton
+local scrollFrame, scrollChild, uiBuilt
+local exportFormSession, RelayoutExportPresentation
+local importFormSession, importParseButton, RelayoutImportPresentation
+local exportNameInput, exportAppearanceCheck, exportAppearanceDropdown, exportMplusCheck, exportRaidCheck, exportResultInput
+local importInputBox, importAppearanceCheck, importLegacyCheck, exportSection, importSection, importButton, apiImportButton
 local importRoleChecks, parsedTransfer
 local importNameRows = {}
+local LayoutTransferColumns
 
 local function Trim(value)
     return tostring(value or ""):gsub("^%s+", ""):gsub("%s+$", "")
 end
 
-local function CreateSmallButton(parent, text, onClick)
-    local button = CreateFrame("Button", nil, parent, "BackdropTemplate")
-    button:SetSize(120, 28); button:SetBackdrop(BACKDROP_SIMPLE); button:SetBackdropColor(0.2, 0.2, 0.25, 0.9)
-    local label = EXUI:CreateVisualFontString(button, EXFONTFRAME, "GameFontNormal")
-    label:SetPoint("CENTER"); label:SetText(text); label:SetTextColor(unpack(THEME.TextMain))
-    button:SetScript("OnClick", onClick)
-    button:SetScript("OnEnter", function(self) self:SetBackdropColor(0.3, 0.3, 0.35, 0.95) end)
-    button:SetScript("OnLeave", function(self) self:SetBackdropColor(0.2, 0.2, 0.25, 0.9) end)
-    return button
-end
-
-local function CreateActionButton(parent, text, onClick, color)
-    local button = CreateFrame("Button", nil, parent, "BackdropTemplate")
-    local base = color or THEME.Primary
-    button:SetSize(180, 40); button:SetBackdrop(BACKDROP); button:SetBackdropColor(unpack(base)); button:SetBackdropBorderColor(0.5, 0.5, 0.55, 0.8)
-    local label = EXUI:CreateVisualFontString(button, EXFONTFRAME, "GameFontNormal")
-    label:SetPoint("CENTER"); label:SetText(text); label:SetTextColor(1, 1, 1, 1)
-    button:SetScript("OnClick", onClick)
-    button:SetScript("OnEnter", function(self)
-        self:SetBackdropColor(math.min(1, base[1] * 1.3), math.min(1, base[2] * 1.3), math.min(1, base[3] * 1.3), 1)
-    end)
-    button:SetScript("OnLeave", function(self) self:SetBackdropColor(unpack(base)) end)
-    return button
+local function CreateActionButton(parent, text, onClick)
+    return EXUI:CreateButton(parent, 180, 28, text, onClick,
+        { variant = "primary", compact = true })
 end
 
 -- Import/export fields must use the shared EXUI factory.  Apart from visual
@@ -70,12 +49,12 @@ end
 
 local function StyleInput(control)
     if control and control.SetBackdropColor then
-        control:SetBackdropColor(0.10, 0.11, 0.16, 0.96)
-        control:SetBackdropBorderColor(0.48, 0.52, 0.66, 0.95)
+        control:SetBackdropColor(unpack(GC.input))
+        control:SetBackdropBorderColor(unpack(GC.panelBorder))
     end
     local edit = GetNativeEditBox(control)
     if edit and edit.SetTextColor then
-        edit:SetTextColor(0.92, 0.94, 0.99, 1)
+        edit:SetTextColor(unpack(GC.text))
     end
     return control
 end
@@ -96,40 +75,12 @@ local function FocusAndHighlight(control)
     end
 end
 
-local function ShowExportPopup(encoded, name)
-    if not exportPopup then
-        local popup = CreateFrame("Frame", "ExBoss_ExportPopup", UIParent, "BackdropTemplate")
-        popup:SetSize(600, 350); popup:SetPoint("CENTER"); popup:SetFrameStrata("FULLSCREEN_DIALOG")
-        popup:SetBackdrop(BACKDROP); popup:SetBackdropColor(0.06, 0.06, 0.08, 0.98); popup:SetBackdropBorderColor(unpack(THEME.Border))
-        popup:EnableMouse(true); popup:SetMovable(true); popup:RegisterForDrag("LeftButton")
-        popup:SetScript("OnDragStart", popup.StartMoving); popup:SetScript("OnDragStop", popup.StopMovingOrSizing)
-        if not tContains(UISpecialFrames, "ExBoss_ExportPopup") then table.insert(UISpecialFrames, "ExBoss_ExportPopup") end
-        local title = EXUI:CreateVisualFontString(popup, EXFONTFRAME)
-        title:SetFont(ExwindTools.MAIN_FONT or "Fonts\\FRIZQT__.TTF", 22, "OUTLINE"); title:SetPoint("TOP", 0, -15); popup.Title = title
-        local close = CreateFrame("Button", nil, popup, "UIPanelCloseButton"); close:SetPoint("TOPRIGHT", -5, -5); close:SetScript("OnClick", function() popup:Hide() end)
-        local hint = EXUI:CreateVisualFontString(popup, EXFONTFRAME, "GameFontHighlight")
-        hint:SetPoint("TOP", title, "BOTTOM", 0, -8); hint:SetTextColor(0.8, 0.8, 0.8); hint:SetText("|cffffd100Ctrl+C|r " .. L["复制，或点击"] .. " |cffffd100" .. L["全选复制"] .. "|r")
-        popup.ExportTextInput = CreateMultiLineEditBox(popup, 560, 200)
-        popup.ExportTextInput:SetPoint("TOP", hint, "BOTTOM", 0, -10)
-        local selectButton = CreateSmallButton(popup, L["全选复制"], function() FocusAndHighlight(popup.ExportTextInput) end)
-        selectButton:SetSize(100, 28); selectButton:SetPoint("BOTTOM", popup, "BOTTOM", -60, 15)
-        local closeButton = CreateSmallButton(popup, L["关闭"], function() popup:Hide() end)
-        closeButton:SetSize(80, 28); closeButton:SetPoint("BOTTOM", popup, "BOTTOM", 60, 15)
-        exportPopup = popup
-    end
-    exportPopup.ExportTextInput:SetText(encoded or "")
-    exportPopup.Title:SetText("|cff00ff80" .. L["导出成功"] .. "|r - " .. tostring(name or ""))
-    exportPopup:Show(); FocusAndHighlight(exportPopup.ExportTextInput)
-end
-
 local function SectionBg(parent, title, color)
-    local frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-    frame:SetBackdrop(BACKDROP); frame:SetBackdropColor(unpack(THEME.Background)); frame:SetBackdropBorderColor(unpack(THEME.Border))
-    local bar = EXUI:CreateVisualTexture(frame, EXBORDERFRAME)
-    bar:SetColorTexture(color[1], color[2], color[3], 0.90); bar:SetHeight(2); bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 6, -6); bar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -6, -6)
-    local heading = EXUI:CreateVisualFontString(frame, EXFONTFRAME)
-    heading:SetFont(ExwindTools.MAIN_FONT or "Fonts\\FRIZQT__.TTF", 16, "OUTLINE"); heading:SetPoint("TOPLEFT", 14, -14); heading:SetText(title); heading:SetTextColor(unpack(color))
-    return frame
+    local card = EXUI:CreateSettingsCard(parent, { title = "", collapsible = false })
+    card._sectionHeading = EXUI:CreateSettingsSection(parent, { kind = "section", title = title })
+    local body = card:GetBody()
+    body._settingsCard = card
+    return body
 end
 
 local function MakeLabel(parent, text)
@@ -146,10 +97,14 @@ local function IE()
     return ExBoss and ExBoss.Voice and ExBoss.Voice.ImportExport
 end
 
-local function SetStatus(target, text, ok)
-    if not target then return end
+local function SetStatus(text, ok)
     local color = ok == true and "|cff33ee77" or ok == false and "|cffff6666" or "|cffbfc8d6"
-    target:SetText(color .. tostring(text or "") .. "|r")
+    local message = color .. tostring(text or "") .. "|r"
+    if ExBoss.Print and type(ExBoss.Print.Say) == "function" then
+        ExBoss.Print.Say(message)
+    else
+        print(message)
+    end
 end
 
 local function IsChecked(check)
@@ -167,6 +122,10 @@ local function IsVisible(frame)
 end
 
 local function ClearImportNameRows()
+    if importFormSession then
+        importFormSession:Release()
+        importFormSession = nil
+    end
     for _, row in ipairs(importNameRows or {}) do
         row.label:Hide()
         row.input:Hide()
@@ -240,52 +199,58 @@ local function IsImportNameRowSelected(row)
     return false
 end
 
+RelayoutImportPresentation = function()
+    if not importFormSession or not importSection then return end
+    local height = importFormSession:Relayout(math.max(1, importSection:GetWidth() or 1))
+    importSection._settingsCard:SetContentHeight(height)
+    if scrollChild then
+        local exportHeight = exportSection and exportSection._settingsCard and exportSection._settingsCard:GetHeight() or 0
+        scrollChild:SetHeight(math.max(1, math.max(exportHeight, importSection._settingsCard:GetHeight()) + 80))
+    end
+end
+
 local function LayoutImportControls()
+    -- 只重排原同parent控件；原选择、显隐、职责顺序及输入对象保持。
     if not importSection then return end
-    local y = -230
+    if importFormSession then
+        importFormSession:Release()
+        importFormSession = nil
+    end
+    local rows = {}
+    rows[#rows + 1] = { controls = { { widget = importInputBox } } }
+    rows[#rows + 1] = { controls = { { widget = importParseButton, width = 100 } } }
     for _, row in ipairs(importNameRows) do
         local visible = IsImportNameRowSelected(row)
         SetVisible(row.label, visible)
         SetVisible(row.input, visible)
         if visible then
-            row.label:ClearAllPoints(); row.label:SetPoint("TOPLEFT", 14, y)
-            row.input:ClearAllPoints(); row.input:SetPoint("TOPLEFT", 14, y - 18)
-            y = y - 52
+            rows[#rows + 1] = { widget = row.input, label = row.label:GetText() }
+            row.label:Hide()
         end
     end
 
-    if importSummary then
-        importSummary:ClearAllPoints(); importSummary:SetPoint("TOPLEFT", 14, y); importSummary:SetPoint("TOPRIGHT", -14, y)
-        y = y - math.max(60, (tonumber(importSummary._lineCount) or 0) * 14 + 10)
-    end
-
-    for _, check in ipairs({ importAppearanceCheck, importLegacyCheck }) do
-        if IsVisible(check) then
-            check:ClearAllPoints(); check:SetPoint("TOPLEFT", 14, y)
-            y = y - 28
+    for _, entry in ipairs({
+        { importAppearanceCheck, L["导入并启用外观配置"] },
+        { importLegacyCheck, L["导入旧版 Author + User（不自动启用）"] },
+    }) do
+        if IsVisible(entry[1]) then
+            rows[#rows + 1] = { widget = entry[1], label = entry[2], presentation = "switch" }
         end
     end
     for _, slot in ipairs(ROLE_ORDER) do
         local check = importRoleChecks and importRoleChecks[slot]
         if IsVisible(check) then
-            check:ClearAllPoints(); check:SetPoint("TOPLEFT", 14, y)
-            y = y - 25
+            rows[#rows + 1] = { widget = check, label = L["导入并切换："] .. ROLE_LABELS[slot], presentation = "switch" }
         end
     end
-    if importButton then
-        importButton:ClearAllPoints(); importButton:SetPoint("TOPLEFT", 14, y)
-        y = y - 44
-    end
-    if apiImportButton then
-        apiImportButton:ClearAllPoints(); apiImportButton:SetPoint("TOPLEFT", 14, y)
-        y = y - 44
-    end
-    if importStatus then
-        importStatus:ClearAllPoints(); importStatus:SetPoint("TOPLEFT", 14, y); importStatus:SetPoint("TOPRIGHT", -14, y)
-        y = y - 34
-    end
-    importSection:SetHeight(math.max(700, -y + 18))
-    if scrollChild then scrollChild:SetHeight(math.max(740, importSection:GetHeight() + 36)) end
+    local actions = { controls = {} }
+    if importButton then actions.controls[#actions.controls + 1] = { widget = importButton, width = 116 } end
+    if apiImportButton then actions.controls[#actions.controls + 1] = { widget = apiImportButton, width = 220 } end
+    rows[#rows + 1] = actions
+    EXUI:PrepareSettingsListCard(importSection._settingsCard, { preserveHeader = false })
+    importFormSession = _G.ExwindGrid:MountSettingsList(importSection, { sections = { { rows = rows } } })
+    importFormSession.card = importSection._settingsCard
+    RelayoutImportPresentation()
 end
 
 local function RefreshImportNameRows()
@@ -394,7 +359,7 @@ end
 local function ExportBundle()
     local ie = IE()
     if not ie or type(ie.ExportBundle) ~= "function" then
-        SetStatus(exportStatus, L["导出系统不可用"], false); return
+        SetStatus(L["导出系统不可用"], false); return
     end
     local options = {
         name = Trim(exportNameInput and exportNameInput:GetText() or ""),
@@ -403,9 +368,10 @@ local function ExportBundle()
         raid = IsChecked(exportRaidCheck),
     }
     local encoded, reason = ie:ExportBundle(options)
-    if not encoded then SetStatus(exportStatus, L["导出失败："] .. tostring(reason), false); return end
-    SetStatus(exportStatus, L["已导出所选配置"], true)
-    ShowExportPopup(encoded, options.name ~= "" and options.name or L["外观 / Boss 配置"])
+    if not encoded then SetStatus(L["导出失败："] .. tostring(reason), false); return end
+    SetStatus(L["已导出所选配置"], true)
+    exportResultInput:SetText(encoded)
+    FocusAndHighlight(exportResultInput)
 end
 
 local function ClearImportChoices()
@@ -414,36 +380,24 @@ local function ClearImportChoices()
     SetVisible(importAppearanceCheck, false)
     SetVisible(importLegacyCheck, false)
     for _, check in pairs(importRoleChecks or {}) do SetVisible(check, false) end
-    if importSummary then importSummary:SetText(""); importSummary._lineCount = 0 end
     LayoutImportControls()
 end
 
 local function ShowParsedTransfer(decoded)
     ClearImportChoices()
     parsedTransfer = decoded
-    local lines = {}
     if decoded.kind == "appearance" then
         importAppearanceCheck:SetChecked(true); SetVisible(importAppearanceCheck, true)
-        lines[#lines + 1] = L["内容：外观与模块配置"]
-        lines[#lines + 1] = L["导入后会直接启用，并重载界面。"]
     elseif decoded.kind == "legacyBoss" then
         importLegacyCheck:SetChecked(true); SetVisible(importLegacyCheck, true)
-        local scene = decoded.profile.category == "raid" and L["团本"] or L["大秘境"]
-        lines[#lines + 1] = L["旧版内容："] .. scene .. " Author + User"
-        lines[#lines + 1] = L["旧字符串没有职责映射：可导入，但不会自动启用。"]
     elseif decoded.kind == "bundle" then
         local bundle = decoded.bundle
-        if Trim(bundle.name) ~= "" then
-            lines[#lines + 1] = L["导出包名称："] .. tostring(bundle.name)
-        end
         if bundle.appearance then
             importAppearanceCheck:SetChecked(true); SetVisible(importAppearanceCheck, true)
-            lines[#lines + 1] = L["外观："] .. tostring(bundle.appearance.name or L["外观配置"])
         end
         for _, category in ipairs({ "mplus", "raid" }) do
             local scene = bundle.scenes[category]
             if scene then
-                lines[#lines + 1] = (category == "raid" and L["团本"] or L["大秘境"]) .. "：" .. tostring(#scene.pairs) .. L[" 个 Author + User 配置对"]
                 for _, slot in ipairs(ROLE_ORDER) do
                     if scene.assignments[slot] then
                         local check = importRoleChecks[slot]
@@ -452,32 +406,29 @@ local function ShowParsedTransfer(decoded)
                 end
             end
         end
-        lines[#lines + 1] = L["勾选的职责会导入并切换；未勾选的职责不会导入对应配置。"]
     end
-    importSummary:SetText(table.concat(lines, "\n"))
-    importSummary._lineCount = #lines
     BuildImportNameRows(decoded)
 end
 
 local function ParseImport()
     ClearImportChoices()
     local raw = Trim(importInputBox and importInputBox:GetText() or "")
-    if raw == "" then SetStatus(importStatus, L["请先粘贴导出字符串"], false); return end
+    if raw == "" then SetStatus(L["请先粘贴导出字符串"], false); return end
 
     local profiles = Profiles()
     if raw:sub(1, 11) == "!EXBOSSAP1!" then
         local profile, reason = profiles and profiles.DecodeImportString and profiles:DecodeImportString(raw)
-        if not profile then SetStatus(importStatus, L["解析失败："] .. tostring(reason), false); return end
+        if not profile then SetStatus(L["解析失败："] .. tostring(reason), false); return end
         ShowParsedTransfer({ kind = "appearance", profile = profile })
-        SetStatus(importStatus, L["解析成功：选择后执行导入"], true)
+        SetStatus(L["解析成功：选择后执行导入"], true)
         return
     end
 
     local ie = IE()
     local decoded, reason = ie and ie.DecodeTransfer and ie:DecodeTransfer(raw)
-    if not decoded then SetStatus(importStatus, L["解析失败："] .. tostring(reason or L["导入系统不可用"]), false); return end
+    if not decoded then SetStatus(L["解析失败："] .. tostring(reason or L["导入系统不可用"]), false); return end
     ShowParsedTransfer(decoded)
-    SetStatus(importStatus, L["解析成功：勾选要导入并启用的内容"], true)
+    SetStatus(L["解析成功：勾选要导入并启用的内容"], true)
 end
 
 local function ImportAppearance(profile, importedName)
@@ -509,36 +460,36 @@ local function HasSelectedRole(selected)
 end
 
 local function DoImport()
-    if not parsedTransfer then SetStatus(importStatus, L["请先点击解析"], false); return end
+    if not parsedTransfer then SetStatus(L["请先点击解析"], false); return end
     if type(InCombatLockdown) == "function" and InCombatLockdown() then
-        SetStatus(importStatus, L["战斗中不能导入或切换配置"], false); return
+        SetStatus(L["战斗中不能导入或切换配置"], false); return
     end
     local importNames, nameReason = CollectImportNames()
-    if not importNames then SetStatus(importStatus, nameReason, false); return end
+    if not importNames then SetStatus(nameReason, false); return end
 
     local changed, imported = false, 0
     if parsedTransfer.kind == "appearance" then
         if IsChecked(importAppearanceCheck) then
             local ok, result = ImportAppearance(parsedTransfer.profile, importNames.appearance)
-            if not ok then SetStatus(importStatus, L["导入失败："] .. tostring(result), false); return end
+            if not ok then SetStatus(L["导入失败："] .. tostring(result), false); return end
             changed, imported = result == true, imported + 1
         end
     elseif parsedTransfer.kind == "legacyBoss" then
         if IsChecked(importLegacyCheck) then
             local ie = IE()
             if not ie or type(ie.ImportUserConfigurationPayload) ~= "function" then
-                SetStatus(importStatus, L["导入失败："] .. L["导入系统不可用"], false)
+                SetStatus(L["导入失败："] .. L["导入系统不可用"], false)
                 return
             end
             local ok, result = ie:ImportUserConfigurationPayload({ version = 6, payloadType = "exboss_author_user_values", profile = parsedTransfer.profile }, importNames.legacy)
-            if not ok then SetStatus(importStatus, L["导入失败："] .. tostring(result), false); return end
+            if not ok then SetStatus(L["导入失败："] .. tostring(result), false); return end
             imported = imported + 1
         end
     elseif parsedTransfer.kind == "bundle" then
         local bundle = parsedTransfer.bundle
         if bundle.appearance and IsChecked(importAppearanceCheck) then
             local ok, result = ImportAppearance(bundle.appearance, importNames.appearance)
-            if not ok then SetStatus(importStatus, L["导入失败："] .. tostring(result), false); return end
+            if not ok then SetStatus(L["导入失败："] .. tostring(result), false); return end
             changed, imported = result == true, imported + 1
         end
         local boss = ExBoss and ExBoss.BossConfig
@@ -548,7 +499,7 @@ local function DoImport()
                 local selected = SelectedRoles(category, scene.assignments)
                 if HasSelectedRole(selected) then
                     if not boss or type(boss.ImportSelectedScene) ~= "function" then
-                        SetStatus(importStatus, L["导入失败："] .. L["Boss 配置系统不可用"], false)
+                        SetStatus(L["导入失败："] .. L["Boss 配置系统不可用"], false)
                         return
                     end
                     -- Do not combine this call with `and`: Lua collapses the
@@ -556,7 +507,7 @@ local function DoImport()
                     -- We need the result table to count imported pairs and
                     -- switched role assignments after a successful import.
                     local ok, result = boss:ImportSelectedScene(category, scene.pairs, scene.assignments, selected, importNames.pairs[category])
-                    if not ok then SetStatus(importStatus, L["导入失败："] .. tostring(result), false); return end
+                    if not ok then SetStatus(L["导入失败："] .. tostring(result), false); return end
                     imported = imported + (tonumber(result.imported) or 0)
                     changed = changed or (tonumber(result.assignments) or 0) > 0
                 end
@@ -564,13 +515,13 @@ local function DoImport()
         end
     end
 
-    if imported == 0 then SetStatus(importStatus, L["没有勾选需要导入的内容"], nil); return end
+    if imported == 0 then SetStatus(L["没有勾选需要导入的内容"], nil); return end
     if changed then
-        if type(ReloadUI) ~= "function" then SetStatus(importStatus, L["无法重载界面，未完成切换"], false); return end
+        if type(ReloadUI) ~= "function" then SetStatus(L["无法重载界面，未完成切换"], false); return end
         ReloadUI()
         return
     end
-    SetStatus(importStatus, L["已导入。旧版字符串不会自动切换配置。"], true)
+    SetStatus(L["已导入。旧版字符串不会自动切换配置。"], true)
 end
 
 -- This is deliberately separate from the normal import workflow: it calls
@@ -578,24 +529,24 @@ end
 -- returned failure reason that a third-party wrapper may otherwise swallow.
 local function DoPublicAPIImport()
     local raw = Trim(importInputBox and importInputBox:GetText() or "")
-    if raw == "" then SetStatus(importStatus, L["请先粘贴导出字符串"], false); return end
+    if raw == "" then SetStatus(L["请先粘贴导出字符串"], false); return end
     if type(InCombatLockdown) == "function" and InCombatLockdown() then
-        SetStatus(importStatus, L["战斗中不能导入或切换配置"], false); return
+        SetStatus(L["战斗中不能导入或切换配置"], false); return
     end
     local api = _G.EXBossWagoAPI
     if type(api) ~= "table" or type(api.ImportProfile) ~= "function" then
-        SetStatus(importStatus, L["Wago API 不可用"], false); return
+        SetStatus(L["Wago API 不可用"], false); return
     end
     local ok, result = api:ImportProfile(raw)
     if not ok then
-        SetStatus(importStatus, L["Wago API 导入失败："] .. tostring(result), false)
+        SetStatus(L["Wago API 导入失败："] .. tostring(result), false)
         return
     end
     if type(result) == "table" and result.reloadRequired == true then
-        SetStatus(importStatus, L["Wago API 导入成功，正在重载界面"], true)
+        SetStatus(L["Wago API 导入成功，正在重载界面"], true)
         if type(ReloadUI) == "function" then ReloadUI(); return end
     end
-    SetStatus(importStatus, L["Wago API 导入成功"], true)
+    SetStatus(L["Wago API 导入成功"], true)
 end
 
 local function DefaultExportChecks()
@@ -604,21 +555,63 @@ local function DefaultExportChecks()
     return true, false
 end
 
+-- [卡片/Grid 迁移边界：导入导出页]
+-- 允许：只按共享规范替换导出/导入两块的外观、锚点、宽高与动态高度报告。
+-- 导出结果只写本页展示框；格式、生成、解析、导入与职责选择保持原处理链。
+-- SectionBg 当前是真实 parent；若换共享卡必须整体承接其 children，不能只把背景当容器声明后遗留子控件。
+RelayoutExportPresentation = function()
+    if not exportFormSession or not exportSection then return end
+    local height = exportFormSession:Relayout(math.max(1, exportSection:GetWidth() or 1))
+    exportSection._settingsCard:SetContentHeight(height)
+    if scrollChild and importSection and importSection._settingsCard then
+        scrollChild:SetHeight(math.max(1, math.max(exportSection._settingsCard:GetHeight(), importSection._settingsCard:GetHeight()) + 80))
+    end
+end
+
+-- Borrow the ordinary settings-row presentation; original controls keep their
+-- parents, values and callbacks. Only the two outer columns own coordinates.
+LayoutTransferColumns = function()
+    if not (scrollChild and exportSection and importSection) then return end
+    local width = math.max(600, scrollChild:GetWidth() or 600)
+    local columnWidth = (width - 36) * 0.5
+    for index, section in ipairs({ exportSection, importSection }) do
+        local card = section._settingsCard
+        local heading = card._sectionHeading
+        heading:ClearAllPoints()
+        heading:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 10 + (index - 1) * (columnWidth + 16), -16)
+        EXUI:UpdateSettingsSectionLayout(heading, columnWidth)
+        card:ClearAllPoints()
+        card:SetPoint("TOPLEFT", heading, "BOTTOMLEFT", 0, 0)
+        card:SetWidth(columnWidth)
+    end
+end
+
 local function EnsureUI(contentFrame)
     if uiBuilt and scrollFrame and scrollFrame:GetParent() == contentFrame then return end
+    if exportFormSession then
+        exportFormSession:Release()
+        exportFormSession = nil
+    end
+    if importFormSession then
+        importFormSession:Release()
+        importFormSession = nil
+    end
     if scrollFrame then scrollFrame:Hide(); scrollFrame:SetParent(UIParent) end
     scrollFrame = CreateFrame("ScrollFrame", nil, contentFrame, "ScrollFrameTemplate")
     if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then ExBoss.UI.ApplyModernScrollBarSkin(scrollFrame) end
-    scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4); scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -26, 4)
+    scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4); scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
     scrollChild = CreateFrame("Frame", nil, scrollFrame); scrollFrame:SetScrollChild(scrollChild)
     local width = math.max(600, (contentFrame:GetWidth() or 1100) - 50)
-    local columnWidth = math.floor((width - 20) / 2) - 6
+    local columnWidth = (width - 36) * 0.5
     local defaultMplus, defaultRaid = DefaultExportChecks()
 
-    local exportSection = SectionBg(scrollChild, L["导出"], THEME.Primary)
-    exportSection:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 10, -16); exportSection:SetWidth(columnWidth); exportSection:SetHeight(700)
+    exportSection = SectionBg(scrollChild, L["导出"], THEME.Primary)
+    exportSection._settingsCard:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 10, -16)
+    exportSection._settingsCard:SetWidth(columnWidth)
+    exportSection:SetHeight(300); exportSection._settingsCard:SetContentHeight(300)
     local y = -42
-    MakeLabel(exportSection, L["导出包名称（可选，供接收方识别）"]):SetPoint("TOPLEFT", 14, y); y = y - 20
+    local exportNameLabel = MakeLabel(exportSection, L["导出包名称（可选，供接收方识别）"])
+    exportNameLabel:SetPoint("TOPLEFT", 14, y); y = y - 20
     exportNameInput = CreateSingleLineEditBox(exportSection, columnWidth - 28)
     exportNameInput:SetPoint("TOPLEFT", 14, y); y = y - 44
     exportAppearanceCheck = EXUI:CreateCheckbox(exportSection, L["是否导出外观配置"], true, function() end)
@@ -632,23 +625,18 @@ local function EnsureUI(contentFrame)
     exportRaidCheck = EXUI:CreateCheckbox(exportSection, L["是否导出团本配置"], defaultRaid, function() end)
     exportRaidCheck:SetPoint("TOPLEFT", 14, y); y = y - 52
     local exportButton = CreateActionButton(exportSection, L["生成导出字符串"], ExportBundle)
-    exportButton:SetSize(170, 38); exportButton:SetPoint("TOPLEFT", 14, y); y = y - 52
-    exportStatus = EXUI:CreateVisualFontString(exportSection, EXFONTFRAME, "GameFontHighlightSmall")
-    exportStatus:SetPoint("TOPLEFT", 14, y); exportStatus:SetPoint("TOPRIGHT", -14, y); exportStatus:SetJustifyH("LEFT"); exportStatus:SetJustifyV("TOP"); exportStatus:SetTextColor(unpack(THEME.TextSub))
-    exportStatus:SetText(L["Boss 配置始终按「Author + 对应 User 覆盖」成对导出。相同 Author 只会导出一次，并附带职责启用映射。"])
+    exportButton:SetSize(170, 28); exportButton:SetPoint("TOPLEFT", 14, y); y = y - 52
+    exportResultInput = CreateMultiLineEditBox(exportSection, columnWidth - 48, 240)
 
     importSection = SectionBg(scrollChild, L["导入"], THEME.Success)
-    importSection:SetPoint("TOPLEFT", exportSection, "TOPRIGHT", 20, 0); importSection:SetWidth(columnWidth); importSection:SetHeight(700)
+    importSection._settingsCard:SetPoint("TOPLEFT", exportSection._settingsCard, "TOPRIGHT", 16, 0)
+    importSection._settingsCard:SetWidth(columnWidth)
+    importSection:SetHeight(700); importSection._settingsCard:SetContentHeight(700)
     local iy = -42
-    MakeLabel(importSection, L["粘贴导出字符串"]):SetPoint("TOPLEFT", 14, iy); iy = iy - 20
-    importInputBox = CreateMultiLineEditBox(importSection, columnWidth - 28, 110)
-    importInputBox:SetPoint("TOPLEFT", 14, iy); iy = iy - 122
-    local parse = CreateActionButton(importSection, L["解析"], ParseImport, THEME.Success)
-    parse:SetSize(100, 32); parse:SetPoint("TOPLEFT", 14, iy); iy = iy - 46
-    importSummary = EXUI:CreateVisualFontString(importSection, EXFONTFRAME, "GameFontHighlightSmall")
-    importSummary:SetPoint("TOPLEFT", 14, iy); importSummary:SetPoint("TOPRIGHT", -14, iy); importSummary:SetJustifyH("LEFT"); importSummary:SetJustifyV("TOP"); importSummary:SetTextColor(unpack(THEME.TextMain)); importSummary:SetText("")
-    importSummary._lineCount = 0
-    iy = iy - 70
+    importInputBox = CreateMultiLineEditBox(importSection, columnWidth - 48, 240)
+    importInputBox:SetPoint("TOPLEFT", 14, iy); iy = iy - 252
+    importParseButton = CreateActionButton(importSection, L["解析"], ParseImport)
+    importParseButton:SetSize(100, 28); importParseButton:SetPoint("TOPLEFT", 14, iy); iy = iy - 46
     importAppearanceCheck = EXUI:CreateCheckbox(importSection, L["导入并启用外观配置"], true, RefreshImportNameRows)
     importAppearanceCheck:SetPoint("TOPLEFT", 14, iy); iy = iy - 28
     importLegacyCheck = EXUI:CreateCheckbox(importSection, L["导入旧版 Author + User（不自动启用）"], true, RefreshImportNameRows)
@@ -659,14 +647,29 @@ local function EnsureUI(contentFrame)
         check:SetPoint("TOPLEFT", 14, iy); iy = iy - 25
         importRoleChecks[slot] = check
     end
-    importButton = CreateActionButton(importSection, L["执行导入"], DoImport, THEME.Success)
-    importButton:SetSize(140, 36); importButton:SetPoint("BOTTOMLEFT", 14, 46)
-    apiImportButton = CreateActionButton(importSection, L["测试：通过 Wago API 导入"], DoPublicAPIImport, THEME.Primary)
-    apiImportButton:SetSize(200, 36); apiImportButton:SetPoint("BOTTOMLEFT", 164, 46)
-    importStatus = EXUI:CreateVisualFontString(importSection, EXFONTFRAME, "GameFontHighlightSmall")
-    importStatus:SetPoint("BOTTOMLEFT", 14, 16); importStatus:SetPoint("BOTTOMRIGHT", -14, 16); importStatus:SetJustifyH("LEFT"); importStatus:SetTextColor(unpack(THEME.TextSub)); importStatus:SetText("")
+    importButton = CreateActionButton(importSection, L["执行导入"], DoImport)
+    importButton:SetSize(140, 28); importButton:SetPoint("BOTTOMLEFT", 14, 46)
+    apiImportButton = CreateActionButton(importSection, L["测试：通过 Wago API 导入"], DoPublicAPIImport)
+    apiImportButton:SetSize(220, 28); apiImportButton:SetPoint("BOTTOMLEFT", 164, 46)
 
-    scrollChild:SetSize(width, 740)
+    scrollChild:SetSize(width, math.max(exportSection._settingsCard:GetHeight(), importSection._settingsCard:GetHeight()) + 80)
+    LayoutTransferColumns()
+    EXUI:PrepareSettingsListCard(exportSection._settingsCard, { preserveHeader = false })
+    exportNameLabel:Hide()
+    exportFormSession = _G.ExwindGrid:MountSettingsList(exportSection, {
+        sections = { { rows = {
+            { widget = exportNameInput, label = exportNameLabel:GetText() },
+            { widget = exportAppearanceCheck, label = L["是否导出外观配置"], presentation = "switch" },
+            { widget = exportAppearanceDropdown, label = L["选择外观配置"] },
+            { widget = exportMplusCheck, label = L["是否导出大秘境配置"], presentation = "switch" },
+            { widget = exportRaidCheck, label = L["是否导出团本配置"], presentation = "switch" },
+            { controls = { { widget = exportButton, width = 170 } } },
+            -- The shared action row supplies the single divider above this result.
+            { controls = { { widget = exportResultInput } } },
+        } } },
+    })
+    exportFormSession.card = exportSection._settingsCard
+    RelayoutExportPresentation()
     uiBuilt = true
     RefreshAppearanceDropdown()
     ClearImportChoices()
@@ -674,8 +677,11 @@ end
 
 function Page:Render(contentFrame)
     EnsureUI(contentFrame)
-    scrollFrame:SetParent(contentFrame); scrollFrame:ClearAllPoints(); scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4); scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -26, 4)
+    scrollFrame:SetParent(contentFrame); scrollFrame:ClearAllPoints(); scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4); scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
     scrollChild:SetWidth(math.max(600, (contentFrame:GetWidth() or 1100) - 50))
+    LayoutTransferColumns()
+    RelayoutExportPresentation()
+    RelayoutImportPresentation()
     scrollFrame:Show()
     RefreshAppearanceDropdown()
 end

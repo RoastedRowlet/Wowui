@@ -360,7 +360,7 @@ if Private.IsRetail then
 			unitToken = UnitTokenFromGUID(data.guid)
 		end
 
-		if unitToken and issecretvalue and issecretvalue(unitToken) then
+		if unitToken and Private.IsSecretValue(unitToken) then
 			return
 		end
 
@@ -988,7 +988,7 @@ table.insert(Private.LoginFnQueue, function()
 
 			local characterName = C_LFGList.GetApplicantMemberInfo(applicantID, memberIdx)
 
-			if characterName == nil then
+			if Private.IsSecretValue(characterName) or characterName == nil then
 				return
 			end
 
@@ -1063,7 +1063,7 @@ table.insert(Private.LoginFnQueue, function()
 
 				local entry = C_LFGList.GetSearchResultInfo(resultID)
 
-				if not entry or not entry.leaderName then
+				if not entry or Private.IsSecretValue(entry.leaderName) or not entry.leaderName then
 					return
 				end
 
@@ -1099,7 +1099,7 @@ table.insert(Private.LoginFnQueue, function()
 
 				local entry = C_LFGList.GetSearchResultInfo(id)
 
-				if not entry or not entry.leaderName then
+				if not entry or Private.IsSecretValue(entry.leaderName) or not entry.leaderName then
 					return
 				end
 
@@ -1153,14 +1153,18 @@ table.insert(Private.LoginFnQueue, function()
 
 				expectedLinesToGetAdded = 0
 
+				local searchResultInfo = C_LFGList.GetSearchResultInfo(id)
+
+				if not searchResultInfo or Private.IsSecretValue(searchResultInfo.leaderName) then
+					return
+				end
+
 				local completedEncounters = originalGetSearchResultEncounterInfo(id)
 
 				if completedEncounters and #completedEncounters > 0 then
 					expectedLinesToGetAdded = #completedEncounters
 					expectedLinesToGetAdded = expectedLinesToGetAdded + 2
 				end
-
-				local searchResultInfo = C_LFGList.GetSearchResultInfo(id)
 
 				if searchResultInfo.autoAccept then
 					expectedLinesToGetAdded = expectedLinesToGetAdded + 2
@@ -1239,6 +1243,11 @@ table.insert(Private.LoginFnQueue, function()
 				end
 
 				local fullName = C_LFGList.GetApplicantMemberInfo(applicantID, memberIdx)
+
+				if Private.IsSecretValue(fullName) or fullName == nil then
+					return
+				end
+
 				local name, realm = strsplit("-", fullName)
 
 				rootDescription:CreateDivider()
@@ -1350,7 +1359,7 @@ table.insert(Private.LoginFnQueue, function()
 					unit = select(2, GameTooltip:GetUnit())
 				end
 
-				if issecretvalue and issecretvalue(unit) then
+				if Private.IsSecretValue(unit) then
 					return
 				end
 

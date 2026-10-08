@@ -3,6 +3,73 @@
 local L = ExwindLocale and ExwindLocale.NewLocale("zhCN", true)
 if not L then return end
 
+-- ExwindTools localization
+L["全部"] = true
+L["编辑"] = true
+L["布局"] = true
+L["清空"] = true
+L["删除组件"] = true
+L["试听 / 停止"] = true
+L["行"] = true
+L["选择样式"] = true
+L["已选 %d/%d"] = true
+L["应用"] = true
+L["自定义预览背景"] = true
+L["施法成功"] = true
+L["左下"] = true
+L["左上"] = true
+L["右下"] = true
+L["右上"] = true
+L["中下"] = true
+L["命令未注册或不能由插件直接执行"] = true
+L["开发中"] = true
+L["音效 %d"] = true
+L["变量与预览"] = true
+L["操作"] = true
+L["测试播放"] = true
+L["常用设置"] = true
+L["动画时长"] = true
+L["法术 ID"] = true
+L["法术冷却结束时，在屏幕中央放大淡出一次法术图标。"] = true
+L["法术手册"] = true
+L["副本外"] = true
+L["工具"] = true
+L["喊话设置"] = true
+L["黑名单 NPC"] = true
+L["忽略法术列表"] = true
+L["记录预览"] = true
+L["技能就绪闪现"] = true
+L["监控法术"] = true
+L["阶段"] = true
+L["阶段二"] = true
+L["阶段三"] = true
+L["阶段四"] = true
+L["阶段一"] = true
+L["结束缩放"] = true
+L["列表中任一法术冷却结束时播放一次闪现。"] = true
+L["配置分享"] = true
+L["起始缩放"] = true
+L["闪现外观"] = true
+L["伤害统计"] = true
+L["声音提示"] = true
+L["输入法术 ID"] = true
+L["数值字体跟随名称"] = true
+L["提示内容"] = true
+L["添加新的监控法术"] = true
+L["添加音效"] = true
+L["填入法术 ID 后按添加或回车"] = true
+L["无效法术 ID"] = true
+L["无效记录，已保持原值"] = true
+L["显示格式"] = true
+L["现有法术列表不是表，已保持原值"] = true
+L["有效路径示例：Interface\\AddOns\\MySoundAddon\\Assets\\example.ogg"] = true
+L["阈值 (%)"] = true
+L["自定义图标"] = true
+L["自定义音效路径"] = true
+L["NPC ID"] = true
+L["NPC ID = 法术 ID"] = true
+L["NPCID = SpellID"] = true
+
 -- 中文为默认语言，所有 key 设为 true（直接用 key 本身作为显示文字）
 -- 此文件会随翻译工作推进持续追加，无需手动维护翻译值
 -- added 2026-08-17 19:54
@@ -283,7 +350,7 @@ L["使用暴雪原生倒数(较省性能)"] = true
 L["法术 ID (优先)"] = true
 L["图标路径/ID |cffff2628优先使用法术ID(如有)|r"] = true
 L["尺寸"] = true
-L["|cff97a393示例: Interface\\AddOns\\ExwindTools\\Textures\\EJ-UI\\EX1.PNG|r"] = true
+L["|cff97a393示例: Interface\\AddOns\\ExwindCore\\Textures\\Images\\ExwindTools\\EJ-UI\\EX1.PNG|r"] = true
 L["内置音效"] = true
 L["使用自定义路径 (下方 1-6)"] = true
 L["使用自定义路径 (下方可持续新增)"] = true
@@ -1577,8 +1644,8 @@ L["启用: 删除物品时自动填写 'DELETE'"] = true
 L["启用: 打开商人时自动出售灰色物品"] = true
 L["打开大秘境面板自动插入钥石"] = true
 L["自动战斗记录"] = true
-L["|cffffd1005人地下城|r"] = true
-L["|cffffd100团队副本|r"] = true
+L["|cffffd1005人地下城|r"] = "|cffffffff五人地下城（多选）|r"
+L["|cffffd100团队副本|r"] = "|cffffffff团队副本（多选）|r"
 L["启用: Shift+点击 接管商人物品购买"] = true
 L["需要确认金额"] = true
 L["启用: 进入副本时弹出重置伤害统计确认框"] = true
@@ -1809,6 +1876,7 @@ L["层数条（原生 Aura Application Bar）"] = true
 L["锚点设置"] = true
 L["启用锚点"] = true
 L["锚点选择器"] = true
+L["选择框架"] = true
 L["FileDataID / 路径"] = true
 L["透明度"] = true
 L["缩放"] = true

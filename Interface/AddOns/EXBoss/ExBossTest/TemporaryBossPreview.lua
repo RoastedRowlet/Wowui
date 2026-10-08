@@ -147,26 +147,14 @@ local function BuildTimer(event, encounterID, duration)
     return timer
 end
 
-local function GetBarDisplayMode()
-    local root = _G.EXBOSS12S2
-    local general = type(root) == "table" and type(root.ui) == "table" and
-        type(root.ui.general) == "table" and root.ui.general or nil
-    local mode = tostring(type(general) == "table" and general.barDisplayMode or "bun"):lower()
-    if mode ~= "bun" and mode ~= "timer" and mode ~= "both" and mode ~= "none" then
-        return "bun"
-    end
-    return mode
-end
-
 local function ShowBars(timer)
-    local mode = GetBarDisplayMode()
-    if timer.showBunBar == true and (mode == "bun" or mode == "both") then
+    if timer.showBunBar == true and ExBoss.DisplayPolicy.IsTimelineBarEnabled("bun") then
         local bunBar = ExBoss and ExBoss.UI and ExBoss.UI.BunBar
         if bunBar and type(bunBar.StartExternalTimer) == "function" then
             pcall(bunBar.StartExternalTimer, bunBar, timer)
         end
     end
-    if timer.showTimerBar == true and (mode == "timer" or mode == "both") then
+    if timer.showTimerBar == true and ExBoss.DisplayPolicy.IsTimelineBarEnabled("timer") then
         local timerBar = ExBoss and ExBoss.UI and ExBoss.UI.TimerBar
         if timerBar and type(timerBar.StartExternalTimer) == "function" then
             pcall(timerBar.StartExternalTimer, timerBar, timer)

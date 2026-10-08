@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Evoker-Devastation',}
-local provider = {region='US',realm='Azuremyst',name='US',type='subscribers',zone=53,date='2026-09-29',data={Dr='Drylo:BAEBNQAECoEYAAIBAAcK6SMvCADQAgeODQAABQBaAHUNAAADAFYAfw0AAAQAWgCpDQAABABcAFwNAAABAF4AXQ0AAAIAYAAzDQAABQBcAAEABwrpIy8IANACB44NAAAFAFoAdQ0AAAMAVgB/DQAABABaAKkNAAAEAFwAXA0AAAEAXgBdDQAAAgBgADMNAAAFAFwAAAA=.',Mo='Moranta:BAEANQADCgYIBgAAAA==.',},}
+local provider = {region='US',realm='Azuremyst',name='US',type='subscribers',zone=53,date='2026-10-06',data={Dr='Drylo:BAEBNQAECoEcAAIBAAgKjSORBQAlAwiODQAABQBaAHUNAAADAFYAfw0AAAUAXgCpDQAABQBcAFwNAAABAF4AXQ0AAAIAXwBlDQAAAQBRADMNAAAGAFwAAQAICo0jkQUAJQMIjg0AAAUAWgB1DQAAAwBWAH8NAAAFAF4AqQ0AAAUAXABcDQAAAQBeAF0NAAACAF8AZQ0AAAEAUQAzDQAABgBcAAAA.',Mo='Moranta:BAEANQADCgYIBgAAAA==.',Tw='Twylo:BAEANQAECggICAABNQAECggIHAABAI0jAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

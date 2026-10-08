@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='Llane',name='US',type='subscribers',zone=53,date='2026-09-29',data={Cr='Credan:BAEANQAECggICAAAAA==.',Hy='Hypnocide:BAEANQAECgQIDAAAAA==.',Ke='Keleena:BAEANQAECgUIDgAAAA==.',Pr='Praeastra:BAEANQAECggIEgAAAA==.',Ru='Ruana:BAEANQADCgcIHAAAAA==.',},}
+local lookup = {'Paladin-Holy','Mage-Arcane',}
+local provider = {region='US',realm='Llane',name='US',type='subscribers',zone=53,date='2026-10-06',data={Cr='Credan:BAEANQAECggICAAAAA==.',Hy='Hypnocide:BAEANQAECgYIEgAAAA==.',Ke='Keleena:BAEBNQAECoEZAAIBAAcKnhhHTwAOAgeODQAABQBMAHUNAAAEAE0Afw0AAAQAOgCpDQAABAA7AFwNAAACAEgAXQ0AAAEAIgAzDQAABQA9AAEABwqeGEdPAA4CB44NAAAFAEwAdQ0AAAQATQB/DQAABAA6AKkNAAAEADsAXA0AAAIASABdDQAAAQAiADMNAAAFAD0AAAA=.',Pr='Praeastra:BAEBNQAECoEbAAICAAkKYAnpwQDcAQmODQAABAAkAHUNAAAEACUAfw0AAAQAFwCpDQAABAASAFwNAAADABwAXQ0AAAQADwBlDQAAAgASAKQNAAABAAcAMw0AAAEAHgACAAkKYAnpwQDcAQmODQAABAAkAHUNAAAEACUAfw0AAAQAFwCpDQAABAASAFwNAAADABwAXQ0AAAQADwBlDQAAAgASAKQNAAABAAcAMw0AAAEAHgAAAA==.',Ru='Ruana:BAEANQADCggIHQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

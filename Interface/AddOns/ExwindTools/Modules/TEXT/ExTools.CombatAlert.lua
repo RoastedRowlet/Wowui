@@ -3,6 +3,9 @@
 -- 业务只提交文字和状态颜色；中央唯一拥有 Anchor、Panel、World、Runtime。
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools or not ExwindTools.UI then return end
 
@@ -15,11 +18,15 @@ local LAYOUT_DEFAULTS = { direction = "DOWN", spacing = 0, maxVisible = 1 }
 local DISPLAY_WIDTH, DISPLAY_HEIGHT = 400, 100
 local RefreshActiveSurfaces
 
+
 local MODULE_SPEC = {
     RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
     moduleKey = MODULE_KEY,
     kind = "text",
     version = 1,
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     anchor = {
         dbPath = "$root",
         xKey = "x",
@@ -33,6 +40,9 @@ local MODULE_SPEC = {
         clampedToScreen = true,
         bindRoot = true,
     },
+    -- =========================================================
+    -- 二、默认配置与配置访问 | Defaults and Configuration Access
+    -- =========================================================
     defaults = {
         font_text = {
             a = 1,
@@ -77,127 +87,57 @@ local MODULE_SPEC = {
             ["core.text"] = { guiKey = "font_text", movable = false, tooltip = L["战斗提示文字"] },
         },
     },
+
+    -- =========================================================
+    -- 三、GUI 声明 | GUI Declarations
+    -- =========================================================
     gui = {
-        fields = {
+        version = 1,
+        sections = {
             {
-                group = "settings",
-                h = 18,
+                kind = "composite",
+                id = "common",
+                title = L["模块通用设置"],
+                component = "modulecommonsettings",
                 key = "moduleCommon",
-                label = L["模块通用设置"],
-                options = {
+                opts = {
                     bindRoot = true,
-                    fields = {
-                        {
-                            label = L["启用"],
-                            path = "enabled",
-                            type = "checkbox",
-                        },
-                    },
+                    presentation = "settings-list",
+                    fields = { { label = L["启用"], path = "enabled", presentation = "switch", type = "checkbox" } },
                     fixedLayout = {
                         controlH = 6,
                         controlW = 46,
                         firstY = 0,
                         logicalWidth = 200,
                         rowStep = 14,
-                        slotX = {
-                            3,
-                            53,
-                            103,
-                            153,
-                        },
+                        slotX = { 3, 53, 103, 153 },
                     },
                 },
-                order = 1,
-                type = "modulecommonsettings",
-                w = 200,
-                x = 1,
-                y = 10,
             },
             {
-                group = "settings",
-                h = 20,
+                kind = "settings",
+                id = "messages",
+                title = L["提示内容"],
+                items = {
+                    { key = "enterMessage", label = L["进入战斗文本"], type = "input" },
+                    { key = "leaveMessage", label = L["离开战斗文本"], type = "input" },
+                    { key = "enterColor", label = L["进入战斗颜色"], type = "color" },
+                    { key = "leaveColor", label = L["离开战斗颜色"], type = "color" },
+                },
+            },
+            {
+                kind = "composite",
+                id = "anchor",
+                title = L["锚点设置"],
+                component = "anchorgroup",
                 key = "anchor",
-                label = L["锚点设置"],
-                order = 2,
-                type = "anchorgroup",
-                w = 200,
-                x = 1,
-                y = 31,
             },
             {
-                group = "settings",
-                h = 6,
-                key = "enterMessage",
-                label = L["进入战斗文本"],
-                labelPos = "top",
-                order = 3,
-                type = "input",
-                w = 92,
-                x = 3,
-                y = 54,
-            },
-            {
-                group = "settings",
-                h = 6,
-                key = "leaveMessage",
-                label = L["离开战斗文本"],
-                labelPos = "top",
-                order = 4,
-                type = "input",
-                w = 92,
-                x = 103,
-                y = 54,
-            },
-            {
-                group = "settings",
-                h = 6,
-                key = "enterColor",
-                label = L["进入战斗颜色"],
-                order = 5,
-                type = "color",
-                w = 46,
-                x = 3,
-                y = 64,
-            },
-            {
-                group = "settings",
-                h = 6,
-                key = "leaveColor",
-                label = L["离开战斗颜色"],
-                order = 6,
-                type = "color",
-                w = 46,
-                x = 53,
-                y = 64,
-            },
-            {
-                group = "settings",
-                h = 50,
+                kind = "composite",
+                id = "font_text",
+                title = L["文字样式"],
+                component = "fontgroup",
                 key = "font_text",
-                label = L["文字样式"],
-                order = 7,
-                type = "fontgroup",
-                w = 200,
-                x = 1,
-                y = 76,
-            },
-        },
-        groups = {
-            {
-                key = "settings",
-                order = 1,
-            },
-        },
-        static = {
-            {
-                h = 6,
-                key = "header",
-                label = L["进出战斗提示"],
-                labelSize = 25,
-                type = "header",
-                w = 200,
-                x = 1,
-                y = 1,
             },
         },
     },
@@ -209,6 +149,12 @@ local central = EXUI:RegisterTextModule(MODULE_SPEC)
 local LAYOUT = DB.layout
 if not ExwindTools:IsModuleEnabled(MODULE_KEY) then return end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function ColorFor(kind)
     local prefix = kind == "enter" and "enterColor" or "leaveColor"
     return {
@@ -246,6 +192,9 @@ RefreshActiveSurfaces = function(controller)
     end
 end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function Play(kind)
     if DB.enabled ~= true then
         central:Clear()
@@ -259,7 +208,13 @@ local function Play(kind)
     }, true)
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 ExwindTools:RegisterEvent("PLAYER_REGEN_DISABLED", MODULE_KEY, function() Play("enter") end)
 ExwindTools:RegisterEvent("PLAYER_REGEN_ENABLED", MODULE_KEY, function() Play("leave") end)
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 RefreshPreview()
 ExwindTools:ReportReady(MODULE_KEY)

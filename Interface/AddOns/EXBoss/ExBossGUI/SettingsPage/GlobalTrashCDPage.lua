@@ -97,61 +97,27 @@ local NAMEPLATE_ICON_STRATA_ITEMS = {
 -- =============================================================
 -- 布局
 -- =============================================================
-local LAYOUT                      = {
-    { key = "header_main", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["小怪内置CD姓名版图标"], labelSize = 22 },
-    {
-        key = "nameplateIcon",
-        type = "icongroup",
-        x = 1,
-        y = 11,
-        w = 200,
-        h = 50,
-        label = L["图标位置与外观"],
-        opts = { enableOffset = true, hideIconID = true }
+-- [卡片/Grid 迁移边界：小怪全局设置]
+-- 允许：只按共享规范调整下列声明的 x/y/w/h、三组自然卡片与实际可见高度。
+-- 禁止：修改 key/type/path、页面 draft→Store 提交、live slider、姓名版预览或字段业务次序。
+-- icongroup/fontgroup 必须整体引用；顶部 panel preview 与屏幕姓名版 preview 是两套独立生命周期。
+local LAYOUT = {
+    version = 1,
+    title = L["小怪内置CD姓名版图标"],
+    sections = {
+        { kind = "settings", id = "placement", title = L["通用"],
+            items = {
+                { key = "nameplateIconSpacing", subKey = "spacing", parentKey = "nameplateIcon", type = "slider", min = 0, max = 50, step = 1, label = L["图标间距"] },
+                { key = "nameplateGrowthSide", type = "select", label = L["图标增长方向"], options = { { value = "left", label = L["左侧"] }, { value = "right", label = L["右侧"] } } },
+                { key = "nameplateIconStrata", type = "select", label = L["图标层级"], options = { { value = "BACKGROUND", label = "BACKGROUND" }, { value = "LOW", label = "LOW" }, { value = "MEDIUM", label = "MEDIUM" }, { value = "HIGH", label = "HIGH" }, { value = "DIALOG", label = "DIALOG" }, { value = "FULLSCREEN", label = "FULLSCREEN" }, { value = "FULLSCREEN_DIALOG", label = "FULLSCREEN_DIALOG" }, { value = "TOOLTIP", label = "TOOLTIP" } } },
+                { key = "hideNameplateIconAboveSeconds", type = "input", label = L["隐藏剩余超过 X 秒的图标（0=关闭）"] },
+                { key = "screenNameplatePreview", type = "button", label = L["屏幕敌方姓名版预览 开/关"], func = function() ToggleScreenNameplatePreview() end },
+            } },
+        { kind = "composite", id = "icon", title = L["外观"],
+            component = "icongroup", key = "nameplateIcon", opts = { enableOffset = true, hideIconID = true } },
+        { kind = "composite", id = "text", title = L["倒数时间文本"],
+            component = "fontgroup", key = "nameplateIconText" },
     },
-
-    -- IconGroup never implemented enableSpacing.  Keep this as a real field
-    -- under nameplateIcon, with its own lifecycle below, so the value reaches
-    -- the same runtime and panel positioning formula.
-    {
-        key = "nameplateIconSpacing",
-        subKey = "spacing",
-        parentKey = "nameplateIcon",
-        type = "slider",
-        x = 1,
-        y = 65,
-        w = 96,
-        h = 5, -- 调整 y：63 → 65
-        min = 0,
-        max = 50,
-        step = 1,
-        label = L["图标间距"],
-        labelPos = "top"
-    },
-    { key = "nameplateGrowthSide", type = "dropdown", x = 103, y = 65, w = 96, h = 5, label = L["图标增长方向"], items = NAMEPLATE_GROWTH_SIDE_ITEMS, labelPos = "top" }, -- 调整 y：63 → 65
-    { key = "nameplateIconStrata", type = "dropdown", x = 1, y = 75, w = 96, h = 5, label = L["图标层级"], items = NAMEPLATE_ICON_STRATA_ITEMS, labelPos = "top" }, -- 调整 y：69 → 75
-    {
-        key = "hideNameplateIconAboveSeconds",
-        type = "input",
-        x = 103,
-        y = 75,
-        w = 96,
-        h = 5, -- 调整 y：69 → 75
-        label = L["隐藏剩余超过 X 秒的图标（0=关闭）"],
-        labelPos = "top"
-    },
-    {
-        key = "screenNameplatePreview",
-        type = "button",
-        x = 1,
-        y = 84,
-        w = 200,
-        h = 5, -- 调整 y：75 → 84
-        label = L["屏幕敌方姓名版预览 开/关"],
-        func = function() ToggleScreenNameplatePreview() end
-    },
-
-    { key = "nameplateIconText", type = "fontgroup", x = 1, y = 91, w = 200, h = 50, label = L["倒数时间文本"] }, -- 调整 y：82 → 91
 }
 
 -- =============================================================
@@ -347,10 +313,10 @@ end
 
 local function InstallPageLiveSliders(draft)
     local Grid = _G.ExwindGrid
-    if not (Grid and type(Grid.Widgets) == "table") then return end
-    InstallLiveSliders(Grid.Widgets.nameplateIcon, "nameplateIcon", draft)
-    InstallLiveSliders(Grid.Widgets.nameplateIconText, "nameplateIconText", draft)
-    local spacing = Grid.Widgets.nameplateIconSpacing
+    if not (Grid and Grid.FindMountedWidget and Page._scrollChild) then return end
+    InstallLiveSliders(Grid:FindMountedWidget(Page._scrollChild, "nameplateIcon"), "nameplateIcon", draft)
+    InstallLiveSliders(Grid:FindMountedWidget(Page._scrollChild, "nameplateIconText"), "nameplateIconText", draft)
+    local spacing = Grid:FindMountedWidget(Page._scrollChild, "nameplateIconSpacing")
     if spacing and type(spacing.SetLifecycleCallbacks) == "function" then
         spacing._onValueChanged = nil
         spacing:SetLifecycleCallbacks({
@@ -474,6 +440,8 @@ EXUI:RegisterModuleValueController(EDITOR_KEY, {
 -- =============================================================
 -- Render
 -- =============================================================
+-- [混合函数边界] Page:Render 内只可调整 Dock/Scroll/Grid 的锚点与尺寸；revision guard、draft、预览、ActivePage 与既有 OnHide 行为禁止修改。
+-- 设置目录切换只隐藏 ScrollFrame：其 OnHide 会清 draft/revision、preview 与 ActivePage，但不会释放 Grid；不得把下方 Page:Hide 的完整释放写成当前目录调用链。
 function Page:Render(contentFrame)
     local Grid = _G.ExwindGrid
     if not Grid then return end
@@ -501,8 +469,7 @@ function Page:Render(contentFrame)
         local dock        = CreateFrame("Frame", "ExBoss_TrashCDNameplatePreviewDock", contentFrame, "BackdropTemplate")
         dock:SetHeight(160)
         dock:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-        dock:SetBackdropBorderColor(0.20, 0.62, 0.90, 0.45)
-        dock:SetBackdropColor(0.5804, 0.6471, 0.9882, 1)
+        EXUI:ApplyStandardPreviewShellStyle(dock, true)
         Page._previewDock = dock
 
         sf:HookScript("OnHide", function()
@@ -533,7 +500,7 @@ function Page:Render(contentFrame)
     sf:SetParent(contentFrame)
     sf:ClearAllPoints()
     sf:SetPoint("TOPLEFT", dock, "BOTTOMLEFT", 0, -6)
-    sf:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -24, 4)
+    sf:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
     sf:SetVerticalScroll(0)
     sf:Show()
 
@@ -557,15 +524,22 @@ function Page:Render(contentFrame)
             ExwindTools.UI.CurrentModule   = EDITOR_KEY
         end
         RefreshPanelPreview()
-        local cols = ResolveGridCols(sc:GetWidth())
-        if Grid.SetContainerCols then
-            Grid:SetContainerCols(sc, cols)
+        if Page._cardSession and type(Page._cardSession.Release) == "function" then
+            Page._cardSession:Release()
+            Page._cardSession = nil
         end
-        Grid:Render(sc, ScaleLayout(LAYOUT, cols), gridDB, EDITOR_KEY)
+        Page._cardSession = Grid:MountCards(sc, LAYOUT, {
+            pageId = EDITOR_KEY,
+            regionId = "global-trash-cd",
+            config = gridDB,
+            moduleKey = EDITOR_KEY,
+            scrollFrame = sf,
+        })
         InstallPageLiveSliders(gridDB)
     end)
 end
 
+-- [释放边界] 显式 Page:Hide 才会额外 ReleaseContainerWidgets；当前 GlobalSettings 目录不会调用它，未来迁移不得偷偷改变调用链或重复释放。
 function Page:Hide()
     Page._renderGeneration = (Page._renderGeneration or 0) + 1
     Page._editorRevision = (Page._editorRevision or 0) + 1

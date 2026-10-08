@@ -10,6 +10,7 @@
 local Panel = ExBoss.UI.Panel
 local L = ExBoss.L or setmetatable({}, { __index = function(_, key) return key end })
 local EXUI = _G.ExwindTools and _G.ExwindTools.UI
+local GC = _G.ExwindTools and _G.ExwindTools.GUIColors
 
 -- =============================================================
 -- 常量
@@ -24,21 +25,28 @@ local CONTENT_X = LEFT_W + 10
 local OUTER_STRIP_W = 140
 local EMBED_TOP_Y    = -36
 
+-- [卡片/Grid 迁移边界：顶级路由]
+-- TABS/redirect/dispatch 顺序与 key 是导航业务合同，禁止因卡片外观迁移改名、重排、恢复历史页或改变可达性。
+-- 页面内容卡片只在各 Page 内迁移；本文件继续只拥有 Unified/fallback 宿主与切页释放。
 local TABS = {
-    { key = "home",          label = L["首页"] },
-    { key = "voicepack",     label = L["语音/配置"] },
-    { key = "boss",          label = L["副本(首领)"] },
-    { key = "trash",         label = L["副本(小怪)"] },
-    { key = "tools",         label = L["小工具"] },
-    { key = "globalsettings",label = L["设置"] },
-    { key = "importexport",  label = L["导入导出"] },
-    { key = "about",         label = L["关于插件"] },
+-- icon 传统一图标库的 ID（不是路径）：选项组只对 ID 图标跟随文字色上色（未选中变暗）。
+    { key = "home",          label = L["首页"], icon = "house" },
+    { key = "voicepack",     label = L["语音/配置"], icon = "headphones" },
+    { key = "boss",          label = L["副本(首领)"], icon = "castle" },
+    { key = "trash",         label = L["副本(小怪)"], icon = "list" },
+    { key = "tools",         label = L["小工具"], icon = "toolbox" },
+    { key = "globalsettings",label = L["设置"], icon = "settings" },
+    { key = "importexport",  label = L["导入导出"], icon = "download" },
+    { key = "about",         label = L["关于插件"], icon = "info" },
 }
 
 local EMBED_TABS = {
     { key = "embed:exwindtools", label = "ExwindTools" },
     { key = "embed:exaura",      label = "EXAura" },
 }
+
+-- [跨插件嵌入边界] 这是 8 个 EXBoss 内容 Tab 之外的 2 条 route：fallback 才使用下方 embedHost，Unified 必须转发到 tools/aura Provider。
+-- key、左侧外挂条顺序、SetEmbedHost/ClearEmbedHost 成对调用与 Provider 转发均禁止因卡片迁移改变；相邻插件内容不归 EXBoss 卡片拥有。
 
 -- =============================================================
 -- 运行时状态
@@ -189,21 +197,13 @@ local function ApplyModernScrollBarSkin(scrollFrame)
     if not scrollFrame then
         return
     end
-    -- ScrollFrameTemplate already owns exactly one native MinimalScrollBar.
-    -- Keep this entry point for existing pages, but never create, hide, or
-    -- rebind another scrollbar.
+    -- ScrollFrameTemplate already owns and binds exactly one native
+    -- MinimalScrollBar.  Delegate only its geometry/appearance to Core.
     scrollFrame:EnableMouseWheel(true)
+    EXUI:ApplyModernScrollFrame(scrollFrame)
 end
 
 ExBoss.UI.ApplyModernScrollBarSkin = ApplyModernScrollBarSkin
-
-local function GetSidebarFontPath()
-    local ET = _G.ExwindTools
-    if ET and type(ET.MAIN_FONT) == "string" and ET.MAIN_FONT ~= "" then
-        return ET.MAIN_FONT
-    end
-    return STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
-end
 
 local function NormalizeSidebarSearchText(text)
     local value = tostring(text or "")
@@ -222,148 +222,25 @@ end
 
 local function CreateSidebarSearchBox(parent, initialText, opts)
     local config = type(opts) == "table" and opts or {}
-    local edit = CreateFrame("EditBox", nil, parent, "BackdropTemplate")
-    edit:SetHeight(config.height or 28)
-    if edit.SetAutoFocus then
-        edit:SetAutoFocus(false)
-    end
-    if edit.SetFont then
-        edit:SetFont(GetSidebarFontPath(), 13, "")
-    end
-    if edit.SetTextColor then
-        edit:SetTextColor(0.90, 0.93, 0.98, 1)
-    end
-    if edit.SetCursorColor then
-        edit:SetCursorColor(0.0, 0.72, 1.0)
-    end
-    if edit.SetTextInsets then
-        edit:SetTextInsets(10, 10, 0, 0)
-    end
-    edit:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        edgeSize = 1,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 },
+    return EXUI:CreateSearchBox(parent, initialText or "", 1, config.height or 30, {
+        onChanged = config.onChanged,
     })
-    edit:SetBackdropColor(0.06, 0.07, 0.09, 0.96)
-    edit:SetBackdropBorderColor(0.20, 0.22, 0.28, 1)
-
-    local placeholder = EXUI:CreateVisualFontString(edit, EXFONTFRAME)
-    placeholder:SetPoint("LEFT", 10, 0)
-    placeholder:SetPoint("RIGHT", -10, 0)
-    placeholder:SetJustifyH("LEFT")
-    placeholder:SetFont(GetSidebarFontPath(), 13, "")
-    placeholder:SetTextColor(0.45, 0.50, 0.58, 1)
-    placeholder:SetText(config.placeholder or L["搜索..."])
-    edit._placeholder = placeholder
-
-    local function RefreshPlaceholder(self)
-        if self:GetText() == "" and not self:HasFocus() then
-            self._placeholder:Show()
-        else
-            self._placeholder:Hide()
-        end
-    end
-
-    edit:SetScript("OnEscapePressed", function(self)
-        self:ClearFocus()
-    end)
-    edit:SetScript("OnEnterPressed", function(self)
-        self:ClearFocus()
-    end)
-    edit:SetScript("OnEditFocusGained", function(self)
-        self:SetBackdropBorderColor(0.00, 0.72, 1.00, 0.95)
-        RefreshPlaceholder(self)
-    end)
-    edit:SetScript("OnEditFocusLost", function(self)
-        self:SetBackdropBorderColor(0.20, 0.22, 0.28, 1)
-        RefreshPlaceholder(self)
-    end)
-    edit:SetScript("OnTextChanged", function(self, userInput)
-        RefreshPlaceholder(self)
-        if config.onChanged then
-            config.onChanged(self:GetText(), userInput, self)
-        end
-    end)
-
-    edit:SetText(initialText or "")
-    RefreshPlaceholder(edit)
-    return edit
 end
 
 local function CreateSidebarCategoryHeader(parent)
-    local btn = CreateFrame("Button", nil, parent)
-    btn:SetHeight(26)
-
-    btn.label = EXUI:CreateVisualFontString(btn, EXFONTFRAME)
-    btn.label:SetPoint("LEFT", 0, 0)
-    btn.label:SetPoint("RIGHT", 0, 0)
-    btn.label:SetJustifyH("LEFT")
-    btn.label:SetFont(GetSidebarFontPath(), 18, "OUTLINE")
-    btn.label:SetTextColor(0.97, 0.98, 1.0, 0.98)
-
-    btn:SetScript("OnEnter", function(self)
-        self.label:SetTextColor(1, 1, 1, 1)
-    end)
-    btn:SetScript("OnLeave", function(self)
-        self.label:SetTextColor(0.97, 0.98, 1.0, 0.98)
-    end)
-
-    return btn
+    return EXUI:CreateSidebarNavigationHeader(parent, "", { height = 26 })
 end
 
-local function CreateSidebarModuleButton(parent)
-    local btn = CreateFrame("Button", nil, parent, "BackdropTemplate")
-    btn:SetHeight(28)
-    btn:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        edgeSize = 1,
-        insets = { left = 0, right = 0, top = 0, bottom = 0 },
+-- opts.selectedPresentation 直接转给公共侧栏导航按钮（nil/"rail" = 默认的淡底+左侧指示条，
+-- "outline" = 只描边）。按钮来自共享池，呈现选项每次创建都要重新传，所以不在这里写死默认值。
+local function CreateSidebarModuleButton(parent, opts)
+    local config = type(opts) == "table" and opts or {}
+    local btn = EXUI:CreateSidebarNavigationButton(parent, "", nil, {
+        level = 1,
+        height = 28,
+        selectedPresentation = config.selectedPresentation,
     })
-    btn:SetBackdropColor(0, 0, 0, 0)
-    btn:SetBackdropBorderColor(0, 0, 0, 0)
-
-    btn.rail = EXUI:CreateVisualTexture(btn, EXBACKGROUNDFRAME)
-    btn.rail:SetPoint("TOPLEFT", 10, -2)
-    btn.rail:SetPoint("BOTTOMLEFT", 10, 2)
-    btn.rail:SetWidth(1)
-    btn.rail:SetColorTexture(0.24, 0.29, 0.38, 0.55)
-
-    btn.accent = EXUI:CreateVisualTexture(btn, EXBORDERFRAME)
-    btn.accent:SetPoint("TOPLEFT", 10, -2)
-    btn.accent:SetPoint("BOTTOMLEFT", 10, 2)
-    btn.accent:SetWidth(1)
-    btn.accent:SetColorTexture(0.0, 0.72, 1.0, 1.0)
-    btn.accent:SetAlpha(0)
-
-    btn.dot = EXUI:CreateVisualFontString(btn, EXFONTFRAME)
-    btn.dot:SetPoint("CENTER", btn, "LEFT", 10, 0)
-    btn.dot:SetFont(GetSidebarFontPath(), 15, "OUTLINE")
-    btn.dot:SetText("")
-    btn.dot:SetTextColor(0.0, 0.72, 1.0, 0.0)
-
-    btn.label = EXUI:CreateVisualFontString(btn, EXFONTFRAME)
-    btn.label:SetPoint("LEFT", 26, 0)
-    btn.label:SetPoint("RIGHT", -10, 0)
-    btn.label:SetJustifyH("LEFT")
-    btn.label:SetWordWrap(false)
-    btn.label:SetFont(GetSidebarFontPath(), 15, "")
-    btn.label:SetTextColor(0.57, 0.63, 0.75, 1)
-
-    btn:SetScript("OnEnter", function(self)
-        self._hovered = true
-        if ExBoss.UI and ExBoss.UI.ApplySidebarModuleButtonState then
-            ExBoss.UI.ApplySidebarModuleButtonState(self, self.isActive, self.isEnabledState)
-        end
-    end)
-    btn:SetScript("OnLeave", function(self)
-        self._hovered = false
-        if ExBoss.UI and ExBoss.UI.ApplySidebarModuleButtonState then
-            ExBoss.UI.ApplySidebarModuleButtonState(self, self.isActive, self.isEnabledState)
-        end
-    end)
-
+    btn:SetHeight(28)
     return btn
 end
 
@@ -373,32 +250,7 @@ local function ApplySidebarModuleButtonState(btn, isActive, isEnabled)
     end
     btn.isActive = isActive == true
     btn.isEnabledState = (isEnabled ~= false)
-
-    if btn.isEnabledState == false then
-        btn.label:SetTextColor(0.38, 0.42, 0.50, 1)
-        btn.rail:SetColorTexture(0.18, 0.20, 0.24, 0.35)
-        btn.accent:SetAlpha(0)
-        btn.dot:SetTextColor(0.0, 0.72, 1.0, 0.0)
-        return
-    end
-
-    if btn.isActive then
-        btn.label:SetTextColor(0.92, 0.96, 1.00, 1)
-        btn.rail:SetColorTexture(0.24, 0.29, 0.38, 0.25)
-        btn.accent:SetAlpha(1)
-        btn.dot:SetTextColor(0.0, 0.72, 1.0, 1.0)
-        return
-    end
-
-    if btn._hovered then
-        btn.label:SetTextColor(0.83, 0.88, 0.97, 1)
-        btn.rail:SetColorTexture(0.34, 0.40, 0.52, 0.8)
-    else
-        btn.label:SetTextColor(0.57, 0.63, 0.75, 1)
-        btn.rail:SetColorTexture(0.24, 0.29, 0.38, 0.55)
-    end
-    btn.accent:SetAlpha(0)
-    btn.dot:SetTextColor(0.0, 0.72, 1.0, 0.0)
+    EXUI:SetSidebarNavigationButtonState(btn, btn.isActive, btn.isEnabledState)
 end
 
 ExBoss.UI.NormalizeSidebarSearchText = NormalizeSidebarSearchText
@@ -411,6 +263,8 @@ ExBoss.UI.ApplySidebarModuleButtonState = ApplySidebarModuleButtonState
 -- =============================================================
 -- 插件切换嵌入 (左侧外挂标签条 -> EXBoss 画布整体渲染其他插件)
 -- =============================================================
+-- [嵌入生命周期边界] fallback embedHost 只承载相邻插件已有 UI：两个 embed route 间切换时清另一插件，返回 EXBoss 内容 Tab 时 UnembedActive 清两者；单纯隐藏 fallback 窗口不会清 host。
+-- 不能由 EXBoss 卡片接管、复制或另行释放相邻插件内容。
 local function SetOwnTopTabBarShown(shown)
     for _, btn in pairs(tabButtons) do
         if shown then btn:Show() else btn:Hide() end
@@ -439,12 +293,12 @@ local function EnsureEmbedHost()
         tile = true, tileSize = 8, edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 },
     })
-    embedHost:SetBackdropColor(0.07, 0.07, 0.09, 1)
-    embedHost:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+    embedHost:SetBackdropColor(unpack(GC.panel))
+    embedHost:SetBackdropBorderColor(unpack(GC.panelBorder))
 
     local placeholder = EXUI:CreateVisualFontString(embedHost, EXFONTFRAME, "GameFontNormal")
     placeholder:SetPoint("CENTER")
-    placeholder:SetTextColor(0.5, 0.5, 0.5, 1)
+    placeholder:SetTextColor(unpack(GC.textDim))
     placeholder:SetJustifyH("CENTER")
     placeholder:SetText("")
     embedHost._placeholder = placeholder
@@ -496,6 +350,58 @@ end
 -- =============================================================
 -- 内容区刷新
 -- =============================================================
+-- [混合函数边界] RefreshContent 内仅宿主 frame 的 SetPoint/SetAllPoints 属布局语句；Tab 分派、Hide 顺序、页面 Render/Hide 与嵌入清理全部禁止修改。
+-- HTML special pages own only the geometry inside EXBoss's B+C host.
+-- Keep navigation reachable at small widths; hiding it would remove real controls.
+local function ApplySpecialPageHostGeometry()
+    if not (mainFrame and leftFrame and contentFrame) then return end
+    local special = currentTab == "boss" or currentTab == "trash"
+    if special then
+        local host = mainFrame
+        -- In split mode FullContentHost is deliberately unanchored by Core.
+        -- Use the live B+C body bounds, respecting the existing preview dock.
+        local rightHost = IsUnifiedMode() and unifiedHosts.contentBodyHost or mainFrame
+        local width = math.max(1, host:GetWidth())
+        local navWidth = IsUnifiedMode() and math.max(1, unifiedHosts.navHost:GetWidth() or 0)
+            or (width <= 1180 and 220 or math.max(248, math.min(320, width * 0.21)))
+        local top = IsUnifiedMode() and 0 or (TAB_BAR_Y - TAB_H - 4)
+        if not mainFrame._prototypeHosts then leftFrame:ClearAllPoints() end
+        leftFrame:SetPoint("TOPLEFT", host, "TOPLEFT", 0, top)
+        leftFrame:SetPoint("BOTTOMLEFT", host, "BOTTOMLEFT", 0, 0)
+        leftFrame:SetWidth(navWidth)
+        if not mainFrame._prototypeHosts then contentFrame:ClearAllPoints() end
+        contentFrame:SetPoint("TOPLEFT", host, "TOPLEFT", navWidth, top)
+        contentFrame:SetPoint("BOTTOMRIGHT", rightHost, "BOTTOMRIGHT", 0, 0)
+        leftFrame:SetBackdropColor(unpack(GC.panel))
+        contentFrame:SetBackdropColor(unpack(GC.panel))
+        leftFrame:SetBackdropBorderColor(unpack(IsUnifiedMode() and GC.transparent or GC.panelBorder))
+        contentFrame:SetBackdropBorderColor(unpack(GC.transparent))
+        mainFrame._prototypeHosts = true
+    elseif mainFrame._prototypeHosts then
+        mainFrame._prototypeHosts = nil
+        leftFrame:SetBackdropColor(unpack(GC.panel))
+        -- Unified Shell 拥有外轮廓与 B/C 分隔线，离开特殊页也不叠加宿主方框。
+        local hostBorder = IsUnifiedMode() and GC.transparent or GC.panelBorder
+        leftFrame:SetBackdropBorderColor(unpack(hostBorder))
+        contentFrame:SetBackdropColor(unpack(GC.panel))
+        contentFrame:SetBackdropBorderColor(unpack(hostBorder))
+        if not IsUnifiedMode() then
+            leftFrame:ClearAllPoints()
+            leftFrame:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 4, TAB_BAR_Y - TAB_H - 4)
+            leftFrame:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", 4, 4)
+            leftFrame:SetWidth(LEFT_W)
+            contentFrame:ClearAllPoints()
+            contentFrame:SetPoint("TOPLEFT", mainFrame, "TOPLEFT",
+                ShouldUseLeftNav(currentTab) and CONTENT_X + 4 or 4, TAB_BAR_Y - TAB_H - 4)
+            contentFrame:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -4, 4)
+        end
+    end
+    if not special then
+        local border = (IsUnifiedMode() or currentTab == "home") and GC.transparent or GC.panelBorder
+        contentFrame:SetBackdropBorderColor(unpack(border))
+    end
+end
+
 local function RefreshContent()
     if not contentFrame then return end
 
@@ -520,13 +426,13 @@ local function RefreshContent()
     if mainFrame then
         local useLeft = ShouldUseLeftNav(currentTab)
         local expectFull = not useLeft
-        if IsUnifiedMode() then
+        if IsUnifiedMode() and currentTab ~= "boss" and currentTab ~= "trash" then
             leftFrame:ClearAllPoints()
             leftFrame:SetAllPoints(unifiedHosts.navHost)
             contentFrame:ClearAllPoints()
             contentFrame:SetAllPoints(useLeft and unifiedHosts.contentBodyHost or unifiedHosts.fullContentHost)
             contentFrame._fullWidthMode = expectFull
-        elseif contentFrame._fullWidthMode ~= expectFull then
+        elseif not IsUnifiedMode() and contentFrame._fullWidthMode ~= expectFull then
             local contentTopY = TAB_BAR_Y - TAB_H - 4
             contentFrame:ClearAllPoints()
             if useLeft then
@@ -537,6 +443,14 @@ local function RefreshContent()
             contentFrame:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -4, 4)
             contentFrame._fullWidthMode = expectFull
         end
+    end
+
+    ApplySpecialPageHostGeometry()
+    if not mainFrame._prototypeResizeHooked then
+        mainFrame._prototypeResizeHooked = true
+        mainFrame:HookScript("OnSizeChanged", function()
+            if currentTab == "boss" or currentTab == "trash" then ApplySpecialPageHostGeometry() end
+        end)
     end
 
     -- Blizzard 样式 Tab 高亮
@@ -772,6 +686,7 @@ end
 -- =============================================================
 -- 窗口创建（懒加载，只执行一次）
 -- =============================================================
+-- [宿主边界] 只可按共享外观调整 EXBoss 内容 root/nav/content 的几何与背景；不能在这里替各页面创建卡片或接管其释放。
 local function CreateUnifiedPanel()
     if mainFrame then return end
     local shellFrame = unifiedHosts.contentHost:GetParent()
@@ -784,22 +699,23 @@ local function CreateUnifiedPanel()
     leftFrame = CreateFrame("Frame", nil, mainFrame, "BackdropTemplate")
     leftFrame:SetAllPoints(unifiedHosts.navHost)
     leftFrame:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-    leftFrame:SetBackdropColor(0.06, 0.06, 0.08, 1)
-    leftFrame:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+    leftFrame:SetBackdropColor(unpack(GC.panel))
+    leftFrame:SetBackdropBorderColor(unpack(GC.transparent))
     Panel.leftFrame = leftFrame
 
     contentFrame = CreateFrame("Frame", nil, mainFrame, "BackdropTemplate")
     contentFrame:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-    contentFrame:SetBackdropColor(0.07, 0.07, 0.09, 1)
-    contentFrame:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+    contentFrame:SetBackdropColor(unpack(GC.panel))
+    contentFrame:SetBackdropBorderColor(unpack(GC.transparent))
     local placeholder = EXUI:CreateVisualFontString(contentFrame, EXFONTFRAME, "GameFontNormal")
     placeholder:SetPoint("CENTER")
-    placeholder:SetTextColor(0.5, 0.5, 0.5, 1)
+    placeholder:SetTextColor(unpack(GC.textDim))
     contentFrame._placeholder = placeholder
     Panel.contentFrame = contentFrame
     Panel._frame = mainFrame
 end
 
+-- [窗口边界：fallback] 仅可迁移旧独立窗口 chrome 与几何；拖动、ESC、Tab 状态机、路由、焦点提交和 Unified 回退条件禁止修改。
 local function CreatePanel()
     if mainFrame then return end
 
@@ -823,6 +739,8 @@ local function CreatePanel()
     mainFrame:SetScript("OnDragStop",  function(self) self:StopMovingOrSizing() end)
     mainFrame:SetScript("OnHide", function()
         FlushFocusedEditBox()
+        local HomePage = ExBoss.UI.Panel.HomePage
+        if HomePage then HomePage:Hide() end
     end)
     mainFrame:Hide()
 
@@ -837,15 +755,15 @@ local function CreatePanel()
         tile = true, tileSize = 8, edgeSize = 1,
         insets = { left=1, right=1, top=1, bottom=1 },
     })
-    mainFrame:SetBackdropColor(0.08, 0.08, 0.10, 0.97)
-    mainFrame:SetBackdropBorderColor(0.3, 0.3, 0.35, 1)
+    mainFrame:SetBackdropColor(unpack(GC.panel))
+    mainFrame:SetBackdropBorderColor(unpack(GC.panelBorder))
 
     -- ── 标题栏 ────────────────────────────────────────────────
     local titleBar = EXUI:CreateVisualTexture(mainFrame, EXBACKGROUNDFRAME)
     titleBar:SetPoint("TOPLEFT",  mainFrame, "TOPLEFT",  4, -4)
     titleBar:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", -4, -4)
     titleBar:SetHeight(28)
-    titleBar:SetColorTexture(0.12, 0.12, 0.16, 1)
+    titleBar:SetColorTexture(unpack(GC.header))
 
     local titleText = EXUI:CreateVisualFontString(mainFrame, EXFONTFRAME, "GameFontNormal")
     titleText:SetPoint("LEFT", titleBar, "LEFT", 10, 0)
@@ -855,36 +773,33 @@ local function CreatePanel()
     local scaleLabel = EXUI:CreateVisualFontString(mainFrame, EXFONTFRAME, "GameFontNormalSmall")
     scaleLabel:SetPoint("LEFT", titleText, "RIGHT", 16, 0)
     scaleLabel:SetText(L["缩放"])
-    scaleLabel:SetTextColor(0.7, 0.7, 0.7, 1)
+    scaleLabel:SetTextColor(unpack(GC.textDim))
 
-    local scaleDropdown = CreateFrame("DropdownButton", nil, mainFrame, "WowStyle1DropdownTemplate")
-    scaleDropdown:SetWidth(100)
-    scaleDropdown:SetPoint("LEFT", scaleLabel, "RIGHT", 6, 0)
-    scaleDropdown:SetFrameLevel(mainFrame:GetFrameLevel() + 30)
-
+    local scaleDropdown
     local function ApplyPanelScale(pct)
         if EXBOSS12S2 and EXBOSS12S2.ui and EXBOSS12S2.ui.general then
             EXBOSS12S2.ui.general.panelScale = pct
         end
         mainFrame:SetScale(pct / 100)
         scaleDropdown:SetText(pct .. "%")
-        scaleDropdown._currentPct = pct
+        scaleDropdown._currentValue = pct
     end
     mainFrame._applyPanelScale = ApplyPanelScale
 
     local scaleOptions = { 70, 75, 80, 85, 90, 95, 100, 105, 110 }
-    scaleDropdown:SetupMenu(function(self, rootDescription)
-        for _, pct in ipairs(scaleOptions) do
-            rootDescription:CreateRadio(pct .. "%",
-                function() return self._currentPct == pct end,
-                function() ApplyPanelScale(pct) end
-            )
-        end
-    end)
+    local scaleItems = {}
+    for _, pct in ipairs(scaleOptions) do
+        scaleItems[#scaleItems + 1] = { pct .. "%", pct }
+    end
+    scaleDropdown = EXUI:CreateDropdown(mainFrame, 100, "", scaleItems, 100, function(pct)
+        ApplyPanelScale(pct)
+    end, false)
+    scaleDropdown:SetPoint("LEFT", scaleLabel, "RIGHT", 6, 0)
+    scaleDropdown:SetFrameLevel(mainFrame:GetFrameLevel() + 30)
 
     local initPct = (EXBOSS12S2 and EXBOSS12S2.ui and EXBOSS12S2.ui.general and EXBOSS12S2.ui.general.panelScale) or 100
     initPct = math.max(70, math.min(110, initPct))
-    scaleDropdown._currentPct = initPct
+    scaleDropdown._currentValue = initPct
     scaleDropdown:SetText(initPct .. "%")
     mainFrame:SetScale(initPct / 100)
 
@@ -910,8 +825,7 @@ local function CreatePanel()
     end)
 
     -- 标题栏右上角：编辑模式按钮（沿用 ExwindTools 的全局编辑模式逻辑）
-    local editModeBtn = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
-    editModeBtn:SetSize(120, 22)
+    local editModeBtn = EXUI:CreateButton(mainFrame, 120, 22, "", nil, { compact = true })
     editModeBtn:SetPoint("RIGHT", closeBtn, "LEFT", -4, -1)
     editModeBtn:SetScript("OnClick", function()
         local ET = _G.ExwindTools
@@ -941,8 +855,8 @@ local function CreatePanel()
         tile = true, tileSize = 8, edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 },
     })
-    outerStrip:SetBackdropColor(0.08, 0.08, 0.10, 0.97)
-    outerStrip:SetBackdropBorderColor(0.3, 0.3, 0.35, 1)
+    outerStrip:SetBackdropColor(unpack(GC.panel))
+    outerStrip:SetBackdropBorderColor(unpack(GC.panelBorder))
 
     local function MakeStripButton(label, onClick)
         local btn = CreateFrame("Button", nil, outerStrip, "UIPanelButtonTemplate")
@@ -1016,12 +930,12 @@ local function CreatePanel()
         tile = true, tileSize = 8, edgeSize = 1,
         insets = { left=1, right=1, top=1, bottom=1 },
     })
-    leftFrame:SetBackdropColor(0.06, 0.06, 0.08, 1)
-    leftFrame:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+    leftFrame:SetBackdropColor(unpack(GC.panel))
+    leftFrame:SetBackdropBorderColor(unpack(GC.panelBorder))
 
     local leftLabel = EXUI:CreateVisualFontString(leftFrame, EXFONTFRAME, "GameFontNormalSmall")
     leftLabel:SetPoint("TOP", leftFrame, "TOP", 0, -10)
-    leftLabel:SetTextColor(0.5, 0.5, 0.5, 1)
+    leftLabel:SetTextColor(unpack(GC.textDim))
     leftLabel:SetText(L["副本 / BOSS 导航\n(待开发)"])
     leftFrame._placeholderLabel = leftLabel
 
@@ -1037,14 +951,14 @@ local function CreatePanel()
         tile = true, tileSize = 8, edgeSize = 1,
         insets = { left=1, right=1, top=1, bottom=1 },
     })
-    contentFrame:SetBackdropColor(0.07, 0.07, 0.09, 1)
-    contentFrame:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+    contentFrame:SetBackdropColor(unpack(GC.panel))
+    contentFrame:SetBackdropBorderColor(unpack(GC.panelBorder))
     Panel.contentFrame = contentFrame
 
     -- 占位文字
     local placeholder = EXUI:CreateVisualFontString(contentFrame, EXFONTFRAME, "GameFontNormal")
     placeholder:SetPoint("CENTER")
-    placeholder:SetTextColor(0.5, 0.5, 0.5, 1)
+    placeholder:SetTextColor(unpack(GC.textDim))
     placeholder:SetJustifyH("CENTER")
     placeholder:SetText("")
     contentFrame._placeholder = placeholder
@@ -1052,20 +966,17 @@ local function CreatePanel()
     -- ── 底部状态栏 ────────────────────────────────────────────
     local statusText = EXUI:CreateVisualFontString(mainFrame, EXFONTFRAME, "GameFontHighlightSmall")
     statusText:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", 12, 8)
-    statusText:SetTextColor(0.5, 0.5, 0.5, 1)
+    statusText:SetTextColor(unpack(GC.textDim))
     statusText:SetText(L["/exb  打开/关闭    |    /exb edit  编辑模式"])
     Panel.statusText = statusText
 
-    local changelogBtn = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
-    changelogBtn:SetSize(88, 22)
-    changelogBtn:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -12, 6)
-    changelogBtn:SetFrameLevel(mainFrame:GetFrameLevel() + 40)
-    changelogBtn:SetText(L["更新日志"])
-    changelogBtn:SetScript("OnClick", function()
+    local changelogBtn = EXUI:CreateButton(mainFrame, 88, 22, L["更新日志"], function()
         if ExBoss and ExBoss.ShowChangelog then
             ExBoss:ShowChangelog({ markShown = true })
         end
-    end)
+    end, { compact = true })
+    changelogBtn:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -12, 6)
+    changelogBtn:SetFrameLevel(mainFrame:GetFrameLevel() + 40)
     Panel.changelogBtn = changelogBtn
 
     Panel._frame = mainFrame
@@ -1088,16 +999,16 @@ end
 
 function Panel:RelayoutUnified()
     if not IsUnifiedMode() or not mainFrame then return end
-    mainFrame:ClearAllPoints()
     mainFrame:SetPoint("TOPLEFT", unifiedHosts.navHost, "TOPLEFT", 0, 0)
     mainFrame:SetPoint("BOTTOMRIGHT", unifiedHosts.contentHost, "BOTTOMRIGHT", 0, 0)
+    ApplySpecialPageHostGeometry()
 end
 
 function Panel:RefreshUnifiedTabs()
     if not IsUnifiedMode() then return end
     unifiedPanel:SetTopTabs("boss", BuildVisibleTabs(), currentTab, function(tabKey)
         unifiedPanel:SelectProvider("boss", { tab = tabKey })
-    end)
+    end, { choiceGroup = true })
 end
 
 function Panel:Toggle()

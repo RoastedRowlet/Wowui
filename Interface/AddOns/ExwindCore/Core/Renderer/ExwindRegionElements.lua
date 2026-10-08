@@ -11,6 +11,7 @@ if not EXUI then return end
 
 local ALLOWED_KINDS = { text = true, icon = true, timerbar = true, texture = true }
 local CONFIG_CONTEXT_PROVIDERS = {}
+local ROOT_POOL, OVERLAY_POOL = {}, {}
 
 local function SetInteractionOverlayVisual(overlay, visible, dragging)
     if not overlay then return end
@@ -20,7 +21,7 @@ local function SetInteractionOverlayVisual(overlay, visible, dragging)
         overlay:SetBackdrop(nil)
         return
     end
-    overlay:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 2 })
+    overlay:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
     if dragging then
         overlay:SetBackdropBorderColor(1.00, 0.82, 0.20, 1.00)
         overlay:SetBackdropColor(1.00, 0.72, 0.12, 0.18)
@@ -68,10 +69,12 @@ end
 
 local function AssertPure(value, label, seen, allowSecret)
     local valueType = type(value)
-    -- 12.x Secret Values are opaque userdata, but are legal only when passed
-    -- unchanged to an existing narrow Widget native API (Duration, raid mark,
-    -- Secret visibility, icon).  Arbitrary userdata/Frame remains forbidden.
-    if valueType == "userdata" and type(issecretvalue) == "function" and issecretvalue(value) and allowSecret == true then return end
+    -- Secret values can retain their apparent Lua type. Only explicit native
+    -- content slots may forward them; declaration geometry/style must be plain.
+    if type(issecretvalue) == "function" and issecretvalue(value) then
+        if allowSecret == true then return end
+        error(label .. " cannot contain a Secret value", 3)
+    end
     if valueType == "function" or valueType == "userdata" or valueType == "thread" then
         error(label .. " cannot contain " .. valueType, 3)
     end
@@ -87,7 +90,19 @@ local function AssertPure(value, label, seen, allowSecret)
 end
 
 local function IsSecret(value)
-    return type(value) == "userdata" and type(issecretvalue) == "function" and issecretvalue(value)
+    return type(issecretvalue) == "function" and issecretvalue(value)
+end
+
+local function IsDurationObject(value)
+    if type(value) ~= "userdata" then return false end
+    local ok, match = pcall(function()
+        return type(value.HasSecretValues) == "function"
+            and type(value.GetRemainingDuration) == "function"
+            and type(value.GetTotalDuration) == "function"
+            and type(value.GetObjectType) ~= "function"
+    end)
+    if not ok then error("RegionElements cannot inspect DurationObject: " .. tostring(match), 2) end
+    return match == true
 end
 
 -- `content` is the only payload channel, but it is not a blanket Secret
@@ -95,14 +110,18 @@ end
 -- which this manager forwards without inspecting.  All other fields remain
 -- ordinary declarative data.
 local SECRET_CONTENT_KEYS = {
-    text = { text = true, durationObject = true, secretDuration = true },
-    icon = { icon = true, stacks = true, cooldown = true },
-    timerbar = { icon = true, stacks = true, durationObject = true, secretDuration = true, value = true },
-    texture = { raidTargetIndex = true, shownFromBoolean = true },
+    text = { text = true, durationObject = true, secretDuration = true, shownFromBoolean = true,
+        colorComponents = true },
+    icon = { icon = true, stacks = true, cooldown = true, shownFromBoolean = true,
+        colorComponents = true, textColorComponents = true },
+    timerbar = { icon = true, stacks = true, durationObject = true, secretDuration = true,
+        value = true, shownFromBoolean = true, fillShownFromBoolean = true,
+        colorComponents = true, fillColorComponents = true, textColorComponents = true },
+    texture = { raidTargetIndex = true, shownFromBoolean = true, colorComponents = true },
 }
 
-local function AssertNativePayload(value, label, seen)
-    if IsSecret(value) then return end
+local function AssertNativePayload(value, label, seen, allowDuration)
+    if IsSecret(value) or (allowDuration and IsDurationObject(value)) then return end
     local valueType = type(value)
     if valueType == "function" or valueType == "userdata" or valueType == "thread" then
         error(label .. " cannot contain " .. valueType, 3)
@@ -113,8 +132,8 @@ local function AssertNativePayload(value, label, seen)
     if seen[value] then return end
     seen[value] = true
     for key, child in pairs(value) do
-        AssertNativePayload(key, label, seen)
-        AssertNativePayload(child, label, seen)
+        AssertNativePayload(key, label, seen, false)
+        AssertNativePayload(child, label, seen, allowDuration)
     end
 end
 
@@ -124,7 +143,8 @@ local function AssertContent(kind, content, label)
     local nativeKeys = SECRET_CONTENT_KEYS[kind] or {}
     for key, value in pairs(content) do
         if nativeKeys[key] then
-            AssertNativePayload(value, label .. "." .. key)
+            AssertNativePayload(value, label .. "." .. key, nil,
+                key == "durationObject" or key == "secretDuration" or key == "cooldown")
         else
             AssertPure(value, label .. "." .. tostring(key), nil, false)
         end
@@ -213,7 +233,9 @@ local function ApplyText(widget, spec)
         widget:SetText(content.text or "")
     end
     if type(content.color) == "table" then widget:SetColor(content.color) end
+    if content.hasColorComponents == true then widget:SetColorComponents(content.colorComponents) end
     if content.shown == false or spec.shown == false or spec.style.enabled == false then widget:Hide() else widget:Show() end
+    if content.hasShownFromBoolean == true then widget:SetShownFromBoolean(content.shownFromBoolean) end
 end
 
 local function ApplyIcon(widget, spec, moduleKey)
@@ -230,13 +252,49 @@ local function ApplyIcon(widget, spec, moduleKey)
     widget:SetLabel(content.label)
     local cooldown = content.cooldown
     if type(cooldown) ~= "table" then widget:ClearCooldown()
-    elseif cooldown.mode == "SECRET" then widget:SetSecretCooldown(cooldown.duration, cooldown.clearIfZero)
+    elseif cooldown.mode == "SECRET" then widget:SetSecretCooldown(cooldown.duration, cooldown.clearIfZero,
+        cooldown.durationTextProperty, cooldown.durationTextOptions)
     elseif cooldown.mode == "DURATION" then widget:SetDurationObject(cooldown.duration, cooldown.clearIfZero,
         cooldown.durationTextProperty, cooldown.durationTextOptions)
-    elseif cooldown.static == true then widget:SetStaticCooldown(cooldown.remaining, cooldown.duration, cooldown.format)
+    elseif cooldown.static == true then
+        widget:SetStaticCooldown(cooldown.remaining, cooldown.duration, cooldown.format)
+        if type(cooldown.text) == "string" then widget:SetCountdownText(cooldown.text) end
     elseif cooldown.start ~= nil and cooldown.duration ~= nil then widget:SetCooldown(moduleKey, cooldown.start, cooldown.duration, cooldown.modRate, cooldown.format)
     else widget:SetCountdownText(cooldown.text) end
+    if content.hasColorComponents == true then widget:SetColorComponents(content.colorComponents) end
+    if content.textColorComponents ~= nil then
+        if type(content.textColorComponents) ~= "table" or IsSecret(content.textColorComponents) then
+            error("RegionElements icon textColorComponents must be an ordinary table", 3)
+        end
+        for slot, components in pairs(content.textColorComponents) do
+            if IsSecret(slot) or type(slot) ~= "string" then
+                error("RegionElements icon text color slot must be an ordinary string", 3)
+            end
+            widget:SetTextColorComponents(slot, components)
+        end
+    end
     widget:SetShown(content.shown ~= false and spec.shown ~= false)
+end
+
+local function ApplyTimerBarTextColorComponents(widget, textColors)
+    if textColors == nil then return end
+    if type(textColors) ~= "table" or IsSecret(textColors) then
+        error("RegionElements timerbar textColorComponents must be an ordinary table", 3)
+    end
+    for slot, components in pairs(textColors) do
+        if IsSecret(slot) or type(slot) ~= "string" then
+            error("RegionElements timerbar text color slot must be an ordinary string", 3)
+        end
+        local field = (slot == "A" or slot == "label" or slot == "spellName") and "textA"
+            or (slot == "B" or slot == "target" or slot == "targetName") and "textB"
+            or (slot == "C" or slot == "time") and "textC"
+            or (slot == "D" or slot == "stacks") and "stackText"
+        local textWidget = field and widget[field] or nil
+        if not textWidget and field == "textA" then textWidget = widget.labelText end
+        if not textWidget and field == "textC" then textWidget = widget.timeText end
+        if not textWidget then error("RegionElements timerbar has no text color slot: " .. tostring(slot), 3) end
+        textWidget:SetColorComponents(components)
+    end
 end
 
 local function ApplyTimerBar(widget, spec, moduleKey)
@@ -247,6 +305,9 @@ local function ApplyTimerBar(widget, spec, moduleKey)
     if spec.standardSchema then
         EXUI:ApplyStandardTimerBarStyle(widget, spec.style, spec.standardSchema)
         EXUI:SetStandardTimerBarContent(widget, moduleKey, content)
+        if content.hasFillColorComponents == true then widget:SetFillColorComponents(content.fillColorComponents)
+        elseif content.hasColorComponents == true then widget:SetFillColorComponents(content.colorComponents) end
+        ApplyTimerBarTextColorComponents(widget, content.textColorComponents)
         return
     end
     widget:ApplyStyle(spec.style)
@@ -256,16 +317,22 @@ local function ApplyTimerBar(widget, spec, moduleKey)
     end
     widget:SetLabel(content.label or content.spellName)
     if widget.textB then widget.textB:SetText(content.targetName or content.textB or "") end
-    if content.durationObject ~= nil then widget:SetDurationObject(content.durationObject, content.interpolation, content.direction)
-    elseif content.secretDuration ~= nil then widget:SetSecretTime(content.secretDuration, content.interpolation, content.direction)
+    if content.durationObject ~= nil then
+        widget:SetDurationObject(content.durationObject, content.interpolation, content.direction, content.textOptions)
+    elseif content.secretDuration ~= nil then
+        widget:SetSecretTime(content.secretDuration, content.interpolation, content.direction, content.textOptions)
     -- Secret values must be forwarded unchanged.  Do not use `or` fallback
     -- selection here, because that turns an opaque native value into Lua
     -- control flow.  The declaration contract requires `maximum` for this
     -- channel.
     elseif content.hasSecretProgress == true then widget:SetSecretProgress(content.value, content.maximum, content.minimum)
-    else widget:SetProgress(content.progress or 0, content.maximum or content.max or 1) end
+    else widget:SetProgress(content.progress or 0, content.maximum or content.max or 1, content.minimum) end
     if content.stacks ~= nil then widget:SetStacks(content.stacks) end
     if type(widget.SetFillVisible) == "function" then widget:SetFillVisible(content.fillVisible ~= false) end
+    if content.hasFillShownFromBoolean == true then widget:SetFillShownFromBoolean(content.fillShownFromBoolean) end
+    if content.hasFillColorComponents == true then widget:SetFillColorComponents(content.fillColorComponents)
+    elseif content.hasColorComponents == true then widget:SetFillColorComponents(content.colorComponents) end
+    ApplyTimerBarTextColorComponents(widget, content.textColorComponents)
     widget:SetShown(content.shown ~= false and spec.shown ~= false)
 end
 
@@ -287,6 +354,7 @@ local function ApplyTexture(widget, spec)
         color = content.color or spec.style,
         shown = content.shown ~= false and spec.shown ~= false,
     })
+    if content.hasColorComponents == true then widget:SetColorComponents(content.colorComponents) end
     -- These native channels may carry opaque Secret values.  Call them
     -- unconditionally so Lua never compares/branches on the secret itself.
     if content.hasRaidTargetIndex == true then widget:SetRaidTargetIndex(content.raidTargetIndex) end
@@ -300,8 +368,13 @@ local function ReleaseEntry(entry)
         entry.overlay:SetScript("OnUpdate", nil)
         entry.overlay:SetScript("OnMouseDown", nil)
         entry.overlay:SetScript("OnMouseUp", nil)
+        entry.overlay:SetScript("OnEnter", nil)
+        entry.overlay:SetScript("OnLeave", nil)
+        entry.overlay.__regionDrag = nil
+        SetInteractionOverlayVisual(entry.overlay, false, false)
         entry.overlay:Hide()
         entry.overlay:SetParent(nil)
+        OVERLAY_POOL[#OVERLAY_POOL + 1] = entry.overlay
         entry.overlay = nil
     end
     if entry.widget then
@@ -315,7 +388,15 @@ local function ReleaseEntry(entry)
     if entry.root then
         entry.root:Hide()
         entry.root:ClearAllPoints()
+        entry.root:SetClipsChildren(false)
+        local content = entry.spec and entry.spec.content
+        if (entry.kind == "icon" or entry.kind == "timerbar")
+            and type(content) == "table" and content.hasShownFromBoolean == true then
+            entry.root:SetAlphaFromBoolean(false, 1, 1)
+        end
+        entry.root:SetAlpha(1)
         entry.root:SetParent(nil)
+        ROOT_POOL[#ROOT_POOL + 1] = entry.root
     end
     entry.root = nil
 end
@@ -352,8 +433,6 @@ function EXUI:CreateRegionElements(options)
             position = { x = position.x, y = position.y },
         })
         if committed ~= true then error("RegionElements failed to commit " .. tostring(manager.configContextID) .. ": " .. tostring(reason), 3) end
-        local moduleKey = EXUI:RequireModuleKey(manager.moduleKey, "RegionElements config-context drag")
-        EXUI:NotifyModuleValueChanged(moduleKey, mapping.x, "committed")
     end
 
     local function ResolveTarget(entry)
@@ -398,7 +477,8 @@ function EXUI:CreateRegionElements(options)
 
     local function EnsureWidget(entry)
         if entry.root and entry.widget then return end
-        entry.root = CreateFrame("Frame", nil, manager.ownerRoot)
+        entry.root = table.remove(ROOT_POOL) or CreateFrame("Frame", nil, manager.ownerRoot)
+        entry.root:SetParent(manager.ownerRoot)
         entry.root:EnableMouse(false)
         if entry.kind == "text" then entry.widget = EXUI:CreateTextWidget(entry.root, "element:" .. entry.id)
         elseif entry.kind == "icon" then entry.widget = EXUI:CreateIconWidget(entry.root)
@@ -416,7 +496,8 @@ function EXUI:CreateRegionElements(options)
         end
         local overlay = entry.overlay
         if not overlay then
-            overlay = CreateFrame("Button", nil, entry.root, "BackdropTemplate")
+            overlay = table.remove(OVERLAY_POOL) or CreateFrame("Button", nil, entry.root, "BackdropTemplate")
+            overlay:SetParent(entry.root)
             entry.overlay = overlay
         end
         overlay:ClearAllPoints(); overlay:SetAllPoints(entry.root)
@@ -506,12 +587,21 @@ function EXUI:CreateRegionElements(options)
         local content = type(entry.spec.content) == "table" and entry.spec.content or {}
         entry.visible = entry.spec.shown ~= false and content.shown ~= false
         entry.root:SetShown(entry.visible)
+        entry.root:SetAlpha(1)
+        if entry.kind == "icon" or entry.kind == "timerbar" then
+            if content.hasShownFromBoolean == true then
+                entry.root:SetAlphaFromBoolean(content.shownFromBoolean, 1, 0)
+            end
+        end
         ConfigureInteraction(entry)
     end
 
-    function manager:Apply(declarations)
+    function manager:Apply(declarations, elementContent)
         if declarations == nil then declarations = {} end
         if type(declarations) ~= "table" then error("RegionElements presentation must be an ordered array", 2) end
+        if elementContent ~= nil and type(elementContent) ~= "table" then
+            error("RegionElements elementContent must be table", 2)
+        end
         local count = #declarations
         for key in pairs(declarations) do
             if type(key) ~= "number" or key < 1 or key > count or key ~= math.floor(key) then
@@ -521,6 +611,19 @@ function EXUI:CreateRegionElements(options)
         local wanted, nextOrder = {}, {}
         for index, spec in ipairs(declarations) do
             if type(spec) ~= "table" then error("RegionElements[" .. index .. "] must be table", 2) end
+            local instanceContent = elementContent and elementContent[spec.id]
+            if instanceContent ~= nil then
+                if type(instanceContent) ~= "table" then
+                    error("RegionElements elementContent." .. tostring(spec.id) .. " must be table", 2)
+                end
+                local merged = {}
+                for key, value in pairs(spec) do merged[key] = value end
+                local content = {}
+                for key, value in pairs(type(spec.content) == "table" and spec.content or {}) do content[key] = value end
+                for key, value in pairs(instanceContent) do content[key] = value end
+                merged.content = content
+                spec = merged
+            end
             for key, value in pairs(spec) do
                 -- Secret data has no place in style/anchor/bounds/interaction.
                 -- Even `content` is checked against the narrow native channel
@@ -574,6 +677,27 @@ function EXUI:CreateRegionElements(options)
             if entry.visible == true then bounds = Union(bounds, entry.declaredBounds) end
         end
         return bounds
+    end
+
+    -- World edit sessions use Core's one overlay for hit testing. Return
+    -- visible materialized roots; panel overlays keep their existing owner.
+    function manager:ListWorldElements()
+        local listed = {}
+        for _, id in ipairs(self.order) do
+            local entry = self.entriesByID[id]
+            if entry and entry.visible == true and entry.root and entry.root:IsShown() then
+                local interaction = type(entry.spec.interaction) == "table" and entry.spec.interaction or {}
+                listed[#listed + 1] = {
+                    elementID = interaction.elementID or ("elements." .. id),
+                    frame = entry.root,
+                    movable = interaction.movable == true,
+                    resizable = interaction.resizable == true,
+                    minWidth = interaction.minWidth, minHeight = interaction.minHeight,
+                    maxWidth = interaction.maxWidth, maxHeight = interaction.maxHeight,
+                }
+            end
+        end
+        return listed
     end
 
     function manager:Release()

@@ -3,6 +3,9 @@
 -- 中央只管理已存在的 Collection、Anchor、Panel 和世界编辑宿主。
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools or not ExwindTools.UI then return end
 local EXUI = ExwindTools.UI
@@ -12,16 +15,23 @@ local RUNTIME_ITEM_ID = "yysound:runtime"
 local PREVIEW_ITEM_ID = "yysound:preview"
 local CD_DURATION = 40
 local RefreshActiveSurfaces
+local CUSTOM_SOUND_PATH_GUIDE = L["有效路径示例：Interface\\AddOns\\MySoundAddon\\Assets\\example.ogg"]
 
 local LSM = LibStub("LibSharedMedia-3.0", true)
 
 -- 预设、DB 字段、锚点、预览交互和所有设置页坐标均由模块声明。
 -- 此表只含数据，绝不把模块函数或渲染实现传给中央。
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local MODULE_SPEC = {
     RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
     moduleKey = MODULE_KEY,
     kind = "icon",
     version = 2,
+    -- =========================================================
+    -- 二、默认配置与配置访问 | Defaults and Configuration Access
+    -- =========================================================
     defaults = {
         font_time = {
             a = 1,
@@ -87,6 +97,9 @@ local MODULE_SPEC = {
             useCustomSound = false,
         },
     },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     anchor = {
         dbPath = "anchor",
         xKey = "x",
@@ -99,317 +112,119 @@ local MODULE_SPEC = {
         initialHeight = 59,
         clampedToScreen = true,
     },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     preview = {
         positionGuiKeys = { "font_time" },
         elements = {
             ["core.icon"] = { guiKey = "icon", movable = false, tooltip = L["嗜血音效图标"] },
             ["core.time"] = {
-                guiKey = "font_time", movable = true, textRole = "time", tooltip = L["倒数文本"],
+                guiKey = "font_time",
+                movable = true,
+                textRole = "time",
+                tooltip = L["倒数文本"],
                 position = { x = "font_time.x", y = "font_time.y" },
             },
         },
     },
+    -- [卡片迁移边界：设置页] 仅可按统一规范调整下列 gui.static/gui.fields 的 x/y/w/h 与卡片分组。
+    -- key/type/opts、DB path、anchor/preview/defaults 及刷新回调均属绑定或业务合同，禁止修改；复合控件必须整体引用，header 本身不等于卡片容器。
+    -- =========================================================
+    -- 三、GUI 声明 | GUI Declarations
+    -- =========================================================
     gui = {
-        fields = {
+        version = 1,
+        sections = {
             {
-                group = "settings",
-                h = 6,
-                key = "enabled",
-                label = L["启用"],
-                order = 1,
-                type = "checkbox",
-                w = 46,
-                x = 2,
-                y = 11,
-            },
-            {
-                group = "settings",
-                h = 6,
-                key = "spellID",
-                label = L["法术 ID（优先）"],
-                labelPos = "top",
-                order = 2,
-                type = "input",
-                w = 70,
-                x = 51,
-                y = 11,
-            },
-            {
-                group = "settings",
-                h = 6,
-                key = "iconTexture",
-                label = L["图标路径/ID"],
-                labelPos = "top",
-                order = 3,
-                type = "input",
-                w = 70,
-                x = 125,
-                y = 11,
-            },
-            {
-                group = "settings",
-                h = 18,
-                key = "anchor",
-                label = L["锚点设置"],
-                order = 4,
-                type = "anchorgroup",
-                w = 200,
-                x = 1,
-                y = 36,
-            },
-            {
-                group = "settings",
-                h = 50,
-                key = "icon",
-                label = L["图标本体"],
-                labelSize = 20,
-                order = 5,
-                type = "icongroup",
-                w = 200,
-                x = 1,
-                y = 57,
-            },
-            {
-                group = "settings",
-                h = 50,
-                key = "font_time",
-                label = L["倒数文本"],
-                labelSize = 20,
-                order = 6,
-                type = "fontgroup",
-                w = 200,
-                x = 1,
-                y = 109,
-            },
-            {
-                group = "settings",
-                h = 6,
-                key = "sound",
-                label = L["内置音效"],
-                labelPos = "top",
-                labelSize = 20,
-                order = 7,
-                type = "lsm_sound",
-                w = 46,
-                x = 1,
-                y = 173,
-            },
-            {
-                group = "settings",
-                h = 6,
+                kind = "settings", id = "common", title = L["通用设置"],
                 items = {
-                    {
-                        L["主音量"],
-                        "Master",
-                    },
-                    {
-                        L["效果"],
-                        "SFX",
-                    },
-                    {
-                        L["环境"],
-                        "Ambience",
-                    },
-                    {
-                        L["音乐"],
-                        "Music",
-                    },
-                    {
-                        L["对话"],
-                        "Dialog",
-                    },
+                    { key = "enabled", label = L["启用"], type = "switch" },
+                    { key = "spellID", label = L["法术 ID（优先）"], type = "input" },
+                    { key = "iconTexture", label = L["图标路径/ID"], type = "input" },
                 },
-                key = "soundChannel",
-                label = L["输出频道"],
-                labelPos = "top",
-                order = 8,
-                type = "dropdown",
-                w = 46,
-                x = 51,
-                y = 173,
             },
             {
-                group = "settings",
-                h = 6,
-                key = "useCustomSound",
-                label = L["使用自定义路径"],
-                order = 9,
-                type = "checkbox",
-                w = 46,
-                x = 2,
-                y = 182,
+                kind = "composite", id = "anchor", title = L["锚点设置"],
+                component = "anchorgroup", key = "anchor",
             },
             {
-                group = "settings",
-                h = 6,
-                key = "randomSound",
-                label = L["随机播放多条"],
-                order = 10,
-                type = "checkbox",
-                w = 46,
-                x = 51,
-                y = 182,
+                kind = "composite", id = "icon", title = L["图标本体"],
+                component = "icongroup", key = "icon",
             },
             {
-                group = "settings",
-                h = 6,
-                key = "customSound1",
-                label = L["音效 1"],
-                labelPos = "left",
-                order = 11,
-                parentKey = "customSounds",
-                subKey = "1",
-                type = "input",
-                w = 180,
-                x = 15,
-                y = 201,
+                kind = "composite", id = "font_time", title = L["倒数文本"],
+                component = "fontgroup", key = "font_time",
             },
             {
-                group = "settings",
-                h = 6,
-                key = "customSound2",
-                label = L["音效 2"],
-                labelPos = "left",
-                order = 12,
-                parentKey = "customSounds",
-                subKey = "2",
-                type = "input",
-                w = 180,
-                x = 15,
-                y = 209,
+                kind = "settings", id = "sound", title = L["音效设置"],
+                items = {
+                    { key = "sound", label = L["内置音效"], type = "select", media = "sound" },
+                    { key = "soundChannel", label = L["输出频道"], type = "select", originalOptions = { { L["主音量"], "Master" }, { L["效果"], "SFX" }, { L["环境"], "Ambience" }, { L["音乐"], "Music" }, { L["对话"], "Dialog" } } },
+                    { key = "useCustomSound", label = L["使用自定义路径"], type = "switch" },
+                    { key = "randomSound", label = L["随机播放多条"], type = "switch" },
+                },
             },
             {
-                group = "settings",
-                h = 6,
-                key = "customSound3",
-                label = L["音效 3"],
-                labelPos = "left",
-                order = 13,
-                parentKey = "customSounds",
-                subKey = "3",
-                type = "input",
-                w = 180,
-                x = 15,
-                y = 217,
+                kind = "settings", id = "custom_sounds", title = L["自定义音效路径"],
+                description = { key = "custom_sound_path_guide", type = "description", label = CUSTOM_SOUND_PATH_GUIDE, fontSize = 16 },
+                items = {
+                    { key = "customSound1", label = L["音效 1"], parentKey = "customSounds", subKey = "1", type = "input", inputWidthPercent = 130 },
+                    { key = "customSound2", label = L["音效 2"], parentKey = "customSounds", subKey = "2", type = "input", inputWidthPercent = 130 },
+                    { key = "customSound3", label = L["音效 3"], parentKey = "customSounds", subKey = "3", type = "input", inputWidthPercent = 130 },
+                    { key = "customSound4", label = L["音效 4"], parentKey = "customSounds", subKey = "4", type = "input", inputWidthPercent = 130 },
+                    { key = "customSound5", label = L["音效 5"], parentKey = "customSounds", subKey = "5", type = "input", inputWidthPercent = 130 },
+                    { key = "customSound6", label = L["音效 6"], parentKey = "customSounds", subKey = "6", type = "input", inputWidthPercent = 130 },
+                },
             },
             {
-                group = "settings",
-                h = 6,
-                key = "customSound4",
-                label = L["音效 4"],
-                labelPos = "left",
-                order = 14,
-                parentKey = "customSounds",
-                subKey = "4",
-                type = "input",
-                w = 180,
-                x = 15,
-                y = 225,
-            },
-            {
-                group = "settings",
-                h = 6,
-                key = "customSound5",
-                label = L["音效 5"],
-                labelPos = "left",
-                order = 15,
-                parentKey = "customSounds",
-                subKey = "5",
-                type = "input",
-                w = 180,
-                x = 15,
-                y = 233,
-            },
-            {
-                group = "settings",
-                h = 6,
-                key = "customSound6",
-                label = L["音效 6"],
-                labelPos = "left",
-                order = 16,
-                parentKey = "customSounds",
-                subKey = "6",
-                type = "input",
-                w = 180,
-                x = 15,
-                y = 241,
-            },
-            {
-                group = "settings",
-                h = 6,
-                key = "btn_test",
-                label = L["测试效果"],
-                order = 23,
-                type = "button",
-                w = 46,
-                x = 15,
-                y = 263,
-            },
-            {
-                group = "settings",
-                h = 6,
-                key = "btn_stop",
-                label = L["停止测试"],
-                order = 24,
-                type = "button",
-                w = 46,
-                x = 65,
-                y = 263,
+                kind = "settings", id = "test", title = L["测试操作"],
+                items = {
+                    { key = "btn_test", label = L["测试效果"], type = "button" },
+                    { key = "btn_stop", label = L["停止测试"], type = "button" },
+                },
             },
         },
-        groups = {
-            {
-                key = "settings",
-                order = 1,
-            },
-        },
-        static = {
-            {
-                h = 6,
-                key = "header",
-                label = L["嗜血音效（YY Sound）"],
-                labelSize = 25,
-                type = "header",
-                w = 200,
-                x = 1,
-                y = 1,
-            },
-            {
-                h = 6,
-                key = "soundHeader",
-                label = L["音效设置"],
-                labelSize = 20,
-                type = "subheader",
-                w = 200,
-                x = 1,
-                y = 162,
-            },
-            {
-                h = 6,
-                key = "customHeader",
-                label = L["自定义音效路径（固定 6 条）"],
-                labelSize = 20,
-                type = "subheader",
-                w = 200,
-                x = 1,
-                y = 190,
-            },
-            {
-                h = 6,
-                key = "testHeader",
-                label = L["测试操作"],
-                labelSize = 20,
-                type = "subheader",
-                w = 200,
-                x = 1,
-                y = 252,
-            },
-        },
-    },
+    }
 }
-
 ExwindTools:DeclareModuleSpecDefaults(MODULE_KEY, MODULE_SPEC.defaults)
 local DB = ExwindTools:GetModuleDB(MODULE_KEY)
+local CUSTOM_SOUNDS_SECTION_INDEX = 6
+local customSoundsDescription = MODULE_SPEC.gui.sections[CUSTOM_SOUNDS_SECTION_INDEX].description
+
+local function GetCustomSoundCount(sounds)
+    local count = 6
+    if type(sounds) == "table" then
+        for index in pairs(sounds) do
+            if type(index) == "number" and index > count and index % 1 == 0 then
+                count = index
+            end
+        end
+    end
+    return count
+end
+
+local function BuildCustomSoundsSection(count)
+    local items = {}
+    for index = 1, count do
+        items[#items + 1] = {
+            key = "customSound" .. index,
+            label = string.format(L["音效 %d"], index),
+            parentKey = "customSounds",
+            subKey = tostring(index),
+            type = "input",
+            inputWidthPercent = 130,
+        }
+    end
+    items[#items + 1] = { key = "btn_add_custom_sound", label = L["添加音效"], type = "button" }
+    return {
+        kind = "settings", id = "custom_sounds", title = L["自定义音效路径"],
+        description = customSoundsDescription,
+        items = items,
+    }
+end
+
+MODULE_SPEC.gui.sections[CUSTOM_SOUNDS_SECTION_INDEX] = BuildCustomSoundsSection(GetCustomSoundCount(DB.customSounds))
 local central = EXUI:RegisterIconModule(MODULE_SPEC)
 local LAYOUT = DB.layout
 if not ExwindTools:IsModuleEnabled(MODULE_KEY) then return end
@@ -425,6 +240,12 @@ local function ResolveDisplayIcon()
     return tonumber(db.iconTexture) or db.iconTexture or 132313
 end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function BuildPresentation(cooldown, isPreview)
     local db = DB
     local iconStyle = db.icon or {}
@@ -465,6 +286,9 @@ RefreshPreview()
 
 local effectTimer, lastSoundHandle
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function StopEffect()
     if lastSoundHandle then
         StopSound(lastSoundHandle)
@@ -544,6 +368,9 @@ local function CheckBloodlustDebuffTrigger()
     end
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 ExwindTools:RegisterEvent("UNIT_AURA", MODULE_KEY, function(_, unit)
     if unit == "player" then C_Timer.After(.05, CheckBloodlustDebuffTrigger) end
 end)
@@ -557,7 +384,21 @@ ExwindTools:WatchState(MODULE_KEY .. ".ButtonClicked", MODULE_KEY, function(clic
         PlayEffect()
     elseif click.key == "btn_stop" then
         StopEffect()
+    elseif click.key == "btn_add_custom_sound" then
+        if type(DB.customSounds) ~= "table" then return end
+        local nextIndex = GetCustomSoundCount(DB.customSounds) + 1
+        DB.customSounds[nextIndex] = ""
+        local section = BuildCustomSoundsSection(nextIndex)
+        central.spec.gui.sections[CUSTOM_SOUNDS_SECTION_INDEX] = section
+        local page = EXUI.ActivePageFrame
+        local session = page and _G.ExwindGrid and _G.ExwindGrid:GetMountedCardSession(page)
+        if session and session.context.moduleKey == MODULE_KEY then
+            session:ReplaceSettingsSection("custom_sounds", section)
+        end
     end
 end)
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 ExwindTools:ReportReady(MODULE_KEY)

@@ -137,7 +137,7 @@ function ExwindTools:RegisterUnitEvent(event, units, owner, func)
         end)
 
         local ok, err = pcall(frame.RegisterUnitEvent, frame, event, Unpack(unitTokens))
-        if not ok then
+        if not ok or err == false then
             frame:SetScript("OnEvent", nil)
             if IsTableEmpty(bindings) then
                 self.UnitEventBindings[event] = nil

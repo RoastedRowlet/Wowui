@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Priest-Holy',}
-local provider = {region='US',realm='Arathor',name='US',type='subscribers',zone=53,date='2026-09-29',data={Ca='Caspias:BAEANQADCggJEgAAAA==.',Da='Dayquil:BAEANQADCgcIBwAAAA==.',Ps='Psypriest:BAEBNQAECoEXAAIBAAgKnhZiNQBPAgiODQAABQBXAHUNAAAEAFcAfw0AAAQARgCpDQAAAwAlAFwNAAACAB4AXQ0AAAEAPABlDQAAAgAvAKQNAAACACkAAQAICp4WYjUATwIIjg0AAAUAVwB1DQAABABXAH8NAAAEAEYAqQ0AAAMAJQBcDQAAAgAeAF0NAAABADwAZQ0AAAIALwCkDQAAAgApAAE1AAUUBggSAAEAmwsA.',Sa='Salina:BAEANQAECgYJCwAAAA==.',},}
+local provider = {region='US',realm='Arathor',name='US',type='subscribers',zone=53,date='2026-10-06',data={Ca='Caspias:BAEANQADCggJEgAAAA==.',Da='Dayquil:BAEANQADCgcIBwAAAA==.',Ps='Psypriest:BAEBNQAECoEcAAIBAAgKzxYHQABFAgiODQAABwBXAHUNAAAFAFcAfw0AAAUARgCpDQAABAApAFwNAAACAB4AXQ0AAAEAPABlDQAAAgAvAKQNAAACACkAAQAICs8WB0AARQIIjg0AAAcAVwB1DQAABQBXAH8NAAAFAEYAqQ0AAAQAKQBcDQAAAgAeAF0NAAABADwAZQ0AAAIALwCkDQAAAgApAAE1AAUUBwgZAAEABQ8A.',Sa='Salina:BAEANQAECgYIDwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

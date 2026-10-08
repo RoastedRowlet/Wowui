@@ -43,6 +43,15 @@ local function ShallowCopy(value)
     return copy
 end
 
+local function RequireOrdinarySettingsLayout(layout, moduleKey)
+    if type(layout) ~= "table" or layout.version ~= 1
+        or type(layout.sections) ~= "table" or layout.cards ~= nil then
+        error("ModuleDefinition settings.layout requires version=1 sections; special cards use their owning page: "
+            .. tostring(moduleKey), 3)
+    end
+    return layout
+end
+
 local function CreatePanelSession(kind, dock, moduleKey, onIntent, options)
     local callbacks = type(onIntent) == "function" and { onIntent = onIntent } or nil
     if type(options) == "table" then
@@ -67,8 +76,7 @@ end
 function Controller:GetLayout()
     local layout = self.definition.settings.layout
     layout = type(layout) == "function" and layout(self:GetConfig()) or layout
-    if type(layout) ~= "table" then error("ModuleDefinition settings.layout must resolve to table: " .. self.moduleKey, 2) end
-    return layout
+    return RequireOrdinarySettingsLayout(layout, self.moduleKey)
 end
 
 function Controller:MountPreview(dock)
@@ -126,6 +134,9 @@ function ExwindTools:RegisterModule(definition)
     RequireFunction(definition.getConfig, "getConfig")
     if type(definition.settings) ~= "table" or definition.settings.layout == nil then
         error("RegisterModule requires settings.layout", 2)
+    end
+    if type(definition.settings.layout) == "table" then
+        RequireOrdinarySettingsLayout(definition.settings.layout, moduleKey)
     end
     if type(definition.display) ~= "table" then error("RegisterModule requires display table", 2) end
     RequireFunction(definition.display.buildPanel, "display.buildPanel")

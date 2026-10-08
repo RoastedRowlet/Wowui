@@ -20,7 +20,6 @@ Core\ExBoss_Print.lua
 Core\ExBoss_Border.lua
 Locale\Init.lua
 Modules\PullCountdown.lua
-Modules\Animation\AnimationDemo.lua
 Core\ExBoss_Changelog.lua
 Modules\Boss\Store.lua
 Modules\Boss\TimelineModeRules.lua

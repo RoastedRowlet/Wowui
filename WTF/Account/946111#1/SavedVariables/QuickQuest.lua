@@ -2,7 +2,7 @@
 QuickQuestDB2 = nil
 QuickQuestDB3 = {
 ["share"] = false,
-["accept"] = 3,
+["accept"] = 1,
 ["acceptRepeatables"] = 3,
 ["skipmovies"] = 3,
 ["skipgossipwhen"] = 2,

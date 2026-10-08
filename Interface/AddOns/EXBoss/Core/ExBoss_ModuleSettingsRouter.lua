@@ -21,6 +21,7 @@ local ROUTABLE_SETTINGS_PAGES = {
     interrupttracker = true,
 }
 
+-- [卡片/Grid 迁移边界] 本文件没有可迁移内容布局；白名单、Show→SetTab 顺序与错误检查均属路由业务合同，禁止修改。
 EXUI:RegisterModuleSettingsRouter("EXBoss", function(settingsPage)
     if ROUTABLE_SETTINGS_PAGES[settingsPage] ~= true then
         error("EXBoss settings router received undeclared page: " .. tostring(settingsPage), 2)

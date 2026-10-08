@@ -1167,8 +1167,9 @@ function GUIPage:Render(contentFrame)
 
     sf:SetParent(contentFrame)
     sf:ClearAllPoints()
-    sf:SetAllPoints(contentFrame)
-    sc:SetWidth(contentFrame:GetWidth() - 24)
+    sf:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 0, 0)
+    sf:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 0)
+    sc:SetWidth(math.max(1, sf:GetWidth()))
 
     local cols = math.max(BASE_COLS, math.floor(((contentFrame:GetWidth() - 24 - 20) / TARGET_CELL) + 0.5))
     Grid:SetContainerCols(sc, cols)

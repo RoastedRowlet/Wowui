@@ -8,26 +8,39 @@ local Page = {}
 ExBoss.UI.Panel.DungeonExtrasPage = Page
 
 local COMMON_OPTS = {
-    bindRoot = true, poolType = "DungeonExtrasCommonSettingsGroup",
-    fixedLayout = { logicalWidth = 200, controlW = 190, controlH = 6, slotX = { 3 }, firstY = 0, rowStep = 14 },
+    bindRoot = true,
+    poolType = "DungeonExtrasCommonSettingsGroup",
     fields = {
-        { path = "enabled", type = "checkbox", label = L["启用副本额外提示"], row = 1 },
-        { path = "rubyWindFire", type = "checkbox", label = L["红玉新生法池：尾王风火图"], row = 2 },
-        { path = "altarTrashHealth", type = "checkbox", label = L["毒牙祭坛：指定小怪血量"], row = 3 },
-        { path = "healthColor", type = "checkbox", label = L["血量条随剩余血量染色"], row = 4 },
+        { path = "enabled", type = "checkbox", label = L["启用副本额外提示"] },
+        { path = "rubyWindFire", type = "checkbox", label = L["红玉新生法池：尾王风火图"] },
+        { path = "altarTrashHealth", type = "checkbox", label = L["毒牙祭坛：指定小怪血量"] },
+        { path = "healthColor", type = "checkbox", label = L["血量条随剩余血量染色"] },
     },
 }
+-- [卡片/Grid 迁移边界：DungeonExtras 设置页]
+-- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
+-- 禁止：修改业务开关 path/key、增长方向、StandardConfigBinding、预览或释放合同。
+-- modulecommonsettings/anchorgroup/widgetlayout/timerBarGroup/fontgroup 必须整体引用；风火图业务样式不并入血量条卡片。
 local LAYOUT = {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["副本额外设置"], labelSize = 25 },
-    { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 10, w = 200, h = 64, label = L["已接管的副本提示"], opts = COMMON_OPTS },
-    { key = "anchor", type = "anchorgroup", x = 1, y = 76, w = 200, h = 20, measure = true, label = L["统一锚点"], opts = Mod:GetStandardAnchorGroupOptions() },
-    { key = "layout", type = "widgetlayout", x = 1, y = 99, w = 200, h = 23, measure = true, label = L["血量条排列"],
-        opts = { allowedDirections = { "UP", "DOWN" }, includeMaxPerRow = false, maxVisibleMin = 1, maxVisibleMax = 6, defaultMaxVisible = 6 } },
-    { key = "timerGroup", type = "timerBarGroup", x = 1, y = 125, w = 200, h = 52, label = L["血量条外观"] },
-    { key = "font_spell", type = "fontgroup", x = 1, y = 180, w = 200, h = 50, label = L["单位名称"] },
-    { key = "font_timer", type = "fontgroup", x = 1, y = 233, w = 200, h = 50, label = L["血量百分比"] },
+    version = 1,
+    title = L["副本额外设置"],
+    sections = {
+        { kind = "composite", id = "module-common", title = L["通用"],
+            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
+        { kind = "composite", id = "layout", title = L["血量条排列"],
+            component = "widgetlayout", key = "layout", opts = { allowedDirections = { "UP", "DOWN" }, includeMaxPerRow = false, maxVisibleMin = 1, maxVisibleMax = 6, defaultMaxVisible = 6 } },
+        { kind = "composite", id = "anchor", title = L["锚点"],
+            component = "anchorgroup", key = "anchor", opts = Mod:GetStandardAnchorGroupOptions() },
+        { kind = "composite", id = "timer-bar", title = L["外观"],
+            component = "timerbargroup", key = "timerGroup" },
+        { kind = "composite", id = "spell-font", title = L["单位名称"],
+            component = "fontgroup", key = "font_spell" },
+        { kind = "composite", id = "timer-font", title = L["血量百分比"],
+            component = "fontgroup", key = "font_timer" },
+    },
 }
 Tools:RegisterModuleLayout(KEY, LAYOUT)
+-- [生命周期边界] StandardModulePage 继续拥有 Scroll、preview 与 release；布局迁移不得另建页面生命周期。
 local standardPage = EXUI:CreateStandardModulePage({
     moduleKey = KEY, page = Page, binding = Mod.StandardConfigBinding, layout = LAYOUT, getColumns = 200,
     preview = { height = 202,

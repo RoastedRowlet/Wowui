@@ -282,20 +282,5 @@ function Export:GetModuleMeta(moduleKey)
     return nil
 end
 
--- =============================================================
--- 导入成功弹窗
--- =============================================================
-StaticPopupDialogs["EXWIND_IMPORT_SUCCESS"] = {
-    text = L["导入成功！已导入 %d 个模块的配置。\n\n配置需要重载界面才能完全生效。"],
-    button1 = L["立即重载"],
-    button2 = L["稍后重载"],
-    OnAccept = function()
-        C_UI.Reload()
-    end,
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    preferredIndex = 3,
-}
 
 EXDebug(L["ExwindExport 核心加载完成"])

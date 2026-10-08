@@ -1804,8 +1804,7 @@ _updateFrame:SetScript("OnUpdate", function(_, elapsed)
 end)
 
 function BunBar:AddTimer(timer)
-    local db = DB()
-    if db and db.enabled == false then return end
+    if not ExBoss.DisplayPolicy.IsTimelineBarEnabled("bun") then return end
     if not anchorFrame then CreateAnchor() end
     RefreshAnchorVisibility()
     if activeNodes[timer.id] then return end
@@ -1846,6 +1845,7 @@ end
 -- 副本通用机制的独立倒数入口：使用本模块已有 synthetic timer 生命周期，
 -- 不写入 Scheduler，也不会参与普通时间轴的施放回调。
 function BunBar:StartExternalTimer(timer)
+    if not ExBoss.DisplayPolicy.IsTimelineBarEnabled("bun") then return false end
     if type(timer) ~= "table" or timer.id == nil then
         return false
     end
@@ -1982,7 +1982,7 @@ end
 BunBar.StandardConfigBinding = CONFIG_BINDING
 BunBar.InteractionSchema = INTERACTION_SCHEMA
 BunBar.BuildPreviewPresentation = BuildBunBarTimelinePresentation
-local function RefreshActiveSurfaces(_, phase)
+local function RefreshActiveSurfaces(_, changedPath, phase)
     local allPatched = CONFIG_BINDING.reapplyExisting()
     -- 拖动期间只走 Core 的轻量补丁；松开滑块时若该字段不能补丁，才完整重建。
     if phase == "committed" and allPatched ~= true then
@@ -1998,8 +1998,7 @@ end
 -- 运行时节点池的空闲期预热入口。预热对象不进入 activeNodes/nodeList，
 -- 因而不会参与 Scheduler、轨道排序或 BunBar 的运行时 OnUpdate。
 function BunBar:GetPrewarmTargetCount()
-    local db = DB()
-    return db and db.enabled == false and 0 or PREWARM_NODE_COUNT
+    return ExBoss.DisplayPolicy.IsTimelineBarEnabled("bun") and PREWARM_NODE_COUNT or 0
 end
 
 function BunBar:AcquirePrewarmObject()

@@ -11,29 +11,11 @@ BigWigs3DB = {
 ["Minimeditite - Area 52"] = "Default",
 },
 ["namespaces"] = {
-["BigWigs_Bosses_Crawth"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[377004] = 3129591,
-},
-},
-},
-},
 ["BigWigs_Bosses_Echo of Doragosa"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
 [388822] = 3129591,
-},
-},
-},
-},
-["BigWigs_Bosses_Ick & Krick"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1264336] = 3129591,
 },
 },
 },
@@ -105,6 +87,22 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Crawth"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[377004] = 3129591,
+},
+},
+},
+},
+["BigWigs_Plugins_Timeline"] = {
+["profiles"] = {
+["Default"] = {
+["blizzTimeline"] = true,
+},
+},
+},
 ["BigWigs_Bosses_Saprish"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -151,7 +149,7 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
+["emphasize"] = false,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -159,7 +157,7 @@ BigWigs3DB = {
 21,
 },
 ["visibleBarLimit"] = 1,
-["emphasize"] = false,
+["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -178,10 +176,12 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Plugins_Timeline"] = {
+["BigWigs_Bosses_Ick & Krick"] = {
 ["profiles"] = {
 ["Default"] = {
-["blizzTimeline"] = true,
+["toggles"] = {
+[1264336] = 3129591,
+},
 },
 },
 },
@@ -196,20 +196,12 @@ BigWigs3DB = {
 },
 },
 ["myKeystones"] = {
-["Player-60-0F7B1446"] = {
-["playerRating"] = 2600,
-["specId"] = 256,
-["keyMap"] = 250,
-["name"] = "Madmareep",
-["keyLevel"] = 15,
-["realm"] = "Stormrage",
-},
 ["Player-60-0F7B141D"] = {
-["playerRating"] = 3896,
+["playerRating"] = 3912,
 ["specId"] = 262,
-["keyMap"] = 587,
+["keyMap"] = 584,
 ["name"] = "Zappyxatu",
-["keyLevel"] = 20,
+["keyLevel"] = 22,
 ["realm"] = "Stormrage",
 },
 ["Player-3676-0DF7D3EF"] = {
@@ -229,7 +221,7 @@ BigWigs3DB = {
 ["realm"] = "Stormrage",
 },
 },
-["prevWeeklyReset"] = 1790694000,
+["prevWeeklyReset"] = 1791298800,
 ["profiles"] = {
 ["Default"] = {
 },
@@ -609,7 +601,7 @@ BigWigsStatsDB = {
 ["fkDuration"] = 369.376,
 },
 ["heroic"] = {
-["kills"] = 12,
+["kills"] = 13,
 ["fkDuration"] = 534.4850000000006,
 ["wipes"] = 16,
 ["fkWipes"] = 1,
@@ -724,7 +716,7 @@ BigWigsStatsDB = {
 [2987] = {
 [2849] = {
 ["heroic"] = {
-["kills"] = 4,
+["kills"] = 5,
 ["fkDate"] = "2026/08/24",
 ["bestDate"] = "2026/09/08",
 ["fkWipes"] = 1,

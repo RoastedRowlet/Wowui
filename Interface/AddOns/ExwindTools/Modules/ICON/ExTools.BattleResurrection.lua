@@ -4,6 +4,9 @@
 -- 中央只管理通用 Collection 宿主，不识别本模块或任何业务名称。
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools or not ExwindTools.UI then return end
 
@@ -49,6 +52,9 @@ end
 
 
 -- 模块自己的默认值与所有 Grid 几何；中央只校验、持久化并渲染本声明。
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local MODULE_SPEC = {
     RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
     moduleKey = MODULE_KEY,
@@ -56,6 +62,9 @@ local MODULE_SPEC = {
     version = 1,
     features = { cooldown = true, timeText = true, stacksText = true, enabled = true },
     textSlots = { time = L["战复计时文字"], stacks = L["战复次数文字"] },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     anchor = {
         dbPath = "anchor",
         xKey = "x",
@@ -68,6 +77,9 @@ local MODULE_SPEC = {
         initialHeight = 50,
         clampedToScreen = true,
     },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     preview = {
         positionGuiKeys = { "font_time", "font_stacks" },
         elements = {
@@ -89,6 +101,9 @@ local MODULE_SPEC = {
             },
         },
     },
+    -- =========================================================
+    -- 二、默认配置与配置访问 | Defaults and Configuration Access
+    -- =========================================================
     defaults = {
         root = {
             anchor = {
@@ -185,129 +200,44 @@ local MODULE_SPEC = {
             },
         },
     },
+    -- [卡片迁移边界：设置页] 仅可按统一规范调整下列 gui.static/gui.fields 的 x/y/w/h 与卡片分组。
+    -- key/type/opts、DB path、anchor/preview/defaults 及刷新回调均属绑定或业务合同，禁止修改；复合控件必须整体引用，header 本身不等于卡片容器。
+    -- =========================================================
+    -- 三、GUI 声明 | GUI Declarations
+    -- =========================================================
     gui = {
-        fields = {
+        version = 1,
+        description = L["战复次数与充能倒数由中央显示层渲染"],
+        sections = {
             {
-                group = "general",
-                h = 18,
-                key = "moduleCommon",
-                label = L["模块通用设置"],
-                measure = true,
-                options = {
+                kind = "composite", id = "common", title = L["模块通用设置"],
+                component = "modulecommonsettings", key = "moduleCommon", opts = {
                     bindRoot = true,
+                    presentation = "settings-list",
                     fields = {
-                        {
-                            label = L["启用战复监控"],
-                            path = "enabled",
-                            type = "checkbox",
-                        },
+                        { label = L["启用战复监控"], path = "enabled", presentation = "switch", type = "checkbox" },
                     },
                     fixedLayout = {
-                        controlH = 6,
-                        controlW = 46,
-                        firstY = 0,
-                        logicalWidth = 200,
-                        rowStep = 14,
-                        slotX = {
-                            3,
-                            53,
-                            103,
-                            153,
-                        },
+                        controlH = 6, controlW = 46, firstY = 0, logicalWidth = 200,
+                        rowStep = 14, slotX = { 3, 53, 103, 153 },
                     },
                 },
-                order = 10,
-                type = "modulecommonsettings",
-                w = 200,
-                x = 1,
-                y = 16,
             },
             {
-                group = "anchor",
-                h = 20,
-                key = "anchor",
-                label = L["锚点设置"],
-                measure = true,
-                order = 10,
-                type = "anchorgroup",
-                w = 200,
-                x = 1,
-                y = 37,
+                kind = "composite", id = "anchor", title = L["锚点设置"],
+                component = "anchorgroup", key = "anchor",
             },
             {
-                group = "appearance",
-                h = 50,
-                key = "icon",
-                label = L["战复整体图标与位置"],
-                labelSize = 20,
-                order = 10,
-                type = "icongroup",
-                w = 200,
-                x = 1,
-                y = 60,
+                kind = "composite", id = "icon", title = L["战复整体图标与位置"],
+                component = "icongroup", key = "icon",
             },
             {
-                group = "text",
-                h = 50,
-                key = "font_time",
-                label = L["战复计时文字（中心）"],
-                labelSize = 20,
-                order = 10,
-                type = "fontgroup",
-                w = 200,
-                x = 1,
-                y = 113,
+                kind = "composite", id = "font_time", title = L["战复计时文字（中心）"],
+                component = "fontgroup", key = "font_time",
             },
             {
-                group = "text",
-                h = 50,
-                key = "font_stacks",
-                label = L["战复次数文字（右下）"],
-                labelSize = 20,
-                order = 20,
-                type = "fontgroup",
-                w = 200,
-                x = 1,
-                y = 166,
-            },
-        },
-        groups = {
-            {
-                key = "general",
-                order = 10,
-            },
-            {
-                key = "anchor",
-                order = 20,
-            },
-            {
-                key = "appearance",
-                order = 30,
-            },
-            {
-                key = "text",
-                order = 40,
-            },
-        },
-        static = {
-            {
-                h = 8,
-                key = "header",
-                label = L["战斗复活"],
-                labelSize = 20,
-                type = "header",
-                w = 197,
-                x = 1,
-                y = 4,
-            },
-            {
-                h = 8,
-                key = "description",
-                label = L["战复次数与充能倒数由中央显示层渲染"],
-                type = "description",
-                w = 197,
-                x = 1,
-                y = 222,
+                kind = "composite", id = "font_stacks", title = L["战复次数文字（右下）"],
+                component = "fontgroup", key = "font_stacks",
             },
         },
     },
@@ -337,6 +267,12 @@ local function MakeTextBounds(style)
 end
 
 -- 这是标准 IconCollection presentation；模块只交纯数据显示，中央不接收模块函数。
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function BuildEntry(itemID, icon, stacks, cooldown)
     local db = DB
     local iconStyle = db.icon or {}
@@ -374,6 +310,9 @@ central:SetPreview({ BuildSampleEntry(MODULE_SPEC.samples.panel) }, LAYOUT)
 -- 战复业务：环境判断、原生充能对象与刷新订阅。
 -- 不创建或操作任何显示对象。
 -- =============================================================
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function IsActiveEnvironment()
     local state = ExwindTools.State or {}
     if state.DifficultyID == 8 then return true end
@@ -431,6 +370,9 @@ local function ScheduleChargeRefresh()
     end
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", MODULE_KEY, function()
     RefreshBattleResurrection()
     ScheduleChargeRefresh()
@@ -455,4 +397,7 @@ end)
 ExwindTools:WatchState("DifficultyID", MODULE_KEY, RefreshBattleResurrection)
 ExwindTools:WatchState("InstanceType", MODULE_KEY, RefreshBattleResurrection)
 RefreshBattleResurrection()
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 ExwindTools:ReportReady(MODULE_KEY)

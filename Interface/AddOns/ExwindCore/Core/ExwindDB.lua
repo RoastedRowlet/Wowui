@@ -159,6 +159,37 @@ EXDB.HealerSpecs = {
 -- 职业排序 (常用排序: DK, 战士, 骑士, 猎人, 萨满, 唤魔师, 盗贼, DH, 武僧, 德鲁伊, 法师, 术士, 牧师)
 EXDB.ClassOrder = { 6, 1, 2, 3, 7, 13, 4, 12, 10, 11, 8, 9, 5 }
 
+-- ItemSubClass (ClassID=4) 的四种护甲名称与职业分组。
+-- classIDs 顺序也用于共用专精选择器的列内排列。
+EXDB.ArmorTypeOrder = { "PLATE", "MAIL", "LEATHER", "CLOTH" }
+EXDB.ArmorTypes = {
+    PLATE = { key = "PLATE", subClassID = 4, classIDs = { 6, 1, 2 }, names = {
+        enUS = "Plate", zhCN = "板甲", zhTW = "鎧甲", koKR = "판금", deDE = "Platte", esES = "Placas", esMX = "Placas", itIT = "Piastre", ptBR = "Placas", frFR = "Plaques", ruRU = "Латы",
+    } },
+    MAIL = { key = "MAIL", subClassID = 3, classIDs = { 3, 7, 13 }, names = {
+        enUS = "Mail", zhCN = "锁甲", zhTW = "鎖甲", koKR = "사슬", deDE = "Kette", esES = "Malla", esMX = "Malla", itIT = "Maglia", ptBR = "Malha", frFR = "Mailles", ruRU = "Кольчуга",
+    } },
+    LEATHER = { key = "LEATHER", subClassID = 2, classIDs = { 4, 12, 10, 11 }, names = {
+        enUS = "Leather", zhCN = "皮甲", zhTW = "皮甲", koKR = "가죽", deDE = "Leder", esES = "Cuero", esMX = "Cuero", itIT = "Cuoio", ptBR = "Couro", frFR = "Cuir", ruRU = "Кожа",
+    } },
+    CLOTH = { key = "CLOTH", subClassID = 1, classIDs = { 8, 9, 5 }, names = {
+        enUS = "Cloth", zhCN = "布甲", zhTW = "布甲", koKR = "천", deDE = "Stoff", esES = "Tela", esMX = "Tela", itIT = "Stoffa", ptBR = "Tecido", frFR = "Tissu", ruRU = "Ткань",
+    } },
+}
+EXDB.ArmorTypeByClassID = {}
+EXDB.SpecsByArmorType = {}
+for _, armorKey in ipairs(EXDB.ArmorTypeOrder) do
+    local armor = EXDB.ArmorTypes[armorKey]
+    local specs = {}
+    EXDB.SpecsByArmorType[armorKey] = specs
+    for _, classID in ipairs(armor.classIDs) do
+        EXDB.ArmorTypeByClassID[classID] = armorKey
+        for _, spec in ipairs(EXDB.SpecsByClassID[classID] or {}) do
+            specs[#specs + 1] = spec
+        end
+    end
+end
+
 -------------------------------------------------------
 -- 全职业打断技能数据 (用于 ExM+.InterruptTracker 等)
 -- [SpecID] = { id = SpellID, cd = BaseSeconds }
@@ -1079,6 +1110,19 @@ function EXDB:GetSpecInfo(specID)
     return self.SpecByID[specID]
 end
 
+function EXDB:GetArmorTypeInfo(armorKey)
+    return self.ArmorTypes[armorKey]
+end
+
+function EXDB:GetArmorTypeForClass(classID)
+    return self.ArmorTypeByClassID[classID]
+end
+
+-- 返回共享静态列表；调用方只读使用。
+function EXDB:GetSpecsByArmorType(armorKey)
+    return self.SpecsByArmorType[armorKey]
+end
+
 -- 获取专精排序优先级: 1=坦克, 2=输出, 3=治疗
 function EXDB:GetSpecRolePriority(specID)
     local info = self:GetSpecInfo(specID)
@@ -1204,9 +1248,9 @@ function EXDB:ApplyFont(fs, config)
         fs:SetDrawLayer("OVERLAY", 6)
     end
     if config.rotation and fs.SetRotation then fs:SetRotation(config.rotation) end
+    if fs.ClearAlphaGradient then fs:ClearAlphaGradient() end
     if fs.SetAlphaGradient then
         -- SetAlphaGradient 要求 length > 0，否则直接报错（"length must be greater than 0"）。
-        -- 暴雪没有提供对应的"清除渐变"接口，禁用渐变时只能不调用它，不能传 0 长度去"重置"。
         local gradientLength = tonumber(config.gradientLength) or 0
         if config.gradientEnabled and gradientLength > 0 then
             fs:SetAlphaGradient(tonumber(config.gradientStart) or 0, gradientLength)

@@ -161,7 +161,7 @@ local BLIZZARD_ICON_IDS = {
     "cooldownmanager", "custom",
 }
 
-local ADDON_PATH = "Interface\\AddOns\\ExwindTools\\Textures\\Icons\\"
+local ADDON_PATH = "Interface\\AddOns\\ExwindCore\\Textures\\Icons\\ExwindTools\\"
 local ICON_THEMES = {
     {
         id = "blizzard",
@@ -410,25 +410,17 @@ local function BuildSlotEditorItems(selectedSide, selectedIndex)
             key = "left_action",
             parentKey = slotPath,
             subKey = "leftClick.action",
-            type = "dropdown",
-            x = 1,
-            y = 252,
-            w = leftIsCustom and 96 or 200,
-            h = 8,
+            type = "select",
             label = "左键点击",
-            items = "func:ExwindTools.GetMicroMenuActionItems"
+            optionsSource = "ExwindTools.GetMicroMenuActionItems",
         },
         {
             key = "right_action",
             parentKey = slotPath,
             subKey = "rightClick.action",
-            type = "dropdown",
-            x = 1,
-            y = 268,
-            w = rightIsCustom and 96 or 200,
-            h = 8,
+            type = "select",
             label = "右键点击",
-            items = "func:ExwindTools.GetMicroMenuActionItems"
+            optionsSource = "ExwindTools.GetMicroMenuActionItems",
         },
     }
 
@@ -438,12 +430,7 @@ local function BuildSlotEditorItems(selectedSide, selectedIndex)
             parentKey = slotPath,
             subKey = "leftClick.cmd",
             type = "input",
-            x = 108,
-            y = 252,
-            w = 96,
-            h = 8,
             label = "左键命令",
-            placeholder = "/target boss1"
         }
     end
 
@@ -453,12 +440,7 @@ local function BuildSlotEditorItems(selectedSide, selectedIndex)
             parentKey = slotPath,
             subKey = "rightClick.cmd",
             type = "input",
-            x = 108,
-            y = 268,
-            w = 96,
-            h = 8,
             label = "右键命令",
-            placeholder = "/focus mouseover"
         }
     end
 
@@ -469,53 +451,82 @@ local function BuildLayout(selectedSide, selectedIndex)
     local currentSide = EX_DB and EX_DB.selectedSlotSide or selectedSide or "left"
     local currentIndex = EX_DB and EX_DB.selectedSlotIndex or selectedIndex or 1
     local selectedTitle = BuildSelectedSlotTitle(currentSide, currentIndex)
+    -- [声明迁移边界：设置页] 仅把原动态设置与复合控件改为 typed sections。
+    -- 左/右槽位选择与动作顺序、selectedSlot 绑定、图标选择器、预览/运行回调禁止修改。
     local layout = {
-        { key = "header", type = "header", x = 1, y = 4, w = 197, h = 8, label = "微型选单" },
-        {
-            key = "desc",
-            type = "description",
-            x = 1,
-            y = 12,
-            w = 200,
-            h = 8,
-            label = "中间时间是唯一根点；左右动作固定相对它排列，三宿主都只展示这一套选单。"
+        version = 1,
+        title = "微型选单",
+        sections = {
+            {
+                kind = "settings", id = "basic", title = "基础设置",
+                description = {
+                    key = "desc", type = "description",
+                    label = "中间时间是唯一根点；左右动作固定相对它排列，三宿主都只展示这一套选单。",
+                },
+                items = {
+                    { key = "enabled", type = "switch", label = "启用" },
+                    { key = "showBackground", type = "switch", label = "显示背景" },
+                    { key = "barScale", type = "slider", label = "整体缩放", min = 0.5, max = 2.0, step = 0.05 },
+                    { key = "bgAlpha", type = "slider", label = "背景透明度", min = 0, max = 1, step = 0.05 },
+                },
+            },
+            {
+                kind = "settings", id = "theme", title = "图标风格",
+                items = {
+                    { key = "iconTheme", type = "select", label = "整体风格", optionsSource = "ExwindTools.GetMicroMenuThemeItems" },
+                    { key = "leftCount", type = "slider", label = "左侧数量", min = 0, max = MAX_SLOTS, step = 1 },
+                    { key = "rightCount", type = "slider", label = "右侧数量", min = 0, max = MAX_SLOTS, step = 1 },
+                },
+            },
+            {
+                kind = "settings", id = "time", title = "时间文字",
+                items = {
+                    {
+                        key = "timeFormat", type = "select", label = "时间格式",
+                        options = {
+                            { value = "24小时制", label = "24小时制" },
+                            { value = "12小时制", label = "12小时制" },
+                        },
+                    },
+                    { key = "showSeconds", type = "switch", label = "显示秒数" },
+                },
+            },
+            {
+                kind = "composite", id = "position", title = L["锚点设置"],
+                component = "anchorgroup", key = "anchorGroup", opts = MICRO_MENU_ANCHOR_OPTS,
+            },
+            {
+                kind = "settings", id = "slot", title = "当前槽位：" .. selectedTitle,
+                description = {
+                    key = "slot_desc", type = "description",
+                    label = "先选择左右分组与槽位编号，再编辑图标和左右键动作；上方预览只展示同一套选单。",
+                },
+                items = {
+                    {
+                        key = "selectedSlotSide", type = "select", label = "分组",
+                        options = {
+                            { value = "左侧", label = "left" },
+                            { value = "右侧", label = "right" },
+                        },
+                    },
+                    { key = "selectedSlotIndex", type = "slider", label = "槽位编号", min = 1, max = MAX_SLOTS, step = 1 },
+                    { key = "btn_select_icon", type = "button", label = "选择图案" },
+                },
+            },
+            {
+                kind = "composite", id = "time_font", title = "时间文字",
+                component = "fontgroup", key = "timeFont", opts = {},
+            },
+            {
+                kind = "composite", id = "icon_style", title = "整体图标",
+                component = "icongroup", key = "iconStyle", opts = { enableOffset = false },
+            },
         },
-
-        { key = "div_basic", type = "divider", x = 1, y = 24, w = 197, h = 4 },
-        { key = "sh_basic", type = "subheader", x = 1, y = 28, w = 197, h = 4, label = "基础设置" },
-
-        { key = "enabled", type = "checkbox", x = 1, y = 36, w = 32, h = 8, label = "启用" },
-        { key = "showBackground", type = "checkbox", x = 40, y = 36, w = 40, h = 8, label = "显示背景" },
-
-        { key = "barScale", type = "slider", x = 76, y = 48, w = 64, h = 8, label = "整体缩放", min = 0.5, max = 2.0, step = 0.05 },
-        { key = "bgAlpha", type = "slider", x = 144, y = 48, w = 56, h = 8, label = "背景透明度", min = 0, max = 1, step = 0.05 },
-
-        { key = "div_theme", type = "divider", x = 1, y = 60, w = 197, h = 4 },
-        { key = "sh_theme", type = "subheader", x = 1, y = 64, w = 197, h = 4, label = "图标风格" },
-        { key = "iconTheme", type = "dropdown", x = 1, y = 72, w = 64, h = 8, label = "整体风格", items = "func:ExwindTools.GetMicroMenuThemeItems" },
-        { key = "leftCount", type = "slider", x = 76, y = 72, w = 56, h = 8, label = "左侧数量", min = 0, max = MAX_SLOTS, step = 1 },
-        { key = "rightCount", type = "slider", x = 140, y = 72, w = 56, h = 8, label = "右侧数量", min = 0, max = MAX_SLOTS, step = 1 },
-
-        { key = "div_time", type = "divider", x = 1, y = 84, w = 197, h = 4 },
-        { key = "sh_time", type = "subheader", x = 1, y = 88, w = 197, h = 4, label = "时间文字" },
-        { key = "timeFormat", type = "dropdown", x = 1, y = 96, w = 64, h = 8, label = "时间格式", items = "24小时制:24小时制,12小时制:12小时制" },
-        { key = "showSeconds", type = "checkbox", x = 76, y = 96, w = 32, h = 8, label = "显示秒数" },
-
-        { key = "div_pos", type = "divider", x = 1, y = 120, w = 197, h = 4 },
-        { key = "anchorGroup", type = "anchorgroup", x = 1, y = 126, w = 200, h = 20, measure = true, label = L["锚点设置"], opts = MICRO_MENU_ANCHOR_OPTS },
-
-        { key = "div_slot", type = "divider", x = 1, y = 150, w = 197, h = 4 },
-        { key = "sh_slot", type = "subheader", x = 1, y = 154, w = 197, h = 4, label = "当前槽位：" .. selectedTitle },
-        { key = "slot_desc", type = "description", x = 1, y = 162, w = 197, h = 8, label = "先选择左右分组与槽位编号，再编辑图标和左右键动作；上方预览只展示同一套选单。" },
-        { key = "selectedSlotSide", type = "dropdown", x = 1, y = 174, w = 64, h = 8, label = "分组", items = "左侧:left,右侧:right" },
-        { key = "selectedSlotIndex", type = "slider", x = 72, y = 174, w = 64, h = 8, label = "槽位编号", min = 1, max = MAX_SLOTS, step = 1 },
-        { key = "btn_select_icon", type = "button", x = 144, y = 174, w = 56, h = 8, label = "选择图案" },
-        { key = "timeFont", type = "fontgroup", x = 1, y = 288, w = 200, h = 50, label = "时间文字", labelSize = 20, opts = {} },
-        { key = "iconStyle", type = "icongroup", x = 1, y = 364, w = 200, h = 50, label = "整体图标", labelSize = 20, opts = { enableOffset = false } },
     }
 
+    local slotItems = layout.sections[5].items
     for _, item in ipairs(BuildSlotEditorItems(currentSide, currentIndex)) do
-        layout[#layout + 1] = item
+        slotItems[#slotItems + 1] = item
     end
 
     return layout
@@ -952,6 +963,7 @@ end
 -- =============================================================
 -- 图标选择器
 -- =============================================================
+-- [卡片迁移边界：外部UI] 下列 IconPicker 是独立工具窗口，不是设置页卡片；窗口尺寸、滚动单元格顺序、选择/关闭回调与复用方式禁止修改。
 local IconPicker = {
     frame = nil,
     targetSide = nil,
@@ -1006,6 +1018,7 @@ local function IconPicker_Refresh()
     end
     frame.titleText:SetText(L["选择图案"] ..
         "  [" .. BuildSelectedSlotTitle(IconPicker.targetSide, IconPicker.targetIndex) .. "]")
+    EXUI:ApplyDialogStyle(frame, frame.titleText)
 
     if not frame.scrollText then
         frame.scrollText = frame:CreateFontString(nil, "OVERLAY")
@@ -1404,6 +1417,7 @@ local function BuildClockPresentation(sample)
     }
 end
 
+-- [卡片迁移边界：自定义渲染] 以下三段 IconCollection/时钟 presentation 同时服务 Runtime/World/Panel，不是设置页布局；槽位顺序、动作与回收合同禁止修改。
 local function BuildPresentation(sample)
     return {
         sample = sample == true,
@@ -1673,7 +1687,6 @@ end
 
 local function ShowPanel(dock)
     ReleasePanel()
-    dock:SetBackdropColor(0.5804, 0.6471, 0.9882, 1)
     panelSurface = CreateSurface(dock, "panel", { onIntent = HandlePanelIntent })
     ApplySurface(panelSurface, BuildPresentation(true))
 end
@@ -1729,7 +1742,6 @@ local function RefreshVisuals()
         RenderRuntime()
     end
     if panelSurface then
-        if panelSurface.dock then panelSurface.dock:SetBackdropColor(0.5804, 0.6471, 0.9882, 1) end
         ApplySurface(panelSurface, BuildPresentation(true))
     end
     SyncTicker()
@@ -1755,7 +1767,6 @@ ExwindTools:RegisterModulePreview(EXWIND_MODULE_KEY, {
     mount = ShowPanel,
     update = function()
         if panelSurface then
-            if panelSurface.dock then panelSurface.dock:SetBackdropColor(0.5804, 0.6471, 0.9882, 1) end
             ApplySurface(panelSurface, BuildPresentation(true))
         end
     end,

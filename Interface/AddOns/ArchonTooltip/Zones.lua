@@ -1,21 +1,22 @@
 ---@class Private
 local Private = select(2, ...)
 
-Private.Zones[46] = {
-    id = 46,
-    name = "VS / DR / MQD",
+Private.Zones[53] = {
+    id = 53,
+    name = "The Venomous Abyss",
     hasMultipleDifficulties = true,
     hasMultipleSizes = false,
     encounters = {
-        { id = 3176, },
-        { id = 3177, },
-        { id = 3179, },
-        { id = 3178, },
-        { id = 3180, },
-        { id = 3181, },
-        { id = 3306, },
-        { id = 3182, },
-        { id = 3183, },
+        { id = 3470, },
+        { id = 3445, },
+        { id = 3455, },
+        { id = 3497, },
+        { id = 3420, },
+        { id = 3421, },
+        { id = 3429, },
+        { id = 3492, },
+        { id = 3379, },
+        { id = 3513, },
     },
     difficultyIconMap = nil,
 }
@@ -62,22 +63,26 @@ Private.Zones[2018] = {
     difficultyIconMap = nil,
 }
 
-Private.Zones[1056] = {
-    id = 1056,
-    name = "SSC / TK",
+Private.Zones[1060] = {
+    id = 1060,
+    name = "BT / Hyjal",
     hasMultipleDifficulties = false,
     hasMultipleSizes = false,
     encounters = {
-        { id = 100623, },
-        { id = 100624, },
-        { id = 100625, },
-        { id = 100626, },
-        { id = 100627, },
-        { id = 100628, },
-        { id = 100730, },
-        { id = 100731, },
-        { id = 100732, },
-        { id = 100733, },
+        { id = 50601, },
+        { id = 50602, },
+        { id = 50603, },
+        { id = 50604, },
+        { id = 50605, },
+        { id = 50606, },
+        { id = 50607, },
+        { id = 50608, },
+        { id = 50609, },
+        { id = 50618, },
+        { id = 50619, },
+        { id = 50620, },
+        { id = 50621, },
+        { id = 50622, },
     },
     difficultyIconMap = nil,
 }

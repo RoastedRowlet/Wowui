@@ -1,37 +1,27 @@
 # EllesmereUI
 
-## [v9.3.3](https://github.com/EllesmereGaming/EllesmereUI/tree/v9.3.3) (2026-09-29)
-[Full Changelog](https://github.com/EllesmereGaming/EllesmereUI/compare/v9.3.2...v9.3.3) [Previous Releases](https://github.com/EllesmereGaming/EllesmereUI/releases)
+## [v9.3.8](https://github.com/EllesmereGaming/EllesmereUI/tree/v9.3.8) (2026-10-05)
+[Full Changelog](https://github.com/EllesmereGaming/EllesmereUI/compare/v9.3.7...v9.3.8) [Previous Releases](https://github.com/EllesmereGaming/EllesmereUI/releases)
 
-- Release v9.3.3  
-- Merge pull request #2336 from JuJuFX-dev/refactor/rb-options-split  
-    Refactor(Resource Bars Options): Split Resource Bars options into per-section files  
-- Rename the Resource Bars option files to *\_Options  
-    ResourceBars/ becomes ResourceBars\_Options/ and every file gets the  
-    \_Options suffix, so they read as part of the load-on-demand options addon  
-    rather than module code.  
-- Merge upstream/main into refactor/rb-options-split  
-    Upstream turned the Mana Regen Spark toggle into an Off / 5-Second Rule /  
-    Regen Ticks dropdown in the Bar Display page, which this branch moved to  
-    ResourceBars/BarDisplayPage.lua. The change is carried over there  
-    verbatim (dedented); the main options file keeps this branch's side.  
-- Fix Cast Bar preview click targets  
-    The icon, spell text and duration hit overlays glowed the wrong slots  
-    after the rows were rearranged: the icon landed on Frame Strata, the  
-    spell text on Bar Texture and the duration text on Spell Text. Point  
-    them at Show Spell Icon, Spell Text and Duration Text.  
-- Wire the Resource Bars option files through a shared env table  
-    The main options file fills ns.\_ERB\_OptEnv with the closure helpers the  
-    sections and pages read, right before RegisterModule. Each moved builder  
-    re-imports them at call time; the pages move onto ns (ERB\_Build*Page)  
-    and write the preview state through two setters. The new files load  
-    before EUI\_ResourceBars\_Options.lua and only define functions.  
-- Move Resource Bars option sections and pages into ResourceBars/  
-    Verbatim move, dedented by four columns (tab-indented lines unchanged).  
-    Not runnable on its own: the wiring follows in the next commit.  
-- Remove dead Advanced-mode branches from Resource Bars options  
-    The Advanced per-spec page was retired and every caller of the shared  
-    section builders passes advanced = false. Drop the statements that only  
-    ran with ctx.advanced set (sync button, synced overlay, threshold  
-    normalization, spec checks) and their four locale keys.  
-    Also shorten the Mana Regen Spark comment block to the comment budget.  
+- Release v9.3.8  
+- Merge pull request #2494 from lkshrk/fix/abr-scenario-where-to-show  
+    fix(aurabuffreminders): add Scenario to Where to Show  
+- Merge branch 'main' into fix/abr-scenario-where-to-show  
+- Merge pull request #2512 from Barbiero/locale/ptbr-since-936  
+    ptBR: catch up with v9.3.5 – v9.3.7  
+- Merge pull request #2511 from JuJuFX-dev/refactor/nameplates-main-split  
+- ptBR: translate nameplate debuff coloring and threat gap, XP bar quest overlay and text slots, character sheet item details and stat sections, Dark Mode colors, graphics restore and full reset, action bar paging tooltips, Unlock Mode width/height matching, QoL auto gossip, and WoW Forever spell ranks and loot feed styles  
+- Merge upstream main (v9.3.7) into refactor/nameplates-main-split  
+- Regenerate the locale key list  
+- Merge upstream main into refactor/nameplates-main-split  
+- Write the profile through SetProfile alone, give class power the same setter shape, point the forward declaration comment at its file  
+- Wire up the nameplate files: headers, shared locals, setters, load order  
+- Move the nameplate code into thirteen new files (verbatim)  
+- locales: translate the Scenario Where to Show entry  
+- fix(aurabuffreminders): add Scenario to Where to Show  
+    Island Expeditions, Warfronts, Visions, Torghast and every other non-delve  
+    scenario resolved to no Where to Show bucket, so every section ignored its  
+    settings there and always showed. Map them to a new "Scenario" entry in  
+    AuraBuffReminders and the Targeted Spell Bars filter.  
+    Housing plots also report as "scenario"; treat them as open world.  
+    Fixes #2493  

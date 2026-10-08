@@ -125,10 +125,13 @@ function CCS.GetCurrentVersion()
         return CCS.CATA
     elseif project == _G.WOW_PROJECT_MISTS_CLASSIC then
         return CCS.MOP
+    elseif project == _G.WOW_PROJECT_CAMELOT then
+        return CCS.FOREVER
     else
         return CCS.ALL -- fallback
     end
 end
+
 
 CCS.CurrentVersion = CCS.GetCurrentVersion()
 

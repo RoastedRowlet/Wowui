@@ -1,6 +1,5 @@
 -- =============================================================
--- DK 血沸监控：保留 EXDK 的冷却更新触发语义，显示由标准 IconCollection 接管。
--- 不创建独立 Frame、SavedVariables、OnUpdate 或第二套拖拽逻辑。
+-- DK 血沸监控：保留 EXDK 的冷却更新触发语义
 -- =============================================================
 
 local ExwindTools = _G.ExwindTools
@@ -269,7 +268,8 @@ local function BuildEntry(itemID, cooldown, isPreview)
             bodySize = { width = width, height = height },
             declaredBounds = { left = -width * .5, right = width * .5, bottom = -height * .5, top = height * .5 },
             semanticBounds = { ["core.time"] = MakeTextBounds(DB.font_time or {}) },
-            interaction = isPreview and EXUI:BuildStandardPreviewInteraction("Icon", DB, MODULE_SPEC.preview.elements) or nil,
+            interaction = isPreview and EXUI:BuildStandardPreviewInteraction("Icon", DB, MODULE_SPEC.preview.elements) or
+            nil,
         },
     }
 end

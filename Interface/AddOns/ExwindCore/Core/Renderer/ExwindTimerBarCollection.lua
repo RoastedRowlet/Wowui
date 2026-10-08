@@ -103,7 +103,7 @@ end
 
 local function ApplyTime(collection, widget, time)
     if type(time) == "table" and time.mode == "SECRET" then
-        widget:SetSecretTime(time.duration, time.interpolation, time.direction)
+        widget:SetSecretTime(time.duration, time.interpolation, time.direction, time.textOptions)
         return true
     end
     if type(time) == "table" and time.mode == "DURATION" then
@@ -177,6 +177,49 @@ local function GetTextWidget(widget, role)
     return nil
 end
 
+local function ApplyOrdinaryTextSlot(widget, slot, declaration)
+    if type(declaration) ~= "table" or (type(issecretvalue) == "function" and issecretvalue(declaration.mode))
+        or (declaration.mode ~= "TEXT" and declaration.mode ~= "SECRET") then
+        error("TimerBar textSlots." .. slot .. " requires TEXT or SECRET mode", 3)
+    end
+    if declaration.mode == "SECRET" then
+        widget:SetSecretText(declaration.value)
+    else
+        if type(issecretvalue) == "function" and issecretvalue(declaration.value) then
+            error("TimerBar TEXT slot cannot contain a Secret value", 3)
+        end
+        widget:SetText(declaration.value)
+    end
+    widget:Show()
+end
+
+local function ApplyOrdinaryTextSlots(widget, presentation, timeOwned)
+    local slots = presentation.textSlots
+    if slots ~= nil and type(slots) ~= "table" then error("TimerBar textSlots must be table", 3) end
+    local b = slots and slots.B
+    if b ~= nil and not widget.textB then
+        widget.textB = EXUI:CreateTextWidget(widget.textLayer, "targetName")
+    end
+    if widget.textB then
+        widget.textB:SetText("")
+        widget.textB:ApplyStyle(presentation.textSlotStyles and presentation.textSlotStyles.B
+            or widget.textStyles and widget.textStyles.label or {})
+        widget.textB:SetBounds(widget.bar:GetWidth() or 1, widget.bar:GetHeight() or 1)
+        widget.textB:SetAnchor("CENTER", widget.bar, "CENTER")
+        if b ~= nil then ApplyOrdinaryTextSlot(widget.textB, "B", b) else widget.textB:Hide() end
+    end
+    if not timeOwned and slots and slots.C ~= nil then
+        ApplyOrdinaryTextSlot(widget.timeText, "C", slots.C)
+    end
+    local enabled = presentation.hasTextShownFromBoolean
+    if enabled ~= nil and type(enabled) ~= "table" then error("TimerBar hasTextShownFromBoolean must be table", 3) end
+    local shown = presentation.textShownFromBoolean
+    if enabled and type(shown) ~= "table" then error("TimerBar textShownFromBoolean must be table", 3) end
+    -- Presence is declared by ordinary flags. Never compare a Secret boolean.
+    if enabled and enabled.B == true and widget.textB then widget.textB:SetShownFromBoolean(shown.B) end
+    if enabled and enabled.C == true and widget.timeText:IsShown() then widget.timeText:SetShownFromBoolean(shown.C) end
+end
+
 local function ApplyStandardPresentation(collection, item, presentation)
     local widget = item.widget
     local schema = presentation.schema or collection.standardSchema
@@ -244,6 +287,7 @@ local function StopOverlayDrag(overlay, emitMove)
 end
 
 local function ResetInteractionOverlay(overlay, detach)
+    if overlay and overlay._canvasDriver then overlay._canvasDriver:CancelOverlay(overlay) end
     if not overlay then return end
     StopOverlayDrag(overlay, false)
     overlay:SetScript("OnMouseDown", nil)
@@ -409,7 +453,7 @@ local function ConfigureInteractionOverlay(collection, item, slotID, spec)
         overlay:SetFrameLevel((item.root:GetFrameLevel() or 0) + 50)
         local highlight = CreateFrame("Frame", nil, overlay, "BackdropTemplate")
         highlight:SetAllPoints(overlay)
-        highlight:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 2 })
+        highlight:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
         highlight:SetBackdropBorderColor(0.32, 0.82, 1.00, 0.95)
         highlight:SetBackdropColor(0.20, 0.65, 1.00, 0.10)
         highlight:Hide()
@@ -453,6 +497,16 @@ local function ConfigureInteractionOverlay(collection, item, slotID, spec)
             return
         end
         if button ~= "LeftButton" or not movable then return end
+        if collection.canvasEditor then
+            local a = ResolveInteractionAnchor(spec, activeSemanticBounds)
+            local origin = isText and not activeSemanticBounds and ResolveTextInteractionPosition(textWidget, a)
+                or {x=a.x or 0,y=a.y or 0}
+            collection.canvasEditor:Begin(self, self._timerBarSlotID, function(position)
+                ApplyTransientPosition(collection, item, slotID, spec, position)
+                ApplyInteractionAnchor(self, ResolveInteractionParent(item, slotID, spec), slotID, spec, semanticBounds, position)
+            end, origin)
+            return
+        end
 
         StopOverlayDrag(self, false)
         -- 鼠标坐标必须用稳定 UI scale 换算；overlay 的 parent 可能是缩放的
@@ -501,6 +555,10 @@ local function ConfigureInteractionOverlay(collection, item, slotID, spec)
         end)
     end)
     overlay:SetScript("OnMouseUp", function(self, button)
+        if collection.canvasEditor then
+            if button == "LeftButton" then collection.canvasEditor:Finish(self) end
+            return
+        end
         if button == "LeftButton" then StopOverlayDrag(self, true) end
     end)
     overlay:Show()
@@ -635,11 +693,13 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
         if item then return item end
         item = NewItem(self, itemID)
         self.itemsByID[itemID] = item
+        self.geometryRevision = (self.geometryRevision or 0) + 1
         return item
     end
 
     function collection:ApplyItem(item, presentation)
         if not item or not item.widget then return item end
+        self.geometryRevision = (self.geometryRevision or 0) + 1
         presentation = type(presentation) == "table" and presentation or {}
         item.presentation = presentation
         local widget = item.widget
@@ -661,30 +721,71 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
             widget:SetLabel(presentation.label)
             local ownsProgress = ApplyTime(self, widget, presentation.time)
             if not ownsProgress then ApplyProgress(widget, presentation.progress) end
-            if presentation.fillColor then
-                widget:SetFillColor(presentation.fillColor)
+            ApplyOrdinaryTextSlots(widget, presentation, ownsProgress)
+            local fill = presentation.fillFromBoolean
+            if type(fill) == "table" then
+                local function color(value)
+                    if type(value) == "table" and value.r ~= nil then
+                        return CreateColor(value.r, value.g, value.b, value.a == nil and 1 or value.a)
+                    end
+                    return value
+                end
+                widget:SetFillColorFromBoolean(fill.value, color(fill.trueColor), color(fill.falseColor))
+            else
+                local fillColor = presentation.fillColor
+                local hasFillColor = presentation.hasFillColor == true
+                if not hasFillColor and (type(issecretvalue) ~= "function" or not issecretvalue(fillColor)) then
+                    hasFillColor = fillColor ~= nil
+                end
+                if hasFillColor then widget:SetFillColor(fillColor) end
+            end
+            local alpha = presentation.alphaFromBoolean
+            if type(alpha) == "table" then
+                widget:SetAlphaFromBoolean(alpha.value, alpha.trueAlpha, alpha.falseAlpha)
+            end
+        end
+        if presentation.hasFillColorComponents == true then
+            widget:SetFillColorComponents(presentation.fillColorComponents)
+        end
+        local textColors = presentation.textColorComponents
+        if textColors ~= nil then
+            if type(textColors) ~= "table" or (type(issecretvalue) == "function" and issecretvalue(textColors)) then
+                error("TimerBar textColorComponents must be an ordinary table", 2)
+            end
+            for slot, components in pairs(textColors) do
+                local textWidget = GetTextWidget(widget, slot)
+                if not textWidget then error("TimerBar has no text color slot: " .. tostring(slot), 2) end
+                textWidget:SetColorComponents(components)
             end
         end
         if type(widget.RefreshDeclaredTextSelections) == "function" then
             widget:RefreshDeclaredTextSelections()
         end
         if type(widget.SetFillVisible) == "function" then widget:SetFillVisible(presentation.fillVisible ~= false) end
+        if presentation.hasFillShownFromBoolean == true then
+            widget:SetFillShownFromBoolean(presentation.fillShownFromBoolean)
+        end
         if presentation.extraHosts ~= nil or presentation.extraElements ~= nil or presentation.extraTextures ~= nil
             or presentation.extraChildren ~= nil or presentation.renderExtraChildren ~= nil then
             error("TimerBarCollection legacy extension presentation is removed; declare ordered regionElements instead", 2)
         end
         item.regions:SetConfigContextID(presentation.regionConfigContextID)
-        item.regions:Apply(presentation.regionElements)
+        item.regions:Apply(presentation.regionElements, presentation.elementContent)
         ConfigureInteractionOverlays(self, item, presentation.interaction)
 
         -- ItemRoot 尺寸只来自固定 Body 的真实宽高。文字与 ExtraChildHost 不得
         -- 参与 collection 步距，也不得通过 visual union 移动语义原点。
         self.itemWidth = math.max(1, widget:GetWidth() or 1)
         self.itemHeight = math.max(1, widget:GetHeight() or 1)
+        item.bodyWidth, item.bodyHeight = self.itemWidth, self.itemHeight
         item.root:SetSize(self.itemWidth, self.itemHeight)
         item.localOffset = ResolveLocalOffset(self, presentation, self.standardSchema)
         widget:ClearAllPoints()
         widget:SetPoint("CENTER", item.root, "CENTER", item.localOffset.x, item.localOffset.y)
+        if item.visualEffects then
+            EXUI:ApplyCollectionItemVisualEffects(item.root, item.visualEffects, self.itemWidth, self.itemHeight)
+        end
+        if item._collectionClickSpec then EXUI:ApplyCollectionItemClick(item, item._collectionClickSpec) end
         if presentation.shown == false then item.root:Hide() else item.root:Show() end
         return item
     end
@@ -702,7 +803,13 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
         return true
     end
 
-    function collection:SetItems(items, layout)
+    function collection:SetItems(items, layout, geometryOnly)
+        local contentItems = items or {}
+        items, layout = self.layout:ResolveGeometryItems(self, items or {}, layout)
+        if not geometryOnly then
+            self.contentItems = {}
+            for index, item in ipairs(contentItems) do self.contentItems[index] = item end
+        end
         local wanted = {}
         for _, item in ipairs(items or {}) do
             if item and item.id then wanted[item.id] = true end
@@ -717,7 +824,8 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
         -- Panel 没有模块世界 XY；只在这个宿主把完整样本组居中。runtime/world
         -- 仍是语义首项固定，绝不受此 preview-only 行为影响。
         if self.contentCenter then layoutStyle.contentCenter = true end
-        self.layout:ApplyStyle(layoutStyle)
+        self.geometryRevision = (self.geometryRevision or 0) + 1
+        self.layout:ApplyStyle(layoutStyle, true)
         self.layout:SetSemanticItems(items or {}, self.itemWidth, self.itemHeight)
         self.currentItems = items or {}
         self.currentLayout = layoutStyle
@@ -746,7 +854,7 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
         -- 拖动期可以只更新代表样本而不重排整组；松手阶段由完整 Render 统一
         -- 同步当前预览数量与布局。
         if options.reapplyLayout ~= false then
-            self:SetItems(self.currentItems, self.currentLayout)
+            self:SetItems(self.currentItems, self.currentLayout, true)
         end
         return true
     end
@@ -757,6 +865,7 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
     function collection:ResizeCurrentItems(width, height)
         if self.released then return false end
         width, height = math.max(1, tonumber(width) or 1), math.max(1, tonumber(height) or 1)
+        self.geometryRevision = (self.geometryRevision or 0) + 1
         local itemWidth, itemHeight
         for _, item in ipairs(self.currentItems or {}) do
             local widget = item and item.widget
@@ -764,6 +873,7 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
                 widget:SetGeometryOverride({ width = width, height = height })
                 local currentWidth = math.max(1, widget:GetWidth() or 1)
                 local currentHeight = math.max(1, widget:GetHeight() or 1)
+                item.bodyWidth, item.bodyHeight = currentWidth, currentHeight
                 item.root:SetSize(currentWidth, currentHeight)
                 itemWidth, itemHeight = currentWidth, currentHeight
             end
@@ -779,14 +889,27 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
     -- Release、重建 Preview session 或重新生成 presentation。
     function collection:ReapplyCurrentLayout(layout)
         if self.released then return false end
-        self:SetItems(self.currentItems or {}, layout or self.currentLayout)
+        self:SetItems(self.contentItems or self.currentItems or {}, layout or self.currentLayout, true)
         return true
+    end
+
+    function collection:PrepareCurrentGeometry(geometryByItemID, layout)
+        if self.released then return nil, "COLLECTION_RELEASED" end
+        return self.layout:PrepareItemGeometry(self, geometryByItemID, layout)
+    end
+
+    function collection:ApplyPreparedGeometry(plan)
+        if self.released then return false, "COLLECTION_RELEASED" end
+        return self.layout:ApplyItemGeometry(self, plan)
     end
 
     function collection:ReleaseItem(itemID)
         local item = self.itemsByID[itemID]
         if not item then return end
         self.itemsByID[itemID] = nil
+        self.geometryRevision = (self.geometryRevision or 0) + 1
+        EXUI:ReleaseCollectionItemClick(item)
+        EXUI:ReleaseCollectionItemVisualEffects(item.root)
         ReleaseInteractionOverlays(item)
         if item.regions then item.regions:Release() end
         if item.isStandard then
@@ -800,11 +923,27 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
         item.regions = nil
         item.interactionOverlays = nil
         item.presentation = nil
+        item.visualEffects = nil
+        item.bodyWidth, item.bodyHeight = nil, nil
         item.localOffset = nil
     end
 
     function collection:GetBounds()
         return self.layout:GetBounds()
+    end
+
+    function collection:SetItemVisualEffects(itemID, effects)
+        local item = self.itemsByID[itemID]
+        if not item or not item.root then return false end
+        item.visualEffects = type(effects) == "table" and effects or nil
+        EXUI:ApplyCollectionItemVisualEffects(item.root, item.visualEffects, self.itemWidth, self.itemHeight)
+        return true
+    end
+
+    function collection:SetItemClickAction(itemID, spec)
+        local item = self.itemsByID[itemID]
+        if not item or not item.root then return false end
+        return EXUI:ApplyCollectionItemClick(item, spec)
     end
 
     -- 暴雪式 Selection Bounds：局部控件矩形 + WidgetLayout 已实际使用的 Item
@@ -840,12 +979,14 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
     end
 
     function collection:Release()
+        self.released = true
         for itemID in pairs(self.itemsByID) do
             self:ReleaseItem(itemID)
         end
         self.layout:Release()
         self.layout = nil
         self.currentItems = nil
+        self.contentItems = nil
         self.currentLayout = nil
         self.host = nil
         self.callbacks = nil

@@ -16,21 +16,7 @@ local MAX_GRID_COLS = 200
 local TARGET_CELL_PX = 18
 local LAYOUT_CACHE = {}
 local ACTIVE_CONTENT_FRAME
-
-local CHANNEL_OPTIONS = {
-    { "Master",   "Master" },
-    { "SFX",      "SFX" },
-    { "Dialog",   "Dialog" },
-    { "Music",    "Music" },
-    { "Ambience", "Ambience" },
-}
-
-local BAR_MODE_OPTIONS = {
-    { L["仅束状条"], "bun" },
-    { L["两者都启用"], "both" },
-    { L["仅计时条"], "timer" },
-    { L["两者都隐藏"], "none" },
-}
+local refreshingTimelineBars = false
 
 local BAR_SOURCE_OPTIONS = {
     { L["Boss 技能"], "boss" },
@@ -109,39 +95,40 @@ local function IsEncounterWarningSoundsEnabled()
     return value ~= "2"
 end
 
+-- [卡片/Grid 迁移边界：通用设置]
+-- 允许：只按共享规范调整下列声明的 x/y/w/h 与自然卡片分组。
+-- 禁止：修改 key/type/parentKey/subKey、字段业务次序、CVar/Store 写回与即时刷新回调。
+-- header/背景类声明不自动拥有相邻控件；迁移后仍须让原 DB 路径与回调负责保存。
 local LAYOUT = {
-    { key = "header_8111", type = "header", x = 1, y = 4, w = 200, h = 6, label = L["通用设置"], labelSize = 20 },
-    { key = "barDisplayMode", type = "dropdown", x = 1, y = 17, w = 63, h = 6, label = L["时间轴样式选择"], items = BAR_MODE_OPTIONS, parentKey = "ui.general" },
-    { key = "bunBarSources", type = "multiselect", x = 68, y = 17, w = 63, h = 6, label = L["束状条显示"], items = BAR_SOURCE_OPTIONS, parentKey = "ui.general" },
-    { key = "timerBarSources", type = "multiselect", x = 135, y = 17, w = 63, h = 6, label = L["计时条显示"], items = BAR_SOURCE_OPTIONS, parentKey = "ui.general" },
-    { key = "disableBlizzardEncounterTimeline", type = "checkbox", x = 1, y = 23, w = 76, h = 6, label = L["关闭暴雪原生计时条"], parentKey = "ui.general" },
-    { key = "disableEXBossInRaid", type = "checkbox", x = 1, y = 30, w = 76, h = 6, label = L["团本中禁用 EXBoss"], parentKey = "ui.general" },
-    { key = "disableAuraSoundRegistration", type = "checkbox", x = 1, y = 36, w = 90, h = 6, label = L["关闭光环语音注册（重载后生效）"], parentKey = "voice.global" },
-    { key = "hideTankBossAlertsForDps", type = "checkbox", x = 1, y = 43, w = 76, h = 6, label = L["DPS职责下不提示坦克技能"], parentKey = "ui.general" },
-    { key = "hideTankBossAlertsForHeal", type = "checkbox", x = 1, y = 50, w = 76, h = 6, label = L["治疗职责下不提示坦克技能"], parentKey = "ui.general" },
-    { key = "showSpellOccurrenceCount", type = "checkbox", x = 1, y = 57, w = 73, h = 6, label = L["法术名称显示次数"], parentKey = "ui.general" },
-    { key = "encounterWarningsEnabled", type = "checkbox", x = 1, y = 64, w = 86, h = 6, label = L["开启暴雪中央文字预警（注意：如果关闭会导致语音不工作）"], parentKey = "ui.general" },
-    { key = "encounterWarningSoundsEnabled", type = "checkbox", x = 1, y = 71, w = 127, h = 6, label = L["开启中央文字预警提示音（预设叮一声）"], parentKey = "ui.general" },
-    { key = "enableBlizzardHintCountdown", type = "checkbox", x = 1, y = 78, w = 44, h = 6, label = L["暴雪时间轴模式启用5秒倒数"], parentKey = "ui.general" },
-    { key = "header_5292", type = "header", x = 1, y = 89, w = 197, h = 10, label = L["音频输出选项"], labelSize = 20 },
-    { key = "channel", type = "dropdown", x = 1, y = 102, w = 48, h = 6, label = L["输出通道"], items = CHANNEL_OPTIONS, parentKey = "voice.global" },
-    { key = "volume", type = "slider", x = 55, y = 102, w = 44, h = 6, label = L["全局音量"], min = 0, max = 1, step = 0.01, parentKey = "voice.global" },
-    { key = "label_5567", type = "label", x = 1, y = 114, w = 95, h = 6, label = L["注意:声音大小请勿在此修改,若要调整声音大小请在ESC的设置面板修改"] },
-    { key = "header_auto_gossip", type = "header", x = 1, y = 121, w = 197, h = 10, label = L["自动对话"], labelSize = 20 },
-    { key = "autoGossipEnabled", type = "checkbox", x = 1, y = 127, w = 76, h = 6, label = L["启用自动对话"], parentKey = "autoGossip", subKey = "enabled" },
-    { key = "autoGossipAcademyBuff", type = "checkbox", x = 1, y = 134, w = 102, h = 6, label = L["[大秘境] 自动对话学院(AA)BUFF"], parentKey = "autoGossip", subKey = "academyBuff" },
-    { key = "autoGossipCaveCauldron", type = "checkbox", x = 1, y = 140, w = 102, h = 6, label = L["[大秘境] 自动对话洞窟(MC)大锅BUFF"], parentKey = "autoGossip", subKey = "caveCauldron" },
-    { key = "autoGossipPosRescue", type = "checkbox", x = 1, y = 146, w = 102, h = 6, label = L["[大秘境] 自动对话萨隆矿坑救人(POS)"], parentKey = "autoGossip", subKey = "posRescue" },
-    { key = "autoGossipNpxBuff", type = "checkbox", x = 1, y = 152, w = 102, h = 6, label = L["[大秘境] 自动对话节点(NPX)BUFF"], parentKey = "autoGossip", subKey = "npxBuff" },
+    version = 1,
+    title = L["通用设置"],
+    sections = {
+        { kind = "settings", id = "general", title = L["通用设置"],
+            items = {
+                { key = "timelineBars", type = "select", multiple = true, label = L["时间轴样式选择"], options = { { value = "bun", label = L["束状条"] }, { value = "timer", label = L["计时条"] } }, parentKey = "ui.general" },
+                { key = "bunBarSources", type = "select", multiple = true, label = L["束状条显示"], options = { { value = "boss", label = L["Boss 技能"] }, { value = "trash", label = L["小怪技能"] } }, parentKey = "ui.general" },
+                { key = "timerBarSources", type = "select", multiple = true, label = L["计时条显示"], options = { { value = "boss", label = L["Boss 技能"] }, { value = "trash", label = L["小怪技能"] } }, parentKey = "ui.general" },
+                { key = "disableBlizzardEncounterTimeline", type = "switch", label = L["关闭暴雪原生计时条"], parentKey = "ui.general" },
+                { key = "disableEXBossInRaid", type = "switch", label = L["团本中禁用 EXBoss"], parentKey = "ui.general" },
+                { key = "disableAuraSoundRegistration", type = "switch", label = L["关闭光环语音注册（重载后生效）"], parentKey = "voice.global" },
+                { key = "hideTankBossAlertsForDps", type = "switch", label = L["DPS职责下不提示坦克技能"], parentKey = "ui.general" },
+                { key = "hideTankBossAlertsForHeal", type = "switch", label = L["治疗职责下不提示坦克技能"], parentKey = "ui.general" },
+                { key = "showSpellOccurrenceCount", type = "switch", label = L["法术名称显示次数"], parentKey = "ui.general" },
+                { key = "encounterWarningsEnabled", type = "switch", label = L["开启暴雪中央文字预警（注意：如果关闭会导致语音不工作）"], parentKey = "ui.general" },
+                { key = "encounterWarningSoundsEnabled", type = "switch", label = L["开启中央文字预警提示音（预设叮一声）"], parentKey = "ui.general" },
+                { key = "enableBlizzardHintCountdown", type = "switch", label = L["暴雪时间轴模式启用5秒倒数"], parentKey = "ui.general" },
+                { key = "enableBlizzardTimelineInRaid", type = "switch", label = L["团本中仍开启暴雪原生计时条"], parentKey = "ui.general" },
+            } },
+        { kind = "settings", id = "auto-gossip", title = L["自动对话"],
+            items = {
+                { key = "autoGossipEnabled", type = "switch", label = L["启用自动对话"], parentKey = "autoGossip", subKey = "enabled" },
+                { key = "autoGossipAcademyBuff", type = "switch", label = L["[大秘境] 自动对话学院(AA)BUFF"], parentKey = "autoGossip", subKey = "academyBuff" },
+                { key = "autoGossipCaveCauldron", type = "switch", label = L["[大秘境] 自动对话洞窟(MC)大锅BUFF"], parentKey = "autoGossip", subKey = "caveCauldron" },
+                { key = "autoGossipPosRescue", type = "switch", label = L["[大秘境] 自动对话萨隆矿坑救人(POS)"], parentKey = "autoGossip", subKey = "posRescue" },
+                { key = "autoGossipNpxBuff", type = "switch", label = L["[大秘境] 自动对话节点(NPX)BUFF"], parentKey = "autoGossip", subKey = "npxBuff" },
+            } },
+    },
 }
-
-local function NormalizeBarDisplayMode(mode)
-    local m = tostring(mode or ""):lower()
-    if m == "timer" or m == "bun" or m == "both" or m == "none" then
-        return m
-    end
-    return "bun"
-end
 
 local function EnsureBarSourceSelections(selections)
     if type(selections) ~= "table" then
@@ -161,7 +148,6 @@ local function EnsureRootDB()
     EXBOSS12S2.autoGossip = EXBOSS12S2.autoGossip or {}
 
     local general = EXBOSS12S2.ui.general
-    general.barDisplayMode = NormalizeBarDisplayMode(general.barDisplayMode)
     general.bunBarSources = EnsureBarSourceSelections(general.bunBarSources)
     general.timerBarSources = EnsureBarSourceSelections(general.timerBarSources)
     if general.bossAlertsEnabledMplus == nil then
@@ -216,6 +202,12 @@ local function EnsureRootDB()
     else
         general.disableBlizzardEncounterTimeline = (general.disableBlizzardEncounterTimeline == true)
     end
+    -- 团本例外是独立的新选择；没有旧叶可以推断，默认保持原有行为（不例外）。
+    if general.enableBlizzardTimelineInRaid == nil then
+        general.enableBlizzardTimelineInRaid = false
+    else
+        general.enableBlizzardTimelineInRaid = (general.enableBlizzardTimelineInRaid == true)
+    end
 
     local voice = EXBOSS12S2.voice.global
     voice.channel = tostring(voice.channel or "Master")
@@ -254,29 +246,20 @@ local function EnsureRootDB()
     return EXBOSS12S2
 end
 
-local function IsTimerBarEnabledByGlobal()
-    local root = EnsureRootDB()
-    local mode = NormalizeBarDisplayMode(root.ui.general.barDisplayMode)
-    return mode == "both" or mode == "timer"
-end
-
-local function IsBunBarEnabledByGlobal()
-    local root = EnsureRootDB()
-    local mode = NormalizeBarDisplayMode(root.ui.general.barDisplayMode)
-    return mode == "both" or mode == "bun"
-end
-
 local function ApplyBarModeChange()
-    if not IsBunBarEnabledByGlobal() and ExBoss and ExBoss.UI and ExBoss.UI.BunBar and ExBoss.UI.BunBar.ReleaseAll then
-        ExBoss.UI.BunBar:ReleaseAll()
-    end
-    if not IsTimerBarEnabledByGlobal() and ExBoss and ExBoss.UI and ExBoss.UI.TimerBar and ExBoss.UI.TimerBar.ReleaseAll then
-        ExBoss.UI.TimerBar:ReleaseAll()
-    end
-
     local sched = ExBoss and ExBoss.Timeline and ExBoss.Timeline.Scheduler
-    if sched and sched._running and sched.StartBoss and sched._encounterID then
-        sched:StartBoss(sched._encounterID)
+    sched:RefreshTimelineBars()
+end
+
+local function RefreshTimelineBarControls()
+    local dropdown = Page._cardSession and Page._cardSession:GetWidget("general", "timelineBars")
+    if dropdown then
+        dropdown._selections = ExBoss.DisplayPolicy.GetTimelineBars()
+        dropdown:RefreshSelectionDisplay()
+    end
+    for _, key in ipairs({ "TimerBarPage", "BunBarPage", "GlobalSettingsPage" }) do
+        local page = ExBoss.UI.Panel[key]
+        if page and page.RefreshTimelineBarControls then page:RefreshTimelineBarControls() end
     end
 end
 
@@ -383,7 +366,22 @@ end
 
 ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
 
-local function RefreshActiveSurfaces(changedPath)
+local function RefreshActiveSurfaces(_, changedPath, phase)
+    if changedPath == "ui.general.timelineBars"
+        or changedPath == "ui.general.timelineBars.bun"
+        or changedPath == "ui.general.timelineBars.timer" then
+        if refreshingTimelineBars then return end
+        refreshingTimelineBars = true
+        -- The shared multi-select's Clear action removes selection keys.
+        -- Persist both off states explicitly so reload remains idempotent.
+        local bars = ExBoss.DisplayPolicy.GetTimelineBars()
+        bars.bun = bars.bun == true
+        bars.timer = bars.timer == true
+        ApplyBarModeChange()
+        RefreshTimelineBarControls()
+        refreshingTimelineBars = false
+        return
+    end
     local rootDB = EnsureRootDB()
     if changedPath == "voice.global.disableAuraSoundRegistration" then
         -- 这个开关只保存下次加载要采用的值；当前会话不刷新或移除注册。
@@ -396,7 +394,8 @@ local function RefreshActiveSurfaces(changedPath)
     local general = rootDB.ui and rootDB.ui.general or {}
     WriteCVarValue("encounterWarningsEnabled", general.encounterWarningsEnabled == true and "1" or "0")
     WriteCVarValue("Sound_EnableEncounterWarningsSounds", general.encounterWarningSoundsEnabled == true and "1" or "2")
-    WriteCVarValue("encounterTimelineEnabled", general.disableBlizzardEncounterTimeline == true and "0" or "1")
+    WriteCVarValue("encounterTimelineEnabled",
+        ExBoss.DisplayPolicy.ShouldEnableBlizzardEncounterTimeline(general) and "1" or "0")
     ApplySpellCountDisplayChange()
     ApplyBlizzardHintCountdownChange()
     ApplyBarModeChange()
@@ -410,6 +409,7 @@ EXUI:RegisterModuleValueController(MODULE_KEY, {
     RefreshActiveSurfaces = RefreshActiveSurfaces,
 })
 
+-- [混合函数边界] Page:Render 内只可调整 sf/sc 的锚点、宽高与布局挂载；rootDB、ActivePage、延迟 guard 和 Grid:Render 绑定禁止修改。
 function Page:Render(contentFrame)
     local Grid = _G.ExwindGrid
     if not Grid or not contentFrame then
@@ -440,7 +440,7 @@ function Page:Render(contentFrame)
     sf:SetParent(contentFrame)
     sf:ClearAllPoints()
     sf:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4)
-    sf:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -24, 4)
+    sf:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
     sf:SetVerticalScroll(0)
     sf:Show()
 
@@ -457,10 +457,16 @@ function Page:Render(contentFrame)
             ExwindTools.UI.ActivePageFrame = sc
             ExwindTools.UI.CurrentModule = MODULE_KEY
         end
-        local cols = ResolveGridCols(sc:GetWidth())
-        if Grid.SetContainerCols then
-            Grid:SetContainerCols(sc, cols)
+        if Page._cardSession and type(Page._cardSession.Release) == "function" then
+            Page._cardSession:Release()
+            Page._cardSession = nil
         end
-        Grid:Render(sc, ScaleLayout(LAYOUT, cols), rootDB, MODULE_KEY)
+        Page._cardSession = Grid:MountCards(sc, LAYOUT, {
+            pageId = MODULE_KEY,
+            regionId = "general-overview",
+            config = rootDB,
+            moduleKey = MODULE_KEY,
+            scrollFrame = sf,
+        })
     end)
 end

@@ -138,8 +138,28 @@ local WORLD_TO_RAID_TARGET = { 6, 4, 3, 7, 1, 2, 5, 8 }
 local function SyncOrderFromWorld()
     local w = _G.WMC_Saved
     if type(w) ~= "table" then return false end
-    -- honour Core.lua's custom-subset mode too
-    local list = (w.customCycleEnabled and w.customCycleMarkers) or w.orderList
+    EnsureSV()
+    local sv = SV()
+    -- This cycler has its OWN cycle order (edited on the Cycle Order page).
+    -- First run: start from the ground-marker settings so nothing changes
+    -- until you edit it.
+    local function valid8(t)
+        if type(t) ~= "table" or #t ~= 8 then return false end
+        for i = 1, 8 do if type(t[i]) ~= "number" or t[i] < 1 or t[i] > 8 then return false end end
+        return true
+    end
+    if not valid8(sv.cycleOrder) then
+        local src = valid8(w.orderList) and w.orderList or { 6, 4, 3, 7, 1, 2, 5, 8 }
+        sv.cycleOrder = {}
+        for i = 1, 8 do sv.cycleOrder[i] = src[i] end
+    end
+    if sv.customCycleEnabled == nil then sv.customCycleEnabled = w.customCycleEnabled and true or false end
+    if type(sv.customCycleMarkers) ~= "table" or #sv.customCycleMarkers == 0 then
+        local src = (type(w.customCycleMarkers) == "table" and #w.customCycleMarkers > 0) and w.customCycleMarkers or { 8, 4, 3, 2 }
+        sv.customCycleMarkers = {}
+        for i, v in ipairs(src) do sv.customCycleMarkers[i] = v end
+    end
+    local list = (sv.customCycleEnabled and sv.customCycleMarkers) or sv.cycleOrder
     if type(list) ~= "table" or #list == 0 then return false end
     local copy = {}
     for i, id in ipairs(list) do
@@ -149,7 +169,6 @@ local function SyncOrderFromWorld()
         if type(id) == "number" then copy[#copy + 1] = WORLD_TO_RAID_TARGET[id] or id end
     end
     if #copy == 0 then return false end
-    EnsureSV()
     SV().orderList = copy
     return true
 end
@@ -203,6 +222,7 @@ SecureHandlerWrapScript(clearBtn, "PreClick", clearBtn, [=[
 -- Key Bindings
 -- =========================
 local bindingsFrame = CreateFrame("Frame", "WMC_TargetMarkerBindings")
+local lastSharedWarning
 
 local function ApplyMarkMode()
     if InCombatLockdown() then return end
@@ -225,6 +245,26 @@ local function UpdateBindings()
 
     local cycleKey = (sv.placeModifier or "") .. (sv.placeKey or "")
     local clearKey = (sv.clearModifier or "") .. (sv.clearKey or "")
+
+    -- If the same key is also set for the mouseover cycler, let mouseover have it.
+    -- Two override bindings on one key means only one fires, and it was often the
+    -- target one - so the "mouseover" key marked the target instead. Mouseover
+    -- already falls back to your target when nothing is under the mouse.
+    local mo = _G.WMC_MouseoverSaved
+    if type(mo) == "table" and mo.enabled ~= false then
+        local moKeys = {}
+        local a = ((mo.placeModifier or "") .. (mo.placeKey or "")):upper()
+        local b = ((mo.clearModifier or "") .. (mo.clearKey or "")):upper()
+        if a ~= "" then moKeys[a] = true end
+        if b ~= "" then moKeys[b] = true end
+        local skipped
+        if moKeys[cycleKey:upper()] then skipped = cycleKey; cycleKey = "" end
+        if moKeys[clearKey:upper()] then skipped = (skipped and (skipped .. ", ") or "") .. clearKey; clearKey = "" end
+        if skipped and skipped ~= lastSharedWarning then
+            print("|cffffd100WorldMarkerCycler:|r " .. skipped .. " is set for both Target and Mouseover - it will use Mouseover (which marks your target when nothing is under the mouse).")
+        end
+        lastSharedWarning = skipped
+    end
 
     if cycleKey ~= "" then
         SetOverrideBindingClick(

@@ -1,6 +1,9 @@
 ﻿-- [[ 大秘境赛季记录 ]]
 -- { Key = "ExM+Info.RunHistory", Name = "大秘境赛季记录", Desc = "查看本赛季大秘境通关记录表格。", Category = 2 },
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXUI = ExwindTools.UI
@@ -16,6 +19,9 @@ if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 local EXDB = _G.EXDB
 
 -- 3. 数据初始化
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EXMYRUN_DEFAULTS = {
     size = 16,
     outline = "OUTLINE",
@@ -30,25 +36,47 @@ local EXMYRUN_DEFAULTS = {
 local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, EXMYRUN_DEFAULTS)
 
 -- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
+-- =========================================================
 -- [v4.2] 注册与配置
 -- =========================================================
 
 
 -- 2. Grid 布局
 local function EX_RegisterLayout()
+    -- [声明迁移边界：设置页] 仅把原筛选与打开按钮改为 settings 声明；纯装饰 divider 不进入新合同。
+    -- key/type、筛选/按钮绑定及历史记录排序禁止修改。
     local layout = {
-        { key = "header", type = "header", x = 8, y = 4, w = 193, h = 8, label = L["大秘境赛季记录 (Run History)"], labelSize = 25 },
-        { key = "desc", type = "description", x = 8, y = 20, w = 193, h = 4, label = L["此模块提供了一个可随时调用的详细战绩表格。使用 /emr 打开窗口。"] },
-        { key = "open", type = "button", x = 8, y = 84, w = 84, h = 12, label = L["打开记录预览"] },
-        { key = "sub_filter", type = "subheader", x = 8, y = 32, w = 193, h = 4, label = L["过滤设置"], labelSize = 20 },
-        { key = "filterThisWeek", type = "checkbox", x = 8, y = 44, w = 40, h = 8, label = L["只看本周记录"] },
-        { key = "filterTimed", type = "checkbox", x = 52, y = 44, w = 40, h = 8, label = L["只看限时记录"] },
-        { key = "size", type = "slider", x = 8, y = 64, w = 84, h = 12, label = L["显示字号"], min = 10, max = 30 },
-        { key = "divider_1965", type = "divider", x = 8, y = 36, w = 193, h = 4, label = "新组件" },
+        version = 1,
+        sections = {
+            {
+                kind = "settings",
+                id = "filters",
+                title = L["过滤设置"],
+                description = {
+                    key = "desc",
+                    type = "description",
+                    label = L["此模块提供了一个可随时调用的详细战绩表格。使用 /emr 打开窗口。"],
+                },
+                items = {
+                    { key = "filterThisWeek", type = "switch", label = L["只看本周记录"] },
+                    { key = "filterTimed", type = "switch", label = L["只看限时记录"] },
+                    { key = "size", type = "slider", label = L["显示字号"], min = 10, max = 30 },
+                },
+            },
+            {
+                kind = "settings",
+                id = "preview",
+                title = L["记录预览"],
+                items = {
+                    { key = "open", type = "button", label = L["打开记录预览"] },
+                },
+            },
+        },
     }
 
-
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
 end
 
 -- 3. 立即注册
@@ -61,6 +89,9 @@ ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY,
     end
 end)
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 -- =========================================================
 -- 核心业务逻辑
 -- =========================================================
@@ -146,7 +177,11 @@ local function EXMYRUN_GetLevelColorHex(level)
     return colorMixin and colorMixin:GenerateHexColor() or "ffffffff"
 end
 
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 -- 界面构建
+-- [卡片迁移边界：自定义渲染] 下列历史窗口、表头、滚动区和行池不是设置页 Grid；迁移设置卡片时禁止改其尺寸、排序、拖动与点击回调。
 function EXMYRUN:CreateMainFrame()
     local f = CreateFrame("Frame", "EXMYRUNMainFrame", UIParent, "BackdropTemplate")
     f:SetSize(self.FrameWidth, self.FrameHeight)
@@ -184,21 +219,18 @@ function EXMYRUN:CreateMainFrame()
     f.Title:SetText(L["大秘境赛季记录"])
 
     -- 关闭按钮
-    local closeBtn = CreateFrame("Button", nil, f, "UIPanelCloseButton")
+    local closeBtn = EXUI:CreatePicButton(f, 24, 24,
+        "Interface\\Buttons\\UI-Panel-CloseButton-Up",
+        "Interface\\Buttons\\UI-Panel-CloseButton-Down",
+        "Interface\\Buttons\\UI-Panel-CloseButton-Highlight",
+        function() f:Hide() end, true)
     closeBtn:SetSize(24, 24)
     closeBtn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -5, -5)
-    closeBtn:SetNormalTexture("Interface\\Buttons\\UI-Panel-CloseButton-Up")
-    closeBtn:SetPushedTexture("Interface\\Buttons\\UI-Panel-CloseButton-Down")
-    closeBtn:SetHighlightTexture("Interface\\Buttons\\UI-Panel-CloseButton-Highlight", "ADD")
-    closeBtn:SetScript("OnClick", function() f:Hide() end)
 
-    local configBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    configBtn:SetSize(80, 22)
-    configBtn:SetPoint("TOPLEFT", 10, -10)
-    configBtn:SetText(L["设置"])
-    configBtn:SetScript("OnClick", function()
+    local configBtn = EXUI:CreateButton(f, 80, 22, L["设置"], function()
         if ExwindTools.UI then ExwindTools.UI:Toggle() end
-    end)
+    end, { compact = true })
+    configBtn:SetPoint("TOPLEFT", 10, -10)
 
     f.headers = {
         { key = "id", text = L["序号"], width = 50, justify = "CENTER" },
@@ -212,11 +244,11 @@ function EXMYRUN:CreateMainFrame()
     f.headerBtns = {}
 
     for _, col in ipairs(f.headers) do
-        local btn = CreateFrame("Button", nil, f)
+        local btn = EXUI:CreateButton(f, col.width, 20, col.text, nil, { compact = true })
         btn:SetPoint("TOPLEFT", f, "TOPLEFT", currentX, headerY)
         btn:SetSize(col.width, 20)
 
-        local text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        local text = btn:GetFontString()
         text:SetAllPoints()
         text:SetJustifyH(col.justify)
         text:SetText(col.text)
@@ -241,8 +273,9 @@ function EXMYRUN:CreateMainFrame()
 
     f.Scroll = CreateFrame("ScrollFrame", "EXMYRUNHistoryScroll", f, "ScrollFrameTemplate")
     f.Scroll:EnableMouseWheel(true)
+    EXUI:ApplyModernScrollFrame(f.Scroll)
     f.Scroll:SetPoint("TOPLEFT", 10, headerY - 25)
-    f.Scroll:SetPoint("BOTTOMRIGHT", -30, 10)
+    f.Scroll:SetPoint("BOTTOMRIGHT", -18, 10)
 
     f.ScrollChild = CreateFrame("Frame", nil, f.Scroll)
     f.ScrollChild:SetSize(self.FrameWidth - 40, 1)
@@ -255,7 +288,7 @@ end
 function EXMYRUN:UpdateList(reuseOnly)
     if not self.MainFrame then return end
 
-    local rawData = C_MythicPlus.GetRunHistory(true, true, false)
+    local rawData = C_MythicPlus.GetRunHistory(true, true, true)
     local displayData = {}
 
     for i, run in ipairs(rawData) do
@@ -410,6 +443,9 @@ function EXMYRUN:ToggleWindow()
     end
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 -- 注册斜杠命令
 SLASH_EXMYRUN1 = "/emr"
 SLASH_EXMYRUN2 = "/exmythicrun"
@@ -424,5 +460,8 @@ end
 
 EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = RefreshActiveSurfaces })
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 -- 报告模块加载完成
 ExwindTools:ReportReady(EXWIND_MODULE_KEY)

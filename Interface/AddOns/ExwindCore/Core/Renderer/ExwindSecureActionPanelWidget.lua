@@ -90,3 +90,151 @@ function EXUI:CreateSecureActionPanelWidget(parent, mode)
     function panel:Release() for _, slot in pairs(self.slots) do slot:Release() end; self.slots = {}; self.root:Hide(); self.root:SetParent(nil) end
     return panel
 end
+
+-- Runtime Collection item clicks.  Secure buttons stay outside the Collection
+-- ItemRoot parent chain so B's visual layout may continue to move in combat.
+local pendingItems, retiredMacros, activeMacros = {}, {}, {}
+local function Locked() return InCombatLockdown and InCombatLockdown() end
+local function DestroyMacro(macro)
+    if not macro then return end
+    if Locked() then retiredMacros[macro] = true; return end
+    if UnregisterStateDriver then UnregisterStateDriver(macro.handler, "exauracombat") end
+    macro.button:SetAttribute("type1", nil)
+    macro.button:SetAttribute("macrotext1", nil)
+    macro.button:Hide()
+    macro.button:ClearAllPoints()
+    macro.button:SetParent(nil)
+    macro.handler:Hide()
+    macro.handler:SetParent(nil)
+    retiredMacros[macro] = nil
+    activeMacros[macro] = nil
+end
+local function CreateMacro(item)
+    local button = CreateFrame("Button", nil, UIParent, "SecureActionButtonTemplate")
+    button:EnableMouse(true)
+    button:RegisterForClicks("LeftButtonUp")
+    local handler = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
+    handler:SetFrameRef("action", button)
+    handler:SetAttribute("_onstate-exauracombat", [[
+        if newstate == "combat" then
+            local action = self:GetFrameRef("action")
+            action:SetAttribute("type1", nil)
+            action:SetAttribute("macrotext1", nil)
+            action:Hide()
+        end
+    ]])
+    RegisterStateDriver(handler, "exauracombat", "[combat] combat; ready")
+    local macro = { button = button, handler = handler }
+    item._collectionMacro = macro
+    activeMacros[macro] = item
+    return macro
+end
+local function MeasureItem(item)
+    local root = item.root
+    if not root or type(root.GetScaledRect) ~= "function" then return nil end
+    local ok, x, y, width, height = pcall(root.GetScaledRect, root)
+    if not ok then return nil end
+    local secret = type(issecretvalue) == "function" and issecretvalue
+    if secret and (secret(x) or secret(y) or secret(width) or secret(height)) then return nil end
+    if type(x) ~= "number" or type(y) ~= "number"
+        or type(width) ~= "number" or type(height) ~= "number"
+        or width <= 0 or height <= 0 then return nil end
+    local scale = UIParent:GetEffectiveScale()
+    if secret and secret(scale) then return nil end
+    if type(scale) ~= "number" or scale <= 0 then return nil end
+    return (x + width / 2) / scale, (y + height / 2) / scale,
+        width / scale, height / scale
+end
+local function ItemVisible(item)
+    local root = item.root
+    if not root or type(root.IsVisible) ~= "function" then return false end
+    local ok, visible = pcall(root.IsVisible, root)
+    if not ok or type(issecretvalue) == "function" and issecretvalue(visible) then return false end
+    return visible == true
+end
+local function ApplyClick(item)
+    if not item.root then return false end
+    local spec = item._collectionClickSpec or {}
+    if spec.mode ~= "code" and item._collectionCodeButton then
+        item._collectionCodeButton:Hide()
+        item._collectionCodeButton:SetScript("OnClick", nil)
+    end
+    if spec.mode == "code" and type(spec.onClick) == "function" then
+        local button = item._collectionCodeButton
+        if not button then
+            button = CreateFrame("Button", nil, item.root)
+            item._collectionCodeButton = button
+            button:EnableMouse(true)
+            button:RegisterForClicks("AnyUp")
+        end
+        button:ClearAllPoints()
+        button:SetAllPoints(item.root)
+        button:SetScript("OnClick", function(_, mouseButton) spec.onClick(mouseButton) end)
+        button:Show()
+    end
+    if Locked() then pendingItems[item] = true; return false end
+    pendingItems[item] = nil
+    if spec.mode ~= "macro" or type(spec.macro) ~= "string" or spec.macro == "" then
+        DestroyMacro(item._collectionMacro)
+        item._collectionMacro = nil
+        return true
+    end
+    if not ItemVisible(item) then
+        local macro = item._collectionMacro
+        if macro then
+            macro.button:SetAttribute("type1", nil)
+            macro.button:SetAttribute("macrotext1", nil)
+            macro.button:Hide()
+        end
+        return false
+    end
+    local x, y, width, height = MeasureItem(item)
+    if not x then
+        DestroyMacro(item._collectionMacro)
+        item._collectionMacro = nil
+        return false
+    end
+    local macro = item._collectionMacro or CreateMacro(item)
+    local button = macro.button
+    button:Hide()
+    button:ClearAllPoints()
+    button:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y)
+    button:SetSize(width, height)
+    button:SetFrameStrata(item.root:GetFrameStrata())
+    button:SetFrameLevel((item.root:GetFrameLevel() or 0) + 20)
+    button:SetAttribute("type1", "macro")
+    button:SetAttribute("macrotext1", spec.macro)
+    button:Show()
+    return true
+end
+local flushFrame = CreateFrame("Frame")
+flushFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+flushFrame:SetScript("OnEvent", function()
+    if Locked() then return end
+    for macro in pairs(retiredMacros) do DestroyMacro(macro) end
+    for item in pairs(pendingItems) do
+        pendingItems[item] = nil
+        if item.root then ApplyClick(item) end
+    end
+    for macro, item in pairs(activeMacros) do
+        if item.root and item._collectionMacro == macro then ApplyClick(item) end
+    end
+end)
+function EXUI:ApplyCollectionItemClick(item, spec)
+    if not item or not item.root then return false end
+    item._collectionClickSpec = type(spec) == "table" and spec or nil
+    return ApplyClick(item)
+end
+function EXUI:ReleaseCollectionItemClick(item)
+    if not item then return end
+    pendingItems[item] = nil
+    local code = item._collectionCodeButton
+    if code then
+        code:SetScript("OnClick", nil)
+        code:Hide()
+        code:SetParent(nil)
+    end
+    item._collectionCodeButton = nil
+    DestroyMacro(item._collectionMacro)
+    item._collectionMacro, item._collectionClickSpec = nil, nil
+end

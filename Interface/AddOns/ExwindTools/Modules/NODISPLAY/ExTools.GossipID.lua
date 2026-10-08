@@ -3,6 +3,9 @@
 -- { Key = "ExTools.GossipID", Name = "对话ID显示", Desc = "显示对话 ID，并支持加入自动对话列表。", Category = 1 },
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXUI = ExwindTools.UI
@@ -23,6 +26,9 @@ local strtrim = _G.strtrim or function(text)
     return text
 end
 
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EX_DEFAULTS = {
     enabled = true,
     showOptionID = false,
@@ -74,6 +80,9 @@ local INSTANCE_NAME_BY_ID = {
     [2993] = L["毒牙祭坛"],
 }
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function GetCurrentInstanceID()
     local id = ExwindTools.State and tonumber(ExwindTools.State.InstanceID)
     return id and id > 0 and id or nil
@@ -283,6 +292,9 @@ local function RefreshCurrentGossipFrameLater()
     end
 end
 
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
 local function RefreshConfigUI()
     if ExwindTools.UI and ExwindTools.UI.RefreshContent then
         ExwindTools.UI:RefreshContent()
@@ -365,145 +377,117 @@ local function RebuildLayoutAndRefreshUI(refreshGossip)
     RemoveCustomIfCoveredByPreset()
 
     if ExwindTools.RegisterModuleLayout then
+        -- [声明迁移边界：设置页] 普通控件与两张记录表各只声明一次。
+        -- 预设优先级与枚举顺序、ID/key/parentKey/subKey、增删按钮及自动对话回调禁止修改。
+        local ids = GetSortedCustomOptionIDs()
         local layout = {
-            { key = "header", type = "header", x = 1, y = 4, w = 200, h = 6, label = L["对话ID显示 / 自动对话"], labelSize = 25 },
-            { key = "enabled", type = "checkbox", x = 1, y = 12, w = 80, h = 6, label = L["启用功能"] },
-            { key = "showQuestID", type = "checkbox", x = 1, y = 18, w = 80, h = 6, label = L["显示任务 ID"] },
-            { key = "showOptionID", type = "checkbox", x = 1, y = 24, w = 80, h = 6, label = L["显示对话选项 ID"] },
-            { key = "autoSelectEnabled", type = "checkbox", x = 1, y = 30, w = 80, h = 6, label = L["启用自动对话"] },
-            { key = "showActionButton", type = "checkbox", x = 1, y = 40, w = 80, h = 8, label = L["显示加入按钮"] },
-            { key = "buttonPosition", type = "dropdown", x = 84, y = 41, w = 64, h = 8, label = L["按钮位置"], items = { { L["前面"], "LEFT" }, { L["后面"], "RIGHT" } } },
-            { key = "sub_manual", type = "subheader", x = 1, y = 53, w = 192, h = 4, label = L["手动添加"] },
-            { key = "manualAddID", type = "input", x = 15, y = 60, w = 46, h = 6, label = L["对话 ID"], labelPos = "left", labelSize = 16 },
-            { key = "manualAddName", type = "input", x = 76, y = 60, w = 46, h = 6, label = L["名称"], labelPos = "left", labelSize = 16 },
-            { key = "btn_add_auto_option", type = "button", x = 135, y = 60, w = 46, h = 6, label = L["添加"] },
+            version = 1,
+            sections = {
+                {
+                    kind = "settings",
+                    id = "common",
+                    title = L["通用设置"],
+                    items = {
+                        { key = "enabled", type = "switch", label = L["启用功能"] },
+                        { key = "showQuestID", type = "switch", label = L["显示任务 ID"] },
+                        { key = "showOptionID", type = "switch", label = L["显示对话选项 ID"] },
+                        { key = "autoSelectEnabled", type = "switch", label = L["启用自动对话"] },
+                        { key = "showActionButton", type = "switch", label = L["显示加入按钮"] },
+                        { key = "buttonPosition", type = "select", label = L["按钮位置"], options = {
+                            { value = "LEFT", label = L["前面"] },
+                            { value = "RIGHT", label = L["后面"] },
+                        } },
+                    },
+                },
+                {
+                    kind = "table",
+                    id = "presets",
+                    title = L["预设自动对话"],
+                    description = L["若某个自定义 ID 后续进入预设，将自动移除自定义项并以预设为准。"],
+                    columns = {
+                        { title = L["启用"] },
+                        { title = L["名称"] },
+                        { title = "ID" },
+                    },
+                    supportsAdd = false,
+                    records = {},
+                },
+                {
+                    kind = "table",
+                    id = "custom",
+                    title = L["自定义自动对话"],
+                    description = #ids == 0
+                        and L["当前没有自定义自动对话项。点击对话行图标，或在上方手动添加。"]
+                        or nil,
+                    columns = {
+                        { title = L["启用"] },
+                        { title = L["名称"] },
+                        { title = "ID" },
+                        { title = L["操作"] },
+                    },
+                    supportsAdd = true,
+                    add = {
+                        cells = {
+                            { text = "" },
+                            { key = "manualAddName", type = "input", label = L["名称"] },
+                            { key = "manualAddID", type = "input", label = L["对话 ID"] },
+                            { key = "btn_add_auto_option", type = "button", label = L["添加"] },
+                        },
+                    },
+                    records = {},
+                },
+            },
         }
 
-        local y = 70
-
-        layout[#layout + 1] = { key = "sub_preset", type = "subheader", x = 1, y = y, w = 194, h = 7, label = L
-        ["预设自动对话"] }
-        y = y + 10
-
+        local presetRecords = layout.sections[2].records
         for _, definition in ipairs(PRESET_DEFINITIONS) do
-            layout[#layout + 1] = {
-                key = "preset_enabled_" .. definition.key,
-                parentKey = "presetStates." .. definition.key,
-                subKey = "enabled",
-                type = "checkbox",
-                x = 1,
-                y = y,
-                w = 20,
-                h = 6,
-                label = "",
+            presetRecords[#presetRecords + 1] = {
+                cells = {
+                    {
+                        key = "preset_enabled_" .. definition.key,
+                        parentKey = "presetStates." .. definition.key,
+                        subKey = "enabled",
+                        type = "switch",
+                        label = "",
+                    },
+                    { text = GetPresetTitle(definition) },
+                    { text = GetPresetIDsText(definition) },
+                },
             }
-            layout[#layout + 1] = {
-                key = "preset_name_" .. definition.key,
-                type = "description",
-                x = 21,
-                y = y,
-                w = 96,
-                h = 6,
-                label = GetPresetTitle(definition),
-            }
-            layout[#layout + 1] = {
-                key = "preset_ids_" .. definition.key,
-                type = "description",
-                x = 119,
-                y = y,
-                w = 80,
-                h = 6,
-                label = GetPresetIDsText(definition),
-            }
-            y = y + 10
         end
 
-        layout[#layout + 1] = {
-            key = "desc_preset_note",
-            type = "description",
-            x = 8,
-            y = y,
-            w = 192,
-            h = 8,
-            label = L["若某个自定义 ID 后续进入预设，将自动移除自定义项并以预设为准。"],
-        }
-        y = y + 16
-
-        layout[#layout + 1] = {
-            key = "sub_custom",
-            type = "subheader",
-            x = 8,
-            y = y,
-            w = 192,
-            h = 4,
-            label = L
-                ["自定义自动对话"]
-        }
-        y = y + 8
-
-        local ids = GetSortedCustomOptionIDs()
-        if #ids == 0 then
-            layout[#layout + 1] = {
-                key = "empty_custom",
-                type = "description",
-                x = 8,
-                y = y,
-                w = 192,
-                h = 8,
-                label = L["当前没有自定义自动对话项。点击对话行图标，或在上方手动添加。"],
+        local customRecords = layout.sections[3].records
+        for _, optionID in ipairs(ids) do
+            local entryPath = "customAutoOptions." .. optionID
+            local entry = GetCustomEntry(optionID)
+            local instanceName = entry and GetInstanceNameByID(entry.instanceID)
+            local idLabel = instanceName
+                and string.format("(%d) [%s]", optionID, instanceName)
+                or string.format("(%d)", optionID)
+            customRecords[#customRecords + 1] = {
+                cells = {
+                    {
+                        key = "custom_enabled_" .. optionID,
+                        parentKey = entryPath,
+                        subKey = "enabled",
+                        type = "switch",
+                        label = "",
+                    },
+                    {
+                        key = "custom_name_" .. optionID,
+                        parentKey = entryPath,
+                        subKey = "name",
+                        type = "input",
+                        label = "",
+                    },
+                    { text = idLabel },
+                    {
+                        key = "btn_delete_custom_" .. optionID,
+                        type = "button",
+                        label = L["删除"],
+                    },
+                },
             }
-        else
-            for _, optionID in ipairs(ids) do
-                local entryPath = "customAutoOptions." .. optionID
-                local entry = GetCustomEntry(optionID)
-                local instanceName = entry and GetInstanceNameByID(entry.instanceID)
-                local idLabel = instanceName
-                    and string.format("(%d) [%s]", optionID, instanceName)
-                    or string.format("(%d)", optionID)
-                layout[#layout + 1] = {
-                    key = "custom_enabled_" .. optionID,
-                    parentKey = entryPath,
-                    subKey = "enabled",
-                    type = "checkbox",
-                    x = 8,
-                    y = y,
-                    w = 16,
-                    h = 8,
-                    label = "",
-                }
-                layout[#layout + 1] = {
-                    key = "custom_name_" .. optionID,
-                    parentKey = entryPath,
-                    subKey = "name",
-                    type = "input",
-                    x = 20,
-                    y = y,
-                    w = 88,
-                    h = 8,
-                    label = "",
-                    labelPos = "left",
-                    labelSize = 16,
-                }
-                layout[#layout + 1] = {
-                    key = "custom_id_" .. optionID,
-                    type = "description",
-                    x = 112,
-                    y = y,
-                    w = 64,
-                    h = 8,
-                    label = idLabel,
-                }
-                layout[#layout + 1] = {
-                    key = "btn_delete_custom_" .. optionID,
-                    type = "button",
-                    x = 176,
-                    y = y,
-                    w = 24,
-                    h = 8,
-                    label = L["删除"],
-                }
-                y = y + 12
-            end
         end
 
         ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
@@ -673,6 +657,7 @@ local function UpdateActionButtonTooltip(self)
     GameTooltip:Show()
 end
 
+-- [卡片迁移边界：自定义渲染] 下列按钮注入暴雪 Gossip 行，不是设置页卡片；行归属、前后位置、点击动作与 hook 生命周期禁止修改。
 local function EnsureOptionActionButton(owner)
     if owner.ExwindAutoButton then
         return owner.ExwindAutoButton
@@ -791,6 +776,9 @@ local function UpdateOptionActionButton(self, optionInfo)
     end
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 local function InstallOptionHook()
     if optionHookInstalled or type(_G.GossipOptionButtonMixin) ~= "table" then
         return
@@ -847,6 +835,9 @@ local function TryInstallHooks()
     return AreAllHooksInstalled()
 end
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 local driver = CreateFrame("Frame")
 driver:RegisterEvent("ADDON_LOADED")
 driver:RegisterEvent("PLAYER_LOGIN")

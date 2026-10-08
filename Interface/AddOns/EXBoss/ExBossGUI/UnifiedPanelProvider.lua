@@ -6,10 +6,12 @@ local Shell = ET.UnifiedPanel
 local BossPanel = ExBoss.UI and ExBoss.UI.Panel
 if not BossPanel then return end
 
+-- [卡片/Grid 迁移边界：共享宿主] Provider 只声明 Shell 路由、22:78 宿主比例与 Mount/Relayout/Hide 生命周期；页面卡片不得在此创建。
 -- Boss 页面左侧为副本/首领导航，明确采用 B:C=22:78；其他 Provider 仍用 Shell 默认 25:75。
 local Provider = { id = "boss", hasTopTabs = true, navRatio = 0.22 }
 
 function Provider:GetLayoutMode(route)
+    -- splitRoutes 是可达页面与宿主模式合同，禁止因卡片迁移改名、重排或漏页。
     local tab = type(route) == "table" and route.tab or BossPanel:GetCurrentTab()
     local splitRoutes = {
         boss = true, trash = true, globalsettings = true, tools = true,
@@ -32,6 +34,7 @@ function Provider:Relayout(metrics)
 end
 
 function Provider:ApplyRoute(route)
+    -- 路由 guard 与首次显示刷新用于避免 BossPage 重复 Hide/Render；只允许下游页面内容 reflow，不得改这里的调用顺序。
     local wasShown = BossPanel._frame and BossPanel._frame:IsShown()
     if type(route) == "table" and route.tab and BossPanel:GetCurrentTab() ~= route.tab then
         BossPanel:SetTab(route.tab)

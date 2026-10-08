@@ -201,7 +201,7 @@ function EXUI:SetEditModeVisualLayerShown(host, shown, profile, moduleTitle, tit
     -- sibling Frame，只解决跨 Cooldown/StatusBar 的绘制层级，不拥有鼠标。
     titleHost:SetSize(layer.frame:GetWidth(), titleFontSize + 4)
     titleHost:SetPoint("BOTTOM", layer.frame, "TOP", 0, 2)
-    titleHost:SetFrameStrata("TOOLTIP")
+    titleHost:SetFrameStrata(profile and profile.titleStrata or "TOOLTIP")
     titleHost:SetFrameLevel(1000)
     if visible then
         -- TimerBar 中已在 PTR 可见的简中文字由 EXDB:ApplyFont + LSM 的“默认”字体

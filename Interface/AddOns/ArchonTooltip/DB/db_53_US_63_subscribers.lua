@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'DemonHunter-Havoc','Unknown-Unknown',}
-local provider = {region='US',realm='Dawnbringer',name='US',type='subscribers',zone=53,date='2026-09-29',data={Ha='Hakeo:BAEANQAECgcIEgAAAA==.',Ke='Keit:BAEANQADCgUIBQABNQAECgkJJAABAGYiAA==.',Ro='Rosefist:BAEANQAECgUIBQAAAA==.Rosemourne:BAEANQADCggICAABNQAECgUIBQACAAAAAA==.',},}
+local lookup = {'Warrior-Protection','DemonHunter-Havoc','Unknown-Unknown',}
+local provider = {region='US',realm='Dawnbringer',name='US',type='subscribers',zone=53,date='2026-10-06',data={Ha='Hakeo:BAEBNQAECoEUAAIBAAYKSSNvCwBaAgaODQAABABDAHUNAAADAGMAfw0AAAMAXACpDQAABQBdAFwNAAADAF8AXQ0AAAIAXgABAAYKSSNvCwBaAgaODQAABABDAHUNAAADAGMAfw0AAAMAXACpDQAABQBdAFwNAAADAF8AXQ0AAAIAXgAAAA==.',Ke='Keit:BAEANQADCgUIBQABNQAFFAMIBgACADYcAA==.',Ro='Rosefist:BAEANQAECgUIBgAAAA==.Rosemourne:BAEANQADCggICAABNQAECgUIBgADAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -6,6 +6,7 @@ if not ExwindTools then return end
 local Page = ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.BossPage
 if not Page then return end
 local L = (ExBoss and ExBoss.L) or setmetatable({}, { __index = function(_, k) return k end })
+local GC = ExwindTools.GUIColors
 
 -- 副本通用设置只管理副本级 options 与 AuraSound；不持有 BossPage 的选择状态。
 -- 当前副本/槽位解析仍由 BossPage 主文件通过公开方法提供。
@@ -16,21 +17,32 @@ Common.MODULE_KEY = "ExBoss.BossConfig.DungeonOptions"
 
 local UI = Common._ui or {}
 Common._ui = UI
+-- V2 只排列原有 GUI owner；配置读取、草稿与提交仍由下方原函数负责。
+-- 虚拟列表保持固定视口，不使用 repeat 展开全部 action。
 local LAYOUT = {}
+
+local function ResolvePackPreviewPath(label)
+    local engine = ExBoss and ExBoss.Voice and ExBoss.Voice.Engine
+    if not (engine and engine.ResolveStandaloneSound) then return nil end
+    local info = engine:ResolveStandaloneSound(
+        { enabled = true, sourceType = "pack", label = tostring(label or "") },
+        { triggerIndex = 0, ignoreState = true })
+    return info and info.file or nil
+end
 
 -- 方案 A 的视觉令牌。这里只影响 Frame/Texture/FontString 的表现，AuraSound
 -- 的 action ID、字段结构、SavedVariables 与运行时调用链均保持原样。
 local AURA_UI_THEME = {
-    canvas = { 0.027, 0.043, 0.067, 1.00 },       -- #070b11
-    panel = { 0.067, 0.090, 0.129, 0.98 },        -- #111721
-    panelDeep = { 0.039, 0.059, 0.086, 0.98 },    -- #0a0f16
-    panelHover = { 0.085, 0.110, 0.150, 0.98 },
-    ink = { 0.925, 0.898, 0.820, 1.00 },          -- #ece5d1
-    muted = { 0.612, 0.639, 0.686, 1.00 },        -- #9ca3af
-    line = { 0.847, 0.773, 0.545, 0.18 },
-    lineStrong = { 0.847, 0.773, 0.545, 0.38 },
-    gold = { 0.953, 0.788, 0.424, 1.00 },         -- #f3c96c
-    cyan = { 0.447, 0.847, 1.000, 1.00 },         -- #72d8ff
+    canvas = GC.panel,
+    panel = GC.card,
+    panelDeep = GC.input,
+    panelHover = GC.headerHover,
+    ink = GC.text,
+    muted = GC.textDim,
+    line = GC.headerDivider,
+    lineStrong = GC.panelBorder,
+    gold = GC.accent,
+    cyan = GC.accentHover,
     success = { 0.420, 0.900, 0.650, 1.00 },
     danger = { 0.937, 0.498, 0.490, 1.00 },
 }
@@ -48,36 +60,8 @@ local function SetAuraThemeText(fontString, color)
 end
 
 local function CreateAuraPrototypeButton(parent, width, height, label, callback)
-    local button = CreateFrame("Button", nil, parent, "BackdropTemplate")
-    button:SetSize(width, height)
-    button:SetBackdrop(AURA_FLAT_BACKDROP)
-    button:SetBackdropColor(0.050, 0.064, 0.090, 0.98)
-    button:SetBackdropBorderColor(
-        AURA_UI_THEME.lineStrong[1], AURA_UI_THEME.lineStrong[2],
-        AURA_UI_THEME.lineStrong[3], AURA_UI_THEME.lineStrong[4]
-    )
-    button.text = ExwindTools.UI:CreateVisualFontString(button, EXFONTFRAME, "GameFontNormalSmall")
-    button.text:SetPoint("CENTER", button, "CENTER", 0, 0)
-    button.text:SetText(label or "")
-    SetAuraThemeText(button.text, AURA_UI_THEME.ink)
-    button:SetScript("OnEnter", function(frame)
-        frame:SetBackdropColor(0.090, 0.100, 0.120, 1.00)
-        frame:SetBackdropBorderColor(
-            AURA_UI_THEME.gold[1], AURA_UI_THEME.gold[2], AURA_UI_THEME.gold[3], 0.72
-        )
-        SetAuraThemeText(frame.text, AURA_UI_THEME.gold)
-    end)
-    button:SetScript("OnLeave", function(frame)
-        frame:SetBackdropColor(0.050, 0.064, 0.090, 0.98)
-        frame:SetBackdropBorderColor(
-            AURA_UI_THEME.lineStrong[1], AURA_UI_THEME.lineStrong[2],
-            AURA_UI_THEME.lineStrong[3], AURA_UI_THEME.lineStrong[4]
-        )
-        SetAuraThemeText(frame.text, AURA_UI_THEME.ink)
-    end)
-    button:SetScript("OnClick", callback)
-    function button:SetText(text) self.text:SetText(text or "") end
-    return button
+    return ExwindTools.UI:CreateButton(parent, width, height, label, callback,
+        { variant = "secondary", compact = true })
 end
 
 local function RaiseInteractiveChild(frame, parent, levelOffset)
@@ -433,16 +417,9 @@ local function AuraSoundRowMatchesSearch(row, needle)
     if needle == "" then return true end
     row = GetAuraSoundItemView(row)
     local name = select(1, GetAuraSpellInfo(row))
-    local unit, auraType = GetAuraSoundTarget(row)
     local source = table.concat({
         tostring(name or ""),
         tostring(row.spellID or ""),
-        tostring(Common.GetAuraSoundCategoryLabel(row.category)),
-        tostring(Common.GetAuraSoundUnitLabel(row)),
-        tostring(unit), tostring(auraType),
-        tostring(Common.GetAuraSoundTriggerLabel(row.trigger)),
-        tostring(row.trigger or ""),
-        tostring(Common.GetAuraSoundDisplayName(row)),
     }, " "):lower()
     return source:find(needle, 1, true) ~= nil
 end
@@ -516,90 +493,83 @@ end
 
 -- Action、分类、增减益类型、触发状态与声音使用固定独立列。单位仍只参与
 -- 搜索和运行时匹配，不在紧凑列表中重复显示。
-local function LayoutAuraSoundColumns(frame, parts, rightInset)
+-- [混合函数边界] 这里只可迁移列宽/锚点；action/category/auraType/trigger/voice 列身份与顺序禁止修改。
+local AURA_SOUND_ROW_HEIGHT = 40
+local AURA_SOUND_VISIBLE_ROWS = 12
+local AURA_SOUND_LIST_HEIGHT = AURA_SOUND_ROW_HEIGHT * AURA_SOUND_VISIBLE_ROWS
+
+local function AuraSoundTableColumns(width)
+    local compact = width < 850
+    return {
+        { title = "", width = 28 },
+        { title = L["光环 Action"], weight = 1.5 },
+        { title = L["分类"], width = compact and 68 or 92 },
+        { title = L["增/减益"], width = compact and 52 or 64 },
+        { title = L["状态"], width = compact and 52 or 64 },
+        { title = L["当前声音"], weight = 1 },
+        { title = "", width = 52 },
+        { title = "", width = 52 },
+    }
+end
+
+local function LayoutAuraSoundColumns(frame, parts)
     if not (frame and parts) then return end
-    local inset = tonumber(rightInset) or 8
-    local isWide = (tonumber(frame.GetWidth and frame:GetWidth()) or 0) >= 760
-    local titleWidth = isWide and 218 or 116
-    local categoryWidth = isWide and 108 or 74
-    local auraTypeWidth = isWide and 76 or 54
-    local triggerWidth = isWide and 72 or 54
-    local iconLeft = frame
-    local iconPoint = "LEFT"
-    local iconOffset = 6
-    if parts.check then
-        parts.check:ClearAllPoints()
-        parts.check:SetPoint("LEFT", frame, "LEFT", 4, 0)
-        parts.check:SetWidth(28)
-        iconLeft = parts.check
-        iconPoint = "RIGHT"
-        iconOffset = 3
+    local EXUI = ExwindTools.UI
+    -- Header and virtual rows both reserve the list's 12px scrollbar strip.
+    local width = math.max(1, frame:GetWidth() - (parts == frame and 0 or 12))
+    local columns = AuraSoundTableColumns(width)
+    local rects = EXUI:ResolveSettingsTableColumns(width, columns)
+    local function Place(region, index, inset, right)
+        local rect = rects[index]
+        region:ClearAllPoints()
+        region:SetPoint("LEFT", frame, "LEFT", rect.x + (inset or 4), 0)
+        region:SetWidth(math.max(1, rect.width - (inset or 4) - (right or 4)))
     end
-    parts.icon:ClearAllPoints()
-    parts.icon:SetPoint("LEFT", iconLeft, iconPoint, iconOffset, 0)
-    parts.title:ClearAllPoints()
-    parts.title:SetPoint("LEFT", parts.icon, "RIGHT", 8, 0)
-    parts.title:SetWidth(titleWidth)
+    if parts == frame then
+        EXUI:UpdateSettingsTableRowLayout(frame, width, rects, { { height = 28 } })
+        -- The shared table defaults to 48px; this virtual list owns its row pitch.
+        -- Restore it before centering controls; the divider follows the bottom.
+        frame:SetHeight(AURA_SOUND_ROW_HEIGHT)
+    elseif frame._auraSoundPublicHeader then
+        local header = frame._auraSoundPublicHeader
+        header._exSettingsTableColumns = columns
+        EXUI:UpdateSettingsTableHeaderLayout(header, width)
+        header:ClearAllPoints()
+        header:SetPoint("TOPLEFT", frame, "TOPLEFT")
+    end
+    if parts.check then Place(parts.check, 1, 0, 0) end
+    if parts.icon then
+        local iconHost = parts.iconFrame or parts.icon
+        Place(iconHost, 2, 4, 4)
+        iconHost:SetWidth(28)
+    end
+    Place(parts.title, 2, 38, 4)
     if parts.unit then parts.unit:Hide() end
-    if parts.edit then
-        parts.edit:ClearAllPoints()
-        parts.edit:SetWidth(62)
-        parts.edit:SetPoint("RIGHT", frame, "RIGHT", -inset, 0)
-    end
-    if parts.preview then
-        parts.preview:ClearAllPoints()
-        parts.preview:SetWidth(62)
-        if parts.edit then
-            parts.preview:SetPoint("RIGHT", parts.edit, "LEFT", -8, 0)
-        else
-            parts.preview:SetPoint("RIGHT", frame, "RIGHT", -inset, 0)
-        end
-    end
-    local categoryFrame = parts.categoryPill or parts.category
-    categoryFrame:ClearAllPoints()
-    categoryFrame:SetPoint("LEFT", parts.title, "RIGHT", 14, 0)
-    categoryFrame:SetWidth(categoryWidth)
+    local category = parts.categoryPill or parts.category
+    Place(category, 3)
     if parts.categoryPill then
-        parts.categoryPill:SetHeight(24)
+        category:SetHeight(24)
         parts.category:ClearAllPoints()
-        if parts.categoryDot then
-            parts.categoryDot:ClearAllPoints()
-            parts.categoryDot:SetPoint("LEFT", parts.categoryPill, "LEFT", 8, 0)
-            parts.category:SetPoint("LEFT", parts.categoryDot, "RIGHT", 6, 0)
-            parts.category:SetPoint("RIGHT", parts.categoryPill, "RIGHT", -6, 0)
-        else
-            parts.category:SetPoint("CENTER", parts.categoryPill, "CENTER", 0, 0)
-            parts.category:SetWidth(categoryWidth - 12)
-        end
+        parts.category:SetPoint("LEFT", category, "LEFT", 14, 0)
+        parts.category:SetPoint("RIGHT", category, "RIGHT", -4, 0)
+        parts.categoryDot:ClearAllPoints()
+        parts.categoryDot:SetPoint("LEFT", category, "LEFT", 4, 0)
     end
-    local voiceLeft = categoryFrame
-    if parts.auraType then
-        parts.auraType:ClearAllPoints()
-        parts.auraType:SetPoint("LEFT", categoryFrame, "RIGHT", 12, 0)
-        parts.auraType:SetWidth(auraTypeWidth)
-        parts.auraType:Show()
-        voiceLeft = parts.auraType
-    end
-    if parts.trigger then
-        parts.trigger:ClearAllPoints()
-        parts.trigger:SetPoint("LEFT", voiceLeft, "RIGHT", 10, 0)
-        parts.trigger:SetWidth(triggerWidth)
-        parts.trigger:Show()
-        voiceLeft = parts.trigger
-    end
-    parts.voice:ClearAllPoints()
-    parts.voice:SetPoint("LEFT", voiceLeft, "RIGHT", 12, 0)
-    if parts.preview then
-        parts.voice:SetPoint("RIGHT", parts.preview, "LEFT", -12, 0)
-    elseif parts.edit then
-        parts.voice:SetPoint("RIGHT", parts.edit, "LEFT", -12, 0)
-    else
-        parts.voice:SetPoint("RIGHT", frame, "RIGHT", -inset, 0)
+    Place(parts.auraType, 4)
+    Place(parts.trigger, 5)
+    Place(parts.voice, 6)
+    Place(parts.preview, 7, 0, 0)
+    Place(parts.edit, 8, 0, 0)
+    if parts.add then
+        parts.add:ClearAllPoints()
+        parts.add:SetPoint("LEFT", frame, "LEFT", rects[7].x, 0)
+        parts.add:SetWidth(rects[8].x + rects[8].width - rects[7].x)
     end
 end
 
+-- [自定义内容边界] 整行作为已有 renderer 引用；只可调整行内几何/皮肤，enabled/edit/preview/tooltip 回调与排序刷新禁止修改。
 function Common.CreateAuraSoundVirtualRow(parent)
-    local row = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+    local row = ExwindTools.UI:CreateSettingsTableRow(parent, {})
     row:SetBackdrop(AURA_FLAT_BACKDROP)
     row:SetBackdropColor(
         AURA_UI_THEME.panelDeep[1], AURA_UI_THEME.panelDeep[2],
@@ -607,14 +577,6 @@ function Common.CreateAuraSoundVirtualRow(parent)
     )
     row:SetBackdropBorderColor(0, 0, 0, 0)
     row:EnableMouse(true)
-
-    row.bottomLine = row:CreateTexture(nil, "BORDER")
-    row.bottomLine:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 0, 0)
-    row.bottomLine:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", 0, 0)
-    row.bottomLine:SetHeight(1)
-    row.bottomLine:SetColorTexture(
-        AURA_UI_THEME.line[1], AURA_UI_THEME.line[2], AURA_UI_THEME.line[3], 0.12
-    )
 
     -- 此勾选框只对应 action.enabled 这个既有叶子字段；不会新建 action、
     -- 改写分类或覆盖任何音效设置，保证列表内的快速开关不会丢用户数据。
@@ -639,9 +601,25 @@ function Common.CreateAuraSoundVirtualRow(parent)
     row.check:SetSize(28, 28)
     RaiseInteractiveChild(row.check, row, 3)
 
-    row.icon = ExwindTools.UI:CreateVisualTexture(row, EXBASEFRAME)
-    row.icon:SetSize(32, 32)
-    row.icon:SetPoint("LEFT", row, "LEFT", 6, 0)
+    row.iconFrame = CreateFrame("Frame", nil, row)
+    row.iconFrame:EnableMouse(false)
+    ExwindTools.UI:SetControlSurface(row.iconFrame, 10, GC.input, GC.panelBorder)
+    row.iconFrame:SetSize(28, 28)
+    row.iconFrame:SetPoint("LEFT", row, "LEFT", 6, 0)
+    row.icon = ExwindTools.UI:CreateRoundedImage(row.iconFrame, 9, true)
+    local function LayoutAuraImage()
+        local inset = PixelUtil.GetNearestPixelSize(1, row.iconFrame:GetEffectiveScale(), 1)
+        row.icon:ClearAllPoints()
+        row.icon:SetPoint("TOPLEFT", inset, -inset)
+        row.icon:SetPoint("BOTTOMRIGHT", -inset, inset)
+        row.icon:SetCornerRadius(10 - inset)
+    end
+    row.iconFrame:HookScript("OnSizeChanged", LayoutAuraImage)
+    row.iconFrame:RegisterEvent("UI_SCALE_CHANGED")
+    row.iconFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
+    row.iconFrame:SetScript("OnEvent", LayoutAuraImage)
+    LayoutAuraImage()
+    row.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 
     row.title = ExwindTools.UI:CreateVisualFontString(row, EXFONTFRAME, "GameFontHighlight")
     row.title:SetJustifyH("LEFT")
@@ -665,12 +643,10 @@ function Common.CreateAuraSoundVirtualRow(parent)
     end)
     RaiseInteractiveChild(row.preview, row, 3)
 
-    row.categoryPill = CreateFrame("Frame", nil, row, "BackdropTemplate")
-    row.categoryPill:SetBackdrop(AURA_FLAT_BACKDROP)
-    row.categoryPill:SetBackdropColor(0.070, 0.078, 0.086, 0.94)
-    row.categoryPill:SetBackdropBorderColor(
-        AURA_UI_THEME.line[1], AURA_UI_THEME.line[2], AURA_UI_THEME.line[3], 0.26
-    )
+    row.categoryPill = CreateFrame("Frame", nil, row)
+    ExwindTools.UI:SetControlSurface(row.categoryPill, 10, GC.input, {
+        AURA_UI_THEME.line[1], AURA_UI_THEME.line[2], AURA_UI_THEME.line[3], 0.26,
+    })
     row.categoryDot = row.categoryPill:CreateTexture(nil, "ARTWORK")
     row.categoryDot:SetSize(6, 6)
     row.categoryDot:SetColorTexture(
@@ -700,7 +676,7 @@ function Common.CreateAuraSoundVirtualRow(parent)
     row.voice:SetWordWrap(false)
     SetAuraThemeText(row.voice, AURA_UI_THEME.ink)
 
-    LayoutAuraSoundColumns(row, row, 8)
+    LayoutAuraSoundColumns(row, row)
 
     row:SetScript("OnEnter", function(frame)
         frame:SetBackdropColor(
@@ -754,7 +730,9 @@ function Common.RefreshAuraSoundVirtualRow(row)
         row.categoryDot:SetColorTexture(categoryColor[1], categoryColor[2], categoryColor[3], 1.00)
     end
     if row.categoryPill then
-        row.categoryPill:SetBackdropBorderColor(categoryColor[1], categoryColor[2], categoryColor[3], 0.34)
+        ExwindTools.UI:SetControlSurface(row.categoryPill, 10, GC.input, {
+            categoryColor[1], categoryColor[2], categoryColor[3], 0.34,
+        })
     end
     -- 分类名与前方色块和边框使用同一颜色；保持满不透明度，
     -- 让弹窗背景被压暗时文字仍能清楚辨认。
@@ -808,14 +786,12 @@ function Common.BindAuraSoundVirtualRow(row, item, index, context)
     }
     -- 方案 A 用统一深色行与极轻的交替变化；分类由胶囊承担识别，不再使用
     -- 彩色行首竖条，避免长列表重新变成彩虹表。
-    local backdrop = index % 2 == 0
-        and { 0.039, 0.059, 0.086, 0.98 }
-        or { 0.047, 0.066, 0.092, 0.98 }
+    local backdrop = index % 2 == 0 and GC.subcard or GC.card
     row._auraSoundRowColor = backdrop
     row:SetBackdropColor(backdrop[1], backdrop[2], backdrop[3], backdrop[4])
     -- VirtualList 的可视行在创建时可能还未拿到最终宽度；每次绑定后重算，
     -- 满宽面板才能把新增空间真实分配给名称与声音列。
-    LayoutAuraSoundColumns(row, row, 8)
+    LayoutAuraSoundColumns(row, row)
     local name, icon = GetAuraSpellInfo(row._auraSoundBinding.item)
     row.icon:SetTexture(icon)
     -- 不使用 ↳ 之类的 Unicode 前缀：WoW 当前字体会把它渲染成方框，且会
@@ -824,6 +800,7 @@ function Common.BindAuraSoundVirtualRow(row, item, index, context)
     Common.RefreshAuraSoundVirtualRow(row)
 end
 
+-- [虚拟列表边界] VirtualList/可视行池拥有行创建、绑定与回收；Grid/卡片只拥有固定视口 host，不得展开全量数据或重复释放行。
 function Common.EnsureAuraSoundVirtualList(host)
     if not host then return nil end
     -- 列表、可视行和行内下拉属于通用页，而不是会被不同 custom renderer
@@ -833,14 +810,14 @@ function Common.EnsureAuraSoundVirtualList(host)
         local VirtualList = _G.ExwindVirtualList
         if not (VirtualList and VirtualList.Create) then return nil end
         list = VirtualList:Create(host, {
-            rowHeight = 42,
+            rowHeight = AURA_SOUND_ROW_HEIGHT,
             overscan = 0,
-            maxRows = 12,
+            maxRows = AURA_SOUND_VISIBLE_ROWS,
             createRow = function(parent) return Common.CreateAuraSoundVirtualRow(parent) end,
             bindRow = function(row, entry, index, context) Common.BindAuraSoundVirtualRow(row, entry, index, context) end,
         })
         list:Hide()
-        -- VirtualList 为了滚动会额外创建一行预读项；本页必须裁在 BUFF 卡片内。
+        -- 固定十二行视口，子控件裁切在列表内。
         if list.SetClipsChildren then
             list:SetClipsChildren(true)
         end
@@ -853,6 +830,7 @@ function Common.EnsureAuraSoundVirtualList(host)
     return list
 end
 
+-- mount/update/release 是同一自定义内容生命周期，必须成对保留。
 function Common.MountAuraSoundVirtualList(host, context)
     local list = Common.EnsureAuraSoundVirtualList(host)
     if not list then return end
@@ -921,6 +899,7 @@ function Common.UpdateAuraSoundVirtualList(host, context)
         slotKey = slotKey,
         revision = view and view.revision,
     })
+    if host._auraV2Context then Common.GuardAuraComponent(host, "list", host._auraV2Context) end
     list._dungeonAuraSoundDungeonKey = dungeonKey
     if restore and restore.dungeonKey == dungeonKey then
         list:SetOffset(restore.offset)
@@ -937,6 +916,7 @@ function Common.UpdateAuraSoundVirtualList(host, context)
     list:Show()
 end
 
+-- release 只清本 renderer 的绑定/可视行；外层 Grid host 由 Common:Hide 归还，二者不能互相重复释放。
 function Common.ReleaseAuraSoundVirtualList(host)
     local list = UI.auraSoundVirtualList
     if list and list.ReleaseData then
@@ -1034,84 +1014,45 @@ end
 
 function Common.EnsureAuraSoundHeaderRenderer()
     if Common._auraSoundHeaderRendererRegistered then return end
-    local Grid = _G.ExwindGrid
-    if not (Grid and Grid.RegisterCustomRenderer) then return end
+    local Grid, EXUI = _G.ExwindGrid, ExwindTools.UI
     Grid:RegisterCustomRenderer("exboss_dungeon_aura_sound_header", {
         mount = function(host)
             if not host._auraSoundHeader then
-                host._auraSoundHeaderBackground = host:CreateTexture(nil, "BACKGROUND")
-                host._auraSoundHeaderBackground:SetAllPoints(host)
-                host._auraSoundHeaderBackground:SetColorTexture(
-                    AURA_UI_THEME.panelDeep[1], AURA_UI_THEME.panelDeep[2],
-                    AURA_UI_THEME.panelDeep[3], AURA_UI_THEME.panelDeep[4]
-                )
-                host._auraSoundHeaderLine = host:CreateTexture(nil, "BORDER")
-                host._auraSoundHeaderLine:SetPoint("BOTTOMLEFT", host, "BOTTOMLEFT", 0, 0)
-                host._auraSoundHeaderLine:SetPoint("BOTTOMRIGHT", host, "BOTTOMRIGHT", 0, 0)
-                host._auraSoundHeaderLine:SetHeight(1)
-                host._auraSoundHeaderLine:SetColorTexture(
-                    AURA_UI_THEME.line[1], AURA_UI_THEME.line[2], AURA_UI_THEME.line[3], 0.24
-                )
-                local function CreateHeaderText()
-                    local fs = ExwindTools.UI:CreateVisualFontString(host, EXFONTFRAME, "GameFontHighlight")
-                    fs:SetJustifyH("LEFT")
-                    fs:SetWordWrap(false)
-                    SetAuraThemeText(fs, AURA_UI_THEME.muted)
-                    return fs
-                end
+                local header = EXUI:CreateSettingsTableHeader(host, { columns = AuraSoundTableColumns(host:GetWidth()) })
+                host._auraSoundPublicHeader = header
+                local labels = header._exSettingsTableLabels
                 host._auraSoundHeader = {
-                    check = ExwindTools.UI:CreateCheckbox(host, "", false, function(checked)
+                    check = EXUI:CreateCheckbox(host, "", false, function(checked)
                         Common:SetVisibleAuraSoundActionsEnabled(checked)
                     end),
-                    icon = CreateHeaderText(),
-                    title = CreateHeaderText(),
-                    unit = CreateHeaderText(),
-                    category = CreateHeaderText(),
-                    auraType = CreateHeaderText(),
-                    trigger = CreateHeaderText(),
-                    voice = CreateHeaderText(),
-                    preview = CreateHeaderText(),
-                    edit = CreateHeaderText(),
+                    title = labels[2], category = labels[3], auraType = labels[4],
+                    trigger = labels[5], voice = labels[6], preview = labels[7], edit = labels[8],
+                    add = EXUI:CreateButton(host, 116, 28, L["+ 添加声音"], function()
+                        Common:AddAuraSound()
+                    end, { variant = "primary", compact = true }),
                 }
-                -- 行内图标列只有 30px，“图标”两个字会被字体截成 ...；留空
-                -- 占位即可，后续列仍严格与真实行图标右缘对齐。
-                host._auraSoundHeader.icon:SetText("")
-                host._auraSoundHeader.icon:SetWidth(30)
+                for _, label in ipairs(labels) do label:SetJustifyH("LEFT") end
                 host._auraSoundHeader.check:SetSize(28, 28)
                 RaiseInteractiveChild(host._auraSoundHeader.check, host, 3)
-                host._auraSoundHeader.title:SetText(L["光环 Action"])
-                host._auraSoundHeader.unit:SetText("")
-                host._auraSoundHeader.category:SetText(L["分类"])
-                host._auraSoundHeader.auraType:SetText(L["增/减益"])
-                host._auraSoundHeader.trigger:SetText(L["状态"])
-                host._auraSoundHeader.voice:SetText(L["当前声音"])
-                host._auraSoundHeader.preview:SetText(L["试听"])
-                host._auraSoundHeader.edit:SetText(L["编辑"])
+                RaiseInteractiveChild(host._auraSoundHeader.add, host, 3)
             end
             UI.auraSoundHeader = host._auraSoundHeader
+            host._auraSoundPublicHeader:Show()
+            host._auraSoundHeader.check:Show()
+            host._auraSoundHeader.add:Show()
             Common:RefreshAuraSoundHeaderSelection()
-            LayoutAuraSoundColumns(host, host._auraSoundHeader, 30)
-            host._auraSoundHeaderBackground:Show()
-            host._auraSoundHeaderLine:Show()
-            for _, fs in pairs(host._auraSoundHeader) do fs:Show() end
+            LayoutAuraSoundColumns(host, host._auraSoundHeader)
         end,
         update = function(host)
-            if host._auraSoundHeader then
-                UI.auraSoundHeader = host._auraSoundHeader
-                Common:RefreshAuraSoundHeaderSelection()
-                LayoutAuraSoundColumns(host, host._auraSoundHeader, 30)
-                host._auraSoundHeaderBackground:Show()
-                host._auraSoundHeaderLine:Show()
-                for _, fs in pairs(host._auraSoundHeader) do fs:Show() end
-            end
+            UI.auraSoundHeader = host._auraSoundHeader
+            Common:RefreshAuraSoundHeaderSelection()
+            LayoutAuraSoundColumns(host, host._auraSoundHeader)
         end,
         release = function(host)
-            if host._auraSoundHeader then
-                if UI.auraSoundHeader == host._auraSoundHeader then UI.auraSoundHeader = nil end
-                host._auraSoundHeaderBackground:Hide()
-                host._auraSoundHeaderLine:Hide()
-                for _, fs in pairs(host._auraSoundHeader) do fs:Hide() end
-            end
+            if UI.auraSoundHeader == host._auraSoundHeader then UI.auraSoundHeader = nil end
+            host._auraSoundPublicHeader:Hide()
+            host._auraSoundHeader.check:Hide()
+            host._auraSoundHeader.add:Hide()
         end,
     })
     Common._auraSoundHeaderRendererRegistered = true
@@ -1228,38 +1169,7 @@ end
 
 local function RefreshAuraSoundCategoryCardStyle(card)
     if not card then return end
-    local color = card._auraSoundCategoryColor or AURA_UI_THEME.gold
-    local selected = card._auraSoundCategorySelected == true
-    local hovered = card._auraSoundCategoryHovered == true
-    local strength = selected and 0.105 or hovered and 0.070 or 0.035
-    card:SetBackdropColor(
-        AURA_UI_THEME.panel[1] + color[1] * strength,
-        AURA_UI_THEME.panel[2] + color[2] * strength,
-        AURA_UI_THEME.panel[3] + color[3] * strength,
-        0.98
-    )
-    local borderAlpha = selected and 0.88 or hovered and 0.58 or 0.30
-    card:SetBackdropBorderColor(color[1], color[2], color[3], borderAlpha)
-    if card.iconTile then
-        card.iconTile:SetBackdropBorderColor(color[1], color[2], color[3], selected and 0.76 or 0.36)
-    end
-    if card.footer then
-        card.footer:SetColorTexture(AURA_UI_THEME.panelDeep[1], AURA_UI_THEME.panelDeep[2], AURA_UI_THEME.panelDeep[3], 0.72)
-    end
-    if card.footerLine then
-        card.footerLine:SetColorTexture(
-            AURA_UI_THEME.line[1], AURA_UI_THEME.line[2], AURA_UI_THEME.line[3], selected and 0.34 or 0.18
-        )
-    end
-    SetAuraThemeText(card.title, AURA_UI_THEME.ink)
-    if card.filterState then
-        card.filterState:SetTextColor(
-            selected and color[1] or AURA_UI_THEME.muted[1],
-            selected and color[2] or AURA_UI_THEME.muted[2],
-            selected and color[3] or AURA_UI_THEME.muted[3],
-            1
-        )
-    end
+    SetAuraThemeText(card.title, card._auraSoundCategorySelected and GC.accent or GC.text)
 end
 
 function Common.RefreshAuraSoundCategoryCardLSMFields(card)
@@ -1358,17 +1268,11 @@ function Common.RefreshAuraSoundCategoryCard(host)
     local categoryKey = host and host._auraSoundCategoryKey
     local meta = AURA_CATEGORY_SHORTCUTS_BY_KEY[categoryKey]
     if not (card and meta) then return end
-    local count, soundSummary = Common.GetAuraSoundCategorySummary(UI.dungeonKey, UI.slotKey, categoryKey)
+    local _, soundSummary = Common.GetAuraSoundCategorySummary(UI.dungeonKey, UI.slotKey, categoryKey)
     local color = meta.color
-    card.accent:SetColorTexture(color[1], color[2], color[3], 0.95)
-    card.iconTile:SetBackdropColor(color[1] * 0.20, color[2] * 0.20, color[3] * 0.20, 0.98)
-    card.icon:SetTexture(meta.icon or 134400)
     card.title:SetText(meta.label)
-    card.count:SetText(string.format(L["%d 个 action"], count))
-    card.count:SetTextColor(color[1], color[2], color[3], 1)
     card.hint:SetText(meta.hint or "")
     card._auraSoundCategorySelected = NormalizeAuraSoundCategoryFilter(UI.auraSoundCategoryFilter) == categoryKey
-    card.filterState:SetText(card._auraSoundCategorySelected and L["● 当前筛选"] or L["点击筛选"])
     card.summary:SetText(soundSummary)
     SetAuraThemeText(card.summary, AURA_UI_THEME.ink)
     card.categoryKey = categoryKey
@@ -1392,166 +1296,15 @@ function Common:RefreshAuraSoundCategoryCardSelection()
         local categoryKey = host and host._auraSoundCategoryKey
         if card and categoryKey then
             card._auraSoundCategorySelected = NormalizeAuraSoundCategoryFilter(UI.auraSoundCategoryFilter) == categoryKey
-            card.filterState:SetText(card._auraSoundCategorySelected and L["● 当前筛选"] or L["点击筛选"])
             RefreshAuraSoundCategoryCardStyle(card)
         end
     end
 end
 
-local AURA_CATEGORY_FILTER_FALLBACK_COLORS = {
-    { 0.48, 0.84, 1.00 }, { 0.52, 0.90, 0.66 }, { 1.00, 0.70, 0.34 },
-    { 0.72, 0.56, 1.00 }, { 1.00, 0.48, 0.62 }, { 0.50, 0.78, 0.86 },
-}
-
-local function GetAuraSoundCategoryFilterColor(categoryKey)
-    if categoryKey == AURA_CATEGORY_FILTER_OTHER then return { 0.52, 0.62, 0.76 } end
-    local shortcut = AURA_CATEGORY_SHORTCUTS_BY_KEY[categoryKey]
-    if shortcut and shortcut.color then return shortcut.color end
-    local sum = 0
-    for index = 1, #tostring(categoryKey or "") do
-        sum = sum + (string.byte(tostring(categoryKey), index) or 0)
-    end
-    return AURA_CATEGORY_FILTER_FALLBACK_COLORS[(sum % #AURA_CATEGORY_FILTER_FALLBACK_COLORS) + 1]
-end
-
-local function RefreshAuraSoundCategoryFilterCardStyle(card)
-    if not card then return end
-    local selected = card._auraSoundCategorySelected == true
-    local hovered = card._auraSoundCategoryHovered == true
-    if selected then
-        card:SetBackdropColor(0.239, 0.176, 0.078, 0.98)
-        card:SetBackdropBorderColor(0.718, 0.529, 0.239, 0.92)
-        SetAuraThemeText(card.name, AURA_UI_THEME.gold)
-    else
-        card:SetBackdropColor(
-            AURA_UI_THEME.panel[1], AURA_UI_THEME.panel[2], AURA_UI_THEME.panel[3], 0.98
-        )
-        card:SetBackdropBorderColor(
-            hovered and AURA_UI_THEME.gold[1] or 0.220,
-            hovered and AURA_UI_THEME.gold[2] or 0.267,
-            hovered and AURA_UI_THEME.gold[3] or 0.329,
-            hovered and 0.56 or 0.86
-        )
-        -- 分类是主要筛选入口，未选中时也必须保持可读；此前的 muted 灰色
-        -- 在深色面板上会被误认为半透明文字。
-        SetAuraThemeText(card.name, AURA_UI_THEME.ink)
-    end
-    card.name:SetAlpha(1.00)
-    if card.state then
-        card.state:Hide()
-    end
-end
-
-local function CreateAuraSoundCategoryFilterCard(parent)
-    local card = CreateFrame("Button", nil, parent, "BackdropTemplate")
-    card:SetSize(96, 38)
-    card:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        edgeSize = 1,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 },
-    })
-    card:EnableMouse(true)
-    card.accent = card:CreateTexture(nil, "ARTWORK")
-    card.accent:SetSize(6, 6)
-    card.accent:SetPoint("LEFT", card, "LEFT", 9, 0)
-    card.accent:Hide()
-    card.name = ExwindTools.UI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalSmall")
-    card.name:SetPoint("LEFT", card, "LEFT", 9, 0)
-    card.name:SetPoint("RIGHT", card, "RIGHT", -9, 0)
-    card.name:SetJustifyH("CENTER")
-    card.name:SetWordWrap(false)
-    card.count = ExwindTools.UI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalSmall")
-    card.count:Hide()
-    card.state = ExwindTools.UI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalSmall")
-    card.state:SetPoint("TOPRIGHT", card, "TOPRIGHT", -7, -7)
-    card.state:SetText("●")
-    card.state:Hide()
-    card:SetScript("OnEnter", function(frame)
-        frame._auraSoundCategoryHovered = true
-        RefreshAuraSoundCategoryFilterCardStyle(frame)
-    end)
-    card:SetScript("OnLeave", function(frame)
-        frame._auraSoundCategoryHovered = nil
-        RefreshAuraSoundCategoryFilterCardStyle(frame)
-    end)
-    card:SetScript("OnClick", function(frame)
-        Common.SetAuraSoundCategoryFilter(frame._auraSoundCategoryKey or "")
-    end)
-    return card
-end
-
-local function BindAuraSoundCategoryFilterCard(card, item)
-    if not (card and item) then return end
-    local categoryKey = NormalizeAuraSoundCategoryFilter(item[2])
-    local color = GetAuraSoundCategoryFilterColor(categoryKey)
-    card._auraSoundCategoryKey = categoryKey
-    card._auraSoundCategoryColor = color
-    card._auraSoundCategorySelected = NormalizeAuraSoundCategoryFilter(UI.auraSoundCategoryFilter) == categoryKey
-    card.accent:SetColorTexture(color[1], color[2], color[3], 0.96)
-    local count = math.max(0, tonumber(item[3]) or 0)
-    card.name:SetText(string.format("%s(%d)", tostring(item[1] or L["未分类"]), count))
-    card.count:SetText(string.format(L["%d 个 action"], count))
-    RefreshAuraSoundCategoryFilterCardStyle(card)
-    card:Show()
-end
-
-local function RefreshAuraSoundCategoryFilterMeta(panel)
-    if not (panel and panel.meta) then return end
-    local categoryKey = NormalizeAuraSoundCategoryFilter(UI.auraSoundCategoryFilter)
-    local label
-    if categoryKey == "" then
-        label = L["全部分类"]
-    elseif categoryKey == AURA_CATEGORY_FILTER_OTHER then
-        label = L["其他分类"]
-    else
-        label = Common.GetAuraSoundCategoryLabel(categoryKey)
-    end
-    panel.title:SetText(label)
-    panel.meta:SetText("")
-end
-
 function Common:RefreshAuraSoundCategoryFilterSelection()
     local panel = UI.auraSoundCategoryFilterControl
-    if not panel then return end
-    local categoryKey = NormalizeAuraSoundCategoryFilter(UI.auraSoundCategoryFilter)
-    for _, card in ipairs(panel.cards or {}) do
-        if card and card:IsShown() then
-            card._auraSoundCategorySelected = NormalizeAuraSoundCategoryFilter(card._auraSoundCategoryKey) == categoryKey
-            RefreshAuraSoundCategoryFilterCardStyle(card)
-        end
-    end
-    RefreshAuraSoundCategoryFilterMeta(panel)
-end
-
-local function LayoutAuraSoundCategoryFilterCards(panel)
-    if not panel then return end
-    local itemCount = math.min(#(panel.items or {}), AURA_CATEGORY_FILTER_MAX_CARDS)
-    if itemCount <= 0 then return end
-    local gap, minWidth = 7, 84
-    local leftInset = 18
-    local availableWidth = math.max(1, (tonumber(panel:GetWidth()) or 1) - leftInset * 2)
-    local fittingColumns = math.max(1, math.floor((availableWidth + gap) / (minWidth + gap)))
-    -- 最多两行：窄窗口优先缩窄卡片，而不是再制造第三行或分页箭头。
-    local minimumColumns = math.ceil(itemCount / 2)
-    local columns = math.min(itemCount, math.max(minimumColumns, fittingColumns))
-    local rows = math.ceil(itemCount / columns)
-    local verticalGap = rows > 1 and 5 or gap
-    local headerHeight = rows > 1 and 40 or 42
-    local cardHeight = rows > 1 and 22 or 27
-    local cardWidth = math.floor((availableWidth - (columns - 1) * gap) / columns)
-    local contentHeight = rows * cardHeight + (rows - 1) * verticalGap
-    local availableHeight = math.max(contentHeight, (tonumber(panel:GetHeight()) or contentHeight) - headerHeight - 7)
-    local topInset = headerHeight + math.max(0, math.floor((availableHeight - contentHeight) * 0.5))
-    for slot, card in ipairs(panel.cards or {}) do
-        if slot <= itemCount then
-            local index = slot - 1
-            local column = index % columns
-            local row = math.floor(index / columns)
-            card:ClearAllPoints()
-            card:SetPoint("TOPLEFT", panel, "TOPLEFT", leftInset + column * (cardWidth + gap), -(topInset + row * (cardHeight + verticalGap)))
-            card:SetSize(cardWidth, cardHeight)
-        end
+    if panel and panel.choice then
+        panel.choice:SetValue(NormalizeAuraSoundCategoryFilter(UI.auraSoundCategoryFilter))
     end
 end
 
@@ -1559,18 +1312,16 @@ function Common.RefreshAuraSoundCategoryFilterControl(focusSelection)
     local panel = UI.auraSoundCategoryFilterControl
     if not panel then return end
     local items = GetAuraSoundCategoryFilterItems(UI.dungeonKey, UI.slotKey)
-    panel.items = items
-    LayoutAuraSoundCategoryFilterCards(panel)
-    for slot = 1, AURA_CATEGORY_FILTER_MAX_CARDS do
-        local card = panel.cards[slot]
-        local item = items[slot]
-        if item then
-            BindAuraSoundCategoryFilterCard(card, item)
-        else
-            card:Hide()
-        end
+    local options = {}
+    for _, item in ipairs(items) do
+        options[#options + 1] = {
+            id = NormalizeAuraSoundCategoryFilter(item[2]),
+            label = string.format("%s(%d)", tostring(item[1]), math.max(0, tonumber(item[3]) or 0)),
+        }
     end
-    RefreshAuraSoundCategoryFilterMeta(panel)
+    panel.choice:SetItems(options)
+    Common:RefreshAuraSoundCategoryFilterSelection()
+    if panel:GetParent()._auraV2Context then panel:GetParent()._auraV2Context:Invalidate() end
 end
 
 function Common.SetAuraSoundCategoryFilter(categoryKey)
@@ -1583,134 +1334,46 @@ function Common.SetAuraSoundCategoryFilter(categoryKey)
     Common:RefreshAuraSoundFilteredList()
 end
 
+-- [自定义卡边界] 分类卡 renderer 可换外观/几何，但筛选身份、LSM 提交/试听与 mount/update/release 归属禁止修改。
 function Common.EnsureAuraSoundCategoryCardRenderer()
     if Common._auraSoundCategoryCardRendererRegistered then return end
-    local Grid = _G.ExwindGrid
-    if not (Grid and Grid.RegisterCustomRenderer) then return end
+    local Grid, EXUI = _G.ExwindGrid, ExwindTools.UI
     Grid:RegisterCustomRenderer("exboss_dungeon_aura_sound_category_card", {
         mount = function(host, context)
             if not host._auraSoundCategoryCard then
-                local card = CreateFrame("Frame", nil, host, "BackdropTemplate")
+                local card = CreateFrame("Frame", nil, host)
                 card:SetAllPoints(host)
-                card:SetBackdrop({
-                    bgFile = "Interface\\Buttons\\WHITE8X8",
-                    edgeFile = "Interface\\Buttons\\WHITE8X8",
-                    edgeSize = 1,
-                    insets = { left = 1, right = 1, top = 1, bottom = 1 },
-                })
                 card:EnableMouse(true)
-                card.accent = card:CreateTexture(nil, "ARTWORK")
-                card.accent:SetPoint("TOPLEFT", card, "TOPLEFT", 0, 0)
-                card.accent:SetPoint("TOPRIGHT", card, "TOPRIGHT", 0, 0)
-                card.accent:SetHeight(3)
-                card.iconTile = CreateFrame("Frame", nil, card, "BackdropTemplate")
-                card.iconTile:SetSize(44, 44)
-                card.iconTile:SetPoint("TOPLEFT", card, "TOPLEFT", 16, -16)
-                card.iconTile:SetBackdrop(AURA_FLAT_BACKDROP)
-                card.icon = ExwindTools.UI:CreateVisualTexture(card.iconTile, EXBASEFRAME)
-                card.icon:SetSize(32, 32)
-                card.icon:SetPoint("CENTER", card.iconTile, "CENTER", 0, 0)
-                card.title = ExwindTools.UI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalLarge")
-                card.title:SetPoint("TOPLEFT", card.iconTile, "TOPRIGHT", 11, -1)
-                card.title:SetPoint("TOPRIGHT", card, "TOPRIGHT", -16, -17)
-                card.title:SetJustifyH("LEFT")
-                card.title:SetWordWrap(false)
-                SetAuraThemeText(card.title, AURA_UI_THEME.ink)
-                card.count = ExwindTools.UI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalSmall")
-                card.count:SetPoint("TOPLEFT", card.title, "BOTTOMLEFT", 0, -4)
-                card.count:SetWidth(82)
-                card.count:SetJustifyH("LEFT")
-                card.count:Hide()
-                card.hint = ExwindTools.UI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalSmall")
-                card.hint:SetPoint("TOPLEFT", card.title, "BOTTOMLEFT", 0, -6)
-                card.hint:SetPoint("TOPRIGHT", card, "TOPRIGHT", -16, -41)
+                card.title = EXUI:CreateVisualFontString(card, EXFONTFRAME, "GameFontHighlight")
+                card.hint = EXUI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalSmall")
+                local hintFont, _, hintFlags = card.hint:GetFont()
+                card.hint:SetFont(hintFont, 11, hintFlags)
                 card.hint:SetJustifyH("LEFT")
-                card.hint:SetWordWrap(false)
-                SetAuraThemeText(card.hint, AURA_UI_THEME.muted)
-                card.filterState = ExwindTools.UI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalSmall")
-                card.filterState:SetPoint("TOPRIGHT", card, "TOPRIGHT", -14, -73)
-                card.filterState:SetWidth(98)
-                card.filterState:SetJustifyH("RIGHT")
-                card.filterState:SetWordWrap(false)
-                SetAuraThemeText(card.filterState, AURA_UI_THEME.muted)
-                card.filterState:Hide()
-                -- 保留不可见的反馈 FontString 给既有试听/保存错误路径使用；
-                -- 主卡不再显示任何声音摘要或额外状态文本。
-                card.summary = ExwindTools.UI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalSmall")
-                card.summary:SetPoint("TOPLEFT", card, "TOPLEFT", 0, 0)
+                card.hint:SetWordWrap(true)
+                SetAuraThemeText(card.hint, GC.textDim)
+                card.summary = EXUI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalSmall")
                 card.summary:Hide()
-                card.footer = card:CreateTexture(nil, "BACKGROUND")
-                card.footer:SetPoint("BOTTOMLEFT", card, "BOTTOMLEFT", 4, 4)
-                card.footer:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT", -4, 4)
-                card.footer:SetHeight(54)
-                card.footer:SetColorTexture(
-                    AURA_UI_THEME.panelDeep[1], AURA_UI_THEME.panelDeep[2], AURA_UI_THEME.panelDeep[3], 0.72
-                )
-                card.footerLine = card:CreateTexture(nil, "BORDER")
-                card.footerLine:SetPoint("TOPLEFT", card.footer, "TOPLEFT", 0, 0)
-                card.footerLine:SetPoint("TOPRIGHT", card.footer, "TOPRIGHT", 0, 0)
-                card.footerLine:SetHeight(1)
-                card.footerLine:SetColorTexture(
-                    AURA_UI_THEME.line[1], AURA_UI_THEME.line[2], AURA_UI_THEME.line[3], 0.18
-                )
-                card.lsmLabel = ExwindTools.UI:CreateVisualFontString(card, EXFONTFRAME, "GameFontNormalSmall")
-                card.lsmLabel:SetPoint("BOTTOMLEFT", card, "BOTTOMLEFT", 14, 39)
-                card.lsmLabel:SetText(L["LSM 音效"])
-                SetAuraThemeText(card.lsmLabel, AURA_UI_THEME.muted)
-                card.lsm = ExwindTools.UI:CreateLSMSoundDropdown(card, 190, "", "", function(value)
+                card.lsm = EXUI:CreateLSMSoundDropdown(card, 240, "", "", function(value)
                     Common.CommitAuraSoundCategoryCardLSM(card, value)
                 end, true)
-                card.lsm:SetPoint("BOTTOMLEFT", card, "BOTTOMLEFT", 14, 10)
-                card.preview = CreateAuraPrototypeButton(card, 70, 24, L["试听"], function()
-                    Common.PreviewAuraSoundCategoryCardLSM(card)
+                card:SetScript("OnMouseUp", function(_, button)
+                    if button == "LeftButton" and card.categoryKey then
+                        Common.SetAuraSoundCategoryFilter(card.categoryKey)
+                    end
                 end)
-                card.preview:SetPoint("LEFT", card.lsm, "RIGHT", 6, 0)
-                local function IgnoreCardClick(button)
-                    local owner = button and button:GetParent()
-                    if owner then owner._auraSoundCategoryIgnoreClick = true end
-                end
-                card.lsm:HookScript("OnMouseDown", IgnoreCardClick)
-                card.preview:HookScript("OnMouseDown", IgnoreCardClick)
                 RaiseInteractiveChild(card.lsm, card, 3)
-                RaiseInteractiveChild(card.preview, card, 4)
-                card:SetScript("OnEnter", function(frame)
-                    frame._auraSoundCategoryHovered = true
-                    RefreshAuraSoundCategoryCardStyle(frame)
-                end)
-                card:SetScript("OnLeave", function(frame)
-                    frame._auraSoundCategoryHovered = nil
-                    RefreshAuraSoundCategoryCardStyle(frame)
-                end)
-                card:SetScript("OnMouseUp", function(frame, button)
-                    if frame._auraSoundCategoryIgnoreClick then
-                        frame._auraSoundCategoryIgnoreClick = nil
-                        return
-                    end
-                    if button == "LeftButton" and frame.categoryKey then
-                        Common.SetAuraSoundCategoryFilter(frame.categoryKey)
-                    end
-                end)
                 host._auraSoundCategoryCard = card
             end
-            local element = context and context.element or {}
-            host._auraSoundCategoryKey = element.categoryKey
-            UI.auraSoundCategoryCardHosts = UI.auraSoundCategoryCardHosts or {}
-            UI.auraSoundCategoryCardHosts[element.categoryKey] = host
-            Common.RefreshAuraSoundCategoryCard(host)
-        end,
-        update = function(host, context)
-            local element = context and context.element or {}
-            if element.categoryKey then host._auraSoundCategoryKey = element.categoryKey end
+            host._auraSoundCategoryKey = context.element.categoryKey
             UI.auraSoundCategoryCardHosts = UI.auraSoundCategoryCardHosts or {}
             UI.auraSoundCategoryCardHosts[host._auraSoundCategoryKey] = host
             Common.RefreshAuraSoundCategoryCard(host)
         end,
+        update = function(host) Common.RefreshAuraSoundCategoryCard(host) end,
         release = function(host)
-            local categoryKey = host and host._auraSoundCategoryKey
-            if UI.auraSoundCategoryCardHosts and UI.auraSoundCategoryCardHosts[categoryKey] == host then
-                UI.auraSoundCategoryCardHosts[categoryKey] = nil
-            end
-            if host and host._auraSoundCategoryCard then host._auraSoundCategoryCard:Hide() end
+            if UI.auraSoundCategoryCardHosts then UI.auraSoundCategoryCardHosts[host._auraSoundCategoryKey] = nil end
+            if host._auraSoundCategoryCard.lsm.CloseMenu then host._auraSoundCategoryCard.lsm:CloseMenu() end
+            host._auraSoundCategoryCard:Hide()
         end,
     })
     Common._auraSoundCategoryCardRendererRegistered = true
@@ -1718,81 +1381,26 @@ end
 
 function Common.EnsureAuraSoundCategoryFilterRenderer()
     if Common._auraSoundCategoryFilterRendererRegistered then return end
-    local Grid = _G.ExwindGrid
-    if not (Grid and Grid.RegisterCustomRenderer) then return end
+    local Grid, EXUI = _G.ExwindGrid, ExwindTools.UI
     Grid:RegisterCustomRenderer("exboss_dungeon_aura_sound_category_filter_cards", {
         mount = function(host)
             if not host._auraSoundCategoryFilter then
-                local panel = CreateFrame("Frame", nil, host, "BackdropTemplate")
+                local panel = CreateFrame("Frame", nil, host)
                 panel:SetAllPoints(host)
-                panel:SetBackdrop({
-                    bgFile = "Interface\\Buttons\\WHITE8X8",
-                    edgeFile = "Interface\\Buttons\\WHITE8X8",
-                    edgeSize = 1,
-                    insets = { left = 1, right = 1, top = 1, bottom = 1 },
-                })
-                panel:SetBackdropColor(
-                    AURA_UI_THEME.panelDeep[1], AURA_UI_THEME.panelDeep[2],
-                    AURA_UI_THEME.panelDeep[3], 0.96
-                )
-                panel:SetBackdropBorderColor(
-                    AURA_UI_THEME.line[1], AURA_UI_THEME.line[2], AURA_UI_THEME.line[3], 0.18
-                )
-                panel.titleRail = panel:CreateTexture(nil, "ARTWORK")
-                panel.titleRail:SetPoint("TOPLEFT", panel, "TOPLEFT", 0, 0)
-                panel.titleRail:SetPoint("TOPRIGHT", panel, "TOPRIGHT", 0, 0)
-                panel.titleRail:SetHeight(2)
-                panel.titleRail:SetColorTexture(
-                    AURA_UI_THEME.gold[1], AURA_UI_THEME.gold[2], AURA_UI_THEME.gold[3], 0.52
-                )
-                panel.title = ExwindTools.UI:CreateVisualFontString(panel, EXFONTFRAME, "GameFontNormalLarge")
-                panel.title:SetPoint("TOPLEFT", panel, "TOPLEFT", 18, -15)
-                panel.title:SetText(L["全部分类"])
-                SetAuraThemeText(panel.title, AURA_UI_THEME.ink)
-                panel.result = ExwindTools.UI:CreateVisualFontString(panel, EXFONTFRAME, "GameFontNormalSmall")
-                panel.result:SetPoint("TOPLEFT", panel.title, "BOTTOMLEFT", 0, -2)
-                panel.result:SetText(L["显示全部动作"])
-                SetAuraThemeText(panel.result, AURA_UI_THEME.muted)
-                panel.result:Hide()
-                panel.meta = ExwindTools.UI:CreateVisualFontString(panel, EXFONTFRAME, "GameFontNormalSmall")
-                panel.meta:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -18, -13)
-                SetAuraThemeText(panel.meta, AURA_UI_THEME.muted)
-                panel.meta:Hide()
-                panel.headerLine = panel:CreateTexture(nil, "BORDER")
-                panel.headerLine:SetPoint("TOPLEFT", panel, "TOPLEFT", 18, -39)
-                panel.headerLine:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -18, -39)
-                panel.headerLine:SetHeight(1)
-                panel.headerLine:SetColorTexture(
-                    AURA_UI_THEME.line[1], AURA_UI_THEME.line[2], AURA_UI_THEME.line[3], 0.12
-                )
-                panel.cards = {}
-                for slot = 1, AURA_CATEGORY_FILTER_MAX_CARDS do
-                    local card = CreateAuraSoundCategoryFilterCard(panel)
-                    panel.cards[slot] = card
-                    RaiseInteractiveChild(card, panel, 3)
-                end
-                panel:HookScript("OnSizeChanged", function(frame)
-                    if frame._auraSoundCategoryLayoutBusy or not frame.items then return end
-                    frame._auraSoundCategoryLayoutBusy = true
-                    LayoutAuraSoundCategoryFilterCards(frame)
-                    frame._auraSoundCategoryLayoutBusy = nil
-                end)
+                panel.choice = EXUI:CreateSegmentedControl(panel, 240, {}, "",
+                    function(value) Common.SetAuraSoundCategoryFilter(value) end,
+                    { height = ExwindTools.GUIMetrics.size.controlHeight })
+                panel.choice:SetPoint("TOPLEFT")
                 host._auraSoundCategoryFilter = panel
             end
             UI.auraSoundCategoryFilterControl = host._auraSoundCategoryFilter
             Common.RefreshAuraSoundCategoryFilterControl()
-            host._auraSoundCategoryFilter:Show()
+            UI.auraSoundCategoryFilterControl:Show()
         end,
-        update = function(host)
-            UI.auraSoundCategoryFilterControl = host and host._auraSoundCategoryFilter or nil
-            Common.RefreshAuraSoundCategoryFilterControl()
-            if host and host._auraSoundCategoryFilter then host._auraSoundCategoryFilter:Show() end
-        end,
+        update = function() end,
         release = function(host)
-            if UI.auraSoundCategoryFilterControl == (host and host._auraSoundCategoryFilter) then
-                UI.auraSoundCategoryFilterControl = nil
-            end
-            if host and host._auraSoundCategoryFilter then host._auraSoundCategoryFilter:Hide() end
+            if UI.auraSoundCategoryFilterControl == host._auraSoundCategoryFilter then UI.auraSoundCategoryFilterControl = nil end
+            host._auraSoundCategoryFilter:Hide()
         end,
     })
     Common._auraSoundCategoryFilterRendererRegistered = true
@@ -2024,20 +1632,12 @@ function Common.EnsureAuraSoundCategoryDrawer(parent)
     drawer.close:SetSize(28, 28)
     drawer.close:SetPoint("TOPRIGHT", -5, -5)
     drawer.close:SetScript("OnClick", function() Common.CloseAuraSoundCategoryDrawer(drawer) end)
-    drawer.search = EXUI:CreateEditBox(drawer, "", 290, 26, nil, {
-        placeholder = L["搜索法术、ID、单位、分类..."],
+    drawer.search = EXUI:CreateSearchBox(drawer, "", 290, 30, {
         onChanged = function(text)
             drawer.searchText = tostring(text or "")
             Common.RefreshAuraSoundCategoryDrawerList(drawer)
         end,
     })
-    if drawer.search.SetBackdropColor then drawer.search:SetBackdropColor(0.035, 0.048, 0.070, 0.98) end
-    if drawer.search.SetBackdropBorderColor then
-        drawer.search:SetBackdropBorderColor(
-            AURA_UI_THEME.lineStrong[1], AURA_UI_THEME.lineStrong[2],
-            AURA_UI_THEME.lineStrong[3], AURA_UI_THEME.lineStrong[4]
-        )
-    end
     drawer.search:SetPoint("TOPRIGHT", drawer, "TOPRIGHT", -18, -57)
     drawer.selectionSummary = ExwindTools.UI:CreateVisualFontString(drawer, EXFONTFRAME, "GameFontHighlight")
     drawer.selectionSummary:SetPoint("TOPRIGHT", drawer, "TOPRIGHT", -18, -94)
@@ -2171,12 +1771,12 @@ function Common.EnsureEncounterVoiceEditor(parent)
     local editor = CreateFrame("Frame", nil, parent, "BackdropTemplate")
     editor:SetSize(510, 250)
     editor:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1, insets = { left = 1, right = 1, top = 1, bottom = 1 } })
-    editor:SetBackdropColor(0.025, 0.035, 0.065, 0.98)
-    editor:SetBackdropBorderColor(0.48, 0.84, 1.00, 0.95)
+    editor:SetBackdropColor(unpack(GC.popup))
+    editor:SetBackdropBorderColor(unpack(GC.popupBorder))
     editor:Hide()
     editor.title = ExwindTools.UI:CreateVisualFontString(editor, EXFONTFRAME, "GameFontNormalLarge")
     editor.title:SetPoint("TOPLEFT", 18, -16)
-    editor.title:SetTextColor(0.48, 0.84, 1.00)
+    editor.title:SetTextColor(unpack(GC.text))
     editor.close = CreateFrame("Button", nil, editor, "UIPanelCloseButton")
     editor.close:SetSize(28, 28)
     editor.close:SetPoint("TOPRIGHT", -5, -5)
@@ -2195,7 +1795,7 @@ function Common.EnsureEncounterVoiceEditor(parent)
         editor.row.label = tostring(value or "")
         Common.SaveEncounterVoiceEditor(editor)
         Common.RefreshEncounterVoiceEditor(editor)
-    end, true)
+    end, { searchable = true, previewPath = ResolvePackPreviewPath })
     editor.pack:SetPoint("TOPLEFT", 18, -155)
     editor.lsm = EXUI:CreateLSMSoundDropdown(editor, 300, "", "", function(value)
         if not editor.row then return end
@@ -2252,13 +1852,10 @@ function Common.EnsureEncounterVoiceRenderer()
                 end)
                 host.configure:SetPoint("RIGHT", host, "RIGHT", -78, 0)
                 RaiseInteractiveChild(host.configure, host, 3)
-                host.preview = CreateFrame("Button", nil, host, "UIPanelButtonTemplate")
-                host.preview:SetSize(66, 24)
-                host.preview:SetPoint("RIGHT", host, "RIGHT", 0, 0)
-                host.preview:SetText(L["试听"])
-                host.preview:SetScript("OnClick", function(button)
+                host.preview = ExwindTools.UI:CreateButton(host, 66, 24, L["试听"], function(button)
                     Common.PreviewEncounterVoiceHost(button:GetParent())
-                end)
+                end, { compact = true })
+                host.preview:SetPoint("RIGHT", host, "RIGHT", 0, 0)
             end
             Common.RefreshEncounterVoiceHost(host, context)
         end,
@@ -2278,6 +1875,7 @@ function Common.EnsureEncounterVoiceRenderer()
     Common._encounterVoiceRendererRegistered = true
 end
 
+-- [共享宿主边界] root/gridHost 覆盖 Boss 的同一右侧 scroll child；只可迁移锚点/外观，不能改 parent、strata、一次释放或高度稳定 guard。
 function Common.EnsureFrames(host)
     if not host then return nil end
     local created = false
@@ -2328,7 +1926,7 @@ function Common.RefreshAuraSoundEditorFields(editor)
     local isCatalogAction = editor.isCatalogAction == true
     local name, icon, spellID = GetAuraSpellInfo(row)
     editor.icon:SetTexture(icon)
-    editor.spellSummary:SetText(string.format("%s |cff888888[%d]|r", name, spellID))
+    editor.spellSummary:SetText(string.format("%s %s[%d]|r", name, GC.markup.placeholder, spellID))
     editor.spellIDInput:SetShown(not isCatalogAction)
     editor.scope:SetShown(not isCatalogAction)
     editor.auraType:SetShown(not isCatalogAction)
@@ -2503,8 +2101,8 @@ function Common.EnsureAuraSoundEditor(parent)
     local editor = CreateFrame("Frame", nil, parent, "BackdropTemplate")
     editor:SetSize(540, 420)
     editor:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1, insets = { left = 1, right = 1, top = 1, bottom = 1 } })
-    editor:SetBackdropColor(0.025, 0.035, 0.065, 0.98)
-    editor:SetBackdropBorderColor(0.48, 0.84, 1.00, 0.95)
+    editor:SetBackdropColor(unpack(GC.popup))
+    editor:SetBackdropBorderColor(unpack(GC.popupBorder))
     editor:Hide()
     -- 关闭按钮、取消、父页面 Hide 甚至外部 Hide 都走同一释放语义。不能让
     -- Frame 在 RegisteredLayouts/父级存活时继续抓住上一条 action 草稿。
@@ -2518,7 +2116,7 @@ function Common.EnsureAuraSoundEditor(parent)
     end)
     editor.title = ExwindTools.UI:CreateVisualFontString(editor, EXFONTFRAME, "GameFontNormalLarge")
     editor.title:SetPoint("TOPLEFT", 18, -16)
-    editor.title:SetTextColor(0.48, 0.84, 1.00)
+    editor.title:SetTextColor(unpack(GC.text))
     editor.title:SetText(L["光环声音"])
     editor.icon = ExwindTools.UI:CreateVisualTexture(editor, EXBASEFRAME)
     editor.icon:SetSize(26, 26)
@@ -2565,7 +2163,7 @@ function Common.EnsureAuraSoundEditor(parent)
     editor.error:SetTextColor(1.00, 0.35, 0.35)
     editor.pack = EXUI:CreateDropdown(editor, 300, "", {}, "", function(value)
         Common.CommitAuraSoundEditor(editor, "label", tostring(value or ""))
-    end, true)
+    end, { searchable = true, previewPath = ResolvePackPreviewPath })
     editor.pack:SetPoint("TOPLEFT", 18, -272)
     editor.lsm = EXUI:CreateLSMSoundDropdown(editor, 300, "", "", function(value)
         Common.CommitAuraSoundEditor(editor, "customLSM", tostring(value or ""))
@@ -2648,108 +2246,279 @@ function Common.RefreshAuraSoundToolbarSummary(visibleCount, totalCount)
     end
 end
 
--- 搜索、数量和新增动作属于同一个“规则列表”工具栏。把三个视觉孤岛合并后，
--- 分类区与数据表之间只有一个明确操作层，页面层级会稳定很多。
+-- 保留搜索控件原有 GUI owner；数量行隐藏，搜索由独立 V2 control 展示。
 function Common.EnsureAuraSoundToolbarRenderer()
     if Common._auraSoundToolbarRendererRegistered then return end
-    local Grid = _G.ExwindGrid
-    if not (Grid and Grid.RegisterCustomRenderer) then return end
+    local Grid, EXUI = _G.ExwindGrid, ExwindTools.UI
     Grid:RegisterCustomRenderer("exboss_dungeon_aura_sound_toolbar", {
         mount = function(host)
             if not host._auraSoundToolbar then
-                local toolbar = CreateFrame("Frame", nil, host, "BackdropTemplate")
+                local toolbar = CreateFrame("Frame", nil, host)
                 toolbar:SetAllPoints(host)
-                toolbar:SetBackdrop({
-                    bgFile = "Interface\\Buttons\\WHITE8X8",
-                    edgeFile = "Interface\\Buttons\\WHITE8X8",
-                    edgeSize = 1,
-                    insets = { left = 1, right = 1, top = 1, bottom = 1 },
-                })
-                toolbar:SetBackdropColor(
-                    AURA_UI_THEME.panelDeep[1], AURA_UI_THEME.panelDeep[2],
-                    AURA_UI_THEME.panelDeep[3], 0.96
-                )
-                toolbar:SetBackdropBorderColor(
-                    AURA_UI_THEME.line[1], AURA_UI_THEME.line[2], AURA_UI_THEME.line[3], 0.18
-                )
-                toolbar.rail = toolbar:CreateTexture(nil, "ARTWORK")
-                toolbar.rail:SetPoint("BOTTOMLEFT", toolbar, "BOTTOMLEFT", 0, 0)
-                toolbar.rail:SetPoint("BOTTOMRIGHT", toolbar, "BOTTOMRIGHT", 0, 0)
-                toolbar.rail:SetHeight(1)
-                toolbar.rail:SetColorTexture(
-                    AURA_UI_THEME.line[1], AURA_UI_THEME.line[2], AURA_UI_THEME.line[3], 0.12
-                )
-                toolbar.title = ExwindTools.UI:CreateVisualFontString(toolbar, EXFONTFRAME, "GameFontHighlight")
-                toolbar.title:SetPoint("LEFT", toolbar, "LEFT", 14, 0)
-                toolbar.title:SetText(L["筛选结果"])
-                SetAuraThemeText(toolbar.title, AURA_UI_THEME.ink)
-                toolbar.count = ExwindTools.UI:CreateVisualFontString(toolbar, EXFONTFRAME, "GameFontNormalSmall")
-                toolbar.count:SetPoint("LEFT", toolbar.title, "RIGHT", 8, 0)
-                SetAuraThemeText(toolbar.count, AURA_UI_THEME.muted)
-                toolbar.search = ExwindTools.UI:CreateEditBox(toolbar, "", 310, 26, nil, {
-                    placeholder = L["搜索法术、ID、单位、声音..."],
+                toolbar.count = EXUI:CreateVisualFontString(toolbar, EXFONTFRAME, "GameFontNormalSmall")
+                toolbar.count:SetJustifyH("LEFT")
+                SetAuraThemeText(toolbar.count, GC.textDim)
+                toolbar.search = EXUI:CreateSearchBox(toolbar, "", 140, 30, {
                     onChanged = function(text)
                         UI.auraSoundSearchText = tostring(text or "")
                         Common:RefreshAuraSoundFilteredList()
                     end,
                 })
-                if toolbar.search.SetBackdropColor then toolbar.search:SetBackdropColor(0.035, 0.048, 0.070, 0.98) end
-                if toolbar.search.SetBackdropBorderColor then
-                    toolbar.search:SetBackdropBorderColor(
-                        AURA_UI_THEME.lineStrong[1], AURA_UI_THEME.lineStrong[2],
-                        AURA_UI_THEME.lineStrong[3], AURA_UI_THEME.lineStrong[4]
-                    )
-                end
-                toolbar.search:SetPoint("LEFT", toolbar, "LEFT", 190, 0)
-                toolbar.add = CreateAuraPrototypeButton(toolbar, 104, 26, L["+ 添加声音"], function()
-                    Common:AddAuraSound()
-                end)
-                toolbar.add:SetPoint("RIGHT", toolbar, "RIGHT", -12, 0)
-                RaiseInteractiveChild(toolbar.search, toolbar, 3)
-                RaiseInteractiveChild(toolbar.add, toolbar, 3)
                 host._auraSoundToolbar = toolbar
             end
             UI.auraSoundToolbar = host._auraSoundToolbar
             local desired = tostring(UI.auraSoundSearchText or "")
-            if UI.auraSoundToolbar.search:GetText() ~= desired then
-                UI.auraSoundToolbar.search:SetText(desired)
-            end
+            if UI.auraSoundToolbar.search:GetText() ~= desired then UI.auraSoundToolbar.search:SetText(desired) end
             UI.auraSoundToolbar:Show()
         end,
         update = function(host)
-            UI.auraSoundToolbar = host and host._auraSoundToolbar or nil
-            if UI.auraSoundToolbar then
-                local desired = tostring(UI.auraSoundSearchText or "")
-                if UI.auraSoundToolbar.search:GetText() ~= desired then
-                    UI.auraSoundToolbar.search:SetText(desired)
-                end
-                UI.auraSoundToolbar:Show()
-            end
+            UI.auraSoundToolbar = host._auraSoundToolbar
+            local desired = tostring(UI.auraSoundSearchText or "")
+            if UI.auraSoundToolbar.search:GetText() ~= desired then UI.auraSoundToolbar.search:SetText(desired) end
         end,
         release = function(host)
-            if UI.auraSoundToolbar == (host and host._auraSoundToolbar) then
-                UI.auraSoundToolbar = nil
-            end
-            if host and host._auraSoundToolbar then host._auraSoundToolbar:Hide() end
+            if UI.auraSoundToolbar == host._auraSoundToolbar then UI.auraSoundToolbar = nil end
+            host._auraSoundToolbar:Hide()
         end,
     })
     Common._auraSoundToolbarRendererRegistered = true
 end
-
--- 当前“副本通用设置”先专注光环音效；通用开关与首领额外设置会在之后独立
--- 页面承载，不能再占用这张规则表的横向空间。
-function Common:BuildPageLayout(dungeonKey)
-    return {
-        { key = "aura_sound_category_floor", type = "custom", renderer = "exboss_dungeon_aura_sound_category_card", x = 4, y = 1, w = 60, h = 28, dungeonKey = dungeonKey, categoryKey = "地板" },
-        { key = "aura_sound_category_error", type = "custom", renderer = "exboss_dungeon_aura_sound_category_card", x = 70, y = 1, w = 60, h = 28, dungeonKey = dungeonKey, categoryKey = "错误" },
-        { key = "aura_sound_category_tank", type = "custom", renderer = "exboss_dungeon_aura_sound_category_card", x = 136, y = 1, w = 60, h = 28, dungeonKey = dungeonKey, categoryKey = "坦克" },
-        { key = "aura_sound_category_filter", type = "custom", renderer = "exboss_dungeon_aura_sound_category_filter_cards", x = 4, y = 32, w = 192, h = 18, dungeonKey = dungeonKey },
-        { key = "aura_sound_toolbar", type = "custom", renderer = "exboss_dungeon_aura_sound_toolbar", x = 4, y = 50, w = 192, h = 8, dungeonKey = dungeonKey },
-        { key = "aura_sound_table_header", type = "custom", renderer = "exboss_dungeon_aura_sound_header", x = 4, y = 58, w = 192, h = 5, dungeonKey = dungeonKey },
-        { key = "dungeon_aura_sound_virtual_list", type = "custom", renderer = "exboss_dungeon_aura_sound_virtual_list", x = 4, y = 63, w = 192, h = 88, dungeonKey = dungeonKey },
-    }
+-- The declaration owns card order and spacing. Original renderer owners retain
+-- their controls and callbacks; these components never receive a config table.
+function Common:BuildPageLayout()
+    local function CategoryRow(id)
+        return { id = id .. "-row", kind = "row", children = {
+            { id = id, kind = "component", ref = id, weight = 1 },
+            { id = id .. "-actions", kind = "actions", position = "end", align = "end", children = {
+                { id = id .. "-sound", kind = "control", controlType = "select", ref = id .. "Sound", width = 240 },
+                { id = id .. "-preview", kind = "button", text = L["试听"], action = id .. "Preview", width = 60 },
+            } },
+        } }
+    end
+    return { version = 2, cards = {
+        { id = "categories", kind = "card", title = "", children = {
+            CategoryRow("floor"),
+            { id = "floor-divider", kind = "component", ref = "divider" },
+            CategoryRow("error"),
+            { id = "error-divider", kind = "component", ref = "divider" },
+            CategoryRow("tank"),
+        } },
+        { id = "rules", kind = "card", title = "", children = {
+            -- Keep the original search owner alive without a visible summary row.
+            { id = "toolbar", kind = "component", ref = "toolbar", visible = "showToolbarSummary" },
+            { id = "filter-row", kind = "row", children = {
+                { id = "filter", kind = "component", ref = "filter", weight = 1 },
+                { id = "search", kind = "control", controlType = "input", ref = "search", width = 140 },
+            } },
+            { id = "header", kind = "component", ref = "header" },
+            { id = "list", kind = "component", ref = "list", height = AURA_SOUND_LIST_HEIGHT },
+        } },
+    } }
 end
 
+-- A retained GUI host keeps the original controls out of V2's node pool.
+-- Release detaches that host before the V2 node can be reused by another page.
+local function LayoutAuraComponent(host, kind, width)
+    host:SetWidth(width)
+    if kind == "category" then
+        local card = host._auraSoundCategoryCard
+        card.title:ClearAllPoints()
+        card.title:SetPoint("TOPLEFT", 4, -1)
+        card.title:SetWidth(math.max(1, width - 8))
+        card.title:SetJustifyH("LEFT")
+        card.hint:ClearAllPoints()
+        card.hint:SetPoint("TOPLEFT", 4, -20)
+        card.hint:SetWidth(math.max(1, width - 8))
+        local textHeight = 20 + math.max(11, card.hint:GetStringHeight()) + 2
+        return math.max(34, textHeight)
+    elseif kind == "filter" then
+        local choice = host._auraSoundCategoryFilter.choice
+        choice:SetWidth(width)
+        return math.max(30, choice:GetHeight())
+    elseif kind == "toolbar" then
+        local label = host._auraSoundToolbar.count
+        label:ClearAllPoints()
+        label:SetPoint("LEFT", 4, 0)
+        label:SetWidth(math.max(1, width - 8))
+        return math.max(28, label:GetStringHeight())
+    elseif kind == "header" then
+        LayoutAuraSoundColumns(host, host._auraSoundHeader)
+        return 28
+    end
+    return AURA_SOUND_LIST_HEIGHT
+end
+
+local function CloseAuraComponentTransientUI(host)
+    local card = host._auraSoundCategoryCard
+    if card and card.lsm.CloseMenu then card.lsm:CloseMenu() end
+    local toolbar = host._auraSoundToolbar
+    if toolbar then
+        local edit = toolbar.search.editBox or toolbar.search
+        if edit.ClearFocus then edit:ClearFocus() end
+    end
+    if GameTooltip then GameTooltip:Hide() end
+end
+
+-- Guard original interaction callbacks for this V2 lease. Values, field paths
+-- and commit functions are not replaced; hidden/released UI cannot act later.
+function Common.GuardAuraComponent(host, kind, context)
+    local function Script(frame, event)
+        if not frame then return end
+        frame._auraOriginalScripts = frame._auraOriginalScripts or {}
+        local original = frame._auraOriginalScripts[event] or frame:GetScript(event)
+        if not original then return end
+        frame._auraOriginalScripts[event] = original
+        frame:SetScript(event, context:Guard(original))
+    end
+    if kind == "category" then
+        local card = host._auraSoundCategoryCard
+        Script(card, "OnMouseUp")
+    elseif kind == "filter" then
+        local choice = host._auraSoundCategoryFilter.choice
+        choice._auraOriginalChange = choice._auraOriginalChange or choice.onChange
+        choice.onChange = context:Guard(choice._auraOriginalChange)
+    elseif kind == "header" then
+        Script(host._auraSoundHeader.check.checkbox, "OnClick")
+        Script(host._auraSoundHeader.add, "OnClick")
+    elseif kind == "list" then
+        for _, row in ipairs(UI.auraSoundVirtualList.rows) do
+            Script(row.check.checkbox, "OnClick")
+            Script(row.edit, "OnClick")
+            Script(row.preview, "OnClick")
+        end
+    end
+end
+
+function Common:CreatePageOwner(dungeonKey, slotKey, pageHost)
+    local Grid = _G.ExwindGrid
+    local owner = { components = {}, controls = {}, actions = {} }
+    owner.predicates = { showToolbarSummary = function() return false end }
+    owner.components.divider = {
+        mount = function(parent)
+            local divider = ExwindTools.UI:CreateSettingsSeparator(parent, 1)
+            return divider
+        end,
+        update = function() end,
+        measure = function(divider) return divider:GetHeight() end,
+        layout = function(divider, context, width, height)
+            divider:ClearAllPoints()
+            divider:SetPoint("TOPLEFT")
+            divider:SetSize(width, height)
+        end,
+        setEnabled = function() end,
+        setVisible = function(divider, context, visible) divider:SetShown(visible) end,
+        release = function(divider) divider:Hide(); divider:ClearAllPoints(); divider:SetParent(nil) end,
+    }
+    UI.componentHosts = UI.componentHosts or {}
+    local function Component(ref, rendererKey, kind, categoryKey)
+        local renderer = Grid:GetCustomRenderer(rendererKey)
+        owner.components[ref] = {
+            mount = function(parent, context)
+                local host = UI.componentHosts[ref]
+                if not host then
+                    host = CreateFrame("Frame", nil, UI.root)
+                    UI.componentHosts[ref] = host
+                end
+                host:SetParent(parent)
+                host:ClearAllPoints()
+                host:SetPoint("TOPLEFT")
+                host._auraV2Context = context
+                host._auraRendererContext = { element = { dungeonKey = dungeonKey, slotKey = slotKey, categoryKey = categoryKey } }
+                host:Show()
+                renderer.mount(host, host._auraRendererContext)
+                Common.GuardAuraComponent(host, kind, context)
+                return host
+            end,
+            update = function(host, context)
+                renderer.update(host, host._auraRendererContext)
+                Common.GuardAuraComponent(host, kind, context)
+            end,
+            measure = function(host, context, width)
+                return LayoutAuraComponent(host, kind, width)
+            end,
+            layout = function(host, context, width, height)
+                host:SetSize(width, height)
+                LayoutAuraComponent(host, kind, width)
+                Common.GuardAuraComponent(host, kind, context)
+            end,
+            setEnabled = function(host, context, enabled)
+                -- No enabled predicate is declared: each original owner keeps its state.
+            end,
+            setVisible = function(host, context, visible)
+                -- Search has its own visible V2 node and focus lifecycle.
+                if not visible and kind ~= "toolbar" then CloseAuraComponentTransientUI(host) end
+                host:SetShown(visible)
+            end,
+            release = function(host)
+                CloseAuraComponentTransientUI(host)
+                renderer.release(host)
+                host._auraV2Context, host._auraRendererContext = nil, nil
+                host:Hide()
+                host:ClearAllPoints()
+                host:SetParent(UI.root)
+            end,
+        }
+    end
+    Component("floor", "exboss_dungeon_aura_sound_category_card", "category", "地板")
+    Component("error", "exboss_dungeon_aura_sound_category_card", "category", "错误")
+    Component("tank", "exboss_dungeon_aura_sound_category_card", "category", "坦克")
+    for _, ref in ipairs({ "floor", "error", "tank" }) do
+        local categoryRef = ref
+        -- Only the frame parent/geometry changes. The dropdown still closes over
+        -- the same card and uses CommitAuraSoundCategoryCardLSM unchanged.
+        owner.controls[categoryRef .. "Sound"] = {
+            mount = function(parent, context)
+                local card = UI.componentHosts[categoryRef]._auraSoundCategoryCard
+                local dropdown = card.lsm
+                dropdown._auraOriginalSelect = dropdown._auraOriginalSelect or dropdown._onSelect
+                dropdown:SetParent(parent)
+                dropdown._onSelect = context:Guard(dropdown._auraOriginalSelect)
+                dropdown:Show()
+                return dropdown
+            end,
+            release = function(dropdown)
+                if dropdown.CloseMenu then dropdown:CloseMenu() end
+                dropdown._onSelect = dropdown._auraOriginalSelect
+                dropdown:Hide()
+                dropdown:ClearAllPoints()
+                dropdown:SetParent(UI.componentHosts[categoryRef]._auraSoundCategoryCard)
+            end,
+        }
+        owner.actions[categoryRef .. "Preview"] = function()
+            Common.PreviewAuraSoundCategoryCardLSM(UI.componentHosts[categoryRef]._auraSoundCategoryCard)
+        end
+    end
+    Component("filter", "exboss_dungeon_aura_sound_category_filter_cards", "filter")
+    Component("toolbar", "exboss_dungeon_aura_sound_toolbar", "toolbar")
+    owner.controls.search = {
+        mount = function(parent, context)
+            local search = UI.componentHosts.toolbar._auraSoundToolbar.search
+            local edit = search.editBox or search
+            edit._auraOriginalTextChanged = edit._auraOriginalTextChanged or edit:GetScript("OnTextChanged")
+            search:SetParent(parent)
+            edit:SetScript("OnTextChanged", context:Guard(edit._auraOriginalTextChanged))
+            search:Show()
+            return search
+        end,
+        release = function(search)
+            local edit = search.editBox or search
+            if edit.ClearFocus then edit:ClearFocus() end
+            edit:SetScript("OnTextChanged", edit._auraOriginalTextChanged)
+            search:Hide()
+            search:ClearAllPoints()
+            search:SetParent(UI.componentHosts.toolbar._auraSoundToolbar)
+        end,
+    }
+    Component("header", "exboss_dungeon_aura_sound_header", "header")
+    Component("list", "exboss_dungeon_aura_sound_virtual_list", "list")
+    owner.onHeightChanged = function(height)
+        height = math.max(1, height)
+        UI.gridHost:SetHeight(height)
+        UI.root:SetHeight(height)
+        pageHost:SetHeight(height)
+    end
+    return owner
+end
 function Common:HasContent()
     local dungeonKey = Page:GetCurrentDungeonCommonOptions()
     -- 没有静态资料的副本仍应进入这张全页光环表，用户可以直接新增自定义
@@ -2757,6 +2526,7 @@ function Common:HasContent()
     return type(dungeonKey) == "string" and dungeonKey ~= ""
 end
 
+-- [混合函数边界] Render 内只可接入共享卡外框与最终高度/reflow；host/dungeon/width guard、旧 Boss 控件单次释放、slot 身份和 renderer 注册禁止修改。
 function Common:Render(host)
     local dungeonKey = Page:GetCurrentDungeonCommonOptions()
     if not (host and dungeonKey and self:HasContent()) then return false end
@@ -2791,33 +2561,23 @@ function Common:Render(host)
     Common.EnsureAuraSoundToolbarRenderer()
     Common.EnsureAuraSoundCategoryCardRenderer()
     Common.EnsureAuraSoundCategoryFilterRenderer()
-    LAYOUT = Common:BuildPageLayout(dungeonKey)
-    for i = 1, #LAYOUT do
-        if LAYOUT[i].renderer == "exboss_dungeon_aura_sound_virtual_list" then
-            LAYOUT[i].slotKey = slotKey
-        end
-    end
+    if UI.cardSession then UI.cardSession:Release(); UI.cardSession = nil end
     UI.slotKey = slotKey
     UI.dungeonKey = dungeonKey
-    ExwindTools:RegisterModuleLayout(Common.MODULE_KEY, LAYOUT)
-    if Grid.SetContainerCols then Grid:SetContainerCols(UI.gridHost, 200) end
-    if Grid.SetContainerPadding then Grid:SetContainerPadding(UI.gridHost, { left = 0, right = 10, top = 0, bottom = 0 }) end
-    if ExwindTools.UI then
-        ExwindTools.UI.ActivePageFrame = UI.gridHost
-        ExwindTools.UI.CurrentModule = Common.MODULE_KEY
+    if not Common._v2PageRegistered then
+        LAYOUT = Common:BuildPageLayout()
+        ExwindTools.UI:RegisterSettingsPageV2(Common.MODULE_KEY, LAYOUT)
+        Common._v2PageRegistered = true
     end
-    Grid:Render(UI.gridHost, LAYOUT, {}, Common.MODULE_KEY)
-    -- Grid 只会更新自身高度；必须同步到 ScrollFrame 的 scroll child，才能让
-    -- 滚动、裁剪与鼠标命中覆盖完整内容区域。
-    local contentHeight = math.max(1, UI.gridHost:GetHeight() or 1)
-    UI.root:SetHeight(contentHeight)
-    host:SetHeight(contentHeight)
+    UI.cardSession = ExwindTools.UI:MountSettingsPageV2(UI.gridHost, Common.MODULE_KEY,
+        Common:CreatePageOwner(dungeonKey, slotKey, host))
     UI._renderedHost = host
     UI._renderedDungeonKey = tostring(dungeonKey)
     UI._renderedWidth = hostWidth
     return true
 end
 
+-- [释放边界] 先关编辑覆盖层，再释放独立 Grid/虚拟上下文与 ActivePage 注册；卡片容器不得重复释放或保留上一副本身份。
 function Common:Hide()
     self._virtualListRestore = nil
     UI._renderedHost = nil
@@ -2830,9 +2590,9 @@ function Common:Hide()
     if UI.encounterVoiceEditor then UI.encounterVoiceEditor:Hide() end
     -- 与 Boss 页面共用右侧区域，但不共用 Grid 容器。离开通用页时同时释放
     -- 本页的独立 Grid，避免 BUFF 行控件停留在随后渲染的 Boss 页面上。
-    local Grid = _G.ExwindGrid
-    if Grid and Grid.ReleaseContainerWidgets and UI.gridHost then
-        Grid:ReleaseContainerWidgets(UI.gridHost)
+    if UI.cardSession and type(UI.cardSession.Release) == "function" then
+        UI.cardSession:Release()
+        UI.cardSession = nil
     end
     -- 离开页面后不保留上一副本的行绑定；下次 Mount 重新建立轻量上下文。
     UI.auraSoundVirtualContext = nil
@@ -2840,17 +2600,10 @@ function Common:Hide()
     UI.auraSoundCategoryFilterControl = nil
     UI.auraSoundToolbar = nil
     UI.auraSoundCategoryOtherKeys = nil
-    -- RegisterModuleLayout 持有 LAYOUT；清除 renderer 可能补入的当前值，保证
-    -- 它永远只携带 layout 标量。
-    for i = 1, #LAYOUT do
-        LAYOUT[i].currentValue = nil
-    end
     UI.host = nil
     UI.slotKey = nil
     UI.dungeonKey = nil
-    -- DungeonCommon 接管过 EXUI 的当前 Grid 注册；离开后不能留下隐藏的
-    -- gridHost 作为 Live Edit / 导出目标。Boss 普通法术 Grid 有自己的清理，
-    -- 因此这里只处理本页实际注册的宿主。
+    -- Clear only a registration owned by this host; never clear another page.
     if ExwindTools.UI and ExwindTools.UI.ActivePageFrame == UI.gridHost then
         ExwindTools.UI.ActivePageFrame = nil
         ExwindTools.UI.CurrentModule = nil

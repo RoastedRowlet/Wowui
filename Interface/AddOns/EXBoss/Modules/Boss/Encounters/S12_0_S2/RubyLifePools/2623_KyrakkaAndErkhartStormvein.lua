@@ -2,6 +2,7 @@
 
 do
     local L = (ExBoss and ExBoss.L) or setmetatable({}, { __index = function(_, key) return key end })
+    local EXUI = _G.ExwindTools and _G.ExwindTools.UI
     local ENCOUNTER_ID = 2623
     local EVENT_WIND = 887
     local EVENT_FIRE_A = 894
@@ -113,6 +114,8 @@ do
         RefreshTexts()
     end
 
+    -- [运行时 GUI 排除边界：风火图面板]
+    -- EXBossKyrakkaWindFirePanel 是遭遇运行时自定义面板，不是设置页/卡片/Grid 内容；只记录其现有 parent、拖动、关闭、动画与显示/隐藏生命周期，本轮禁止修改。
     local function EnsurePanel()
         if panel then return end
         panel = CreateFrame("Frame", "EXBossKyrakkaWindFirePanel", UIParent, "BackdropTemplate")
@@ -141,9 +144,12 @@ do
         panel.FireText = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         panel.FireText:SetPoint("TOP", panel.WindText, "BOTTOM", 0, -4)
 
-        local closeButton = CreateFrame("Button", nil, panel, "UIPanelCloseButton")
+        local closeButton = EXUI:CreatePicButton(panel, 24, 24,
+            "Interface\\Buttons\\UI-Panel-CloseButton-Up",
+            "Interface\\Buttons\\UI-Panel-CloseButton-Down",
+            "Interface\\Buttons\\UI-Panel-CloseButton-Highlight",
+            function() panel:Hide() end, true)
         closeButton:SetPoint("TOPRIGHT", 2, 2)
-        closeButton:SetScript("OnClick", function() panel:Hide() end)
 
         panelArea = CreateFrame("Frame", nil, panel)
         panelArea:SetSize(PANEL_SIZE, PANEL_SIZE)

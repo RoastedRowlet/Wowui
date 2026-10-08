@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Rogue-Assassination','Monk-Windwalker',}
-local provider = {region='US',realm='TheForgottenCoast',name='US',type='subscribers',zone=53,date='2026-09-29',data={['Fú']='Fúsion:BAEBNQAECoEXAAIBAAkKRiG1CQAPAwmODQAABQBbAHUNAAADAF4Afw0AAAMAUgCpDQAAAwBfAFwNAAABAFEAXQ0AAAEASwBlDQAAAwBNAKQNAAACAEcAMw0AAAIAYgABAAkKRiG1CQAPAwmODQAABQBbAHUNAAADAF4Afw0AAAMAUgCpDQAAAwBfAFwNAAABAFEAXQ0AAAEASwBlDQAAAwBNAKQNAAACAEcAMw0AAAIAYgAAAA==.',Mk='Mk:BAEANQAECgQIBAABNQAECgcIGQACAIwbAA==.',},}
+local lookup = {'Rogue-Assassination',}
+local provider = {region='US',realm='TheForgottenCoast',name='US',type='subscribers',zone=53,date='2026-10-06',data={['Fú']='Fúsion:BAEBNQAECoEYAAIBAAkKxyEcDQD/AgmODQAABQBbAHUNAAADAF4Afw0AAAMAUgCpDQAAAwBfAFwNAAABAFEAXQ0AAAEASwBlDQAAAwBNAKQNAAADAFIAMw0AAAIAYgABAAkKxyEcDQD/AgmODQAABQBbAHUNAAADAF4Afw0AAAMAUgCpDQAAAwBfAFwNAAABAFEAXQ0AAAEASwBlDQAAAwBNAKQNAAADAFIAMw0AAAIAYgAAAA==.',Mk='Mk:BAEANQAECgQIBAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

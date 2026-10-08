@@ -130,7 +130,7 @@ local function EnsureInteractionHighlight(overlay)
     if overlay.highlight then return overlay.highlight end
     local highlight = CreateFrame("Frame", nil, overlay, "BackdropTemplate")
     highlight:SetAllPoints(overlay)
-    highlight:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 2 })
+    highlight:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
     highlight:SetBackdropBorderColor(0.32, 0.82, 1.00, 0.95)
     highlight:SetBackdropColor(0.20, 0.65, 1.00, 0.10)
     highlight:Hide()
@@ -286,7 +286,17 @@ local function ApplyTextSlot(item, slotID, slot)
     widget:SetStylePositionOverride(0, 0)
     widget:ResetSecretText()
     widget:ApplyStyle(style)
-    widget:SetText(slot.text or "")
+    if slot.durationObject ~= nil then
+        widget:SetDurationBinding(slot.durationObject, slot.durationOptions)
+    elseif slot.secretDuration ~= nil then
+        widget:SetDurationBinding(slot.secretDuration, slot.durationOptions)
+    elseif slot.secretText == true then
+        widget:SetSecretText(slot.text)
+    else
+        widget:SetText(slot.text or "")
+    end
+    if type(slot.color) == "table" then widget:SetColor(slot.color) end
+    if slot.hasColorComponents == true then widget:SetColorComponents(slot.colorComponents) end
     widget:SetBounds(bounds.right - bounds.left, bounds.top - bounds.bottom)
     local anchor = ResolveTextSlotAnchor(slot)
     widget:SetAnchor(anchor.point, item.root, anchor.relativePoint, anchor.x, anchor.y)
@@ -444,13 +454,18 @@ function EXUI:CreateMaterialCollection(parent, interactionMode, moduleKey, callb
         item.declaredBounds = RequireDeclaredBounds(presentation)
         item.localOffset = ResolveLocalOffset(presentation)
         item.widget:ApplyPresentation(presentation)
+        if presentation.hasColorComponents == true then item.widget:SetColorComponents(presentation.colorComponents) end
         item.bodyWidth, item.bodyHeight = math.max(1, item.widget:GetWidth() or 1), math.max(1, item.widget:GetHeight() or 1)
         item.root:SetSize(item.bodyWidth, item.bodyHeight)
         ApplyLocalOffset(item, item.localOffset)
         ConfigurePanelInteraction(self, item, presentation.interaction)
         ApplyTextSlots(self, item, presentation)
         item.regions:SetConfigContextID(presentation.regionConfigContextID)
-        item.regions:Apply(presentation.regionElements)
+        item.regions:Apply(presentation.regionElements, presentation.elementContent)
+        if item.visualEffects then
+            EXUI:ApplyCollectionItemVisualEffects(item.root, item.visualEffects, item.bodyWidth, item.bodyHeight)
+        end
+        if item._collectionClickSpec then EXUI:ApplyCollectionItemClick(item, item._collectionClickSpec) end
         return item
     end
 
@@ -524,10 +539,26 @@ function EXUI:CreateMaterialCollection(parent, interactionMode, moduleKey, callb
         return self.itemsByID
     end
 
+    function collection:SetItemClickAction(itemID, spec)
+        local item = self.itemsByID[itemID]
+        if not item or not item.root then return false end
+        return EXUI:ApplyCollectionItemClick(item, spec)
+    end
+
+    function collection:SetItemVisualEffects(itemID, effects)
+        local item = self.itemsByID[itemID]
+        if not item or not item.root then return false end
+        item.visualEffects = type(effects) == "table" and effects or nil
+        EXUI:ApplyCollectionItemVisualEffects(item.root, item.visualEffects, item.bodyWidth, item.bodyHeight)
+        return true
+    end
+
     function collection:ReleaseItem(itemID)
         local item = self.itemsByID[itemID]
         if not item then return end
         self.itemsByID[itemID] = nil
+        EXUI:ReleaseCollectionItemClick(item)
+        EXUI:ReleaseCollectionItemVisualEffects(item.root)
         ResetOverlay(item.interactionOverlay, true)
         if item.regions then item.regions:Release() end
         for slotID in pairs(item.textWidgets or {}) do ResetTextSlot(item, slotID, true) end
@@ -537,6 +568,7 @@ function EXUI:CreateMaterialCollection(parent, interactionMode, moduleKey, callb
         item.widget:Release()
         ReleaseItemRoot(item.root)
         item.widget, item.root, item.presentation, item.declaredBounds, item.localOffset, item.interactionOverlay = nil, nil, nil, nil, nil, nil
+        item.visualEffects = nil
         item.textWidgets, item.textInteractionOverlays, item.textSlotBounds, item.textSlotAnchors, item.regions = nil, nil, nil, nil, nil
     end
     function collection:Release()

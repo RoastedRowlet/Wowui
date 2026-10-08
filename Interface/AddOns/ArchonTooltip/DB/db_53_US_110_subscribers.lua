@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Druid-Balance',}
-local provider = {region='US',realm='Gorefiend',name='US',type='subscribers',zone=53,date='2026-09-29',data={Am='Amatsano:BAEANQAECgEIAQAAAA==.',Ch='Chaboomy:BAECNQAFFIEMAAIBAAUKDxdYCACXAQWODQAAAwBVAHUNAAACAEkAfw0AAAIAHACpDQAABABBADMNAAABACkAAQAFCg8XWAgAlwEFjg0AAAMAVQB1DQAAAgBJAH8NAAACABwAqQ0AAAQAQQAzDQAAAQApADUABAqBJwACAQAJCpcj7AoAXAMAAQAJCpcj7AoAXAMAAAA=.',Co='Collie:BAEANQAECgYIDgAAAA==.',Ps='Psyndra:BAEANQAFFAEIAQAAAA==.',},}
+local lookup = {'Druid-Balance','Shaman-Restoration',}
+local provider = {region='US',realm='Gorefiend',name='US',type='subscribers',zone=53,date='2026-10-06',data={Am='Amatsano:BAEANQAECgQIAwAAAA==.',Ch='Chaboomy:BAECNQAFFIESAAIBAAYK0RNECADKAQaODQAABABVAHUNAAADAEkAfw0AAAMAHACpDQAABQBHAFwNAAABAAMAMw0AAAIAKQABAAYK0RNECADKAQaODQAABABVAHUNAAADAEkAfw0AAAMAHACpDQAABQBHAFwNAAABAAMAMw0AAAIAKQA1AAQKgSoAAgEACQqsI+cMAFUDAAEACQqsI+cMAFUDAAAA.',Co='Collie:BAEANQAECggIEQAAAA==.',Ps='Psyndra:BAEANQAFFAEIAQABNQAECgkJHQACAAQgAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

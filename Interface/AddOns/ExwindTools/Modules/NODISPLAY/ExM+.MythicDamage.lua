@@ -1,6 +1,9 @@
 -- [[ 大秘境伤害计算模块 ]]
 -- { Key = "ExM+.MythicDamage", Name = "大秘境伤害计算", Desc = "根据层数计算法术实际伤害数值。", Category = 2 },
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 local EXDB = _G.EXDB
 if not ExwindTools then return end
@@ -15,6 +18,9 @@ local EXWIND_MODULE_KEY = "ExM+.MythicDamage"
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 
 -- 3. 数据初始化
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EXWIND_DEFAULTS = {
     mythicLevel = 10,
     useColoredNumbers = true,
@@ -25,6 +31,9 @@ local EXWIND_DEFAULTS = {
 }
 local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, EXWIND_DEFAULTS)
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 -- =========================================================
 -- 核心业务逻辑 (需提前定义供 Layout 使用)
 -- =========================================================
@@ -111,6 +120,9 @@ function EXMD.ProcessDamageText(text, multiplier)
 end
 
 -- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
+-- =========================================================
 -- [v4.2] 注册与配置
 -- =========================================================
 
@@ -124,23 +136,43 @@ local function EX_RegisterLayout()
         level, seasonID, 1.76, multi
     )
 
+    -- [声明迁移边界：设置页] 仅把原设置控件改为 settings 声明。
+    -- 上方倍率/说明计算、key/type、按钮与刷新绑定禁止修改。
     local layout = {
-        { key = "header", type = "header", x = 1, y = 4, w = 200, h = 3, label = L["大秘境伤害计算"], labelSize = 25 },
-        { key = "desc", type = "description", x = 1, y = 12, w = 200, h = 8, label = L["法术描述的数值会随着层数改变"] },
-        { key = "useColoredNumbers", type = "checkbox", x = 1, y = 23, w = 46, h = 6, label = L["数值染色"] },
-        { key = "mythicLevel", type = "slider", x = 2, y = 39, w = 46, h = 6, label = L["模拟层数 (0-30)"], min = 0, max = 30 },
-        { key = "damageColor", type = "color", x = 52, y = 39, w = 46, h = 6, label = L["伤害数值颜色"] },
-        { key = "openSpellInfo", type = "button", x = 116, y = 24, w = 55, h = 10, label = L["大米怪物法术"] },
-        { key = "abbreviateNumbers", type = "checkbox", x = 51, y = 23, w = 46, h = 6, label = L["简写数字 (万/亿)"] },
+        version = 1,
+        sections = {
+            {
+                kind = "settings",
+                id = "common",
+                title = L["通用设置"],
+                description = L["法术描述的数值会随着层数改变"],
+                items = {
+                    { key = "useColoredNumbers", type = "switch", label = L["数值染色"] },
+                    { key = "abbreviateNumbers", type = "switch", label = L["简写数字 (万/亿)"] },
+                    { key = "mythicLevel", type = "slider", label = L["模拟层数 (0-30)"], min = 0, max = 30 },
+                    { key = "damageColor", type = "color", label = L["伤害数值颜色"] },
+                },
+            },
+            {
+                kind = "settings",
+                id = "tools",
+                title = L["工具"],
+                items = {
+                    { key = "openSpellInfo", type = "button", label = L["大米怪物法术"] },
+                },
+            },
+        },
     }
 
-
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
 end
 
 -- 3. 立即注册
 EX_RegisterLayout()
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 local function RefreshActiveSurfaces()
     -- 当前 Grid 控件已经持有写入后的值；这里只重套已存在的法术手册面板。
     if _G.EXSP and _G.EXSP.LevelSlider then
@@ -159,5 +191,8 @@ ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY,
     end
 end)
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 -- 报告模块加载完成
 ExwindTools:ReportReady(EXWIND_MODULE_KEY)

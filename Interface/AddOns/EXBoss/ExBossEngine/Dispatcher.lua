@@ -15,31 +15,12 @@ end
 local TIMELINE_HINT_EVENT = "EXBOSS_TIMELINE_HINT"
 local L = (ExBoss and ExBoss.L) or setmetatable({}, { __index = function(_, key) return key end })
 
-local function NormalizeBarDisplayMode(mode)
-    local m = tostring(mode or ""):lower()
-    if m == "timer" or m == "bun" or m == "both" or m == "none" then
-        return m
-    end
-    return "bun"
-end
-
-local function GetBarDisplayMode()
-    EXBOSS12S2 = EXBOSS12S2 or {}
-    EXBOSS12S2.ui = EXBOSS12S2.ui or {}
-    EXBOSS12S2.ui.general = EXBOSS12S2.ui.general or {}
-    local g = EXBOSS12S2.ui.general
-    g.barDisplayMode = NormalizeBarDisplayMode(g.barDisplayMode)
-    return g.barDisplayMode
-end
-
 local function IsTimerBarEnabledByGlobal()
-    local mode = GetBarDisplayMode()
-    return mode == "both" or mode == "timer"
+    return ExBoss.DisplayPolicy.IsTimelineBarEnabled("timer")
 end
 
 local function IsBunBarEnabledByGlobal()
-    local mode = GetBarDisplayMode()
-    return mode == "both" or mode == "bun"
+    return ExBoss.DisplayPolicy.IsTimelineBarEnabled("bun")
 end
 
 local function ResolveSafeTimerName(timer)

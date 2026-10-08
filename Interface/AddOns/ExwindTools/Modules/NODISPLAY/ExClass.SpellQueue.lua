@@ -3,9 +3,13 @@
 -- { Key = "ExTools.SpellQueue", Name = "全职业延迟容限", Desc = "根据当前专精自动调整输入延迟容限(SpellQueueWindow)。", Category = 5 },
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXUI = ExwindTools.UI
+local GM = ExwindTools.GUIMetrics
 local L = (ExwindTools and ExwindTools.L) or setmetatable({}, { __index = function(_, key) return key end })
 local EXState = ExwindTools.State
 
@@ -22,6 +26,9 @@ if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 local EXDB = _G.EXDB
 if not EXDB then return end
 
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EXWIND_DEFAULTS = {
     enabled = false,
     aiMode = false,
@@ -48,65 +55,76 @@ local function MakeSpecLabel(icon, colorHex, specName)
     return string.format("|T%d:14:14:0:0|t |cff%s%s|r", icon, colorHex, L[specName])
 end
 
-local function EX_RegisterLayout()
-    --GRID引擎数据
-    local layout = {
-        { key = "header", type = "header", x = 8, y = 4, w = 193, h = 8, label = L["全职业延迟容限 (SpellQueueWindow)"], labelSize = 25 },
-        { key = "desc", type = "description", x = 8, y = 16, w = 120, h = 8, label = L["AI模式：容限 = 延迟 + 偏移。固定模式：容限 = 设定值。"] },
-        { key = "live_status", type = "description", x = 8, y = 20, w = 193, h = 8, label = GetCurrentInfo() },
-        { key = "ctrl_header", type = "subheader", x = 8, y = 28, w = 193, h = 8, label = L["核心控制"], labelPos = "top" },
-        { key = "enabled", type = "checkbox", x = 16, y = 44, w = 32, h = 8, label = L["开启功能"] },
-        { key = "aiMode", type = "checkbox", x = 56, y = 44, w = 32, h = 8, label = "|cff00ffff" .. L["启用 AI 智能模式"] .. "|r" },
-        { key = "globalFixed", type = "input", x = 104, y = 44, w = 60, h = 8, label = L["全局默认延迟值 (固定)"], labelSize = 17 },
-        { key = "h_板甲职业", type = "subheader", x = 8, y = 60, w = 193, h = 4, label = L["板甲职业"] },
-        { key = "250", type = "input", x = 36, y = 72, w = 36, h = 8, label = MakeSpecLabel(135770, "C41E3A", "鲜血"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "251", type = "input", x = 100, y = 72, w = 36, h = 8, label = MakeSpecLabel(135773, "C41E3A", "冰霜"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "252", type = "input", x = 168, y = 72, w = 33, h = 8, label = MakeSpecLabel(135775, "C41E3A", "邪恶"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "71", type = "input", x = 100, y = 80, w = 36, h = 8, label = MakeSpecLabel(132355, "C79C6E", "武器"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "72", type = "input", x = 168, y = 80, w = 33, h = 8, label = MakeSpecLabel(132347, "C79C6E", "狂怒"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "73", type = "input", x = 36, y = 80, w = 36, h = 8, label = MakeSpecLabel(132341, "C79C6E", "防护"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "65", type = "input", x = 168, y = 88, w = 33, h = 8, label = MakeSpecLabel(135920, "F48CBA", "神圣"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "66", type = "input", x = 36, y = 88, w = 36, h = 8, label = MakeSpecLabel(236264, "F48CBA", "防护"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "70", type = "input", x = 100, y = 88, w = 36, h = 8, label = MakeSpecLabel(135873, "F48CBA", "惩戒"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "h_锁甲职业", type = "subheader", x = 8, y = 108, w = 193, h = 4, label = L["锁甲职业"] },
-        { key = "253", type = "input", x = 168, y = 128, w = 33, h = 8, label = MakeSpecLabel(461112, "ABD473", "野兽控制"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "254", type = "input", x = 100, y = 128, w = 36, h = 8, label = MakeSpecLabel(236179, "ABD473", "射击"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "255", type = "input", x = 36, y = 128, w = 36, h = 8, label = MakeSpecLabel(461113, "ABD473", "生存"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "262", type = "input", x = 36, y = 120, w = 36, h = 8, label = MakeSpecLabel(136048, "0070DD", "元素"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "263", type = "input", x = 100, y = 120, w = 36, h = 8, label = MakeSpecLabel(237581, "0070DD", "增强"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "264", type = "input", x = 168, y = 120, w = 33, h = 8, label = MakeSpecLabel(136052, "0070DD", "恢复"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "1467", type = "input", x = 36, y = 136, w = 36, h = 8, label = MakeSpecLabel(4511811, "33937F", "湮灭"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "1468", type = "input", x = 168, y = 136, w = 33, h = 8, label = MakeSpecLabel(4511812, "33937F", "恩护"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "1473", type = "input", x = 100, y = 136, w = 36, h = 8, label = MakeSpecLabel(5198700, "33937F", "增辉"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "h_皮甲职业", type = "subheader", x = 8, y = 156, w = 193, h = 4, label = L["皮甲职业"] },
-        { key = "577", type = "input", x = 100, y = 168, w = 36, h = 8, label = MakeSpecLabel(1247264, "A330C9", "浩劫"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "581", type = "input", x = 36, y = 168, w = 36, h = 8, label = MakeSpecLabel(1247265, "A330C9", "复仇"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "1480", type = "input", x = 168, y = 168, w = 33, h = 8, label = MakeSpecLabel(7455385, "A330C9", "噬灭"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "259", type = "input", x = 100, y = 176, w = 36, h = 8, label = MakeSpecLabel(236270, "FFF468", "奇袭"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "260", type = "input", x = 36, y = 176, w = 36, h = 8, label = MakeSpecLabel(236286, "FFF468", "狂徒"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "261", type = "input", x = 168, y = 176, w = 33, h = 8, label = MakeSpecLabel(132320, "FFF468", "敏锐"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "268", type = "input", x = 36, y = 184, w = 36, h = 8, label = MakeSpecLabel(608951, "00FF98", "酒仙"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "269", type = "input", x = 100, y = 184, w = 36, h = 8, label = MakeSpecLabel(608953, "00FF98", "踏风"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "270", type = "input", x = 168, y = 184, w = 33, h = 8, label = MakeSpecLabel(608952, "00FF98", "织雾"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "102", type = "input", x = 132, y = 192, w = 24, h = 8, label = MakeSpecLabel(136096, "FF7C0A", "平衡"), parentKey = "specs", labelPos = "left" },
-        { key = "103", type = "input", x = 84, y = 192, w = 24, h = 8, label = MakeSpecLabel(132115, "FF7C0A", "野性"), parentKey = "specs", labelPos = "left" },
-        { key = "104", type = "input", x = 36, y = 192, w = 24, h = 8, label = MakeSpecLabel(132276, "FF7C0A", "守护"), parentKey = "specs", labelPos = "left" },
-        { key = "105", type = "input", x = 180, y = 192, w = 21, h = 8, label = MakeSpecLabel(136041, "FF7C0A", "恢复"), parentKey = "specs", labelPos = "left" },
-        { key = "h_布甲职业", type = "subheader", x = 8, y = 212, w = 193, h = 4, label = L["布甲职业"] },
-        { key = 62, type = "input", x = 168, y = 224, w = 33, h = 8, label = MakeSpecLabel(135932, "3FC7EB", "奥术"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = 63, type = "input", x = 100, y = 224, w = 36, h = 8, label = MakeSpecLabel(135810, "3FC7EB", "火焰"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = 64, type = "input", x = 36, y = 224, w = 36, h = 8, label = MakeSpecLabel(135846, "3FC7EB", "冰霜"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = 265, type = "input", x = 100, y = 232, w = 36, h = 8, label = MakeSpecLabel(136145, "8788EE", "痛苦"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "266", type = "input", x = 168, y = 232, w = 33, h = 8, label = MakeSpecLabel(136172, "8788EE", "恶魔学识"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = 267, type = "input", x = 36, y = 232, w = 36, h = 8, label = MakeSpecLabel(136186, "8788EE", "毁灭"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = 256, type = "input", x = 36, y = 240, w = 36, h = 8, label = MakeSpecLabel(135940, "FFFFFF", "戒律"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = 257, type = "input", x = 100, y = 240, w = 36, h = 8, label = MakeSpecLabel(237542, "FFFFFF", "神圣"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = 258, type = "input", x = 168, y = 240, w = 33, h = 8, label = MakeSpecLabel(136207, "FFFFFF", "暗影"), parentKey = "specs", labelPos = "left", labelSize = 18 },
-        { key = "divider_9437", type = "divider", x = 8, y = 36, w = 193, h = 4, label = L["新组件"] },
-        { key = "divider_4513", type = "divider", x = 8, y = 64, w = 193, h = 4, label = L["新组件"] },
-        { key = "divider_6806", type = "divider", x = 8, y = 112, w = 193, h = 4, label = L["新组件"] },
-        { key = "divider_8842", type = "divider", x = 8, y = 160, w = 193, h = 4, label = L["新组件"] },
-        { key = "divider_5635", type = "divider", x = 8, y = 216, w = 193, h = 4, label = L["新组件"] },
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
+local function EX_RegisterLegacyLayout()
+    -- [声明迁移边界：设置页] 控件只声明一次；专精紧凑行由 Core 按原 moduleKey/parentKey/key 语义呈现。
+    -- AI/固定模式的 key、专精 parentKey 切换、专精业务顺序与 CVar 回调禁止修改。
+    local liveStatus = { key = "live_status", type = "description", label = GetCurrentInfo() }
+    local coreItems = {
+        { key = "enabled", type = "switch", label = L["开启功能"] },
+        { key = "aiMode", type = "switch", label = "|cff00ffff" .. L["启用 AI 智能模式"] .. "|r" },
+        { key = "globalFixed", type = "input", label = L["全局默认延迟值 (固定)"] },
+    }
+    local plateItems = {
+        { key = "250", type = "input", label = MakeSpecLabel(135770, "C41E3A", "鲜血"), parentKey = "specs" },
+        { key = "251", type = "input", label = MakeSpecLabel(135773, "C41E3A", "冰霜"), parentKey = "specs" },
+        { key = "252", type = "input", label = MakeSpecLabel(135775, "C41E3A", "邪恶"), parentKey = "specs" },
+        { key = "73", type = "input", label = MakeSpecLabel(132341, "C79C6E", "防护"), parentKey = "specs" },
+        { key = "71", type = "input", label = MakeSpecLabel(132355, "C79C6E", "武器"), parentKey = "specs" },
+        { key = "72", type = "input", label = MakeSpecLabel(132347, "C79C6E", "狂怒"), parentKey = "specs" },
+        { key = "66", type = "input", label = MakeSpecLabel(236264, "F48CBA", "防护"), parentKey = "specs" },
+        { key = "70", type = "input", label = MakeSpecLabel(135873, "F48CBA", "惩戒"), parentKey = "specs" },
+        { key = "65", type = "input", label = MakeSpecLabel(135920, "F48CBA", "神圣"), parentKey = "specs" },
+    }
+    local mailItems = {
+        { key = "255", type = "input", label = MakeSpecLabel(461113, "ABD473", "生存"), parentKey = "specs" },
+        { key = "254", type = "input", label = MakeSpecLabel(236179, "ABD473", "射击"), parentKey = "specs" },
+        { key = "253", type = "input", label = MakeSpecLabel(461112, "ABD473", "野兽控制"), parentKey = "specs" },
+        { key = "262", type = "input", label = MakeSpecLabel(136048, "0070DD", "元素"), parentKey = "specs" },
+        { key = "263", type = "input", label = MakeSpecLabel(237581, "0070DD", "增强"), parentKey = "specs" },
+        { key = "264", type = "input", label = MakeSpecLabel(136052, "0070DD", "恢复"), parentKey = "specs" },
+        { key = "1467", type = "input", label = MakeSpecLabel(4511811, "33937F", "湮灭"), parentKey = "specs" },
+        { key = "1473", type = "input", label = MakeSpecLabel(5198700, "33937F", "增辉"), parentKey = "specs" },
+        { key = "1468", type = "input", label = MakeSpecLabel(4511812, "33937F", "恩护"), parentKey = "specs" },
+    }
+    local leatherItems = {
+        { key = "581", type = "input", label = MakeSpecLabel(1247265, "A330C9", "复仇"), parentKey = "specs" },
+        { key = "577", type = "input", label = MakeSpecLabel(1247264, "A330C9", "浩劫"), parentKey = "specs" },
+        { key = "1480", type = "input", label = MakeSpecLabel(7455385, "A330C9", "噬灭"), parentKey = "specs" },
+        { key = "260", type = "input", label = MakeSpecLabel(236286, "FFF468", "狂徒"), parentKey = "specs" },
+        { key = "259", type = "input", label = MakeSpecLabel(236270, "FFF468", "奇袭"), parentKey = "specs" },
+        { key = "261", type = "input", label = MakeSpecLabel(132320, "FFF468", "敏锐"), parentKey = "specs" },
+        { key = "268", type = "input", label = MakeSpecLabel(608951, "00FF98", "酒仙"), parentKey = "specs" },
+        { key = "269", type = "input", label = MakeSpecLabel(608953, "00FF98", "踏风"), parentKey = "specs" },
+        { key = "270", type = "input", label = MakeSpecLabel(608952, "00FF98", "织雾"), parentKey = "specs" },
+        { key = "104", type = "input", label = MakeSpecLabel(132276, "FF7C0A", "守护"), parentKey = "specs" },
+        { key = "103", type = "input", label = MakeSpecLabel(132115, "FF7C0A", "野性"), parentKey = "specs" },
+        { key = "102", type = "input", label = MakeSpecLabel(136096, "FF7C0A", "平衡"), parentKey = "specs" },
+        { key = "105", type = "input", label = MakeSpecLabel(136041, "FF7C0A", "恢复"), parentKey = "specs" },
+    }
+    local clothItems = {
+        { key = 64, type = "input", label = MakeSpecLabel(135846, "3FC7EB", "冰霜"), parentKey = "specs" },
+        { key = 63, type = "input", label = MakeSpecLabel(135810, "3FC7EB", "火焰"), parentKey = "specs" },
+        { key = 62, type = "input", label = MakeSpecLabel(135932, "3FC7EB", "奥术"), parentKey = "specs" },
+        { key = 267, type = "input", label = MakeSpecLabel(136186, "8788EE", "毁灭"), parentKey = "specs" },
+        { key = 265, type = "input", label = MakeSpecLabel(136145, "8788EE", "痛苦"), parentKey = "specs" },
+        { key = "266", type = "input", label = MakeSpecLabel(136172, "8788EE", "恶魔学识"), parentKey = "specs" },
+        { key = 256, type = "input", label = MakeSpecLabel(135940, "FFFFFF", "戒律"), parentKey = "specs" },
+        { key = 257, type = "input", label = MakeSpecLabel(237542, "FFFFFF", "神圣"), parentKey = "specs" },
+        { key = 258, type = "input", label = MakeSpecLabel(136207, "FFFFFF", "暗影"), parentKey = "specs" },
+    }
+    local items = {
+        coreItems[1], coreItems[2], coreItems[3],
+        plateItems[1], plateItems[2], plateItems[3], plateItems[5], plateItems[6], plateItems[4],
+        plateItems[9], plateItems[7], plateItems[8],
+        mailItems[3], mailItems[2], mailItems[1], mailItems[4], mailItems[5], mailItems[6],
+        mailItems[7], mailItems[9], mailItems[8],
+        leatherItems[2], leatherItems[1], leatherItems[3], leatherItems[5], leatherItems[4], leatherItems[6],
+        leatherItems[7], leatherItems[8], leatherItems[9], leatherItems[12], leatherItems[11], leatherItems[10], leatherItems[13],
+        clothItems[3], clothItems[2], clothItems[1], clothItems[5], clothItems[6], clothItems[4],
+        clothItems[7], clothItems[8], clothItems[9],
     }
 
 
@@ -119,8 +137,8 @@ local function EX_RegisterLayout()
     local targetStorage = EX_DB.aiMode and "specsAI" or "specs"
     local suffix = EX_DB.aiMode and " |cff00ffff(AI)|r" or ""
 
-    for i = 1, #layout do
-        local item = layout[i]
+    for i = 1, #items do
+        local item = items[i]
 
         -- 全局默认值切换 (双向修复)
         -- 无论当前 layout 里写的是 globalFixed 还是 globalOffset，都根据 aiMode 强制修正
@@ -152,9 +170,231 @@ local function EX_RegisterLayout()
         end
     end
 
+    local layout = {
+        version = 1,
+        description = L["AI模式：容限 = 延迟 + 偏移。固定模式：容限 = 设定值。"],
+        sections = {
+            {
+                kind = "settings",
+                id = "overview",
+                title = L["全职业延迟容限 (SpellQueueWindow)"],
+                description = liveStatus,
+                items = {},
+            },
+            { kind = "settings", id = "core", title = L["核心控制"], items = coreItems },
+            { kind = "settings", id = "plate", title = L["板甲职业"], items = plateItems },
+            { kind = "settings", id = "mail", title = L["锁甲职业"], items = mailItems },
+            { kind = "settings", id = "leather", title = L["皮甲职业"], items = leatherItems },
+            { kind = "settings", id = "cloth", title = L["布甲职业"], items = clothItems },
+        },
+    }
+
     ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
 end
 
+local SPEC_GROUPS = {
+    plate = {
+        { class = "死亡骑士", specs = { { 250, 135770, "C41E3A", "鲜血" }, { 251, 135773, "C41E3A", "冰霜" }, { 252, 135775, "C41E3A", "邪恶" } } },
+        { class = "战士", specs = { { 73, 132341, "C79C6E", "防护" }, { 71, 132355, "C79C6E", "武器" }, { 72, 132347, "C79C6E", "狂怒" } } },
+        { class = "圣骑士", specs = { { 66, 236264, "F48CBA", "防护" }, { 70, 135873, "F48CBA", "惩戒" }, { 65, 135920, "F48CBA", "神圣" } } },
+    },
+    mail = {
+        { class = "猎人", specs = { { 255, 461113, "ABD473", "生存" }, { 254, 236179, "ABD473", "射击" }, { 253, 461112, "ABD473", "野兽控制" } } },
+        { class = "萨满祭司", specs = { { 262, 136048, "0070DD", "元素" }, { 263, 237581, "0070DD", "增强" }, { 264, 136052, "0070DD", "恢复" } } },
+        { class = "唤魔师", specs = { { 1467, 4511811, "33937F", "湮灭" }, { 1473, 5198700, "33937F", "增辉" }, { 1468, 4511812, "33937F", "恩护" } } },
+    },
+    leather = {
+        { class = "恶魔猎手", specs = { { 581, 1247265, "A330C9", "复仇" }, { 577, 1247264, "A330C9", "浩劫" }, { 1480, 7455385, "A330C9", "噬灭" } } },
+        { class = "潜行者", specs = { { 260, 236286, "FFF468", "狂徒" }, { 259, 236270, "FFF468", "奇袭" }, { 261, 132320, "FFF468", "敏锐" } } },
+        { class = "武僧", specs = { { 268, 608951, "00FF98", "酒仙" }, { 269, 608953, "00FF98", "踏风" }, { 270, 608952, "00FF98", "织雾" } } },
+        { class = "德鲁伊", specs = { { 104, 132276, "FF7C0A", "守护" }, { 103, 132115, "FF7C0A", "野性" }, { 102, 136096, "FF7C0A", "平衡" }, { 105, 136041, "FF7C0A", "恢复" } } },
+    },
+    cloth = {
+        { class = "法师", specs = { { 64, 135846, "3FC7EB", "冰霜" }, { 63, 135810, "3FC7EB", "火焰" }, { 62, 135932, "3FC7EB", "奥术" } } },
+        { class = "术士", specs = { { 267, 136186, "8788EE", "毁灭" }, { 265, 136145, "8788EE", "痛苦" }, { 266, 136172, "8788EE", "恶魔学识" } } },
+        { class = "牧师", specs = { { 256, 135940, "FFFFFF", "戒律" }, { 257, 237542, "FFFFFF", "神圣" }, { 258, 136207, "FFFFFF", "暗影" } } },
+    },
+}
+
+local function BuildSpecCard(id, title, source)
+    local columns = { { width = 104 } }
+    local cells = {
+        { id = id .. ".classCell", kind = "cell", children = {
+            { id = id .. ".className", kind = "text", textSource = "className" },
+        } },
+    }
+    for slot = 1, source == "leather" and 4 or 3 do
+        columns[#columns + 1] = { weight = 1 }
+        cells[#cells + 1] = { id = id .. ".specCell" .. slot, kind = "cell", children = {
+            { id = id .. ".spec" .. slot, kind = "control", ref = "spec" .. slot,
+                controlType = "input", visible = slot == 4 and "hasFourthSpec" or nil },
+        } }
+    end
+    return {
+        id = id, kind = "card", title = title, children = {
+            { id = id .. ".columns", kind = "columns",
+                columns = columns,
+                children = {
+                    { id = id .. ".rows", kind = "repeat", source = source,
+                        template = { id = id .. ".row", kind = "row", separator = true, children = cells } },
+                },
+            },
+        },
+    }
+end
+
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations — V2 Page Adapters / V2 页面适配器
+-- =========================================================
+local function BuildV2Declaration()
+    return {
+        version = 2,
+        cards = {
+            {
+                id = "queue.core", kind = "card", title = L["全职业延迟容限 (SpellQueueWindow)"], children = {
+                    { id = "queue.status", kind = "hint", textSource = "status" },
+                    { id = "queue.help", kind = "hint", text = L["AI模式：容限 = 延迟 + 偏移。固定模式：容限 = 设定值。"] },
+                    { id = "queue.coreRow", kind = "row", children = {
+                        { id = "queue.enabled", kind = "control", ref = "enabled", controlType = "checkbox", width = 150 },
+                        { id = "queue.aiMode", kind = "control", ref = "aiMode", controlType = "checkbox", width = 210 },
+                        { id = "queue.global", kind = "control", ref = "global", controlType = "input", weight = 1 },
+                    } },
+                },
+            },
+            BuildSpecCard("queue.plate", L["板甲职业"], "plate"),
+            BuildSpecCard("queue.mail", L["锁甲职业"], "mail"),
+            BuildSpecCard("queue.leather", L["皮甲职业"], "leather"),
+            BuildSpecCard("queue.cloth", L["布甲职业"], "cloth"),
+        },
+    }
+end
+
+local function CreateV2Owner()
+    local owner = { controls = {}, components = {}, actions = {}, predicates = {}, sources = {}, texts = {} }
+    local session
+    function owner:AttachSession(value) session = value end
+    local function RefreshPage() if session then session:Refresh() end end
+    local function ReleaseControl(widget)
+        if _G.ExwindGrid and _G.ExwindGrid.ReleaseWidgetInstance then
+            _G.ExwindGrid:ReleaseWidgetInstance(widget)
+        end
+    end
+    local function Commit(binding, value)
+        if binding.read() == value then return false end
+        EXUI:CommitModuleValue({
+            moduleKey = EXWIND_MODULE_KEY,
+            path = binding.path,
+            readValue = binding.read,
+            writeValue = binding.write,
+        }, value)
+        RefreshPage()
+        return true
+    end
+    local function Checkbox(label, key)
+        return {
+            mount = function(host)
+                return EXUI:CreateCheckbox(host, label, EX_DB[key] == true, function(value)
+                    Commit({ path = key, read = function() return EX_DB[key] end,
+                        write = function(nextValue) EX_DB[key] = nextValue end }, value == true)
+                end)
+            end,
+            update = function(widget) widget:SetChecked(EX_DB[key] == true) end,
+            release = ReleaseControl,
+        }
+    end
+    local function Input(bindingFor, labelFor)
+        return {
+            mount = function(host, context)
+                local binding = bindingFor(context.scope)
+                local widget = EXUI:CreateEditBox(host, tostring(binding.read() or ""), 180, GM.size.inputHeight,
+                    labelFor(context.scope), {
+                        labelPos = "left",
+                        onEnter = function(text) Commit(bindingFor(context.scope), text or "") end,
+                        onEditFocusLost = function(text) Commit(bindingFor(context.scope), text or "") end,
+                    })
+                return widget
+            end,
+            update = function(widget, context)
+                local binding = bindingFor(context.scope)
+                if widget.label then widget.label:SetText(labelFor(context.scope)) end
+                local editBox = widget.editBox or widget
+                local text = tostring(binding.read() or "")
+                if (not editBox.HasFocus or not editBox:HasFocus()) and editBox:GetText() ~= text then
+                    editBox:SetText(text)
+                end
+            end,
+            measure = function(widget, context, width)
+                local gap = GM.space.settingsV2Gap
+                local labelWidth = math.min(math.ceil(widget.label:GetUnboundedStringWidth()),
+                    math.max(1, width - GM.size.sliderInputWidth - gap))
+                widget.label:SetWidth(labelWidth)
+                widget.label:SetWordWrap(true)
+                widget._exV2LabelWidth = labelWidth
+                return math.max(GM.size.inputHeight, math.ceil(widget.label:GetStringHeight()))
+            end,
+            layout = function(widget, context, width, height)
+                local gap = GM.space.settingsV2Gap
+                local labelWidth = widget._exV2LabelWidth or 0
+                widget:ClearAllPoints()
+                widget:SetPoint("TOPRIGHT", widget:GetParent(), "TOPRIGHT", 0,
+                    -(height - GM.size.inputHeight) / 2)
+                widget:SetSize(math.max(1, width - labelWidth - gap), GM.size.inputHeight)
+                widget.label:ClearAllPoints()
+                widget.label:SetPoint("RIGHT", widget, "LEFT", -gap, 0)
+                widget.label:SetJustifyH("LEFT")
+                widget.label:SetWidth(labelWidth)
+            end,
+            release = ReleaseControl,
+        }
+    end
+
+    owner.controls.enabled = Checkbox(L["开启功能"], "enabled")
+    owner.controls.aiMode = Checkbox("|cff00ffff" .. L["启用 AI 智能模式"] .. "|r", "aiMode")
+    owner.controls.global = Input(function()
+        local key = EX_DB.aiMode and "globalOffset" or "globalFixed"
+        return { path = key, read = function() return EX_DB[key] end,
+            write = function(value) EX_DB[key] = value end }
+    end, function()
+        return EX_DB.aiMode and L["全局延迟偏移 |cff00ffff(AI)|r"] or L["全局默认延迟值 (固定)"]
+    end)
+    for slot = 1, 4 do
+        local specSlot = slot
+        owner.controls["spec" .. specSlot] = Input(function(scope)
+            local spec = scope.item.specs[specSlot]
+            if not spec then
+                return { path = "specs.__unused", read = function() return nil end, write = function() end }
+            end
+            local storageKey = EX_DB.aiMode and "specsAI" or "specs"
+            local storage = EX_DB[storageKey]
+            return { path = storageKey .. "." .. spec[1], read = function() return storage[spec[1]] end,
+                write = function(value) storage[spec[1]] = value end }
+        end, function(scope)
+            local spec = scope.item.specs[specSlot]
+            if not spec then return "" end
+            local prefix = EX_DB.aiMode and "|cff00ffff(AI)|r " or ""
+            return prefix .. MakeSpecLabel(spec[2], spec[3], spec[4])
+        end)
+    end
+    owner.sources.plate = function() return SPEC_GROUPS.plate end
+    owner.sources.mail = function() return SPEC_GROUPS.mail end
+    owner.sources.leather = function() return SPEC_GROUPS.leather end
+    owner.sources.cloth = function() return SPEC_GROUPS.cloth end
+    owner.texts.status = function() return GetCurrentInfo() end
+    owner.texts.className = function(scope) return L[scope.item.class] end
+    owner.predicates.hasFourthSpec = function(scope) return scope.item.specs[4] ~= nil end
+    return owner
+end
+
+local layoutRegistered = false
+local function EX_RegisterLayout()
+    if layoutRegistered then return end
+    EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, BuildV2Declaration(), CreateV2Owner)
+    layoutRegistered = true
+end
+
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function ApplySpellQueue()
     if not EX_DB.enabled then return end
 
@@ -181,6 +421,9 @@ local function ApplySpellQueue()
     SetCVar("SpellQueueWindow", finalVal)
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 -- =============================================================
 -- 第四部分：事件与状态订阅
 -- =============================================================
@@ -215,6 +458,9 @@ ExwindTools:WatchState("SpecName", EXWIND_MODULE_KEY, OnIdentityChanged)
 -- =============================================================
 -- 第五部分：初始化与模块报告
 -- =============================================================
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 C_Timer.After(2, ApplySpellQueue)
 
 ExwindTools:ReportReady(EXWIND_MODULE_KEY)

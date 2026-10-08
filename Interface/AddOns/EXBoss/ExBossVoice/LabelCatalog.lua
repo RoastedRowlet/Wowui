@@ -31,11 +31,6 @@ local function GetManifestLabels()
     return out
 end
 
--- 所有新制式语音包共享同一标签 -> 文件名映射；包之间仅音频内容不同。
-function Catalog.GetPackLabels(_)
-    return GetManifestLabels()
-end
-
 function Catalog.GetStandardLabels()
     return GetManifestLabels()
 end

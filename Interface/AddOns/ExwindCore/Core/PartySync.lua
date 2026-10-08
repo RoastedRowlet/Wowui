@@ -45,7 +45,7 @@ local function IsPlainString(value)
 end
 
 local function NormalizeGUIDKey(guid)
-    if type(guid) ~= "string" or guid == "" then
+    if not IsPlainString(guid) or guid == "" then
         return nil
     end
     return guid
@@ -56,23 +56,14 @@ local function GetUnitGUIDSafe(unit)
         return nil
     end
 
-    local ok, guid = pcall(_G.UnitGUID, unit)
-    if not ok then
-        return nil
-    end
-
-    return NormalizeGUIDKey(guid)
+    return NormalizeGUIDKey(_G.UnitGUID(unit))
 end
 
 local function NormalizeName(name)
     if not IsPlainString(name) then
         return nil
     end
-    local ok, normalized = pcall(_G.Ambiguate, name, "none")
-    if ok and type(normalized) == "string" then
-        return normalized
-    end
-    return nil
+    return _G.Ambiguate(name, "none")
 end
 
 local function GetPlayerSpecID()
@@ -221,7 +212,7 @@ local function FindGUIDBySender(sender)
 end
 
 local function FindPartyUnitByName(name)
-    if not IsPlainString(name) then return nil end
+    if not IsPartySyncContextAllowed() or not IsPlainString(name) then return nil end
 
     local guid = FindGUIDBySender(name)
     if guid then
@@ -253,6 +244,7 @@ local function FindPartyUnitByName(name)
 end
 
 local function ResolvePartyMember(unitHint, nameHint)
+    if not IsPartySyncContextAllowed() then return nil end
     if type(unitHint) == "string" and unitHint ~= "" and _G.UnitExists(unitHint) then
         local guid = GetUnitGUIDSafe(unitHint)
         if guid then
@@ -273,6 +265,7 @@ local function UpdateSpec(guid, unit, specID, source)
     if not guid or specID <= 0 then return end
 
     local entry = EnsureCache(guid, unit)
+    if entry.sourceSpec == "LibSpec" and source ~= "LibSpec" then return end
     local oldSpecID = entry.specID
     entry.specID = specID
     entry.specTS = _G.GetTime()
@@ -293,7 +286,8 @@ local function UpdateKeystone(guid, unit, keyLevel, keyMapID, rating, source)
     keyMapID = tonumber(keyMapID) or 0
     rating = tonumber(rating) or 0
 
-    local changed = entry.keyLevel ~= keyLevel or entry.keyMapID ~= keyMapID or entry.rating ~= rating
+    if entry.sourceKey == "LibKeystone" and source ~= "LibKeystone" then return end
+    local changed = not entry.sourceKey or entry.keyLevel ~= keyLevel or entry.keyMapID ~= keyMapID or entry.rating ~= rating
     entry.keyLevel = keyLevel
     entry.keyMapID = keyMapID
     entry.rating = rating
@@ -467,14 +461,14 @@ local function RebuildRoster()
 end
 
 local function OnInspectReady(guid)
+    guid = NormalizeGUIDKey(guid)
+    if not guid then return end
     if not IsPartySyncContextAllowed() then
         if guid == activeInspectGUID then
             ClearInspectState()
         end
         return
     end
-    guid = NormalizeGUIDKey(guid)
-    if not guid then return end
 
     local unit = GuidToUnit[guid]
     if unit and _G.UnitExists(unit) then
@@ -554,26 +548,16 @@ end
 
 local function RequestExternalLibData()
     TryHookExternalLibs()
-    ImportOpenRaidCache()
 
-    if not IsInGroupNow() or not HasRealPlayerPartyMembers() then
+    if not IsPartySyncContextAllowed() or _G.C_ChatInfo.InChatMessagingLockdown() then
         return
     end
 
-    if LibSpecialization and LibSpecialization.RequestGroupSpecialization then
-        LibSpecialization.RequestGroupSpecialization()
-    end
+    -- LibSpecialization synchronizes the group automatically.
     if LibKeystone and LibKeystone.Request then
         LibKeystone.Request("PARTY")
     end
-    if LibOpenRaid then
-        if LibOpenRaid.RequestAllData then
-            LibOpenRaid.RequestAllData()
-        end
-        if LibOpenRaid.RequestKeystoneDataFromParty then
-            LibOpenRaid.RequestKeystoneDataFromParty()
-        end
-    end
+    -- OpenRaid is a passive secondary source; LibKeystone owns requests.
 end
 
 local function CollectGarbage()
@@ -607,7 +591,14 @@ local function OnEvent(event, ...)
     elseif event == "INSPECT_READY" then
         OnInspectReady(...)
     elseif event == "PLAYER_REGEN_ENABLED" then
+        RebuildRoster()
         TryInspectNext()
+        RequestExternalLibData()
+    elseif event == "ADDON_RESTRICTION_STATE_CHANGED" then
+        if not _G.C_ChatInfo.InChatMessagingLockdown() then
+            RebuildRoster()
+            RequestExternalLibData()
+        end
     elseif event == "ACTIVE_COMBAT_CONFIG_CHANGED" or event == "TRAIT_CONFIG_UPDATED" or event == "PLAYER_SPECIALIZATION_CHANGED" then
         RefreshOwnData()
         RequestExternalLibData()
@@ -677,6 +668,7 @@ ExwindTools:RegisterEvent("GROUP_ROSTER_UPDATE", "PartySync", OnEvent)
 ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", "PartySync", OnEvent)
 ExwindTools:RegisterEvent("INSPECT_READY", "PartySync", OnEvent)
 ExwindTools:RegisterEvent("PLAYER_REGEN_ENABLED", "PartySync", OnEvent)
+ExwindTools:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED", "PartySync", OnEvent)
 ExwindTools:RegisterEvent("ACTIVE_COMBAT_CONFIG_CHANGED", "PartySync", OnEvent)
 ExwindTools:RegisterEvent("TRAIT_CONFIG_UPDATED", "PartySync", OnEvent)
 ExwindTools:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", "PartySync", OnEvent)

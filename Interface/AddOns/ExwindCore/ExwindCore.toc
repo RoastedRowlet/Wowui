@@ -29,13 +29,16 @@ Locale\itIT.lua
 # 1. 主引擎
 Core\ExwindTools_Metadata.lua
 Core\ExwindTools.lua
+Core\ExwindCapability.lua
+Core\GUI\ExwindGUIColor.lua
+Core\GUI\ExwindGUIMetrics.lua
+Core\GUI\ExwindGUIIcons.lua
 Core\Panel\ExwindPanelTheme.lua
 Core\Renderer\ExwindVisualLayers.lua
 Core\ExwindMedia.lua
 Core\ExwindUnitFrame.lua
 Core\Renderer\ExwindBlizzardNameplateAnchor.lua
 Core\ExwindEvent.lua
-Core\ExwindPerfMonitor.lua
 Core\GUI\ExwindTools_Changelog.lua
 
 
@@ -48,8 +51,13 @@ Core\Renderer\ExwindEditMode.lua
 Core\GUI\ExwindFramePool.lua
 Core\GUI\ExwindVirtualList.lua
 Core\GUI\ExwindGUI.lua
+Core\GUI\ExwindGUISettingsList.lua
+Core\GUI\ExwindGUIComposite.lua
 Core\GUI\ExwindControlAppearance.lua
 Core\GUI\ExwindChoiceGroup.lua
+Core\GUI\ExwindGUITree.lua
+Core\GUI\ExwindTextureCatalog.lua
+Core\GUI\ExwindTextureBrowser.lua
 Core\Renderer\ExwindWidgets.lua
 Core\Renderer\ExwindRegionElements.lua
 Core\Renderer\ExwindPreviewWorkspace.lua
@@ -66,6 +74,7 @@ Core\Renderer\ExwindStandardTimerBar.lua
 Core\Renderer\ExwindGlow.lua
 Core\GUI\ExwindGrid.lua
 Core\GUI\ExwindToolsUI.lua
+Core\GUI\ExwindSettingsV2.lua
 Core\Renderer\ExwindModuleDefinition.lua
 Core\Renderer\ExwindCentralRender.lua
 Core\Renderer\ExwindCentralTextRender.lua
@@ -78,9 +87,9 @@ Core\Panel\ExwindToolsPanelProvider.lua
 Core\Panel\ExwindPanelRouter.lua
 
 # 4. 配置/队伍专精
-# [临时排查内存增长]
 Core\ExwindExport.lua
-# Core\PartySync.lua
+Core\PartySync.lua
+# [临时排查内存增长：PartySpec 仍停用]
 # Core\PartySpec.lua
 
 # 5. UI 皮肤集成（可选，检测到对应插件时自动生效）

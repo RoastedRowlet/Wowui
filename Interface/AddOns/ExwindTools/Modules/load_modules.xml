@@ -44,6 +44,7 @@
     <Script file="NODISPLAY/ExClass.SpellEffectAlpha.lua"/>
     <Script file="ICON/ExTools.YYSound.lua"/>
     <Script file="SPECIAL/ExTools.PlayerPosition.lua"/>
+    <Script file="SPECIAL/ExTools.CooldownFlash.lua"/>
     <!-- 个人保留旧模块：保持原功能，不纳入 EXUI 标准重构。 -->
 
     <Script file="TEXT/ExTools.CombatTimer.lua"/>

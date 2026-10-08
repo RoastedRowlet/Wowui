@@ -52,6 +52,11 @@ NS.Defaults = {
     maxPerRow = 6,
     -- Hide the default plate's own aura row, so ours is not a second one.
     hideBlizzardAuras = false,
+    -- Mouseover tooltips on our icons. OFF, because the hitbox comes with
+    -- them: an icon that can be hovered is an icon that can take the click
+    -- you meant for the mob behind it, and these sit directly over a plate
+    -- you are trying to target. The tooltip is the smaller want.
+    tooltips = false,
     borderSize = 1,
     borderColor = { r = 0, g = 0, b = 0, a = 1 },
     -- Swirl and countdown numbers are separate: one checkbox for both meant

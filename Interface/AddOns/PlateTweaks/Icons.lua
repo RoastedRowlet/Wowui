@@ -22,6 +22,12 @@ local function InitializeIcon(icons, button)
   local db = NS.db.icons
   table.insert(icons.buttons, button)
 
+  -- The hitbox IS the tooltip: these are the game's own aura buttons, and
+  -- they show the aura's tooltip when the mouse can reach them. Mouse off is
+  -- also click-through, which is the other half of why someone turns this
+  -- off -- an icon over a plate otherwise eats the click meant for the mob.
+  pcall(button.EnableMouse, button, db.tooltips and true or false)
+
   pcall(function()
     button:SetSize(db.size, db.size)
 
@@ -141,6 +147,9 @@ function NS.AnchorIcons(rig)
   for _, button in ipairs(icons.buttons) do
     pcall(button.SetSize, button, db.size, db.size)
     pcall(button.SetFrameLevel, button, rig.baseLevel + 20)
+    -- Re-applied here as well as at creation, so the switch reaches buttons
+    -- that already exist instead of waiting for the next plate.
+    pcall(button.EnableMouse, button, db.tooltips and true or false)
   end
 end
 

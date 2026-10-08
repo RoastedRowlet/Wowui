@@ -17,7 +17,7 @@ local p3SoakTimers = {
 }
 
 local debuffCircleFilter = "HARMFUL"
-local debuffCircleCandidateFilters = {isFromPlayerOrPlayerPet = false, maxDuration = 5.5}
+local debuffCircleCandidateFilters = {isFromPlayerOrPlayerPet = false, maxDuration = 5.5, isBossOrRoleAura = false}
 
 NSI.InitializeAlerts[encID] = function(self)
     NSRT.EncounterAlerts[encID] = NSRT.EncounterAlerts[encID] or {}
@@ -146,7 +146,7 @@ local debuffCirclePreview = [[return function(NSI)
         },
     }
     local data = {group = "Coiled Altar", internalID = "DebuffCircle", name = "Orb/Bomb Circle", text = "", DisplayType = "Circle", encID = encID,
-        phase = nil, TTS = false, difficulties = {14, 15, 16}, isSpecialDisplay = true, BlockCopy = true, NoEdit = true,
+        phase = nil, TTS = false, difficulties = {14, 15, 16}, BlockCopy = true, NoEdit = true,
         CircleColor = {1, 0, 0, 1}, CircleTexture = "Interface\\AddOns\\NorthernSkyRaidTools\\Media\\Textures\\circle_8px.png",
         Preview = debuffCirclePreview, extraOptions = debuffCircleOptions,
     }
@@ -170,7 +170,7 @@ local debuffCirclePreview = [[return function(NSI)
         },
     }
     local data = {Version = {versionNumber = 2, [1] = {group = "Coiled Altar"}, [2] = {customIcon = 1286918}}, group = "Coiled Altar", internalID = "EternalNightfallAbsorb", name = "Eternal Nightfall Absorb", text = "", customIcon = 1286918, DisplayType = "Bar", encID = encID,
-        phase = nil, TTS = false, dur = eternalNightfallDuration, enabled = true, isSpecialDisplay = true, BlockCopy = true,
+        phase = nil, TTS = false, dur = eternalNightfallDuration, enabled = true, BlockCopy = true,
         BarColor = {0.6235, 0.2510, 1, 1}, BarWidth = 300, BarHeight = 40, Anchor = "TOP", relativeTo = "TOP", xOffset = 0, yOffset = -300,
         Preview = eternalNightfallPreview, extraOptions = eternalNightfallOptions, difficulties = {15, 16}, NoEdit = true,
     }
@@ -218,7 +218,7 @@ local debuffCirclePreview = [[return function(NSI)
     local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P3Shield", name = "P3 Shield", text = "Shield", DisplayType = "Text", encID = encID, phase = 3, TTS = false, dur = 6,
         spellID = 1310752,
         timers = {
-            [15] = {41.9, 141.8},
+            [15] = {39, 139},
             [16] = {38, 134.8},
         },
     }
@@ -274,7 +274,7 @@ local debuffCirclePreview = [[return function(NSI)
     self:AddEncounterAlert(data)
 
     local data = {group = "Coiled Altar", internalID = "InterruptAssignments", name = "Interrupt Assignments", text = "Interrupts", customIcon = 6552, DisplayType = "Text", encID = encID, phase = 2, TTS = false, dur = 35,
-        difficulties = {16}, enabled = true, pinned = true, isSpecialDisplay = true, BlockCopy = true, NoEdit = true, NumberFontSize = 12, NameFontSize = 12, BoxSize = 30,
+        difficulties = {16}, enabled = true, pinned = true, BlockCopy = true, NoEdit = true, NumberFontSize = 12, NameFontSize = 12, BoxSize = 30,
         NameplateAnchor = "TOP", NameplateXOffset = 0, NameplateYOffset = 0, ShowAll = false, DisplayStaticBox = false, HideNameplateBox = false,
         Version = {versionNumber = 4, [1] = {BoxSize = 30}, [2] = {NumberFontSize = 12, NameFontSize = 12}, [3] = {group = "Coiled Altar"}, [4] = {customIcon = 6552}},
         extraOptions = {
@@ -347,6 +347,14 @@ function NSI:UpdateCoiledAltarDebuffCircle()
     self:UpdateAuraContainerCircle("CoiledAltarDebuffCircleContainer", "CoiledAltarDebuffCircleAuraSlot", alert, shown)
 end
 
+local function HideCoiledAltarWrongTargetReminder(self)
+    local info = self.CoiledAltarWrongTargetInfo
+    if not info then return end
+    self:HideReminder(info, self.CoiledAltarWrongTargetFrame)
+    self.CoiledAltarWrongTargetInfo = nil
+    self.CoiledAltarWrongTargetFrame = nil
+end
+
 local function HideCoiledAltarWrongTarget(self)
     self:EncounterRegister("CoiledAltarWrongTarget", "PLAYER_TARGET_CHANGED", false)
     self.CoiledAltarWrongTargetEndTime = nil
@@ -354,10 +362,7 @@ local function HideCoiledAltarWrongTarget(self)
         self.CoiledAltarWrongTargetTimer:Cancel()
         self.CoiledAltarWrongTargetTimer = nil
     end
-    if self.CoiledAltarWrongTargetFrame then
-        self.CoiledAltarWrongTargetFrame:Hide()
-        self.CoiledAltarWrongTargetFrame = nil
-    end
+    HideCoiledAltarWrongTargetReminder(self)
 end
 
 local function UpdateCoiledAltarWrongTarget(self)
@@ -368,27 +373,22 @@ local function UpdateCoiledAltarWrongTarget(self)
 
     local targetExists = UnitExists("target")
     if issecretvalue(targetExists) or not targetExists then
-        if self.CoiledAltarWrongTargetFrame then
-            self.CoiledAltarWrongTargetFrame:Hide()
-            self.CoiledAltarWrongTargetFrame = nil
-        end
+        HideCoiledAltarWrongTargetReminder(self)
         return
     end
 
     local isBossTarget = UnitIsUnit("target", "boss1")
     if issecretvalue(isBossTarget) then return end
     if isBossTarget then
-        if self.CoiledAltarWrongTargetFrame then
-            self.CoiledAltarWrongTargetFrame:Hide()
-            self.CoiledAltarWrongTargetFrame = nil
-        end
+        HideCoiledAltarWrongTargetReminder(self)
         return
     end
 
-    if self.CoiledAltarWrongTargetFrame and self.CoiledAltarWrongTargetFrame:IsShown() then return end
+    if self.CoiledAltarWrongTargetInfo then return end
     local remainingDuration = self.CoiledAltarWrongTargetEndTime - GetTime()
     local alert = self.CoiledAltarWrongTargetAlert
     local info = self:CreateReminder({
+        internalID = "P2_5WrongTarget",
         text = alert.text,
         DisplayType = alert.DisplayType,
         textColors = alert.textColors,
@@ -399,10 +399,11 @@ local function UpdateCoiledAltarWrongTarget(self)
         HideTimer = true,
         sticky = alert.sticky,
         TTS = false,
-        IsAlert = false,
+        IsAlert = true,
         ReloeReminder = true,
     })
-    self.CoiledAltarWrongTargetFrame = info and self:DisplayReminder(info)
+    self.CoiledAltarWrongTargetInfo = info
+    self.CoiledAltarWrongTargetFrame = self:DisplayReminder(info)
 end
 
 NSI.AddAssignments[encID] = function(self, id) -- on ENCOUNTER_START

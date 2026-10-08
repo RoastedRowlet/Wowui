@@ -1,11 +1,31 @@
 -- ExwindTools 的游戏内更新日志正文。由发布打包器写入；Core 只提供共享查看窗口。
 ExwindTools_ChangelogData = {
     changelog = {
-        version = "v26.9.13.0946",
-        title = "v26.9.13.0946 更新日志",
-        publishedAt = "2026-09-13 09:46",
+        version = "v26.10.5.2034",
+        title = "v26.10.5.2034 更新日志",
+        publishedAt = "2026-10-05 20:34",
         fontSize = 14,
         content = [[
+@H1@ v26.10.5.2034
+
+@CN@ @H2@ 界面全面改版
+@CN@ - 设置界面整体换新：所有页面改成卡片 / 列表式布局，统一颜色系统、圆角和层次感，滚动条、下拉框、开关、按钮全部换成新版控件
+@CN@ - GRID渲染引擎升级到4.0版本 (5.0版本会在月中左右到来)
+@CN@ - 首页新增致谢与联系方式入口（还在施工中）
+@CN@ - 确认弹窗不再借用暴雪原生弹窗，避免了许多调用链污染问题
+
+@CN@ @H2@ 问题修复
+@CN@ - 修复了许多用户提出的问题
+
+@EN@ @H2@ Complete UI Overhaul
+@EN@ - Redesigned the settings interface: all pages now use card / list layouts with consistent colors, rounded corners, and visual depth. Scrollbars, dropdowns, toggles, and buttons all use new controls
+@EN@ - Upgraded the GRID rendering engine to version 4.0 (version 5.0 is expected around mid-month)
+@EN@ - Added links to acknowledgments and contact information on the home page (still under construction)
+@EN@ - Confirmation dialogs no longer use Blizzard's native popups, avoiding many call-chain taint issues
+
+@EN@ @H2@ Bug Fixes
+@EN@ - Fixed many user-reported issues
+
 @H1@ v26.9.13.0946
 
 @CN@ @H2@ 通用

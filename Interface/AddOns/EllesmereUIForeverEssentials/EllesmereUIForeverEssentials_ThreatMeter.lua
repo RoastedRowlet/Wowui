@@ -486,7 +486,6 @@ local function ApplyChrome(dm, s)
     border:SetPoint("BOTTOMRIGHT", s, "BOTTOMRIGHT", 0, 0)
     border:SetFrameLevel(header:GetFrameLevel() + 4)
     Border(border, dm, true)
-    if s.caption then Font(s.caption, 10, dm) end
     if s.unlockKey then EUI.MatchPadChanged(s.unlockKey) end
 end
 
@@ -799,7 +798,7 @@ local function RefreshPreview(self)
     local list = DemoList()
     local n = #list
     local width = ClampW(Get("width"))
-    local height = 2 * dm.inset + dm.headerHeight + n * dm.barHeight + math.max(0, n - 1) * dm.barSpacing + 26
+    local height = 2 * dm.inset + dm.headerHeight + n * dm.barHeight + math.max(0, n - 1) * dm.barSpacing
     self:SetSize(width, height)
     local pw = parent:GetWidth()
     local available = (pw > 0 and pw) or self.availableWidth or width + 40
@@ -821,11 +820,6 @@ function ns.CreateSettingsPreview(parent, availableWidth, onHeightChanged)
     if not view then
         view = CreateSurface(parent)
         settingsPreview = view
-        view.caption = view:CreateFontString(nil, "OVERLAY")
-        view.caption:SetPoint("BOTTOM", 0, 6)
-        view.caption:SetTextColor(0.65, 0.65, 0.65)
-        Font(view.caption, 10, Style())
-        view.caption:SetText(EllesmereUI.L("Preview"))
         view.title:SetFormattedText(EllesmereUI.L("Threat - %s"), EllesmereUI.L("Training Dummy"))
         view.Refresh = RefreshPreview
         view:SetScript("OnShow", RefreshPreview)
@@ -1170,12 +1164,15 @@ function ns.Apply()
         shownList = nil
         if frame then frame:Hide() end
     end
+    -- A reset also reaches a Damage Meters Threat window (ThreatFeed file).
+    ns.FeedChanged()
     RefreshSettingsPreview()
 end
 
 function ns.ApplyStyle()
     cachedStyle = nil
     if frame and Get("enabled") then RequestUpdate() end
+    ns.FeedChanged()
     RefreshSettingsPreview()
 end
 
@@ -1232,8 +1229,9 @@ local function ResizeTo(width, height, key)
     Cfg()[key] = math.floor(size + 0.5)
 end
 
-local function ShowQuickMenu(anchor)
-    local items = {}
+-- What the list shows (tracked unit, displayed value, pets), appended to
+-- `items`. Also the head of a Damage Meters Threat window's settings menu.
+local function DataItems(items)
     if Get("focusEnabled") then
         items[#items + 1] = { text = EllesmereUI.L("Tracked Unit"), children = SourceItems() }
     end
@@ -1253,6 +1251,12 @@ local function ShowQuickMenu(anchor)
             Cfg().pets = not Get("pets")
             Changed()
         end }
+    return items
+end
+ns.DataMenuItems = DataItems
+
+local function ShowQuickMenu(anchor)
+    local items = DataItems({})
     items[#items + 1] = { text = EllesmereUI.L("Warning Sound"), isActive = Get("warnSound") == true,
         onClick = function()
             Cfg().warnSound = not Get("warnSound")

@@ -315,10 +315,66 @@ local function EnsureDB()
     return db
 end
 
+local function StoredRules()
+    local db = type(EXBossDataDB) == "table" and EXBossDataDB.bossConfig or nil
+    return type(db) == "table" and type(db.specRules) == "table" and db.specRules or nil
+end
+
+local rulesRevision = 0
+local cachedRuleSpecID, cachedRuleRevision, cachedRule
+local function ActiveRule(specID)
+    if not specID then return nil end
+    if cachedRuleSpecID == specID and cachedRuleRevision == rulesRevision then
+        return cachedRule
+    end
+    cachedRuleSpecID, cachedRuleRevision, cachedRule = specID, rulesRevision, nil
+    for _, rule in ipairs(StoredRules() or {}) do
+        if type(rule) == "table" and rule.enabled == true and rule.specID == specID then
+            cachedRule = rule
+            break
+        end
+    end
+    return cachedRule
+end
+
+local function AppearanceExists(id)
+    local profiles = ExBoss and ExBoss.AppearanceProfiles
+    if not profiles or type(profiles.GetProfileItems) ~= "function" then return false end
+    for _, item in ipairs(profiles:GetProfileItems()) do
+        if item[2] == id then return true end
+    end
+    return false
+end
+
+local function ValidRule(rule, exceptIndex)
+    if rule.enabled == true then
+        if not rule.specID then return false, "enabled rule requires a specialization" end
+        for index, other in ipairs(StoredRules() or {}) do
+            if index ~= exceptIndex and type(other) == "table" and other.enabled == true
+                and other.specID == rule.specID then
+                return false, "specialization already has an enabled rule"
+            end
+        end
+    end
+    if rule.appearance ~= "" and not AppearanceExists(rule.appearance) then
+        return false, "appearance profile not found"
+    end
+    if rule.mplus ~= "" and not AuthorExists("mplus", rule.mplus) then
+        return false, "M+ Author configuration not found"
+    end
+    if rule.raid ~= "" and not AuthorExists("raid", rule.raid) then
+        return false, "Raid Author configuration not found"
+    end
+    return true
+end
+
 local function AuthorForSlot(slot)
     slot = NormalizeSlot(slot)
     if not slot then return nil end
     local db, category = EnsureDB(), SlotCategory(slot)
+    local rule = ActiveRule(CurrentSpecID())
+    local override = rule and rule[category] or nil
+    if override and override ~= "" and AuthorExists(category, override) then return override end
     local selected = db.authorSelection[slot]
     if AuthorExists(category, selected) then return selected end
     return SLOTS[slot].author
@@ -351,6 +407,97 @@ end
 
 function BossConfig:Ensure()
     return EnsureDB()
+end
+
+function BossConfig:GetSpecRules()
+    local out = {}
+    for index, rule in ipairs(StoredRules() or {}) do
+        if type(rule) == "table" then
+            out[index] = {
+                enabled = rule.enabled == true,
+                specID = rule.specID,
+                appearance = rule.appearance or "",
+                mplus = rule.mplus or "",
+                raid = rule.raid or "",
+            }
+        end
+    end
+    return out
+end
+
+function BossConfig:AddSpecRule()
+    local db = EnsureDB()
+    if type(db.specRules) ~= "table" then db.specRules = {} end
+    local index = #db.specRules + 1
+    db.specRules[index] = { enabled = false, specID = nil, appearance = "", mplus = "", raid = "" }
+    rulesRevision = rulesRevision + 1
+    return true, index
+end
+
+function BossConfig:UpdateSpecRule(index, field, value)
+    local rules = StoredRules()
+    index = tonumber(index)
+    if not rules or not index or index % 1 ~= 0 or type(rules[index]) ~= "table" then
+        return false, "specialization rule not found"
+    end
+    if field ~= "enabled" and field ~= "specID" and field ~= "appearance"
+        and field ~= "mplus" and field ~= "raid" then
+        return false, "unknown specialization rule field"
+    end
+    local current = rules[index]
+    local rule = {
+        enabled = current.enabled == true,
+        specID = current.specID,
+        appearance = current.appearance or "",
+        mplus = current.mplus or "",
+        raid = current.raid or "",
+    }
+    if field == "enabled" then
+        if type(value) ~= "boolean" then return false, "enabled must be boolean" end
+        rule.enabled = value
+    elseif field == "specID" then
+        if value == nil or value == "" then
+            rule.specID = nil
+        else
+            local id = tonumber(value)
+            if not id or id <= 0 or id % 1 ~= 0
+                or not (_G.EXDB and type(_G.EXDB.SpecByID) == "table" and _G.EXDB.SpecByID[id]) then
+                return false, "invalid specialization ID"
+            end
+            rule.specID = id
+        end
+    else
+        if type(value) ~= "string" then return false, "profile ID must be a string" end
+        rule[field] = Trim(value) or ""
+    end
+    local valid, reason = ValidRule(rule, index)
+    if not valid then return false, reason end
+    rules[index] = rule
+    rulesRevision = rulesRevision + 1
+    self:PublishRuntimeSelection()
+    return true
+end
+
+function BossConfig:DeleteSpecRule(index)
+    local rules = StoredRules()
+    index = tonumber(index)
+    if not rules or not index or index % 1 ~= 0 or type(rules[index]) ~= "table" then
+        return false, "specialization rule not found"
+    end
+    table.remove(rules, index)
+    rulesRevision = rulesRevision + 1
+    self:PublishRuntimeSelection()
+    return true
+end
+
+function BossConfig:IsProfileReferenced(kind, id)
+    if kind ~= "appearance" and kind ~= "mplus" and kind ~= "raid" then return false end
+    id = Trim(id)
+    if not id then return false end
+    for _, rule in ipairs(StoredRules() or {}) do
+        if type(rule) == "table" and rule[kind] == id then return true end
+    end
+    return false
 end
 
 function BossConfig:GetSlotKeys(scene)
@@ -506,11 +653,35 @@ function BossConfig:GetRuntimeEncounterOption(id, option)
     return type(row) == "table" and row[tostring(option or "")] or nil
 end
 
+-- Activation owns initialization and Author -> User resolution. Reads only
+-- compare the editor slot with that existing state; stale slots cannot read
+-- another configuration, and no per-action EnsureDB/ListAuthors is needed.
+local function CurrentAuraSoundUser(slot)
+    slot = NormalizeSlot(slot) or BossConfig:GetRuntimeSlotForScene("mplus")
+    if SlotCategory(slot) ~= "mplus" then return nil end
+    local api = API()
+    local context = api and api.GetCurrentConfiguration("mplus")
+    local db = EXBossDataDB and EXBossDataDB.bossConfig
+    local selected = type(db) == "table" and db.authorSelection
+    local bindings = type(db) == "table" and db.userByAuthor
+    local users = type(bindings) == "table" and bindings.mplus
+    if not context or context.category ~= "mplus"
+        or type(selected) ~= "table" or selected[slot] ~= context.authorID
+        or type(users) ~= "table" or users[context.authorID] ~= context.userID then
+        return nil
+    end
+    return context.userID
+end
+
 function BossConfig:GetMplusDungeonAuraSoundView(dungeonKey, slot)
-    return API().GetMplusDungeonAuraSoundView(Selected(NormalizeSlot(slot) or self:GetRuntimeSlotForScene("mplus")), dungeonKey)
+    local userID = CurrentAuraSoundUser(slot)
+    if not userID then return nil end
+    return API().GetMplusDungeonAuraSoundView(userID, dungeonKey)
 end
 function BossConfig:GetMplusDungeonAuraSoundActionView(dungeonKey, actionID, slot)
-    return API().GetMplusDungeonAuraSoundActionView(Selected(NormalizeSlot(slot) or self:GetRuntimeSlotForScene("mplus")), dungeonKey, actionID)
+    local userID = CurrentAuraSoundUser(slot)
+    if not userID then return nil end
+    return API().GetMplusDungeonAuraSoundActionView(userID, dungeonKey, actionID)
 end
 function BossConfig:SetMplusDungeonAuraSoundActionFields(slot, dungeonKey, actionID, fields)
     local api = API()
@@ -672,6 +843,9 @@ function BossConfig:DeleteAuthorConfiguration(category, authorID)
         if row.id == authorID then isImported = row.imported == true; break end
     end
     if not isImported then return false, "only imported Author configurations can be deleted" end
+    if self:IsProfileReferenced(category, authorID) then
+        return false, "Author configuration is referenced by a specialization rule"
+    end
 
     local db = EnsureDB()
     for _, slot in ipairs(self:GetSlotKeys(category)) do
@@ -879,10 +1053,30 @@ function BossConfig:PublishRuntimeSelection()
     local slot = scene and self:GetRuntimeSlotForScene(scene) or self:GetRuntimeSlotForScene("mplus")
     local ok, reason = Activate(slot)
     if ok then NotifyRuntime() end
+    self:ApplySpecAppearance()
     if ExwindTools and type(ExwindTools.UpdateState) == "function" then
         ExwindTools:UpdateState("ExBoss.BossConfig.SelectionChanged", {})
     end
     return ok, reason
+end
+
+function BossConfig:ApplySpecAppearance()
+    local profiles = ExBoss and ExBoss.AppearanceProfiles
+    if not profiles or type(profiles.ActivateProfile) ~= "function"
+        or type(profiles.GetDefaultProfileID) ~= "function" then
+        return false, "appearance profile store is unavailable"
+    end
+    local specID = CurrentSpecID()
+    if not specID then return true, "specialization is not ready" end
+    local rule = ActiveRule(specID)
+    local id = rule and rule.appearance ~= "" and rule.appearance or profiles:GetDefaultProfileID()
+    if not id then return false, "default appearance profile is unavailable" end
+    if type(InCombatLockdown) == "function" and InCombatLockdown() then
+        self._pendingSpecAppearance = true
+        return true, "deferred until combat ends"
+    end
+    self._pendingSpecAppearance = nil
+    return profiles:ActivateProfile(id, true)
 end
 
 function BossConfig:ApplyPersistedChange()
@@ -898,4 +1092,7 @@ if ExwindTools and ExwindTools.RegisterEvent then
         if tostring(addonName or ""):lower() == "exboss" then BossConfig:Ensure(); BossConfig:PublishRuntimeSelection() end
     end)
     ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", "ExBoss.BossConfig.Enter", function() BossConfig:PublishRuntimeSelection() end)
+    ExwindTools:RegisterEvent("PLAYER_REGEN_ENABLED", "ExBoss.BossConfig.AppearanceAfterCombat", function()
+        if BossConfig._pendingSpecAppearance then BossConfig:ApplySpecAppearance() end
+    end)
 end

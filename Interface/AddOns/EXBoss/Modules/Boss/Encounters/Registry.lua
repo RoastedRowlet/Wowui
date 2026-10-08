@@ -61,6 +61,7 @@ function Registry:GetAll()
     return self.byEncounterID
 end
 
+-- [卡片/Grid 迁移边界] extras 的数组顺序、key/defaults/layout/onChanged 是遭遇声明合同；只由页面迁移其布局呈现，本 Registry 不重排、不改业务。
 -- Ordered encounter-local cards. These are settings declarations, not timeline events.
 function Registry:GetExtras(encounterID)
     local def = self:Get(encounterID)

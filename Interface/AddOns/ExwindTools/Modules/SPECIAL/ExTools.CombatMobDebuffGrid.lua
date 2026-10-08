@@ -4,12 +4,17 @@
 -- 在目标 Debuff 存在时显示。禁止读取 AuraButton / Aura 数据，也不监听 UNIT_AURA。
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools or not ExwindTools.UI then return end
 
 local EXUI = ExwindTools.UI
 local L = ExwindTools.L or setmetatable({}, { __index = function(_, key) return key end })
 local MODULE_KEY = "ExTools.CombatMobDebuffGrid"
+
+local SPELL_LIST_RENDERER = MODULE_KEY .. ".SpellList"
 
 local MAX_NAMEPLATES = 40
 local DEFAULT_CELL_WIDTH = 20
@@ -22,6 +27,9 @@ local REFRESH_INTERVAL = 0.10
 local AURA_SLOT_KEY = "watched_debuff"
 local AURA_TEMPLATE = "ExToolsCombatMobDebuffGridAuraButtonTemplate"
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local SPEC_OPTION_DEFS = {
     { specID = 71, className = "战士", specName = "武器", colorHex = "C79C6E" },
     { specID = 72, className = "战士", specName = "狂怒", colorHex = "C79C6E" },
@@ -76,6 +84,14 @@ local worldPreviewActive = false
 local lastRuntimeSignature
 local gridCells = {}
 local auraRecordsByUnit = {}
+local spellDisplayCache = {}
+local spellRendererHost, spellRendererContext
+
+local SPELL_LIST_COLUMNS = {
+    { title = L["法术 ID"] },
+    { title = L["法术名称"] },
+    { title = L["操作"] },
+}
 
 local function ParseSpellID(value)
     local spellID = tonumber(value)
@@ -119,8 +135,8 @@ local function BuildSpecOptions()
     local options = {}
     for _, def in ipairs(SPEC_OPTION_DEFS) do
         options[#options + 1] = {
-            string.format("|cff%s%s|r - %s", def.colorHex, L[def.className] or def.className, L[def.specName] or def.specName),
-            GetSpecOptionValue(def.specID),
+            value = GetSpecOptionValue(def.specID),
+            label = string.format("|cff%s%s|r - %s", def.colorHex, L[def.className] or def.className, L[def.specName] or def.specName),
         }
     end
     return options
@@ -208,9 +224,8 @@ end
 local function CollectSpellIDs(db)
     local spellIDs = {}
     local signatureParts = {}
-    for index = 1, MAX_DEBUFF_SPELL_IDS do
-        local key = index == 1 and "debuffSpellID" or "debuffSpellID" .. index
-        local spellID = ParseSpellID(db[key])
+    for _, entry in ipairs(type(db.debuffSpellEntries) == "table" and db.debuffSpellEntries or {}) do
+        local spellID = type(entry) == "table" and entry.present == true and ParseSpellID(entry.value) or nil
         if spellID and spellIDs[spellID] ~= true then
             spellIDs[spellID] = true
             signatureParts[#signatureParts + 1] = tostring(spellID)
@@ -224,6 +239,247 @@ end
 
 local function GetDB()
     return ExwindTools:GetModuleDB(MODULE_KEY)
+end
+
+local function GetStoredSpellEntries(createForExplicitEdit)
+    local storage = ExwindTools:GetModuleDBStorage(MODULE_KEY)
+    local existing = storage and storage.ModuleDB and storage.ModuleDB[MODULE_KEY]
+    if type(existing) == "table" then
+        local entries = rawget(existing, "debuffSpellEntries")
+        if type(entries) == "table" then return entries end
+        if entries ~= nil or not createForExplicitEdit then return nil end
+        entries = {}
+        existing.debuffSpellEntries = entries
+        return entries
+    end
+    if existing ~= nil or not createForExplicitEdit then return nil end
+
+    -- An absent module table is initialized only in direct response to Add.
+    local db = GetDB()
+    if type(db) ~= "table" then return nil end
+    db.debuffSpellEntries = {}
+    return db.debuffSpellEntries
+end
+
+local function ReleaseSpellRendererControl(control)
+    if not control then return end
+    if EXUI.RestoreSettingsListControl then EXUI:RestoreSettingsListControl(control) end
+    local factory = _G.ExwindFactory
+    if factory and control._isCompositeHost then
+        factory:ReleaseCompositeHost(control)
+    elseif factory then
+        factory:ReleaseGridWidget(control)
+    else
+        control:Hide()
+        control:SetParent(nil)
+    end
+end
+
+local RebuildSpellRenderer
+
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
+local spellDataEventFrame = CreateFrame("Frame")
+spellDataEventFrame:RegisterEvent("SPELL_DATA_LOAD_RESULT")
+spellDataEventFrame:SetScript("OnEvent", function(_, _, spellID, success)
+    spellID = tonumber(spellID)
+    local cached = spellID and spellDisplayCache[spellID]
+    if not cached then return end
+    cached.requested = nil
+    cached.completed = true
+    cached.failed = success ~= true
+    if success == true and _G.C_Spell and _G.C_Spell.GetSpellInfo then
+        local info = _G.C_Spell.GetSpellInfo(spellID)
+        if info then
+            cached.name = info.name
+            cached.iconID = info.iconID
+            cached.failed = nil
+        end
+    end
+    local controls = spellRendererHost and spellRendererHost._exSpellListControls
+    if controls then
+        local name = cached.name or L["未知法术"]
+        local display = cached.iconID
+            and string.format("|T%s:20:20:0:0|t %s", tostring(cached.iconID), name) or name
+        for _, row in ipairs(controls.rows) do
+            if row.spellID == spellID and row.nameText and row.nameText.text then
+                row.nameText.text:SetText(display)
+            end
+        end
+    end
+end)
+
+local function GetSpellDisplay(value)
+    local spellID = ParseSpellID(value)
+    if not spellID then return L["无效法术 ID"] end
+    local cached = spellDisplayCache[spellID]
+    if not cached then
+        cached = {}
+        spellDisplayCache[spellID] = cached
+    end
+
+    local spellAPI = _G.C_Spell
+    local info = spellAPI and spellAPI.GetSpellInfo and spellAPI.GetSpellInfo(spellID)
+    if info then
+        cached.name = info.name
+        cached.iconID = info.iconID
+        cached.failed = nil
+        cached.requested = nil
+        cached.completed = true
+    elseif spellAPI and spellAPI.RequestLoadSpellData and not cached.requested and not cached.completed then
+        local exists = not spellAPI.DoesSpellExist or spellAPI.DoesSpellExist(spellID) == true
+        local isCached = spellAPI.IsSpellDataCached and spellAPI.IsSpellDataCached(spellID) == true
+        if exists and not isCached then
+            cached.requested = true
+            spellAPI.RequestLoadSpellData(spellID)
+        elseif not exists or isCached then
+            cached.completed = true
+            cached.failed = true
+        end
+    end
+
+    local name = cached.name or L["未知法术"]
+    if cached.iconID then
+        return string.format("|T%s:20:20:0:0|t %s", tostring(cached.iconID), name)
+    end
+    return name
+end
+
+local function ClearSpellRendererRows(controls)
+    for index = #controls.rows, 1, -1 do
+        local record = controls.rows[index]
+        if record.idControlIsEditBox then
+            -- OnEditFocusLost 槽位上有 Core 的焦点画器，走 ClearControlScript
+            -- 清槽位时一并丢掉安装记录，下一次借用才会重装画器。
+            EXUI:ClearControlScript(record.idControl, "OnEditFocusLost")
+            record.idControl:SetScript("OnEnterPressed", nil)
+        end
+        ReleaseSpellRendererControl(record.action)
+        ReleaseSpellRendererControl(record.nameText)
+        ReleaseSpellRendererControl(record.idControl)
+        controls.rows[index] = nil
+    end
+end
+
+local function CommitSpellEntry(entry, originalText, text, record)
+    if text == originalText then return originalText end
+    entry.present = true
+    entry.value = text
+    if RefreshRuntime then RefreshRuntime(true) end
+    record.spellID = ParseSpellID(text)
+    record.nameText.text:SetText(GetSpellDisplay(text))
+    return text
+end
+
+RebuildSpellRenderer = function(host, ctx)
+    local controls = host and host._exSpellListControls
+    if not controls then return end
+    ctx:ReleaseTablePresentation()
+    ClearSpellRendererRows(controls)
+
+    local entries = GetStoredSpellEntries(false)
+    if entries == nil then
+        local storage = ExwindTools:GetModuleDBStorage(MODULE_KEY)
+        local existing = storage and storage.ModuleDB and storage.ModuleDB[MODULE_KEY]
+        local invalid = type(existing) == "table" and rawget(existing, "debuffSpellEntries") ~= nil
+        if invalid then
+            controls.rows[1] = {
+                idControl = EXUI:CreateDescription(host, L["现有法术列表不是表，已保持原值"], 1),
+                nameText = EXUI:CreateDescription(host, "—", 1),
+                action = EXUI:CreateDescription(host, "—", 1),
+            }
+            ctx:SetTableControls({
+                add = {
+                    cells = {
+                        { widget = controls.rows[1].idControl, type = "text" },
+                        { widget = controls.rows[1].nameText, type = "text" },
+                        { widget = controls.rows[1].action, type = "text" },
+                    },
+                },
+                records = {},
+            })
+            return
+        end
+        entries = {}
+    end
+
+    local addRecord = {
+        idControl = EXUI:CreateEditBox(host, "", 1, 28, nil, { placeholder = L["输入法术 ID"] }),
+        idControlIsEditBox = true,
+        nameText = EXUI:CreateDescription(host, L["添加新的监控法术"], 1),
+    }
+    addRecord.action = EXUI:CreateButton(host, 1, 28, L["添加"], function()
+        local target = GetStoredSpellEntries(true)
+        if type(target) ~= "table" then return end
+        target[#target + 1] = { present = true, value = addRecord.idControl:GetText() }
+        if RefreshRuntime then RefreshRuntime(true) end
+        RebuildSpellRenderer(host, ctx)
+        ctx:RequestReflow()
+    end, { variant = "primary", compact = true })
+    controls.rows[#controls.rows + 1] = addRecord
+
+    for index, entry in ipairs(entries) do
+        local rowIndex = index
+        local isRecord = type(entry) == "table"
+        local valueText = isRecord and (entry.value == nil and "" or tostring(entry.value)) or tostring(entry)
+        local record = {}
+        if isRecord then
+            record.idControl = EXUI:CreateEditBox(host, valueText, 1, 28, nil, {})
+            record.idControlIsEditBox = true
+            record.spellID = ParseSpellID(entry.value)
+            local committedText = valueText
+            local function Commit(self)
+                committedText = CommitSpellEntry(entry, committedText, self:GetText(), record)
+            end
+            -- 焦点画器就在这个槽位上，用 HookScript 把提交逻辑叠加上去。
+            record.idControl:HookScript("OnEditFocusLost", function(self)
+                if self._exSkipLostCommit then self._exSkipLostCommit = nil return end
+                Commit(self)
+            end)
+            record.idControl:SetScript("OnEnterPressed", function(self)
+                Commit(self)
+                self._exSkipLostCommit = true
+                self:ClearFocus()
+            end)
+            record.nameText = EXUI:CreateDescription(host, GetSpellDisplay(entry.value), 1)
+            record.action = EXUI:CreateButton(host, 1, 28, L["删除"], function()
+                local current = GetStoredSpellEntries(false)
+                if type(current) ~= "table" then return end
+                table.remove(current, rowIndex)
+                if RefreshRuntime then RefreshRuntime(true) end
+                RebuildSpellRenderer(host, ctx)
+                ctx:RequestReflow()
+            end, { variant = "danger", compact = true })
+        else
+            record.idControl = EXUI:CreateDescription(host, valueText, 1)
+            record.nameText = EXUI:CreateDescription(host, L["无效记录，已保持原值"], 1)
+            record.action = EXUI:CreateDescription(host, "—", 1)
+        end
+        controls.rows[#controls.rows + 1] = record
+    end
+
+    local presentedRecords = {}
+    for index = 2, #controls.rows do
+        local record = controls.rows[index]
+        presentedRecords[#presentedRecords + 1] = {
+            cells = {
+                { widget = record.idControl, type = record.idControlIsEditBox and "input" or "text" },
+                { widget = record.nameText, type = "text" },
+                { widget = record.action, type = record.idControlIsEditBox and "button" or "text" },
+            },
+        }
+    end
+    ctx:SetTableControls({
+        add = {
+            cells = {
+                { widget = addRecord.idControl, type = "input" },
+                { widget = addRecord.nameText, type = "text" },
+                { widget = addRecord.action, type = "button" },
+            },
+        },
+        records = presentedRecords,
+    })
 end
 
 local function PickAnchor()
@@ -242,65 +498,62 @@ local ANCHOR_OPTS = {
     onPickFrame = PickAnchor,
 }
 
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
 local COMMON_OPTS = {
     bindRoot = true,
-    fixedLayout = {
-        logicalWidth = 200,
-        controlW = 46,
-        controlH = 6,
-        slotX = { 3, 53, 103, 153 },
-        firstY = 0,
-        rowStep = 14,
-    },
     fields = {
-        { path = "enabled", type = "checkbox", label = L["启用周围怪物DEBUFF监控"], row = 1 },
+        { path = "enabled", type = "checkbox", label = L["启用周围怪物DEBUFF监控"] },
     },
 }
 
+-- [声明迁移边界：设置页] 原始法术控件由唯一 shared table 承载，其余控件改为 typed sections。
+-- key/type/opts、专精与 SpellID 顺序、AuraContainer/runtime 刷新和编辑模式回调禁止修改。
 ExwindTools:RegisterModuleLayout(MODULE_KEY, {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["周围怪物DEBUFF监控"], labelSize = 25 },
-    { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 10, w = 200, h = 18,
-        label = L["模块设置"], opts = COMMON_OPTS },
-    { key = "loadSpecHeader", type = "subheader", x = 3, y = 31, w = 194, h = 5, label = L["加载条件"] },
-    { key = "enabledSpecs", type = "multiselect", x = 3, y = 39, w = 194, h = 8,
-        label = L["启用专精"], items = SPEC_OPTIONS },
-    { key = "anchor", type = "anchorgroup", x = 1, y = 50, w = 200, h = 25,
-        label = L["锚点设置"], opts = ANCHOR_OPTS },
-    { key = "appearance", type = "subheader", x = 3, y = 78, w = 194, h = 5, label = L["格子外观"] },
-    { key = "cellWidth", type = "slider", x = 3, y = 86, w = 46, h = 6,
-        label = L["方块宽度"], min = 8, max = 100, step = 1 },
-    { key = "cellHeight", type = "slider", x = 53, y = 86, w = 46, h = 6,
-        label = L["方块高度"], min = 8, max = 100, step = 1 },
-    { key = "cellGap", type = "slider", x = 103, y = 86, w = 46, h = 6,
-        label = L["方块间距"], min = 0, max = 30, step = 1 },
-    { key = "cellsPerRow", type = "slider", x = 153, y = 86, w = 46, h = 6,
-        label = L["每行方块数"], min = 1, max = 20, step = 1 },
-    { key = "noDebuffColor", type = "color", x = 3, y = 100, w = 46, h = 6,
-        label = L["没有 Debuff 时的颜色"] },
-    { key = "debuffColor", type = "color", x = 53, y = 100, w = 46, h = 6,
-        label = L["有 Debuff 时的颜色"] },
-    { key = "debuffSpellID", type = "input", x = 103, y = 100, w = 46, h = 6,
-        label = L["Debuff ID 1"], labelPos = "top", labelSize = 16 },
-    { key = "debuffSpellID2", type = "input", x = 153, y = 100, w = 46, h = 6,
-        label = L["Debuff ID 2"], labelPos = "top", labelSize = 16 },
-    { key = "debuffSpellID3", type = "input", x = 3, y = 113, w = 46, h = 6,
-        label = L["Debuff ID 3"], labelPos = "top", labelSize = 16 },
-    { key = "debuffSpellID4", type = "input", x = 53, y = 113, w = 46, h = 6,
-        label = L["Debuff ID 4"], labelPos = "top", labelSize = 16 },
-    { key = "debuffSpellID5", type = "input", x = 103, y = 113, w = 46, h = 6,
-        label = L["Debuff ID 5"], labelPos = "top", labelSize = 16 },
-    { key = "debuffSpellID6", type = "input", x = 153, y = 113, w = 46, h = 6,
-        label = L["Debuff ID 6"], labelPos = "top", labelSize = 16 },
-    { key = "debuffSpellID7", type = "input", x = 3, y = 126, w = 46, h = 6,
-        label = L["Debuff ID 7"], labelPos = "top", labelSize = 16 },
-    { key = "debuffSpellID8", type = "input", x = 53, y = 126, w = 46, h = 6,
-        label = L["Debuff ID 8"], labelPos = "top", labelSize = 16 },
-    { key = "debuffSpellID9", type = "input", x = 103, y = 126, w = 46, h = 6,
-        label = L["Debuff ID 9"], labelPos = "top", labelSize = 16 },
-    { key = "debuffSpellID10", type = "input", x = 153, y = 126, w = 46, h = 6,
-        label = L["Debuff ID 10"], labelPos = "top", labelSize = 16 },
+    version = 1,
+    sections = {
+        {
+            kind = "composite", id = "common", title = L["模块设置"],
+            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS,
+        },
+        {
+            kind = "settings", id = "load_conditions", title = L["加载条件"],
+            items = {
+                { key = "enabledSpecs", type = "select", multiple = true,
+                    label = L["启用专精"], options = SPEC_OPTIONS },
+            },
+        },
+        {
+            kind = "settings", id = "appearance", title = L["格子外观"],
+            items = {
+                { key = "cellWidth", type = "slider",
+                    label = L["方块宽度"], min = 8, max = 100, step = 1 },
+                { key = "cellHeight", type = "slider",
+                    label = L["方块高度"], min = 8, max = 100, step = 1 },
+                { key = "cellGap", type = "slider",
+                    label = L["方块间距"], min = 0, max = 30, step = 1 },
+                { key = "cellsPerRow", type = "slider",
+                    label = L["每行方块数"], min = 1, max = 20, step = 1 },
+                { key = "noDebuffColor", type = "color", label = L["没有 Debuff 时的颜色"] },
+                { key = "debuffColor", type = "color", label = L["有 Debuff 时的颜色"] },
+            },
+        },
+        {
+            kind = "table", id = "spells", title = L["监控法术"],
+            key = "debuffSpellRecords", controlFactory = SPELL_LIST_RENDERER,
+            columns = SPELL_LIST_COLUMNS, supportsAdd = true,
+        },
+        {
+            kind = "composite", id = "anchor", title = L["锚点设置"],
+            component = "anchorgroup", key = "anchor", opts = ANCHOR_OPTS,
+        },
+    },
 })
 
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local DEFAULTS = {
     root = {
         enabled = false,
@@ -338,11 +591,52 @@ ExwindTools:DeclareModuleDefaults(MODULE_KEY, DEFAULTS, {
     { group = "root", root = true, fields = {
         "enabled", "enabledSpecs", "debuffSpellID", "debuffSpellID2", "debuffSpellID3", "debuffSpellID4", "debuffSpellID5",
         "debuffSpellID6", "debuffSpellID7", "debuffSpellID8", "debuffSpellID9", "debuffSpellID10",
+        "debuffSpellEntries",
         "cellWidth", "cellHeight", "cellGap", "cellsPerRow",
         "noDebuffColorR", "noDebuffColorG", "noDebuffColorB", "noDebuffColorA",
         "debuffColorR", "debuffColorG", "debuffColorB", "debuffColorA",
         "offsetX", "offsetY", "attachToCustom", "customAttachTarget",
     } },
+})
+
+do
+    local storage = ExwindTools:GetModuleDBStorage(MODULE_KEY)
+    local existing = storage.ModuleDB[MODULE_KEY]
+    if type(existing) == "table" and rawget(existing, "debuffSpellEntries") == nil then
+        local entries = {}
+        for index = 1, MAX_DEBUFF_SPELL_IDS do
+            local key = index == 1 and "debuffSpellID" or "debuffSpellID" .. index
+            local value = rawget(existing, key)
+            local entry = { present = value ~= nil }
+            if value ~= nil then entry.value = value end
+            entries[index] = entry
+        end
+        existing.debuffSpellEntries = entries
+    end
+end
+
+local Grid = ExwindTools.Grid
+if not Grid then error("CombatMobDebuffGrid requires ExwindGrid", 2) end
+Grid:RegisterTableControls(SPELL_LIST_RENDERER, {
+    mount = function(host, ctx)
+        spellRendererHost, spellRendererContext = host, ctx
+        host._exSpellListControls = {
+            rows = {},
+        }
+        RebuildSpellRenderer(host, ctx)
+    end,
+    update = function(host, ctx)
+        spellRendererHost, spellRendererContext = host, ctx
+        RebuildSpellRenderer(host, ctx)
+    end,
+    release = function(host)
+        local controls = host._exSpellListControls
+        if controls then ClearSpellRendererRows(controls) end
+        host._exSpellListControls = nil
+        if spellRendererHost == host then
+            spellRendererHost, spellRendererContext = nil, nil
+        end
+    end,
 })
 
 if not ExwindTools:IsModuleEnabled(MODULE_KEY) then return end
@@ -392,6 +686,9 @@ EnsureAnchorController = function()
     return anchorController
 end
 
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function EnsureGridCell(index)
     local cell = gridCells[index]
     if cell then
@@ -542,6 +839,7 @@ local function HideAllRuntimeVisuals()
     end
 end
 
+-- [卡片迁移边界：自定义渲染] 以下白格 + 原生 AuraContainer 是 Runtime/World 内容，不是设置页卡片；单位/SpellID 顺序、容器复用与刷新判定禁止修改。
 local function RenderGrid(units, spellIDs, spellIDSignature, sample, settings)
     local count = sample and settings.cellsPerRow or #units
     if count <= 0 then
@@ -592,6 +890,9 @@ local function RenderGrid(units, spellIDs, spellIDSignature, sample, settings)
     end
 end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic — Runtime Grid Refresh / 运行网格刷新
+-- =========================================================
 RefreshRuntime = function(force)
     local db = GetDB()
     local settings = GetGridSettings(db)
@@ -664,6 +965,9 @@ EXUI:RegisterEditableModule({
     end,
 })
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh — Runtime Events / 运行时事件
+-- =========================================================
 refreshFrame = _G.CreateFrame("Frame")
 refreshFrame:SetScript("OnUpdate", function(_, elapsed)
     refreshElapsed = refreshElapsed + (tonumber(elapsed) or 0)
@@ -695,6 +999,9 @@ ExwindTools:WatchState("SpecID", MODULE_KEY, function()
     RefreshRuntime(true)
 end)
 
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 _G.C_Timer.After(0, function()
     EnsureAnchor()
     RefreshRuntime(true)

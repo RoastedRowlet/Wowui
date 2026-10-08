@@ -7,26 +7,17 @@
 ExBoss.UI.Panel.VoicePackPage             = ExBoss.UI.Panel.VoicePackPage or {}
 local Page                                = ExBoss.UI.Panel.VoicePackPage
 local EXUI                                = _G.ExwindTools and _G.ExwindTools.UI
+local GC                                  = _G.ExwindTools and _G.ExwindTools.GUIColors
 local L                                   = (ExBoss and ExBoss.L) or
     setmetatable({}, { __index = function(_, k) return k end })
 
 local root                                = nil
 local packDropdown                        = nil
 local ui                                  = {}
-local RefreshInfo                         = nil
 local RefreshPage                         = nil
 local UpdateConfigurationManagerButtonState = nil
 local DEFAULT_VOICE_PACK                  = "EXWIND(默认)"
 local ENGLISH_VOICE_PACK                  = "英文(ENG)"
-
-local THEME                               = {
-    accent = { 1.00, 0.82, 0.22 },
-    cyan   = { 0.24, 0.78, 1.00 },
-    ok     = { 0.20, 0.95, 0.50 },
-    muted  = { 0.55, 0.60, 0.68 },
-    border = { 0.18, 0.22, 0.28 },
-    cardBg = { 0.03, 0.04, 0.07 },
-}
 
 -- ─── 帮助函数 ─────────────────────────────────────────────────
 
@@ -38,9 +29,12 @@ local function Bg(parent, r, g, b, a)
         edgeSize = 10,
         insets   = { left = 2, right = 2, top = 2, bottom = 2 },
     })
-    f:SetBackdropColor(r or 0.03, g or 0.04, b or 0.07, a or 0.92)
-    f:SetBackdropBorderColor(
-        THEME.border[1], THEME.border[2], THEME.border[3], 0.95)
+    if r ~= nil and g ~= nil and b ~= nil then
+        f:SetBackdropColor(r, g, b, a or 0.92)
+    else
+        f:SetBackdropColor(unpack(GC.card))
+    end
+    f:SetBackdropBorderColor(unpack(GC.panelBorder))
     return f
 end
 
@@ -56,7 +50,7 @@ end
 local function Divider(parent, anchor, offY)
     local t = EXUI:CreateVisualTexture(parent, EXBORDERFRAME)
     t:SetHeight(1)
-    t:SetColorTexture(0.22, 0.26, 0.32, 0.85)
+    t:SetColorTexture(unpack(GC.popupDivider))
     t:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, offY or -10)
     t:SetPoint("TOPRIGHT", parent, "RIGHT", -16, 0)
     return t
@@ -175,38 +169,24 @@ local function FinalizePackSelection(g, packName)
 end
 
 local function ShowNonEnglishVoicePackConfirm(packName, onChanged)
-    if not StaticPopupDialogs or not StaticPopup_Show then
-        return false
-    end
-    local dialogKey = "EXBOSS_CONFIRM_NON_ENGLISH_VOICE_PACK"
-    if not StaticPopupDialogs[dialogKey] then
-        StaticPopupDialogs[dialogKey] = {
-            text = L["这是非英文语音包。\n确认后将停止英文环境下的自动强制切换。"],
-            button1 = L["确定"],
-            button2 = CANCEL,
-            OnAccept = function(_, data)
-                if type(data) ~= "table" then
-                    return
-                end
+    EXUI:ShowDialog({
+        sourceAddon = "EXBoss", sourceModule = L["语音/配置"],
+        id = "EXBOSS_CONFIRM_NON_ENGLISH_VOICE_PACK",
+        text = L["这是非英文语音包。\n确认后将停止英文环境下的自动强制切换。"],
+        buttons = {
+            { id = "cancel", text = CANCEL, variant = "secondary", onClick = RefreshPackDropdownText },
+            { id = "confirm", text = L["确定"], variant = "primary", onClick = function()
                 local g = EnsureDB()
                 g.allowNonEnglishVoicePackOnEnglishLocale = true
-                FinalizePackSelection(g, data.packName)
-                if type(data.onChanged) == "function" then
-                    data.onChanged()
-                end
-            end,
-            OnCancel = function()
-                RefreshPackDropdownText()
-            end,
-            timeout = 0,
-            whileDead = true,
-            hideOnEscape = true,
-            preferredIndex = 3,
-        }
-    end
-    StaticPopup_Show(dialogKey, nil, nil, {
-        packName = packName,
-        onChanged = onChanged,
+                FinalizePackSelection(g, packName)
+                if type(onChanged) == "function" then onChanged() end
+            end },
+        },
+        cancelButton = "cancel",
+        defaultButton = "confirm",
+        onClose = function(_, reason)
+            if reason ~= "confirm" and reason ~= "cancel" then RefreshPackDropdownText() end
+        end,
     })
     return true
 end
@@ -227,181 +207,6 @@ local function SetPack(packName)
     end
     FinalizePackSelection(g, packName)
     return true
-end
-
-local PACK_META = {
-    ["英文(ENG)"] = {
-        displayName = "English (ENG)",
-        subtitle    = "English Voice Pack",
-        description = "English voice pack with the same standard labels and filenames.",
-        addonName   = "EXBOSS-ENG",
-    },
-    ["EXWIND(默认)"] = {
-        displayName = "EXWIND (Default)",
-        subtitle    = L["ExBoss 官方默认语音包"],
-        description = L["覆盖常见首领与大秘境语音标签，标准参考实现。"],
-        addonName   = "EXBOSS-EXWIND",
-    },
-    ["忘忧景久"] = {
-        displayName = "忘忧景久",
-        subtitle    = L["中文配音语音包"],
-        description = L["忘忧景久语音包，标签与默认包兼容，可直接替换全局语音。"],
-        addonName   = "EXBOSS-WYJJ",
-    },
-    ["顾衣衿-少女音"] = {
-        displayName = "顾衣衿 · 少女音",
-        subtitle    = L["中文配音语音包"],
-        description = L["顾衣衿少女音版本，保留同一套标签结构，便于统一切换。"],
-        addonName   = "EXBOSS-GUYIJIN-GIRL",
-    },
-    ["顾衣衿-御姐音"] = {
-        displayName = "顾衣衿 · 御姐音",
-        subtitle    = L["中文配音语音包"],
-        description = L["顾衣衿御姐音版本，保持标签兼容，适配现有副本方案。"],
-        addonName   = "EXBOSS-GUYIJIN-LADY",
-    },
-    ["Kele"] = {
-        displayName = "Kele",
-        subtitle    = L["中文配音语音包"],
-        description = L["Kele 语音包，标签兼容默认方案，可直接用于副本配置。"],
-        addonName   = "EXBOSS-KELE",
-    },
-    ["夏一可"] = {
-        displayName = "夏一可",
-        subtitle    = L["中文配音语音包"],
-        description = L["夏一可语音包，保持标准标签兼容，可直接切换使用。"],
-        addonName   = "EXBOSS-XIAYIKE",
-    },
-    ["然然"] = {
-        displayName = "然然",
-        subtitle    = L["中文配音语音包"],
-        description = L["然然语音包，包含标准标签与倒数语音。"],
-        addonName   = "EXBOSS-RANRAN",
-    },
-    ["糖糖酱"] = {
-        displayName = "糖糖酱",
-        subtitle    = L["中文配音语音包"],
-        description = L["糖糖酱语音包，标签结构与默认包兼容。"],
-        addonName   = "EXBOSS-TANGTANGJIANG",
-    },
-    ["小羊(Yagi)"] = {
-        displayName = "小羊 (Yagi)",
-        subtitle    = L["中文配音语音包"],
-        description = L["小羊 Yagi 语音包，包含标准标签与倒数语音。"],
-        addonName   = "EXBOSS-YAGI",
-    },
-    ["你好牛(niuniu)"] = {
-        displayName = "你好牛 (niuniu)",
-        subtitle    = L["中文配音语音包"],
-        description = L["你好牛语音包，来源目录为牛师傅，包含标准标签与倒数语音。"],
-        addonName   = "EXBOSS-NIUNIU",
-    },
-    ["绫零(Ayarei)"] = {
-        displayName = "绫零 (Ayarei)",
-        subtitle    = L["中文配音语音包"],
-        description = L["绫零语音包，使用标准标签结构，兼容默认包配置。"],
-        addonName   = "EXBOSS-AYAREI",
-    },
-    ["露露緹婭"] = {
-        displayName = "露露緹婭",
-        subtitle    = L["中文配音语音包"],
-        description = L["露露緹婭语音包，标签结构与默认包兼容。"],
-        addonName   = "EXBOSS-RURU",
-    },
-}
-
-local function NormalizePackKey(name)
-    name = tostring(name or "")
-    if PACK_META[name] then return name end
-    local u = name:upper()
-    if name:find("英文", 1, true) or u:find("EXBOSS%-ENG", 1, true) or u:find("%(ENG%)", 1, true) then return "英文(ENG)" end
-    if name:find("忘忧景久", 1, true) or u:find("WYJJ", 1, true) then return "忘忧景久" end
-    if name:find("少女音", 1, true) or u:find("GUYIJIN%-GIRL", 1, true) then return "顾衣衿-少女音" end
-    if name:find("御姐音", 1, true) or u:find("GUYIJIN%-LADY", 1, true) then return "顾衣衿-御姐音" end
-    if u:find("KELE", 1, true) then return "Kele" end
-    if name:find("夏一可", 1, true) or u:find("XIAYIKE", 1, true) then return "夏一可" end
-    if name:find("然然", 1, true) or u:find("RANRAN", 1, true) then return "然然" end
-    if name:find("糖糖酱", 1, true) or u:find("TANGTANGJIANG", 1, true) then return "糖糖酱" end
-    if name:find("小羊", 1, true) or u:find("YAGI", 1, true) then return "小羊(Yagi)" end
-    if name:find("你好牛", 1, true) or name:find("牛师傅", 1, true) or u:find("NIUNIU", 1, true) then return "你好牛(niuniu)" end
-    if name:find("绫零", 1, true) or u:find("AYAREI", 1, true) then return "绫零(Ayarei)" end
-    if name:find("露露", 1, true) or name:find("緹婭", 1, true) or u:find("RURU", 1, true) or u:find("RURUTIA", 1, true) then
-        return
-        "露露緹婭"
-    end
-    if u:find("EXWIND", 1, true) then return "EXWIND(默认)" end
-    return name
-end
-
-local function GetPackInfo(packName)
-    local Registry = ExBoss and ExBoss.Voice and ExBoss.Voice.PackRegistry
-    local registered = Registry and Registry.GetPack and Registry.GetPack(packName)
-    local key   = NormalizePackKey(packName)
-    local base  = PACK_META[key] or {}
-    local addon = (registered and registered.addon) or base.addonName
-    local title, notes, author, version
-    if addon and GetAddOnMetadata then
-        title   = GetAddOnMetadata(addon, "Title")
-        notes   = GetAddOnMetadata(addon, "Notes")
-        author  = GetAddOnMetadata(addon, "Author")
-        version = GetAddOnMetadata(addon, "Version")
-    end
-    local labelCount = 0
-    local Catalog = ExBoss and ExBoss.Voice and ExBoss.Voice.LabelCatalog
-    if Catalog and Catalog.GetPackLabels then
-        local t = Catalog.GetPackLabels(packName)
-        if type(t) == "table" then labelCount = #t end
-    end
-    return {
-        displayName = (registered and registered.displayName) or (title ~= "" and title) or base.displayName or key,
-        subtitle    = base.subtitle or "Voice Pack",
-        description = (notes ~= "" and notes) or base.description or L["暂无描述"],
-        author      = (author ~= "" and author) or L["—"],
-        version     = version or L["—"],
-        labelCount  = labelCount,
-    }
-end
-
-local function BuildLabelSet(labels)
-    local set = {}
-    for i = 1, #(labels or {}) do
-        local label = tostring(labels[i] or "")
-        if label ~= "" then
-            set[label] = true
-        end
-    end
-    return set
-end
-
-local MISSING_LABEL_IGNORE = {
-    ["54321"] = true,
-    ["准备跑圈"] = true,
-    ["准备追人"] = true,
-    ["召唤小怪"] = true,
-    ["坦克击退"] = true,
-    ["注意击飞"] = true,
-    ["集合放圈"] = true,
-}
-
-local function GetMissingLabelsForPack(packName)
-    local Catalog = ExBoss and ExBoss.Voice and ExBoss.Voice.LabelCatalog
-    if not (Catalog and Catalog.GetPackLabels) then
-        return nil, L["标签目录未加载"]
-    end
-
-    local baseline = Catalog.GetPackLabels("EXWIND(默认)") or {}
-    local current = Catalog.GetPackLabels(packName) or {}
-    local currentSet = BuildLabelSet(current)
-
-    local missing, seen = {}, {}
-    for i = 1, #baseline do
-        local label = tostring(baseline[i] or "")
-        if label ~= "" and not MISSING_LABEL_IGNORE[label] and not currentSet[label] and not seen[label] then
-            seen[label] = true
-            missing[#missing + 1] = label
-        end
-    end
-    return missing, nil
 end
 
 local function GetProfiles()
@@ -444,7 +249,7 @@ local function BuildAuthorPresetItems(slotKey)
     return {}
 end
 
-local CONFIG_CATEGORY_LABELS = { mplus = L["大秘境"], raid = L["团本"] }
+local CONFIG_CATEGORY_LABELS = { mplus = L["大秘境"], raid = L["团本"], appearance = L["外观配置"] }
 
 local function BuildAllConfigurationItems()
     local bossCfg = GetBossConfig()
@@ -460,6 +265,9 @@ local function BuildAllConfigurationItems()
                 items[#items + 1] = { string.format("%s · %s：%s", CONFIG_CATEGORY_LABELS[category], kind, name), category .. ":" .. id, row.imported == true, name }
             end
         end
+    end
+    for _, row in ipairs(BuildAppearanceProfileItems()) do
+        items[#items + 1] = { L["外观配置"] .. " · " .. tostring(row[1]), "appearance:" .. tostring(row[2]), true, row[1] }
     end
     return items
 end
@@ -518,7 +326,7 @@ local function FindConfigurationRow(configurationRef)
     local target = tostring(configurationRef or "")
     for _, item in ipairs(BuildAllConfigurationItems()) do
         if tostring(item[2] or "") == target then
-            local category, id = target:match("^(mplus|raid):(.+)$")
+            local category, id = target:match("^([^:]+):(.+)$")
             return { category = category, id = id, name = tostring(item[4] or id), ref = target,
                 builtIn = item[3] ~= true }
         end
@@ -538,10 +346,6 @@ local lastSyncedConfigurationRef = nil
 -- ModuleDB：语音包、职责 Author 选择和 User 实体本身各有自己的 authority，
 -- 持久 ModuleDB 会在重新打开页面时拿旧镜像覆盖这些真实状态。
 local pageDraft = nil
-local pageStatus = {
-    configText = "",
-    configOk = nil,
-}
 
 local function GetPageDBDefaults()
     return {
@@ -595,74 +399,41 @@ local function BuildPackItemsForGrid()
     return items
 end
 
-local function GetCurrentPackName()
-    local db = GetPageDB()
-    local value = tostring(db.selectedVoicePack or "")
-    if value == "" then
-        value = tostring(EnsureDB().selectedVoicePack or ResolveDefaultVoicePack())
-    end
-    return value
-end
-
-local function GetCurrentPackInfo()
-    return GetPackInfo(GetCurrentPackName())
-end
-
-local function BuildMissingVoiceText()
-    local missing, err = GetMissingLabelsForPack(GetCurrentPackName())
-    if err then
-        return string.format("|cffff6666%s|r\n%s", L["缺少语音：?"], tostring(err))
-    end
-    if type(missing) == "table" and #missing > 0 then
-        return string.format("|cffffaa55%s|r\n%s", string.format(L["缺少语音：%d"], #missing), table.concat(missing, L["、"]))
-    end
-    return "|cff33dd88" .. L["缺少语音：0"] .. "|r\n" .. L["已覆盖默认语音标签"]
-end
-
-local function BuildDefaultConfigStatusText()
-    local bossCfg = GetBossConfig()
-    if not bossCfg then
-        return L["Boss 配置模块未加载"], false
-    end
-    return L["各职责只选择 Author；对应的 User 覆盖始终自动绑定该 Author，不能独立选择。"], nil
-end
-
 local function SetStatus(text, ok)
-    pageStatus.configText = tostring(text or "")
-    pageStatus.configOk = ok
+    local message = ApplyStatusColor(text, ok, ok == false)
+    if message ~= "" then
+        if ExBoss.Print and type(ExBoss.Print.Say) == "function" then
+            ExBoss.Print.Say(message)
+        else
+            print(message)
+        end
+    end
     if type(RefreshPage) == "function" then
         RefreshPage(false)
     end
 end
 
 local function ShowReloadAfterAuthorSwitchConfirm(slotLabel, intent)
-    if not StaticPopupDialogs or not StaticPopup_Show then
-        return false
-    end
-    local dialogKey = "EXBOSS_AUTHOR_SWITCH_RELOAD_CONFIRM"
-    if not StaticPopupDialogs[dialogKey] then
-        StaticPopupDialogs[dialogKey] = {
-            text = L["切换配置：%s\n是否现在重载界面以完整生效？"],
-            button1 = L["确定"],
-            button2 = L["取消"],
-            OnAccept = function(_, data)
-                if type(data) ~= "table" or type(data.commit) ~= "function" then
-                    return
-                end
-                data.commit(data)
-            end,
-            OnCancel = function(_, data)
-                if type(data) == "table" and type(data.cancel) == "function" then
-                    data.cancel()
-                end
-            end,
-            timeout = 0,
-            whileDead = true,
-            hideOnEscape = true,
-            preferredIndex = 3,
-        }
-    end
-    StaticPopup_Show(dialogKey, tostring(slotLabel or L["当前槽位"]), nil, intent)
+    EXUI:ShowDialog({
+        sourceAddon = "EXBoss", sourceModule = L["语音/配置"],
+        id = "EXBOSS_AUTHOR_SWITCH_RELOAD_CONFIRM",
+        title = L["重载界面"],
+        text = string.format(L["切换配置：%s\n是否现在重载界面以完整生效？"], tostring(slotLabel or L["当前槽位"])),
+        buttons = {
+            { id = "cancel", text = L["取消切换"], variant = "secondary", onClick = function()
+                if type(intent) == "table" and type(intent.cancel) == "function" then intent.cancel() end
+            end },
+            { id = "confirm", text = L["现在重载"], variant = "primary", onClick = function()
+                if type(intent) == "table" and type(intent.commit) == "function" then intent.commit(intent) end
+            end },
+        },
+        cancelButton = "cancel",
+        defaultButton = "confirm",
+        onClose = function(_, reason)
+            if reason ~= "confirm" and reason ~= "cancel"
+                and type(intent) == "table" and type(intent.cancel) == "function" then intent.cancel() end
+        end,
+    })
     return true
 end
 
@@ -766,13 +537,13 @@ local function SyncRuntimeToPageDB()
     db.selectedVoicePack = tostring(EnsureDB().selectedVoicePack or ResolveDefaultVoicePack())
 
     local profiles = GetAppearanceProfiles()
-    local appearanceID = profiles and type(profiles.GetActiveProfileID) == "function" and profiles:GetActiveProfileID() or ""
+    local appearanceID = profiles and type(profiles.GetDefaultProfileID) == "function" and profiles:GetDefaultProfileID() or ""
     db.appearanceProfileID = tostring(appearanceID or "")
     lastAppearanceProfileID = db.appearanceProfileID
 
     local bossCfg = GetBossConfig()
     for _, row in ipairs(SLOT_ROWS) do
-        local author = bossCfg and bossCfg.GetSelectedAuthor and bossCfg:GetSelectedAuthor(row.slot) or ""
+        local author = bossCfg and bossCfg.GetBaseSelectedAuthor and bossCfg:GetBaseSelectedAuthor(row.slot) or ""
         db["author_" .. tostring(row.slot)] = tostring(author or "")
         lastAuthorPresetValues["author_" .. tostring(row.slot)] = db["author_" .. tostring(row.slot)]
     end
@@ -809,7 +580,7 @@ end
 
 local function ParseConfigurationRef(configurationRef)
     local category, configID = tostring(configurationRef or ""):match("^([^:]+):(.+)$")
-    if category ~= "mplus" and category ~= "raid" then
+    if category ~= "mplus" and category ~= "raid" and category ~= "appearance" then
         return nil, nil
     end
     return category, configID
@@ -828,10 +599,16 @@ local function RenameManagedConfiguration()
     local bossCfg = GetBossConfig()
     local name = tostring(db.configurationName or "")
     if not category or not configID or name == "" or not (bossCfg and bossCfg.RenameAuthorConfiguration) then
-        SetStatus(L["请选择 Author 配置并输入名称"], false)
+        SetStatus(L["请选择配置并输入名称"], false)
         return
     end
-    local ok, err = bossCfg:RenameAuthorConfiguration(category, configID, name)
+    local ok, err
+    if category == "appearance" then
+        local profiles = GetAppearanceProfiles()
+        ok, err = profiles:RenameProfile(configID, name)
+    else
+        ok, err = bossCfg:RenameAuthorConfiguration(category, configID, name)
+    end
     SetStatus(ok and (L["已重命名："] .. name) or (L["重命名失败："] .. tostring(err)), ok)
     if type(RefreshPage) == "function" then
         RefreshPage(false)
@@ -848,6 +625,10 @@ local function CopyManagedConfiguration()
         return
     end
 
+    if category == "appearance" then
+        SetStatus(L["外观配置请使用导入创建"], false)
+        return
+    end
     local ok, result = bossCfg:DuplicateAuthorConfiguration(category, configID, name)
     if not ok then
         SetStatus(L["复制失败："] .. tostring(result), false)
@@ -871,7 +652,7 @@ local function DeleteManagedConfiguration()
     local category, configID = ParseConfigurationRef(db.selectedConfiguration)
     local bossCfg = GetBossConfig()
     if not category or not configID or not (bossCfg and bossCfg.DeleteAuthorConfiguration) then
-        SetStatus(L["请选择要删除的 Author 配置"], false)
+        SetStatus(L["请选择要删除的配置"], false)
         return
     end
     local selected = FindConfigurationRow(db.selectedConfiguration)
@@ -880,7 +661,12 @@ local function DeleteManagedConfiguration()
         return
     end
     local function DeleteNow()
-        local ok, err = bossCfg:DeleteAuthorConfiguration(category, configID)
+        local ok, err
+        if category == "appearance" then
+            ok, err = GetAppearanceProfiles():DeleteProfile(configID)
+        else
+            ok, err = bossCfg:DeleteAuthorConfiguration(category, configID)
+        end
         if ok then
             db.selectedConfiguration = ""
             db.configurationName = ""
@@ -891,49 +677,43 @@ local function DeleteManagedConfiguration()
             RefreshPage(false)
         end
     end
-    local dialogKey = "EXBOSS_CONFIGURATION_DELETE_CONFIRM"
-    if StaticPopupDialogs and StaticPopup_Show then
-        if not StaticPopupDialogs[dialogKey] then
-            StaticPopupDialogs[dialogKey] = {
-                text = L["确认删除方案：%s ？"],
-                button1 = L["删除"],
-                button2 = L["取消"],
-                OnAccept = function(_, data)
-                    if type(data) == "function" then data() end
-                end,
-                timeout = 0,
-                whileDead = true,
-                hideOnEscape = true,
-                preferredIndex = 3,
-            }
-        end
-        StaticPopup_Show(dialogKey, tostring(db.configurationName or configID), nil, DeleteNow)
-    else
-        DeleteNow()
-    end
-end
-
-local function BuildVoicePackInfoBody()
-    local info = GetCurrentPackInfo()
-    local lines = {
-        string.format("|cff66d0ff%s|r", tostring(info.description or "")),
-        "",
-        string.format("|cffffd16d%s|r  %s", L["标签"], string.format(L["%d 标签"], tonumber(info.labelCount) or 0)),
-        string.format("|cffffd16d%s|r  %s", L["作者"], tostring(info.author or L["—"])),
-        string.format("|cffffd16d%s|r  %s", L["版本"], tostring(info.version or L["—"])),
-        "",
-        BuildMissingVoiceText(),
-    }
-    return table.concat(lines, "\n")
+    EXUI:ShowDialog({
+        sourceAddon = "EXBoss", sourceModule = L["语音/配置"],
+        id = "EXBOSS_CONFIGURATION_DELETE_CONFIRM",
+        text = string.format(L["确认删除方案：%s ？"], tostring(selected and selected.name or configID)),
+        danger = true,
+        buttons = {
+            { id = "cancel", text = L["取消"], variant = "secondary" },
+            { id = "confirm", text = L["删除"], variant = "dangerSolid", onClick = DeleteNow },
+        },
+        cancelButton = "cancel",
+    })
 end
 
 local function FindLayoutEntry(items, key)
+    if type(items) == "table" and type(items.cards) == "table" then
+        for _, card in ipairs(items.cards) do
+            local found = FindLayoutEntry(card.content and card.content.items, key)
+            if found then return found end
+        end
+    end
+    if type(items) == "table" and type(items.sections) == "table" then
+        for i = 1, #items.sections do
+            local section = items.sections[i]
+            if section.id == key then return section end
+            if type(section.description) == "table" and section.description.key == key then return section.description end
+            if section.footerDescription and section.footerDescription.key == key then return section.footerDescription end
+            local found = FindLayoutEntry(section.items, key)
+            if found then return found end
+        end
+    end
     for i = 1, #(items or {}) do
         local item = items[i]
         if type(item) == "table" then
             if item.key == key then
                 return item
             end
+            if type(item.description) == "table" and item.description.key == key then return item.description end
             if type(item.children) == "table" then
                 local found = FindLayoutEntry(item.children, key)
                 if found then
@@ -945,55 +725,185 @@ local function FindLayoutEntry(items, key)
     return nil
 end
 
-local function BuildConfigurationLayout()
-    local info = GetCurrentPackInfo()
-    local db = GetPageDB()
-    local allConfigurations = BuildAllConfigurationItems()
-    local layout = {
-        { key = "header_main", type = "header", x = 1, y = 3, w = 104, h = 4, label = L["语音 / 配置"], labelSize = 24 },
-        {
-            key = "btn_toggle_grid_edit", type = "button", x = 88, y = 1, w = 11, h = 2,
-            label = IsGridEditActive() and L["退出布局编辑"] or L["开启布局编辑"],
-            func = function()
-                local Grid = _G.ExwindGrid
-                if Grid and scrollChild then
-                    Grid:ToggleLiveEdit(scrollChild)
-                    C_Timer.After(0, function() if RefreshPage then RefreshPage(false) end end)
+-- Choice and management cards share the existing draft; documentation is display-only.
+local DOCUMENTATION_URL = "https://exwind.net/exboss/config"
+local DOCUMENTATION_RENDERER = "ExBoss.VoicePackDocumentation"
+
+local function RegisterDocumentationRenderer(Grid)
+    if Grid:GetCustomRenderer(DOCUMENTATION_RENDERER) then return end
+    Grid:RegisterCustomRenderer(DOCUMENTATION_RENDERER, {
+        mount = function(host)
+            local input = EXUI:CreateEditBox(host, DOCUMENTATION_URL, 280, 28, nil, {})
+            input:SetPoint("TOPLEFT", 0, 0)
+            input:SetPoint("TOPRIGHT", 0, 0)
+            local edit = input.editBox or input
+            edit:SetScript("OnTextChanged", function(self)
+                if self:GetText() ~= DOCUMENTATION_URL then
+                    self:SetText(DOCUMENTATION_URL)
+                    self:HighlightText()
                 end
-            end,
-        },
+            end)
+            -- OnEditFocusGained 槽位上有 Core 的输入框画器（HookScript 挂的，与业务
+            -- 脚本同在一个 extrinsic 槽位），SetScript 会把它一起清掉。先走
+            -- ClearControlScript 丢掉该槽位的安装记录，写完业务脚本后再调一次
+            -- ApplyControlAppearance 把画器补回来；顺序不能颠倒。
+            EXUI:ClearControlScript(edit, "OnEditFocusGained")
+            edit:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
+            edit:SetScript("OnMouseUp", function(self) self:HighlightText() end)
+            EXUI:ApplyControlAppearance(input)
+            host.documentationInput = input
+        end,
+        layout = function() return 28 end,
+        release = function(host)
+            local input = host.documentationInput
+            if input then
+                local edit = input.editBox or input
+                -- 置 nil 的一支同样不能裸 SetScript：走 ClearControlScript 清槽位并
+                -- 丢掉画器安装记录，下一次借用时 CreateEditBox 会把画器重新装上。
+                EXUI:ClearControlScript(edit, "OnMouseUp")
+                EXUI:ClearControlScript(edit, "OnEditFocusGained")
+                edit:ClearFocus()
+                if input._fromPool and _G.ExwindFactory then
+                    _G.ExwindFactory:Release(input._fromPool, input)
+                else
+                    input:Hide()
+                    input:SetParent(nil)
+                end
+            end
+            host.documentationInput = nil
+        end,
+    })
+end
 
-        -- 左栏：语音包保持现状，后续单独调整。
-        { key = "card_pack_picker", type = "card", x = 3, y = 11, w = 60, h = 40, title = L["语音包"], desc = L["选择当前生效的语音包。"], accentAlign = "left", accentColor = { r = THEME.accent[1], g = THEME.accent[2], b = THEME.accent[3], a = 1 } },
-        { key = "selectedVoicePack", type = "dropdown", x = 5, y = 23, w = 50, h = 4, label = L["当前语音包"], items = BuildPackItemsForGrid(), labelPos = "top", labelWrap = true, labelMaxLines = 2, search = true },
-        { key = "card_pack_details", type = "card", x = 3, y = 57, w = 60, h = 40, title = tostring(info.displayName or ""), desc = tostring(info.subtitle or ""), accentAlign = "left", accentColor = { r = THEME.accent[1], g = THEME.accent[2], b = THEME.accent[3], a = 1 } },
-        { key = "desc_pack_info", type = "description", x = 5, y = 65, w = 50, h = 30, label = BuildVoicePackInfoBody() },
+local RULES_RENDERER = "ExBoss.SpecializationRules"
+local function RegisterRulesRenderer(Grid)
+    if Grid:GetCustomRenderer(RULES_RENDERER) then return end
+    local function Release(host)
+        if host.rulesForm then host.rulesForm:Release(); host.rulesForm = nil end
+        for _, control in ipairs(host.ruleControls or {}) do
+            if control._specRulePicker then control:Release()
+            elseif control._fromPool and _G.ExwindFactory then _G.ExwindFactory:Release(control._fromPool, control)
+            else control:Hide(); control:SetParent(nil) end
+        end
+        host.ruleControls = nil
+    end
+    local function Mount(host)
+        local bossCfg = GetBossConfig()
+        host.ruleControls = {}
+        local function Keep(control, kind)
+            host.ruleControls[#host.ruleControls + 1] = control
+            return { widget = control, type = kind }
+        end
+        local function Complete(ok, reason)
+            -- SetStatus rebuilds the page; wait until the menu/click callback returns.
+            C_Timer.After(0, function()
+                if Page._visible then SetStatus(ok and "" or tostring(reason), ok) end
+            end)
+        end
+        local function Items(kind)
+            local options = { { kind == "appearance" and L["默认（依一般设置）"] or L["默认（依职责设置）"], "" } }
+            if kind == "appearance" then
+                for _, row in ipairs(BuildAppearanceProfileItems()) do options[#options + 1] = row end
+            else
+                for _, row in ipairs(bossCfg:GetAuthorConfigurationItems(kind)) do
+                    options[#options + 1] = { row.name or row.id, row.id }
+                end
+            end
+            return options
+        end
+        local records = {}
+        for i, rule in ipairs(bossCfg:GetSpecRules()) do
+            local index = i
+            local function Update(field, value) Complete(bossCfg:UpdateSpecRule(index, field, value)) end
+            local enabled = EXUI:CreateCheckbox(host, "", rule.enabled == true, function(v) Update("enabled", v) end)
+            local picker = EXUI:CreateSpecPicker(host, 190, rule.specID, function(v) Update("specID", v) end)
+            picker._specRulePicker = true
+            local cells = { Keep(enabled, "switch"), Keep(picker, "select") }
+            for _, kind in ipairs({ "appearance", "mplus", "raid" }) do
+                local field = kind
+                cells[#cells + 1] = Keep(EXUI:CreateDropdown(host, 170, nil, Items(field), rule[field] or "",
+                    function(value) Update(field, value) end), "select")
+            end
+            cells[#cells + 1] = Keep(EXUI:CreateButton(host, 80, 28, L["删除"], function()
+                Complete(bossCfg:DeleteSpecRule(index))
+            end, { variant = "danger", compact = true }), "button")
+            records[#records + 1] = { cells = cells }
+        end
+        local add = Keep(EXUI:CreateButton(host, 96, 28, L["新增规则"], function()
+            Complete(bossCfg:AddSpecRule())
+        end, { variant = "primary", compact = true }), "button")
+        host.rulesForm = Grid:MountSettingsForm(host, {
+            kind = "table", id = "specialization-rules", title = "", supportsAdd = true,
+            columns = { {title=L["启用"]}, {title=L["职业 / 专精"]}, {title=L["外观配置"]},
+                {title=L["大秘境"]}, {title=L["团本"]}, {title=L["操作"]} },
+            add = { cells = { {text=""}, {text=""}, {text=""}, {text=""}, {text=""}, add } },
+            records = records,
+        })
+    end
+    Grid:RegisterCustomRenderer(RULES_RENDERER, {
+        mount = Mount,
+        update = function(host) Release(host); Mount(host) end,
+        layout = function(host, _, width) return host.rulesForm:Relayout(width) end,
+        release = Release,
+    })
+end
 
-        -- All active configuration choices live together.  User overrides
-        -- remain internal and automatically follow their selected Author.
-        { key = "card_active_configurations", type = "card", x = 69, y = 11, w = 60, h = 116, title = L["当前配置选择"], desc = L["外观配置与六个职责的当前 Author 配置。切换任一项会在确认后重载界面。"], accentAlign = "left", accentColor = { r = THEME.cyan[1], g = THEME.cyan[2], b = THEME.cyan[3], a = 1 } },
-        { key = "appearanceProfileID", type = "dropdown", x = 71, y = 22, w = 54, h = 4, label = L["外观配置"], items = BuildAppearanceProfileItems(), labelPos = "top", search = true },
-        { key = "author_mplus_tank", type = "dropdown", x = 71, y = 36, w = 54, h = 4, label = L["大秘境坦克 Author"], items = BuildAuthorPresetItems("mplus_tank"), labelPos = "top", search = true },
-        { key = "author_mplus_dps", type = "dropdown", x = 71, y = 48, w = 54, h = 4, label = L["大秘境 DPS Author"], items = BuildAuthorPresetItems("mplus_dps"), labelPos = "top", search = true },
-        { key = "author_mplus_heal", type = "dropdown", x = 71, y = 60, w = 54, h = 4, label = L["大秘境治疗 Author"], items = BuildAuthorPresetItems("mplus_heal"), labelPos = "top", search = true },
-        { key = "author_raid_tank", type = "dropdown", x = 71, y = 76, w = 54, h = 4, label = L["团本坦克 Author"], items = BuildAuthorPresetItems("raid_tank"), labelPos = "top", search = true },
-        { key = "author_raid_dps", type = "dropdown", x = 71, y = 88, w = 54, h = 4, label = L["团本 DPS Author"], items = BuildAuthorPresetItems("raid_dps"), labelPos = "top", search = true },
-        { key = "author_raid_heal", type = "dropdown", x = 71, y = 100, w = 54, h = 4, label = L["团本治疗 Author"], items = BuildAuthorPresetItems("raid_heal"), labelPos = "top", search = true },
+local function BuildConfigurationLayout()
+    local function Card(id, title, placement, items)
+        local rows = {}
+        local actions
+        for index, item in ipairs(items) do
+            item.x, item.y, item.w, item.h = 1, index, 200, 1
+            item.measure = { preferredHeight = 28, minHeight = 28 }
+            if item.type == "select" then
+                item.items, item.originalOptions = item.originalOptions, nil
+            end
+            if item.type == "select" or item.type == "input" then
+                rows[#rows + 1] = { key = item.key, label = item.label }
+            elseif item.type == "button" then
+                if not actions then
+                    actions = { controls = {} }
+                    rows[#rows + 1] = actions
+                end
+                local width = item.key == "btn_copy_configuration" and 140
+                    or item.key == "btn_rename_configuration" and 100 or 80
+                actions.controls[#actions.controls + 1] = { key = item.key, width = width }
+            else
+                rows[#rows + 1] = { controls = { { key = item.key } } }
+            end
+        end
+        return { id = id, title = title, placement = placement,
+            content = { kind = "grid", items = items },
+            settingsList = { title = title, preserveHeader = false, rows = rows } }
+    end
+    local halfWidth = { ratio = 0.5, offset = -8 }
+    local choices = {
+        { key = "appearanceProfileID", type = "select", label = L["外观配置"], originalOptions = BuildAppearanceProfileItems(), search = true },
+        { key = "author_mplus_tank", type = "select", label = L["大秘境 · 坦克"], originalOptions = BuildAuthorPresetItems("mplus_tank"), search = true },
+        { key = "author_mplus_dps", type = "select", label = L["大秘境 · 输出"], originalOptions = BuildAuthorPresetItems("mplus_dps"), search = true },
+        { key = "author_mplus_heal", type = "select", label = L["大秘境 · 治疗"], originalOptions = BuildAuthorPresetItems("mplus_heal"), search = true },
+        { key = "author_raid_tank", type = "select", label = L["团本 · 坦克"], originalOptions = BuildAuthorPresetItems("raid_tank"), search = true },
+        { key = "author_raid_dps", type = "select", label = L["团本 · 输出"], originalOptions = BuildAuthorPresetItems("raid_dps"), search = true },
+        { key = "author_raid_heal", type = "select", label = L["团本 · 治疗"], originalOptions = BuildAuthorPresetItems("raid_heal"), search = true },
+        { key = "selectedVoicePack", type = "select", label = L["当前语音包"], originalOptions = BuildPackItemsForGrid(), search = true },
     }
-
-    local manageTop = 11
-    local managedConfiguration = FindConfigurationRow(db.selectedConfiguration)
-    local builtInDeleteHint = managedConfiguration and managedConfiguration.builtIn == true
-        and ApplyStatusColor(L["内置 Author 无法重命名或删除"], false, true) or ""
-    layout[#layout + 1] = { key = "card_configuration_manager", type = "card", x = 135, y = manageTop, w = 60, h = 52, title = L["Author 配置管理"], desc = L["这里只管理 Author。输入新名称后可复制为独立配置；User 覆盖始终绑定 Author。"], accentAlign = "left", accentColor = { r = THEME.accent[1], g = THEME.accent[2], b = THEME.accent[3], a = 1 } }
-    layout[#layout + 1] = { key = "selectedConfiguration", type = "dropdown", x = 137, y = 23, w = 56, h = 4, label = L["选择 Author 配置"], items = allConfigurations, labelPos = "top", search = true }
-    layout[#layout + 1] = { key = "configurationName", type = "input", x = 137, y = 35, w = 56, h = 4, label = L["Author 名称"], labelPos = "top" }
-    layout[#layout + 1] = { key = "btn_copy_configuration", type = "button", x = 137, y = 45, w = 18, h = 4, label = L["复制配置"], func = CopyManagedConfiguration }
-    layout[#layout + 1] = { key = "btn_rename_configuration", type = "button", x = 156, y = 45, w = 18, h = 4, label = L["重命名"], func = RenameManagedConfiguration }
-    layout[#layout + 1] = { key = "btn_delete_configuration", type = "button", x = 175, y = 45, w = 18, h = 4, label = L["删除"], func = DeleteManagedConfiguration }
-    layout[#layout + 1] = { key = "desc_builtin_delete_hint", type = "description", x = 137, y = 51, w = 56, h = 3, label = builtInDeleteHint }
-    layout[#layout + 1] = { key = "desc_config_status", type = "description", x = 137, y = 57, w = 56, h = 4, label = ApplyStatusColor(pageStatus.configText, pageStatus.configOk, pageStatus.configOk == false) }
-    return layout
+    local manager = {
+        { key = "selectedConfiguration", type = "select", label = L["选择配置"], originalOptions = BuildAllConfigurationItems(), search = true },
+        { key = "configurationName", type = "input", label = L["名称"] },
+        { key = "btn_copy_configuration", type = "button", label = L["复制为新配置"], variant = "primary", func = CopyManagedConfiguration },
+        { key = "btn_rename_configuration", type = "button", label = L["确认改名"], func = RenameManagedConfiguration },
+        { key = "btn_delete_configuration", type = "button", label = L["删除"], variant = "danger", func = DeleteManagedConfiguration },
+    }
+    return { version = 1, title = L["语音 / 配置"], settingsListWidthPercent = 100, cards = {
+        Card("active-configurations", L["配置与语音选择"], { target = "$container", point = "TOPLEFT", relativePoint = "TOPLEFT", width = halfWidth }, choices),
+        Card("configuration-manager", L["配置管理"], { target = "active-configurations", side = "right", align = "start", gap = 16, width = halfWidth }, manager),
+        Card("specialization-rules", L["专精自动选用"], { target = "active-configurations", side = "below", align = "start", gap = 16, width = {ratio=1} }, {
+            { key = "specialization_rules", type = "custom", renderer = RULES_RENDERER },
+        }),
+        Card("configuration-documentation", L["配置说明"], { target = "configuration-manager", side = "below", align = "end", gap = 16, width = halfWidth }, {
+            { key = "config_documentation", type = "custom", renderer = DOCUMENTATION_RENDERER },
+        }),
+    } }
 end
 
 local function BuildLayout()
@@ -1005,18 +915,8 @@ local function UpdateLayoutData(layout)
         return
     end
 
-    local info = GetCurrentPackInfo()
-    local configStatusText, configStatusOk = BuildDefaultConfigStatusText()
-    if pageStatus.configText ~= "" then
-        configStatusText = pageStatus.configText
-        configStatusOk = pageStatus.configOk
-    end
-
     local updates = {
-        btn_toggle_grid_edit = { label = IsGridEditActive() and L["退出布局编辑"] or L["开启布局编辑"] },
         selectedVoicePack = { items = BuildPackItemsForGrid() },
-        card_pack_details = { title = tostring(info.displayName or ""), desc = tostring(info.subtitle or "") },
-        desc_pack_info = { label = BuildVoicePackInfoBody() },
         appearanceProfileID = { items = BuildAppearanceProfileItems() },
         author_mplus_tank = { items = BuildAuthorPresetItems("mplus_tank") },
         author_mplus_dps = { items = BuildAuthorPresetItems("mplus_dps") },
@@ -1024,7 +924,6 @@ local function UpdateLayoutData(layout)
         author_raid_tank = { items = BuildAuthorPresetItems("raid_tank") },
         author_raid_dps = { items = BuildAuthorPresetItems("raid_dps") },
         author_raid_heal = { items = BuildAuthorPresetItems("raid_heal") },
-        desc_config_status = { label = ApplyStatusColor(configStatusText, configStatusOk, configStatusOk == false) },
     }
 
     for key, fields in pairs(updates) do
@@ -1044,12 +943,15 @@ local function GetOrBuildLayout()
     return pageLayoutData
 end
 
+-- [混合函数边界] RenderGrid 内只可调整 Scroll/Grid 几何；动态重建布局、RegisterModuleLayout、编辑状态和延迟 guard 禁止修改。
 local function RenderGrid(contentFrame, resetScroll)
     local Grid = _G.ExwindGrid
     if not Grid then
         return
     end
 
+    RegisterDocumentationRenderer(Grid)
+    RegisterRulesRenderer(Grid)
     local layout = GetOrBuildLayout()
     ExwindTools:RegisterModuleLayout(MODULE_KEY, layout)
 
@@ -1068,7 +970,7 @@ local function RenderGrid(contentFrame, resetScroll)
     scrollFrame:SetParent(contentFrame)
     scrollFrame:ClearAllPoints()
     scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4)
-    scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -24, 4)
+    scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
     if resetScroll == true then
         scrollFrame:SetVerticalScroll(0)
     end
@@ -1092,35 +994,42 @@ local function RenderGrid(contentFrame, resetScroll)
             ExwindTools.UI.ActivePageFrame = scrollChild
             ExwindTools.UI.CurrentModule = MODULE_KEY
         end
-        if Grid.SetContainerCols then
-            Grid:SetContainerCols(scrollChild, GRID_COLS)
+        if Page._cardSession and type(Page._cardSession.Release) == "function" then
+            Page._cardSession:Release()
+            Page._cardSession = nil
         end
-        Grid:Render(scrollChild, layout, GetPageDB(), MODULE_KEY)
+        Page._cardSession = Grid:MountCards(scrollChild, layout, {
+            pageId = MODULE_KEY,
+            regionId = "voice-pack",
+            config = GetPageDB(),
+            moduleKey = MODULE_KEY,
+            scrollFrame = scrollFrame,
+        })
         UpdateConfigurationManagerButtonState(Grid)
     end)
 end
 
 UpdateConfigurationManagerButtonState = function(Grid)
-    if not Grid or type(Grid.Widgets) ~= "table" then
+    if not (Grid and Grid.FindMountedWidget and scrollChild) then
         return
     end
     -- Keep these controls clickable.  The action itself validates whether the
     -- selected Author was imported and shows the precise reason for built-ins.
     -- Grid's disabled-state handling was leaving the rename button inert even
     -- after an imported Author had been selected.
-    local copyButton = Grid.Widgets.btn_copy_configuration
+    local copyButton = Grid:FindMountedWidget(scrollChild, "btn_copy_configuration")
     if copyButton and copyButton.SetEnabled then
-        copyButton:SetEnabled(true)
+        copyButton:SetEnabled(select(1, ParseConfigurationRef(GetPageDB().selectedConfiguration)) ~= "appearance")
     elseif copyButton and copyButton.Enable then
         copyButton:Enable()
     end
-    local renameButton = Grid.Widgets.btn_rename_configuration
+    local renameButton = Grid:FindMountedWidget(scrollChild, "btn_rename_configuration")
     if renameButton and renameButton.SetEnabled then
         renameButton:SetEnabled(true)
     elseif renameButton and renameButton.Enable then
         renameButton:Enable()
     end
-    local deleteButton = Grid.Widgets.btn_delete_configuration
+    local deleteButton = Grid:FindMountedWidget(scrollChild, "btn_delete_configuration")
     if deleteButton and deleteButton.SetEnabled then
         deleteButton:SetEnabled(true)
     elseif deleteButton and deleteButton.Enable then
@@ -1162,6 +1071,11 @@ local function RefreshActiveSurfaces()
         return
     end
     local db = GetPageDB()
+    local selectedRef = tostring(db.selectedConfiguration or "")
+    if selectedRef ~= tostring(lastSyncedConfigurationRef or "") then
+        SelectConfiguration(selectedRef)
+        return
+    end
     local changed = SetPack(db.selectedVoicePack)
     if changed == false then
         SyncRuntimeToPageDB()

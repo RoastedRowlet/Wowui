@@ -1,6 +1,7 @@
-## Interface: 120100
+## Interface: 120100, 16001
+## AllowLoadGameType: standard, camelot
 ## Title: |cFF00FFFFNorthern Sky Raid Tools - UI|r
-## Version: 12.1.24
+## Version: 12.1.26
 ## IconTexture: Interface\AddOns\NorthernSkyRaidTools\Media\NSLogo.blp
 ## Author: Reloe, Rav
 ## LoadOnDemand: 1
@@ -29,8 +30,8 @@ UI\Options\InterruptDisplay.lua
 UI\Options\ReadyCheck.lua
 UI\Options\AuraTracking.lua
 UI\Options\PaceComparison.lua
-UI\Options\QoL.lua
-UI\Options\WAImports.lua
+UI\Options\QoL.lua [AllowLoadGameType standard]
+UI\Options\WAImports.lua [AllowLoadGameType standard]
 UI\AnchorWindow.lua
 Timeline.lua
 

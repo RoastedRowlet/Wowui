@@ -1,6 +1,9 @@
 -- [[ 自动购买 ]]
 -- { Key = "ExTools.AutoBuy", Name = "自动购买", Desc = "在商人处自动购买预设或自定义的物品（如钥石地图、消耗品等）。", Category = 4 },
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 local EXDB = _G.EXDB
 if not ExwindTools then return end
@@ -14,6 +17,9 @@ local EXWIND_MODULE_KEY = "ExTools.AutoBuy"
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 
 -- 3. 数据默认值与 DB 初始化
+-- =========================================================
+-- 二、默认配置与配置访问 | Defaults and Configuration Access
+-- =========================================================
 local EXWIND_DEFAULTS = {
     enabled = true,
     Items = {},       -- 存储 ID -> {enabled, quantity}
@@ -62,29 +68,60 @@ local PRESET_ITEMS = {
 
 
 -- 2. Grid 布局 (核心)
+-- =========================================================
+-- 三、GUI 声明 | GUI Declarations
+-- =========================================================
+local pendingItemInfo = {}
+local function ItemTextCell(itemID)
+    local name, _, quality = C_Item.GetItemInfo(itemID)
+    if not name and not pendingItemInfo[itemID] then
+        pendingItemInfo[itemID] = true
+        C_Item.RequestLoadItemDataByID(itemID)
+    end
+    if name then
+        local _, _, _, hex = C_Item.GetItemQualityColor(quality or 1)
+        name = "|c" .. hex .. name .. "|r"
+    end
+    return {
+        text = name or ("ID: " .. itemID),
+        icon = C_Item.GetItemIconByID(itemID) or 134400,
+        itemID = itemID,
+    }
+end
+
 local function EX_RegisterLayout()
+    -- 物品身份由正式表格的只读 text/icon 单元格显示；启用、数量、增删
+    -- 继续使用原记录、配置路径和业务回调。
     local layout = {
-        { key = "header", type = "header", x = 1, y = 4, w = 188, h = 12, label = L["自动购买 (Auto Buy)"], labelSize = 25 },
-        { key = "desc", type = "description", x = 1, y = 16, w = 188, h = 8, label = L["当打开商人界面时，自动购买背包中缺少的物品 (自动补齐到设置数量)"] },
-        { key = "sub_add", type = "subheader", x = 1, y = 24, w = 188, h = 4, label = L["手动添加 (输入物品ID)"], labelSize = 20 },
-        { key = "addID", type = "input", x = 1, y = 36, w = 72, h = 8, label = L["输入 ID"] },
-        { key = "addItem", type = "button", x = 80, y = 36, w = 32, h = 8, label = L["添加"] },
-        { key = "sub_c", type = "subheader", x = 1, y = 48, w = 188, h = 8, label = L["自定义购买列表 (支持拖拽添加)"], labelSize = 20 },
+        version = 1,
+        title = L["自动购买 (Auto Buy)"],
+        description = L["当打开商人界面时，自动购买背包中缺少的物品 (自动补齐到设置数量)"],
+        sections = {
+            {
+                kind = "table",
+                id = "general",
+                title = L["通用设置"],
+                columns = {
+                    { title = L["启用"] },
+                    { title = L["物品"] },
+                    { title = L["数量"] },
+                    { title = L["操作"] },
+                },
+                supportsAdd = true,
+                add = {
+                    cells = {
+                        { text = "" },
+                        { key = "addID", type = "input", label = L["输入 ID"] },
+                        { text = "" },
+                        { key = "addItem", type = "button", label = L["添加"] },
+                    },
+                },
+                records = {},
+            },
+        },
     }
 
-
-    -- 问号框（添加位）始终固定在自定义列表开头
-    table.insert(layout, {
-        key = "new_item_drop",
-        type = "itemconfig",
-        itemID = 0,
-        x = 1,
-        y = 56,
-        w = 140,
-        h = 8
-    })
-
-    local y = 70
+    local records = layout.sections[1].records
 
     -- 渲染自定义列表
     local customList = {}
@@ -92,26 +129,23 @@ local function EX_RegisterLayout()
     table.sort(customList)
 
     for _, id in ipairs(customList) do
-        table.insert(layout, {
-            key = id,
-            parentKey = "CustomItems",
-            subKey = id,
-            type = "itemconfig",
-            itemID = id,
-            x = 1,
-            y = y,
-            w = 140,
-            h = 8,
-            canDelete = true, -- 显式启用删除按钮（上报事件模式）
-            labelSize = 18
-        })
-        y = y + 10
+        records[#records + 1] = { cells = {
+            {
+                key = "custom_enabled_" .. id,
+                parentKey = "CustomItems", subKey = id, type = "itemenabled", itemID = id,
+            },
+            ItemTextCell(id),
+            {
+                key = "custom_quantity_" .. id,
+                parentKey = "CustomItems", subKey = id, type = "itemquantity", itemID = id,
+            },
+            {
+                key = "custom_delete_" .. id,
+                parentKey = "CustomItems", subKey = id, type = "itemdelete", itemID = id,
+                canDelete = true,
+            },
+        } }
     end
-
-    y = y + 4
-    table.insert(layout,
-        { key = "sub_p", type = "subheader", x = 1, y = y, w = 188, h = 4, label = L["预设项目 (仅支持开启/禁用)"] })
-    y = y + 8
 
     local cats = { { k = "food", n = L["消耗品"] }, { k = "key", n = L["钥石设置"] }, { k = "map", n = L["副本地图"] } }
     for _, cat in ipairs(cats) do
@@ -120,46 +154,44 @@ local function EX_RegisterLayout()
         local shouldShow = (not isBetaOnly) or ExwindTools.IsBeta
 
         if shouldShow then
-            table.insert(layout,
-                {
-                    key = "t_" .. cat.k,
-                    type = "description",
-                    x = 1,
-                    y = y,
-                    w = 188,
-                    h = 4,
-                    label = "|cffffd100" .. cat.n ..
-                        "|r"
-                })
-            y = y + 6
             for _, it in ipairs(PRESET_ITEMS) do
                 if it.cat == cat.k then
                     if not EX_DB.Items[it.id] then EX_DB.Items[it.id] = { enabled = true, quantity = it.buy } end
-                    table.insert(layout, {
-                        key = it.id,
-                        parentKey = "Items",
-                        subKey = it.id,
-                        type = "itemconfig",
-                        itemID = it.id,
-                        x = 1,
-                        y = y,
-                        w = 140,
-                        h = 8,
-                        canDelete = false, -- 预设项目不可删除
-                        labelSize = 18
-                    })
-                    y = y + 10
+                    records[#records + 1] = { cells = {
+                        {
+                            key = "preset_enabled_" .. it.id,
+                            parentKey = "Items", subKey = it.id, type = "itemenabled", itemID = it.id,
+                        },
+                        ItemTextCell(it.id),
+                        {
+                            key = "preset_quantity_" .. it.id,
+                            parentKey = "Items", subKey = it.id, type = "itemquantity", itemID = it.id,
+                        },
+                        { text = "" },
+                    } }
                 end
             end
-            y = y + 4
         end
     end
 
     ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    return layout
 end
 
 -- 3. 立即注册
 EX_RegisterLayout()
+
+ExwindTools:RegisterEvent("GET_ITEM_INFO_RECEIVED", EXWIND_MODULE_KEY, function(_, itemID, success)
+    if not pendingItemInfo[itemID] then return end
+    pendingItemInfo[itemID] = nil
+    if not success then return end
+    local layout = EX_RegisterLayout()
+    local ui = ExwindTools.UI
+    if ui.CurrentPage == "ModuleSettings" and ui.CurrentModule == EXWIND_MODULE_KEY then
+        local session = ui.ActivePageFrame and ui.ActivePageFrame._exCardSession
+        if session then session:ReplaceSettingsSection("general", layout.sections[1]) end
+    end
+end)
 
 -- =========================================================
 -- 逻辑绑定：通过事件处理添加与删除
@@ -189,18 +221,9 @@ ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ItemConfigDelete", EXWIND_MODULE_K
     end
 end)
 
--- 3. 处理 ItemConfig 组件上报的拖拽更新事件（用于新项目添加）
-ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ItemConfigUpdate", EXWIND_MODULE_KEY, function(data)
-    if data.key == "new_item_drop" then
-        local newItemID = tonumber(data.itemID)
-        if newItemID and newItemID > 0 then
-            EX_DB.CustomItems[newItemID] = { enabled = true, quantity = 5 }
-            EX_RegisterLayout()
-            ExwindTools.UI:RefreshContent()
-        end
-    end
-end)
-
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function GetCount(id)
     local c = 0
     local maxBagIndex = 4
@@ -243,6 +266,9 @@ local function DoBuy(id, target)
     return false
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 ExwindTools:RegisterEvent("MERCHANT_SHOW", EXWIND_MODULE_KEY, function()
     local boughtAnything = false
 

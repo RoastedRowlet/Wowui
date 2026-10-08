@@ -99,33 +99,50 @@ TalentLoadoutEx = {
 ["SHAMAN"] = {
 {
 {
+["name"] = "Dungeons",
 ["isExpanded"] = true,
 ["icon"] = 134400,
-["name"] = "Dungeons",
 },
 {
+["isInGroup"] = true,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYssYajZmtxyMPwMjhFLzMLDjZmFAghBwMjhhB",
 ["name"] = "Altar",
 ["icon"] = 134400,
 },
 {
+["isInGroup"] = true,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZGjlZmZGDLWmZWGGzMLAADDgZGDDD",
 ["name"] = "Den",
 ["icon"] = 134400,
 },
 {
+["name"] = "bv",
+["isInGroup"] = true,
+["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYssYajZGjlZMzMDLWmZWGGzMLAADDgZGDDD",
+["icon"] = 134400,
+},
+{
+["isInGroup"] = true,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZGjlZegZGjZxyMzywYmZBAYYAMzYYYA",
 ["name"] = "Temple",
 ["icon"] = 134400,
 },
 {
+["isInGroup"] = true,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYCzMGLzMzMGzilZmlhxMzCAwwAYmxwwA",
 ["name"] = "VSA",
 ["icon"] = 134400,
 },
 {
-["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZGjlZegZGjZxyMzywYmZBAYYAMzYYYA",
+["isInGroup"] = true,
+["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMLzMzYstYajZGjlZMzMjZxyMzywYmZBAYAgZGDDD",
 ["name"] = "Murder",
+["icon"] = 134400,
+},
+{
+["isInGroup"] = true,
+["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMLzMzYstYajZGjlZmZGDLWmZWGGzMLAADDgZGDDD",
+["name"] = "KR",
 ["icon"] = 134400,
 },
 },
@@ -237,35 +254,30 @@ TalentLoadoutEx = {
 {
 {
 ["name"] = "Wizard WS",
-["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbzMYMbMb2mBAAAAAAAAAALGa2mhpZAMLmZmZWMMAAAAAYADYGAAEAAwsNzWz2Mb2YMzMMzsBaGAgZGAGA",
 },
 {
 ["name"] = "Crazy Cow",
-["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbDPAjZxMb2mBAAAAAAAAAALDa2mhpZYgZxMzMzihxAAAAAYAAzAAgAAAmtZ2a2mZzGjZGMzsAaGAgZGAGA",
 },
 {
 ["name"] = "Theory",
-["isInGroup"] = false,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbzMGmZjZz2MAAAAAAAAAAYZQz2MMNDDMLzMzMzihxAAAAAYAAzAstNWw0MzyAAY2mZrZbmNLMmZwMAaGAMzMzAwA",
 ["icon"] = 134400,
 ["pvp1"] = 697,
 },
 {
 ["name"] = "wowhead raid",
-["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMjxMLzMjZmxsNMYmNjNmBAAAAAAAAAALDa2YMNzY4BMLzMzMDDzAAAAAAAAAAIAAgZbmlmtZ2sxYmZYmBGNDAwMDADA",
 },
 {
 ["name"] = "wowhead",
-["isInGroup"] = false,
 ["text"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzsMsZbGAAAAAAAAAAsMoZzw0MjZwsYmZmZZGegZAAAAAAAwAAQAAAz2MbNbzsYjxMDMzCoZAAmZAYA",
 ["icon"] = 134400,
 ["pvp1"] = 697,

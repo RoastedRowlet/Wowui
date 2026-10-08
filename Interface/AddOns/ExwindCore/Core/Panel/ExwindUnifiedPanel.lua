@@ -8,6 +8,8 @@
 
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
+local GC = ExwindTools.GUIColors
+if not GC then error("ExwindGUIColor.lua must load before ExwindUnifiedPanel.lua") end
 local EXUI = ExwindTools.UI
 local L = ExwindTools.L
 
@@ -58,15 +60,9 @@ local function MakeSolidFrame(parent, color, borderColor)
     return frame
 end
 
--- 标题栏与 Tab 处于同一个连续背景内；这里刻意不建立边框，避免顶部出现
--- 多余分隔线或让 Tab 看起来像一排按钮。
-local function MakeFlatFrame(parent, color)
-    local frame = CreateFrame("Frame", nil, parent)
-    local background = EXUI:CreateVisualTexture(frame, EXBACKGROUNDFRAME)
-    background:SetAllPoints()
-    background:SetColorTexture(CopyColor(color or Color.header))
-    frame.Background = background
-    return frame
+-- 标题栏、Tab 与侧栏共用 Shell 的圆角底色，不再用矩形贴图盖住外角。
+local function MakeFlatFrame(parent)
+    return CreateFrame("Frame", nil, parent)
 end
 
 local function MakeText(parent, _, size, color, flags)
@@ -204,6 +200,14 @@ function Panel:ApplyLayout(mode, options)
     self.ActiveNavRatio = (requestedRatio and requestedRatio > 0 and requestedRatio < 1) and requestedRatio or nil
     self.TopTabHost:SetShown(hasTabs)
     self:HideAllHosts()
+    if self.NavDivider then self.NavDivider:SetShown(hasNav) end
+    if self.TopDivider then
+        local topEdge = hasTabs and self.TopTabHost or self.Header
+        self.TopDivider:ClearAllPoints()
+        self.TopDivider:SetPoint("TOPLEFT", topEdge, "BOTTOMLEFT", 0, 0)
+        self.TopDivider:SetPoint("TOPRIGHT", topEdge, "BOTTOMRIGHT", 0, 0)
+        self.TopDivider:SetShown(hasNav)
+    end
 
     local metrics = self:GetMetrics()
     self.NavHost:ClearAllPoints()
@@ -213,14 +217,15 @@ function Panel:ApplyLayout(mode, options)
     if hasNav then
         self.NavHost:SetWidth(metrics.navWidth)
         self.NavHost:SetPoint("TOPLEFT", self.Frame, "TOPLEFT", Layout.APP_RAIL_WIDTH, -(Layout.HEADER_HEIGHT + (hasTabs and Layout.TOP_TAB_HEIGHT or 0)))
-        self.NavHost:SetPoint("BOTTOMLEFT", self.Frame, "BOTTOMLEFT", Layout.APP_RAIL_WIDTH, 0)
+        self.NavHost:SetPoint("BOTTOMLEFT", self.Frame, "BOTTOMLEFT", Layout.APP_RAIL_WIDTH, 1)
         self.ContentHost:SetPoint("TOPLEFT", self.NavHost, "TOPRIGHT", 0, 0)
-        self.ContentHost:SetPoint("BOTTOMRIGHT", self.Frame, "BOTTOMRIGHT", 0, 0)
+        -- Provider 内容仍可能使用矩形底色；留出圆角所需的 4px 内距。
+        self.ContentHost:SetPoint("BOTTOMRIGHT", self.Frame, "BOTTOMRIGHT", -4, 4)
         self.NavHost:Show()
         self.ContentHost:Show()
     else
         self.FullContentHost:SetPoint("TOPLEFT", self.Frame, "TOPLEFT", Layout.APP_RAIL_WIDTH, -(Layout.HEADER_HEIGHT + (hasTabs and Layout.TOP_TAB_HEIGHT or 0)))
-        self.FullContentHost:SetPoint("BOTTOMRIGHT", self.Frame, "BOTTOMRIGHT", 0, 0)
+        self.FullContentHost:SetPoint("BOTTOMRIGHT", self.Frame, "BOTTOMRIGHT", -4, 4)
         self.FullContentHost:Show()
     end
 
@@ -400,7 +405,7 @@ function Panel:SetTopTabs(providerID, tabs, activeKey, onSelect, options)
     if options and options.choiceGroup then
         local items = {}
         for _, tab in ipairs(tabs or {}) do
-            items[#items + 1] = { id = tab.key, label = tab.label, disabled = tab.disabled }
+            items[#items + 1] = { id = tab.key, label = tab.label, icon = tab.icon, disabled = tab.disabled }
         end
         local group = EXUI:CreateTabGroup(self.TopTabHost, {
             items = items, value = activeKey, sizing = "content", itemHeight = Layout.TOP_TAB_HEIGHT - 2,
@@ -430,26 +435,40 @@ function Panel:SetTopTabs(providerID, tabs, activeKey, onSelect, options)
                 button.label = MakeText(button, "OVERLAY", Layout.TOP_TAB_FONT_SIZE or 14, Color.muted, "OUTLINE")
                 button.label:SetPoint("CENTER", 0, 0)
                 button.accent = EXUI:CreateVisualTexture(button, EXBASEFRAME)
-                button.accent:SetPoint("BOTTOMLEFT", 8, 0)
-                button.accent:SetPoint("BOTTOMRIGHT", -8, 0)
+                button.accent:SetPoint("BOTTOMLEFT", 8, 3)
+                button.accent:SetPoint("BOTTOMRIGHT", -8, 3)
                 button.accent:SetHeight(2)
                 self.TopTabButtons[index] = button
             end
 
             button._tabKey = tab.key
             button.label:SetText(tab.label)
+            button.label:ClearAllPoints()
+            if tab.icon then
+                if not button.icon then
+                    button.icon = EXUI:CreateVisualTexture(button, EXBORDERFRAME)
+                    button.icon:SetSize(20, 20)
+                end
+                button.icon:SetTexture(_G.ExwindTools.GUIIcons.ids[tab.icon] and EXUI:GetIcon(tab.icon) or tab.icon)
+                button.icon:ClearAllPoints()
+                button.icon:SetPoint("LEFT", button, "LEFT", 12, 0)
+                button.icon:Show()
+                button.label:SetPoint("LEFT", button.icon, "RIGHT", 6, 0)
+            else
+                if button.icon then button.icon:SetTexture(nil); button.icon:Hide() end
+                button.label:SetPoint("CENTER", 0, 0)
+            end
             button:ClearAllPoints()
             if previous then
                 button:SetPoint("LEFT", previous, "RIGHT", 5, 0)
             else
                 button:SetPoint("LEFT", self.TopTabHost, "LEFT", 14, 0)
             end
-            button:SetWidth(math.max(68, button.label:GetStringWidth() + 26))
+            button:SetWidth(math.max(68, button.label:GetStringWidth() + (tab.icon and 50 or 26)))
             local active = tab.key == activeKey
-            local provider = self.Providers and self.Providers[providerID]
-            local accent = Color[provider and provider.accent or "cyan"] or Color.cyan
             button.label:SetTextColor(CopyColor(active and Color.text or Color.muted))
-            button.accent:SetColorTexture(CopyColor(accent))
+            if button.icon then button.icon:SetVertexColor(CopyColor(active and Color.text or Color.muted)) end
+            button.accent:SetColorTexture(CopyColor(GC.tabIndicator)) -- 统一主色（原 Provider accent）
             button.accent:SetShown(active)
             button.hover:SetShown(active)
             button:SetScript("OnEnter", function(self)
@@ -469,14 +488,15 @@ function Panel:SetTopTabs(providerID, tabs, activeKey, onSelect, options)
     return true
 end
 
+local function SetRailButtonSurface(button, fill)
+    EXUI:SetControlSurface(button, 4, fill, GC.transparent)
+end
+
 local function SetRailButtonState(button, active)
     if not button then return end
-    local meta = button._providerMeta or {}
-    local accent = Color[meta.accent or "cyan"] or Color.cyan
     button._active = active == true
-    button:SetBackdropColor(active and 0.075 or 0.03, active and 0.12 or 0.04, active and 0.17 or 0.06, active and 0.96 or 0)
-    button:SetBackdropBorderColor(active and accent[1] or Color.borderSoft[1], active and accent[2] or Color.borderSoft[2], active and accent[3] or Color.borderSoft[3], active and 0.65 or 0)
-    button.accent:SetShown(active == true)
+    SetRailButtonSurface(button, active and GC.shell.railActive or GC.shell.railTransparent)
+    button.accent:Hide() -- 选中不再显示左侧竖线（原 SetShown(active == true)）
     button.label:SetTextColor(CopyColor(active and Color.text or Color.muted))
 end
 
@@ -492,15 +512,14 @@ function Panel:RebuildAppRail()
         if provider then
             local button = self.RailButtonByID[id]
             if not button then
-                button = CreateFrame("Button", nil, self.AppRail, "BackdropTemplate")
+                button = CreateFrame("Button", nil, self.AppRail)
                 button:SetSize(42, 42)
-                button:SetBackdrop(Backdrop)
                 button._providerID = id
                 button._providerMeta = self.ProviderMeta[id] or {}
                 button.label = MakeText(button, "OVERLAY", 15, Color.muted, "OUTLINE")
                 button.label:SetPoint("CENTER")
                 button.accent = EXUI:CreateVisualTexture(button, EXBASEFRAME)
-                button.accent:SetPoint("LEFT", -9, 0)
+                button.accent:SetPoint("LEFT", -6, 0)
                 button.accent:SetSize(2, 23)
                 button.accent:SetColorTexture(CopyColor(Color.cyan))
                 button:SetScript("OnClick", function(self)
@@ -508,7 +527,7 @@ function Panel:RebuildAppRail()
                 end)
                 button:SetScript("OnEnter", function(self)
                     if not self._active then
-                        self:SetBackdropColor(0.10, 0.13, 0.18, 0.78)
+                        SetRailButtonSurface(self, GC.shell.railHover)
                     end
                     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                     GameTooltip:SetText((self._providerMeta and self._providerMeta.title) or self._providerID, 0.86, 0.92, 1)
@@ -583,10 +602,9 @@ function SettingsProvider:Mount(hosts)
     root:SetAllPoints()
     self.Root = root
 
-    local scrollFrame = CreateFrame("ScrollFrame", nil, root, "ScrollFrameTemplate")
-    scrollFrame:EnableMouseWheel(true)
+    local scrollFrame = EXUI:CreateScrollFrame(root)
     scrollFrame:SetPoint("TOPLEFT", root, "TOPLEFT", 4, -4)
-    scrollFrame:SetPoint("BOTTOMRIGHT", root, "BOTTOMRIGHT", -24, 4)
+    scrollFrame:SetPoint("BOTTOMRIGHT", root, "BOTTOMRIGHT", -18, 4)
     local scrollChild = CreateFrame("Frame", nil, scrollFrame)
     scrollChild:SetHeight(1)
     scrollFrame:SetScrollChild(scrollChild)
@@ -716,10 +734,8 @@ end
 function Panel:CreateFrame()
     if self.Frame then return self.Frame end
 
-    local frame = CreateFrame("Frame", "ExwindUnifiedPanelFrame", UIParent, "BackdropTemplate")
-    frame:SetBackdrop(Backdrop)
-    frame:SetBackdropColor(CopyColor(Color.panel))
-    frame:SetBackdropBorderColor(CopyColor(Color.border))
+    local frame = CreateFrame("Frame", "ExwindUnifiedPanelFrame", UIParent)
+    EXUI:SetControlSurface(frame, 10, Color.rail, Color.border)
     frame:SetFrameStrata("DIALOG")
     frame:SetToplevel(true)
     frame:SetMovable(true)
@@ -820,17 +836,25 @@ function Panel:CreateFrame()
     self.Frame = frame
     self:RestoreGeometry()
 
-    local rail = MakeSolidFrame(frame, Color.rail, Color.border)
-    rail:SetPoint("TOPLEFT")
-    rail:SetPoint("BOTTOMLEFT")
-    rail:SetWidth(Layout.APP_RAIL_WIDTH)
+    local rail = MakeFlatFrame(frame)
+    rail:SetPoint("TOPLEFT", frame, "TOPLEFT", 1, -1)
+    rail:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 1, 1)
+    rail:SetWidth(Layout.APP_RAIL_WIDTH - 1)
     self.AppRail = rail
 
-    local brand = MakeText(rail, "OVERLAY", 14, Color.violet, "OUTLINE")
-    brand:SetPoint("TOP", 0, -22)
-    brand:SetText("EX")
+    local railDivider = EXUI:CreateVisualTexture(rail, EXBASEFRAME)
+    railDivider:SetPoint("TOPRIGHT", rail, "TOPRIGHT")
+    railDivider:SetPoint("BOTTOMRIGHT", rail, "BOTTOMRIGHT")
+    railDivider:SetWidth(1)
+    railDivider:SetColorTexture(CopyColor(Color.borderSoft))
+
+    local brand = EXUI:CreateVisualTexture(rail, EXBASEFRAME)
+    brand:SetPoint("TOP", 0, -5)
+    brand:SetSize(36, 44)
+    brand:SetTexture("Interface\\AddOns\\ExwindCore\\Textures\\LOGO\\EXShellLogo.tga")
+    brand:SetVertexColor(CopyColor(GC.selectedText))
     local brandLine = EXUI:CreateVisualTexture(rail, EXBASEFRAME)
-    brandLine:SetPoint("TOP", brand, "BOTTOM", 0, -12)
+    brandLine:SetPoint("TOP", brand, "BOTTOM", 0, -8)
     brandLine:SetSize(22, 1)
     brandLine:SetColorTexture(CopyColor(Color.borderSoft))
 
@@ -840,15 +864,13 @@ function Panel:CreateFrame()
 
     -- 固定在应用栏底部的通用设置入口。不属于任何 Provider，承载不属于
     -- 单一插件的全局开关（例如统一小地图按钮的隐藏开关）。
-    local settingsBtn = CreateFrame("Button", nil, rail, "BackdropTemplate")
+    local settingsBtn = CreateFrame("Button", nil, rail)
     settingsBtn:SetSize(42, 42)
     settingsBtn:SetPoint("BOTTOM", rail, "BOTTOM", 0, 188)
-    settingsBtn:SetBackdrop(Backdrop)
-    settingsBtn:SetBackdropColor(0.03, 0.04, 0.06, 0)
-    settingsBtn:SetBackdropBorderColor(Color.borderSoft[1], Color.borderSoft[2], Color.borderSoft[3], 0)
+    SetRailButtonSurface(settingsBtn, GC.shell.railTransparent)
     settingsBtn._providerMeta = { accent = "cyan" }
     settingsBtn.accent = EXUI:CreateVisualTexture(settingsBtn, EXBASEFRAME)
-    settingsBtn.accent:SetPoint("LEFT", -9, 0)
+    settingsBtn.accent:SetPoint("LEFT", -6, 0)
     settingsBtn.accent:SetSize(2, 23)
     settingsBtn.accent:SetColorTexture(CopyColor(Color.cyan))
     settingsBtn.accent:Hide()
@@ -863,7 +885,7 @@ function Panel:CreateFrame()
     settingsBtn:SetScript("OnClick", function() Panel:SelectProvider("settings") end)
     settingsBtn:SetScript("OnEnter", function(self)
         if not self._active then
-            self:SetBackdropColor(0.10, 0.13, 0.18, 0.78)
+            SetRailButtonSurface(self, GC.shell.railHover)
         end
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L["通用设置"], 0.86, 0.92, 1)
@@ -876,12 +898,10 @@ function Panel:CreateFrame()
     self.SettingsRailButton = settingsBtn
 
     -- 唯一的更新日志入口：正文仍由各插件注册，Core 只打开统一 TAB 窗口。
-    local changelog = CreateFrame("Button", nil, rail, "BackdropTemplate")
+    local changelog = CreateFrame("Button", nil, rail)
     changelog:SetSize(42, 42)
     changelog:SetPoint("BOTTOM", rail, "BOTTOM", 0, 137)
-    changelog:SetBackdrop(Backdrop)
-    changelog:SetBackdropColor(0.03, 0.04, 0.06, 0)
-    changelog:SetBackdropBorderColor(Color.borderSoft[1], Color.borderSoft[2], Color.borderSoft[3], 0)
+    SetRailButtonSurface(changelog, GC.shell.railTransparent)
     changelog.label = MakeText(changelog, "OVERLAY", 15, Color.muted, "OUTLINE")
     changelog.label:SetPoint("CENTER")
     changelog.label:SetText("≡")
@@ -892,27 +912,23 @@ function Panel:CreateFrame()
         end
     end)
     changelog:SetScript("OnEnter", function(self)
-        self:SetBackdropColor(0.10, 0.13, 0.18, 0.78)
-        self:SetBackdropBorderColor(Color.cyan[1], Color.cyan[2], Color.cyan[3], 0.55)
+        SetRailButtonSurface(self, GC.shell.railHover)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L["更新日志"], 0.86, 0.92, 1)
         GameTooltip:Show()
     end)
     changelog:SetScript("OnLeave", function(self)
-        self:SetBackdropColor(0.03, 0.04, 0.06, 0)
-        self:SetBackdropBorderColor(Color.borderSoft[1], Color.borderSoft[2], Color.borderSoft[3], 0)
+        SetRailButtonSurface(self, GC.shell.railTransparent)
         GameTooltip:Hide()
     end)
     self.ChangelogRailButton = changelog
 
     -- 固定在应用栏底部的全局编辑模式入口。它不属于任何 Provider，因此
     -- Tools / EXBoss / EXAura 任一页面都复用同一个 Core 编辑会话。
-    local editMode = CreateFrame("Button", nil, rail, "BackdropTemplate")
+    local editMode = CreateFrame("Button", nil, rail)
     editMode:SetSize(42, 42)
     editMode:SetPoint("BOTTOM", rail, "BOTTOM", 0, 86)
-    editMode:SetBackdrop(Backdrop)
-    editMode:SetBackdropColor(0.03, 0.04, 0.06, 0)
-    editMode:SetBackdropBorderColor(Color.borderSoft[1], Color.borderSoft[2], Color.borderSoft[3], 0)
+    SetRailButtonSurface(editMode, GC.shell.railTransparent)
     editMode.icon = EXUI:CreateVisualTexture(editMode, EXBASEFRAME)
     editMode.icon:SetPoint("CENTER")
     editMode.icon:SetSize(26.4, 26.4)
@@ -921,47 +937,41 @@ function Panel:CreateFrame()
     editMode.icon:SetTexture("Interface\\AddOns\\ExwindCore\\Textures\\grid.png")
     editMode:SetScript("OnClick", function() Panel:EnterEditMode() end)
     editMode:SetScript("OnEnter", function(self)
-        self:SetBackdropColor(0.10, 0.13, 0.18, 0.78)
-        self:SetBackdropBorderColor(Color.cyan[1], Color.cyan[2], Color.cyan[3], 0.55)
+        SetRailButtonSurface(self, GC.shell.railHover)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L["编辑模式"], 0.86, 0.92, 1)
         GameTooltip:Show()
     end)
     editMode:SetScript("OnLeave", function(self)
-        self:SetBackdropColor(0.03, 0.04, 0.06, 0)
-        self:SetBackdropBorderColor(Color.borderSoft[1], Color.borderSoft[2], Color.borderSoft[3], 0)
+        SetRailButtonSurface(self, GC.shell.railTransparent)
         GameTooltip:Hide()
     end)
     self.EditModeRailButton = editMode
 
-    local reload = CreateFrame("Button", nil, rail, "BackdropTemplate")
+    local reload = CreateFrame("Button", nil, rail)
     reload:SetSize(42, 42)
     reload:SetPoint("BOTTOM", rail, "BOTTOM", 0, 35)
-    reload:SetBackdrop(Backdrop)
-    reload:SetBackdropColor(0.03, 0.04, 0.06, 0)
-    reload:SetBackdropBorderColor(Color.borderSoft[1], Color.borderSoft[2], Color.borderSoft[3], 0)
+    SetRailButtonSurface(reload, GC.shell.railTransparent)
     reload.icon = EXUI:CreateVisualTexture(reload, EXBASEFRAME)
     reload.icon:SetPoint("CENTER")
     reload.icon:SetSize(24, 24)
     reload.icon:SetTexture("Interface\\AddOns\\ExwindCore\\Textures\\reload.png")
     reload:SetScript("OnClick", function() ReloadUI() end)
     reload:SetScript("OnEnter", function(self)
-        self:SetBackdropColor(0.10, 0.13, 0.18, 0.78)
-        self:SetBackdropBorderColor(Color.cyan[1], Color.cyan[2], Color.cyan[3], 0.55)
+        SetRailButtonSurface(self, GC.shell.railHover)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L["重新加载界面"], 0.86, 0.92, 1)
         GameTooltip:Show()
     end)
     reload:SetScript("OnLeave", function(self)
-        self:SetBackdropColor(0.03, 0.04, 0.06, 0)
-        self:SetBackdropBorderColor(Color.borderSoft[1], Color.borderSoft[2], Color.borderSoft[3], 0)
+        SetRailButtonSurface(self, GC.shell.railTransparent)
         GameTooltip:Hide()
     end)
     self.ReloadRailButton = reload
     self.RailButtons = {}
     self.RailButtonByID = {}
 
-    local header = MakeFlatFrame(frame, Color.header)
+    local header = MakeFlatFrame(frame)
     header:SetPoint("TOPLEFT", rail, "TOPRIGHT", 0, 0)
     header:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
     header:SetHeight(Layout.HEADER_HEIGHT)
@@ -977,8 +987,21 @@ function Panel:CreateFrame()
     self.HeaderSubtitle = titleSub
 
     -- 关闭键属于整个 Shell，而非 Header 中线；始终贴齐窗口右上角。
-    local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -3, -3)
+    local close = CreateFrame("Button", nil, frame)
+    close:SetSize(20, 20)
+    close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -8, -3)
+    EXUI:SetControlSurface(close, 4, GC.input, GC.panelBorder)
+    close.label = MakeText(close, "OVERLAY", 17, GC.text, "OUTLINE")
+    close.label:SetPoint("CENTER", 0, 1)
+    close.label:SetText("×")
+    close:SetScript("OnEnter", function(self)
+        EXUI:SetControlSurface(self, 4, GC.dangerBorder, GC.dangerBorder)
+        self.label:SetTextColor(CopyColor(GC.white))
+    end)
+    close:SetScript("OnLeave", function(self)
+        EXUI:SetControlSurface(self, 4, GC.input, GC.panelBorder)
+        self.label:SetTextColor(CopyColor(GC.text))
+    end)
     close:SetScript("OnClick", function() frame:Hide() end)
 
     local drag = CreateFrame("Button", nil, header)
@@ -995,20 +1018,36 @@ function Panel:CreateFrame()
         StopShellDrag(frame)
     end)
 
-    local tabHost = MakeFlatFrame(frame, Color.header)
+    local tabHost = MakeFlatFrame(frame)
     tabHost:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, 0)
     tabHost:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
     tabHost:SetHeight(Layout.TOP_TAB_HEIGHT)
     self.TopTabHost = tabHost
 
-    local navHost = MakeSolidFrame(frame, Color.nav, Color.border)
+    local topDivider = CreateFrame("Frame", nil, frame)
+    topDivider:SetHeight(1)
+    topDivider:SetFrameLevel(frame:GetFrameLevel() + 20)
+    local topDividerLine = EXUI:CreateVisualTexture(topDivider, EXBASEFRAME)
+    topDividerLine:SetAllPoints()
+    topDividerLine:SetColorTexture(CopyColor(Color.borderSoft))
+    self.TopDivider = topDivider
+
+    local navHost = MakeFlatFrame(frame)
     self.NavHost = navHost
+
+    local navDivider = CreateFrame("Frame", nil, frame)
+    navDivider:SetPoint("TOPLEFT", navHost, "TOPRIGHT", -1, 0)
+    navDivider:SetPoint("BOTTOMLEFT", navHost, "BOTTOMRIGHT", -1, 0)
+    navDivider:SetWidth(1)
+    navDivider:SetFrameLevel(frame:GetFrameLevel() + 20)
+    local navDividerLine = EXUI:CreateVisualTexture(navDivider, EXBASEFRAME)
+    navDividerLine:SetAllPoints()
+    navDividerLine:SetColorTexture(CopyColor(Color.borderSoft))
+    self.NavDivider = navDivider
 
     local contentHost = CreateFrame("Frame", nil, frame)
     self.ContentHost = contentHost
-    local contentBg = EXUI:CreateVisualTexture(contentHost, EXBACKGROUNDFRAME)
-    contentBg:SetAllPoints()
-    contentBg:SetColorTexture(CopyColor(Color.content))
+    EXUI:SetControlSurface(contentHost, 10, Color.content, GC.transparent)
 
     local previewDock = MakeSolidFrame(contentHost, Color.cardAlt, Color.border)
     previewDock:SetPoint("TOPLEFT")
@@ -1031,9 +1070,7 @@ function Panel:CreateFrame()
 
     local fullContentHost = CreateFrame("Frame", nil, frame)
     self.FullContentHost = fullContentHost
-    local fullBg = EXUI:CreateVisualTexture(fullContentHost, EXBACKGROUNDFRAME)
-    fullBg:SetAllPoints()
-    fullBg:SetColorTexture(CopyColor(Color.content))
+    EXUI:SetControlSurface(fullContentHost, 10, Color.content, GC.transparent)
 
     local modalLayer = CreateFrame("Frame", nil, frame)
     modalLayer:SetAllPoints(frame)

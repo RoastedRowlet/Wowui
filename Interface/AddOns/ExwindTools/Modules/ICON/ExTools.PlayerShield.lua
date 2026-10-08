@@ -1,6 +1,9 @@
 -- 玩家护盾量：模块声明自己的 DB / GUI / 锚点，业务只提交标准 Icon presentation。
 -- 中央不识别本模块名称、字段或业务规则。
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools or not ExwindTools.UI then return end
 
@@ -13,6 +16,9 @@ local ICON_HIDE_DELAY = 10
 local RefreshActiveSurfaces
 
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local MODULE_SPEC = {
     RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
     moduleKey = MODULE_KEY,
@@ -20,6 +26,9 @@ local MODULE_SPEC = {
     version = 1,
     features = { icon = true, labelText = true, enabled = true },
     textSlots = { label = L["护盾文字样式"] },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     anchor = {
         dbPath = "$root",
         bindRoot = true,
@@ -33,6 +42,9 @@ local MODULE_SPEC = {
         initialHeight = 40,
         clampedToScreen = true,
     },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     preview = {
         positionGuiKeys = { "font_text" },
         elements = {
@@ -46,77 +58,126 @@ local MODULE_SPEC = {
             },
         },
     },
+    -- =========================================================
+    -- 二、默认配置与配置访问 | Defaults and Configuration Access
+    -- =========================================================
     defaults = {
         font_text = {
-            a = 1, autoWidth = false, b = 1, font = "默认", g = 0.91372555494308,
-            justifyH = "CENTER", justifyV = "MIDDLE", outline = "OUTLINE", r = 0.24705883860588,
-            shadow = true, shadowX = 1, shadowY = -1, size = 18, x = 0, y = -6,
+            a = 1,
+            autoWidth = false,
+            b = 1,
+            font = "默认",
+            g = 0.91372555494308,
+            justifyH = "CENTER",
+            justifyV = "MIDDLE",
+            outline = "OUTLINE",
+            r = 0.24705883860588,
+            shadow = true,
+            shadowX = 1,
+            shadowY = -1,
+            size = 18,
+            x = 0,
+            y = -6,
         },
         icon = {
-            alpha = 1, blendMode = "BLEND", borderColorA = 1, borderColorB = 0, borderColorG = 0,
-            borderColorR = 0, borderPadding = 0.6, borderSize = 0, borderTexture = "EX_Default",
-            colorA = 1, colorB = 1, colorG = 1, colorR = 1,
+            alpha = 1,
+            blendMode = "BLEND",
+            borderColorA = 1,
+            borderColorB = 0,
+            borderColorG = 0,
+            borderColorR = 0,
+            borderPadding = 0.6,
+            borderSize = 0,
+            borderTexture = "EX_Default",
+            colorA = 1,
+            colorB = 1,
+            colorG = 1,
+            colorR = 1,
             cooldown = { edgeAlpha = 0.75, showBling = false, showEdge = true, showSwipe = true, swipeAlpha = 0.55000001192093, },
-            cropBottom = 0.92, cropLeft = 0.08, cropRight = 0.92, cropTop = 0.08, desaturated = false,
-            enableCrop = true, height = 45, iconID = 135940, reverse = false, showBorder = true,
-            showCooldown = true, showIcon = true, width = 45, x = 0, y = 0,
+            cropBottom = 0.92,
+            cropLeft = 0.08,
+            cropRight = 0.92,
+            cropTop = 0.08,
+            desaturated = false,
+            enableCrop = true,
+            height = 45,
+            iconID = 135940,
+            reverse = false,
+            showBorder = true,
+            showCooldown = true,
+            showIcon = true,
+            width = 45,
+            x = 0,
+            y = 0,
         },
         root = {
-            abbreviateNumber = true, attachToCustom = false, customAttachTarget = "", enabled = true,
-            hideWhenZero = true, layout = { direction = "DOWN", maxVisible = 1, spacing = 0, },
-            xOffset = -48, yOffset = -330,
+            abbreviateNumber = true,
+            attachToCustom = false,
+            customAttachTarget = "",
+            enabled = true,
+            hideWhenZero = true,
+            layout = { direction = "DOWN", maxVisible = 1, spacing = 0, },
+            xOffset = -48,
+            yOffset = -330,
         },
     },
     samples = {
-        panel = { itemID = "player-shield:sample", icon = 135940, text = "125万" },
-        world = { itemID = "player-shield:sample", icon = 135940, text = "125万" },
+        panel = { itemID = "player-shield:sample", icon = 135940, text = string.format(L["%d万"], 125) },
+        world = { itemID = "player-shield:sample", icon = 135940, text = string.format(L["%d万"], 125) },
     },
+    -- [卡片迁移边界：设置页] 仅可按统一规范调整下列 gui.static/gui.fields 的 x/y/w/h 与卡片分组。
+    -- key/type/opts、DB path、anchor/preview/defaults 及刷新回调均属绑定或业务合同，禁止修改；复合控件必须整体引用，header 本身不等于卡片容器。
+    -- =========================================================
+    -- 三、GUI 声明 | GUI Declarations
+    -- =========================================================
     gui = {
-        fields = {
+        version = 1,
+        sections = {
             {
-                group = "settings",
-                h = 32,
+                kind = "composite",
+                id = "common",
+                title = L["模块通用设置"],
+                component = "modulecommonsettings",
                 key = "moduleCommon",
-                label = L["模块通用设置"],
-                measure = true,
-                options = {
-                    bindRoot = true,
-                    fields = {
-                        { label = L["启用"], path = "enabled", type = "checkbox", },
-                        { label = L["数值为零时隐藏"], path = "hideWhenZero", type = "checkbox", },
-                        { label = L["数字缩写"], path = "abbreviateNumber", type = "checkbox", },
-                    },
-                    fixedLayout = {
-                        controlH = 6,
-                        controlW = 46,
-                        firstY = 0,
-                        logicalWidth = 200,
-                        rowStep = 14,
-                        slotX = { 3, 53, 103, 153, },
-                    },
+                opts = {
+                        bindRoot = true,
+                        presentation = "settings-list",
+                        fields = {
+                            { column = 1, label = L["启用"], path = "enabled", presentation = "switch", row = 1, type = "checkbox", },
+                            { column = 2, label = L["数值为零时隐藏"], path = "hideWhenZero", presentation = "switch", row = 1, type = "checkbox", },
+                            { column = 3, label = L["数字缩写"], path = "abbreviateNumber", presentation = "switch", row = 1, type = "checkbox", },
+                        },
+                        fixedLayout = {
+                            controlH = 6,
+                            controlW = 46,
+                            firstY = 0,
+                            logicalWidth = 200,
+                            rowStep = 14,
+                            slotX = { 3, 53, 103, 153, },
+                        },
                 },
-                order = 1,
-                type = "modulecommonsettings",
-                w = 200,
-                x = 1,
-                y = 16,
             },
             {
-                group = "settings", h = 20, key = "anchor", label = L["锚点设置"], measure = true,
-                order = 2, type = "anchorgroup", w = 200, x = 1, y = 51,
+                kind = "composite",
+                id = "anchor",
+                title = L["锚点设置"],
+                component = "anchorgroup",
+                key = "anchor",
             },
             {
-                group = "settings", h = 50, key = "icon", label = L["护盾图标样式"], labelSize = 20,
-                order = 3, type = "icongroup", w = 200, x = 1, y = 74,
+                kind = "composite",
+                id = "icon",
+                title = L["护盾图标样式"],
+                component = "icongroup",
+                key = "icon",
             },
             {
-                group = "settings", h = 50, key = "font_text", label = L["护盾文字样式"], labelSize = 20,
-                order = 4, type = "fontgroup", w = 200, x = 1, y = 127,
+                kind = "composite",
+                id = "font_text",
+                title = L["护盾文字样式"],
+                component = "fontgroup",
+                key = "font_text",
             },
-        },
-        groups = { { key = "settings", order = 1, }, },
-        static = {
-            { h = 8, key = "header", label = L["玩家护盾量"], labelSize = 25, type = "header", w = 197, x = 1, y = 4, },
         },
     },
 }
@@ -135,6 +196,12 @@ local function MakeTextBounds(style)
     }
 end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function BuildEntry(itemID, icon, text)
     local db = DB
     local iconStyle = db.icon or {}
@@ -170,6 +237,9 @@ local C_Timer = _G.C_Timer
 local math_abs, math_floor, math_max = math.abs, math.floor, math.max
 local refreshTimer, iconHideTimer, lastAbsorbEventTime
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function IsSecretValue(value)
     return type(_G.issecretvalue) == "function" and _G.issecretvalue(value)
 end
@@ -244,7 +314,7 @@ RefreshActiveSurfaces = function(controller)
     local amount, isSecret = GetPlayerShieldAmount()
     if db.hideWhenZero and not isSecret and math_abs(tonumber(amount) or 0) <= 0.0001 then return end
     local text = isSecret and db.hideWhenZero and not db.abbreviateNumber and BuildSecretZeroSafeValueText(amount) or
-    FormatShieldValue(amount)
+        FormatShieldValue(amount)
     controller.runtimeEntries[1].presentation = BuildEntry(RUNTIME_ITEM_ID, (db.icon or {}).iconID, text).presentation
 end
 
@@ -274,11 +344,17 @@ local function MarkAbsorbEventActive()
     end
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 ExwindTools:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", MODULE_KEY, function(_, unit)
     if unit == "player" then
         MarkAbsorbEventActive(); ScheduleRefresh()
     end
 end)
 ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", MODULE_KEY, ScheduleRefresh)
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 ScheduleRefresh()
 ExwindTools:ReportReady(MODULE_KEY)

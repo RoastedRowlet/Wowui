@@ -3,6 +3,9 @@
 -- 中央只管理通用 Collection、Anchor、Panel 与 World 生命周期。
 -- =============================================================
 
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools or not ExwindTools.UI then return end
 
@@ -17,6 +20,9 @@ local RefreshActiveSurfaces
 
 
 -- 默认值、锚点、预览语义与每一个 Grid 坐标均由模块声明；中央没有模块分支。
+-- =========================================================
+-- 一、模块标识与依赖引用 | Module Identity and Dependencies
+-- =========================================================
 local MODULE_SPEC = {
     RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
     moduleKey = MODULE_KEY,
@@ -24,6 +30,9 @@ local MODULE_SPEC = {
     version = 1,
     features = { icon = true, labelText = true, secretLabelText = true },
     textSlots = { label = L["治疗吸收文字样式"] },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     anchor = {
         dbPath = "$root",
         xKey = "xOffset",
@@ -37,6 +46,9 @@ local MODULE_SPEC = {
         clampedToScreen = true,
         bindRoot = true,
     },
+    -- =========================================================
+    -- 二、默认配置与配置访问 | Defaults and Configuration Access
+    -- =========================================================
     defaults = {
         font_text = {
             a = 1,
@@ -88,6 +100,9 @@ local MODULE_SPEC = {
             yOffset = -329,
         },
     },
+    -- =========================================================
+    -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+    -- =========================================================
     preview = {
         positionGuiKeys = { "font_text" },
         elements = {
@@ -103,110 +118,41 @@ local MODULE_SPEC = {
         },
         sample = { amount = 360000, itemID = "player-heal-absorb:preview" },
     },
+    -- [卡片迁移边界：设置页] 仅可按统一规范调整下列 gui.static/gui.fields 的 x/y/w/h 与卡片分组。
+    -- key/type/opts、DB path、anchor/preview/defaults 及刷新回调均属绑定或业务合同，禁止修改；复合控件必须整体引用，header 本身不等于卡片容器。
+    -- =========================================================
+    -- 三、GUI 声明 | GUI Declarations
+    -- =========================================================
     gui = {
-        fields = {
+        version = 1,
+        sections = {
             {
-                group = "settings",
-                h = 26,
-                key = "moduleCommon",
-                label = L["模块通用设置"],
-                options = {
+                kind = "composite", id = "common", title = L["模块通用设置"],
+                component = "modulecommonsettings", key = "moduleCommon", opts = {
                     bindRoot = true,
+                    presentation = "settings-list",
                     fields = {
-                        {
-                            column = 1,
-                            label = L["启用"],
-                            path = "enabled",
-                            row = 1,
-                            type = "checkbox",
-                        },
-                        {
-                            column = 2,
-                            label = L["数值为零时隐藏"],
-                            path = "hideWhenZero",
-                            row = 1,
-                            type = "checkbox",
-                        },
-                        {
-                            column = 3,
-                            label = L["数字缩写"],
-                            path = "abbreviateNumber",
-                            row = 1,
-                            type = "checkbox",
-                        },
+                        { column = 1, label = L["启用"], path = "enabled", presentation = "switch", row = 1, type = "checkbox" },
+                        { column = 2, label = L["数值为零时隐藏"], path = "hideWhenZero", presentation = "switch", row = 1, type = "checkbox" },
+                        { column = 3, label = L["数字缩写"], path = "abbreviateNumber", presentation = "switch", row = 1, type = "checkbox" },
                     },
                     fixedLayout = {
-                        controlH = 6,
-                        controlW = 46,
-                        firstY = 0,
-                        logicalWidth = 200,
-                        rowStep = 14,
-                        slotX = {
-                            3,
-                            53,
-                            103,
-                            153,
-                        },
+                        controlH = 6, controlW = 46, firstY = 0, logicalWidth = 200,
+                        rowStep = 14, slotX = { 3, 53, 103, 153 },
                     },
                 },
-                order = 1,
-                type = "modulecommonsettings",
-                w = 200,
-                x = 1,
-                y = 10,
             },
             {
-                group = "settings",
-                h = 20,
-                key = "anchor",
-                label = L["锚点设置"],
-                order = 2,
-                type = "anchorgroup",
-                w = 200,
-                x = 1,
-                y = 39,
+                kind = "composite", id = "anchor", title = L["锚点设置"],
+                component = "anchorgroup", key = "anchor",
             },
             {
-                group = "settings",
-                h = 50,
-                key = "icon",
-                label = L["治疗吸收图标样式"],
-                labelSize = 20,
-                order = 3,
-                type = "icongroup",
-                w = 200,
-                x = 1,
-                y = 62,
+                kind = "composite", id = "icon", title = L["治疗吸收图标样式"],
+                component = "icongroup", key = "icon",
             },
             {
-                group = "settings",
-                h = 50,
-                key = "font_text",
-                label = L["治疗吸收文字样式"],
-                labelSize = 20,
-                order = 4,
-                type = "fontgroup",
-                w = 200,
-                x = 1,
-                y = 115,
-            },
-        },
-        groups = {
-            {
-                key = "settings",
-                order = 1,
-            },
-        },
-        static = {
-            {
-                h = 6,
-                key = "header",
-                label = L["玩家治疗吸收盾"],
-                labelSize = 25,
-                type = "header",
-                w = 200,
-                x = 1,
-                y = 1,
+                kind = "composite", id = "font_text", title = L["治疗吸收文字样式"],
+                component = "fontgroup", key = "font_text",
             },
         },
     },
@@ -228,6 +174,9 @@ local C_Timer = _G.C_Timer
 local math_abs, math_floor, math_max = math.abs, math.floor, math.max
 local refreshTimer, iconHideTimer, lastHealAbsorbEventTime
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function IsSecretValue(value)
     return type(_G.issecretvalue) == "function" and _G.issecretvalue(value)
 end
@@ -275,6 +224,9 @@ local function ResolveIcon()
     return _G.GetSpellTexture and _G.GetSpellTexture(DEFAULT_ICON_SPELL_ID) or nil
 end
 
+-- =========================================================
+-- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
+-- =========================================================
 local function BuildPresentation(text, iconShown)
     local db, icon, font = DB, DB.icon or {}, DB.font_text or {}
     local width = math_max(1, tonumber(icon.width) or 36)
@@ -295,6 +247,9 @@ local function SetStandardPreview()
     central:SetPreview({ entry }, LAYOUT)
 end
 
+-- =========================================================
+-- 五、业务状态与功能逻辑 | Business State and Logic
+-- =========================================================
 local function IsIconEventActive()
     return lastHealAbsorbEventTime ~= nil and (GetTime() - lastHealAbsorbEventTime) < ICON_HIDE_DELAY
 end
@@ -360,6 +315,9 @@ local function MarkHealAbsorbEventActive()
     end
 end
 
+-- =========================================================
+-- 六、事件订阅与配置刷新 | Events and Configuration Refresh
+-- =========================================================
 ExwindTools:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", MODULE_KEY, function(_, unit)
     if unit == "player" then
         MarkHealAbsorbEventActive(); ScheduleRefresh()
@@ -376,5 +334,8 @@ ExwindTools:RegisterEvent("UNIT_MAX_HEALTH_MODIFIERS_CHANGED", MODULE_KEY, funct
 end)
 ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", MODULE_KEY, ScheduleRefresh)
 SetStandardPreview()
+-- =========================================================
+-- 七、初始化与启动 | Initialization and Startup
+-- =========================================================
 ScheduleRefresh()
 ExwindTools:ReportReady(MODULE_KEY)

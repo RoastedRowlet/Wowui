@@ -42,14 +42,14 @@ function Provider:CreateHeaderActions(header)
     holder:SetPoint("RIGHT", header, "RIGHT", -46, 0)
     self.HeaderActions = holder
 
-    local reload = EXUI:CreateSmallButton(holder, L["立即重载界面"], function()
+    local reload = EXUI:CreateButton(holder, 120, ExwindTools.GUIMetrics.size.buttonHeight, L["立即重载界面"], function()
         C_UI.Reload()
     end)
     reload:SetSize(118, 24)
     reload:SetPoint("RIGHT", 0, 0)
     self.ReloadButton = reload
 
-    local edit = EXUI:CreateSmallButton(holder, "", function()
+    local edit = EXUI:CreateButton(holder, 120, ExwindTools.GUIMetrics.size.buttonHeight, "", function()
         EXUI:ToggleEditMode()
         UpdateEditModeButton()
         -- 保留旧行为：开启全局编辑时收起总面板，给世界中的锚点操作让出空间。
@@ -62,7 +62,7 @@ function Provider:CreateHeaderActions(header)
     self.EditModeButton = edit
     EXUI.EditModeToggleButton = edit
 
-    local changelog = EXUI:CreateSmallButton(holder, L["更新日志"], function()
+    local changelog = EXUI:CreateButton(holder, 120, ExwindTools.GUIMetrics.size.buttonHeight, L["更新日志"], function()
         if ExwindTools.ShowChangelog then
             ExwindTools:ShowChangelog({ markShown = true })
         end

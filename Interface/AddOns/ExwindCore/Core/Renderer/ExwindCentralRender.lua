@@ -33,17 +33,78 @@ local function getPath(root, path)
     if path == "$root" then return root end
     local value = root; for key in path:gmatch("[^.]+") do if type(value) ~= "table" then return nil end; value = value[key] end; return value
 end
+local function validateGUI(gui, moduleKey)
+    if type(gui) ~= "table" then error("MODULE_SPEC.gui is required", 3) end
+    if gui.version ~= 1 or type(gui.sections) ~= "table" or gui.cards ~= nil
+        or gui.static ~= nil or gui.fields ~= nil or gui.groups ~= nil then
+        error("MODULE_SPEC.gui accepts only version=1 sections; special cards are not a central-module settings entry", 3)
+    end
+    local grid = _G.ExwindGrid
+    if not grid or type(grid.ValidateSettingsDeclaration) ~= "function" then
+        error("MODULE_SPEC.gui version 1 requires ExwindGrid typed settings validation", 3)
+    end
+    local ok, reason = grid:ValidateSettingsDeclaration(gui, {
+        pageId = moduleKey,
+        regionId = "central-icon-registration",
+    })
+    if not ok then error(reason, 3) end
+end
+local function visitGUIItems(gui, visitor)
+    local function visit(items, contextPath)
+        for _, item in ipairs(items or {}) do
+            local currentPath = contextPath
+            if item.parentKey ~= nil then
+                currentPath = currentPath and (currentPath .. "." .. tostring(item.parentKey))
+                    or tostring(item.parentKey)
+            end
+            visitor(item, currentPath)
+            if type(item.children) == "table" then visit(item.children, currentPath) end
+        end
+    end
+    if gui.version == 1 then
+        for _, section in ipairs(gui.sections) do
+            if section.kind == "settings" then
+                for _, item in ipairs(section.items or {}) do
+                    if item.controls then visit(item.controls) else visit({ item }) end
+                end
+            elseif section.kind == "table" then
+                local function visitCells(cells)
+                    for _, cell in ipairs(cells or {}) do
+                        if type(cell) == "table" and cell.text == nil then visit({ cell }) end
+                    end
+                end
+                if section.add then visitCells(section.add.cells) end
+                for _, row in ipairs(section.records or {}) do visitCells(row.cells) end
+            elseif section.kind == "composite" then
+                visit({ {
+                    type = string.lower(section.component), key = section.key,
+                    parentKey = section.parentKey, subKey = section.subKey,
+                    setKey = section.setKey, opts = section.opts,
+                } })
+            end
+        end
+        return
+    end
+    visit(gui.static)
+    visit(gui.fields)
+end
+local function declaredItemPath(item, contextPath)
+    if type(item.opts) == "table" and item.opts.bindRoot == true then return "$root" end
+    if item.setKey ~= nil then return tostring(item.setKey) end
+    local key = item.subKey or item.key
+    if contextPath ~= nil then return tostring(contextPath) .. "." .. tostring(key) end
+    if item.parentKey ~= nil then return tostring(item.parentKey) .. "." .. tostring(key) end
+    return tostring(key)
+end
 local function validateSpec(spec)
     if type(spec) ~= "table" then error("RegisterIconModule requires MODULE_SPEC", 3) end
     validatePure(spec, "MODULE_SPEC"); requireString(spec.moduleKey, "MODULE_SPEC.moduleKey", 3)
     if spec.kind ~= "icon" then error("MODULE_SPEC.kind must be icon", 3) end
     if specs[spec.moduleKey] then error("duplicate MODULE_SPEC: " .. spec.moduleKey, 3) end
     if spec.catalog ~= nil then error("MODULE_SPEC.catalog is forbidden; define metadata in ExwindTools.ModuleList", 3) end
-    if type(spec.gui) ~= "table" or type(spec.gui.static) ~= "table" or type(spec.gui.fields) ~= "table" then error("MODULE_SPEC.gui.static/gui.fields are required", 3) end
+    validateGUI(spec.gui, spec.moduleKey)
     if type(spec.anchor) ~= "table" then error("MODULE_SPEC.anchor is required", 3) end
     requireString(spec.anchor.dbPath, "MODULE_SPEC.anchor.dbPath", 3); requireString(spec.anchor.xKey, "MODULE_SPEC.anchor.xKey", 3); requireString(spec.anchor.yKey, "MODULE_SPEC.anchor.yKey", 3)
-    for _, item in ipairs(spec.gui.static) do requireGeometry(item, "MODULE_SPEC.gui.static") end
-    for _, item in ipairs(spec.gui.fields) do requireString(item.key, "MODULE_SPEC.gui.fields key", 3); requireString(item.type, "MODULE_SPEC.gui.fields type", 3); requireGeometry(item, "MODULE_SPEC.gui.fields") end
 end
 local function splitRefreshContract(spec)
     local refresh = spec.RefreshActiveSurfaces
@@ -66,17 +127,59 @@ end
 
 local Controller = {}; Controller.__index = Controller
 function Controller:GetConfig() return self.db end
+function Controller:CompileGUIItem(source, preservePlacement)
+    local item = copy(source)
+    if not preservePlacement then item.group, item.order = nil, nil end
+    if item.type == "anchorgroup" then
+        local opts = copy(item.opts or item.options or {})
+        opts.bindRoot = self.spec.anchor.bindRoot == true
+        opts.offsetXKey = self.spec.anchor.xKey
+        opts.offsetYKey = self.spec.anchor.yKey
+        opts.defaultOffsetX = self.spec.anchor.defaultX or 0
+        opts.defaultOffsetY = self.spec.anchor.defaultY or 0
+        opts.attachEnabledKey = self.spec.anchor.attachEnabledKey
+        opts.attachTargetKey = self.spec.anchor.attachTargetKey
+        opts.onPickFrame = function() return self.anchor:StartFramePicker() end
+        item.opts, item.options = opts, nil
+    elseif item.type == "icongroup" then
+        local opts = copy(item.opts or item.options or {})
+        opts.hideIconID = true
+        item.opts, item.options = opts, nil
+    elseif item.options then
+        item.opts = copy(item.options); item.options = nil
+    end
+    if type(item.children) == "table" then
+        local children = {}
+        for index, child in ipairs(item.children) do
+            children[index] = self:CompileGUIItem(child, true)
+        end
+        item.children = children
+    end
+    return item
+end
 function Controller:BuildGridLayout()
+    if self.spec.gui.version == 1 then
+        error("card MODULE_SPEC.gui must be requested through BuildSettingsDeclaration", 2)
+    end
     local layout = {}; for _, source in ipairs(self.spec.gui.static) do layout[#layout + 1] = copy(source) end
     for _, source in ipairs(self.spec.gui.fields) do
-        local item = copy(source); item.group, item.order = nil, nil
-        if item.type == "anchorgroup" then
-            item.opts = { bindRoot = self.spec.anchor.bindRoot == true, offsetXKey = self.spec.anchor.xKey, offsetYKey = self.spec.anchor.yKey, defaultOffsetX = self.spec.anchor.defaultX or 0, defaultOffsetY = self.spec.anchor.defaultY or 0, attachEnabledKey = self.spec.anchor.attachEnabledKey, attachTargetKey = self.spec.anchor.attachTargetKey, onPickFrame = function() return self.anchor:StartFramePicker() end }
-        elseif item.type == "icongroup" then item.opts = { hideIconID = true }
-        elseif item.options then item.opts = copy(item.options); item.options = nil end
-        layout[#layout + 1] = item
+        layout[#layout + 1] = self:CompileGUIItem(source, false)
     end
     return layout
+end
+function Controller:BuildSettingsDeclaration()
+    if self.spec.gui.version ~= 1 then return self:BuildGridLayout() end
+    local declaration = copy(self.spec.gui)
+    for _, section in ipairs(declaration.sections) do
+        if section.kind == "composite" then
+            local item = self:CompileGUIItem({
+                type = string.lower(section.component),
+                opts = section.opts,
+            }, true)
+            section.opts = item.opts
+        end
+    end
+    return declaration
 end
 function Controller:Apply(collection, entries, layout)
     local items = {}; for _, entry in ipairs(entries) do local item = collection:AcquireItem(entry.itemID); collection:ApplyItem(item, entry.presentation); items[#items + 1] = item end; collection:SetItems(items, layout); return collection
@@ -153,18 +256,22 @@ function EXUI:RegisterIconModule(spec)
     if not moduleMeta then error("MODULE_SPEC.moduleKey is missing from ExwindTools.ModuleList: " .. registered.moduleKey, 2) end
     local db = ExwindTools:GetModuleDB(registered.moduleKey); local controller=setmetatable({ moduleKey=registered.moduleKey,spec=registered,db=db,previewEntries={},moduleRefreshActiveSurfaces=refresh },Controller)
     local anchorDB=getPath(db,registered.anchor.dbPath); if type(anchorDB) ~= "table" then error("MODULE_SPEC.anchor.dbPath does not resolve to table",2) end
-    for _, field in ipairs(registered.gui.fields) do
+    visitGUIItems(registered.gui, function(field, contextPath)
         if field.type == "icongroup" then
             if controller.resizePath then error("MODULE_SPEC icon family requires exactly one icongroup", 2) end
-            controller.resizePath = field.key
+            controller.resizePath = declaredItemPath(field, contextPath)
         end
-    end
+    end)
     local resizeDB = controller.resizePath and getPath(db, controller.resizePath) or nil
     if type(resizeDB) ~= "table" or type(resizeDB.width) ~= "number" or type(resizeDB.height) ~= "number" then
         error("MODULE_SPEC icon family requires one icongroup with numeric width/height", 2)
     end
     controller.anchor=ExwindTools:CreateAnchorController({ moduleKey=registered.moduleKey,frameName="ExwindCentral_"..registered.moduleKey:gsub("[^%w]","_"),title=moduleMeta.Name,getDB=function() return anchorDB end,offsetXKey=registered.anchor.xKey,offsetYKey=registered.anchor.yKey,defaultOffsetX=registered.anchor.defaultX or 0,defaultOffsetY=registered.anchor.defaultY or 0,attachEnabledKey=registered.anchor.attachEnabledKey,attachTargetKey=registered.anchor.attachTargetKey,initialWidth=registered.anchor.initialWidth or 1,initialHeight=registered.anchor.initialHeight or 1,clampedToScreen=registered.anchor.clampedToScreen==true })
     controller.binding=EXUI:RegisterStandardConfigBinding({ moduleKey=registered.moduleKey,getConfig=function() return controller.db end })
+    if registered.gui.version == 1 then
+        if type(EXUI.RegisterSettingsPage) ~= "function" then error("RegisterSettingsPage is unavailable", 2) end
+        EXUI:RegisterSettingsPage(registered.moduleKey, registered.gui)
+    end
     EXUI:RegisterEditableModule({ addon="ExwindTools",key=registered.moduleKey,name=moduleMeta.Name,orientation="HORIZONTAL",settingsPage=registered.moduleKey,getAnchor=function() return controller.anchor:Ensure() end,RenderWorld=function(host) controller:RenderWorld(host) end,ReleaseWorld=function() controller:ReleaseWorld() end,GetWorldBounds=function() return controller:GetWorldBounds() end,OnWorldPreviewStateChanged=function(editing) controller:OnWorldPreviewStateChanged(editing) end })
     controllers[registered.moduleKey]=controller
     EXUI:RegisterModuleValueController(registered.moduleKey, controller)

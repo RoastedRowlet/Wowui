@@ -141,6 +141,8 @@ function Mod.GetDebugBufferText()
     return table.concat(buffer, "\n")
 end
 
+-- [窗口边界：Trash 调试复制窗] 只可迁移窗口 chrome、输入/滚动几何；调试缓冲、复制文本、焦点、全选与关闭行为禁止修改。
+-- 此函数是混合业务文件中唯一获准的设置外 GUI 区块，其余 Runtime 逻辑不属于卡片迁移范围。
 local function EnsureDebugCopyFrame()
     if type(Mod._debugCopyFrame) == "table" then
         return Mod._debugCopyFrame
@@ -167,14 +169,18 @@ local function EnsureDebugCopyFrame()
     local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOP", 0, -16)
     title:SetText("ExBoss Trash Debug Copy")
+    ET.UI:ApplyDialogStyle(frame, title)
 
-    local closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    local closeButton = ET.UI:CreatePicButton(frame, 24, 24,
+        "Interface\\Buttons\\UI-Panel-CloseButton-Up",
+        "Interface\\Buttons\\UI-Panel-CloseButton-Down",
+        "Interface\\Buttons\\UI-Panel-CloseButton-Highlight",
+        function() frame:Hide() end, true)
     closeButton:SetPoint("TOPRIGHT", -6, -6)
 
-    local scrollFrame = CreateFrame("ScrollFrame", nil, frame, "ScrollFrameTemplate")
+    local scrollFrame = ET.UI:CreateScrollFrame(frame)
     scrollFrame:SetPoint("TOPLEFT", 18, -46)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -32, 18)
-    scrollFrame:EnableMouseWheel(true)
+    scrollFrame:SetPoint("BOTTOMRIGHT", -18, 18)
     scrollFrame:SetScript("OnMouseWheel", function(self, delta)
         local cur = self:GetVerticalScroll()
         self:SetVerticalScroll(math.max(0, math.min(cur - delta * 24, self:GetVerticalScrollRange())))

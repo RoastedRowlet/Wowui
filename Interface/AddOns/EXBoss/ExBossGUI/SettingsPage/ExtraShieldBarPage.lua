@@ -26,9 +26,8 @@ end
 local SHIELD_COMMON_OPTS = {
     bindRoot = true,
     poolType = "ExtraShieldBarModuleCommonSettingsGroup",
-    fixedLayout = { logicalWidth = 200, controlW = 46, controlH = 6, slotX = { 3, 53, 103, 153 }, firstY = 0, rowStep = 14 },
     fields = {
-        { path = "enabled", type = "checkbox", label = L["启用"], row = 1 },
+        { path = "enabled", type = "checkbox", label = L["启用"] },
     },
 }
 
@@ -39,14 +38,25 @@ if type(SHIELD_ANCHOR_OPTS) ~= "table" then
     error("ExtraShieldBarPage requires standard AnchorGroup options", 2)
 end
 
+-- [卡片/Grid 迁移边界：ExtraShieldBar 设置页]
+-- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
+-- 禁止：修改 key/type/path/opts、虚构无业务意义的 layout、预览、Slider 或释放合同。
+-- modulecommonsettings/anchorgroup/timerBarGroup/fontgroup 必须整体引用，不能拆成原子控件重拼。
 local LAYOUT = {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["额外护盾条设置"], labelSize = 25 },
-    { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 9, w = 200, h = 20, label = L["模块通用设置"], opts = SHIELD_COMMON_OPTS },
-    { key = "anchor", type = "anchorgroup", x = 1, y = 31, w = 200, h = 20, measure = true, label = L["锚点设置"], opts = SHIELD_ANCHOR_OPTS },
-    -- ExtraShield 是固定单条 Body；没有第二条可排列，故不凭空显示 layout 卡。
-    { key = "timerGroup", type = "timerBarGroup", x = 1, y = 54, w = 200, h = 50, label = L["计时条外观"], labelSize = 20 },
-    { key = "font_spell", type = "fontgroup", x = 1, y = 107, w = 200, h = 50, label = L["法术名称"], labelSize = 20 },
-    { key = "font_timer", type = "fontgroup", x = 1, y = 160, w = 200, h = 50, label = L["数值文本"], labelSize = 20 },
+    version = 1,
+    title = L["额外护盾条设置"],
+    sections = {
+        { kind = "composite", id = "module-common", title = L["通用设置"],
+            component = "modulecommonsettings", key = "moduleCommon", opts = SHIELD_COMMON_OPTS },
+        { kind = "composite", id = "anchor", title = L["锚点设置"],
+            component = "anchorgroup", key = "anchor", opts = SHIELD_ANCHOR_OPTS },
+        { kind = "composite", id = "timer-bar", title = L["外观"],
+            component = "timerbargroup", key = "timerGroup" },
+        { kind = "composite", id = "spell-font", title = L["法术名称"],
+            component = "fontgroup", key = "font_spell" },
+        { kind = "composite", id = "timer-font", title = L["数值文本"],
+            component = "fontgroup", key = "font_timer" },
+    },
 }
 
 ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
@@ -72,11 +82,12 @@ local function ReleaseStandardPreview()
 end
 
 local function RebindModuleCommon(grid, container, db)
-    local state = grid and grid.ContainerStates and grid.ContainerStates[container]
-    local group = state and state.widgets and state.widgets.moduleCommon
+    -- state.widgets.moduleCommon 是稳定组合控件入口，迁移后必须保留 key 查找语义。
+    local group = grid and grid.FindMountedWidget and grid:FindMountedWidget(container, "moduleCommon")
     if group and type(group.RebindDB) == "function" then group:RebindDB(db) end
 end
 
+-- [生命周期边界] StandardModulePage 继续拥有 Scroll、preview 与 release；布局迁移不得改这些回调。
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,

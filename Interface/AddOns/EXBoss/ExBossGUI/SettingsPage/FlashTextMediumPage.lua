@@ -22,23 +22,31 @@ end
 
 local COMMON_OPTS = {
     bindRoot = true, poolType = "FlashTextMediumModuleCommonSettingsGroup",
-    fixedLayout = { logicalWidth = 200, controlW = 46, controlH = 6, slotX = { 3, 53, 103, 153 }, firstY = 0, rowStep = 14 },
     fields = {
-        { path = "enabled", type = "checkbox", label = L["启用"], row = 1 },
-        { path = "flashDuration", type = "slider", label = L["持续时间(秒)"], min = 0.5, max = 6, step = 0.5, row = 2 },
-        { key = "test", type = "button", label = L["测试文字公告"], onClick = TestFlashText, row = 2 },
+        { path = "enabled", type = "checkbox", label = L["启用"] },
+        { path = "flashDuration", type = "slider", label = L["持续时间(秒)"], min = 0.5, max = 6, step = 0.5 },
+        { key = "test", type = "button", label = L["测试文字公告"], onClick = TestFlashText },
     },
 }
 local ANCHOR_OPTS = GetFlashText():GetStandardAnchorGroupOptions()
 if type(ANCHOR_OPTS) ~= "table" then
     error("FlashTextMediumPage requires standard AnchorController group options", 2)
 end
+-- [普通 sections 声明边界：FlashTextMedium 设置页]
+-- Core 统一测量和排列；本页仅声明原复合控件及其语义选项。
+-- 禁止：修改 key/type/path、语义 opts、测试按钮回调、预览、Slider 或释放合同。
+-- modulecommonsettings/anchorgroup/fontgroup 是完整组合，不能拆成原子控件重拼。
 local LAYOUT = {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["文字公告(中)"], labelSize = 25 },
-    { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 10, w = 200, h = 30, label = L["模块通用设置"], opts = COMMON_OPTS },
-    { key = "anchor", type = "anchorgroup", x = 1, y = 43, w = 200, h = 25, measure = true, label = L["锚点设置"], opts = ANCHOR_OPTS },
-    { key = "font_text", type = "fontgroup", x = 1, y = 71, w = 200, h = 50, label = L["文字公告(中)"], labelSize = 20,
-        opts = { unboundedWidth = true } },
+    version = 1,
+    title = L["文字公告(中)"],
+    sections = {
+        { kind = "composite", id = "module-common", title = L["通用设置"],
+            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
+        { kind = "composite", id = "anchor", title = L["锚点设置"],
+            component = "anchorgroup", key = "anchor", opts = ANCHOR_OPTS },
+        { kind = "composite", id = "text-font", title = L["外观"],
+            component = "fontgroup", key = "font_text", opts = { unboundedWidth = true } },
+    },
 }
 ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
 
@@ -53,6 +61,7 @@ local function ReleaseStandardPreview()
     if module and type(module.ReleasePanelPreview) == "function" then module:ReleasePanelPreview() end
 end
 
+-- [生命周期边界] StandardModulePage 继续拥有 Scroll、Watch、预览与 release；布局迁移不得另建页面外壳。
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,

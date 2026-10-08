@@ -521,6 +521,7 @@ local function SanitiseIcons(source)
     padY              = Num(source.padY, d.padY),
     maxPerRow         = Int(source.maxPerRow, d.maxPerRow),
     hideBlizzardAuras = Bool(source.hideBlizzardAuras, d.hideBlizzardAuras),
+    tooltips          = Bool(source.tooltips, d.tooltips),
     borderSize        = Num(source.borderSize, d.borderSize),
     borderColor       = Colour(source.borderColor, d.borderColor),
     showSwirl         = Bool(source.showSwirl, d.showSwirl),
@@ -826,7 +827,7 @@ local KNOWN = {
   },
   icons = {
     "enabled", "list", "size", "spacing", "anchor", "grow", "padX", "padY",
-    "maxPerRow", "hideBlizzardAuras", "borderSize", "borderColor",
+    "maxPerRow", "hideBlizzardAuras", "tooltips", "borderSize", "borderColor",
     "showSwirl", "showTimer", "timerFont", "timerSize", "timerOutline",
     "timerAnchor", "timerX", "timerY", "timerPrecision",
     "showCount", "countFont", "countSize", "countOutline", "countAnchor",
