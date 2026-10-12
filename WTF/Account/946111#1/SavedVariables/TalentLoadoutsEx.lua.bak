@@ -99,20 +99,20 @@ TalentLoadoutEx = {
 ["SHAMAN"] = {
 {
 {
+["icon"] = 134400,
 ["name"] = "Dungeons",
 ["isExpanded"] = true,
-["icon"] = 134400,
 },
 {
+["name"] = "Altar",
 ["isInGroup"] = true,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYssYajZmtxyMPwMjhFLzMLDjZmFAghBwMjhhB",
-["name"] = "Altar",
 ["icon"] = 134400,
 },
 {
+["name"] = "Den",
 ["isInGroup"] = true,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZGjlZmZGDLWmZWGGzMLAADDgZGDDD",
-["name"] = "Den",
 ["icon"] = 134400,
 },
 {
@@ -122,27 +122,27 @@ TalentLoadoutEx = {
 ["icon"] = 134400,
 },
 {
+["name"] = "Temple",
 ["isInGroup"] = true,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZGjlZegZGjZxyMzywYmZBAYYAMzYYYA",
-["name"] = "Temple",
 ["icon"] = 134400,
 },
 {
+["name"] = "VSA",
 ["isInGroup"] = true,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYCzMGLzMzMGzilZmlhxMzCAwwAYmxwwA",
-["name"] = "VSA",
 ["icon"] = 134400,
 },
 {
+["name"] = "Murder",
 ["isInGroup"] = true,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMLzMzYstYajZGjlZMzMjZxyMzywYmZBAYAgZGDDD",
-["name"] = "Murder",
 ["icon"] = 134400,
 },
 {
+["name"] = "KR",
 ["isInGroup"] = true,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMLzMzYstYajZGjlZmZGDLWmZWGGzMLAADDgZGDDD",
-["name"] = "KR",
 ["icon"] = 134400,
 },
 },

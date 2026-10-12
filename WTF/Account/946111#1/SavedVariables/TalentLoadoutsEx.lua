@@ -3,9 +3,9 @@ TalentLoadoutEx = {
 ["SHAMAN"] = {
 {
 {
+["isExpanded"] = true,
 ["icon"] = 134400,
 ["name"] = "Dungeons",
-["isExpanded"] = true,
 },
 {
 ["name"] = "Altar",

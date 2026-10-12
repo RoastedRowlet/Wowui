@@ -158,7 +158,7 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
+["emphasize"] = false,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -166,7 +166,7 @@ BigWigs3DB = {
 21,
 },
 ["visibleBarLimit"] = 1,
-["emphasize"] = false,
+["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -199,9 +199,9 @@ BigWigs3DB = {
 ["Player-60-0F7B141D"] = {
 ["playerRating"] = 3912,
 ["specId"] = 262,
-["keyMap"] = 0,
+["keyMap"] = 588,
 ["name"] = "Zappyxatu",
-["keyLevel"] = 0,
+["keyLevel"] = 20,
 ["realm"] = "Stormrage",
 },
 ["Player-3676-0DF7D3EF"] = {

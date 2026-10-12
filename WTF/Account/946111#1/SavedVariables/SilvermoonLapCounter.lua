@@ -43,13 +43,13 @@ SilvermoonLapCounterDB = {
 },
 ["Zappyxatu-Stormrage"] = {
 ["bestLapTime"] = 6.986000000004424,
-["lastLapDate"] = "2026-10-08 22:01",
+["lastLapDate"] = "2026-10-09 02:37",
 ["realm"] = "Stormrage",
-["lastLapTime"] = 9.74199999999837,
+["lastLapTime"] = 9.105000000010477,
 ["firstLapDate"] = "2026-05-09 22:09",
 ["class"] = "SHAMAN",
 ["bestLapDate"] = "2026-05-10 13:03",
-["lapCount"] = 100,
+["lapCount"] = 101,
 },
 ["Minimeditite-Area 52"] = {
 ["class"] = "MONK",
