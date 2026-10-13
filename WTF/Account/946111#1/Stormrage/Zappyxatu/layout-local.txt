@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 327
+FrameLevel: 328
 Anchor: LEFT
 X: 44
 Y: -235
@@ -13,6 +13,13 @@ X: -172
 Y: -32
 W: 126
 H: 88
+Frame: InstanceAbandonPopup
+FrameLevel: 1
+Anchor: BOTTOMRIGHT
+X: -110
+Y: 138
+W: 1
+H: 1
 Frame: GroupLootHistoryFrame
 FrameLevel: 1
 Anchor: TOPLEFT
@@ -34,13 +41,6 @@ X: 0
 Y: 0
 W: 536
 H: 695
-Frame: PlayerSpellsFrame
-FrameLevel: 1
-Anchor: LEFT
-X: 121
-Y: -8
-W: 1618
-H: 883
 Frame: MRTCombatTimer
 FrameLevel: 1
 Anchor: CENTER
@@ -48,10 +48,3 @@ X: -235
 Y: -122
 W: 77
 H: 27
-Frame: InstanceAbandonPopup
-FrameLevel: 1
-Anchor: BOTTOMRIGHT
-X: -110
-Y: 138
-W: 384
-H: 165

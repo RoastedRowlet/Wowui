@@ -5,6 +5,7 @@ local tinsert = table.insert
 local tconcat = table.concat
 local tdelete = Grid2.TableRemoveByValue
 local GetSpellInfo = Grid2.API.GetSpellInfo
+local GetSpellSubtext = C_Spell.GetSpellSubtext
 
 --==============================================
 --
@@ -273,8 +274,12 @@ local MAX_AURAS_VALUES = { [-1] = "Unlimited" }
 for i=1,16 do MAX_AURAS_VALUES[i] = tostring(i) end
 
 local function refresh_aura_status(status)
-	status:UpdateDB()
-	Grid2Options:RefreshStatusIndicators(status, "Layout")
+	if status.isAura then -- blizz aura containers
+		status:UpdateDB()
+		Grid2Options:RefreshStatusIndicators(status, "Layout")
+	else -- buffs-missing status
+		status:Refresh()
+	end
 end
 
 local function format_aura_duration(seconds)
@@ -297,6 +302,13 @@ local function get_aura_duration(str)
    local mul = (suf=='h' and 3600) or (suf=='m' and 60) or 1
    local num = tonumber(pre or str)
    return num and num*mul or nil
+end
+
+local function get_full_spellname(spellID)
+	local spellName = GetSpellInfo(spellID)
+	if not spellName then return nil end
+	local rank = GetSpellSubtext(spellID)
+	return (rank and rank~='') and string.format("%s(%s)", spellName, rank) or spellName
 end
 
 local function get_similar_spells(typ, spell)
@@ -661,14 +673,14 @@ function Grid2Options:MakeStatusAuraMiscOptions(status, options)
 	}
 end
 
-function Grid2Options:MakeStatusAuraListOptions(status, options)
+function Grid2Options:MakeStatusAuraListOptions(status, options, hideWarning)
 
 	options.auraListError = {
 		type = "description",
 		order = 510,
 		name = string.format("|cffFC6A03%s|r", L["Warning: There are missing spell identifiers in the buffs list. Grid2 cannot track auras by name anymore so you must specify spell identifiers."] ),
 		hidden = function()
-			return spells_are_valid(status.dbx.auras)
+			return hideWarning or spells_are_valid(status.dbx.auras)
 		end,
 	}
 	options.auraListAdd = {
@@ -699,7 +711,7 @@ function Grid2Options:MakeStatusAuraListOptions(status, options)
 		get = function()
 			local auras = {}
 			for _,aura in pairs(status.dbx.auras) do
-				auras[#auras+1] = type(aura)~='number' and aura or string.format("%s <%d>", GetSpellInfo(aura) or UNKNOWN or L["Unknown"], aura)
+				auras[#auras+1] = type(aura)~='number' and aura or string.format("%s <%d>", get_full_spellname(aura) or  UNKNOWN or L["Unknown"], aura)
 			end
 			return table.concat( auras, "\n" )
 		end,
@@ -903,3 +915,27 @@ Grid2Options:RegisterStatusOptions("mdebuffType", "debuff", function(self, statu
 end,{
 	groupOrder = 5,
 })
+
+--==============================================
+--
+--==============================================
+
+function Grid2Options:MakeMissingBuffsSecretWarningOptions(status, options)
+	options.warning = {
+		type = "description",
+		order = 0,
+		name = string.format("|cffFFCC00%s|r", L["Attention: Due to Blizzard restrictions missing buffs cannot be displayed while in combat or in competitive content like PvP or Mythic Dungeons and Raids."] ),
+	}
+	-- options.header = { type = "header", order = 1, name = "" }
+end
+
+Grid2Options:RegisterStatusOptions("mbuff-missing", "buff", function(self, status, options, optionParams)
+	self:MakeStatusColorOptions(status, options, optionParams)
+	self:MakeMissingBuffsSecretWarningOptions(status, options)
+	self:MakeStatusAuraListOptions(status, options, true)
+	return options
+end,{
+	groupOrder = 15, isDeletable = true,
+	titleIcon = "Interface\\RaidFrame\\ReadyCheck-NotReady",
+})
+

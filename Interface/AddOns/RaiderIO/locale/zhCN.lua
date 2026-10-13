@@ -509,6 +509,8 @@ L["RAID_BOSS_TOT_8"] = "普利莫修斯"
 L["RAID_BOSS_TOT_9"] = "黑暗意志"
 L["RAID_BOSS_TOTFW_1"] = "风之议会"
 L["RAID_BOSS_TOTFW_2"] = "奥拉基尔"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_UOK_1"] = ""--]] 
 L["RAID_BOSS_VA_1"] = "盘魂者内克扎莉"
 L["RAID_BOSS_VA_2"] = "陵寝哨兵"
 L["RAID_BOSS_VA_3"] = "迷失的探险者"
@@ -575,6 +577,8 @@ L["RAID_ToES"] = "永春台"
 L["RAID_TOES"] = "永春台"
 L["RAID_TOT"] = "雷电王座"
 L["RAID_TOTFW"] = "风神王座"
+--[[Translation missing --]]
+--[[ L["RAID_UOK"] = ""--]] 
 L["RAID_VA"] = "烈毒之渊"
 L["RAID_VS"] = "虚影尖塔"
 L["RAID_VS_DR_MQD"] = "虚影/梦境/进军"

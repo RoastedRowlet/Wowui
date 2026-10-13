@@ -68,31 +68,30 @@ local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, {})
 -- [模块 0] Python 导出数据区 & 配置 (严禁修改逻辑)
 -- =========================================================
 -- [[ PYTHON_DATA_START ]]
-local EXMRH_PYTHON_DATA             = {
+local EXMRH_PYTHON_DATA = {
     RankTable = {
-        { label = "0.1%",   score = 4148.95, count = 1497 },
-        { label = "1%",     score = 3912.34, count = 14973 },
-        { label = "10%",    score = 3478.08, count = 149737 },
-        { label = "25%",    score = 3221.05, count = 374343 },
-        { label = "40%",    score = 3023.99, count = 598949 },
-        { label = "47.80%", score = 2920.00, count = 715750 },
-        { label = "50%",    score = 2875.64, count = 748687 },
-        { label = "59.70%", score = 2680.00, count = 893941 },
-        { label = "60%",    score = 2672.01, count = 898424 },
-        { label = "64.20%", score = 2560.00, count = 961317 },
-        { label = "68.80%", score = 2320.00, count = 1030197 },
-        { label = "70%",    score = 2240.01, count = 1048161 },
-        { label = "70.60%", score = 2200.00, count = 1057147 },
-        { label = "72.10%", score = 2080.00, count = 1079607 },
-        { label = "75.30%", score = 1840.00, count = 1127525 },
-        { label = "76.50%", score = 1720.00, count = 1145492 },
-        { label = "79.40%", score = 1480.00, count = 1188916 },
-        { label = "80.70%", score = 1360.00, count = 1208381 },
-        { label = "82.70%", score = 1240.00, count = 1238329 },
+        { label = "0.1%", score = 3936.28, count = 1141 },
+        { label = "1%", score = 3737.93, count = 11407 },
+        { label = "10%", score = 3357.43, count = 114060 },
+        { label = "25%", score = 3052.64, count = 285152 },
+        { label = "40%", score = 2841.93, count = 456237 },
+        { label = "48.90%", score = 2679.88, count = 557746 },
+        { label = "50%", score = 2654.31, count = 570289 },
+        { label = "54.20%", score = 2556.68, count = 618194 },
+        { label = "59.20%", score = 2316.32, count = 675225 },
+        { label = "60%", score = 2271.02, count = 684347 },
+        { label = "61.30%", score = 2197.36, count = 699179 },
+        { label = "63.10%", score = 2074.25, count = 719706 },
+        { label = "66.30%", score = 1833.45, count = 756204 },
+        { label = "67.60%", score = 1715.48, count = 771032 },
+        { label = "70%", score = 1531.19, count = 798405 },
+        { label = "70.70%", score = 1477.42, count = 806392 },
+        { label = "72.20%", score = 1354.37, count = 823501 },
+        { label = "74.40%", score = 1233.29, count = 848591 },
     },
-    TotalPopulation = 1497374,
-    DataTime = "2026.07.02 19:53",
-    ExwindVersion = "v26.7.2.1953",
+    TotalPopulation = 1140579,
+    DataTime = "2026.10.09 08:04",
+    ExwindVersion = "v26.10.9.1239",
 }
 -- [[ PYTHON_DATA_END ]]
 
@@ -264,12 +263,11 @@ function EXMRH.CreateStandaloneFrame()
     f:SetBackdropColor(unpack(EXWIND_THEME.Background))
     f:SetBackdropBorderColor(0, 0, 0, 0.8)
 
-    local closeBtn = EXUI:CreatePicButton(f, 24, 24,
-        "Interface\\Buttons\\UI-Panel-CloseButton-Up",
-        "Interface\\Buttons\\UI-Panel-CloseButton-Down",
-        "Interface\\Buttons\\UI-Panel-CloseButton-Highlight",
-        function() f:Hide() end, true)
+    local closeBtn = EXUI:CreateButton(f, 24, 24, "×", function() f:Hide() end,
+        { compact = true, variant = "danger" })
     closeBtn:SetPoint("TOPRIGHT", -8, -8)
+    closeBtn:SetFrameLevel(f:GetFrameLevel() + 20)
+    f.CloseButton = closeBtn
 
     tinsert(UISpecialFrames, "EXMRH_MainFrame")
     EXMRH.Main = CreateFrame("Frame", nil, f); EXMRH.Main:SetAllPoints()
@@ -475,6 +473,7 @@ function EXMRH.InitHeader()
     EXMRH.TitleLineText:SetFont(MAIN_FONT, GUI_FONT.small, "OUTLINE");
     EXMRH.TitleLineText:SetPoint("TOPLEFT", barBG, "BOTTOMLEFT", 0, -6);
     EXMRH.TitleLineText:SetTextColor(1, 0.92, 0.22)
+    EXMRH.TitleLineText:SetText(L["当前称号线 (0.1%): "] .. EXMRH_PYTHON_DATA.RankTable[1].score)
 
     local function CreateCrestFrame(id, xOfs)
         local cF = CreateFrame("Frame", nil, barGroup, "BackdropTemplate")
@@ -872,8 +871,6 @@ function EXMRH.UpdateAllData()
     EXMRH.RankBar:SetStatusBarColor(classCol.r, classCol.g, classCol.b) -- 职业染色
     EXMRH.RankBarText:SetText(string.format("%.2f%%", realVal))         -- 进度条中间显示百分比
 
-    -- 更新称号线底下的静态文字
-    EXMRH.TitleLineText:SetText(L["当前称号线 (0.1%): "] .. EXMRH_PYTHON_DATA.RankTable[1].score)
     --=======================================================================================
     ----------------------------------------坚韧钥石及低保模块--------------------------------
     ---=======================================================================================

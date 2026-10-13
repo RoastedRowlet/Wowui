@@ -295,10 +295,9 @@ end
 -- =========================================================
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
+local settingsSession
 local function RefreshConfigUI()
-    if ExwindTools.UI and ExwindTools.UI.RefreshContent then
-        ExwindTools.UI:RefreshContent()
-    end
+    if settingsSession then settingsSession:Refresh() end
 end
 
 local function HasIDTag(text)
@@ -375,129 +374,115 @@ end
 
 local function RebuildLayoutAndRefreshUI(refreshGossip)
     RemoveCustomIfCoveredByPreset()
-
-    if ExwindTools.RegisterModuleLayout then
-        -- [声明迁移边界：设置页] 普通控件与两张记录表各只声明一次。
-        -- 预设优先级与枚举顺序、ID/key/parentKey/subKey、增删按钮及自动对话回调禁止修改。
-        local ids = GetSortedCustomOptionIDs()
-        local layout = {
-            version = 1,
-            sections = {
-                {
-                    kind = "settings",
-                    id = "common",
-                    title = L["通用设置"],
-                    items = {
-                        { key = "enabled", type = "switch", label = L["启用功能"] },
-                        { key = "showQuestID", type = "switch", label = L["显示任务 ID"] },
-                        { key = "showOptionID", type = "switch", label = L["显示对话选项 ID"] },
-                        { key = "autoSelectEnabled", type = "switch", label = L["启用自动对话"] },
-                        { key = "showActionButton", type = "switch", label = L["显示加入按钮"] },
-                        { key = "buttonPosition", type = "select", label = L["按钮位置"], options = {
-                            { value = "LEFT", label = L["前面"] },
-                            { value = "RIGHT", label = L["后面"] },
-                        } },
-                    },
-                },
-                {
-                    kind = "table",
-                    id = "presets",
-                    title = L["预设自动对话"],
-                    description = L["若某个自定义 ID 后续进入预设，将自动移除自定义项并以预设为准。"],
-                    columns = {
-                        { title = L["启用"] },
-                        { title = L["名称"] },
-                        { title = "ID" },
-                    },
-                    supportsAdd = false,
-                    records = {},
-                },
-                {
-                    kind = "table",
-                    id = "custom",
-                    title = L["自定义自动对话"],
-                    description = #ids == 0
-                        and L["当前没有自定义自动对话项。点击对话行图标，或在上方手动添加。"]
-                        or nil,
-                    columns = {
-                        { title = L["启用"] },
-                        { title = L["名称"] },
-                        { title = "ID" },
-                        { title = L["操作"] },
-                    },
-                    supportsAdd = true,
-                    add = {
-                        cells = {
-                            { text = "" },
-                            { key = "manualAddName", type = "input", label = L["名称"] },
-                            { key = "manualAddID", type = "input", label = L["对话 ID"] },
-                            { key = "btn_add_auto_option", type = "button", label = L["添加"] },
-                        },
-                    },
-                    records = {},
-                },
-            },
-        }
-
-        local presetRecords = layout.sections[2].records
-        for _, definition in ipairs(PRESET_DEFINITIONS) do
-            presetRecords[#presetRecords + 1] = {
-                cells = {
-                    {
-                        key = "preset_enabled_" .. definition.key,
-                        parentKey = "presetStates." .. definition.key,
-                        subKey = "enabled",
-                        type = "switch",
-                        label = "",
-                    },
-                    { text = GetPresetTitle(definition) },
-                    { text = GetPresetIDsText(definition) },
-                },
-            }
-        end
-
-        local customRecords = layout.sections[3].records
-        for _, optionID in ipairs(ids) do
-            local entryPath = "customAutoOptions." .. optionID
-            local entry = GetCustomEntry(optionID)
-            local instanceName = entry and GetInstanceNameByID(entry.instanceID)
-            local idLabel = instanceName
-                and string.format("(%d) [%s]", optionID, instanceName)
-                or string.format("(%d)", optionID)
-            customRecords[#customRecords + 1] = {
-                cells = {
-                    {
-                        key = "custom_enabled_" .. optionID,
-                        parentKey = entryPath,
-                        subKey = "enabled",
-                        type = "switch",
-                        label = "",
-                    },
-                    {
-                        key = "custom_name_" .. optionID,
-                        parentKey = entryPath,
-                        subKey = "name",
-                        type = "input",
-                        label = "",
-                    },
-                    { text = idLabel },
-                    {
-                        key = "btn_delete_custom_" .. optionID,
-                        type = "button",
-                        label = L["删除"],
-                    },
-                },
-            }
-        end
-
-        ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
-    end
-
     RefreshConfigUI()
     if refreshGossip then
         RefreshCurrentGossipFrameLater()
     end
 end
+
+-- 设置页（V2）：普通控件按 path 绑定；两张记录表由 owner 提供记录与控件。
+-- 预设优先级与枚举顺序、存档路径、增删按钮及自动对话回调禁止修改。
+local customRecords = {}
+local function CustomRecords()
+    local list = {}
+    for _, optionID in ipairs(GetSortedCustomOptionIDs()) do
+        local record = customRecords[optionID] or { id = optionID }
+        customRecords[optionID] = record
+        list[#list + 1] = record
+    end
+    return list
+end
+
+local function TableHead(id, titles)
+    local row = { id = id, kind = "row", children = {} }
+    for index, title in ipairs(titles) do
+        row.children[index] = { id = id .. "." .. index, kind = "cell", children = {
+            { id = id .. "." .. index .. ".text", kind = "hint", text = title },
+        } }
+    end
+    return row
+end
+
+local function Cell(id, child)
+    return { id = id, kind = "cell", children = { child } }
+end
+
+local function BuildV2Declaration()
+    return { version = 2, cards = {
+        { id = "common", kind = "card", title = L["通用设置"], children = {
+            { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用功能"] },
+            { id = "showQuestID", kind = "control", controlType = "switch", path = "showQuestID", label = L["显示任务 ID"] },
+            { id = "showOptionID", kind = "control", controlType = "switch", path = "showOptionID", label = L["显示对话选项 ID"] },
+            { id = "autoSelectEnabled", kind = "control", controlType = "switch", path = "autoSelectEnabled", label = L["启用自动对话"] },
+            { id = "showActionButton", kind = "control", controlType = "switch", path = "showActionButton", label = L["显示加入按钮"] },
+            { id = "buttonPosition", kind = "control", controlType = "select", path = "buttonPosition", label = L["按钮位置"],
+                options = { { value = "LEFT", label = L["前面"] }, { value = "RIGHT", label = L["后面"] } } },
+        } },
+        { id = "presets", kind = "card", title = L["预设自动对话"], children = {
+            { id = "presets.desc", kind = "hint", text = L["若某个自定义 ID 后续进入预设，将自动移除自定义项并以预设为准。"] },
+            { id = "presets.table", kind = "columns", columns = { { width = 64 }, { weight = 1 }, { weight = 1 } }, children = {
+                TableHead("presets.head", { L["启用"], L["名称"], "ID" }),
+                { id = "presets.rows", kind = "repeat", source = "presets", template = { id = "presets.row", kind = "row", children = {
+                    Cell("presets.row.enabled", { id = "presets.row.enabled.control", kind = "control", controlType = "checkbox", ref = "presetEnabled" }),
+                    Cell("presets.row.name", { id = "presets.row.name.text", kind = "text", textSource = "presetTitle" }),
+                    Cell("presets.row.ids", { id = "presets.row.ids.text", kind = "text", textSource = "presetIDs" }),
+                } } },
+            } },
+        } },
+        { id = "custom", kind = "card", title = L["自定义自动对话"], children = {
+            { id = "custom.empty", kind = "hint", visible = "noCustom",
+                text = L["当前没有自定义自动对话项。点击对话行图标，或在上方手动添加。"] },
+            { id = "custom.table", kind = "columns", columns = { { width = 64 }, { weight = 1 }, { weight = 1 }, { width = 96 } }, children = {
+                TableHead("custom.head", { L["启用"], L["名称"], "ID", L["操作"] }),
+                { id = "custom.add", kind = "row", children = {
+                    Cell("custom.add.blank", { id = "custom.add.blank.text", kind = "text", text = "" }),
+                    Cell("custom.add.name", { id = "manualAddName", kind = "control", controlType = "input", path = "manualAddName" }),
+                    Cell("custom.add.id", { id = "manualAddID", kind = "control", controlType = "input", path = "manualAddID" }),
+                    Cell("custom.add.button", { id = "btn_add_auto_option", kind = "button", text = L["添加"],
+                        clickKey = "btn_add_auto_option", presentation = "primary" }),
+                } },
+                { id = "custom.rows", kind = "repeat", source = "custom", template = { id = "custom.row", kind = "row", children = {
+                    Cell("custom.row.enabled", { id = "custom.row.enabled.control", kind = "control", controlType = "checkbox", ref = "customEnabled" }),
+                    Cell("custom.row.name", { id = "custom.row.name.control", kind = "control", controlType = "input", ref = "customName" }),
+                    Cell("custom.row.id", { id = "custom.row.id.text", kind = "text", textSource = "customID" }),
+                    Cell("custom.row.delete", { id = "custom.row.delete.button", kind = "button", text = L["删除"], action = "deleteCustom" }),
+                } } },
+            } },
+        } },
+    } }
+end
+
+local function CreateV2Owner()
+    local owner = { controls = {}, components = {}, actions = {}, predicates = {}, sources = {}, texts = {} }
+    function owner:AttachSession(session) settingsSession = session end
+    local function Bind(path)
+        return EXUI:CreateSettingsV2Binding(EXWIND_MODULE_KEY, EX_DB, path)
+    end
+    owner.sources.presets = function() return PRESET_DEFINITIONS end
+    owner.sources.custom = CustomRecords
+    owner.texts.presetTitle = function(scope) return GetPresetTitle(scope.item) end
+    owner.texts.presetIDs = function(scope) return GetPresetIDsText(scope.item) end
+    owner.texts.customID = function(scope)
+        local entry = GetCustomEntry(scope.item.id)
+        local instanceName = entry and GetInstanceNameByID(entry.instanceID)
+        return instanceName and string.format("(%d) [%s]", scope.item.id, instanceName)
+            or string.format("(%d)", scope.item.id)
+    end
+    owner.predicates.noCustom = function() return #GetSortedCustomOptionIDs() == 0 end
+    owner.controls.presetEnabled = EXUI:CreateSettingsV2Control({ controlType = "checkbox", label = "" },
+        function(context) return Bind("presetStates." .. context.scope.item.key .. ".enabled") end)
+    owner.controls.customEnabled = EXUI:CreateSettingsV2Control({ controlType = "checkbox", label = "" },
+        function(context) return Bind("customAutoOptions." .. context.scope.item.id .. ".enabled") end)
+    owner.controls.customName = EXUI:CreateSettingsV2Control({ controlType = "input" },
+        function(context) return Bind("customAutoOptions." .. context.scope.item.id .. ".name") end)
+    owner.actions.deleteCustom = function(context)
+        ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked",
+            { key = "btn_delete_custom_" .. context.scope.item.id, ts = GetTime() })
+    end
+    return owner
+end
+
+EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, BuildV2Declaration(), CreateV2Owner)
 
 RebuildLayoutAndRefreshUI(false)
 

@@ -27,30 +27,21 @@ local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, EXWIND_DEFAULTS)
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
 -- ========================================================================
--- [布局注册] Grid 设置界面
+-- [布局注册] V2 设置界面
 -- ========================================================================
-local function RegisterLayout()
-    -- [声明迁移边界：设置页] 仅把原设置控件改为唯一 settings 声明。
-    -- key/type、Beta 门禁及反馈/专业按钮 hook 禁止修改。
-    local layout = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings",
-                id = "common",
-                title = L["通用设置"],
-                description = L["|cff808080* 以上功能仅在 Beta/PTR 环境生效。一键全学按钮会在专业专精页面显示。|r"],
-                items = {
-                    { key = "blockFeedback", type = "switch", label = L["屏蔽PTR自带反馈框 (Tooltip Issue Reporter)"] },
-                    { key = "autoLearnProf", type = "switch", label = L["开启专业专精一键全学按钮"] },
-                },
-            },
-        },
-    }
-    ExwindTools.UI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
-end
-
-RegisterLayout()
+ExwindTools.UI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, {
+    version = 2,
+    cards = {
+        { id = "common", kind = "card", title = L["通用设置"], children = {
+            { id = "desc", kind = "hint",
+                text = L["|cff808080* 以上功能仅在 Beta/PTR 环境生效。一键全学按钮会在专业专精页面显示。|r"] },
+            { id = "blockFeedback", kind = "control", controlType = "switch", path = "blockFeedback",
+                label = L["屏蔽PTR自带反馈框 (Tooltip Issue Reporter)"] },
+            { id = "autoLearnProf", kind = "control", controlType = "switch", path = "autoLearnProf",
+                label = L["开启专业专精一键全学按钮"] },
+        } },
+    },
+})
 
 -- =========================================================
 -- 五、业务状态与功能逻辑 | Business State and Logic

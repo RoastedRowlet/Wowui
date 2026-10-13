@@ -55,47 +55,32 @@ local EXDB = _G.EXDB
 -- =========================================================
 
 
--- 1. Grid 布局
-local function EX_RegisterLayout()
-    -- [声明迁移边界：设置页] 仅把原设置控件与说明改为 typed sections；打开按钮仍只负责进入自有手册窗口。
-    -- 跨模块 mythicLevel 绑定、key/type 与按钮回调禁止修改。
-    local layout = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings",
-                id = "guide",
-                title = L["法术手册"],
-                description = {
-                    key = "desc",
-                    type = "description",
-                    label = L["此模块提供了一个极度详细的地下城百科，涵盖所有层数下的怪物技能数值。"],
-                },
-                items = {
-                    { key = "open", type = "button", label = L["立即打开手册"] },
-                },
-            },
-            {
-                kind = "settings",
-                id = "simulation",
-                title = L["数值模拟 (全局同步)"],
-                items = {
-                    { key = "mythicLevel", type = "slider", label = L["模拟层数"], min = 0, max = 30, parentKey = "ExM+.MythicDamage" },
-                },
-                footerDescription = {
-                    key = "info",
-                    type = "description",
-                    label = "|cff888888" .. L["注：模拟层数与“大秘境伤害计算”模块共享数据。"] .. "|r",
-                },
-            },
-        },
-    }
-
-    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
+-- 1. 设置页（V2）
+-- 模拟层数直接读写“大秘境伤害计算”模块的 mythicLevel，与 /EXSP 窗口的滑块是同一个值。
+local function CreateSettingsOwner()
+    local owner = { controls = {} }
+    owner.controls.mythicLevel = EXUI:CreateSettingsV2Control(
+        { controlType = "slider", label = L["模拟层数"], min = 0, max = 30, step = 1 },
+        function()
+            return EXUI:CreateSettingsV2Binding("ExM+.MythicDamage",
+                ExwindTools:GetModuleDB("ExM+.MythicDamage"), "mythicLevel")
+        end)
+    return owner
 end
 
--- 3. 立即注册
-EX_RegisterLayout()
+EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, {
+    version = 2,
+    cards = {
+        { id = "guide", kind = "card", title = L["法术手册"], children = {
+            { id = "desc", kind = "hint", text = L["此模块提供了一个极度详细的地下城百科，涵盖所有层数下的怪物技能数值。"] },
+            { id = "open", kind = "button", text = L["立即打开手册"], clickKey = "open" },
+        } },
+        { id = "simulation", kind = "card", title = L["数值模拟 (全局同步)"], children = {
+            { id = "mythicLevel", kind = "control", controlType = "slider", ref = "mythicLevel" },
+            { id = "info", kind = "hint", text = "|cff888888" .. L["注：模拟层数与“大秘境伤害计算”模块共享数据。"] .. "|r" },
+        } },
+    },
+}, CreateSettingsOwner)
 
 
 ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY, function(data)

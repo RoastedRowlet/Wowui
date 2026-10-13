@@ -119,100 +119,106 @@ end
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
 -- =============================================================
--- 第一部分：Grid 布局定义
+-- 第一部分：设置页（V2）
 -- =============================================================
 local function EX_RegisterLayout()
-    -- [声明迁移边界：设置页] 仅把原设置控件与复合控件改为 typed sections。
-    -- key/type、Beta 门禁、PVE 侧栏位置配置与 secure 制钥按钮回调禁止修改。
+    local function Slider(path, label, min, max, step)
+        return { id = path, kind = "control", controlType = "slider", path = path,
+            label = label, min = min, max = max, step = step or 1 }
+    end
     local layout = {
-        version = 1,
-        sections = {
+        version = 2,
+        cards = {
             {
-                kind = "settings",
+                kind = "card",
                 id = "overview",
                 title = L["BETA 大米制作挂架"],
-                description = {
-                    key = "desc", type = "description",
-                    label = L["自动依附在 PVE 面板左侧的快速设钥架。"],
+                children = {
+                    { id = "overview.desc", kind = "hint", text = L["自动依附在 PVE 面板左侧的快速设钥架。"] },
                 },
-                items = {},
             },
             {
-                kind = "settings",
+                kind = "card",
                 id = "common",
                 title = L["通用设置"],
-                items = {
-                    { key = "enabled", type = "switch", label = L["启用模块"] },
+                children = {
+                    { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用模块"] },
                     {
-                        key = "side", type = "select", label = L["依附侧"],
+                        id = "side", kind = "control", controlType = "select", path = "side", label = L["依附侧"],
                         options = {
                             { value = "LEFT", label = L["左侧"] },
                             { value = "RIGHT", label = L["右侧"] },
                         },
                     },
-                    { key = "offsetX", type = "slider", label = L["整体 X 偏移"], min = -100, max = 100, step = 1 },
-                    { key = "offsetY", type = "slider", label = L["整体 Y 偏移"], min = -500, max = 500, step = 5 },
-                    { key = "iconsX", type = "slider", label = L["图标组 X"], min = -100, max = 100, step = 1 },
-                    { key = "iconsY", type = "slider", label = L["图标组 Y"], min = -100, max = 100, step = 1 },
+                    Slider("offsetX", L["整体 X 偏移"], -100, 100, 1),
+                    Slider("offsetY", L["整体 Y 偏移"], -500, 500, 5),
+                    Slider("iconsX", L["图标组 X"], -100, 100, 1),
+                    Slider("iconsY", L["图标组 Y"], -100, 100, 1),
                 },
             },
             {
-                kind = "settings",
+                kind = "card",
                 id = "current_position",
                 title = L["当前显示"],
-                items = {
-                    { key = "groupX", type = "slider", label = L["模块 X"], min = -100, max = 100, parentKey = "current" },
-                    { key = "groupY", type = "slider", label = L["模块 Y"], min = -100, max = 100, parentKey = "current" },
+                children = {
+                    Slider("current.groupX", L["模块 X"], -100, 100),
+                    Slider("current.groupY", L["模块 Y"], -100, 100),
                 },
             },
             {
-                kind = "composite", id = "current_font", title = L["当前文字设置"],
-                component = "fontgroup", key = "current",
+                kind = "card", id = "current_font", title = L["当前文字设置"], children = {
+                    { id = "current_font.component", kind = "component", component = "fontgroup", path = "current" },
+                },
             },
             {
-                kind = "settings",
+                kind = "card",
                 id = "level_position",
                 title = L["等级按钮"],
-                items = {
-                    { key = "groupX", type = "slider", label = L["模块 X"], min = -100, max = 100, parentKey = "level" },
-                    { key = "groupY", type = "slider", label = L["模块 Y"], min = -100, max = 100, parentKey = "level" },
-                    { key = "spacingX", type = "slider", label = L["横向间距"], min = 20, max = 100, parentKey = "level" },
+                children = {
+                    Slider("level.groupX", L["模块 X"], -100, 100),
+                    Slider("level.groupY", L["模块 Y"], -100, 100),
+                    Slider("level.spacingX", L["横向间距"], 20, 100),
                 },
             },
             {
-                kind = "composite", id = "level_font", title = L["数字字体设置"],
-                component = "fontgroup", key = "level",
+                kind = "card", id = "level_font", title = L["数字字体设置"], children = {
+                    { id = "level_font.component", kind = "component", component = "fontgroup", path = "level" },
+                },
             },
             {
-                kind = "settings",
+                kind = "card",
                 id = "map_position",
                 title = L["地图按钮"],
-                items = {
-                    { key = "groupX", type = "slider", label = L["模块 X"], min = -100, max = 100, parentKey = "map" },
-                    { key = "groupY", type = "slider", label = L["模块 Y"], min = -100, max = 100, parentKey = "map" },
-                    { key = "spacingX", type = "slider", label = L["横向间距"], min = 20, max = 120, parentKey = "map" },
-                    { key = "spacingY", type = "slider", label = L["纵向间距"], min = 20, max = 120, parentKey = "map" },
+                children = {
+                    Slider("map.groupX", L["模块 X"], -100, 100),
+                    Slider("map.groupY", L["模块 Y"], -100, 100),
+                    Slider("map.spacingX", L["横向间距"], 20, 120),
+                    Slider("map.spacingY", L["纵向间距"], 20, 120),
                 },
             },
             {
-                kind = "composite", id = "map_font", title = L["副本字体设置"],
-                component = "fontgroup", key = "map",
+                kind = "card", id = "map_font", title = L["副本字体设置"], children = {
+                    { id = "map_font.component", kind = "component", component = "fontgroup", path = "map" },
+                },
             },
             {
-                kind = "composite", id = "current_icon", title = L["当前图标"],
-                component = "icongroup", key = "currentIconStyle", opts = { enableOffset = false },
+                kind = "card", id = "current_icon", title = L["当前图标"], children = {
+                    { id = "current_icon.component", kind = "component", component = "icongroup", path = "currentIconStyle", opts = { enableOffset = false } },
+                },
             },
             {
-                kind = "composite", id = "level_icon", title = L["等级图标"],
-                component = "icongroup", key = "levelIconStyle", opts = { enableOffset = false },
+                kind = "card", id = "level_icon", title = L["等级图标"], children = {
+                    { id = "level_icon.component", kind = "component", component = "icongroup", path = "levelIconStyle", opts = { enableOffset = false } },
+                },
             },
             {
-                kind = "composite", id = "map_icon", title = L["地图图标"],
-                component = "icongroup", key = "mapIconStyle", opts = { enableOffset = false },
+                kind = "card", id = "map_icon", title = L["地图图标"], children = {
+                    { id = "map_icon.component", kind = "component", component = "icongroup", path = "mapIconStyle", opts = { enableOffset = false } },
+                },
             },
         },
     }
-    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, layout)
 end
 EX_RegisterLayout()
 

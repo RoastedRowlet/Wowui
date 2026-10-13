@@ -701,6 +701,8 @@ L["RAID_BOSS_TG_1"] = "Invocatrice dell'Onda Nymrissa"
 --[[ L["RAID_BOSS_TOTFW_1"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_TOTFW_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_UOK_1"] = ""--]] 
 L["RAID_BOSS_VA_1"] = "Nek'zali la Spiranima"
 L["RAID_BOSS_VA_2"] = "Sentinelle Sepolte"
 L["RAID_BOSS_VA_3"] = "Gli Esploratori Perduti"
@@ -784,6 +786,8 @@ L["RAID_TG"] = "Grotta Vincolata alla Marea"
 --[[Translation missing --]]
 --[[ L["RAID_TOT"] = ""--]] 
 L["RAID_TOTFW"] = "Trono dei Quattro Venti"
+--[[Translation missing --]]
+--[[ L["RAID_UOK"] = ""--]] 
 L["RAID_VA"] = "Abissi Velenosi"
 L["RAID_VS"] = "Pinnacolo del Vuoto"
 L["RAID_VS_DR_MQD"] = "PdV/FdS/MsQD"

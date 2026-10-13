@@ -95,42 +95,48 @@ end
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
 local function EX_RegisterLayout()
-    -- [声明迁移边界：设置页] 仅把原设置控件改为 typed sections；三个 fontgroup 仍整体引用。
-    -- key/type、PVE 附着字段、数据请求/刷新/显隐回调禁止修改。
+    -- [声明迁移边界：设置页] 仅把原设置控件改为 V2 声明；三个 fontgroup 仍整体引用。
+    -- 存档路径、PVE 附着字段、数据请求/刷新/显隐回调禁止修改。
     local layout = {
-        version = 1,
-        sections = {
+        version = 2,
+        cards = {
             {
-                kind = "settings",
+                kind = "card",
                 id = "common",
                 title = L["通用设置"],
-                items = {
-                    { key = "enabled", type = "switch", label = L["启用模块"] },
-                    { key = "previewMode", type = "switch", label = L["预览模式"] },
+                children = {
+                    { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用模块"] },
+                    { id = "previewMode", kind = "control", controlType = "switch", path = "previewMode", label = L["预览模式"] },
                     {
-                        key = "side", type = "select", label = L["依附侧"],
+                        id = "side", kind = "control", controlType = "select", path = "side", label = L["依附侧"],
                         options = {},
                     },
-                    { key = "offsetX", type = "slider", label = L["水平偏移 (X)"], min = -300, max = 300 },
-                    { key = "offsetY", type = "slider", label = L["垂直偏移 (Y)"], min = -500, max = 500 },
+                    { id = "offsetX", kind = "control", controlType = "slider", path = "offsetX", label = L["水平偏移 (X)"], min = -300, max = 300 },
+                    { id = "offsetY", kind = "control", controlType = "slider", path = "offsetY", label = L["垂直偏移 (Y)"], min = -500, max = 500 },
                 },
             },
             {
-                kind = "composite", id = "player_font", title = L["玩家文字设置"],
-                component = "fontgroup", key = "playerFont",
+                kind = "card", id = "player_font", title = L["玩家文字设置"],
+                children = {
+                    { id = "playerFont", kind = "component", component = "fontgroup", path = "playerFont" },
+                },
             },
             {
-                kind = "composite", id = "party_name_font", title = L["队友名称设置"],
-                component = "fontgroup", key = "partyNameFont",
+                kind = "card", id = "party_name_font", title = L["队友名称设置"],
+                children = {
+                    { id = "partyNameFont", kind = "component", component = "fontgroup", path = "partyNameFont" },
+                },
             },
             {
-                kind = "composite", id = "party_key_font", title = L["队友钥石设置"],
-                component = "fontgroup", key = "partyKeyFont",
+                kind = "card", id = "party_key_font", title = L["队友钥石设置"],
+                children = {
+                    { id = "partyKeyFont", kind = "component", component = "fontgroup", path = "partyKeyFont" },
+                },
             },
         },
     }
 
-    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, layout)
 end
 EX_RegisterLayout()
 

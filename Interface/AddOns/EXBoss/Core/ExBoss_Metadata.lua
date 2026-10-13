@@ -3,7 +3,7 @@
 -- 请勿手动通过 Git 提交修改此文件中的版本号，除非你是为了测试。
 
 ExBoss_MetaData = {
-    version = "v26.10.6.1123",
+    version = "v26.10.9.1239",
     changelog = {
         version = "v26.10.5.2034",
         title = "v26.10.5.2034 更新日志",

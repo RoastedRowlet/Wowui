@@ -1,4 +1,4 @@
-local Type, Version = "SearchEditBox_Base", 4
+local Type, Version = "SearchEditBox_Base", 5
 local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
 if not AceGUI or (AceGUI:GetWidgetVersion(Type) or 0) >= Version then return end
 
@@ -10,6 +10,7 @@ local predictorBackdrop = {
   insets = {left = 9, right = 9, top = 9, bottom = 9},
 }
 local queryResult = {}
+local querySorted = {}
 
 local GetMouseFocus = GetMouseFocus or function()
 	local t = GetMouseFoci()
@@ -223,23 +224,26 @@ end
 
 local function Predictor_Query(self, object)
 	Predictor_Reset(self,object)
-	local activeButtons = 0
 	local result = Fire( self.obj, "GetValues", self.obj.editBox:GetText(), queryResult, PREDICTOR_ROWS ) or queryResult
-	for key,text in pairs(result) do
-		activeButtons = activeButtons + 1
-		local button = self.buttons[activeButtons]
-		button:SetText( text )
+	wipe(querySorted)
+	for key in pairs(result) do
+		querySorted[#querySorted+1] = key
+		if #querySorted >= PREDICTOR_ROWS then break end
+	end
+	table.sort(querySorted)
+	for index, key in ipairs(querySorted) do
+		local button = self.buttons[index]
+		button:SetText( result[key] )
 		button.key = key
 		button:Show()
-		if activeButtons >= PREDICTOR_ROWS then break end
 	end
-	if activeButtons > 0 then
-		self:SetHeight(15 + activeButtons * 14)
+	if #querySorted > 0 then
+		self:SetHeight(15 + #querySorted * 14)
 		self:Show()
 	else
 		self:Hide()
 	end
-	self.activeButtons = activeButtons
+	self.activeButtons = #querySorted
 end
 -- }}
 

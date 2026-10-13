@@ -1639,103 +1639,74 @@ EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = 
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
 local function EX_RegisterLayout()
-    -- [声明迁移边界：设置页] 仅把原多功能设置项改为 typed sections；fontgroup 仍整体引用。
-    -- 各业务 key/type/顺序、商人/宏界面 hook、购买确认和战斗记录回调禁止修改。
-    local layout = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings", id = "map", title = L["地图"],
-                items = {
-                    { key = "ShowMapInfo", type = "switch", label = L["启用：世界地图显示坐标信息"] },
-                    { key = "MapInfoHideMapID", type = "switch", label = L["不显示地图ID"] },
-                    {
-                        key = "MapInfoAnchor", type = "select", label = L["显示位置"],
-                        options = {
-                            { value = "左下", label = L["左下"] },
-                            { value = "左上", label = L["左上"] },
-                            { value = "右下", label = L["右下"] },
-                            { value = "右上", label = L["右上"] },
-                            { value = "中下", label = L["中下"] },
-                        },
-                    },
-                },
-            },
-            {
-                kind = "composite", id = "map_font", title = L["字体设置"],
-                component = "fontgroup", key = "MapInfoFont",
-            },
-            {
-                kind = "settings", id = "utilities", title = L["小功能"],
-                items = {
-                    { key = "AutoDelete", type = "switch", label = L["启用: 删除物品时自动填写 'DELETE'"] },
-                    { key = "MacroEnhancement", type = "switch", label = L["启用:宏界面增强|cffff1f13(注意 功能测试中!!!)|r"] },
-                    { key = "AutoSellJunk", type = "switch", label = L["启用: 打开商人时自动出售灰色物品"] },
-                    { key = "EJTooltip", type = "switch", label = L["启用:地下城手侧显示法术Tooltip"] },
-                    { key = "BulkBuy", type = "switch", label = L["启用: Shift+点击 接管商人物品购买"] },
-                    { key = "BulkBuy_WarnThreshold", type = "input", label = L["需要确认金额"] },
-                    { key = "AutoInsertKeystone", type = "switch", label = L["打开大秘境面板自动插入钥石"] },
-                    { key = "AutoResetDamageMeter", type = "switch", label = L["启用: 进入副本时弹出重置伤害统计确认框"] },
-                },
-            },
-            {
-                kind = "settings", id = "combat_log", title = L["自动战斗记录"],
-                items = {
-                    { key = "AutoCombatLog", type = "switch", label = L["启用模块 (总开关)"] },
-                    {
-                        label = L["|cffffd1005人地下城|r"],
-                        controls = {
-                            { key = "ACL_DungeonFollower", type = "switch", label = L["追随者"], presentation = "card" },
-                            { key = "ACL_DungeonNormal", type = "switch", label = L["普通"], presentation = "card" },
-                            { key = "ACL_DungeonHeroic", type = "switch", label = L["英雄"], presentation = "card" },
-                            { key = "ACL_DungeonMythic", type = "switch", label = L["史诗"], presentation = "card" },
-                            { key = "ACL_DungeonChallenge", type = "switch", label = L["大秘境"], presentation = "card" },
-                        },
-                    },
-                    {
-                        label = L["|cffffd100团队副本|r"],
-                        controls = {
-                            { key = "ACL_RaidLFR", type = "switch", label = L["随机"], presentation = "card" },
-                            { key = "ACL_RaidNormal", type = "switch", label = L["普通"], presentation = "card" },
-                            { key = "ACL_RaidHeroic", type = "switch", label = L["英雄"], presentation = "card" },
-                            { key = "ACL_RaidMythic", type = "switch", label = L["史诗"], presentation = "card" },
-                        },
-                    },
-                },
-            },
-            {
-                kind = "settings", id = "battle_tag", title = L["修改战网名称"],
-                items = {
-                    { key = "HideBattleTag", type = "switch", label = L["启用: 修改战网名称 |cffff0c08(需要 /rl 生效)|r"] },
-                    { key = "BattleTagText", type = "input", label = L["输入名称 (留空则隐藏)"] },
-                },
-            },
-            {
-                kind = "settings", id = "repair", title = L["自动修理"],
-                items = {
-                    { key = "AutoRepair", type = "switch", label = L["启用：打开商人时自动修理全部装备"] },
-                    { key = "AutoRepair_UseGuildBank", type = "switch", label = L["优先使用公会银行修理（公会银行余额不足则自费）"] },
-                    { key = "AutoRepair_ShowMessage", type = "switch", label = L["修理后在聊天框显示花费提示"] },
-                },
-            },
-            {
-                kind = "settings", id = "merchant", title = L["商人界面增强"],
-                items = {
-                    { key = "MerchantExpansion", type = "switch", label = L["启用：商人界面加宽 (不改动高度)"] },
-                    {
-                        key = "MerchantColumns", type = "select", label = L["显示列数"],
-                        options = {
-                            { value = "2", label = "2" },
-                            { value = "3", label = "3" },
-                            { value = "4", label = "4" },
-                            { value = "5", label = "5" },
-                        },
-                    },
-                },
-            },
-        },
-    }
-    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
+    -- [声明迁移边界：设置页] 各业务 key/type/顺序、商人/宏界面 hook、购买确认和战斗记录回调禁止修改。
+    local function Switch(key, label)
+        return { id = key, kind = "control", controlType = "switch", path = key, label = label }
+    end
+    local function Card(key, label)
+        return { id = key, kind = "control", controlType = "card", path = key, label = label }
+    end
+    local function Select(key, label, values)
+        local options = {}
+        for index, value in ipairs(values) do options[index] = { value = value[1], label = value[2] } end
+        return { id = key, kind = "control", controlType = "select", path = key, label = label, options = options }
+    end
+    local function CardRow(id, label, cards)
+        return { id = id, kind = "row", children = {
+            { id = id .. ".label", kind = "text", text = label },
+            { id = id .. ".cards", kind = "actions", position = "end", align = "end", children = cards },
+        } }
+    end
+    EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, { version = 2, cards = {
+        { id = "map", kind = "card", title = L["地图"], children = {
+            Switch("ShowMapInfo", L["启用：世界地图显示坐标信息"]),
+            Switch("MapInfoHideMapID", L["不显示地图ID"]),
+            Select("MapInfoAnchor", L["显示位置"], {
+                { "左下", L["左下"] }, { "左上", L["左上"] }, { "右下", L["右下"] },
+                { "右上", L["右上"] }, { "中下", L["中下"] },
+            }),
+        } },
+        { id = "map_font", kind = "card", title = L["字体设置"], children = {
+            { id = "MapInfoFont", kind = "component", component = "fontgroup", path = "MapInfoFont" },
+        } },
+        { id = "utilities", kind = "card", title = L["小功能"], children = {
+            Switch("AutoDelete", L["启用: 删除物品时自动填写 'DELETE'"]),
+            Switch("MacroEnhancement", L["启用:宏界面增强|cffff1f13(注意 功能测试中!!!)|r"]),
+            Switch("AutoSellJunk", L["启用: 打开商人时自动出售灰色物品"]),
+            Switch("EJTooltip", L["启用:地下城手侧显示法术Tooltip"]),
+            Switch("BulkBuy", L["启用: Shift+点击 接管商人物品购买"]),
+            { id = "BulkBuy_WarnThreshold", kind = "control", controlType = "input", path = "BulkBuy_WarnThreshold",
+                label = L["需要确认金额"] },
+            Switch("AutoInsertKeystone", L["打开大秘境面板自动插入钥石"]),
+            Switch("AutoResetDamageMeter", L["启用: 进入副本时弹出重置伤害统计确认框"]),
+        } },
+        { id = "combat_log", kind = "card", title = L["自动战斗记录"], children = {
+            Switch("AutoCombatLog", L["启用模块 (总开关)"]),
+            CardRow("combat_log.dungeon", L["|cffffd1005人地下城|r"], {
+                Card("ACL_DungeonFollower", L["追随者"]), Card("ACL_DungeonNormal", L["普通"]),
+                Card("ACL_DungeonHeroic", L["英雄"]), Card("ACL_DungeonMythic", L["史诗"]),
+                Card("ACL_DungeonChallenge", L["大秘境"]),
+            }),
+            CardRow("combat_log.raid", L["|cffffd100团队副本|r"], {
+                Card("ACL_RaidLFR", L["随机"]), Card("ACL_RaidNormal", L["普通"]),
+                Card("ACL_RaidHeroic", L["英雄"]), Card("ACL_RaidMythic", L["史诗"]),
+            }),
+        } },
+        { id = "battle_tag", kind = "card", title = L["修改战网名称"], children = {
+            Switch("HideBattleTag", L["启用: 修改战网名称 |cffff0c08(需要 /rl 生效)|r"]),
+            { id = "BattleTagText", kind = "control", controlType = "input", path = "BattleTagText",
+                label = L["输入名称 (留空则隐藏)"] },
+        } },
+        { id = "repair", kind = "card", title = L["自动修理"], children = {
+            Switch("AutoRepair", L["启用：打开商人时自动修理全部装备"]),
+            Switch("AutoRepair_UseGuildBank", L["优先使用公会银行修理（公会银行余额不足则自费）"]),
+            Switch("AutoRepair_ShowMessage", L["修理后在聊天框显示花费提示"]),
+        } },
+        { id = "merchant", kind = "card", title = L["商人界面增强"], children = {
+            Switch("MerchantExpansion", L["启用：商人界面加宽 (不改动高度)"]),
+            Select("MerchantColumns", L["显示列数"], { { "2", "2" }, { "3", "3" }, { "4", "4" }, { "5", "5" } }),
+        } },
+    } })
 end
 
 EX_RegisterLayout()

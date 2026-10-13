@@ -1281,7 +1281,7 @@ local function ApplyTrashSettingsLabelLayout(widgets)
             end
         end
     end
-    if Page._settingsCardSession then Page._settingsCardSession:Relayout() end
+    if Page._settingsCardSession then _G.ExwindGrid:RequestReflow(settingsScrollChild) end
 end
 
 local function AnchorTrashWidget(widget, parent, left, top, width, height, right)
@@ -1759,13 +1759,8 @@ local function LayoutTrashTargetCard(session)
     return 274
 end
 
-local function ApplyTrashCustomCardLayouts(session)
+local function AnchorTrashSummaryEnabled(session)
     if not (session and session.byId and session.GetWidget) then return end
-    LayoutTrashQuickRow(session)
-    LayoutTrashTextCard(session)
-    LayoutTrashCastCard(session)
-    LayoutTrashVoiceCard(session)
-    LayoutTrashTargetCard(session)
     local summaryEnabled = session:GetWidget("master", "enabled")
     if summaryEnabled and detailEnableHost then
         detailEnableHost:SetSize(90, 28)
@@ -2030,8 +2025,7 @@ local function ApplyTrashSettingsCardSurfaces(session)
             end
         end
     end
-    session:Relayout()
-    ApplyTrashCustomCardLayouts(session)
+    AnchorTrashSummaryEnabled(session)
 end
 
 local function ReleaseTrashSettingsCardSession()
@@ -2977,12 +2971,38 @@ function Page:RefreshSpellList()
     end
 end
 
+local function PrepareTrashSettingsSelection()
+    CancelTrashVoiceSequencePreview()
+    local session = Page._settingsCardSession
+    if not session or session.released then return end
+    for _, card in ipairs(SETTINGS_LAYOUT.cards) do
+        for _, item in ipairs(card.content.items) do
+            local widget = session:GetWidget(card.id, item.key)
+            if widget then
+                if item.type == "input" then widget:ClearFocus() end
+                if widget.CloseMenu then widget:CloseMenu() end
+            end
+        end
+    end
+    for _, spec in ipairs({ { "voice", "tr1ValueTest" }, { "voice", "tr2ValueTest" },
+        { "target", "targetAlertStartValueTest" } }) do
+        local button = session:GetWidget(spec[1], spec[2])
+        if button then button:Hide() end
+    end
+    -- 打开的颜色选择器可能仍持有旧技能的回调；按原释放合同退役它。
+    if ColorPickerFrame and ColorPickerFrame:IsShown() then
+        ReleaseTrashSettingsCardSession()
+    end
+end
+
 local function RefreshSelectedSpellSync()
+    local suspended = _suspendSpellSettingPersist
     _suspendSpellSettingPersist = true
+    PrepareTrashSettingsSelection()
     LoadSelectedSpellToEditor()
-    _suspendSpellSettingPersist = false
     UpdateDetailCard()
     Page:RenderSettingsGrid(true)
+    _suspendSpellSettingPersist = suspended
 end
 
 GetRowSpellDescription = function(row)
@@ -3001,19 +3021,8 @@ function Page:RefreshSelectedSpell()
         if not IsValid() then
             return
         end
-        _suspendSpellSettingPersist = true
-        LoadSelectedSpellToEditor()
-        _suspendSpellSettingPersist = false
-        coroutine.yield()
-        if not IsValid() then
-            return
-        end
-        UpdateDetailCard()
-        coroutine.yield()
-        if not IsValid() then
-            return
-        end
-        Page:RenderSettingsGrid(true)
+        -- 加载和回填之间不让出执行权，避免旧控件写入新选择的草稿。
+        RefreshSelectedSpellSync()
     end
 
     local async = GetAsyncHandler()
@@ -3026,7 +3035,51 @@ function Page:RefreshSelectedSpell()
     end
 end
 
--- [混合函数边界] 只可迁移设置 Grid 的几何、卡片外框与内容高度反馈；draft/context、RegisterModuleLayout、ActivePage 与持久回调禁止修改。
+local function FindTrashDropdownText(items, value)
+    for _, item in ipairs(items or {}) do
+        if type(item) == "table" then
+            if item.isMenu then
+                local text = FindTrashDropdownText(item.menu, value)
+                if text ~= nil then return text end
+            elseif item[2] == value or tostring(item[2]) == tostring(value) then
+                return item[1]
+            end
+        elseif item == value or tostring(item) == tostring(value) then
+            return item
+        end
+    end
+end
+
+local function RefreshTrashSettingsValues(session, db)
+    if not session or session.released or session.parent ~= settingsScrollChild
+        or session.declaration ~= SETTINGS_LAYOUT or session.context.config ~= db then return false end
+    for _, card in ipairs(SETTINGS_LAYOUT.cards) do
+        if not session.byId[card.id] then return false end
+        for _, item in ipairs(card.content.items) do
+            local widget = session:GetWidget(card.id, item.key)
+            if not widget then return false end
+            local value = db[item.key]
+            if item.type == "checkbox" then
+                widget:SetChecked(value == true)
+            elseif item.type == "input" then
+                local text = tostring(value or "")
+                if widget:GetText() ~= text then widget:SetText(text) end
+            elseif item.type == "dropdown" then
+                widget._currentValue = value
+                widget:OverrideText(FindTrashDropdownText(widget._items, value) or L["请选择..."])
+            elseif item.type == "lsm_sound" then
+                widget._selectedValue = value
+                widget:OverrideText(tostring(value or ""))
+            elseif item.type == "color" then
+                widget._currentDb, widget._currentKey = db, item.key
+                widget:UpdateColor()
+            end
+        end
+    end
+    return true
+end
+
+-- 稳定声明和同一草稿只回填已有控件；选择身份与持久字段仍由原提交入口负责。
 function Page:RenderSettingsGrid(resetScroll)
     if not (settingsScrollChild and settingsPane and settingsPane:IsShown()) then
         return
@@ -3046,22 +3099,27 @@ function Page:RenderSettingsGrid(resetScroll)
         settingsScrollFrame:SetVerticalScroll(0)
     end
     RegisterSpellSettingsGridAsActive(SPELL_SETTINGS_MODULE_KEY)
-    ReleaseTrashSettingsCardSession()
-    Page._settingsCardSession = Grid:MountCards(settingsScrollChild, SETTINGS_LAYOUT, {
-        pageId = SPELL_SETTINGS_MODULE_KEY,
-        regionId = "trash-spell-editor",
-        layoutDefaults = { left = 0, right = 0, top = 12, bottom = 0, gap = 6 },
-        config = db,
-        moduleKey = SPELL_SETTINGS_MODULE_KEY,
-        scrollFrame = settingsScrollFrame,
-        exbossSummaryEnableHost = detailEnableHost,
-    })
-    ApplyTrashSettingsCardSurfaces(Page._settingsCardSession)
+    local suspended = _suspendSpellSettingPersist
+    _suspendSpellSettingPersist = true
+    if not RefreshTrashSettingsValues(Page._settingsCardSession, db) then
+        ReleaseTrashSettingsCardSession()
+        Page._settingsCardSession = Grid:MountCards(settingsScrollChild, SETTINGS_LAYOUT, {
+            pageId = SPELL_SETTINGS_MODULE_KEY,
+            regionId = "trash-spell-editor",
+            layoutDefaults = { left = 0, right = 0, top = 12, bottom = 0, gap = 6 },
+            config = db,
+            moduleKey = SPELL_SETTINGS_MODULE_KEY,
+            scrollFrame = settingsScrollFrame,
+            exbossSummaryEnableHost = detailEnableHost,
+        })
+        ApplyTrashSettingsCardSurfaces(Page._settingsCardSession)
+    end
     if detailOutputHost and GetSelectedSpellRow() then
         detailOutputHost:Show()
         RefreshDetailCardLayout()
     end
     RefreshSettingsDynamicWidgets()
+    _suspendSpellSettingPersist = suspended
 end
 
 -- [混合函数边界] EnsureUI 内只可迁移三 pane、详情卡、Scroll/Grid 的外观与 SetPoint/SetSize；池、OnClick、异步 Spell 数据、预览与回调禁止修改。
@@ -3430,7 +3488,7 @@ end
 -- The Core controller intentionally receives no field route.  Persist every
 -- current draft field as the editor's single reapply transaction.
 local function RefreshActiveSurfaces()
-    if Page._visible ~= true then return end
+    if _suspendSpellSettingPersist or Page._visible ~= true then return end
     CancelTrashVoiceSequencePreview()
     local fields = {
         "enabled", "showBunBar", "showTimerBar", "showNameplate",

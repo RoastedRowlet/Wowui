@@ -508,6 +508,8 @@ L["RAID_BOSS_TOT_8"] = "Primordius"
 L["RAID_BOSS_TOT_9"] = "Animus Sombrio"
 L["RAID_BOSS_TOTFW_1"] = "O Conclave do Vento"
 L["RAID_BOSS_TOTFW_2"] = "Al'Akir"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_UOK_1"] = ""--]] 
 L["RAID_BOSS_VA_1"] = "Nek'zali, a Enrosca-almas"
 L["RAID_BOSS_VA_2"] = "Sentinelas Sepultadas"
 L["RAID_BOSS_VA_3"] = "Exploradores Perdidos"
@@ -574,6 +576,8 @@ L["RAID_ToES"] = "Terraço da Primavera Eterna"
 L["RAID_TOES"] = "Terraço da Primavera Eterna"
 L["RAID_TOT"] = "Trono do Trovão"
 L["RAID_TOTFW"] = "Trono dos Quatro Ventos"
+--[[Translation missing --]]
+--[[ L["RAID_UOK"] = ""--]] 
 L["RAID_VA"] = "Abismo Peçonhento"
 L["RAID_VS"] = "A Torre do Caos"
 L["RAID_VS_DR_MQD"] = "Torre/Fenda/Quel'Danas"

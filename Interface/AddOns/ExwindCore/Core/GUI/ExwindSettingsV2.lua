@@ -1,4 +1,6 @@
--- V2 owns presentation only. Existing owners retain controls, records and writes.
+-- V2 owns presentation. control/component nodes that declare `path` are bound by
+-- the standard layer below (read, write, NotifyModuleValueChanged); nodes that
+-- declare `ref` keep their owner adapters, records and writes.
 local UI, Factory = _G.ExwindTools.UI, _G.ExwindFactory
 local Pages, Session = {}, {}
 UI.SettingsDeclarationSchemaRevision = 1 -- Static declaration rules; bump when accepted schema changes.
@@ -12,13 +14,24 @@ local Fields = {
     group = "title children", row = "children separator", cell = "children",
     actions = "children position align", columns = "columns children",
     ["repeat"] = "source template",
-    control = "ref controlType mode", component = "ref",
+    control = "ref controlType mode path label description options optionsSource media multiple search min max step inputWidthPercent",
+    component = "ref component path label opts optionsRef",
     text = "text textSource", hint = "text textSource",
-    button = "text action presentation",
+    button = "text action clickKey presentation",
 }
 local Common = "id kind visible enabled width weight height"
-local ControlTypes = { input=true, multiline=true, checkbox=true, card=true,
+local ControlTypes = { input=true, multiline=true, checkbox=true, switch=true, card=true,
     choice=true, tristate=true, select=true, slider=true, color=true, field=true }
+-- Standard binding layer: the control types and composite components a `path`
+-- node may declare. Records, choice groups and custom content stay on owners.
+local PathControlTypes = { switch=true, checkbox=true, card=true, input=true, select=true, slider=true, color=true }
+local RowControlTypes = { switch=true, input=true, select=true, slider=true, color=true }
+local SelectMedia = { font=true, sound=true, statusbar=true, border=true, background=true }
+local StandardComponents = { fontgroup=true, icongroup=true, timerbargroup=true, anchorgroup=true,
+    soundgroup=true, widgetlayout=true, modulecommonsettings=true, glow_settings=true, texturegroup=true }
+local PathControlFields = "controlType label description options optionsSource media multiple search min max step inputWidthPercent"
+local PathOnlyFields = { "label", "description", "options", "optionsSource", "media", "multiple", "search",
+    "min", "max", "step", "inputWidthPercent", "component", "opts", "optionsRef" }
 local AdapterMethods = { "mount", "update", "measure", "layout", "setEnabled", "setVisible", "release" }
 local ControlMethods = { "mount", "release" }
 local Build, MountNode, ReleaseNode, RefreshNode, LayoutNode
@@ -135,6 +148,76 @@ local function SchemaReference(owner, bucket, name, path, id)
     return true
 end
 
+local function Finite(value)
+    return type(value) == "number" and value == value and math.abs(value) < math.huge
+end
+
+-- path/clickKey nodes write through owner.binding = { moduleKey, config }.
+local function SchemaBinding(owner, path, id)
+    if owner == nil then return true end
+    local binding = rawget(owner, "binding")
+    if type(binding) ~= "table" or not Name(rawget(binding, "moduleKey")) or type(rawget(binding, "config")) ~= "table" then
+        return Issue(path, "path binding requires owner.binding { moduleKey, config }", id)
+    end
+    return true
+end
+
+-- Shared by declaration nodes and owner-built standard controls.
+local function SchemaPathControl(spec, path, id)
+    local function fail(field, message) return Issue(path .. "." .. field, message, id) end
+    local kind = spec.controlType
+    if not PathControlTypes[kind] then return fail("controlType", "path control requires switch/checkbox/card/input/select/slider/color") end
+    if spec.mode ~= nil then return fail("mode", "mode belongs to owner choice controls") end
+    for _, field in ipairs({ "label", "description" }) do
+        if spec[field] ~= nil and type(spec[field]) ~= "string" then return fail(field, "expected string") end
+    end
+    if (kind == "switch" or kind == "checkbox" or kind == "card") and type(spec.label) ~= "string" then
+        return fail("label", "label required")
+    end
+    if kind ~= "select" and (spec.options ~= nil or spec.optionsSource ~= nil or spec.media ~= nil
+        or spec.multiple ~= nil or spec.search ~= nil) then return fail("options", "options require select") end
+    if kind ~= "slider" and (spec.min ~= nil or spec.max ~= nil or spec.step ~= nil) then return fail("min", "bounds require slider") end
+    if kind ~= "input" and spec.inputWidthPercent ~= nil then return fail("inputWidthPercent", "requires input") end
+    if kind == "select" then
+        local sources = (spec.options ~= nil and 1 or 0) + (spec.optionsSource ~= nil and 1 or 0) + (spec.media ~= nil and 1 or 0)
+        if sources ~= 1 then return fail("options", "select requires exactly one of options, optionsSource, media") end
+        if spec.multiple ~= nil and type(spec.multiple) ~= "boolean" then return fail("multiple", "expected boolean") end
+        if spec.search ~= nil and type(spec.search) ~= "boolean" then return fail("search", "expected boolean") end
+        if spec.media ~= nil and (not SelectMedia[spec.media] or spec.multiple ~= nil) then
+            return fail("media", "media requires a single font/sound/statusbar/border/background select")
+        end
+        if spec.optionsSource ~= nil and (type(spec.optionsSource) ~= "string"
+            or not spec.optionsSource:match("^[%a_][%w_%.]*$")) then
+            return fail("optionsSource", "expected a global provider name")
+        end
+        if spec.options ~= nil then
+            local ok, issue = SchemaArray(spec.options, path .. ".options", id)
+            if not ok then return false, issue end
+            local seen = {}
+            for i, option in ipairs(spec.options) do
+                local at = path .. ".options[" .. i .. "]"
+                ok, issue = SchemaKeys(option, "value label", at, id)
+                if not ok then return false, issue end
+                if type(option.label) ~= "string" then return Issue(at .. ".label", "expected string", id) end
+                local valueType = type(option.value)
+                if valueType ~= "string" and valueType ~= "boolean" and not Finite(option.value) then
+                    return Issue(at .. ".value", "expected string, number or boolean", id)
+                end
+                if seen[option.value] then return Issue(at .. ".value", "duplicate option value", id) end
+                seen[option.value] = true
+            end
+        end
+    elseif kind == "slider" then
+        for _, field in ipairs({ "min", "max", "step" }) do
+            if spec[field] ~= nil and not Finite(spec[field]) then return fail(field, "expected a finite number") end
+        end
+        if (spec.min or 0) > (spec.max or 100) or (spec.step or 1) <= 0 then return fail("step", "invalid slider bounds or step") end
+    elseif kind == "input" and spec.inputWidthPercent ~= nil and not Number(spec.inputWidthPercent) then
+        return fail("inputWidthPercent", "expected a positive finite number")
+    end
+    return true
+end
+
 local function ValidateNode(node, owner, ids, depth, location, columnCount, path, overflow)
     if type(node) ~= "table" or not Fields[node.kind] then return Issue(path, "unknown node kind") end
     local kind, id = node.kind, node.id
@@ -177,8 +260,34 @@ local function ValidateNode(node, owner, ids, depth, location, columnCount, path
             if node.collapsed and not node.collapsible then return fail("collapsed", "collapsed requires collapsible") end
             if node.help ~= nil and not Name(node.help) then return fail("help", "expected non-empty help") end
         end
+    elseif (kind == "control" or kind == "component") and node.path ~= nil then
+        if node.ref ~= nil then return fail("ref", "use ref or path") end
+        if not Name(node.path) then return fail("path", "expected a non-empty path") end
+        if kind == "control" then
+            ok, issue = SchemaPathControl(node, path, id)
+            if not ok then return false, issue end
+        else
+            if not StandardComponents[node.component] then return fail("component", "unknown standard component") end
+            if node.label ~= nil and type(node.label) ~= "string" then return fail("label", "expected string") end
+            if node.opts ~= nil and type(node.opts) ~= "table" then return fail("opts", "expected a plain table") end
+            -- optionsRef names owner.options[ref]: runtime options (callbacks) merged over opts.
+            if node.optionsRef ~= nil then
+                if not Name(node.optionsRef) then return fail("optionsRef", "expected a named reference") end
+                if owner then
+                    local options = rawget(owner, "options")
+                    if type(options) ~= "table" or type(rawget(options, node.optionsRef)) ~= "table" then
+                        return fail("optionsRef", "missing options." .. node.optionsRef)
+                    end
+                end
+            end
+        end
+        ok, issue = SchemaBinding(owner, path .. ".path", id)
+        if not ok then return false, issue end
     elseif kind == "control" or kind == "component" then
         if not Name(node.ref) then return fail("ref", "reference required") end
+        for _, field in ipairs(PathOnlyFields) do
+            if node[field] ~= nil then return fail(field, "requires path") end
+        end
         if kind == "control" and not ControlTypes[node.controlType] then return fail("controlType", "invalid control type") end
         if node.mode ~= nil and (node.controlType ~= "choice" or (node.mode ~= "single" and node.mode ~= "multiple")) then return fail("mode", "invalid choice mode") end
         if owner then
@@ -194,7 +303,13 @@ local function ValidateNode(node, owner, ids, depth, location, columnCount, path
         end
     elseif kind == "button" then
         if type(node.text) ~= "string" then return fail("text", "text required") end
-        ok, issue = SchemaReference(owner, "actions", node.action, path .. ".action", id)
+        if (node.action ~= nil) == (node.clickKey ~= nil) then return fail("action", "use action or clickKey") end
+        if node.clickKey ~= nil then
+            if not Name(node.clickKey) then return fail("clickKey", "expected a non-empty key") end
+            ok, issue = SchemaBinding(owner, path .. ".clickKey", id)
+        else
+            ok, issue = SchemaReference(owner, "actions", node.action, path .. ".action", id)
+        end
         if not ok then return false, issue end
         if node.presentation ~= nil and node.presentation ~= "primary" and node.presentation ~= "secondary" and node.presentation ~= "danger" then return fail("presentation", "invalid button presentation") end
     elseif kind == "text" or kind == "hint" then
@@ -312,10 +427,12 @@ local function Acquire(parent)
     return host
 end
 
+-- Settings GUI lands on whole physical pixels (UI scale is usually fractional);
+-- otherwise nine-slice surfaces such as switch knobs show their seams.
 local function Place(frame, parent, x, y, width, height)
     frame:ClearAllPoints()
-    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", x, -y)
-    frame:SetSize(math.max(1, width), math.max(1, height))
+    PixelUtil.SetPoint(frame, "TOPLEFT", parent, "TOPLEFT", x, -y, 0, 0)
+    PixelUtil.SetSize(frame, math.max(1, width), math.max(1, height), 1, 1)
 end
 
 local function Records(node)
@@ -413,6 +530,12 @@ local function Context(node)
         node.session:Invalidate()
         return true
     end
+    -- After a committed write: re-read every bound value and re-evaluate predicates.
+    function ctx:RefreshPage()
+        if not valid() then return false end
+        node.session:Refresh()
+        return true
+    end
     -- 当前分配宽度（最近一次 measure 收到的 width）；尚未布局时为 nil。
     function ctx:GetRequestedWidth() return valid() and node.width or nil end
     return ctx
@@ -478,6 +601,390 @@ local function ControlAdapter(provider)
     return setmetatable({}, { __index=function(_, method) return rawget(provider, method) or ControlDefaults[method] end })
 end
 
+-- =========================================================
+-- Standard binding layer
+-- =========================================================
+-- A binding addresses one value under a module DB root by a dot path; numeric
+-- segments are numeric keys. Writes create missing intermediate tables, skip
+-- equal values and notify through the single ValueController entry.
+local Binding = {}
+Binding.__index = Binding
+
+function Binding:Read()
+    local value = self.root
+    for _, key in ipairs(self.segments) do
+        if type(value) ~= "table" then return nil end
+        value = value[key]
+    end
+    return value
+end
+
+function Binding:Parent(create)
+    local parent = self.root
+    for i = 1, #self.segments - 1 do
+        local key = self.segments[i]
+        local child = parent[key]
+        if child == nil and create then
+            child = {}
+            parent[key] = child
+        end
+        if type(child) ~= "table" then
+            Check(child == nil, self.path .. ": segment " .. tostring(key) .. " is not a table")
+            return nil
+        end
+        parent = child
+    end
+    return parent
+end
+
+function Binding:Key()
+    return self.segments[#self.segments]
+end
+
+function Binding:Notify(phase)
+    UI:NotifyModuleValueChanged(self.moduleKey, self.path, phase == "live" and "changing" or "committed")
+end
+
+-- phase: "live" (dragging), "commit", or "silent" (no notification).
+function Binding:Write(value, phase)
+    local parent, key = self:Parent(true), self:Key()
+    if parent[key] == value then return false end
+    parent[key] = value
+    if phase ~= "silent" then self:Notify(phase) end
+    return true
+end
+
+local function CreateBinding(moduleKey, root, path)
+    Check(Name(moduleKey), "binding requires moduleKey")
+    Check(type(root) == "table", "binding requires a root table")
+    Check(Name(path), "binding requires a path")
+    local segments = {}
+    for part in path:gmatch("[^%.]+") do segments[#segments + 1] = tonumber(part) or part end
+    Check(#segments > 0, "binding requires a path")
+    return setmetatable({ moduleKey=moduleKey, root=root, path=path, segments=segments,
+        parentPath=path:match("^(.*)%.[^%.]+$") }, Binding)
+end
+
+local function ReleaseBoundWidget(widget)
+    UI:RestoreSettingsListControl(widget)
+    if widget._exGridOwnedControls then
+        for index = #widget._exGridOwnedControls, 1, -1 do
+            Factory:ReleaseGridWidget(widget._exGridOwnedControls[index])
+            widget._exGridOwnedControls[index] = nil
+        end
+        widget._exGridOwnedControls = nil
+    end
+    if widget._isCompositeHost then
+        Factory:ReleaseCompositeHost(widget)
+    elseif widget._fromPool then
+        Factory:Release(widget._fromPool, widget)
+    else
+        widget:Hide()
+        widget:SetParent(nil)
+    end
+end
+
+-- optionsSource names a global provider (resolved at every mount). A table result
+-- is used as-is; a string result keeps the "value:display,..." inline form.
+local function SelectItems(spec)
+    if spec.options then
+        local items = {}
+        for i, option in ipairs(spec.options) do items[i] = { option.label, option.value } end
+        return items
+    end
+    local provider = _G
+    for part in spec.optionsSource:gmatch("[^%.]+") do
+        provider = type(provider) == "table" and provider[part] or nil
+    end
+    Check(type(provider) == "function", "optionsSource is not a function: " .. spec.optionsSource)
+    local data = provider()
+    if type(data) == "table" then return data end
+    local items = {}
+    for entry in tostring(data or ""):gmatch("([^,]+)") do
+        local value, display = entry:match("^([^:]+):(.+)$")
+        items[#items + 1] = (value and not spec.multiple) and { display, value } or entry
+    end
+    return items
+end
+
+local function IsOrdinaryRowControl(widget)
+    local kind = widget._gridType
+    if kind == "GridInput" then return widget.IsMultiLine and not widget:IsMultiLine() end
+    return kind == "GridDropdown" or kind == "GridLSMDropdown" or kind == "GridMultiselect"
+        or kind == "GridColorButton" or kind == "GridSlider"
+end
+
+-- bindingFor(context) returns the binding of one mounted control.  A labelled
+-- switch/input/select/slider/color is presented as a settings row: label and
+-- description on the left, the control on the right, a divider between rows.
+local function StandardControl(spec, bindingFor)
+    local states = setmetatable({}, { __mode = "k" })
+    local kind = spec.controlType
+    local adapter = {}
+    function adapter.mount(host, context)
+        local binding = bindingFor(context)
+        local function Commit(value)
+            binding:Write(value, "commit")
+            context:RefreshPage()
+        end
+        local width, value, widget = GM.size.controlDefaultWidth, binding:Read(), nil
+        local search = { search = spec.search }
+        if kind == "switch" or kind == "checkbox" or kind == "card" then
+            widget = UI:CreateCheckbox(host, spec.label, value == true, function(checked) Commit(checked == true) end)
+        elseif kind == "slider" then
+            widget = UI:CreateSlider(host, width, spec.label or "", spec.min or 0, spec.max or 100, value or 0,
+                spec.step or 1, nil, {
+                    onLive = function(live) binding:Write(live, "live") end,
+                    onCommit = Commit,
+                })
+        elseif kind == "input" then
+            widget = UI:CreateEditBox(host, value or "", width, GM.size.controlHeight, spec.label,
+                { onEnter = Commit, onEditFocusLost = Commit })
+        elseif kind == "color" then
+            widget = UI:CreateColorButton(host, spec.label or "", binding:Parent(false) or binding.root, binding:Key(), true,
+                function()
+                    binding:Notify("committed")
+                    context:RefreshPage()
+                end)
+        elseif spec.media == "font" then
+            widget = UI:CreateLSMDropdown(host, "font", width, spec.label, value, Commit, search)
+        elseif spec.media == "sound" then
+            widget = UI:CreateLSMSoundDropdown(host, width, spec.label, value, Commit, search)
+        elseif spec.media then
+            widget = UI:CreateLSMTextureDropdown(host, spec.media, width, spec.label, value, Commit, search)
+        elseif spec.multiple then
+            if type(value) ~= "table" then
+                value = {}
+                binding:Write(value, "silent")
+            end
+            widget = UI:CreateMultiSelectDropdown(host, width, spec.label, SelectItems(spec), value, function()
+                binding:Notify("committed")
+                context:RefreshPage()
+            end, search)
+        else
+            widget = UI:CreateDropdown(host, width, spec.label, SelectItems(spec), value, Commit, search)
+        end
+        local state = { binding = binding, host = host, context = context }
+        if spec.label and RowControlTypes[kind] then
+            local ordinary = kind ~= "switch" and IsOrdinaryRowControl(widget)
+            state.ordinary = ordinary
+            state.valuePosition = kind == "slider" and "right" or nil
+            state.row = UI:CreateSettingsRow(host, {
+                label = spec.label, description = spec.description,
+                controlKind = ordinary and "ordinary" or nil,
+                controlMinWidth = ordinary and (kind == "slider" and GM.size.settingsRowSliderMinWidth
+                    or GM.size.settingsRowControlMinWidth) or nil,
+                inputWidthPercent = spec.inputWidthPercent,
+            })
+            UI:PrepareSettingsListControl(widget, {
+                ordinaryControl = ordinary, hideLabel = true,
+                presentation = kind == "switch" and "switch" or nil,
+                valuePosition = state.valuePosition,
+            })
+            context._exSettingsRow = true
+        end
+        states[widget] = state
+        return widget
+    end
+    function adapter.update(widget)
+        local value = states[widget].binding:Read()
+        if kind == "switch" or kind == "checkbox" or kind == "card" then
+            widget:SetChecked(value == true)
+            UI:ApplyControlAppearance(widget)
+        elseif kind == "slider" then
+            if tonumber(value) then widget:SetEXUIValue(tonumber(value), "silent") end
+        elseif kind == "input" then
+            if not widget:HasFocus() then widget:SetText(value == nil and "" or tostring(value)) end
+        elseif kind == "color" then
+            widget:UpdateColor()
+        elseif not spec.media and not spec.multiple then
+            UI:SetDropdownValue(widget, value)
+        end
+    end
+    function adapter.measure(widget, context, width)
+        local state = states[widget]
+        local row = state.row
+        if not row then
+            widget:SetWidth(width)
+            return kind == "slider" and widget:GetHeight() or (spec.height or GM.size.controlHeight)
+        end
+        UI:SetSettingsRowLast(row, context._exRowLast ~= false)
+        local height, x, y, controlWidth = UI:UpdateSettingsRowLayout(row, width, math.max(1, widget:GetHeight()), nil)
+        widget:SetWidth(controlWidth)
+        if state.ordinary or state.valuePosition then UI:UpdateSettingsListControlLayout(widget, controlWidth) end
+        height, x, y = UI:UpdateSettingsRowLayout(row, width, math.max(1, widget:GetHeight()), nil)
+        state.x, state.y = x, y
+        return height
+    end
+    function adapter.layout(widget, context, width, height)
+        local state = states[widget]
+        if not state.row then
+            Place(widget, state.host, 0, 0, width, height)
+            return
+        end
+        state.row:ClearAllPoints()
+        state.row:SetPoint("TOPLEFT", state.host, "TOPLEFT", 0, 0)
+        widget:ClearAllPoints()
+        PixelUtil.SetPoint(widget, "TOPLEFT", state.row, "TOPLEFT", state.x, -state.y, 0, 0)
+    end
+    function adapter.release(widget, context)
+        local state = states[widget]
+        states[widget] = nil
+        context._exSettingsRow, context._exRowLast = nil, nil
+        ReleaseBoundWidget(widget)
+        if state and state.row then state.row:Release() end
+    end
+    adapter.setEnabled, adapter.setVisible = ControlDefaults.setEnabled, ControlDefaults.setVisible
+    return adapter
+end
+
+local DEFAULT_FONT_GROUP = { font = "Friz Quadrata TT", size = 14, r = 1, g = 1, b = 1, a = 1,
+    outline = "", shadow = false, x = 0, y = 0 }
+local DEFAULT_TIMER_BAR_GROUP = { width = 240, height = 24, texture = "Clean",
+    barColorR = 1, barColorG = 0.7, barColorB = 0, barColorA = 1,
+    barBgColorR = 0, barBgColorG = 0, barBgColorB = 0, barBgColorA = 0.5,
+    showIcon = true, iconSide = "LEFT", iconWidth = 24, iconHeight = 24, iconOffsetX = -5, iconOffsetY = 0 }
+
+local function CopyTable(source)
+    local copy = {}
+    for key, value in pairs(source or {}) do copy[key] = value end
+    return copy
+end
+
+-- Composite groups bind exactly as the settings-section page did: `path` is the
+-- section path plus the component key; opts.bindRoot / opts.bindValue keep
+-- their meaning. Components inside a card render body-only.
+local function StandardComponent(spec, bindingFor, runtimeOpts)
+    local states = setmetatable({}, { __mode = "k" })
+    local kind = spec.component
+    local adapter = {}
+    function adapter.mount(host, context)
+        local binding = bindingFor(context)
+        local opts = CopyTable(spec.opts)
+        for key, value in pairs(runtimeOpts or {}) do opts[key] = value end
+        if opts.bodyOnly == nil then opts.bodyOnly = true end
+        if kind == "modulecommonsettings" then
+            opts.presentation = opts.presentation or "settings-list"
+            opts._exTypedSettings = true
+        end
+        local key, parentPath, root, fullPath = binding:Key(), binding.parentPath, binding.root, binding.path
+        local scoped = parentPath and binding:Parent(false) or root
+        local width = math.max(GM.size.controlDefaultWidth, host:GetWidth())
+        local function Options(pathPrefix)
+            local result = CopyTable(opts)
+            result._exWriteContext = { moduleKey = binding.moduleKey, pathPrefix = pathPrefix }
+            return result
+        end
+        local function Notifier(notifyPath)
+            return function()
+                UI:NotifyModuleValueChanged(binding.moduleKey, notifyPath, "committed")
+                context:RefreshPage()
+            end
+        end
+        local widget
+        if kind == "fontgroup" then
+            local value = binding:Read()
+            if not value then
+                value = CopyTable(DEFAULT_FONT_GROUP)
+                binding:Write(value, "commit")
+            end
+            widget = UI:CreateFontGroup(host, width, spec.label, value, Notifier(fullPath), Options(fullPath))
+        elseif kind == "glow_settings" then
+            widget = UI:CreateGlowSettings(host, width, spec.label, scoped, key, Notifier(fullPath), Options(fullPath))
+        elseif kind == "widgetlayout" then
+            widget = UI:CreateWidgetLayoutGroup(host, width, spec.label, scoped, key, Notifier(fullPath), Options(fullPath))
+        elseif kind == "soundgroup" then
+            widget = UI:CreateSoundGroup(host, width, spec.label, scoped, key, Notifier(fullPath), Options(fullPath))
+        elseif kind == "modulecommonsettings" then
+            local bindKey = opts.bindRoot ~= true and key or nil
+            local commonPath = bindKey and fullPath or (parentPath or "")
+            widget = UI:CreateModuleCommonSettingsGroup(host, width, spec.label, scoped, bindKey,
+                Notifier(commonPath), Options(commonPath))
+        elseif kind == "anchorgroup" then
+            local bindKey = opts.bindRoot ~= true and key or nil
+            local anchorPath = fullPath
+            if not bindKey then
+                local targetKey = (type(opts.attachTargetKey) == "string" and opts.attachTargetKey ~= "")
+                    and opts.attachTargetKey or "customAttachTarget"
+                anchorPath = parentPath and (parentPath .. "." .. targetKey) or targetKey
+            end
+            widget = UI:CreateAnchorGroup(host, width, spec.label, scoped, bindKey, Notifier(anchorPath), Options(anchorPath))
+        elseif kind == "texturegroup" then
+            local bindValue = opts.bindValue == true
+            widget = UI:CreateTextureGroup(host, width, spec.label, bindValue and binding:Read() or scoped,
+                not bindValue and key or nil, Notifier(fullPath), Options(fullPath))
+        elseif kind == "icongroup" then
+            local bindRoot, bindValue = opts.bindRoot == true, opts.bindValue == true
+            local source = bindValue and binding:Read() or (bindRoot and root or scoped)
+            local bindKey = (not bindRoot and not bindValue) and key or nil
+            local iconPath = (bindValue or bindKey) and fullPath or (parentPath or "")
+            widget = UI:CreateIconGroup(host, width, spec.label, source, bindKey, Notifier(iconPath), Options(iconPath))
+        else -- timerbargroup
+            local bindRoot = opts.bindRoot == true
+            local value = bindRoot and root or binding:Read()
+            if not value then
+                value = CopyTable(DEFAULT_TIMER_BAR_GROUP)
+                binding:Write(value, "commit")
+            end
+            local timerPath = bindRoot and (parentPath or "") or fullPath
+            widget = UI:CreateTimerBarGroup(host, width, spec.label, value, nil, Notifier(timerPath), Options(timerPath))
+        end
+        states[widget] = { host = host, opts = opts, scoped = scoped,
+            item = { type = kind, key = key, label = spec.label, opts = opts } }
+        return widget
+    end
+    function adapter.update(widget)
+        UI:RefreshCompositeGroupFromDB(widget)
+    end
+    function adapter.measure(widget, context, width)
+        local state = states[widget]
+        local measured = UI:MeasureGridComponent(kind, width, state.opts, state.scoped, state.item)
+        if type(measured) == "table" then
+            local preferred = tonumber(measured.preferredHeight or measured.height)
+            local minimum = tonumber(measured.minHeight)
+            measured = preferred and minimum and math.max(preferred, minimum) or preferred or minimum
+        end
+        return tonumber(measured) or widget:GetHeight()
+    end
+    function adapter.layout(widget, context, width, height)
+        Place(widget, states[widget].host, 0, 0, width, height)
+        widget._exGridWidth = width
+        UI:LayoutCompositeGroup(widget, width, height)
+    end
+    function adapter.release(widget)
+        states[widget] = nil
+        ReleaseBoundWidget(widget)
+    end
+    adapter.setEnabled, adapter.setVisible = ControlDefaults.setEnabled, ControlDefaults.setVisible
+    return adapter
+end
+
+local PathControlSpecFields = PathControlFields .. " height"
+
+function UI:CreateSettingsV2Binding(moduleKey, root, path)
+    return CreateBinding(moduleKey, root, path)
+end
+
+-- Owner helpers: the same standard controls for records and other owner data.
+-- bindingFor(context) returns UI:CreateSettingsV2Binding(...) for that mount.
+function UI:CreateSettingsV2Control(spec, bindingFor)
+    local ok, issue = SchemaKeys(spec, PathControlSpecFields, "control")
+    if ok then ok, issue = SchemaPathControl(spec, "control") end
+    Check(ok, issue and (issue.path .. ": " .. issue.message))
+    Check(type(bindingFor) == "function", "CreateSettingsV2Control requires bindingFor")
+    return StandardControl(DeclarationCopy(spec, {}), bindingFor)
+end
+
+-- runtimeOpts (optional) may carry callbacks; it is merged over spec.opts at mount.
+function UI:CreateSettingsV2Component(spec, bindingFor, runtimeOpts)
+    local ok, issue = SchemaKeys(spec, "component label opts", "component")
+    Check(ok, issue and (issue.path .. ": " .. issue.message))
+    Check(StandardComponents[spec.component], "unknown standard component " .. tostring(spec.component))
+    Check(type(bindingFor) == "function", "CreateSettingsV2Component requires bindingFor")
+    Check(runtimeOpts == nil or type(runtimeOpts) == "table", "runtimeOpts must be a table")
+    return StandardComponent(DeclarationCopy(spec, {}), bindingFor, runtimeOpts)
+end
+
 Build = function(session, spec, parentFrame, scope, parent)
     local node = { session=session, spec=spec, scope=scope, parent=parent, alive=true, generation=1, children={} }
     local list = parent and parent.children or session.nodes
@@ -520,8 +1027,8 @@ MountNode = function(node, parentFrame)
         for i = 1, node.frame._exSettingsCardHeader:GetNumPoints() do
             node.headerPoints[i] = { node.frame._exSettingsCardHeader:GetPoint(i) }
         end
-        node.body:SetPoint("TOPLEFT", PAD, -PAD)
-        node.body:SetPoint("TOPRIGHT", -PAD, -PAD)
+        PixelUtil.SetPoint(node.body, "TOPLEFT", node.frame:GetBody(), "TOPLEFT", PAD, -PAD, 0, 0)
+        PixelUtil.SetPoint(node.body, "TOPRIGHT", node.frame:GetBody(), "TOPRIGHT", -PAD, -PAD, 0, 0)
         if spec.collapsible then
             node.toggleFont = { node.frame._exSettingsCardToggle._exGlyph:GetFont() }
             node.toggleSize = { node.frame._exSettingsCardToggle:GetSize() }
@@ -545,8 +1052,15 @@ MountNode = function(node, parentFrame)
         node.separator:Show()
     end
     if spec.kind == "control" or spec.kind == "component" then
-        local provider = (spec.kind == "control" and session.owner.controls or session.owner.components)[spec.ref]
-        node.adapter = spec.kind == "control" and ControlAdapter(provider) or provider
+        if spec.path then
+            local binding = session.owner.binding
+            local function BindingFor() return CreateBinding(binding.moduleKey, binding.config, spec.path) end
+            node.adapter = spec.kind == "control" and StandardControl(spec, BindingFor)
+                or StandardComponent(spec, BindingFor, spec.optionsRef and session.owner.options[spec.optionsRef])
+        else
+            local provider = (spec.kind == "control" and session.owner.controls or session.owner.components)[spec.ref]
+            node.adapter = spec.kind == "control" and ControlAdapter(provider) or provider
+        end
         node.mountPending = true
         node.instance = node.adapter.mount(node.frame, node.context, spec)
         Check(node.instance ~= nil, spec.id .. ": mount must return instance")
@@ -566,11 +1080,20 @@ MountNode = function(node, parentFrame)
             end
         end
     elseif spec.kind == "button" then
+        local onClick
+        if spec.clickKey then
+            -- Same State contract the settings-section buttons published.
+            local moduleKey = session.owner.binding.moduleKey
+            onClick = function()
+                _G.ExwindTools:UpdateState(moduleKey .. ".ButtonClicked",
+                    { key = spec.clickKey, fullPath = spec.clickKey, ts = GetTime() })
+            end
+        else
+            onClick = function(_, mouseButton) session.owner.actions[spec.action](node.context, mouseButton) end
+        end
         node.button = UI:CreateButton(node.frame, spec.width or GM.size.controlDefaultWidth,
             spec.height or GM.size.controlHeight, spec.text,
-            node.context:Guard(function(_, mouseButton)
-                session.owner.actions[spec.action](node.context, mouseButton)
-            end), { variant=spec.presentation or "secondary", compact=true })
+            node.context:Guard(onClick), { variant=spec.presentation or "secondary", compact=true })
     elseif spec.kind == "text" or spec.kind == "hint" or spec.kind == "group" then
         if not node.frame._v2Label then
             node.frame._v2Label = UI:CreateVisualFontString(node.frame, _G.EXFONTFRAME, "GameFontHighlight")
@@ -776,6 +1299,15 @@ local function Natural(node)
                 + ((widget.choiceStyle == "segmented" or widget.choiceStyle == "connected") and 4 or 0))
         end
     end
+    -- Bound card checkboxes are as wide as their title (same metrics as the settings list);
+    -- owner cards keep the width their owner gave them.
+    if kind == "control" and node.spec.controlType == "card" and node.spec.path then
+        local card = node.instance.checkbox._exSettingsCardSurface
+        if card then
+            return 14 + (node.instance._exSettingsCardIcon and 24 or 0)
+                + math.ceil(card.Title:GetUnboundedStringWidth()) + 30
+        end
+    end
     -- The owner's original control width is its natural size. Explicit DSL
     -- widths still take precedence above; do not force every control to 160.
     if node.adapter then
@@ -833,22 +1365,26 @@ local function Grow(node)
     return 0
 end
 
+local function IsSettingsRow(node)
+    return node ~= nil and node.context ~= nil and node.context._exSettingsRow == true
+end
+
 local function Stack(node, width, columns, offset)
-    local y, any = offset or 0, false
-    local lastRepeatRow
-    if node.spec.kind == "repeat" then
-        for index, child in ipairs(node.children) do
-            if child.visible then lastRepeatRow = index end
-        end
+    local y = offset or 0
+    local visible = {}
+    for _, child in ipairs(node.children) do
+        if child.visible then visible[#visible + 1] = child end
     end
-    for index, child in ipairs(node.children) do
-        if child.visible then
-            child.hideTrailingSeparator = index == lastRepeatRow
-            if any then y = y + GAP end
-            local height = LayoutNode(child, width, columns)
-            Place(child.frame, node.body, 0, y, width, height)
-            y, any = y + height, true
-        end
+    for index, child in ipairs(visible) do
+        local previous, nextChild = visible[index - 1], visible[index + 1]
+        child.hideTrailingSeparator = node.spec.kind == "repeat" and nextChild == nil
+        -- Consecutive settings rows form one list: no gap, divider only between rows.
+        local row = IsSettingsRow(child)
+        if row then child.context._exRowLast = not IsSettingsRow(nextChild) end
+        if previous and not (row and IsSettingsRow(previous)) then y = y + GAP end
+        local height = LayoutNode(child, width, columns)
+        Place(child.frame, node.body, 0, y, width, height)
+        y = y + height
     end
     return y
 end
@@ -1007,8 +1543,8 @@ LayoutNode = function(node, width, columns)
         card._exSettingsCardHeader:SetShown(hasHeader)
         card._exSettingsCardHeader:SetHeight(math.max(1, headerHeight))
         card:GetBody():ClearAllPoints()
-        card:GetBody():SetPoint("TOPLEFT", card, "TOPLEFT", 0, -headerHeight)
-        card:GetBody():SetPoint("TOPRIGHT", card, "TOPRIGHT", 0, -headerHeight)
+        PixelUtil.SetPoint(card:GetBody(), "TOPLEFT", card, "TOPLEFT", 0, -headerHeight, 0, 0)
+        PixelUtil.SetPoint(card:GetBody(), "TOPRIGHT", card, "TOPRIGHT", 0, -headerHeight, 0, 0)
         node.frame:SetContentHeight(height + PAD * 2)
         if node.spec.titlePosition == "bottom" then
             card:GetBody():ClearAllPoints()
@@ -1311,6 +1847,28 @@ local function ArrangeRibbon(session)
     session.ribbonMetrics = { availableWidth=budget, barWidth=barWidth, barHeight=height, totalWidth=totalWidth,
         overflowCount=overflow, overflowWidth=overflow > 0 and overflowWidth or 0, overflowHeight=overflowHeight }
     return totalWidth, height
+end
+
+-- Mounted-node lookup for page services (preview focus, style presets). Repeat
+-- templates share one id; the first mounted record wins.
+function Session:ForEachNode(callback)
+    local function Walk(nodes)
+        for _, node in ipairs(nodes) do
+            if node.alive and not node.deferred then
+                if callback(node) == true then return true end
+                if Walk(node.children) then return true end
+            end
+        end
+    end
+    if self.alive then Walk(self.nodes) end
+end
+
+function Session:FindNode(id)
+    local found
+    self:ForEachNode(function(node)
+        if node.spec.id == id then found = node; return true end
+    end)
+    return found
 end
 
 function Session:GetHeight() return self.height or 0 end

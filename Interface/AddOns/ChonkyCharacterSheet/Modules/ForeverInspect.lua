@@ -120,8 +120,7 @@ local function initclickframe()
     btnfont1:SetPoint("RIGHT", btn, "LEFT", -3 , 2)
     btnfont1:SetText(MOUNT_JOURNAL_PLAYER)
     btnfont1:SetWordWrap(true)
-   
-    --btnfont1:SetPoint("BOTTOM", btn, "TOP", -3 ,0)
+
 	if option("showfontshadow") == true then
 		btnfont1:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
 		btnfont1:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
@@ -145,13 +144,6 @@ local function initializeinspectframe(optupdate)
     InspectFrame:SetScale(option("sheetscale_inspect") or 1)
     InspectFrame:SetHeight(479+(7*option("vpad_inspect"))) -- Do not allow the frame to get any smaller than the default bliz frame
     InspectFrame:SetWidth(617)
-
-	if not InspectFrame.ccshooked then
-		-- This may be used if I need to in the future
-		--hooksecurefunc(InspectFrame, "Show", function() print("OPEN") end)
-		--hooksecurefunc(InspectFrame, "Hide", function() print("CLOSE") end)
-		InspectFrame.ccshooked = true
-	end
 	
     local bcolor = CCS.NormalizeColor(CCS.StyleColor.border)	
     local Bgoffset = 209 + (610 - 540)
@@ -178,12 +170,6 @@ local function initializeinspectframe(optupdate)
     InspectFrameCloseButton:SetPoint("TOPRIGHT", InspectFrameBg, "TOPRIGHT", -10, -10)
     InspectFrameCloseButton:SetSize(32, 32)
     InspectFrameCloseButton:SetScale(.5)
-    
-    if InspectPVPFrame then
-        InspectPVPFrame.BG:SetPoint("BOTTOMRIGHT", InspectFrameBg, "BOTTOMRIGHT", -5, 30)
-        InspectPVPFrame.HonorLevel:SetPoint("TOP", InspectPVPFrame, "TOP", 0, -70)
-        InspectPVPFrame.HKs:SetPoint("TOP", InspectPVPFrame, "TOP", 0, -100)
-    end
     
     local charbg = _G["InspectFrameBgbg"] or CreateFrame("Frame", "InspectFrameBgbg", InspectFrame, BackdropTemplateMixin and "BackdropTemplate")
     local charbgtex = _G["InspectFrameBgbgtex"] or charbg:CreateTexture("InspectFrameBgbgtex", "BACKGROUND", nil, 1)    
@@ -417,7 +403,7 @@ loopitems = function()
     end 
 
     -- Create Ilvl Frame and populate
-    local iLvl = CCS.GetUnitItemLevel(unit) 
+    local iLvl = CCS.GetUnitItemLevel(unit) -- Bliz doesn't have a function for getting this, so we calculate it
     local ilvlTxt = _G["InspectFrameilvlfs"] or _G["InspectPaperDollFrame"]:CreateFontString("InspectFrameilvlfs")
     local color = "ffffff"
 	
@@ -430,14 +416,9 @@ loopitems = function()
 		ilvlTxt:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
 	end
 		
-    if C_AddOns.IsAddOnLoaded("LoxxInterruptTracker") then
-		ilvlTxt:SetFont(option("fontname_inspect_ilvl") or CCS.fontname, 12, CCS.textoutline)
-		ilvlTxt:SetText("|cFFFFFF00Loxx Interrupt Tracker is Interfering with this addon.|r")
-		ilvlTxt:Show()
-	else
-		ilvlTxt:SetText("|cFF".. color .. format("%.2f", iLvl or "") .. "|r")
-		ilvlTxt:SetShown(option("showilvlinspect"))
-    end
+    ilvlTxt:SetText("|cFF".. color .. format("%.2f", iLvl or "") .. "|r")
+    ilvlTxt:SetShown(option("showilvlinspect"))
+
 	if not InspectFrame.ccsinitload then
 		initclickframe()
 		InspectFrame.ccsinitload = true
@@ -447,7 +428,7 @@ end
 -- Event handler for inspect sheet
 function CCS.ForeverInspectSheetEventHandler(event, ...)
 
-    -- Retail-only inspect frame updates
+    -- Inspect frame updates
     if CCS.CurrentVersion ~= CCS.FOREVER then return end
     if not InspectFrame or not option("show_inspect") then return end
 

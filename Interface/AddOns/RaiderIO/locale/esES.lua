@@ -735,6 +735,8 @@ L["RAID_BOSS_SOD_9"] = "Kel'Thuzad"
 L["RAID_BOSS_TOTFW_1"] = "El Cónclave del Viento"
 L["RAID_BOSS_TOTFW_2"] = "Al'Akir"
 --[[Translation missing --]]
+--[[ L["RAID_BOSS_UOK_1"] = ""--]] 
+--[[Translation missing --]]
 --[[ L["RAID_BOSS_VA_1"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_VA_2"] = ""--]] 
@@ -830,6 +832,8 @@ L["RAID_ToES"] = "Veranda de la Primavera Eterna - ToES"
 L["RAID_TOES"] = "Veranda de la Primavera Eterna"
 L["RAID_TOT"] = "Solio del Trueno - ToT"
 L["RAID_TOTFW"] = "Trono de los Cuatro Vientos - TOTFW"
+--[[Translation missing --]]
+--[[ L["RAID_UOK"] = ""--]] 
 L["RAID_VA"] = "Abismo Venenoso - VA"
 L["RAID_VS"] = "Aguja del Vacío - VS"
 L["RAID_VS_DR_MQD"] = "Aguja/Falla/Marcha - AV/FO/MQD"

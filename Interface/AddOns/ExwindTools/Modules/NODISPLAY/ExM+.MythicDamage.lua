@@ -126,7 +126,7 @@ end
 -- [v4.2] 注册与配置
 -- =========================================================
 
--- 1. Grid 布局
+-- 1. 设置页（V2）
 local function EX_RegisterLayout()
     local level = EX_DB.mythicLevel or 10
     local multi = EXMD and EXMD.GetCurrentMultiplier and EXMD.GetCurrentMultiplier() or 1
@@ -136,35 +136,33 @@ local function EX_RegisterLayout()
         level, seasonID, 1.76, multi
     )
 
-    -- [声明迁移边界：设置页] 仅把原设置控件改为 settings 声明。
-    -- 上方倍率/说明计算、key/type、按钮与刷新绑定禁止修改。
     local layout = {
-        version = 1,
-        sections = {
+        version = 2,
+        cards = {
             {
-                kind = "settings",
+                kind = "card",
                 id = "common",
                 title = L["通用设置"],
-                description = L["法术描述的数值会随着层数改变"],
-                items = {
-                    { key = "useColoredNumbers", type = "switch", label = L["数值染色"] },
-                    { key = "abbreviateNumbers", type = "switch", label = L["简写数字 (万/亿)"] },
-                    { key = "mythicLevel", type = "slider", label = L["模拟层数 (0-30)"], min = 0, max = 30 },
-                    { key = "damageColor", type = "color", label = L["伤害数值颜色"] },
+                children = {
+                    { id = "commonDescription", kind = "hint", text = L["法术描述的数值会随着层数改变"] },
+                    { id = "useColoredNumbers", kind = "control", controlType = "switch", path = "useColoredNumbers", label = L["数值染色"] },
+                    { id = "abbreviateNumbers", kind = "control", controlType = "switch", path = "abbreviateNumbers", label = L["简写数字 (万/亿)"] },
+                    { id = "mythicLevel", kind = "control", controlType = "slider", path = "mythicLevel", label = L["模拟层数 (0-30)"], min = 0, max = 30, step = 1 },
+                    { id = "damageColor", kind = "control", controlType = "color", path = "damageColor", label = L["伤害数值颜色"] },
                 },
             },
             {
-                kind = "settings",
+                kind = "card",
                 id = "tools",
                 title = L["工具"],
-                items = {
-                    { key = "openSpellInfo", type = "button", label = L["大米怪物法术"] },
+                children = {
+                    { id = "openSpellInfo", kind = "button", text = L["大米怪物法术"], clickKey = "openSpellInfo" },
                 },
             },
         },
     }
 
-    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, layout)
 end
 
 -- 3. 立即注册

@@ -188,8 +188,10 @@ local function RefreshCompositeControl(entry, db)
         local callback = control._onValueChanged
         control._onValueChanged = nil
         if control.Init and control._exCompositeMin ~= nil then
-            control:Init(tonumber(value) or control._exCompositeMin, control._exCompositeMin,
-                control._exCompositeMax, control._exCompositeSteps)
+            -- 存档缺字段时与构造时一致按 0 显示（夹到滑条范围内），不是显示最小值。
+            local minValue, maxValue = control._exCompositeMin, control._exCompositeMax
+            local fallback = math.max(minValue, maxValue and math.min(maxValue, 0) or 0)
+            control:Init(tonumber(value) or fallback, minValue, maxValue, control._exCompositeSteps)
         elseif control.SetValue then
             control:SetValue(tonumber(value) or 0)
         end

@@ -224,9 +224,20 @@ end
 -- 选择器写入锚点 DB 后，标准 AnchorGroup 内的输入框不在旧的 Grid.Widgets
 -- 顶层索引中；只对当前显示的同模块容器走 Grid 已有的组合控件回读入口。
 local function SyncActiveModuleContainer(moduleKey)
-    local Grid = _G.ExwindGrid
     local ui = ExwindTools.UI
-    if not Grid or not ui or ui.CurrentModule ~= moduleKey then
+    if not ui or ui.CurrentModule ~= moduleKey then
+        return
+    end
+
+    -- V2 页面：所有绑定控件统一从存档回读。
+    local page = ui:GetModulePage(moduleKey)
+    if page and not page.grid then
+        page:Refresh()
+        return
+    end
+
+    local Grid = _G.ExwindGrid
+    if not Grid then
         return
     end
 
@@ -330,6 +341,14 @@ end
 function AnchorController:SyncWidgets(keys)
     local db = self:GetDB()
     if not db then
+        return
+    end
+
+    -- V2 页面没有按 key 的旧控件索引；整页从存档回读即可覆盖这些字段。
+    local ui = ExwindTools.UI
+    local page = ui and ui.CurrentModule == self.options.moduleKey and ui:GetModulePage(self.options.moduleKey)
+    if page and not page.grid then
+        page:Refresh()
         return
     end
 

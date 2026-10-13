@@ -36,7 +36,7 @@ local DEFAULT_MSG = EXWIND_DEFAULTS.teleportShoutText
 -- [v4.2] 注册与配置
 -- =========================================================
 
--- Grid 布局
+-- 设置页（V2）
 local function BuildPreviewText()
     local fmt = EX_DB.teleportShoutText or DEFAULT_MSG
     local name = (EXDB.GetLocalizedInstanceNoteName and EXDB:GetLocalizedInstanceNoteName(658)) or L["萨隆矿坑"]
@@ -52,64 +52,66 @@ local function BuildPreviewText()
         L["预览:"] .. "|r\n|cffaaaaff[" .. L["队伍"] .. "] [" .. playerColored .. "]: " .. out .. "|r"
 end
 
-local function BuildPreviewSection()
-    return {
-        kind = "table", id = "preview", title = L["变量与预览"],
-        columns = { { title = "" } }, supportsAdd = false,
-        records = {
-            { cells = { { text = L["|cffffd100变量说明:|r\
-  |cff00ff00%link|r  = 法术链接\
-  |cff00ff00%name|r = 副本名称"] } } },
-            { cells = { { text = BuildPreviewText() } } },
-        },
-    }
+local settingsSession
+local function CreateSettingsOwner()
+    local owner = { texts = { preview = BuildPreviewText } }
+    function owner:AttachSession(session) settingsSession = session end
+    return owner
 end
 
 local function EX_RegisterLayout()
     local layout = {
-        version = 1,
-        sections = {
+        version = 2,
+        cards = {
             {
-                kind = "settings",
+                kind = "card",
                 id = "common",
                 title = L["喊话设置"],
-                items = {
+                children = {
                     {
-                        key = "shoutTiming", type = "select", label = L["喊话时机"],
+                        id = "shoutTiming", kind = "control", controlType = "select", path = "shoutTiming", label = L["喊话时机"],
                         options = {
                             { value = "施法开始", label = L["施法开始"] },
                             { value = "施法成功", label = L["施法成功"] },
                         },
                     },
-                    { key = "reset", type = "button", label = L["恢复默认喊话"] },
-                    { key = "teleportShoutText", type = "input", label = L["自定义喊话内容"],
+                    { id = "reset", kind = "button", text = L["恢复默认喊话"], clickKey = "reset" },
+                    { id = "teleportShoutText", kind = "control", controlType = "input", path = "teleportShoutText", label = L["自定义喊话内容"],
                         inputWidthPercent = 200 },
                 },
             },
-            BuildPreviewSection(),
+            { id = "preview", kind = "card", title = L["变量与预览"], children = {
+                { id = "preview.table", kind = "columns", columns = { { weight = 1 } }, children = {
+                    { id = "preview.head", kind = "row", children = {
+                        { id = "preview.head.cell", kind = "cell", children = {
+                            { id = "preview.head.text", kind = "hint", text = "" },
+                        } },
+                    } },
+                    { id = "preview.variables", kind = "row", children = {
+                        { id = "preview.variables.cell", kind = "cell", children = {
+                            { id = "preview.variables.text", kind = "text", text = L["|cffffd100变量说明:|r\
+  |cff00ff00%link|r  = 法术链接\
+  |cff00ff00%name|r = 副本名称"] },
+                        } },
+                    } },
+                    { id = "preview.message", kind = "row", children = {
+                        { id = "preview.message.cell", kind = "cell", children = {
+                            { id = "preview.message.text", kind = "text", textSource = "preview" },
+                        } },
+                    } },
+                } },
+            } },
         },
     }
 
-    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, layout, CreateSettingsOwner)
 end
 
 -- 3. 立即注册
 EX_RegisterLayout()
 
-local function GetVisibleSettingsSession()
-    if EXUI.CurrentPage ~= "ModuleSettings" or EXUI.CurrentModule ~= EXWIND_MODULE_KEY then return nil end
-    local page = EXUI.ActivePageFrame
-    return page and page._exCardSession or nil
-end
-
-local function RefreshVisibleText(resetInput)
-    local session = GetVisibleSettingsSession()
-    if not session then return end
-    if resetInput then
-        local input = session:GetWidget("common", "teleportShoutText")
-        if input then input:SetText(EX_DB.teleportShoutText or DEFAULT_MSG) end
-    end
-    session:ReplaceSettingsSection("preview", BuildPreviewSection())
+local function RefreshVisibleText()
+    if settingsSession then settingsSession:Refresh() end
 end
 
 -- =========================================================
@@ -170,13 +172,13 @@ ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY,
     if data.key == "reset" then
         EX_DB.teleportShoutText = DEFAULT_MSG
         EXUI:NotifyModuleValueChanged(EXWIND_MODULE_KEY, "teleportShoutText", "committed")
-        RefreshVisibleText(true)
+        RefreshVisibleText()
     end
 end)
 
 local function RefreshActiveSurfaces(_, changedPath)
     UpdateTelemsgEvent()
-    if changedPath == "teleportShoutText" then RefreshVisibleText(false) end
+    if changedPath == "teleportShoutText" then RefreshVisibleText() end
 end
 
 EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = RefreshActiveSurfaces })

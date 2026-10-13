@@ -33,30 +33,19 @@ local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, EXWIND_DEFAULTS)
 
 
 
--- 2. Grid 布局
+-- 2. 设置页（V2）
 local function EX_RegisterLayout()
-    -- [声明迁移边界：设置页] 仅把原开关改为 settings 声明；纯装饰 divider 不进入新合同。
-    -- key/type 与 PVE Tooltip/传送冷却 hook 禁止修改。
-    local layout = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings",
-                id = "common",
-                title = L["通用设置"],
-                description = {
-                    key = "desc",
-                    type = "description",
-                    label = L["开启后，鼠标悬停在 PVE 挑战面板的副本图标上时，会显示该副本的详细通关记录、队友专精以及该副本的快捷传送冷却状态。"],
-                },
-                items = {
-                    { key = "enabled", type = "switch", label = L["启用法术提示增强"] },
-                },
-            },
+    ExwindTools.UI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, {
+        version = 2,
+        cards = {
+            { id = "common", kind = "card", title = L["通用设置"], children = {
+                { id = "desc", kind = "hint",
+                    text = L["开启后，鼠标悬停在 PVE 挑战面板的副本图标上时，会显示该副本的详细通关记录、队友专精以及该副本的快捷传送冷却状态。"] },
+                { id = "enabled", kind = "control", controlType = "switch", path = "enabled",
+                    label = L["启用法术提示增强"] },
+            } },
         },
-    }
-
-    ExwindTools.UI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
+    })
 end
 
 -- 3. 立即注册

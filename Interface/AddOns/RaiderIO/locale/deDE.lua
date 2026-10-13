@@ -509,6 +509,8 @@ L["RAID_BOSS_TOT_8"] = "Primordius"
 L["RAID_BOSS_TOT_9"] = "Dunkler Animus"
 L["RAID_BOSS_TOTFW_1"] = "Konklave des Windes"
 L["RAID_BOSS_TOTFW_2"] = "Al'Akir"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_UOK_1"] = ""--]] 
 L["RAID_BOSS_VA_1"] = "Nek'zali die Seelenwinderin"
 L["RAID_BOSS_VA_2"] = "Eingeschlossene Wächter"
 L["RAID_BOSS_VA_3"] = "Die verirrten Entdecker"
@@ -575,6 +577,8 @@ L["RAID_ToES"] = "Terrasse des Endlosen Frühlings"
 L["RAID_TOES"] = "Terrasse des Endlosen Frühlings"
 L["RAID_TOT"] = "Der Thron des Donners"
 L["RAID_TOTFW"] = "Thron der Vier Winde"
+--[[Translation missing --]]
+--[[ L["RAID_UOK"] = ""--]] 
 L["RAID_VA"] = "Der Giftige Abgrund"
 L["RAID_VS"] = "Die Leerenspitze"
 L["RAID_VS_DR_MQD"] = "Leerenspitze/Traumriss/Quel'Danas"

@@ -510,6 +510,8 @@ L["RAID_BOSS_TOT_8"] = "프리모디우스"
 L["RAID_BOSS_TOT_9"] = "암흑 원령"
 L["RAID_BOSS_TOTFW_1"] = "바람의 비밀의회"
 L["RAID_BOSS_TOTFW_2"] = "알아키르"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_UOK_1"] = ""--]] 
 L["RAID_BOSS_VA_1"] = "영혼살무사 네크잘리"
 L["RAID_BOSS_VA_2"] = "매장된 파수꾼"
 L["RAID_BOSS_VA_3"] = "길 잃은 탐험가"
@@ -576,6 +578,8 @@ L["RAID_ToES"] = "영원한 봄의 정원"
 L["RAID_TOES"] = "영원한 봄의 정원"
 L["RAID_TOT"] = "천둥의 왕좌"
 L["RAID_TOTFW"] = "네 바람의 왕좌"
+--[[Translation missing --]]
+--[[ L["RAID_UOK"] = ""--]] 
 L["RAID_VA"] = "맹독 심연"
 L["RAID_VS"] = "공허첨탑"
 L["RAID_VS_DR_MQD"] = "첨탑/균열/진격로"

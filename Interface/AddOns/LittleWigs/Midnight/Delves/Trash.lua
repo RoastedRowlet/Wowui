@@ -76,6 +76,9 @@ function mod:GOSSIP_SHOW()
 		elseif self:GetGossipID(138496) then -- Atal'Aman, teleport to boss (Mojo)
 			-- 138496:Help me reach Spiritflayer Jin'Ma.
 			self:SelectGossipID(138496)
+		elseif self:GetGossipID(140366) then -- Atal'Aman, start Delve (Marla)
+			-- 140366:Snakes and Toxic Clouds? Must be Ula'tek...
+			self:SelectGossipID(140366)
 		elseif self:GetGossipID(135708) then -- Collegiate Calamity, start Delve (Bloomkeeper Thornflare)
 			-- 135708:|cFF0000FF(Delve)|r I'll get rid of these weeds!
 			self:SelectGossipID(135708)
@@ -85,6 +88,9 @@ function mod:GOSSIP_SHOW()
 		elseif self:GetGossipID(135798) then -- Collegiate Calamity, start Delve (Thalandri Fatesinger)
 			-- 135798:|cFF0000FF(Delve)|r I'll stop this invasion!
 			self:SelectGossipID(135798)
+		elseif self:GetGossipID(138592) then -- Collegiate Calamity, start Delve (Sir Finley Mrrgglton)
+			-- 138592:|cFF0000FF(Delve)|r Never did enjoy homework.
+			self:SelectGossipID(138592)
 		elseif self:GetGossipID(139635) then -- Gnarldor Isle, start Delve (Artolla)
 			-- 139635:They'll never know what hit them.
 			self:SelectGossipID(139635)
@@ -151,6 +157,9 @@ function mod:GOSSIP_SHOW()
 		elseif self:GetGossipID(135811) then -- Twilight Crypts, start Delve (Scout Lok'aemon)
 			-- 135811:|cFF0000FF(Delve)|r Drink this if the Bound Loa gets close? But what's it taste like?
 			self:SelectGossipID(135811)
+		elseif self:GetGossipID(138141) then -- Twilight Crypts, start Delve (Harrison Jones)
+			-- 138141:|cFF0000FF(Delve)|r You got it, Dr. Jones!
+			self:SelectGossipID(138141)
 		end
 	end
 end

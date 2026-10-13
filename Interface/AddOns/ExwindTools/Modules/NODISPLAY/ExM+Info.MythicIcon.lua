@@ -283,48 +283,51 @@ end
 
 
 
--- 2. Grid 布局
+-- 2. 设置页（V2）
 local function EX_RegisterLayout()
-    -- [声明迁移边界：设置页] 仅把原静态项、动态副本简称项和 fontgroup 改为 typed sections。
+    -- [声明迁移边界：设置页] 仅把原静态项、副本简称项和 fontgroup 改为 V2 声明。
     -- challengeModeID key、mapNames 绑定、地图枚举顺序、fontgroup 内容及 secure 传送业务禁止修改。
     local layout = {
-        version = 1,
-        sections = {
+        version = 2,
+        cards = {
             {
-                kind = "settings",
+                kind = "card",
                 id = "common",
                 title = L["通用设置"],
-                items = {
-                    { key = "showBestLevel", type = "switch", label = L["显示最佳层数 (居中)"], parentKey = "displayOptions" },
-                    { key = "showScore", type = "switch", label = L["显示副本评分 (底部)"], parentKey = "displayOptions" },
+                children = {
+                    { id = "showBestLevel", kind = "control", controlType = "switch", path = "displayOptions.showBestLevel", label = L["显示最佳层数 (居中)"] },
+                    { id = "showScore", kind = "control", controlType = "switch", path = "displayOptions.showScore", label = L["显示副本评分 (底部)"] },
                 },
             },
             {
-                kind = "composite",
+                kind = "card",
                 id = "name_style",
                 title = L["副本名称样式"],
-                component = "fontgroup",
-                key = "nameStyle",
+                children = {
+                    { id = "nameStyle", kind = "component", component = "fontgroup", path = "nameStyle" },
+                },
             },
             {
-                kind = "composite",
+                kind = "card",
                 id = "level_style",
                 title = L["最佳层数样式"],
-                component = "fontgroup",
-                key = "levelStyle",
+                children = {
+                    { id = "levelStyle", kind = "component", component = "fontgroup", path = "levelStyle" },
+                },
             },
             {
-                kind = "composite",
+                kind = "card",
                 id = "score_style",
                 title = L["副本评分样式"],
-                component = "fontgroup",
-                key = "scoreStyle",
+                children = {
+                    { id = "scoreStyle", kind = "component", component = "fontgroup", path = "scoreStyle" },
+                },
             },
             {
-                kind = "settings",
+                kind = "card",
                 id = "map_names",
                 title = L["副本简称自定义 (留空则使用默认)"],
-                items = {},
+                children = {},
             },
         },
     }
@@ -335,18 +338,18 @@ local function EX_RegisterLayout()
         local challengeModeID = tonumber(meta.challengeModeID) or 0
         local shortName = EXWIND_GetLocalizedDefaultMapName(challengeModeID)
 
-        layout.sections[5].items[#layout.sections[5].items + 1] = {
-            key = tostring(challengeModeID),
-            type = "input",
+        layout.cards[5].children[#layout.cards[5].children + 1] = {
+            id = "mapName." .. tostring(challengeModeID),
+            kind = "control",
+            controlType = "input",
             label = string.format("%s (%d)", shortName, challengeModeID),
-            parentKey = "mapNames",
-            subKey = tostring(challengeModeID),
+            path = "mapNames." .. tostring(challengeModeID),
         }
     end
 
 
 
-    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, layout)
 end
 
 -- 3. 立即注册

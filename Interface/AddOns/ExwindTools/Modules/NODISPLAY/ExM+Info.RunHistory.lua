@@ -43,44 +43,25 @@ local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, EXMYRUN_DEFAULTS)
 -- =========================================================
 
 
--- 2. Grid 布局
-local function EX_RegisterLayout()
-    -- [声明迁移边界：设置页] 仅把原筛选与打开按钮改为 settings 声明；纯装饰 divider 不进入新合同。
-    -- key/type、筛选/按钮绑定及历史记录排序禁止修改。
-    local layout = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings",
-                id = "filters",
-                title = L["过滤设置"],
-                description = {
-                    key = "desc",
-                    type = "description",
-                    label = L["此模块提供了一个可随时调用的详细战绩表格。使用 /emr 打开窗口。"],
-                },
-                items = {
-                    { key = "filterThisWeek", type = "switch", label = L["只看本周记录"] },
-                    { key = "filterTimed", type = "switch", label = L["只看限时记录"] },
-                    { key = "size", type = "slider", label = L["显示字号"], min = 10, max = 30 },
-                },
-            },
-            {
-                kind = "settings",
-                id = "preview",
-                title = L["记录预览"],
-                items = {
-                    { key = "open", type = "button", label = L["打开记录预览"] },
-                },
-            },
-        },
-    }
-
-    EXUI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
-end
-
--- 3. 立即注册
-EX_RegisterLayout()
+-- 2. 设置页（V2）
+EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, {
+    version = 2,
+    cards = {
+        { id = "filters", kind = "card", title = L["过滤设置"], children = {
+            { id = "desc", kind = "hint",
+                text = L["此模块提供了一个可随时调用的详细战绩表格。使用 /emr 打开窗口。"] },
+            { id = "filterThisWeek", kind = "control", controlType = "switch", path = "filterThisWeek",
+                label = L["只看本周记录"] },
+            { id = "filterTimed", kind = "control", controlType = "switch", path = "filterTimed",
+                label = L["只看限时记录"] },
+            { id = "size", kind = "control", controlType = "slider", path = "size",
+                label = L["显示字号"], min = 10, max = 30 },
+        } },
+        { id = "preview", kind = "card", title = L["记录预览"], children = {
+            { id = "open", kind = "button", text = L["打开记录预览"], clickKey = "open" },
+        } },
+    },
+})
 
 -- 按钮监听
 ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY, function(data)
@@ -104,12 +85,12 @@ _G.EXMYRUN = EXMYRUN
 
 local LSM = LibStub("LibSharedMedia-3.0", true)
 EXMYRUN.TimeOffset = 8
-EXMYRUN.RowHeight = 25
-EXMYRUN.FrameWidth = 700
-EXMYRUN.FrameHeight = 600
+EXMYRUN.FrameWidth = 960
+EXMYRUN.FrameHeight = 620
 
 EXMYRUN.MainFrame = nil
 EXMYRUN.SortState = { key = "date", asc = false }
+EXMYRUN.DisplayData = {}
 
 -- 工具函数
 local function EXMYRUN_FormatTime(seconds)
@@ -180,8 +161,174 @@ end
 -- =========================================================
 -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
 -- =========================================================
--- 界面构建
--- [卡片迁移边界：自定义渲染] 下列历史窗口、表头、滚动区和行池不是设置页 Grid；迁移设置卡片时禁止改其尺寸、排序、拖动与点击回调。
+local HISTORY_PAGE = EXWIND_MODULE_KEY .. ".History"
+local HISTORY_COLUMNS = {
+    { key = "id", title = L["序号"], width = 48, justify = "CENTER" },
+    { key = "map", title = L["副本 (层数)"], weight = 1, justify = "LEFT" },
+    { key = "date", title = L["日期时间"], width = 148, justify = "LEFT" },
+    { key = "result", title = L["结果 (时间)"], width = 180, justify = "LEFT" },
+}
+
+EXUI:RegisterSettingsPageV2(HISTORY_PAGE, {
+    version = 2,
+    cards = {{
+        id = "history-card", kind = "card", title = "", children = {
+            { id = "history-header", kind = "component", ref = "header" },
+            { id = "history-records", kind = "repeat", source = "records", template = {
+                id = "history-record", kind = "component", ref = "record",
+            } },
+            { id = "history-empty", kind = "text", textSource = "empty", visible = "empty" },
+        },
+    }},
+})
+
+local function LayoutHistoryWidget(widget, context, width, height)
+    widget:ClearAllPoints()
+    widget:SetPoint("TOPLEFT")
+    widget:SetSize(width, height)
+end
+
+local function SetHistoryWidgetEnabled(widget, context, enabled)
+    for _, button in ipairs(widget.sortButtons or {}) do button:SetEnabled(enabled) end
+end
+
+local function SetHistoryWidgetVisible(widget, context, visible)
+    widget:SetShown(visible)
+end
+
+local function UpdateHistoryRecord(row, context)
+    local run = context.scope.item
+    local fontPath = LSM and LSM:Fetch("font", EX_DB.font) or ExwindTools.MAIN_FONT
+    for index, column in ipairs(HISTORY_COLUMNS) do
+        local cell = row._exSettingsTableStaticLabels[index]
+        cell:SetFont(fontPath, EX_DB.size, EX_DB.outline)
+        cell:SetJustifyH(column.justify)
+        cell:SetWordWrap(true)
+    end
+
+    row._exSettingsTableStaticLabels[1]:SetText(run.originalIndex)
+    local mapName, _, _, texture = C_ChallengeMode.GetMapUIInfo(run.mapChallengeModeID)
+    local icon = texture and ("|T" .. texture .. ":" .. EX_DB.size .. ":" .. EX_DB.size .. ":0:0:64:64:5:59:5:59|t ") or ""
+    local color = EXMYRUN_GetLevelColorHex(run.level)
+    row._exSettingsTableStaticLabels[2]:SetText(icon .. "|c" .. color .. (mapName or L["未知副本"]) .. " (+" .. run.level .. ")|r")
+    row._exSettingsTableStaticLabels[3]:SetText(run.dateStr)
+
+    local result = "|cff999999" .. L["无时间记录"] .. "|r"
+    if run.hasData then
+        local difference = EXMYRUN_FormatTime(math.abs(run.durationSec - run.timeLimit))
+        if run.isTimed then
+            result = string.format("|cff00ff00" .. L["限时 (剩%s)"] .. "|r", difference)
+        elseif run.isOverTime then
+            result = string.format("|cffff0000" .. L["超时 (超%s)"] .. "|r", difference)
+        end
+    end
+    row._exSettingsTableStaticLabels[4]:SetText(result)
+    EXUI:SetSettingsRowLast(row, context.scope.index == #EXMYRUN.DisplayData)
+end
+
+function EXMYRUN:CreateHistoryOwner()
+    local owner = { controls = {}, components = {}, actions = {}, predicates = {}, sources = {}, texts = {} }
+    owner.sources.records = function() return self.DisplayData end
+    owner.predicates.empty = function() return #self.DisplayData == 0 end
+    owner.texts.summary = function()
+        local filters = {}
+        if EX_DB.filterThisWeek then filters[#filters + 1] = L["只看本周记录"] end
+        if EX_DB.filterTimed then filters[#filters + 1] = L["只看限时记录"] end
+        return string.format(L["记录：%d"], #self.DisplayData)
+            .. (#filters > 0 and ("  ·  " .. table.concat(filters, " / ")) or "")
+    end
+    owner.texts.empty = function()
+        if self.RawRecordCount > 0 then
+            return L["当前筛选条件下没有记录。可在设置中调整筛选条件。"]
+        end
+        return L["本赛季暂无大秘境通关记录。完成大秘境后可在这里查看副本、层数、日期与通关结果。"]
+    end
+    owner.onHeightChanged = function(height)
+        self.MainFrame.ScrollChild:SetHeight(math.max(1, height))
+        self.MainFrame.Scroll:UpdateScrollChildRect()
+    end
+    owner.components.header = {
+        mount = function(host, context)
+            local header = EXUI:CreateSettingsTableHeader(host, { columns = HISTORY_COLUMNS })
+            header.sortButtons = {}
+            for index, column in ipairs(HISTORY_COLUMNS) do
+                if column.key ~= "result" then
+                    header._exSettingsTableLabels[index]:Hide()
+                    local key = column.key
+                    header.sortButtons[index] = EXUI:CreateButton(header, 100, 30, column.title,
+                        context:Guard(function()
+                            if self.SortState.key == key then
+                                self.SortState.asc = not self.SortState.asc
+                            else
+                                self.SortState.key = key
+                                self.SortState.asc = (key ~= "date")
+                            end
+                            self:UpdateList()
+                        end), { compact = true })
+                end
+            end
+            return header
+        end,
+        update = function(header)
+            for index, button in ipairs(header.sortButtons) do
+                local column = HISTORY_COLUMNS[index]
+                local arrow = self.SortState.key == column.key and (self.SortState.asc and " ▲" or " ▼") or ""
+                button:SetText(column.title .. arrow)
+            end
+        end,
+        measure = function(header, context, width)
+            local _, columns = EXUI:UpdateSettingsTableHeaderLayout(header, width)
+            local height = 26
+            for index, button in ipairs(header.sortButtons) do
+                button:ClearAllPoints()
+                button:SetPoint("LEFT", header, "LEFT", columns[index].x + 4, 0)
+                button:SetSize(math.max(1, columns[index].width - 8), height)
+            end
+            local resultLabel = header._exSettingsTableLabels[4]
+            resultLabel:ClearAllPoints()
+            resultLabel:SetPoint("LEFT", header, "LEFT", columns[4].x + 4, 0)
+            resultLabel:SetWidth(math.max(1, columns[4].width - 8))
+            return height
+        end,
+        layout = LayoutHistoryWidget,
+        setEnabled = SetHistoryWidgetEnabled,
+        setVisible = SetHistoryWidgetVisible,
+        release = function(header)
+            for _, button in ipairs(header.sortButtons) do ExwindFactory:Release(button._fromPool, button) end
+            header.sortButtons = nil
+            header:Release()
+        end,
+    }
+    owner.components.record = {
+        mount = function(host)
+            return EXUI:CreateSettingsTableRow(host, { staticCells = { "", "", "", "" } })
+        end,
+        update = UpdateHistoryRecord,
+        measure = function(row, context, width)
+            local columns = EXUI:ResolveSettingsTableColumns(width, HISTORY_COLUMNS)
+            local height = math.max(24, EX_DB.size + 6)
+            for index, column in ipairs(columns) do
+                local cell = row._exSettingsTableStaticLabels[index]
+                cell:SetWidth(math.max(1, column.width - 8))
+                height = math.max(height, cell:GetStringHeight() + 6)
+                cell:ClearAllPoints()
+                cell:SetPoint("LEFT", row, "LEFT", column.x + 4, 0)
+            end
+            local divider = row._exSettingsTableDivider
+            divider:ClearAllPoints()
+            divider:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", columns[1].x, 0)
+            divider:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -columns[1].x, 0)
+            return height
+        end,
+        layout = LayoutHistoryWidget,
+        setEnabled = SetHistoryWidgetEnabled,
+        setVisible = SetHistoryWidgetVisible,
+        release = function(row) row:Release() end,
+    }
+    return owner
+end
+
+-- 窗口几何仍由本模块持有，记录正文由正式 V2 会话持有。
 function EXMYRUN:CreateMainFrame()
     local f = CreateFrame("Frame", "EXMYRUNMainFrame", UIParent, "BackdropTemplate")
     f:SetSize(self.FrameWidth, self.FrameHeight)
@@ -206,89 +353,56 @@ function EXMYRUN:CreateMainFrame()
         EX_DB.yOfs = yOfs
     end)
 
-    f:SetBackdrop({
-        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        edgeSize = 16,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
-    })
-    f:SetBackdropColor(0, 0, 0, 0.98)
+    local colors = ExwindTools.GUIColors
+    EXUI:SetControlSurface(f, ExwindTools.GUIMetrics.radius.card, colors.panel, colors.panelBorder)
 
-    f.Title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    f.Title:SetPoint("TOP", 0, -10)
+    f.Title = EXUI:CreateVisualFontString(f, _G.EXFONTFRAME, "GameFontNormalLarge")
+    f.Title:SetPoint("TOPLEFT", 12, -10)
+    f.Title:SetTextColor(unpack(colors.text))
     f.Title:SetText(L["大秘境赛季记录"])
 
     -- 关闭按钮
-    local closeBtn = EXUI:CreatePicButton(f, 24, 24,
-        "Interface\\Buttons\\UI-Panel-CloseButton-Up",
-        "Interface\\Buttons\\UI-Panel-CloseButton-Down",
-        "Interface\\Buttons\\UI-Panel-CloseButton-Highlight",
-        function() f:Hide() end, true)
-    closeBtn:SetSize(24, 24)
-    closeBtn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -5, -5)
+    f.CloseButton = EXUI:CreateButton(f, 26, 26, "×", function() f:Hide() end,
+        { compact = true, variant = "danger" })
+    f.CloseButton:SetPoint("TOPRIGHT", -6, -6)
 
-    local configBtn = EXUI:CreateButton(f, 80, 22, L["设置"], function()
-        if ExwindTools.UI then ExwindTools.UI:Toggle() end
-    end, { compact = true })
-    configBtn:SetPoint("TOPLEFT", 10, -10)
+    f.SettingsButton = EXUI:CreateButton(f, 64, 26, L["设置"],
+        function() ExwindTools:OpenConfig(EXWIND_MODULE_KEY) end, { compact = true })
+    f.SettingsButton:SetPoint("RIGHT", f.CloseButton, "LEFT", -8, 0)
+    f.Summary = EXUI:CreateVisualFontString(f, _G.EXFONTFRAME, "GameFontHighlightSmall")
+    f.Summary:SetPoint("LEFT", f.Title, "RIGHT", 12, 0)
+    f.Summary:SetPoint("RIGHT", f.SettingsButton, "LEFT", -12, 0)
+    f.Summary:SetJustifyH("LEFT")
+    f.Summary:SetWordWrap(false)
+    f.Summary:SetTextColor(unpack(colors.text))
 
-    f.headers = {
-        { key = "id", text = L["序号"], width = 50, justify = "CENTER" },
-        { key = "map", text = L["副本 (层数)"], width = 280, justify = "LEFT" },
-        { key = "date", text = L["日期时间"], width = 140, justify = "LEFT" },
-        { key = "result", text = L["结果 (时间)"], width = 250, justify = "LEFT" },
-    }
-
-    local currentX = 20
-    local headerY = -45
-    f.headerBtns = {}
-
-    for _, col in ipairs(f.headers) do
-        local btn = EXUI:CreateButton(f, col.width, 20, col.text, nil, { compact = true })
-        btn:SetPoint("TOPLEFT", f, "TOPLEFT", currentX, headerY)
-        btn:SetSize(col.width, 20)
-
-        local text = btn:GetFontString()
-        text:SetAllPoints()
-        text:SetJustifyH(col.justify)
-        text:SetText(col.text)
-        btn.textWidget = text
-        btn.key = col.key
-        btn.textData = col.text
-
-        btn:SetScript("OnClick", function(self)
-            if self.key == "result" then return end
-            if EXMYRUN.SortState.key == self.key then
-                EXMYRUN.SortState.asc = not EXMYRUN.SortState.asc
-            else
-                EXMYRUN.SortState.key = self.key
-                EXMYRUN.SortState.asc = (self.key ~= "date")
-            end
-            EXMYRUN:UpdateList()
-        end)
-
-        table.insert(f.headerBtns, btn)
-        currentX = currentX + col.width
-    end
-
-    f.Scroll = CreateFrame("ScrollFrame", "EXMYRUNHistoryScroll", f, "ScrollFrameTemplate")
-    f.Scroll:EnableMouseWheel(true)
-    EXUI:ApplyModernScrollFrame(f.Scroll)
-    f.Scroll:SetPoint("TOPLEFT", 10, headerY - 25)
-    f.Scroll:SetPoint("BOTTOMRIGHT", -18, 10)
+    f.Scroll = EXUI:CreateScrollFrame(f, "EXMYRUNHistoryScroll")
+    f.Scroll:SetPoint("TOPLEFT", 4, -38)
+    f.Scroll:SetPoint("BOTTOMRIGHT", -EXUI.MODERN_SCROLL_FRAME_RIGHT_INSET, 4)
 
     f.ScrollChild = CreateFrame("Frame", nil, f.Scroll)
-    f.ScrollChild:SetSize(self.FrameWidth - 40, 1)
+    f.ScrollChild:SetSize(f.Scroll:GetWidth(), 1)
     f.Scroll:SetScrollChild(f.ScrollChild)
 
     self.MainFrame = f
+    self.HistoryOwner = self:CreateHistoryOwner()
+    f.Scroll:HookScript("OnSizeChanged", function(scroll)
+        f.ScrollChild:SetWidth(scroll:GetWidth())
+    end)
+    f:SetScript("OnHide", function()
+        if self.HistorySession then
+            self.HistorySession:Release()
+            self.HistorySession = nil
+        end
+    end)
     f:Hide()
 end
 
-function EXMYRUN:UpdateList(reuseOnly)
+function EXMYRUN:UpdateList()
     if not self.MainFrame then return end
 
     local rawData = C_MythicPlus.GetRunHistory(true, true, true)
+    self.RawRecordCount = #rawData
     local displayData = {}
 
     for i, run in ipairs(rawData) do
@@ -355,80 +469,13 @@ function EXMYRUN:UpdateList(reuseOnly)
         return a.originalIndex < b.originalIndex
     end)
 
-    for _, btn in ipairs(self.MainFrame.headerBtns) do
-        local arrow = ""
-        if self.SortState.key == btn.key then
-            arrow = self.SortState.asc and " |cff00ff00▲|r" or " |cff00ff00▼|r"
-        end
-        btn.textWidget:SetText(btn.textData .. arrow)
+    self.DisplayData = displayData
+    self.MainFrame.Summary:SetText(self.HistoryOwner.texts.summary())
+    if self.HistorySession then
+        self.HistorySession:Refresh()
+    elseif self.MainFrame:IsShown() then
+        self.HistorySession = EXUI:MountSettingsPageV2(self.MainFrame.ScrollChild, HISTORY_PAGE, self.HistoryOwner)
     end
-
-    -- 正常打开窗口可从池取得行；GUI 自动刷新只能重套已经物化的行。
-    self.ActiveRows = self.ActiveRows or {}
-    if not reuseOnly then
-        for _, row in ipairs(self.ActiveRows) do
-            ExwindFactory:Release("StandardRow", row)
-        end
-        wipe(self.ActiveRows)
-    end
-
-    local totalHeight = 0
-    local fontPath = LSM and LSM:Fetch("font", EX_DB.font) or ExwindTools.MAIN_FONT
-
-    for i, run in ipairs(displayData) do
-        local row = reuseOnly and self.ActiveRows[i] or ExwindFactory:Acquire("StandardRow", self.MainFrame.ScrollChild)
-        if not row then break end
-        if not reuseOnly then table.insert(self.ActiveRows, row) end
-
-        row:Show()
-        row:SetSize(self.FrameWidth - 40, EX_DB.size + 12)
-        row:SetPoint("TOPLEFT", self.MainFrame.ScrollChild, "TOPLEFT", 0, -totalHeight)
-
-        if i % 2 == 0 then row.bg:Show() else row.bg:Hide() end
-
-        -- 配置列对齐和字体 (StandardRow 预设了 5 个 cells)
-        for idx, col in ipairs(self.MainFrame.headers) do
-            local cell = row.cells[idx]
-            if cell then
-                cell:SetFont(fontPath, EX_DB.size, EX_DB.outline)
-                cell:SetJustifyH(col.justify)
-                -- 动态调整位置
-                local xOfs = 10
-                for prevIdx = 1, idx - 1 do
-                    xOfs = xOfs + self.MainFrame.headers[prevIdx].width
-                end
-                cell:SetPoint("LEFT", row, "LEFT", xOfs, 0)
-                cell:SetWidth(col.width)
-            end
-        end
-
-        row.cells[1]:SetText(run.originalIndex)
-        local mapName, _, _, texture = C_ChallengeMode.GetMapUIInfo(run.mapChallengeModeID)
-        -- 为内联图标应用裁剪标准 (0.08, 0.92 对应 64像素下的 5:59)
-        local icon = texture and ("|T" .. texture .. ":" .. EX_DB.size .. ":" .. EX_DB.size .. ":0:0:64:64:5:59:5:59|t ") or
-            ""
-        local color = EXMYRUN_GetLevelColorHex(run.level)
-        row.cells[2]:SetText(icon .. "|c" .. color .. (mapName or L["未知副本"]) .. " (+" .. run.level .. ")|r")
-        row.cells[3]:SetText(run.dateStr)
-
-        local res = "|cff999999" .. L["无时间记录"] .. "|r"
-        if run.hasData then
-            local diff = math.abs(run.durationSec - run.timeLimit)
-            local diffStr = EXMYRUN_FormatTime(diff)
-            if run.isTimed then
-                res = string.format("|cff00ff00" .. L["限时 (剩%s)"] .. "|r", diffStr)
-            elseif run.isOverTime then
-                res = string.format("|cffff0000" .. L["超时 (超%s)"] .. "|r", diffStr)
-            end
-        end
-        row.cells[4]:SetText(res)
-
-        totalHeight = totalHeight + (EX_DB.size + 12)
-    end
-    if reuseOnly then
-        for i = #displayData + 1, #self.ActiveRows do self.ActiveRows[i]:Hide() end
-    end
-    self.MainFrame.ScrollChild:SetHeight(totalHeight)
 end
 
 function EXMYRUN:ToggleWindow()
@@ -455,7 +502,7 @@ end
 
 local function RefreshActiveSurfaces()
     EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, EXMYRUN_DEFAULTS)
-    if EXMYRUN.MainFrame and EXMYRUN.MainFrame:IsShown() then EXMYRUN:UpdateList(true) end
+    if EXMYRUN.MainFrame and EXMYRUN.MainFrame:IsShown() then EXMYRUN:UpdateList() end
 end
 
 EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = RefreshActiveSurfaces })

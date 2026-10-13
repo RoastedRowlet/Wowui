@@ -1532,6 +1532,14 @@ function AdvancedFocusCastBarMixin:OnLoad()
 
 	self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 
+	do
+		local playerClass = select(3, UnitClass("player"))
+
+		if playerClass == Constants.UICharacterClasses.Warlock then
+			self:RegisterUnitEvent("UNIT_PET", "player")
+		end
+	end
+
 	self:ToggleTargetMarkerIntegration()
 	self:ToggleUnitIntegration()
 	self:SetFrameStrata("HIGH")
@@ -2638,6 +2646,7 @@ do
 		LOADING_SCREEN_DISABLED = AdvancedFocusCastBarMixin.OnZoneOrSpecChanged,
 		PLAYER_SPECIALIZATION_CHANGED = AdvancedFocusCastBarMixin.OnZoneOrSpecChanged,
 		UPDATE_INSTANCE_INFO = AdvancedFocusCastBarMixin.OnZoneOrSpecChanged,
+		UNIT_PET = AdvancedFocusCastBarMixin.OnZoneOrSpecChanged,
 
 		-- custom event routed through Private.EventRegistry; identical to the
 		-- LibEditMode "layout" callback, so reuse that handler.

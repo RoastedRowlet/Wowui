@@ -1,3 +1,23 @@
+## 3.9.2
+
+### New Features
+
+- **Out of Range Shadow Options** — New Hide Shadow and Shadow Size options in Range Indicator. Hide the dark shadow and keep the red tint, or resize it.
+
+### Bug Fixes
+
+- **Icons Shuffled After Stealth or Mounting** — Icons no longer mix up between groups after a /reload and your first Stealth or mount.
+- **Tooltips Coming Back** — With Show Tooltips off, tooltips stay off after Stealth or mounting.
+- **Out of Range Shadow Fit** — The out-of-range shadow now fits the icon instead of spilling past it.
+- **Account Sharing on Alts** — Alts pick up the shared layout again after sharing is turned off and back on. Alts that were already stuck need Enable ticked once.
+- **Castbar and Bars Shifting Sideways** — Bars anchored with Match Slots Only stay lined up when the group's first icon is hidden.
+
+## 3.9.1.a
+
+### Bug Fixes
+
+- **Charge Spells on Arc Icons** — Arc spell icons for spells that get an extra charge from a talent, like Stormstrike, show their cooldown swipe and recharge timer again. Before, after a talent or loadout change the icon could show only the charge count, with no swipe or timer, until a reload.
+
 ## 3.9.1
 
 ### Bug Fixes

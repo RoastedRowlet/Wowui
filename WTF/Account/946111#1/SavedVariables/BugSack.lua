@@ -1,12 +1,12 @@
 
 BugSackDB = {
-["soundMedia"] = "None",
-["altwipe"] = false,
-["useMaster"] = false,
 ["fontSize"] = "GameFontHighlight",
-["mute"] = false,
 ["auto"] = false,
+["useMaster"] = false,
+["mute"] = false,
+["soundMedia"] = "None",
 ["chatframe"] = false,
+["altwipe"] = false,
 }
 BugSackLDBIconDB = {
 ["minimapPos"] = 46.66128212627133,

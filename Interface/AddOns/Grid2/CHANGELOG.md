@@ -1,7 +1,6 @@
 # Grid2
 
-## [4.1.2-beta](https://github.com/michaelnpsp/Grid2/tree/4.1.2-beta) (2026-09-28)
-[Full Changelog](https://github.com/michaelnpsp/Grid2/compare/4.1.1-beta...4.1.2-beta) [Previous Releases](https://github.com/michaelnpsp/Grid2/releases)
+## [4.1.6-beta](https://github.com/michaelnpsp/Grid2/tree/4.1.6-beta) (2026-10-12)
+[Full Changelog](https://github.com/michaelnpsp/Grid2/compare/4.1.4-beta...4.1.6-beta) [Previous Releases](https://github.com/michaelnpsp/Grid2/releases)
 
-- Fixing ping icons not disapled in raid for some units when raid frames are disabled (GH issue #467)  
-- Fixing possible crash importing old classic profiles (CF issue #1575)  
+- Added a new "buff-missing" status, that can be used to display missing buffs, but only out of combat and in non-competitivy content.  

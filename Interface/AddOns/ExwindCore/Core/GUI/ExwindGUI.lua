@@ -3655,6 +3655,7 @@ function EXUI:CreateDropdown(parent, width, label, items, currentValue, onSelect
 
     local initialText = GetEntry(currentValue)
     SetDropdownDisplayText(dropdown, initialText)
+    dropdown._exResolveEntry = GetEntry
 
     -- [Fix] 使用 Self 引用构建菜单
     dropdown:SetupMenu(function(self, rootDescription)
@@ -3712,6 +3713,12 @@ function EXUI:CreateDropdown(parent, width, label, items, currentValue, onSelect
     end)
 
     return dropdown
+end
+
+-- 外部改值后回显：只更新当前值与显示文字，不触发 onSelect。
+function EXUI:SetDropdownValue(dropdown, value)
+    dropdown._currentValue = value
+    SetDropdownDisplayText(dropdown, (dropdown._exResolveEntry(value)))
 end
 
 -- =========================================================

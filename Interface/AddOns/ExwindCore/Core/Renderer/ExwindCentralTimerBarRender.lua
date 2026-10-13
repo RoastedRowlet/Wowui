@@ -42,6 +42,12 @@ local function writePath(root, path, value)
 end
 local function validateGUI(gui, moduleKey)
     if type(gui) ~= "table" then error("MODULE_SPEC.gui is required", 3) end
+    -- V2：页面声明直接登记为 V2 模块设置页；锚点与图标的运行期选项由工厂 owner 经 optionsRef 提供。
+    if gui.version == 2 then
+        local ok, issue = EXUI:ValidateSettingsDeclarationV2(gui)
+        if not ok then error("MODULE_SPEC.gui " .. issue.path .. ": " .. issue.message, 3) end
+        return
+    end
     if gui.version ~= 1 or type(gui.sections) ~= "table" or gui.cards ~= nil
         or gui.static ~= nil or gui.fields ~= nil or gui.groups ~= nil then
         error("MODULE_SPEC.gui accepts only version=1 sections; special cards are not a central-module settings entry", 3)
@@ -90,6 +96,26 @@ end
 
 local Controller = {}; Controller.__index = Controller
 function Controller:GetConfig() return self.db end
+-- V2 设置页 owner：绑定本模块存档；optionsRef="anchor" 取得锚点字段与选框回调。
+function Controller:CreateSettingsOwner()
+    local anchor = self.spec.anchor
+    return {
+        binding = { moduleKey = self.moduleKey, config = self.db },
+        options = {
+            anchor = {
+                bindRoot = anchor.bindRoot == true,
+                offsetXKey = anchor.xKey,
+                offsetYKey = anchor.yKey,
+                defaultOffsetX = anchor.defaultX or 0,
+                defaultOffsetY = anchor.defaultY or 0,
+                attachEnabledKey = anchor.attachEnabledKey,
+                attachTargetKey = anchor.attachTargetKey,
+                onPickFrame = function() return self.anchor:StartFramePicker() end,
+            },
+        },
+    }
+end
+
 function Controller:CompileGUIItem(source, preservePlacement)
     local item = copy(source)
     if not preservePlacement then item.group, item.order = nil, nil end
@@ -241,7 +267,10 @@ function EXUI:RegisterTimerBarModule(spec)
     end
     controller.anchor = ExwindTools:CreateAnchorController({ moduleKey = registered.moduleKey, frameName = "ExwindCentral_" .. registered.moduleKey:gsub("[^%w]", "_"), title = moduleMeta.Name, getDB = function() return anchorDB end, offsetXKey = registered.anchor.xKey, offsetYKey = registered.anchor.yKey, defaultOffsetX = registered.anchor.defaultX or 0, defaultOffsetY = registered.anchor.defaultY or 0, attachEnabledKey = registered.anchor.attachEnabledKey, attachTargetKey = registered.anchor.attachTargetKey, initialWidth = registered.anchor.initialWidth or 1, initialHeight = registered.anchor.initialHeight or 1, clampedToScreen = registered.anchor.clampedToScreen == true })
     controller.binding = EXUI:RegisterStandardConfigBinding({ moduleKey = registered.moduleKey, getConfig = function() return controller.db end })
-    if registered.gui.version == 1 then
+    if registered.gui.version == 2 then
+        EXUI:RegisterModuleSettingsPageV2(registered.moduleKey, registered.gui,
+            function() return controller:CreateSettingsOwner() end)
+    elseif registered.gui.version == 1 then
         if type(EXUI.RegisterSettingsPage) ~= "function" then error("RegisterSettingsPage is unavailable", 2) end
         EXUI:RegisterSettingsPage(registered.moduleKey, registered.gui)
     end

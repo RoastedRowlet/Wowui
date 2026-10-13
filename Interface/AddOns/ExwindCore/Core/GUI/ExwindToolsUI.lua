@@ -90,12 +90,13 @@ EXUI.PendingRightScrollRestore = nil -- 通用右侧滚动容器刷新后需要�
 EXUI.SettingsPageDeclarations = EXUI.SettingsPageDeclarations or {}
 EXUI.ModuleSettingsV2Pages = EXUI.ModuleSettingsV2Pages or {}
 
+-- ownerFactory 可省略：只用 path 绑定的页面由中央挂载提供 owner.binding。
 function EXUI:RegisterModuleSettingsPageV2(moduleKey, declaration, ownerFactory)
     if type(moduleKey) ~= "string" or moduleKey == "" then
         error("RegisterModuleSettingsPageV2 requires a moduleKey", 2)
     end
-    if type(ownerFactory) ~= "function" then
-        error("RegisterModuleSettingsPageV2 requires an owner factory", 2)
+    if ownerFactory ~= nil and type(ownerFactory) ~= "function" then
+        error("RegisterModuleSettingsPageV2 ownerFactory must be a function", 2)
     end
     if self.ModuleSettingsV2Pages[moduleKey] ~= nil then
         error("duplicate module V2 settings page: " .. moduleKey, 2)
@@ -459,46 +460,109 @@ function EXUI:CreatePreviewInteractionLayer(host, options)
     return layer
 end
 
--- 预览右键必须由页面明确交出它正在显示的 ScrollFrame + ScrollChild。不能从
--- 当前全局 WidgetMap 猜同名 key：页面切换或另一容器完成 render 后会把焦点错误
--- 指到别的容器。模块仍只传语义 GUI target；Core 严格在该 container 的 state 中找。
-function EXUI:FocusModuleGridKey(moduleKey, gridKey, scrollFrame, container)
-    if type(moduleKey) ~= "string" or moduleKey == "" or type(gridKey) ~= "string" or gridKey == "" then
-        return false
+-- =========================================================
+-- 当前模块设置页的统一查询入口。预览、锚点等只经这里按 key 找控件、列出组合控件、
+-- 回读存档和定位控件，不区分页面是 V2 会话还是旧 Grid 挂载。
+-- =========================================================
+local ModulePage = {}
+ModulePage.__index = ModulePage
+
+-- 页面可以另含绑定到其他正式 owner 的共享数据卡；只要至少一张属于本模块即可。
+local function MountedStatesBelongToModule(mounted, moduleKey)
+    local owned = false
+    for _, entry in ipairs(mounted) do
+        local state = entry.state
+        if type(state) ~= "table" or type(state.moduleKey) ~= "string" or state.moduleKey == "" then
+            return false
+        end
+        if state.moduleKey == moduleKey then owned = true end
     end
-    if not scrollFrame or type(scrollFrame.SetVerticalScroll) ~= "function" or not container then return false end
+    return owned
+end
+
+function EXUI:GetModulePage(moduleKey, container)
+    container = container or self.ActivePageFrame
+    if type(moduleKey) ~= "string" or moduleKey == "" or not container then return nil end
+    local session = container._exV2Session
+    if session then
+        local binding = container._exV2Owner and container._exV2Owner.binding
+        if not session.alive or type(binding) ~= "table" or binding.moduleKey ~= moduleKey then return nil end
+        return setmetatable({ moduleKey = moduleKey, container = container, owner = session }, ModulePage)
+    end
     local grid = _G.ExwindGrid
-    if not grid or type(grid.FindMountedWidget) ~= "function" then return false end
-    local mountedOwner = type(grid.GetMountedOwner) == "function"
-        and grid:GetMountedOwner(container) or nil
-    if not mountedOwner then return false end
+    if not grid then return nil end
+    local mounted, owner = grid:GetMountedContainerStates(container)
+    if type(mounted) ~= "table" or #mounted == 0 or not owner
+        or not MountedStatesBelongToModule(mounted, moduleKey) then return nil end
+    return setmetatable({ moduleKey = moduleKey, container = container, owner = owner,
+        grid = grid, mounted = mounted }, ModulePage)
+end
 
-    local function ResolveTarget()
-        if type(grid.IsMountedOwnerCurrent) ~= "function"
-            or not grid:IsMountedOwnerCurrent(container, mountedOwner) then return nil end
-        local target, state, _, ownerContainer = grid:FindMountedWidget(container, gridKey)
-        if not state or state.moduleKey ~= moduleKey then return nil end
-        local meta = target and state.widgetMap and state.widgetMap[target]
-        if not target or not meta or not meta.item or meta.item.key ~= gridKey then return nil end
-        -- 卡片页的直接 owner 是该卡 Body；旧页仍是根 container。拒绝已回池、
-        -- 被页面切换重新 parent 或来自另一个挂载会话的同名对象。
-        if type(target.GetParent) ~= "function" or target:GetParent() ~= ownerContainer then return nil end
-        return target
+function ModulePage:IsCurrent()
+    if self.grid then return self.grid:IsMountedOwnerCurrent(self.container, self.owner) end
+    return self.owner.alive == true and self.container._exV2Session == self.owner
+end
+
+-- 返回 控件本体, 组件类型(小写), 用于定位的区域。拒绝已回池或来自别的挂载的同名对象。
+function ModulePage:Find(key)
+    if not self:IsCurrent() then return nil end
+    if self.grid then
+        local widget, state, _, ownerContainer = self.grid:FindMountedWidget(self.container, key)
+        if not widget or not state or state.moduleKey ~= self.moduleKey then return nil end
+        local meta = state.widgetMap and state.widgetMap[widget]
+        if not meta or not meta.item or meta.item.key ~= key then return nil end
+        if type(widget.GetParent) ~= "function" or widget:GetParent() ~= ownerContainer then return nil end
+        return widget, string.lower(tostring(meta.item.type or "")), widget
     end
+    local node = self.owner:FindNode(key)
+    if not node or not node.frame then return nil end
+    local spec = node.spec
+    return node.instance or node.button or node.frame,
+        string.lower(tostring(spec.component or spec.controlType or spec.kind)), node.frame
+end
 
-    if not ResolveTarget() then return false end
-
-    local function Reveal()
-        local target = ResolveTarget()
-        if not target or not target.GetTop then return end
-        if scrollFrame and container and scrollFrame.SetVerticalScroll then
-            local childTop, widgetTop = container:GetTop(), target:GetTop()
-            if childTop and widgetTop then
-                -- 预览右键的契约是“目标设置块位于可视区最上方”，不是只保证
-                -- 可见或留一个任意边距。childTop - widgetTop 是该块在 ScrollChild
-                -- 内的精确纵向偏移；ScrollFrame 会自行夹到可滚动范围。
-                scrollFrame:SetVerticalScroll(math.max(0, childTop - widgetTop))
+function ModulePage:Components(componentType)
+    local list = {}
+    if not self:IsCurrent() then return list end
+    if self.grid then
+        for _, entry in ipairs(self.mounted) do
+            for _, widget in ipairs(entry.state.instances or {}) do
+                local element = widget and widget._exGridPixelElement
+                if type(element) == "table" and string.lower(tostring(element.type or "")) == componentType then
+                    list[#list + 1] = widget
+                end
             end
+        end
+    else
+        self.owner:ForEachNode(function(node)
+            if node.spec.kind == "component" and node.spec.component == componentType and node.instance then
+                list[#list + 1] = node.instance
+            end
+        end)
+    end
+    return list
+end
+
+-- 预览或锚点写入同一份存档后，让页面上的控件回读。
+function ModulePage:Refresh()
+    if not self:IsCurrent() then return false end
+    if self.grid then return self.grid:RefreshMountedValues(self.container) == true end
+    self.owner:Refresh()
+    return true
+end
+
+-- 把目标设置块滚到可视区最上方并闪烁描边。
+function ModulePage:Focus(key, scrollFrame)
+    if not scrollFrame or type(scrollFrame.SetVerticalScroll) ~= "function" then return false end
+    if not select(3, self:Find(key)) then return false end
+    local page = self
+    local function Reveal()
+        local _, _, target = page:Find(key)
+        if not target or not target.GetTop then return end
+        local childTop, widgetTop = page.container:GetTop(), target:GetTop()
+        if childTop and widgetTop then
+            -- childTop - widgetTop 是该块在 ScrollChild 内的纵向偏移；ScrollFrame 自行夹到可滚动范围。
+            scrollFrame:SetVerticalScroll(math.max(0, childTop - widgetTop))
         end
 
         local flash = target._exPreviewFocusFlash
@@ -536,11 +600,16 @@ function EXUI:FocusModuleGridKey(moduleKey, gridKey, scrollFrame, container)
             if flash then flash:Hide() end
         end)
     end
-
-    -- 等当前鼠标事件结束后再重新按同一 container 解析一次，确保坐标最新且
-    -- 不会对页面切换后回池/改 parent 的旧目标操作。
+    -- 等当前鼠标事件结束后再按同一页面重新解析一次，不对页面切换后回池的旧目标操作。
     C_Timer.After(0, Reveal)
     return true
+end
+
+-- 预览右键必须由页面明确交出它正在显示的 ScrollFrame + ScrollChild；模块只传语义 GUI key。
+function EXUI:FocusModuleGridKey(moduleKey, gridKey, scrollFrame, container)
+    if type(gridKey) ~= "string" or gridKey == "" or not container then return false end
+    local page = self:GetModulePage(moduleKey, container)
+    return page ~= nil and page:Focus(gridKey, scrollFrame)
 end
 
 --- Panel Preview 的模块侧右键入口。当前页面在 Render 时已明确持有其
@@ -1426,6 +1495,73 @@ end
 -- 离开模块页时必须在 root Hide/SetParent(nil) 之前归还 Grid 实例，
 -- 否则每个首次访问的模块都会长期占用一套 active pool widget。
 -- =========================================================
+-- V2 模块页沿用设置页版式：页头（模块名与说明）在上，内容居中占 75% 宽。
+local V2_MODULE_PAGE_INSET_X, V2_MODULE_PAGE_TOP, V2_MODULE_PAGE_BOTTOM = 12, 16, 52
+
+local function ReleaseV2ModulePage(page)
+    if page._exV2Session then
+        page._exV2Session:Release()
+        page._exV2Session = nil
+        page._exV2Owner = nil
+    end
+    if page._exV2Heading then
+        page._exV2Heading:Release()
+        page._exV2Heading = nil
+    end
+end
+
+local function V2ModulePageColumn(page)
+    local available = math.max(1, page:GetWidth() - V2_MODULE_PAGE_INSET_X * 2)
+    local width = math.max(1, math.floor(available * 0.75 + 0.5))
+    return V2_MODULE_PAGE_INSET_X + math.floor((available - width) * 0.5 + 0.5), width
+end
+
+local function LayoutV2ModulePage(page)
+    local host = page._exV2Host
+    if not host or not page._exV2Session then return end
+    local left, width = V2ModulePageColumn(page)
+    local top = V2_MODULE_PAGE_TOP
+    local heading = page._exV2Heading
+    if heading then
+        local height = EXUI:UpdateSettingsSectionLayout(heading, width)
+        heading:ClearAllPoints()
+        PixelUtil.SetPoint(heading, "TOPLEFT", page, "TOPLEFT", left, -top, 0, 0)
+        top = top + height
+    end
+    host:ClearAllPoints()
+    PixelUtil.SetPoint(host, "TOPLEFT", page, "TOPLEFT", left, -top, 0, 0)
+    PixelUtil.SetWidth(host, width, 1)
+    page:SetHeight(math.max(1, top + page._exV2Session:GetHeight() + V2_MODULE_PAGE_BOTTOM))
+    if EXUI.ModuleScrollFrame and EXUI.ModuleScrollFrame.UpdateScrollChildRect then
+        EXUI.ModuleScrollFrame:UpdateScrollChildRect()
+    end
+end
+
+local function MountV2ModulePage(page, pageId, owner, title, description)
+    local host = page._exV2Host
+    if not host then
+        host = CreateFrame("Frame", nil, page)
+        host._isPersistent = true
+        host:SetHeight(1)
+        page._exV2Host = host
+        page:HookScript("OnSizeChanged", function(self) LayoutV2ModulePage(self) end)
+    end
+    if title or description then
+        page._exV2Heading = EXUI:CreateSettingsSection(page, { kind = "page", title = title, description = description })
+    end
+    local ownerHeightChanged = owner.onHeightChanged
+    owner.onHeightChanged = function(height)
+        LayoutV2ModulePage(page)
+        if ownerHeightChanged then ownerHeightChanged(height) end
+    end
+    local _, width = V2ModulePageColumn(page)
+    host:SetWidth(width)
+    page._exV2Owner = owner
+    page._exV2Session = EXUI:MountSettingsPageV2(host, pageId, owner)
+    LayoutV2ModulePage(page)
+    return page._exV2Session
+end
+
 function EXUI:ReleaseModuleSettingsPage(page)
     page = page or EXUI._InternalPageFrame
     if not page or not page._exGridPage then
@@ -1435,9 +1571,7 @@ function EXUI:ReleaseModuleSettingsPage(page)
     local grid = _G.ExwindGrid
 
     if page._exV2Session then
-        page._exV2Session:Release()
-        page._exV2Session = nil
-        page._exV2Owner = nil
+        ReleaseV2ModulePage(page)
     elseif not grid then
         return false
     end
@@ -1999,11 +2133,7 @@ function EXUI:ShowModuleSettingsPage()
             and _G.ExwindGrid:GetMountedCardSession(page) or nil
         if previousCardSession then previousCardSession:Release() end
         page._exCardSession = nil
-        if page._exV2Session then
-            page._exV2Session:Release()
-            page._exV2Session = nil
-            page._exV2Owner = nil
-        end
+        ReleaseV2ModulePage(page)
         if usesCardDeclaration and _G.ExwindGrid.ContainerStates[page] then
             _G.ExwindGrid:ReleaseContainerWidgets(page)
         end
@@ -2038,20 +2168,14 @@ function EXUI:ShowModuleSettingsPage()
                 settingsPageDescription = moduleMeta.Desc,
                 scrollFrame = EXUI.ModuleScrollFrame,
             }
-            local owner = v2Entry.ownerFactory(mountContext)
+            local owner = v2Entry.ownerFactory and v2Entry.ownerFactory(mountContext) or {}
             if type(owner) ~= "table" then
                 error("module V2 owner factory must return a table: " .. tostring(currentModuleKey), 2)
             end
-            local ownerHeightChanged = owner.onHeightChanged
-            owner.onHeightChanged = function(height)
-                page:SetHeight(math.max(1, height + 52))
-                if EXUI.ModuleScrollFrame.UpdateScrollChildRect then
-                    EXUI.ModuleScrollFrame:UpdateScrollChildRect()
-                end
-                if ownerHeightChanged then ownerHeightChanged(height) end
+            if owner.binding == nil then
+                owner.binding = { moduleKey = currentModuleKey, config = config }
             end
-            page._exV2Owner = owner
-            page._exV2Session = EXUI:MountSettingsPageV2(page, v2Entry.pageId, owner)
+            MountV2ModulePage(page, v2Entry.pageId, owner, moduleMeta.Name, moduleMeta.Desc)
             if type(owner.AttachSession) == "function" then
                 owner:AttachSession(page._exV2Session)
             end

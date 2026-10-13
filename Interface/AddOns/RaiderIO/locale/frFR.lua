@@ -620,6 +620,8 @@ L["RAID_BOSS_TOT_9"] = "Sombre animus"
 L["RAID_BOSS_TOTFW_1"] = "Conclave du Vent"
 L["RAID_BOSS_TOTFW_2"] = "Al’Akir"
 --[[Translation missing --]]
+--[[ L["RAID_BOSS_UOK_1"] = ""--]] 
+--[[Translation missing --]]
 --[[ L["RAID_BOSS_VA_1"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_VA_2"] = ""--]] 
@@ -712,6 +714,8 @@ L["RAID_ToES"] = "Terrasse Printanière"
 L["RAID_TOES"] = "Terrasse Printanière"
 L["RAID_TOT"] = "Trône du tonnerre"
 L["RAID_TOTFW"] = "Trône des quatre vents"
+--[[Translation missing --]]
+--[[ L["RAID_UOK"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_VA"] = ""--]] 
 --[[Translation missing --]]

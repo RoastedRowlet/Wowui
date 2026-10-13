@@ -5,7 +5,7 @@ local addonName, addon = ...
 --
 
 local function print(...)
-	_G.print("|cff259054BugSack:|r", ...)
+	_G.print("|cFF33FF99BugSack:|r", ...)
 end
 if not LibStub then
 	print("BugSack requires LibStub.")
@@ -15,17 +15,21 @@ end
 local L = addon.L
 local BugGrabber = BugGrabber
 if not BugGrabber then
-	local msg =
-		L["|cffff4411BugSack requires the |r|cff44ff44!BugGrabber|r|cffff4411 addon, which you can download from the same place you got BugSack. Happy bug hunting!|r"]
 	local f = CreateFrame("Frame")
-	f:SetScript("OnEvent", function()
-		RaidNotice_AddMessage(RaidWarningFrame, msg, { r = 1, g = 0.3, b = 0.1 })
-		print(msg)
-		f:UnregisterEvent("PLAYER_ENTERING_WORLD")
-		f:SetScript("OnEvent", nil)
-		f = nil
+	local Timer = C_Timer.After
+	f:SetScript("OnEvent", function(self, event)
+		self:UnregisterEvent(event)
+		self:SetScript("OnEvent", nil)
+		Timer(0, function() -- Timers aren't fully functional until 1 frame after loading is done, this ensures the message stays onscreen for 20 seconds as desired
+			print(L.bugGrabberMissing)
+			if RaidWarningUtil and RaidWarningUtil.AddMessage then
+				RaidWarningUtil.AddMessage(L.bugGrabberMissing, { r = 1, g = 1, b = 1 }, 20)
+			else
+				RaidNotice_AddMessage(RaidBossEmoteFrame, L.bugGrabberMissing, { r = 1, g = 1, b = 1 }, 20)
+			end
+		end)
 	end)
-	f:RegisterEvent("PLAYER_ENTERING_WORLD")
+	f:RegisterEvent("LOADING_SCREEN_DISABLED")
 	return
 end
 
@@ -35,7 +39,7 @@ addon.healthCheck = true
 
 -- Sound
 local media = LibStub("LibSharedMedia-3.0")
-media:Register("sound", "BugSack: Fatality", "Interface\\AddOns\\" .. addonName .. "\\Media\\error.ogg")
+media:Register("sound", "BugSack: Fatality", "Interface\\AddOns\\BugSack\\Media\\error.ogg")
 
 -----------------------------------------------------------------------
 -- Utility
@@ -71,141 +75,6 @@ do
 end
 
 -----------------------------------------------------------------------
--- Event handling
---
-
-do
-	local eventFrame = CreateFrame("Frame")
-	local tbl = {}
-	eventFrame:SetScript("OnEvent", function(self, event, loadedAddon)
-		if loadedAddon ~= addonName then
-			return
-		end
-		self:UnregisterEvent("ADDON_LOADED")
-
-		local ac = LibStub("AceComm-3.0", true)
-		if ac then
-			ac:Embed(addon)
-		end
-		local as = LibStub("AceSerializer-3.0", true)
-		if as then
-			as:Embed(addon)
-		end
-
-		local popup = _G.StaticPopupDialogs
-		if type(popup) ~= "table" then
-			popup = {}
-		end
-		if type(popup.BugSackSendBugs) ~= "table" then
-			popup.BugSackSendBugs = {
-				text = L["Send all bugs from the currently viewed session (%d) in the sack to the player specified below."],
-				button1 = L["Send"],
-				button2 = CLOSE,
-				timeout = 0,
-				whileDead = true,
-				hideOnEscape = true,
-				hasEditBox = true,
-				OnAccept = function(self, data)
-					local recipient = self:GetEditBox():GetText()
-					addon:SendBugsToUser(recipient, data)
-				end,
-				OnShow = function(self)
-					self:GetButton1():Disable()
-				end,
-				EditBoxOnTextChanged = function(self)
-					local t = self:GetText()
-					local dialog = self:GetParent()
-					if t:len() > 2 and not t:find("%s") then
-						dialog:GetButton1():Enable()
-					else
-						dialog:GetButton1():Disable()
-					end
-				end,
-				enterClicksFirstButton = true,
-				--OnCancel = function() show() end, -- Need to wrap it so we don't pass |self| as an error argument to show().
-				preferredIndex = 1,
-			}
-		end
-
-		if type(BugSackDB) ~= "table" then
-			BugSackDB = {}
-		end
-		local sv = BugSackDB
-		sv.profileKeys = nil
-		sv.profiles = nil
-		if type(sv.mute) ~= "boolean" then
-			sv.mute = false
-		end
-		if type(sv.auto) ~= "boolean" then
-			sv.auto = false
-		end
-		if type(sv.chatframe) ~= "boolean" then
-			sv.chatframe = false
-		end
-		if type(sv.soundMedia) ~= "string" then
-			sv.soundMedia = "BugSack: Fatality"
-		end
-		if type(sv.fontSize) ~= "string" then
-			sv.fontSize = "GameFontHighlight"
-		end
-		if type(sv.altwipe) ~= "boolean" then
-			sv.altwipe = false
-		end
-		if type(sv.useMaster) ~= "boolean" then
-			sv.useMaster = false
-		end
-		addon.db = sv
-
-		-- Make sure we grab any errors fired before bugsack loaded.
-		local session = addon:GetErrors(BugGrabber:GetSessionId())
-		if #session > 0 then
-			if not addon.db.mute then
-				local sound = media:Fetch("sound", addon.db.soundMedia)
-				if addon.db.useMaster then
-					PlaySoundFile(sound, "Master")
-				else
-					PlaySoundFile(sound)
-				end
-			end
-			if addon.db.chatframe then
-				print(L["There's a bug in your soup!"])
-			end
-			if addon.db.auto then
-				addon:OpenSack()
-			end
-			addon:UpdateDisplay()
-		end
-
-		if addon.RegisterComm then
-			addon:RegisterComm("BugSack", "OnBugComm")
-		end
-
-		-- Set up our error event handler
-		EventRegistry:RegisterCallback("BugGrabber.BugGrabbed", onError, tbl)
-		EventRegistry:TriggerEvent("BugGrabber.DisplayRegistered")
-
-		-- Initialize settings now that database is ready
-		if addon.InitializeSettings then
-			addon.InitializeSettings()
-		end
-
-		SlashCmdList.BugSack = function(msg)
-			msg = msg:lower()
-			if msg == "show" then
-				addon:OpenSack()
-			else
-				Settings.OpenToCategory(addon.settingsCategory:GetID())
-			end
-		end
-		SLASH_BugSack1 = "/bugsack"
-
-		self:SetScript("OnEvent", nil)
-	end)
-	eventFrame:RegisterEvent("ADDON_LOADED")
-	-- Frame reference no longer needed with vertical layout
-end
-
------------------------------------------------------------------------
 -- API
 --
 
@@ -232,15 +101,15 @@ end
 
 do
 	local function colorStack(ret)
-		ret = ret:gsub("[%.I][%.n][%.t][%.e][%.r]face/", "")
-		ret = ret:gsub("%.?%.?%.?/?AddOns/", "")
-		ret = ret:gsub("%.%.%.dOns/", "")
-		ret = ret:gsub("|([^chHr])", "||%1"):gsub("|$", "||") -- Pipes
-		ret = ret:gsub("<([^>]+)>", "|cffffea00<%1>|r") -- Things wrapped in <>
-		ret = ret:gsub("%[(.-)%]", "|cffffea00[%1]|r") -- Things wrapped in []
-		ret = ret:gsub("([\"`'])(.-)%1", "|cff8888ff%0|r") -- Quotes
-		ret = ret:gsub(":(%d+)([%S\n])", ":|cff00ff00%1|r%2") -- Line numbers
-		ret = ret:gsub("([^/]+%.lua)", "|cffffffff%1|r") -- Lua files
+		ret = ret:gsub("Interface/AddOns/", "")
+		ret = ret:gsub("^%.%.%.[^/]+/AddOns/", "")
+		ret = ret:gsub("^%.%.%.[^/]*dOns/", "")
+		ret = ret:gsub("<([^>]+:)(%d+)>", "|cffffea00<%1|cff00ff00%2|r>|r") -- File paths wrapped in <> e.g. <Addon/Module.lua:188>
+		ret = ret:gsub("%[([^%]]+)%]:(%d+):", "|cffffea00[%1]:|cff00ff00%2|r:|r") -- File paths wrapped in [] e.g. [Addon/Module.lua]:69:
+		ret = ret:gsub("\"[^\"\n]-\"", "|cff8888ff%0|r") -- Quotes ""
+		ret = ret:gsub("'[^'\n ]-'", "|cff8888ff%0|r") -- Quotes ''
+		ret = ret:gsub("`[^`\n ]-`", "|cff8888ff%0|r") -- Quotes ``
+		ret = ret:gsub("'%(for generator%)'", "|cff8888ff%0|r") -- Quote '(for generator)'
 		return ret
 	end
 	addon.ColorStack = colorStack
@@ -281,7 +150,6 @@ do
 end
 
 function addon:Reset()
-	self:CloseSack()
 	BugGrabber:Reset()
 	self:UpdateDisplay()
 	print(L["All stored bugs have been exterminated painfully."])
@@ -397,3 +265,113 @@ do
 		end
 	end
 end]]
+
+-----------------------------------------------------------------------
+-- Initialize
+--
+
+do
+	SlashCmdList.BugSack = function()
+		addon:OpenSack()
+	end
+	SLASH_BugSack1 = "/bugsack"
+
+	local ac = LibStub("AceComm-3.0", true)
+	if ac then
+		ac:Embed(addon)
+	end
+	local as = LibStub("AceSerializer-3.0", true)
+	if as then
+		as:Embed(addon)
+	end
+
+	local popup = _G.StaticPopupDialogs
+	if type(popup) ~= "table" then
+		popup = {}
+	end
+	if type(popup.BugSackSendBugs) ~= "table" then
+		popup.BugSackSendBugs = {
+			text = L["Send all bugs from the currently viewed session (%d) in the sack to the player specified below."],
+			button1 = L["Send"],
+			button2 = CLOSE,
+			timeout = 0,
+			whileDead = true,
+			hideOnEscape = true,
+			hasEditBox = true,
+			OnAccept = function(self, data)
+				local recipient = self:GetEditBox():GetText()
+				addon:SendBugsToUser(recipient, data)
+			end,
+			OnShow = function(self)
+				self:GetButton1():Disable()
+			end,
+			EditBoxOnTextChanged = function(self)
+				local t = self:GetText()
+				local dialog = self:GetParent()
+				if t:len() > 2 and not t:find("%s") then
+					dialog:GetButton1():Enable()
+				else
+					dialog:GetButton1():Disable()
+				end
+			end,
+			enterClicksFirstButton = true,
+			--OnCancel = function() show() end, -- Need to wrap it so we don't pass |self| as an error argument to show().
+			preferredIndex = 1,
+		}
+	end
+
+	if type(BugSackDB) ~= "table" then
+		BugSackDB = {}
+	end
+	local sv = BugSackDB
+	if type(sv.mute) ~= "boolean" then
+		sv.mute = false
+	end
+	if type(sv.auto) ~= "boolean" then
+		sv.auto = false
+	end
+	if type(sv.chatframe) ~= "boolean" then
+		sv.chatframe = false
+	end
+	if type(sv.soundMedia) ~= "string" then
+		sv.soundMedia = "BugSack: Fatality"
+	end
+	if type(sv.fontSize) ~= "string" then
+		sv.fontSize = "GameFontHighlight"
+	end
+	if type(sv.altwipe) ~= "boolean" then
+		sv.altwipe = false
+	end
+	if type(sv.useMaster) ~= "boolean" then
+		sv.useMaster = false
+	end
+	addon.db = sv
+
+	-- Make sure we grab any errors fired before bugsack loaded.
+	local session = addon:GetErrors(BugGrabber:GetSessionId())
+	if #session > 0 then
+		if not addon.db.mute then
+			local sound = media:Fetch("sound", addon.db.soundMedia)
+			if addon.db.useMaster then
+				PlaySoundFile(sound, "Master")
+			else
+				PlaySoundFile(sound)
+			end
+		end
+		if addon.db.chatframe then
+			print(L["There's a bug in your soup!"])
+		end
+		if addon.db.auto then
+			addon:OpenSack()
+		end
+		addon:UpdateDisplay()
+	end
+
+	if addon.RegisterComm then
+		addon:RegisterComm("BugSack", "OnBugComm")
+	end
+
+	-- Set up our error event handler
+	EventRegistry:RegisterCallback("BugGrabber.BugGrabbed", onError, {})
+	EventRegistry:TriggerEvent("BugGrabber.DisplayRegistered")
+end

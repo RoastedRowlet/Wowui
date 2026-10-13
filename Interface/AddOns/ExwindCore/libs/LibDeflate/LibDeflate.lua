@@ -3,8 +3,6 @@ LibDeflate 1.0.2-release <br>
 Pure Lua compressor and decompressor with high compression ratio using
 DEFLATE/zlib format.
 
-EXWIND local alteration: bounded raw DEFLATE decompression API.
-
 @file LibDeflate.lua
 @author Haoqian He (Github: SafeteeWoW; World of Warcraft: Safetyy-Illidan(US))
 @copyright LibDeflate <2018-2021> Haoqian He
@@ -77,9 +75,9 @@ Their original licenses shall be comply when used.
 ]] --[[
 	Curseforge auto-packaging replacements:
 
-	Project Date: 2021-05-05T13:18:27Z
-	Project Hash: afc3b78d12fb3bcfa6b21e5332031ad3d7572e19
-	Project Version: afc3b78
+	Project Date: @project-date-iso@
+	Project Hash: @project-hash@
+	Project Version: @project-version@
 --]] local LibDeflate
 
 do
@@ -90,8 +88,8 @@ do
   -- 2. _VERSION
   -- 3. _MINOR
 
-  -- Version label marks this EXWIND modification of LibDeflate 1.0.2.
-  local _VERSION = "1.0.2-release-exwind1"
+  -- version to store the official version of LibDeflate
+  local _VERSION = "1.0.2-release"
 
   -- When MAJOR is changed, I should name it as LibDeflate2
   local _MAJOR = "LibDeflate"
@@ -101,8 +99,7 @@ do
   -- 1 : v1.0.0
   -- 2 : v1.0.1
   -- 3 : v1.0.2
-  -- 4 : EXWIND bounded raw DEFLATE API
-  local _MINOR = 4
+  local _MINOR = 3
 
   local _COPYRIGHT = "LibDeflate " .. _VERSION ..
                        " Copyright (C) 2018-2021 Haoqian He." ..
@@ -2277,7 +2274,7 @@ end
 -- @param dictionary The preset dictionary. nil if not provided.
 --		This dictionary should be produced by LibDeflate:CreateDictionary(str)
 -- @return The decomrpess state.
-local function CreateDecompressState(str, dictionary, max_output_size)
+local function CreateDecompressState(str, dictionary)
   local ReadBits, ReadBytes, Decode, ReaderBitlenLeft, SkipToByteBoundary =
     CreateReader(str)
   local state = {
@@ -2289,9 +2286,7 @@ local function CreateDecompressState(str, dictionary, max_output_size)
     buffer_size = 0,
     buffer = {},
     result_buffer = {},
-    dictionary = dictionary,
-    max_output_size = max_output_size,
-    output_size = 0
+    dictionary = dictionary
   }
   return state
 end
@@ -2388,10 +2383,6 @@ local function DecodeUntilEndOfBlock(state, lcodes_huffman_bitlens,
       -- invalid literal/length or distance code in fixed or dynamic block
       return -10
     elseif symbol < 256 then -- Literal
-      if state.max_output_size then
-        if state.output_size >= state.max_output_size then return "SIZE_LIMIT" end
-        state.output_size = state.output_size + 1
-      end
       buffer_size = buffer_size + 1
       buffer[buffer_size] = _byte_to_char[symbol]
     elseif symbol > 256 then -- Length code
@@ -2416,10 +2407,6 @@ local function DecodeUntilEndOfBlock(state, lcodes_huffman_bitlens,
       if char_buffer_index < buffer_end then
         -- distance is too far back in fixed or dynamic block
         return -11
-      end
-      if state.max_output_size then
-        if bitlen > state.max_output_size - state.output_size then return "SIZE_LIMIT" end
-        state.output_size = state.output_size + bitlen
       end
       if char_buffer_index >= -257 then
         for _ = 1, bitlen do
@@ -2486,16 +2473,11 @@ local function DecompressStoreBlock(state)
     return -2 -- Not one's complement
   end
 
-  if state.max_output_size then
-    if bytelen > state.max_output_size - state.output_size then return "SIZE_LIMIT" end
-  end
-
   -- Note that ReadBytes will skip to the next byte boundary first.
   buffer_size = ReadBytes(bytelen, buffer, buffer_size)
   if buffer_size < 0 then
     return 2 -- available inflate data did not terminate
   end
-  if state.max_output_size then state.output_size = state.output_size + bytelen end
 
   -- memory clean up when there are enough bytes in the buffer.
   if buffer_size >= 65536 then
@@ -2663,8 +2645,8 @@ end
 
 -- @see LibDeflate:DecompressDeflate(str)
 -- @see LibDeflate:DecompressDeflateWithDict(str, dictionary)
-local function DecompressDeflateInternal(str, dictionary, max_output_size)
-  local state = CreateDecompressState(str, dictionary, max_output_size)
+local function DecompressDeflateInternal(str, dictionary)
+  local state = CreateDecompressState(str, dictionary)
   local result, status = Inflate(state)
   if not result then return nil, status end
 
@@ -2763,25 +2745,6 @@ function LibDeflate:DecompressDeflate(str)
     error(("Usage: LibDeflate:DecompressDeflate(str): " .. arg_err), 2)
   end
   return DecompressDeflateInternal(str)
-end
-
---- Decompress raw DEFLATE while limiting the uncompressed output.
--- This EXWIND extension checks before every literal, match, and stored block
--- write. On overflow it returns nil, "SIZE_LIMIT" without expanding further.
--- On success the second result is the ordinary unprocessed-byte count.
--- @param str [string] The raw DEFLATE stream.
--- @param maxOutputBytes [number] Nonnegative integer output budget.
-function LibDeflate:DecompressDeflateLimited(str, maxOutputBytes)
-  local arg_valid, arg_err = IsValidArguments(str)
-  if not arg_valid then
-    error(("Usage: LibDeflate:DecompressDeflateLimited(str, maxOutputBytes): " .. arg_err), 2)
-  end
-  if type(maxOutputBytes) ~= "number" or maxOutputBytes < 0 or
-    maxOutputBytes == math.huge or maxOutputBytes ~= maxOutputBytes or
-    maxOutputBytes % 1 ~= 0 then
-    error("Usage: LibDeflate:DecompressDeflateLimited(str, maxOutputBytes): maxOutputBytes must be a nonnegative finite integer", 2)
-  end
-  return DecompressDeflateInternal(str, nil, maxOutputBytes)
 end
 
 --- Decompress a raw deflate compressed data with a preset dictionary.

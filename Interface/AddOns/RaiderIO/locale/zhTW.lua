@@ -507,6 +507,8 @@ L["RAID_BOSS_TOT_8"] = "普莫迪斯"
 L["RAID_BOSS_TOT_9"] = "黑暗憎惡魔像"
 L["RAID_BOSS_TOTFW_1"] = "風之議會"
 L["RAID_BOSS_TOTFW_2"] = "奧拉基爾"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_UOK_1"] = ""--]] 
 L["RAID_BOSS_VA_1"] = "『纏魂者』尼札利"
 L["RAID_BOSS_VA_2"] = "埋葬衛哨"
 L["RAID_BOSS_VA_3"] = "迷路的探險者"
@@ -573,6 +575,8 @@ L["RAID_ToES"] = "豐泉臺"
 L["RAID_TOES"] = "豐泉台"
 L["RAID_TOT"] = "雷霆王座"
 L["RAID_TOTFW"] = "四風王座"
+--[[Translation missing --]]
+--[[ L["RAID_UOK"] = ""--]] 
 L["RAID_VA"] = "劇毒深淵"
 L["RAID_VS"] = "虛無之塔"
 L["RAID_VS_DR_MQD"] = "虛無/夢境/進軍"

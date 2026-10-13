@@ -206,12 +206,11 @@ local MODULE_SPEC = {
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        description = L["战复次数与充能倒数由中央显示层渲染"],
-        sections = {
-            {
-                kind = "composite", id = "common", title = L["模块通用设置"],
-                component = "modulecommonsettings", key = "moduleCommon", opts = {
+        version = 2,
+        cards = {
+            { id = "card.common", kind = "card", title = L["模块通用设置"], children = {
+                { id = "description", kind = "hint", text = L["战复次数与充能倒数由中央显示层渲染"] },
+                { id = "moduleCommon", kind = "component", component = "modulecommonsettings", path = "moduleCommon", opts = {
                     bindRoot = true,
                     presentation = "settings-list",
                     fields = {
@@ -221,24 +220,20 @@ local MODULE_SPEC = {
                         controlH = 6, controlW = 46, firstY = 0, logicalWidth = 200,
                         rowStep = 14, slotX = { 3, 53, 103, 153 },
                     },
-                },
-            },
-            {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchor",
-            },
-            {
-                kind = "composite", id = "icon", title = L["战复整体图标与位置"],
-                component = "icongroup", key = "icon",
-            },
-            {
-                kind = "composite", id = "font_time", title = L["战复计时文字（中心）"],
-                component = "fontgroup", key = "font_time",
-            },
-            {
-                kind = "composite", id = "font_stacks", title = L["战复次数文字（右下）"],
-                component = "fontgroup", key = "font_stacks",
-            },
+                } },
+            } },
+            { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
+                { id = "anchor", kind = "component", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+            { id = "card.icon", kind = "card", title = L["战复整体图标与位置"], children = {
+                { id = "icon", kind = "component", component = "icongroup", path = "icon", optionsRef = "icon" },
+            } },
+            { id = "card.font_time", kind = "card", title = L["战复计时文字（中心）"], children = {
+                { id = "font_time", kind = "component", component = "fontgroup", path = "font_time" },
+            } },
+            { id = "card.font_stacks", kind = "card", title = L["战复次数文字（右下）"], children = {
+                { id = "font_stacks", kind = "component", component = "fontgroup", path = "font_stacks" },
+            } },
         },
     },
     samples = {
