@@ -825,10 +825,9 @@ L.selectPlayer = "选择玩家"
 L.myself = "自己"
 L.trigger = "触发条件"
 L.remove = "移除"
-L.auraCountdownDesc = "启用后，光环结束前3秒将播放语音倒计时。"
-L.auraDuration = "光环持续时间"
-L.auraDurationDesc = "光环的持续时间（秒）。"
 L.currentUnit = "（当前：%s）"
+L.throttle = "播放间隔"
+L.throttleDesc = "光环触发时播放音效的最短间隔（秒）。设为 0 则每次触发都播放。"
 
 -----------------------------------------------------------------------
 -- AutoReply.lua

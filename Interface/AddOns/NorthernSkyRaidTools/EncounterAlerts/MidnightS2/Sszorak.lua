@@ -3,6 +3,16 @@ local _, NSI = ... -- Internal namespace
 local encID = 3420
 -- /run NSAPI:DebugEncounter(3420)
 
+NSI:RegisterBuiltinAuraGlow("SszorakVenomousSurge", {
+    name = NSI:Loc("Venomous Surge"),
+    encounterID = encID,
+    group = "Season 2",
+    menuIcon = 1305963,
+    roles = {HEALER = true},
+    color = {1, 0, 0, 1},
+    candidateFilters = {isBossAura = true, isRoleAura = false, MaxDuration = 12},
+})
+
 local tankComboTimers = {
     [14] = {5.5, 57.7, 143.7, 196, 282, 334},
     [15] = {5.5, 57.7, 143.7, 196, 282, 334},
@@ -94,7 +104,7 @@ NSI.InitializeAlerts[encID] = function(self)
     local data = {Version = {versionNumber = 2, [1] = {loadConditions = {}}, [2] = {customIcon = 1297367}}, group = "Sszorak", internalID = "SerpentsFury", name = "Serpent's Fury", text = "Stack Up", customIcon = 1297367, DisplayType = "Text", encID = encID, phase = 1, TTS = "Stack", dur = 6,
         loadConditions = {},
         timers = {
-            [16] = {25.5, 75.5, 152.5, 202.5, 279.5, 326.6},
+            [16] = {25.5, 72.5, 152.5, 199.5, 279.5, 326.6},
         },
     }
     self:AddEncounterAlert(data)

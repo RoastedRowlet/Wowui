@@ -150,3 +150,4 @@ SpellOverlay Enhanced: enabled
 TotemRecall: disabled
 BigWigs_MidnightLairs: enabled
 EXBoss: enabled
+BigWigs_TheUnbindingOfKithix: enabled

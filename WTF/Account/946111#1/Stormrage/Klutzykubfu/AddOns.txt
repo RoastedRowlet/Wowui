@@ -111,3 +111,4 @@ Blizzard_CombatText: enabled
 Blizzard_WeeklyRewards: enabled
 BigWigs_TheVenomousAbyss: enabled
 BigWigs_MidnightLairs: enabled
+BigWigs_TheUnbindingOfKithix: enabled

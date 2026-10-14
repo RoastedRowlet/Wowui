@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Warlock-Demonology','Mage-Arcane','Shaman-Restoration',}
-local provider = {region='US',realm='DemonSoul',name='US',type='subscribers',zone=53,date='2026-10-06',data={Co='Cobalt:BAEANQAECgMJAwABNQAFFAIIBAABAFATAA==.',Ja='Jake:BAEANQAECgMICAABNQAFFAcIGQACAJAZAA==.',To='Totemterror:BAEBNQAECoEYAAIDAAkKVCVFAgC2AwmODQAABABiAHUNAAADAFYAfw0AAAMAYgCpDQAAAwBiAFwNAAADAFoAXQ0AAAMAYABlDQAAAgBjAKQNAAABAF8AMw0AAAIAXwADAAkKVCVFAgC2AwmODQAABABiAHUNAAADAFYAfw0AAAMAYgCpDQAAAwBiAFwNAAADAFoAXQ0AAAMAYABlDQAAAgBjAKQNAAABAF8AMw0AAAIAXwAAAA==.',Wh='Whalethen:BAEANQAECgcICAABNQAECgkJGAADAFQlAA==.',},}
+local lookup = {'Warlock-Demonology','Shaman-Restoration',}
+local provider = {region='US',realm='DemonSoul',name='US',type='subscribers',zone=53,date='2026-10-13',data={Co='Cobalt:BAEANQAECgMJAwABNQAFFAUIBQABAMQPAA==.',Ja='Jake:BAEANQAECgMIBgAAAA==.',To='Totemterror:BAEBNQAECn8YAAICAAkKVCV+AwCwAwmODQAABABiAHUNAAADAFYAfw0AAAMAYgCpDQAAAwBiAFwNAAADAFoAXQ0AAAMAYABlDQAAAgBjAKQNAAABAF8AMw0AAAIAXwACAAkKVCV+AwCwAwmODQAABABiAHUNAAADAFYAfw0AAAMAYgCpDQAAAwBiAFwNAAADAFoAXQ0AAAMAYABlDQAAAgBjAKQNAAABAF8AMw0AAAIAXwAAAA==.',Wh='Whalethen:BAEANQAECgcICAABNQAECgkJGAACAFQlAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

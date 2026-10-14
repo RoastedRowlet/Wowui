@@ -55,3 +55,4 @@ EllesmereUIRaidFrames: enabled
 BigWigs_TheVenomousAbyss: enabled
 BigWigs_MidnightLairs: enabled
 LittleWigs_Cataclysm: enabled
+BigWigs_TheUnbindingOfKithix: enabled

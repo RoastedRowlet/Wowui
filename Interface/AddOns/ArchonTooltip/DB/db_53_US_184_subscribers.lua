@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='ScarletCrusade',name='US',type='subscribers',zone=53,date='2026-10-06',data={Ch='Cheeseydeath:BAEANQAECgMIAwAAAA==.',In='Invariance:BAEANQADCgUIBQABNQAECgUIBQABAAAAAA==.',Pi='Pineappledk:BAEANQADCggIEgABNQAECgMIBgABAAAAAA==.Pineapplle:BAEANQAECgMIBgAAAA==.',Ra='Ramhadin:BAEANQADCgcIEAABNQAECgYIEQABAAAAAA==.',},}
+local lookup = {'Unknown-Unknown','Priest-Shadow',}
+local provider = {region='US',realm='ScarletCrusade',name='US',type='subscribers',zone=53,date='2026-10-13',data={Ch='Cheeseydeath:BAEANQAECgMIAwAAAA==.',In='Invariance:BAEANQADCgUIBQABNQAECgUIBgABAAAAAA==.',Pi='Pineappledk:BAEANQADCggIEgABNQAECgQIBQABAAAAAA==.Pineapplepn:BAEANQAECgQIBQAAAA==.Pineapplle:BAEANQAECgMICQABNQAECgQIBQABAAAAAA==.',Ra='Ramhadin:BAEANQADCgcIFgABNQAECgcIHwACAGkdAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

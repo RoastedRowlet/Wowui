@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Baelgun',name='US',type='subscribers',zone=53,date='2026-10-06',data={Da='Daddio:BAEANQAECgQIBwAAAA==.',Dr='Driver:BAEANQAECgYIBQAAAA==.',Ev='Evilmonkeydr:BAEANQAECgQIBAABNQAECggIEAABAAAAAA==.Evilmonkeymg:BAEANQAECggIEAAAAA==.Evilmonkeysh:BAEANQADCgUIBQABNQAECggIEAABAAAAAA==.',},}
+local lookup = {'Unknown-Unknown','Mage-Arcane',}
+local provider = {region='US',realm='Baelgun',name='US',type='subscribers',zone=53,date='2026-10-13',data={Da='Daddio:BAEANQAECgQIBwAAAA==.',Dr='Driver:BAEANQAECgYIBgABNQAECggICAABAAAAAA==.',Ev='Evilmonkeydr:BAEANQAECgQIBAABNQAECgkJGAACAJYcAA==.Evilmonkeymg:BAEBNQAECn8YAAICAAkKlhw7WgDLAgmODQAABABHAHUNAAADAFAAfw0AAAMAOgCpDQAABAAuAFwNAAADAFQAXQ0AAAMAPgBlDQAAAQBdAKQNAAABAEgAMw0AAAIAQQACAAkKlhw7WgDLAgmODQAABABHAHUNAAADAFAAfw0AAAMAOgCpDQAABAAuAFwNAAADAFQAXQ0AAAMAPgBlDQAAAQBdAKQNAAABAEgAMw0AAAIAQQAAAA==.Evilmonkeysh:BAEANQADCgUIBQABNQAECgkJGAACAJYcAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

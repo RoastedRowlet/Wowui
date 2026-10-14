@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='Hydraxis',name='US',type='subscribers',zone=53,date='2026-10-06',data={},}
+local lookup = {'Priest-Holy','Priest-Shadow','Mage-Frost','Mage-Arcane',}
+local provider = {region='US',realm='Hydraxis',name='US',type='subscribers',zone=53,date='2026-10-13',data={Ho='Hondojoe:BAEBNQAECn8bAAMBAAgKrRMxbADVAQiODQAABAAoAHUNAAAEAB0Afw0AAAQAUQCpDQAABAA8AFwNAAADAEYAXQ0AAAMAKgBlDQAAAgAYADMNAAADADUAAQAICq0TMWwA1QEIjg0AAAMAKAB1DQAAAgAdAH8NAAACAFEAqQ0AAAIAPABcDQAAAwBGAF0NAAADACoAZQ0AAAIAGAAzDQAAAwA1AAIABAqmDcVNANkABI4NAAABACgAdQ0AAAIAKQB/DQAAAgAvAKkNAAACABcAAAA=.',Jo='Joerollin:BAEANQADCggICQABNQAECggIGwABAK0TAA==.',Si='Simichaelton:BAECNQAFFH8GAAMDAAIKTBFuEgBJAAKODQAAAwAvAKkNAAADACkABAABCm0SslYAUAABjg0AAAMALwADAAEKKxBuEgBJAAGpDQAAAwApADUABAp/LwADAwAJCnQZtxoAGgEABAAIClQTeq4AJAIAAwAECn4ctxoAGgEAAAA=.',Zo='Zomby:BAEANQADCggICAABNQAFFAIIBgADAEwRAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

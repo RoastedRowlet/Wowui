@@ -1,11 +1,6 @@
 local _, NSI = ... -- Internal namespace
 NSI.LSM = LibStub("LibSharedMedia-3.0")
 NSMedia = {}
---Icons
-NSI.LSM:Register("statusbar", "play_icon", [[Interface\Addons\NorthernSkyRaidTools\Media\Icons\play_icon]])
-NSI.LSM:Register("statusbar", "stop_icon", [[Interface\Addons\NorthernSkyRaidTools\Media\Icons\stop_icon]])
-NSI.LSM:Register("statusbar", "user_icon", [[Interface\Addons\NorthernSkyRaidTools\Media\Icons\user-round]])
-NSI.LSM:Register("statusbar", "users_icon", [[Interface\Addons\NorthernSkyRaidTools\Media\Icons\users-round]])
 --Sounds
 local color = "|cFF4BAAC8"
 NSI.LSM:Register("sound", color .. "Macro|r", [[Interface\Addons\NorthernSkyRaidTools\Media\Sounds\macro.mp3]])
@@ -56,6 +51,7 @@ NSI.LSM:Register("sound", color .. "Ranged|r", [[Interface\Addons\NorthernSkyRai
 NSI.LSM:Register("sound", color .. "Boss|r", [[Interface\Addons\NorthernSkyRaidTools\Media\Sounds\Boss.ogg]])
 NSI.LSM:Register("sound", color .. "Suck|r", [[Interface\Addons\NorthernSkyRaidTools\Media\Sounds\Suck.ogg]])
 NSI.LSM:Register("sound", color .. "RunOut|r", [[Interface\Addons\NorthernSkyRaidTools\Media\Sounds\RunOut.ogg]])
+NSI.LSM:Register("sound", color .. "Safe|r", [[Interface\Addons\NorthernSkyRaidTools\Media\Sounds\Safe.ogg]])
 NSI.LSM:Register("sound", color .. "Fire|r", [[Interface\Addons\NorthernSkyRaidTools\Media\Sounds\Fire.ogg]])
 NSI.LSM:Register("sound", color .. "Frost|r", [[Interface\Addons\NorthernSkyRaidTools\Media\Sounds\Frost.ogg]])
 NSI.LSM:Register("sound", color .. "North|r", [[Interface\Addons\NorthernSkyRaidTools\Media\Sounds\North.ogg]])

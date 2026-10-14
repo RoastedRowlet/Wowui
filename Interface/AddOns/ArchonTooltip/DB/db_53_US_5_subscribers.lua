@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown','Warlock-Demonology','Warlock-Destruction',}
-local provider = {region='US',realm='Akama',name='US',type='subscribers',zone=53,date='2026-10-06',data={Fr='Fries:BAEANQAECgcIBwABNQAECggIDAABAAAAAA==.',Ph='Phoon:BAECNQAFFIEFAAMCAAIKoRbcJACkAAKODQAAAwA0AKkNAAACAD8AAgACCqEW3CQApAACjg0AAAMANACpDQAAAQA/AAMAAQopEWsZAFAAAakNAAABACsANQAECoEmAAMCAAkKtiCbMgCkAgACAAcKASObMgCkAgADAAQKVBxBIgBTAQAAAA==.Phoondk:BAEANQAECgUICAABNQAFFAIIBQACAKEWAA==.',},}
+local provider = {region='US',realm='Akama',name='US',type='subscribers',zone=53,date='2026-10-13',data={Fr='Fries:BAEANQAECgcIBwABNQAECggIDQABAAAAAA==.',Ph='Phoon:BAECNQAFFH8JAAMCAAQKzxsqFQBRAQSODQAABABGAHUNAAABAEkAfw0AAAEALgCpDQAAAwBFAAIABArPGyoVAFEBBI4NAAAEAEYAdQ0AAAEASQB/DQAAAQAuAKkNAAACAEUAAwABCikRghwATgABqQ0AAAEAKwA1AAQKfykAAwIACQpvI0A7AJ8CAAIABwouI0A7AJ8CAAMABAqiITkkAE8BAAAA.Phoondk:BAEANQAECgUICAABNQAFFAQICQACAM8bAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

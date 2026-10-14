@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Mage-Arcane','Paladin-Retribution',}
-local provider = {region='US',realm='Doomhammer',name='US',type='subscribers',zone=53,date='2026-10-06',data={De='Demonicfyre:BAEBNQAECoEdAAIBAAkKvxxMVgDDAgmODQAABABBAHUNAAADAEwAfw0AAAMAUwCpDQAABABXAFwNAAACAEAAXQ0AAAIALwBlDQAABABhAKQNAAAFAD8AMw0AAAIATAABAAkKvxxMVgDDAgmODQAABABBAHUNAAADAEwAfw0AAAMAUwCpDQAABABXAFwNAAACAEAAXQ0AAAIALwBlDQAABABhAKQNAAAFAD8AMw0AAAIATAAAAA==.Demonstein:BAEANQAECgUIBgABNQAFFAUIDQACAM8YAA==.',Ne='Nerissa:BAEANQAECggICgAAAA==.',Sh='Shamanstein:BAEANQADCggJDwABNQAFFAUIDQACAM8YAA==.',Sm='Smâlls:BAEANQAECgQIDQAAAA==.',Vi='Viirnald:BAEANQADCgcIDQAAAA==.',},}
+local provider = {region='US',realm='Doomhammer',name='US',type='subscribers',zone=53,date='2026-10-13',data={De='Demonicfyre:BAECNQAFFH8HAAIBAAMKDBiuMQD8AAOODQAAAwAuAHUNAAABAEIAqQ0AAAMARwABAAMKDBiuMQD8AAOODQAAAwAuAHUNAAABAEIAqQ0AAAMARwA1AAQKfyAAAgEACQoTHM5UANcCAAEACQoTHM5UANcCAAAA.Demonstein:BAEANQAECgUIBQABNQAFFAUIDQACAI4gAA==.',Ne='Nerissa:BAEANQAECggIEQAAAA==.',Sh='Shamanstein:BAEANQADCggJDwABNQAFFAUIDQACAI4gAA==.',Sm='Smâlls:BAEANQAECgUIDAAAAA==.',Vi='Viirnald:BAEANQADCgcIDQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

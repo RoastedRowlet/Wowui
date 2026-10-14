@@ -1,6 +1,4 @@
 local _, NSI = ...
-local AuraTrackingSerializer = LibStub("AceSerializer-3.0")
-
 local AuraTrackingFilters = {
     "HARMFUL",
 }
@@ -16,6 +14,7 @@ local AuraTrackingExcludedSpellIDs = {
     [95809] = true, -- Insanity
     [160455] = true, -- Fatigued
 }
+NSI.AuraTrackingExcludedSpellIDs = AuraTrackingExcludedSpellIDs
 NSI.AuraTrackingFilterDefinitions = {
     { key = "Helpful", value = "HELPFUL" },
     { key = "Harmful", value = "HARMFUL" },
@@ -216,6 +215,7 @@ function NSI:CreateAuraTrackingSettingsDefaults(overrides)
         NameXOffset = 0,
         NameYOffset = 4,
         NameFontSize = 30,
+        NameLength = 12,
         TrackingMode = "SpellIDs",
         SpellIDPlayerFilter = "Disabled",
         SpellIDs = {},
@@ -658,7 +658,7 @@ local AuraTrackingDisplayFields = {
     "DurationColor", "ShowDecimalSeconds", "DecimalThreshold", "ColorDurationUnderThreshold", "ColorDurationThreshold", "DurationThresholdColor",
     "StackColor", "DurationFontSize", "StackFontSize",
     "TextFont", "TextFontFlags", "DurationAnchorPoint", "DurationXOffset", "DurationYOffset", "StackAnchorPoint", "StackXOffset", "StackYOffset",
-    "NameEnabled", "UnitNameEnabled", "NamePosition", "NameXOffset", "NameYOffset", "NameFontSize",
+    "NameEnabled", "UnitNameEnabled", "NamePosition", "NameXOffset", "NameYOffset", "NameFontSize", "NameLength",
     "DisableTargetTracking",
     "OnlyShowFirstTank",
     "MultiTankGrow", "MultiTankXOffset", "MultiTankYOffset",
@@ -1257,7 +1257,7 @@ function NSI:ExportAuraTrackingEntry(settingsKey)
                 settings = CopyTable(settings),
             },
         },
-    }, AuraTrackingSerializer) or ""
+    }, "AuraTracking") or ""
 end
 
 function NSI:ExportAuraTrackingGroup(groupName)
@@ -1277,11 +1277,11 @@ function NSI:ExportAuraTrackingGroup(groupName)
         version = 1,
         group = groupName,
         entries = entries,
-    }, AuraTrackingSerializer) or ""
+    }, "AuraTracking") or ""
 end
 
 function NSI:ImportAuraTrackingString(text)
-    local payload = self:DecodeExportData(text, AuraTrackingSerializer)
+    local payload = self:DecodeExportData(text, "AuraTracking")
     if not payload or payload.type ~= "NSRT_AURA_TRACKING" or type(payload.entries) ~= "table" then
         return false
     end
@@ -2029,7 +2029,7 @@ local function ConfigureAuraTrackingButton(self, state, button, width, height, s
     end
     local isCustom = tostring(key):match("^Custom") and true or false
     local isGroupUnitTracking = isCustom and self:IsAuraTrackingGroupUnitInput(settings.Unit)
-    if (key == "External" or isCustom) and self:IsPTRPatch() then
+    if key == "External" or isCustom then
         if settings.NameEnabled and not isGroupUnitTracking then
             local casterName = EnsureAuraTrackingFontString(regions, "casterName")
             PositionAuraTrackingUnitName(casterName, button, settings)
@@ -2047,7 +2047,8 @@ local function ConfigureAuraTrackingButton(self, state, button, width, height, s
         local unitName = EnsureAuraTrackingFontString(regions, "unitName")
         PositionAuraTrackingUnitName(unitName, button, settings)
         unitName:SetFont(fontPath, settings.NameFontSize or settings.StackFontSize, settings.TextFontFlags)
-        unitName:SetText(NSAPI:Shorten(unit, nil, false, "GlobalNickNames") or "")
+        local nameLength = (tostring(key):match("^Tank") or isCotankTracking) and (settings.NameLength or 12) or nil
+        unitName:SetText(NSAPI:Shorten(unit, nameLength, false, "GlobalNickNames") or "")
         unitName:Show()
     elseif regions.unitName then
         regions.unitName:SetText("")
@@ -2461,7 +2462,7 @@ function NSI:CreateDebuffOverviewContainers(regularFilter, candidateFilters, con
         local lastRaidIndex = math.min(nextRaidIndex + 3, 30)
         for raidIndex = nextRaidIndex, lastRaidIndex do
             local unit = "raid" .. raidIndex
-            local displayName = NSAPI:Shorten(unit, nil, false, "GlobalNickNames", true, true) or UnitName(unit) or unit
+            local displayName = NSAPI:Shorten(unit, settings.NameLength or 12, false, "GlobalNickNames", true, true) or UnitName(unit) or unit
             for copyIndex = 1, copies do
                 local height = overrides and overrides.height or settings.Height
                 local state = {
@@ -2535,6 +2536,7 @@ function NSI:UpdateDebuffOverviewContainers()
 
     for _, states in pairs(sets) do
         for _, state in ipairs(states) do
+            state.displayName = NSAPI:Shorten(state.unit, settings.NameLength or 12, false, "GlobalNickNames", true, true) or UnitName(state.unit) or state.unit
             local container = state.container
             local height = state.height or settings.Height
             container:SetSize(settings.Width + height, height)
@@ -2567,6 +2569,7 @@ end
 
 function NSI:SetDebuffOverviewContainersShown(shown, containerName)
     local sets = self.DebuffOverviewContainerSetsByName or {}
+    local settings = NSRT.ReminderSettings.DebuffOverviewSettings
     containerName = containerName or "Default"
     local states = sets[containerName]
     if not states then return end
@@ -2581,7 +2584,7 @@ function NSI:SetDebuffOverviewContainersShown(shown, containerName)
     end
     if not self:Restricted() then
         for _, state in ipairs(states) do
-            local displayName = NSAPI:Shorten(state.unit, nil, false, "GlobalNickNames", true, true) or UnitName(state.unit) or state.unit
+            local displayName = NSAPI:Shorten(state.unit, settings.NameLength or 12, false, "GlobalNickNames", true, true) or UnitName(state.unit) or state.unit
             state.displayName = displayName
             for button, regions in pairs(state.buttonRegions) do
                 if regions.name then
@@ -2714,7 +2717,10 @@ function NSI:UpdateDebuffOverviewFakePreview(rowCount, useApplicationBar, maxApp
         row.Name:SetPoint("LEFT", row.Bar, "LEFT", settings.xTextOffset, settings.yTextOffset)
         row.Name:SetFont(fontPath, settings.FontSize, settings.FontFlags)
         row.Name:SetTextColor(unpack(settings.textColors))
-        row.Name:SetText(rowIndex == 1 and (NSAPI:Shorten("player", nil, false, "GlobalNickNames", true, true) or "Player") or "Player " .. rowIndex)
+        local nameLength = settings.NameLength or 12
+        local displayName = rowIndex == 1 and (NSAPI:Shorten("player", nameLength, false, "GlobalNickNames", true, true) or "Player") or "Player " .. rowIndex
+        if rowIndex ~= 1 then displayName = self:Utf8Sub(displayName, 1, nameLength) end
+        row.Name:SetText(displayName)
         row.Value:SetPoint("RIGHT", row.Bar, "RIGHT", settings.xTimer, settings.yTimer)
         row.Value:SetFont(fontPath, settings.TimerFontSize, settings.FontFlags)
         row.Value:SetTextColor(unpack(settings.textColors))
@@ -2819,7 +2825,10 @@ local function InitAuraTrackingContainer(self, unit, settings, key, reconfigureB
     else
         state.requiresAssist = nil
     end
-    state.unitCanAssist = state.requiresAssist ~= nil and GetAuraTrackingUnitCanAssist(unit, state.requiresAssist) or nil
+    state.unitCanAssist = nil
+    if state.requiresAssist ~= nil then
+        state.unitCanAssist = GetAuraTrackingUnitCanAssist(unit, state.requiresAssist)
+    end
     state.encounterConditioned = hasEncounterConditions
     state.width = width
     state.height = height
@@ -2853,7 +2862,8 @@ local function InitAuraTrackingContainer(self, unit, settings, key, reconfigureB
     local showUnitName = (tostring(key):match("^Tank") or isCotankTracking) and settings.NameEnabled
         or isGroupUnitTracking and settings.UnitNameEnabled
     if showUnitName then
-        local unitName = NSAPI:Shorten(unit, nil, false, "GlobalNickNames") or ""
+        local nameLength = (tostring(key):match("^Tank") or isCotankTracking) and (settings.NameLength or 12) or nil
+        local unitName = NSAPI:Shorten(unit, nameLength, false, "GlobalNickNames") or ""
         for _, regions in pairs(state.buttonRegions) do
             if regions.unitName then
                 regions.unitName:SetText(unitName)
@@ -3183,40 +3193,6 @@ local function SetAuraTrackingPlayerVehicleState(self, disabled)
     self:RefreshAuraMatrixVisibility()
 end
 
-local function UpdateAuraTrackingAssistStates(self, unit)
-    if self:IsPTRPatch() then return end
-    local unitCanAssist = GetAuraTrackingUnitCanAssist(unit, true)
-    for _, state in pairs(self.AuraTrackingState or {}) do
-        if state.active and state.unit == unit and state.requiresAssist ~= nil then
-            state.unitCanAssist = unitCanAssist
-            local shouldShow = state.settings.enabled and self:EvaluateLoad(state.settings)
-            if unit == "player" then
-                shouldShow = shouldShow and not (self.AuraTrackingPlayerVehicleDisabled or UnitHasVehicleUI("player"))
-            end
-            shouldShow = shouldShow and unitCanAssist == state.requiresAssist
-            if state.container:IsShown() ~= shouldShow or state.container:IsEnabled() ~= shouldShow then
-                state.container:SetEnabled(shouldShow)
-                state.container:SetShown(shouldShow)
-                state.anchorFrame:SetShown(shouldShow)
-            end
-            if state.unitSetKey then
-                self:LayoutAuraTrackingUnitSet(state.unitSetKey)
-            end
-        end
-    end
-end
-
-local function RegisterAuraTrackingAssistRefreshEvents()
-    local units = {}
-    for unit in pairs(AuraTrackingUnitRefreshStates.faction) do
-        units[#units + 1] = unit
-    end
-    if #units > 0 then
-        AuraTrackingUnitRefreshFrame:RegisterUnitEvent("UNIT_FACTION", unpack(units))
-        AuraTrackingUnitRefreshFrame:RegisterUnitEvent("UNIT_FLAGS", unpack(units))
-    end
-end
-
 function NSI:InitAuraTracking(allowRestrictedCreate, reconfigureButtons)
     if self.IsBuilding then return end
     reconfigureButtons = reconfigureButtons or self.PendingAuraTrackingReconfigure
@@ -3324,12 +3300,7 @@ function NSI:InitAuraTracking(allowRestrictedCreate, reconfigureButtons)
         boss = {},
         roster = rosterRefreshStates,
         playerControl = false,
-        faction = {},
     }
-    if matrixTargetState or matrixSettings.enabled and not matrixSettings.DisableTargetTracking then
-        AuraTrackingUnitRefreshStates.faction.target = true
-    end
-
     if (NSRT.AuraTrackingSettings.Player and NSRT.AuraTrackingSettings.Player.enabled)
         or (NSRT.AuraTrackingSettings.External and NSRT.AuraTrackingSettings.External.enabled)
         or matrixSettings.enabled or matrixPlayerState then
@@ -3344,9 +3315,6 @@ function NSI:InitAuraTracking(allowRestrictedCreate, reconfigureButtons)
                     AuraTrackingUnitRefreshStates[unit][#AuraTrackingUnitRefreshStates[unit] + 1] = state
                 elseif unit:match("^boss%d+$") then
                     AuraTrackingUnitRefreshStates.boss[#AuraTrackingUnitRefreshStates.boss + 1] = state
-                end
-                if state.requiresAssist ~= nil and not self:IsPTRPatch() then
-                    AuraTrackingUnitRefreshStates.faction[unit] = true
                 end
             end
         end
@@ -3367,7 +3335,7 @@ function NSI:InitAuraTracking(allowRestrictedCreate, reconfigureButtons)
         end
     end
 
-    if #AuraTrackingUnitRefreshStates.target > 0 or #AuraTrackingUnitRefreshStates.focus > 0 or #AuraTrackingUnitRefreshStates.mouseover > 0 or #AuraTrackingUnitRefreshStates.boss > 0 or #AuraTrackingUnitRefreshStates.roster > 0 or next(AuraTrackingUnitRefreshStates.faction) or AuraTrackingUnitRefreshStates.playerControl then
+    if #AuraTrackingUnitRefreshStates.target > 0 or #AuraTrackingUnitRefreshStates.focus > 0 or #AuraTrackingUnitRefreshStates.mouseover > 0 or #AuraTrackingUnitRefreshStates.boss > 0 or #AuraTrackingUnitRefreshStates.roster > 0 or AuraTrackingUnitRefreshStates.playerControl then
         if not AuraTrackingUnitRefreshFrame then
             AuraTrackingUnitRefreshFrame = CreateFrame("Frame")
             AuraTrackingUnitRefreshFrame:SetScript("OnEvent", function(_, event, unit)
@@ -3382,9 +3350,6 @@ function NSI:InitAuraTracking(allowRestrictedCreate, reconfigureButtons)
                     end
                     NSI.AuraTrackingPlayerVehicleDisabled = true
                     SetAuraTrackingPlayerVehicleState(NSI, true)
-                    return
-                elseif event == "UNIT_FACTION" or event == "UNIT_FLAGS" then
-                    UpdateAuraTrackingAssistStates(NSI, unit)
                     return
                 elseif event == "UNIT_EXITED_VEHICLE" or event == "PLAYER_ENTERING_WORLD" then
                     if AuraTrackingVehicleStateTimer then
@@ -3460,6 +3425,10 @@ function NSI:InitAuraTracking(allowRestrictedCreate, reconfigureButtons)
         if #AuraTrackingUnitRefreshStates.target > 0 or matrixTargetState then
             AuraTrackingUnitRefreshFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
         end
+        if matrixTargetState or matrixSettings.enabled and not matrixSettings.DisableTargetTracking then
+            AuraTrackingUnitRefreshFrame:RegisterUnitEvent("UNIT_FACTION", "target")
+            AuraTrackingUnitRefreshFrame:RegisterUnitEvent("UNIT_FLAGS", "target")
+        end
         if #AuraTrackingUnitRefreshStates.focus > 0 then
             AuraTrackingUnitRefreshFrame:RegisterEvent("PLAYER_FOCUS_CHANGED")
         end
@@ -3474,7 +3443,6 @@ function NSI:InitAuraTracking(allowRestrictedCreate, reconfigureButtons)
             AuraTrackingUnitRefreshFrame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", "player")
             AuraTrackingUnitRefreshFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
         end
-        RegisterAuraTrackingAssistRefreshEvents()
     elseif AuraTrackingUnitRefreshFrame then
         AuraTrackingUnitRefreshFrame:UnregisterAllEvents()
     end
@@ -3581,7 +3549,7 @@ local function StartAuraTrackingPreviewTimer(self, key)
     end)
 end
 
-local function UpdateAuraTrackingPreviewFrame(self, frame, settings, texture, key, index, duration, dispelType, fontPath, previewData, previewUnitName)
+local function UpdateAuraTrackingPreviewFrame(self, frame, settings, texture, key, index, duration, dispelType, fontPath, previewData, previewUnitName, previewSourceName)
     local durationColor = settings.DurationColor or {1, 1, 0.25, 1}
     local thresholdColor = settings.DurationThresholdColor or {1, 0, 0, 1}
     fontPath = fontPath or GetAuraTrackingFontPath(self, settings)
@@ -3703,7 +3671,19 @@ local function UpdateAuraTrackingPreviewFrame(self, frame, settings, texture, ke
     local isCustom = tostring(key):match("^Custom") and true or false
     local isGroupUnitTracking = isCustom and self:IsAuraTrackingGroupUnitInput(settings.Unit)
     local isCotankTracking = settings.Unit and string.lower(strtrim(settings.Unit)) == "cotank"
-    local showUnitName = (key == "External" or key == "Tank" or isCotankTracking) and settings.NameEnabled
+    local showCasterName = (key == "External" or isCustom) and settings.NameEnabled and not isGroupUnitTracking
+    if showCasterName then
+        local casterName = EnsureAuraTrackingFontString(frame, "CasterName")
+        PositionAuraTrackingUnitName(casterName, frame, settings)
+        casterName:SetFont(fontPath, settings.NameFontSize or settings.StackFontSize, settings.TextFontFlags)
+        casterName:SetText(previewSourceName or "")
+        casterName:Show()
+    elseif frame.CasterName then
+        frame.CasterName:SetText("")
+        frame.CasterName:Hide()
+    end
+
+    local showUnitName = (key == "Tank" or isCotankTracking) and settings.NameEnabled
         or isCustom and isGroupUnitTracking and settings.UnitNameEnabled
     if showUnitName then
         local unitName = EnsureAuraTrackingFontString(frame, "UnitName")
@@ -3861,18 +3841,22 @@ function NSI:PreviewAuraTracking(key, show)
     local previewPlayerName = UnitName(previewUnit) or previewUnit
     local previewClass = select(2, UnitClass(previewUnit))
     local previewColor = GetClassColorObj(previewClass)
+    local previewSourceName = previewPlayerName
+    if previewColor then
+        previewSourceName = previewColor:WrapTextInColorCode(previewSourceName)
+    end
     local firstPreviewName = previewPlayerName
     local secondPreviewName
     local firstPreviewSuffix
     local secondPreviewSuffix
     if isCotankTracking then
-        local cotankPreviewName = NSAPI:GetName(previewUnit, "GlobalNickNames") or previewPlayerName
+        local cotankPreviewName = NSAPI:Shorten(previewUnit, settings.NameLength or 12, false, "GlobalNickNames") or previewPlayerName
         firstPreviewName = cotankPreviewName
         secondPreviewName = cotankPreviewName
         firstPreviewSuffix = " 1"
         secondPreviewSuffix = " 2"
     end
-    if previewColor then
+    if previewColor and not isCotankTracking then
         firstPreviewName = previewColor:WrapTextInColorCode(firstPreviewName)
         if secondPreviewName then
             secondPreviewName = previewColor:WrapTextInColorCode(secondPreviewName)
@@ -3896,7 +3880,7 @@ function NSI:PreviewAuraTracking(key, show)
             local xOffset, yOffset = GetAuraTrackingPreviewOffset(settings, settings.GrowDirection, i, #entries)
             icon:ClearAllPoints()
             icon:SetPoint("CENTER", mover, "CENTER", xOffset, yOffset)
-            UpdateAuraTrackingPreviewFrame(self, icon, settings, entry.texture or texture, key, i, entry.duration, entry.dispelType, fontPath, previewData, firstPreviewName)
+            UpdateAuraTrackingPreviewFrame(self, icon, settings, entry.texture or texture, key, i, entry.duration, entry.dispelType, fontPath, previewData, firstPreviewName, previewSourceName)
             icon:Show()
         else
             icon.PreviewExpires = nil
@@ -3919,7 +3903,7 @@ function NSI:PreviewAuraTracking(key, show)
                 local xOffset, yOffset = GetAuraTrackingPreviewOffset(settings, secondMover.GrowDirection, i, #entries)
                 icon:ClearAllPoints()
                 icon:SetPoint("CENTER", secondMover, "CENTER", xOffset, yOffset)
-                UpdateAuraTrackingPreviewFrame(self, icon, settings, entry.texture or texture, key, i, entry.duration, entry.dispelType, fontPath, previewData, secondPreviewName)
+                UpdateAuraTrackingPreviewFrame(self, icon, settings, entry.texture or texture, key, i, entry.duration, entry.dispelType, fontPath, previewData, secondPreviewName, previewSourceName)
                 icon:Show()
             else
                 icon.PreviewExpires = nil

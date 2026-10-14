@@ -59,3 +59,4 @@ BigWigs_MidnightLairs: enabled
 LittleWigs_Cataclysm: enabled
 Clique: disabled
 WarpDeplete: disabled
+BigWigs_TheUnbindingOfKithix: enabled

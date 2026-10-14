@@ -23,10 +23,10 @@
 
 ## Dependencies: BigWigs
 ## LoadOnDemand: 1
-## Version: v12.1.20
+## Version: v12.1.21
 
-## X-BigWigs-Minimum: 426
-## X-BigWigs-LoadOn-InstanceId: 2805,2811,2813,2825,2859,2874,2915,2923,2993, 2933,2952,2953,2961,2962,2963,2964,2965,2966,2979,3003,3038,3077,3079 [AllowLoadGameType standard]
+## X-BigWigs-Minimum: 427
+## X-BigWigs-LoadOn-InstanceId: 2805,2811,2813,2825,2859,2874,2915,2923,2993, 2933,2952,2953,2961,2962,2963,2964,2965,2966,2979,3003,3038,3043,3077,3079 [AllowLoadGameType standard]
 
 Midnight\!Locales\[TextLocale].lua [AllowLoadGameType standard][AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]
 Midnight\AltarOfFangs\Ravi.lua [AllowLoadGameType standard]
@@ -37,6 +37,7 @@ Midnight\Delves\AtalAman\SpiritflayerJinma.lua [AllowLoadGameType standard]
 Midnight\Delves\CollegiateCalamity\Hydrangea.lua [AllowLoadGameType standard]
 Midnight\Delves\CollegiateCalamity\InfiltratorGarand.lua [AllowLoadGameType standard]
 Midnight\Delves\CollegiateCalamity\VoidscornedVagrant.lua [AllowLoadGameType standard]
+Midnight\Delves\LabyrinthOfKindojan\Kindojan.lua [AllowLoadGameType standard]
 Midnight\Delves\ParhelionPlaza\GladiusSlaurna.lua [AllowLoadGameType standard]
 Midnight\Delves\ShadowguardPoint\ChiefArcanistPatram.lua [AllowLoadGameType standard]
 Midnight\Delves\SunkillerSanctum\Esuritus.lua [AllowLoadGameType standard]

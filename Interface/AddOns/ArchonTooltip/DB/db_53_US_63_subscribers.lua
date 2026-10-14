@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Warrior-Protection','DemonHunter-Havoc','Unknown-Unknown',}
-local provider = {region='US',realm='Dawnbringer',name='US',type='subscribers',zone=53,date='2026-10-06',data={Ha='Hakeo:BAEBNQAECoEUAAIBAAYKSSNvCwBaAgaODQAABABDAHUNAAADAGMAfw0AAAMAXACpDQAABQBdAFwNAAADAF8AXQ0AAAIAXgABAAYKSSNvCwBaAgaODQAABABDAHUNAAADAGMAfw0AAAMAXACpDQAABQBdAFwNAAADAF8AXQ0AAAIAXgAAAA==.',Ke='Keit:BAEANQADCgUIBQABNQAFFAMIBgACADYcAA==.',Ro='Rosefist:BAEANQAECgUIBgAAAA==.Rosemourne:BAEANQADCggICAABNQAECgUIBgADAAAAAA==.',},}
+local provider = {region='US',realm='Dawnbringer',name='US',type='subscribers',zone=53,date='2026-10-13',data={Ha='Hakeo:BAEBNQAECn8YAAIBAAcK1SJWCQC1AgeODQAABABDAHUNAAAEAGMAfw0AAAQAXACpDQAABgBdAFwNAAADAF8AXQ0AAAIAXgBlDQAAAQBVAAEABwrVIlYJALUCB44NAAAEAEMAdQ0AAAQAYwB/DQAABABcAKkNAAAGAF0AXA0AAAMAXwBdDQAAAgBeAGUNAAABAFUAAAA=.',Ke='Keit:BAEANQADCgUIBQABNQAFFAQICgACAEoWAA==.',Ro='Rosefist:BAEANQAECgUIBQAAAA==.Rosemourne:BAEANQADCggICAABNQAECgUIBQADAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

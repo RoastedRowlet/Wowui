@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Rogue-Outlaw',}
-local provider = {region='US',realm='TheUnderbog',name='US',type='subscribers',zone=53,date='2026-10-06',data={De='Deladre:BAEANQAECggIDwABNQAECgkJGQABANcYAA==.',Sa='Sammie:BAEBNQAECoEZAAIBAAkK1xguBgBcAgmODQAABABOAHUNAAADAFgAfw0AAAMAXgCpDQAAAwA/AFwNAAADAE0AXQ0AAAIAPgBlDQAAAgAiAKQNAAABAAUAMw0AAAQAQwABAAkK1xguBgBcAgmODQAABABOAHUNAAADAFgAfw0AAAMAXgCpDQAAAwA/AFwNAAADAE0AXQ0AAAIAPgBlDQAAAgAiAKQNAAABAAUAMw0AAAQAQwAAAA==.',Ye='Yearofspear:BAEANQAECgEIAQABNQAECgkJGQABANcYAA==.',},}
+local lookup = {'Rogue-Outlaw','Unknown-Unknown',}
+local provider = {region='US',realm='TheUnderbog',name='US',type='subscribers',zone=53,date='2026-10-13',data={De='Deladre:BAEANQAECggIEAAAAA==.',Sa='Sammie:BAEBNQAECn8ZAAIBAAkK4RYBBwBPAgmODQAABABOAHUNAAADAFgAfw0AAAMAXgCpDQAAAwA/AFwNAAADAE0AXQ0AAAIAPgBlDQAAAgAiAKQNAAABAAUAMw0AAAQAQwABAAkK4RYBBwBPAgmODQAABABOAHUNAAADAFgAfw0AAAMAXgCpDQAAAwA/AFwNAAADAE0AXQ0AAAIAPgBlDQAAAgAiAKQNAAABAAUAMw0AAAQAQwABNQAECggIEAACAAAAAA==.',Ye='Yearofspear:BAEANQAECgEIAQABNQAECggIEAACAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

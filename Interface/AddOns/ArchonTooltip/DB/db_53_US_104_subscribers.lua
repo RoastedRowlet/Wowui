@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Garona',name='US',type='subscribers',zone=53,date='2026-10-06',data={Fo='Forceed:BAEANQAECgEIAQABNQAECgUICgABAAAAAA==.',Io='Iock:BAEANQAECgUIBQAAAA==.',Ne='Nedgamingttv:BAEANQAECgUICgAAAA==.',Ni='Nikor:BAEANQAECgcICwAAAA==.',},}
+local lookup = {'Warlock-Demonology','Unknown-Unknown',}
+local provider = {region='US',realm='Garona',name='US',type='subscribers',zone=53,date='2026-10-13',data={De='Demonicflats:BAEANQADCgcIDAABNQAECgkJKwABAFERAA==.',Dk='Dkflat:BAEANQADCggICQABNQAECgkJKwABAFERAA==.',Fl='Flattulata:BAEANQADCggICQABNQAECgkJKwABAFERAA==.Flatulatta:BAEBNQAECn8rAAIBAAkKURHxXAA9AgmODQAABwAuAHUNAAAJAC0Afw0AAAcAKQCpDQAABwAzAFwNAAAEAE8AXQ0AAAMAKABlDQAAAgATAKQNAAABABwAMw0AAAMANwABAAkKURHxXAA9AgmODQAABwAuAHUNAAAJAC0Afw0AAAcAKQCpDQAABwAzAFwNAAAEAE8AXQ0AAAMAKABlDQAAAgATAKQNAAABABwAMw0AAAMANwAAAA==.Flatunter:BAEANQADCggICAABNQAECgkJKwABAFERAA==.',Fo='Forceed:BAEANQAECgEIAQABNQAECgUIDwACAAAAAA==.',Io='Iock:BAEANQAECgUIBQAAAA==.',Ne='Nedgamingttv:BAEANQAECgUIDwAAAA==.',Ni='Nikor:BAEANQAECgcIDwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

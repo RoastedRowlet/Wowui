@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Evoker-Preservation','Rogue-Assassination','Rogue-Outlaw','Rogue-Subtlety',}
-local provider = {region='US',realm='Warsong',name='US',type='subscribers',zone=53,date='2026-10-06',data={Bu='Buffmw:BAEANQADCgIIAgABNQAFFAkJJwABAIQeAA==.',['Fú']='Fúsión:BAEANQAECgEIAQABNQAECgkJGAACAMchAA==.',Ja='Jarco:BAECNQAFFIELAAIDAAYKsxVnAAAQAgaODQAABABUAHUNAAABAB0Afw0AAAEAJQCpDQAAAwBOAFwNAAABAEoAMw0AAAEAHAADAAYKsxVnAAAQAgaODQAABABUAHUNAAABAB0Afw0AAAEAJQCpDQAAAwBOAFwNAAABAEoAMw0AAAEAHAA1AAQKgSMAAwMACQr1I48BAGEDAAMACQoKI48BAGEDAAQACQphHukIANwCAAAA.',},}
+local lookup = {'Druid-Restoration','Rogue-Assassination','Rogue-Outlaw','Rogue-Subtlety',}
+local provider = {region='US',realm='Warsong',name='US',type='subscribers',zone=53,date='2026-10-13',data={Bu='Buffmw:BAEANQADCgIIAgABNQAFFAkJGAABABseAA==.',['Fú']='Fúsión:BAEANQAECgEIAQABNQAECgkJGAACAGAhAA==.',Ja='Jarco:BAECNQAFFH8MAAMDAAYKHBqgAAD8AQaODQAABABUAHUNAAABAB0Afw0AAAEAJQCpDQAAAwBOAFwNAAABAEoAMw0AAAIAHAADAAYKHBqgAAD8AQaODQAABABUAHUNAAABAB0Afw0AAAEAJQCpDQAAAwBOAFwNAAABAEoAMw0AAAEAHAACAAEKAAA0HQBOAAEzDQAAAQAYADUABAp/JQADAwAJCgkkcwEAcQMAAwAJCtoicwEAcQMABAAJCqQdwwoAxgIAAAA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

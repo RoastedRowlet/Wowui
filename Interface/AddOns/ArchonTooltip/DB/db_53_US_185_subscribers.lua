@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Scilla',name='US',type='subscribers',zone=53,date='2026-10-06',data={Au='Augtism:BAEANQADCgIIAgABNQAECgQIBQABAAAAAA==.',['Hô']='Hôldem:BAEANQAECgYIEwAAAA==.',St='Stinkyhooves:BAEANQADCgQIBgABNQAECgQIBQABAAAAAA==.',},}
+local lookup = {'Druid-Feral','Druid-Balance',}
+local provider = {region='US',realm='Scilla',name='US',type='subscribers',zone=53,date='2026-10-13',data={Co='Collie:BAEBNQAECn8UAAIBAAgKdyOaBQAcAwiODQAABQBhAHUNAAADAF4Afw0AAAIAYgCpDQAAAgBbAFwNAAACAFsAXQ0AAAIAWABlDQAAAgBUAKQNAAACAFcAAQAICncjmgUAHAMIjg0AAAUAYQB1DQAAAwBeAH8NAAACAGIAqQ0AAAIAWwBcDQAAAgBbAF0NAAACAFgAZQ0AAAIAVACkDQAAAgBXAAAA.',['Hô']='Hôldem:BAEBNQAECn8eAAICAAgK/w29RgDOAQiODQAABQAlAHUNAAAFACwAfw0AAAUAOQCpDQAABQBFAFwNAAADABMAXQ0AAAIAEABlDQAAAQAbADMNAAAEACQAAgAICv8NvUYAzgEIjg0AAAUAJQB1DQAABQAsAH8NAAAFADkAqQ0AAAUARQBcDQAAAwATAF0NAAACABAAZQ0AAAEAGwAzDQAABAAkAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DeathKnight-Frost','Unknown-Unknown',}
-local provider = {region='US',realm='Duskwood',name='US',type='subscribers',zone=53,date='2026-10-06',data={Ae='Aegondk:BAEBNQAFFIEGAAIBAAMK0xkWCQAJAQOODQAAAwBRAHUNAAABABYAqQ0AAAIAXQABAAMK0xkWCQAJAQOODQAAAwBRAHUNAAABABYAqQ0AAAIAXQAAAA==.',Da='Damitsu:BAEANQADCggIHQABNQAECgUICgACAAAAAA==.Damnitsu:BAEANQAECgUICgAAAA==.',Wa='Watevr:BAEANQADCgcIBwABNQAECgUICgACAAAAAA==.',},}
+local provider = {region='US',realm='Duskwood',name='US',type='subscribers',zone=53,date='2026-10-13',data={Ae='Aegondk:BAEBNQAFFH8GAAIBAAMK0xnfDQD1AAOODQAAAwBRAHUNAAABABYAqQ0AAAIAXQABAAMK0xnfDQD1AAOODQAAAwBRAHUNAAABABYAqQ0AAAIAXQAAAA==.',Da='Damitsu:BAEANQADCggIHQABNQAECgUIDgACAAAAAA==.Damnitsu:BAEANQAECgUIDgAAAA==.',Wa='Watevr:BAEANQADCgcIDgABNQAECgUIDgACAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

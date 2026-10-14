@@ -209,9 +209,9 @@ local function ShowAuraTrackingExportPopup(text, label)
         auraTrackingExportPopup.textbox:SetScript("OnMouseDown", function(self) self:SetFocus() end)
         NSI:SetUIFont(auraTrackingExportPopup.textbox.editbox, 13, "OUTLINE")
 
-        local doneBtn = DF:CreateButton(auraTrackingExportPopup, function()
+        local doneBtn = CreateLocalizedButton(auraTrackingExportPopup, "Done", function()
             auraTrackingExportPopup:Hide()
-        end, 100, 20, NSI:Loc("Done"))
+        end, 280, 20)
         doneBtn:SetPoint("BOTTOM", auraTrackingExportPopup, "BOTTOM", 0, 10)
     end
 
@@ -242,7 +242,7 @@ local function ShowAuraTrackingImportPopup(onImport)
         auraTrackingImportPopup.textbox:SetScript("OnMouseDown", function(self) self:SetFocus() end)
         NSI:SetUIFont(auraTrackingImportPopup.textbox.editbox, 13, "OUTLINE")
 
-        local importBtn = DF:CreateButton(auraTrackingImportPopup, function()
+        local importBtn = CreateLocalizedButton(auraTrackingImportPopup, "Import", function()
             local success, imported = NSI:ImportAuraTrackingString(auraTrackingImportPopup.textbox:GetText())
             if success then
                 auraTrackingImportPopup:Hide()
@@ -253,7 +253,7 @@ local function ShowAuraTrackingImportPopup(onImport)
             else
                 auraTrackingImportPopup.statusLabel:SetText("|cFFFF0000" .. NSI:Loc("Invalid Aura Tracking import string.") .. "|r")
             end
-        end, 100, 20, NSI:Loc("Import"))
+        end, 280, 20)
         importBtn:SetPoint("BOTTOM", auraTrackingImportPopup, "BOTTOM", 0, 10)
     end
 
@@ -834,7 +834,7 @@ local function BuildAuraTrackingUI(screen)
                 row:Show()
 
                 local settings = item.settings
-                local willLoad = NSI:EvaluateLoad(settings)
+                local willLoad = NSI:EvaluateLoad(settings, true)
                 if selectedKey == item.settingsKey then
                     row.__background:SetVertexColor(0, 1, 1); row.__background:SetAlpha(1)
                 else
@@ -1227,7 +1227,7 @@ local function BuildAuraTrackingUI(screen)
                     and tip("Show Co-Tank Name", "Shows the co-tank name attached to visible aura icons.")
                     or isGroupUnitTracking
                     and tip("Show Unit Name", "Shows the class-colored nickname of the unit whose aura is shown. This replaces caster names for this display.")
-                    or tip("Show Source Name", "Shows the source name attached to visible aura icons. This feature is not yet available. Blizzard will add the functionality in Patch 12.1.5"),
+                    or tip("Show Source Name", "Shows the source name attached to visible aura icons."),
                 get = function() return isGroupUnitTracking and s.UnitNameEnabled or s.NameEnabled end,
                 set = function(_, v)
                     if isGroupUnitTracking then
@@ -1249,6 +1249,12 @@ local function BuildAuraTrackingUI(screen)
             add({ Type = "Slider", label = "Name Font Size", min = 6, max = 80, step = 1,
                 tooltip = tip("Name Font Size", "Font size of the " .. string.lower(nameType) .. " name."),
                 get = function() return s.NameFontSize end, set = function(_, v) s.NameFontSize = v; apply(key) end })
+            if isCotankTracking then
+                add({ Type = "Slider", label = "Name Length", min = 1, max = 12, step = 1,
+                    tooltip = tip("Name Length", "Maximum number of characters in the displayed name."),
+                    get = function() return s.NameLength or 12 end,
+                    set = function(self, v) s.NameLength = v; apply(key) end })
+            end
         end
         if key == "AuraMatrix" then
             add({ Type = "Label", text = "Aura Matrix Label Settings", highlight = true })
@@ -1565,10 +1571,16 @@ local function BuildAuraTrackingUI(screen)
         if previousScroll then
             previousScroll.frame:Hide()
         end
-        local topPad = (activeTab == "Display") and DISPLAY_TOP or 0
+        local topPad = 0
+        local search = string.lower(displaySearchText)
+        if activeTab == "Display" then
+            local showAnchor = search == "" or string.find(string.lower(NSI:Loc("Anchor Frame")), search, 1, true) ~= nil
+            anchorLbl:SetShown(showAnchor)
+            anchorEntry.frame:SetShown(showAnchor)
+            topPad = showAnchor and DISPLAY_TOP or 0
+        end
         local defs = DEF_BUILDERS[activeTab](settings, selectedKey)
-        if activeTab == "Display" and displaySearchText ~= "" then
-            local search = string.lower(displaySearchText)
+        if activeTab == "Display" and search ~= "" then
             local filteredDefs = {}
             local currentHeader
             local headerAdded = false
@@ -1607,7 +1619,7 @@ local function BuildAuraTrackingUI(screen)
         local totalH = BuildWidgets(scrollObj.scrollChild, defs, scrollObj.scrollChild:GetWidth(), "NSRTAuraTrack" .. activeTab)
         scrollObj.scrollChild:SetHeight(math.max(totalH, 1))
         scrollObj:UpdateScrollBar()
-        scrollObj.frame:SetVerticalScroll(scrollPosition)
+        scrollObj.frame:SetVerticalScroll(math.min(scrollPosition, math.max(0, scrollObj.scrollChild:GetHeight() - scrollObj.frame:GetHeight())))
         tabScroll[activeTab] = scrollObj
     end
 
@@ -1917,17 +1929,19 @@ local function BuildAuraTrackingUI(screen)
         end
 
         local y = 0
-        local encounterData = BossData.BuildBossDropdownOptions(nil, false)
-        y = LoadSection(y, "Encounters", NSI:Loc("Encounters (leave all unchecked for any encounter)"), CountSel(cond.EncounterIDs))
-        if not loadCollapsed.Encounters then
-            for _, encounter in ipairs(encounterData) do
-                local encounterID = encounter.value
-                y = AddCheck(y, encounter.label, cond.EncounterIDs[encounterID],
-                    function() cond.EncounterIDs[encounterID] = (not cond.EncounterIDs[encounterID]) or nil end,
-                    0.2, 0.8, 1, encounter.icon, encounter.texcoord)
+        if not s.builtin then
+            local encounterData = BossData.BuildBossDropdownOptions(nil, false)
+            y = LoadSection(y, "Encounters", NSI:Loc("Encounters (leave all unchecked for any encounter)"), CountSel(cond.EncounterIDs))
+            if not loadCollapsed.Encounters then
+                for _, encounter in ipairs(encounterData) do
+                    local encounterID = encounter.value
+                    y = AddCheck(y, encounter.label, cond.EncounterIDs[encounterID],
+                        function() cond.EncounterIDs[encounterID] = (not cond.EncounterIDs[encounterID]) or nil end,
+                        0.2, 0.8, 1, encounter.icon, encounter.texcoord)
+                end
             end
+            y = y + 4
         end
-        y = y + 4
         -- Roles
         y = LoadSection(y, "Roles", NSI:Loc("Roles (leave all unchecked for any role)"), CountSel(cond.Roles))
         if not loadCollapsed.Roles then
@@ -1999,7 +2013,10 @@ local function BuildAuraTrackingUI(screen)
     displaySearchEntry.editBox:SetScript("OnTextChanged", function(self)
         displaySearchText = self:GetText()
         UpdateDisplaySearchHint(self)
-        if activeTab == "Display" then RebuildCurrentTab() end
+        if activeTab == "Display" then
+            if tabScroll.Display then tabScroll.Display.frame:SetVerticalScroll(0) end
+            RebuildCurrentTab()
+        end
     end)
     displaySearchEntry.editBox:HookScript("OnEditFocusGained", function(self) UpdateDisplaySearchHint(self) end)
     displaySearchEntry.editBox:HookScript("OnEditFocusLost", function(self) UpdateDisplaySearchHint(self) end)

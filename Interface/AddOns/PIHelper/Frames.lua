@@ -1,7 +1,8 @@
 --[[
 	Discover raid and party frames from Blizzard, ElvUI, Grid2,
 	DandersFrames, EllesmereUI, BuzzardFrames, VuhDo, Mich's Raid Frames,
-	and Cell. Player/target/focus unit frames are ignored.
+	Cell, Enhance QoL, and Shadowed Unit Frames. Player/target/focus
+	unit frames are ignored.
 ]]
 
 local ADDON_NAME, addon = ...
@@ -16,6 +17,8 @@ local FRAME_ADDONS = {
 	VuhDo = true,
 	Michs_RaidFrames = true,
 	Cell = true,
+	EnhanceQoLUnitFrames = true,
+	ShadowedUnitFrames = true,
 }
 
 local hookedAddons = {}
@@ -61,6 +64,14 @@ function addon.GetFrameUnit(frame)
 		end
 	end
 	if not unit then
+		unit = PlainUnitToken(frame._eqolUnit)
+	end
+	-- SUF leaves frame.unit empty. The secure attribute is the group token;
+	-- unitSUF can be the vehicle pet while that attribute stays on the player.
+	if not unit then
+		unit = PlainUnitToken(frame.unitSUF)
+	end
+	if not unit then
 		return nil
 	end
 	local okPlate, isPlate = pcall(string.find, unit, "nameplate", 1, true)
@@ -69,6 +80,27 @@ function addon.GetFrameUnit(frame)
 		return nil
 	end
 	return unit
+end
+
+-- Combat can hide the token without clearing it. Distinct from a button
+-- whose unit was removed (player left, empty cell).
+function addon.FrameUnitIsSecret(frame)
+	if not frame or not addon.IsSecret then
+		return false
+	end
+	local secret = addon.IsSecret
+	if secret(frame.displayedUnit) or secret(frame.unit) or secret(frame.unitid)
+		or secret(frame.unitToken) or secret(frame.raidid) or secret(frame._eqolUnit)
+		or secret(frame.unitSUF) then
+		return true
+	end
+	if frame.GetAttribute then
+		local ok, attr = pcall(frame.GetAttribute, frame, "unit")
+		if ok and secret(attr) then
+			return true
+		end
+	end
+	return false
 end
 
 local playerUnitTokens = {}
@@ -214,6 +246,31 @@ local function NameLooksLikeGroup(name)
 		or n:match("^cellraidframeheader%d+unitbutton%d+$") then
 		return true
 	end
+	-- Enhance QoL SecureGroupHeader children. Anchors, pets, and the
+	-- player/target/focus unit frames share the EQOLUF prefix.
+	if n:find("eqoluf", 1, true) then
+		if n:match("^eqolufpartyheaderunitbutton%d+$")
+			or n:match("^eqolufraidheaderunitbutton%d+$")
+			or n:match("^eqolufraidgroupheader%d+unitbutton%d+$")
+			or n:match("^eqolufmtheaderunitbutton%d+$")
+			or n:match("^eqolufmaheaderunitbutton%d+$")
+			or n:match("^eqolufspotlightheaderunitbutton%d+$") then
+			return true
+		end
+		return false
+	end
+	-- Shadowed Unit Frames. SUFUnit* is player/target/focus. SUFChild* is
+	-- pet or target-of-unit. Split raid groups are SUFHeaderraidNUnitButtonM.
+	if n:find("sufheader", 1, true) or n:find("sufchild", 1, true) or n:find("sufunit", 1, true) then
+		if n:match("^sufheaderpartyunitbutton%d+$")
+			or n:match("^sufheaderraidunitbutton%d+$")
+			or n:match("^sufheaderraid%d+unitbutton%d+$")
+			or n:match("^sufheadermaintankunitbutton%d+$")
+			or n:match("^sufheadermainassistunitbutton%d+$") then
+			return true
+		end
+		return false
+	end
 	if n:find("raid", 1, true) or n:find("party", 1, true) then
 		return true
 	end
@@ -298,8 +355,128 @@ function addon.IsCellUnitButton(frame)
 	return name:match("^CellRaidFrameHeader%d+UnitButton%d+$") ~= nil
 end
 
--- ElvUI / Grid2 / Danders / Ellesmere / Buzzard / VuhDo / Mich's / Cell replace compact
--- raid/party. Those leftover cells still run PrivateAurasUI on encounter auras.
+function addon.IsEnhanceQoLGroupButton(frame)
+	if not frame or frame._eqolPreview or frame._eqolPartyPet then
+		return false
+	end
+	local kind = frame._eqolGroupKind
+	if kind == "party" or kind == "raid" or kind == "mt" or kind == "ma" then
+		return true
+	end
+	local name = frame.GetName and frame:GetName()
+	if type(name) ~= "string" then
+		return false
+	end
+	return name:match("^EQOLUFPartyHeaderUnitButton%d+$") ~= nil
+		or name:match("^EQOLUFRaidHeaderUnitButton%d+$") ~= nil
+		or name:match("^EQOLUFRaidGroupHeader%d+UnitButton%d+$") ~= nil
+		or name:match("^EQOLUFMTHeaderUnitButton%d+$") ~= nil
+		or name:match("^EQOLUFMAHeaderUnitButton%d+$") ~= nil
+		or name:match("^EQOLUFSpotlightHeaderUnitButton%d+$") ~= nil
+end
+
+local function EnhanceQoLGroupDB()
+	local root = _G.EnhanceQoL
+	local db = root and root.db and root.db.ufGroupFrames
+	if type(db) ~= "table" then
+		return nil
+	end
+	return db
+end
+
+local function EnhanceQoLKindEnabled(kind)
+	local db = EnhanceQoLGroupDB()
+	local cfg = db and db[kind]
+	return type(cfg) == "table" and cfg.enabled == true
+end
+
+local function EnhanceQoLUnitFramesLoaded()
+	return C_AddOns.IsAddOnLoaded("EnhanceQoLUnitFrames")
+end
+
+local function CompactFrameKind(frame)
+	local current = frame
+	for _ = 1, 6 do
+		if not current then
+			return nil
+		end
+		local name = current.GetName and current:GetName()
+		if type(name) == "string" then
+			local n = string.lower(name)
+			if n:find("compactparty", 1, true) or n == "partyframe" then
+				return "party"
+			end
+			if n:find("compactraid", 1, true) then
+				return "raid"
+			end
+		end
+		current = current.GetParent and current:GetParent()
+	end
+	return nil
+end
+
+-- Party and raid layouts are separate. Only the enabled one hides Blizzard.
+function addon.EnhanceQoLReplacesCompactFrame(frame)
+	if not frame or not EnhanceQoLUnitFramesLoaded() then
+		return false
+	end
+	local kind = CompactFrameKind(frame)
+	if kind ~= "party" and kind ~= "raid" then
+		return false
+	end
+	return EnhanceQoLKindEnabled(kind)
+end
+
+local SHADOWED_GROUP_TYPES = {
+	party = true,
+	raid = true,
+	maintank = true,
+	mainassist = true,
+}
+
+function addon.IsShadowedGroupButton(frame)
+	if not frame or frame.isHeaderFrame or frame.isChildUnit then
+		return false
+	end
+	local kind = frame.unitType
+	if type(kind) == "string" and SHADOWED_GROUP_TYPES[kind] then
+		return true
+	end
+	local name = frame.GetName and frame:GetName()
+	if type(name) ~= "string" then
+		return false
+	end
+	return name:match("^SUFHeaderpartyUnitButton%d+$") ~= nil
+		or name:match("^SUFHeaderraidUnitButton%d+$") ~= nil
+		or name:match("^SUFHeaderraid%d+UnitButton%d+$") ~= nil
+		or name:match("^SUFHeadermaintankUnitButton%d+$") ~= nil
+		or name:match("^SUFHeadermainassistUnitButton%d+$") ~= nil
+end
+
+local function ShadowedHidesCompact(kind)
+	local UF = _G.ShadowUF
+	local hidden = UF and UF.db and UF.db.profile and UF.db.profile.hidden
+	if type(hidden) ~= "table" then
+		return false
+	end
+	return hidden[kind] == true
+end
+
+-- SUF hides party frames by default and raid frames only when that option is on.
+function addon.ShadowedReplacesCompactFrame(frame)
+	if not frame or not _G.ShadowUF then
+		return false
+	end
+	local kind = CompactFrameKind(frame)
+	if kind ~= "party" and kind ~= "raid" then
+		return false
+	end
+	return ShadowedHidesCompact(kind)
+end
+
+-- ElvUI / Grid2 / Danders / Ellesmere / Buzzard / VuhDo / Mich's / Cell /
+-- Enhance QoL / Shadowed Unit Frames replace compact raid/party. Those leftover
+-- cells still run PrivateAurasUI on encounter auras.
 function addon.UsesReplacementGroupFrames()
 	local DF = _G.DandersFrames
 	if type(DF) == "table" then
@@ -337,11 +514,20 @@ function addon.UsesReplacementGroupFrames()
 	if _G.CellMainFrame or (_G.Cell and _G.Cell.unitButtons) then
 		return true
 	end
+	if EnhanceQoLUnitFramesLoaded() and EnhanceQoLKindEnabled("party") and EnhanceQoLKindEnabled("raid") then
+		return true
+	end
+	if _G.ShadowUF and ShadowedHidesCompact("party") and ShadowedHidesCompact("raid") then
+		return true
+	end
 	return false
 end
 
 function addon.IsGroupUnitFrame(frame)
 	if not Safe(frame) then
+		return false
+	end
+	if frame._eqolPreview or frame._eqolPartyPet then
 		return false
 	end
 	if addon.IsEllesmereRaidButton(frame) then
@@ -358,6 +544,15 @@ function addon.IsGroupUnitFrame(frame)
 	end
 	if addon.IsCellUnitButton(frame) then
 		return true
+	end
+	if addon.IsEnhanceQoLGroupButton(frame) then
+		return true
+	end
+	if addon.IsShadowedGroupButton(frame) then
+		return true
+	end
+	if addon.EnhanceQoLReplacesCompactFrame(frame) or addon.ShadowedReplacesCompactFrame(frame) then
+		return false
 	end
 	if frame.dfIsDandersFrame then
 		return true
@@ -493,8 +688,68 @@ local function CaptureChildren(...)
 	end
 end
 
+local function ReadChildren(parent)
+	CaptureChildren(parent:GetChildren())
+end
+
+local function FrameName(frame)
+	if not frame.GetName then
+		return nil
+	end
+	local ok, name = pcall(frame.GetName, frame)
+	if ok and type(name) == "string" and not (addon.IsSecret and addon.IsSecret(name)) then
+		return name
+	end
+	return nil
+end
+
+-- Debuff icons from Blizzard_AuraContainerFrameProviders. GetChildren on
+-- these throws in combat: forbidden object, even when IsForbidden is false.
+local function IsAuraHost(frame, name)
+	if frame.GetObjectType then
+		local ok, kind = pcall(frame.GetObjectType, frame)
+		if ok and kind == "AuraContainer" then
+			return true
+		end
+	end
+	local filter = frame.filter
+	if addon.IsSecret and addon.IsSecret(filter) then
+		return true
+	end
+	if type(filter) == "string" and frame.cooldown then
+		return true
+	end
+	if type(name) ~= "string" then
+		return false
+	end
+	local n = string.lower(name)
+	if n:find("debuff", 1, true) or n:find("buffs", 1, true) or n:find("buffframe", 1, true) or n:find("privateaura", 1, true) then
+		return true
+	end
+	return false
+end
+
+-- oUF / compact cells. Their children include aura buttons; the cell is the leaf.
+local function IsLeafUnitButton(name)
+	if type(name) ~= "string" then
+		return false
+	end
+	local n = string.lower(name)
+	if n:find("debuff", 1, true) or n:find("buffs", 1, true) or n:find("buffframe", 1, true) then
+		return false
+	end
+	if n:find("unitbutton%d") or n:match("member%d+$") or n:match("^vd%d+h%d+$") then
+		return true
+	end
+	return false
+end
+
 local function WalkChildren(parent, callback, seen, depth)
 	if not Safe(parent) or depth > 5 or not parent.GetChildren then
+		return
+	end
+	local parentName = FrameName(parent)
+	if IsAuraHost(parent, parentName) or IsLeafUnitButton(parentName) then
 		return
 	end
 	local kids = childPools[depth]
@@ -502,17 +757,30 @@ local function WalkChildren(parent, callback, seen, depth)
 		kids = {}
 		childPools[depth] = kids
 	end
+	kids.n = 0
 	captureTarget = kids
-	CaptureChildren(parent:GetChildren())
+	-- A forbidden child fails the whole call. Skip that branch; do not error.
+	if not pcall(ReadChildren, parent) then
+		return
+	end
 	local n = kids.n or 0
 	for i = 1, n do
 		local child = kids[i]
 		kids[i] = nil
 		if child and not seen[child] then
-			if addon.GetFrameUnit(child) and addon.IsGroupUnitFrame(child) then
-				Consider(child, callback, seen)
+			local name = FrameName(child)
+			if IsAuraHost(child, name) then
+				seen[child] = true
 			else
-				WalkChildren(child, callback, seen, depth + 1)
+				local unit = addon.GetFrameUnit(child)
+				local hidden = not unit and addon.FrameUnitIsSecret(child)
+				if (unit or hidden) and addon.IsGroupUnitFrame(child) then
+					Consider(child, callback, seen)
+				elseif IsLeafUnitButton(name) then
+					seen[child] = true
+				else
+					WalkChildren(child, callback, seen, depth + 1)
+				end
 			end
 		end
 	end
@@ -816,6 +1084,93 @@ local function CollectCell(callback, seen)
 	end
 end
 
+local function CollectEnhanceQoLHeader(header, callback, seen)
+	if not header then
+		return
+	end
+	WalkHeader(header, callback, seen, 100)
+	WalkChildren(header, callback, seen, 1)
+	local name = header.GetName and header:GetName()
+	if type(name) ~= "string" then
+		return
+	end
+	for i = 1, 100 do
+		local button = _G[name .. "UnitButton" .. i]
+		if not button then
+			break
+		end
+		Consider(button, callback, seen)
+	end
+end
+
+local function CollectEnhanceQoL(callback, seen)
+	local root = _G.EnhanceQoL
+	local GF = root and root.Aura and root.Aura.UF and root.Aura.UF.GroupFrames
+	local headers = GF and GF.headers
+	if type(headers) == "table" then
+		for _, header in pairs(headers) do
+			CollectEnhanceQoLHeader(header, callback, seen)
+		end
+	end
+	local groups = GF and GF._raidGroupHeaders
+	if type(groups) == "table" then
+		for i = 1, 8 do
+			CollectEnhanceQoLHeader(groups[i], callback, seen)
+		end
+	end
+	CollectEnhanceQoLHeader(_G.EQOLUFPartyHeader, callback, seen)
+	CollectEnhanceQoLHeader(_G.EQOLUFRaidHeader, callback, seen)
+	CollectEnhanceQoLHeader(_G.EQOLUFMTHeader, callback, seen)
+	CollectEnhanceQoLHeader(_G.EQOLUFMAHeader, callback, seen)
+	CollectEnhanceQoLHeader(_G.EQOLUFSpotlightHeader, callback, seen)
+	CollectEnhanceQoLHeader(GF and GF._spotlightHeader, callback, seen)
+	for i = 1, 8 do
+		CollectEnhanceQoLHeader(_G["EQOLUFRaidGroupHeader" .. i], callback, seen)
+	end
+end
+
+local function CollectShadowedHeader(header, callback, seen)
+	if not header then
+		return
+	end
+	local kind = header.unitType
+	if type(kind) == "string" and not SHADOWED_GROUP_TYPES[kind] then
+		return
+	end
+	WalkHeader(header, callback, seen, 80)
+	WalkChildren(header, callback, seen, 1)
+	local name = header.GetName and header:GetName()
+	if type(name) ~= "string" then
+		return
+	end
+	for i = 1, 80 do
+		local button = _G[name .. "UnitButton" .. i]
+		if not button then
+			break
+		end
+		Consider(button, callback, seen)
+	end
+end
+
+local function CollectShadowed(callback, seen)
+	local UF = _G.ShadowUF
+	local headers = UF and UF.Units and UF.Units.headerFrames
+	if type(headers) == "table" then
+		for key, header in pairs(headers) do
+			if type(key) == "string" and (key == "party" or key == "raid" or key == "maintank" or key == "mainassist" or key:match("^raid%d+$")) then
+				CollectShadowedHeader(header, callback, seen)
+			end
+		end
+	end
+	CollectShadowedHeader(_G.SUFHeaderparty, callback, seen)
+	CollectShadowedHeader(_G.SUFHeaderraid, callback, seen)
+	CollectShadowedHeader(_G.SUFHeadermaintank, callback, seen)
+	CollectShadowedHeader(_G.SUFHeadermainassist, callback, seen)
+	for i = 1, 8 do
+		CollectShadowedHeader(_G["SUFHeaderraid" .. i], callback, seen)
+	end
+end
+
 function addon.ForEachUnitFrame(callback)
 	if type(callback) ~= "function" then
 		return
@@ -850,6 +1205,12 @@ function addon.ForEachUnitFrame(callback)
 	end
 	if _G.CellMainFrame or (_G.Cell and _G.Cell.unitButtons) then
 		CollectCell(callback, seenScratch)
+	end
+	if EnhanceQoLUnitFramesLoaded() or _G.EQOLUFPartyHeader or _G.EQOLUFRaidHeader then
+		CollectEnhanceQoL(callback, seenScratch)
+	end
+	if _G.ShadowUF or _G.SUFHeaderparty or _G.SUFHeaderraid or _G.SUFHeaderraid1 then
+		CollectShadowed(callback, seenScratch)
 	end
 end
 
@@ -973,7 +1334,7 @@ local function HookThirdParty(name)
 			end)
 		end
 	end
-	if name == "EllesmereUIRaidFrames" or name == "EllesmereUI" or name == "BuzzardFrames" or name == "VuhDo" or name == "Michs_RaidFrames" or name == "Cell" then
+	if name == "EllesmereUIRaidFrames" or name == "EllesmereUI" or name == "BuzzardFrames" or name == "VuhDo" or name == "Michs_RaidFrames" or name == "Cell" or name == "EnhanceQoLUnitFrames" or name == "ShadowedUnitFrames" then
 		if addon.HookRaidFrameProviders then
 			addon.HookRaidFrameProviders()
 		end
@@ -1003,6 +1364,8 @@ addon.On("LOGIN", function()
 	HookThirdParty("VuhDo")
 	HookThirdParty("Michs_RaidFrames")
 	HookThirdParty("Cell")
+	HookThirdParty("EnhanceQoLUnitFrames")
+	HookThirdParty("ShadowedUnitFrames")
 	if addon.HookRaidFrameProviders then
 		addon.HookRaidFrameProviders()
 	end
@@ -1019,4 +1382,6 @@ addon.On("ACTIVATE", function()
 	HookThirdParty("VuhDo")
 	HookThirdParty("Michs_RaidFrames")
 	HookThirdParty("Cell")
+	HookThirdParty("EnhanceQoLUnitFrames")
+	HookThirdParty("ShadowedUnitFrames")
 end)

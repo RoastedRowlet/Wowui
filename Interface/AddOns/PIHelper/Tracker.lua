@@ -947,6 +947,11 @@ local function SyncFrame(frame)
 		SetLive(container, false)
 		return
 	end
+	-- Token is secret for this tick, not gone. Dropping the cell here turns
+	-- the glow off for the rest of combat and SyncAll then deletes it.
+	if not unit and container and container.pihUnit and addon.FrameUnitIsSecret and addon.FrameUnitIsSecret(frame) then
+		return
+	end
 	if not ShouldTrack(frame, unit) then
 		SetLive(container, false)
 		return
@@ -1104,6 +1109,12 @@ local function HookCompact()
 			if addon.UsesReplacementGroupFrames and addon.UsesReplacementGroupFrames() then
 				return
 			end
+			if addon.EnhanceQoLReplacesCompactFrame and addon.EnhanceQoLReplacesCompactFrame(frame) then
+				return
+			end
+			if addon.ShadowedReplacesCompactFrame and addon.ShadowedReplacesCompactFrame(frame) then
+				return
+			end
 			if addon.IsActive and addon.IsActive() then
 				addon.AttachUnitFrame(frame)
 			end
@@ -1224,6 +1235,74 @@ local function HookCellAssign()
 	end)
 end
 
+local eqolHooked
+
+local function HookEnhanceQoLAssign()
+	if eqolHooked then
+		return
+	end
+	local root = _G.EnhanceQoL
+	local GF = root and root.Aura and root.Aura.UF and root.Aura.UF.GroupFrames
+	if type(GF) ~= "table" or type(GF.UnitButton_SetUnit) ~= "function" then
+		return
+	end
+	eqolHooked = true
+	-- GF:UnitButton_SetUnit(button, unit). The module is the implicit self.
+	hooksecurefunc(GF, "UnitButton_SetUnit", function(_, button)
+		if not button or button._eqolPreview or button._eqolPartyPet then
+			return
+		end
+		if addon.IsActive and addon.IsActive() then
+			addon.AttachUnitFrame(button)
+		end
+	end)
+	local function rescan()
+		if addon.IsActive and addon.IsActive() and addon.QueueAttach then
+			addon.QueueAttach()
+		end
+	end
+	if type(GF.EnableFeature) == "function" then
+		hooksecurefunc(GF, "EnableFeature", rescan)
+	end
+	if type(GF.DisableFeature) == "function" then
+		hooksecurefunc(GF, "DisableFeature", rescan)
+	end
+	if type(GF.FullRefresh) == "function" then
+		hooksecurefunc(GF, "FullRefresh", rescan)
+	end
+end
+
+local sufHooked
+
+local function HookShadowedAssign()
+	if sufHooked then
+		return
+	end
+	local UF = _G.ShadowUF
+	local units = UF and UF.Units
+	if type(UF) ~= "table" or type(units) ~= "table" then
+		return
+	end
+	sufHooked = true
+	local function rescan()
+		if addon.IsActive and addon.IsActive() and addon.QueueAttach then
+			addon.QueueAttach()
+		end
+	end
+	if type(UF.LoadUnits) == "function" then
+		hooksecurefunc(UF, "LoadUnits", rescan)
+	end
+	if type(UF.ProfilesChanged) == "function" then
+		hooksecurefunc(UF, "ProfilesChanged", rescan)
+	end
+	if type(units.InitializeFrame) == "function" then
+		hooksecurefunc(units, "InitializeFrame", rescan)
+	end
+	if type(units.ReloadHeader) == "function" then
+		hooksecurefunc(units, "ReloadHeader", rescan)
+	end
+end
+
 function addon.HookRaidFrameProviders()
 	HookCompact()
 	HookEllesmereAssign()
@@ -1231,6 +1310,8 @@ function addon.HookRaidFrameProviders()
 	HookVuhDoAssign()
 	HookMichsAssign()
 	HookCellAssign()
+	HookEnhanceQoLAssign()
+	HookShadowedAssign()
 end
 
 addon.On("LOADED", addon.HookRaidFrameProviders)

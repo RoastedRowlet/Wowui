@@ -2,16 +2,16 @@
 QuickQuestDB2 = nil
 QuickQuestDB3 = {
 ["share"] = false,
-["accept"] = 1,
+["accept"] = 3,
 ["acceptRepeatables"] = 3,
 ["pausekeyreverse"] = false,
 ["pausekey"] = "SHIFT",
 ["completereward"] = 1,
-["paydarkmoonfaire"] = true,
 ["autoquestgossip"] = true,
-["selectreward"] = true,
-["skipcinematics"] = 3,
 ["skipgossip"] = true,
+["paydarkmoonfaire"] = true,
+["skipcinematics"] = 3,
+["selectreward"] = true,
 ["skipgossipwhen"] = 2,
 ["skipmovies"] = 3,
 }

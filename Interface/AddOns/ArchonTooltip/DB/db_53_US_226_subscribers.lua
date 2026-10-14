@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Paladin-Retribution',}
-local provider = {region='US',realm='Turalyon',name='US',type='subscribers',zone=53,date='2026-10-06',data={Be='Beârback:BAEANQAECggIEQAAAA==.',He='Hekus:BAEANQADCggICAABNQAECgkJHAABAA0VAA==.',Si='Sintaro:BAEANQAECgYIDQAAAA==.',},}
+local lookup = {'Druid-Guardian','Monk-Windwalker','Monk-Brewmaster','Mage-Frost',}
+local provider = {region='US',realm='Turalyon',name='US',type='subscribers',zone=53,date='2026-10-13',data={Be='Beârback:BAEBNQAECn8ZAAIBAAkKpx1dBgAoAwmODQAABQBhAHUNAAAEAGAAfw0AAAQAYwCpDQAABABfAFwNAAACAE0AXQ0AAAEATgBlDQAAAQBQAKQNAAABAAUAMw0AAAMAXQABAAkKpx1dBgAoAwmODQAABQBhAHUNAAAEAGAAfw0AAAQAYwCpDQAABABfAFwNAAACAE0AXQ0AAAEATgBlDQAAAQBQAKQNAAABAAUAMw0AAAMAXQAAAA==.',Pe='Perrinaybara:BAEBNQAECn80AAMCAAkKJSC3CgAlAwmODQAABwBcAHUNAAAGAFUAfw0AAAcASwCpDQAABwBMAFwNAAAEAF8AXQ0AAAUARwBlDQAABQBDAKQNAAADAFcAMw0AAAgAXwACAAkKJSC3CgAlAwmODQAABwBcAHUNAAAFAFUAfw0AAAYASwCpDQAABgBMAFwNAAAEAF8AXQ0AAAUARwBlDQAABQBDAKQNAAADAFcAMw0AAAgAXwADAAMKRhNSIwC4AAN1DQAAAQA0AH8NAAABAD0AqQ0AAAEALgABNQAFFAIIBgAEAEwRAA==.',Si='Sintaro:BAEANQAECgcIDwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

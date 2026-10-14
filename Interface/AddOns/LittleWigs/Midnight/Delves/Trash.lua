@@ -2,7 +2,7 @@
 -- Module Declaration
 --
 
-local mod, CL = BigWigs:NewBoss("Midnight Delve Trash", {2933, 2952, 2953, 2961, 2962, 2963, 2964, 2965, 2979, 3003, 3038, 3077}) -- All Midnight Delves (except Nemesis Delves)
+local mod, CL = BigWigs:NewBoss("Midnight Delve Trash", {2933, 2952, 2953, 2961, 2962, 2963, 2964, 2965, 2979, 3003, 3038, 3043, 3077}) -- All Midnight Delves (except Nemesis Delves)
 if not mod then return end
 mod:SetTrashModule(true)
 
@@ -18,9 +18,10 @@ mod:SetTrashModule(true)
 -- Auras
 --
 
---mod:SetAuraData({
-	--{1256045, soundOnApplied = "underyou"}, -- Null Zone (Season 1)
---})
+mod:SetAuraData({
+	--{1256045, header = 252950, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Null Zone (Nullaeus, Season 1)
+	{1295701, header = 265525, soundOnApplied = "underyou", tip = CL.debuffUnderYouNote}, -- Noxious Poison (Azta'rec, Season 2)
+})
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -109,6 +110,9 @@ function mod:GOSSIP_SHOW()
 		elseif self:GetGossipID(136446) then -- Parhelion Plaza, start Delve (Vindicator Xayann)
 			-- 136446:|cFF0000FF(Delve)|r I'll drive back the attackers.
 			self:SelectGossipID(136446)
+		elseif self:GetGossipID(141655) then -- Labyrinth of Kindo'jan, continue Delve (Warlord Kaz'kara)
+			-- 141655:I will find your faithful steed.
+			self:SelectGossipID(141655)
 		elseif self:GetGossipID(134949) then -- Shadowguard Point, start Delve (Lysikas)
 			-- 134949:|cFF0000FF(Delve)|r Sounds like a plan.
 			self:SelectGossipID(134949)
@@ -172,8 +176,9 @@ function mod:PLAYER_CHOICE_UPDATE()
 		if choiceInfo then
 			local numChoices = self:GetPlayerChoiceCount(choiceInfo)
 			if numChoices == 1 then
+				local spellID = self:GetPlayerChoiceSpellID(choiceInfo, numChoices)
 				local numButtons = self:GetPlayerChoiceButtonCount(choiceInfo, numChoices)
-				if numButtons == 1 then
+				if numButtons == 1 and spellID then
 					self:SelectPlayerChoiceButton(choiceInfo, numChoices, numButtons)
 				end
 			end

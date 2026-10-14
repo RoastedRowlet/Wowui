@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Druid-Restoration','Druid-Balance',}
-local provider = {region='US',realm='Stonemaul',name='US',type='subscribers',zone=53,date='2026-10-06',data={Br='Broccoliz:BAECNQAFFIEcAAIBAAcKmBOjAQBDAgeODQAAAwBHAHUNAAAFAEAAfw0AAAUAKwCpDQAABgAaAFwNAAAEACUAXQ0AAAIASQAzDQAAAwAiAAEABwqYE6MBAEMCB44NAAADAEcAdQ0AAAUAQAB/DQAABQArAKkNAAAGABoAXA0AAAQAJQBdDQAAAgBJADMNAAADACIANQAECoEsAAMBAAkKvxsnEQCsAgABAAkKvxsnEQCsAgACAAEKVxZimgBBAAAAAA==.',Xe='Xen:BAEANQAECggICwAAAA==.',},}
+local provider = {region='US',realm='Stonemaul',name='US',type='subscribers',zone=53,date='2026-10-13',data={Br='Broccoliz:BAECNQAFFH8cAAIBAAcKmBOtAgAsAgeODQAAAwBHAHUNAAAFAEAAfw0AAAUAKwCpDQAABgAaAFwNAAAEACUAXQ0AAAIASQAzDQAAAwAiAAEABwqYE60CACwCB44NAAADAEcAdQ0AAAUAQAB/DQAABQArAKkNAAAGABoAXA0AAAQAJQBdDQAAAgBJADMNAAADACIANQAECn8vAAMBAAkKvxs6FQCaAgABAAkKvxs6FQCaAgACAAEKVxbqqABBAAAAAA==.',Xe='Xen:BAEANQAECggICwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

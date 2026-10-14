@@ -1,4 +1,5 @@
-## Interface: 120100
+## Interface: 120100, 120105
+## X-TestedPatch: 12.1.5
 ## Title: StutterAlert
 ## Notes: Auto detect micro stutters, FPS lag spikes, and frame drops to find the exact addons causing performance issues
 ## Notes-deDE: Erkennt Mikroruckler, FPS-Einbrüche und Frame-Drops automatisch und findet genau die Addons, die Leistungsprobleme verursachen
@@ -12,7 +13,7 @@
 ## Notes-zhCN: 自动检测微卡顿、帧数骤降和掉帧，精确找出导致性能问题的插件
 ## Notes-zhTW: 自動偵測微卡頓、幀數驟降和掉幀，精確找出導致效能問題的插件
 ## Author: Osiris the Kiwi / Discord: osirisnz
-## Version: 1.0.6
+## Version: 1.0.7
 ## SavedVariables: StutterAlertDB
 ## Category: Development Tools
 ## X-License: All Rights Reserved

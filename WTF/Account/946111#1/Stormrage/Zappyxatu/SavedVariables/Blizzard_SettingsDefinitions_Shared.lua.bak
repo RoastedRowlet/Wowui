@@ -5,6 +5,6 @@ NewSettingsSeen = {
 ["accessibilityScreenNarrationEnabled"] = true,
 ["nameplateUseClassColorForFriendlyPlayerUnitNames"] = true,
 ["nameplateShowFriendlyRealmName"] = true,
-["SOCIAL_ENABLE_DISCORD_FUNCTIONALITY"] = true,
 ["nameplateShowOnlyNameForFriendlyPlayerUnits"] = true,
+["SOCIAL_ENABLE_DISCORD_FUNCTIONALITY"] = true,
 }

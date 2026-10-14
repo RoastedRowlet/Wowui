@@ -12,17 +12,9 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Hairypottèr-area-52"] = true,
-["us-Bubuloseven-stormrage"] = true,
-["us-Kyaníte-stormrage"] = true,
-["us-Volkx-azralon"] = true,
-["us-Yuen-stormrage"] = true,
-["us-Tofurkie-stormrage"] = true,
-["us-Stepsistér-stormrage"] = true,
-["us-Livie-stormrage"] = true,
-["us-Zuldjin-nemesis"] = true,
+["us-Tuchankha-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

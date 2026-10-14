@@ -9,10 +9,10 @@ CliqueDB3 = {
 ["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Zappyxatu - Stormrage"] = {
-["spec1_profileKey"] = "Zappyxatu - Stormrage",
-["specswap"] = false,
 ["spec3_profileKey"] = "Zappyxatu - Stormrage",
+["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["spec2_profileKey"] = "Zappyxatu - Stormrage",
+["specswap"] = false,
 },
 ["Madmareep - Stormrage"] = {
 ["spec1_profileKey"] = "Madmareep - Stormrage",
@@ -29,12 +29,12 @@ CliqueDB3 = {
 },
 ["Lonelylitten - Stormrage"] = {
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
-["spec4_profileKey"] = "Lonelylitten - Stormrage",
-["fastooc"] = false,
-["downclick"] = false,
-["specswap"] = false,
 ["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["downclick"] = false,
+["spec4_profileKey"] = "Lonelylitten - Stormrage",
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
+["specswap"] = false,
+["fastooc"] = false,
 },
 ["Klutzykubfu - Stormrage"] = {
 ["spec1_profileKey"] = "Klutzykubfu - Stormrage",
@@ -343,12 +343,12 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["icon"] = 132212,
+["type"] = "menu",
 ["key"] = "SHIFT-BUTTON2",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 132212,
-["type"] = "menu",
 },
 {
 ["type"] = "menu",
