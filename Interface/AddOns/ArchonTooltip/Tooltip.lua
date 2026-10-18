@@ -753,7 +753,7 @@ table.insert(Private.LoginFnQueue, function()
 		---@param memberInfo ClubMemberInfo
 		local function DoGuildFrameTooltipUpdate(memberInfo)
 			-- ignore deleted characters which may still show up
-			if not memberInfo.name then
+			if Private.IsSecretValue(memberInfo.name) or not memberInfo.name then
 				return
 			end
 

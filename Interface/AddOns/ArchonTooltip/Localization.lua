@@ -151,7 +151,7 @@ if locale == "deDE" then
         L["Encounter-3429"] = [[Der Gewundene Altar]]
         L["Encounter-3492"] = [[Ula'tek]]
         L["Encounter-3379"] = [[Nymrissa Wellenrufer]]
-        L["Encounter-3513"] = [[]]
+        L["Encounter-3513"] = [[Kith'ix]]
     elseif Private.IsMists then
         L["addon.parse-gate-description"] = "Parses shown after 10H kills"
         L["Encounter-51602"] = [[Immerseus]]
@@ -247,7 +247,7 @@ elseif locale == "esES" or locale == "esMX" then
         L["Encounter-3429"] = [[El Altar en Espiral]]
         L["Encounter-3492"] = [[Ula'tek]]
         L["Encounter-3379"] = [[Nymrissa Clamaolas]]
-        L["Encounter-3513"] = [[]]
+        L["Encounter-3513"] = [[Kith'ix]]
     elseif Private.IsMists then
         L["addon.parse-gate-description"] = "Parses mostrados tras 10H muertes"
         L["Encounter-51602"] = [[Immerseus]]
@@ -342,7 +342,7 @@ elseif locale == "frFR" then
         L["Encounter-3429"] = [[Autel Annelé]]
         L["Encounter-3492"] = [[Ula’tek]]
         L["Encounter-3379"] = [[Nymrissa Mande-vagues]]
-        L["Encounter-3513"] = [[]]
+        L["Encounter-3513"] = [[Kith’ix]]
     elseif Private.IsMists then
         L["addon.parse-gate-description"] = "Parses shown after 10H kills"
         L["Encounter-51602"] = [[Immerseus]]
@@ -437,7 +437,7 @@ elseif locale == "itIT" then
         L["Encounter-3429"] = [[Altare Serpeggiante]]
         L["Encounter-3492"] = [[Ula'tek]]
         L["Encounter-3379"] = [[Invocatrice dell'Onda Nymrissa]]
-        L["Encounter-3513"] = [[]]
+        L["Encounter-3513"] = [[Kith'ix]]
     elseif Private.IsMists then
         L["addon.parse-gate-description"] = "Parses shown after 10H kills"
         L["Encounter-51602"] = [[Immerseus]]
@@ -532,7 +532,7 @@ elseif locale == "koKO" then
         L["Encounter-3429"] = [[똬리의 제단]]
         L["Encounter-3492"] = [[울라텍]]
         L["Encounter-3379"] = [[님리사 웨이브콜러]]
-        L["Encounter-3513"] = [[]]
+        L["Encounter-3513"] = [[키식스]]
     elseif Private.IsMists then
         L["addon.parse-gate-description"] = "10H회 처치 후 로그 점수 표시"
         L["Encounter-51602"] = [[잿빛너울]]
@@ -627,7 +627,7 @@ elseif locale == "ptBR" then
         L["Encounter-3429"] = [[O Altar Enrolado]]
         L["Encounter-3492"] = [[Ula'tek]]
         L["Encounter-3379"] = [[Nymrissa Clamaondas]]
-        L["Encounter-3513"] = [[]]
+        L["Encounter-3513"] = [[Kith'ix]]
     elseif Private.IsMists then
         L["addon.parse-gate-description"] = "Análises apresentadas após: mortes por limiar "
         L["Encounter-51602"] = [[Immerseus]]
@@ -722,7 +722,7 @@ elseif locale == "ruRU" then
         L["Encounter-3429"] = [[Спиральный алтарь]]
         L["Encounter-3492"] = [[Ула'тек]]
         L["Encounter-3379"] = [[Нимрисса Волногон]]
-        L["Encounter-3513"] = [[]]
+        L["Encounter-3513"] = [[Кит'икс]]
     elseif Private.IsMists then
         L["addon.parse-gate-description"] = "Parses shown after 10H kills"
         L["Encounter-51602"] = [[Глубиний]]
@@ -817,7 +817,7 @@ elseif locale == "zhCN" then
         L["Encounter-3429"] = [[盘卷祭坛]]
         L["Encounter-3492"] = [[乌拉特克]]
         L["Encounter-3379"] = [[尼姆瑞莎·唤波者]]
-        L["Encounter-3513"] = [[]]
+        L["Encounter-3513"] = [[基希克斯]]
     elseif Private.IsMists then
         L["addon.parse-gate-description"] = "分数在 10H 击杀后显示"
         L["Encounter-51602"] = [[伊墨苏斯]]

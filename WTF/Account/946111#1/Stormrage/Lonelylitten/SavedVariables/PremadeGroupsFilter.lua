@@ -168,7 +168,7 @@ PremadeGroupsFilterState = {
 ["raid"] = {
 ["difficulty"] = {
 ["val"] = 2,
-["act"] = true,
+["act"] = false,
 },
 ["heals"] = {
 ["max"] = "",
@@ -176,8 +176,8 @@ PremadeGroupsFilterState = {
 ["act"] = false,
 },
 ["tanks"] = {
-["max"] = "",
-["min"] = "",
+["max"] = "1",
+["min"] = "1",
 ["act"] = false,
 },
 ["defeated"] = {
@@ -195,7 +195,7 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["matchingid"] = true,
+["matchingid"] = false,
 ["expression"] = "",
 },
 },
