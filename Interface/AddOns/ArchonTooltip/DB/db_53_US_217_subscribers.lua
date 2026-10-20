@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {}
-local provider = {region='US',realm='TheVentureCo',name='US',type='subscribers',zone=53,date='2026-10-13',data={As='Asonda:BAEANQAECgQICAAAAA==.',},}
+local provider = {region='US',realm='TheVentureCo',name='US',type='subscribers',zone=53,date='2026-10-19',data={As='Asonda:BAEANQAECgUIDgAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

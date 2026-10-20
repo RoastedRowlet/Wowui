@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Mage-Frost',}
-local provider = {region='US',realm='Tanaris',name='US',type='subscribers',zone=53,date='2026-10-13',data={El='Elimae:BAEANQADCgQIBgAAAA==.',Um='Umbraheart:BAEANQAECgEIAQABNQAECgkJMgABAFsZAA==.',},}
+local provider = {region='US',realm='Tanaris',name='US',type='subscribers',zone=53,date='2026-10-19',data={El='Elimae:BAEANQADCgUIBwAAAA==.',Um='Umbraheart:BAEANQAECgEIAQABNQAECgoKOgABAH4bAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

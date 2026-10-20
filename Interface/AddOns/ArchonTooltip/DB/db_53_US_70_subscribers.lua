@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Mage-Arcane','Paladin-Retribution',}
-local provider = {region='US',realm='Doomhammer',name='US',type='subscribers',zone=53,date='2026-10-13',data={De='Demonicfyre:BAECNQAFFH8HAAIBAAMKDBiuMQD8AAOODQAAAwAuAHUNAAABAEIAqQ0AAAMARwABAAMKDBiuMQD8AAOODQAAAwAuAHUNAAABAEIAqQ0AAAMARwA1AAQKfyAAAgEACQoTHM5UANcCAAEACQoTHM5UANcCAAAA.Demonstein:BAEANQAECgUIBQABNQAFFAUIDQACAI4gAA==.',Ne='Nerissa:BAEANQAECggIEQAAAA==.',Sh='Shamanstein:BAEANQADCggJDwABNQAFFAUIDQACAI4gAA==.',Sm='Smâlls:BAEANQAECgUIDAAAAA==.',Vi='Viirnald:BAEANQADCgcIDQAAAA==.',},}
+local lookup = {'Mage-Arcane','Paladin-Retribution','Monk-Brewmaster','Hunter-Marksmanship',}
+local provider = {region='US',realm='Doomhammer',name='US',type='subscribers',zone=53,date='2026-10-20',data={De='Demonicfyre:BAECNQAFFH8KAAIBAAMKDBkgDQDyAAOODQAABAAuAHUNAAACAEIAqQ0AAAQATwABAAMKDBkgDQDyAAOODQAABAAuAHUNAAACAEIAqQ0AAAQATwA1AAQKfyEAAgEACgr9G5dVANUCAAEACgr9G5dVANUCAAAA.Demonstein:BAEANQAECgUIBQABNQAFFAUIDQACAI4gAA==.',Ne='Nerissa:BAEANQAECggIEgAAAA==.',Sh='Shamanstein:BAEANQADCggJDwABNQAFFAUIDQACAI4gAA==.',Sm='Smâlls:BAEBNQAECn8WAAIDAAYKExsCBgAZAQaODQAABABDAHUNAAAEAEwAfw0AAAMAPQCpDQAABABCAFwNAAACAEIAMw0AAAUAVQADAAYKExsCBgAZAQaODQAABABDAHUNAAAEAEwAfw0AAAMAPQCpDQAABABCAFwNAAACAEIAMw0AAAUAVQAAAA==.',Vi='Viirnald:BAEANQADCgcIDQAAAA==.',Za='Zazzy:BAEANQAECgIIAgABNQAFFAQIDgAEALELAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

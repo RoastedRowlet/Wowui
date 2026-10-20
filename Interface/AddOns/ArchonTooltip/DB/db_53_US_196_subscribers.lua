@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Monk-Brewmaster','Mage-Arcane','Priest-Holy',}
-local provider = {region='US',realm='Silvermoon',name='US',type='subscribers',zone=53,date='2026-10-13',data={Al='Alextros:BAEANQAECgEIAQABNQAECgkJKAABAMMhAA==.',De='Delacour:BAECNQAFFH8JAAICAAUKTwoPJQBXAQWODQAAAwAqAHUNAAACABYAfw0AAAEABACpDQAAAgANADMNAAABAAYAAgAFCk8KDyUAVwEFjg0AAAMAKgB1DQAAAgAWAH8NAAABAAQAqQ0AAAIADQAzDQAAAQAGADUABAp/JAACAgAICjYX2aEAPAIAAgAICjYX2aEAPAIAATUABAoHCBgAAwALFAA=.',},}
+local provider = {region='US',realm='Silvermoon',name='US',type='subscribers',zone=53,date='2026-10-20',data={Al='Alextros:BAEANQAECgEIAQABNQAECgoKKwABAEMgAA==.',De='Delacour:BAECNQAFFH8JAAICAAUKTwr/JQBXAQWODQAAAwAqAHUNAAACABYAfw0AAAEABACpDQAAAgANADMNAAABAAYAAgAFCk8K/yUAVwEFjg0AAAMAKgB1DQAAAgAWAH8NAAABAAQAqQ0AAAIADQAzDQAAAQAGADUABAp/JQACAgAJCo4VpqQAOAIAAgAJCo4VpqQAOAIAATUABAoJCRwAAwC7EQA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

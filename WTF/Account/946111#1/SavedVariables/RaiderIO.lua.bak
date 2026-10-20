@@ -14,16 +14,26 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Lilyfall-area-52"] = true,
-["us-Mikalockz-stormrage"] = true,
+["us-Sharkfins-stormrage"] = true,
+["us-Ivanrolando-ragnaros"] = true,
+["us-Abalyon-thrall"] = true,
+["us-Acerpilk-dentarg"] = true,
+["us-Fuzzyy-eredar"] = true,
+["us-Thardabim-dalaran"] = true,
+["us-Mplusonly-bleeding-hollow"] = true,
+["us-Schevlina-quelthalas"] = true,
+["us-Herathor-malganis"] = true,
 ["us-party5-stormrage"] = true,
-["us-Andyisdandy-stormrage"] = true,
-["us-Reymuh-stormrage"] = true,
-["us-Queruel-dalaran"] = true,
-["us-Tómmý-area-52"] = true,
-["us-Eightfifty-stormrage"] = true,
-["us-Solocha-stormrage"] = true,
-["us-Klawwz-area-52"] = true,
+["us-Fallenherald-sargeras"] = true,
+["us-Captmoolol-stormrage"] = true,
+["us-Bathmats-illidan"] = true,
+["us-Rancidone-stormrage"] = true,
+["us-Maidfrills-stormrage"] = true,
+["us-Greenbeef-stormrage"] = true,
+["us-Skerrit-blood-furnace"] = true,
+["us-Moonrei-norgannon"] = true,
+["us-Kobê-malganis"] = true,
+["us-Deadnamed-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

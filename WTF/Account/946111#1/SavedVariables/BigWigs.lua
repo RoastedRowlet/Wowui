@@ -11,50 +11,6 @@ BigWigs3DB = {
 ["Minimeditite - Area 52"] = "Default",
 },
 ["namespaces"] = {
-["BigWigs_Bosses_Saprish"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1263523] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[-2516] = true,
-[-1004] = true,
-[1049] = true,
-[1065] = true,
-[1050] = true,
-[-2529] = true,
-[-323] = true,
-},
-},
-},
-["BigWigs_Plugins_Auras"] = {
-["global"] = {
-["showHelpTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["player"] = {
-["disabled"] = true,
-},
-},
-},
-},
-["BigWigs_Bosses_Crawth"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[377004] = 3129591,
-},
-},
-},
-},
 ["BigWigs_Bosses_Echo of Doragosa"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -69,31 +25,6 @@ BigWigs3DB = {
 ["Default"] = {
 ["toggles"] = {
 [1264336] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_Timeline"] = {
-["profiles"] = {
-["Default"] = {
-["blizzTimeline"] = true,
-},
-},
-},
-["BigWigs_Bosses_Vexamus"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[386173] = 3129591,
-},
-},
-},
-},
-["BigWigs_Bosses_Zuraal"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1263399] = 3129591,
 },
 },
 },
@@ -124,6 +55,92 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1264756] = 3129591,
+},
+},
+},
+},
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[-2516] = true,
+[-1004] = true,
+[1049] = true,
+[1065] = true,
+[1050] = true,
+[-2529] = true,
+[-323] = true,
+},
+},
+},
+["MythicPlus"] = {
+["global"] = {
+["showViewerTeleportTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["viewerPosition"] = {
+"TOPLEFT",
+"TOPLEFT",
+13,
+-156,
+},
+},
+},
+},
+["BigWigs_Plugins_Auras"] = {
+["global"] = {
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["disabled"] = true,
+},
+},
+},
+},
+["BigWigs_Bosses_Crawth"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[377004] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Saprish"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263523] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Vexamus"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[386173] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Zuraal"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263399] = 3129591,
+},
+},
+},
+},
 ["BigWigs_Plugins_Sounds"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -139,24 +156,6 @@ BigWigs3DB = {
 ["BigWigs_Bosses_Zuraal"] = {
 [1263440] = "BigWigs: Flag Taken (PvP)",
 },
-},
-},
-},
-},
-["BigWigs_Bosses_Kith'ix"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1304424] = 3129591,
-},
-},
-},
-},
-["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1264756] = 3129591,
 },
 },
 },
@@ -191,17 +190,18 @@ BigWigs3DB = {
 },
 },
 },
-["MythicPlus"] = {
-["global"] = {
-["showViewerTeleportTip"] = false,
-},
+["BigWigs_Plugins_Timeline"] = {
 ["profiles"] = {
 ["Default"] = {
-["viewerPosition"] = {
-"TOPLEFT",
-"TOPLEFT",
-13,
--156,
+["blizzTimeline"] = true,
+},
+},
+},
+["BigWigs_Bosses_Kith'ix"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1304424] = 3129591,
 },
 },
 },
@@ -217,9 +217,9 @@ BigWigs3DB = {
 ["realm"] = "Stormrage",
 },
 ["Player-60-0F7B141D"] = {
-["playerRating"] = 3945,
+["playerRating"] = 3957,
 ["specId"] = 262,
-["keyMap"] = 587,
+["keyMap"] = 588,
 ["name"] = "Zappyxatu",
 ["keyLevel"] = 20,
 ["realm"] = "Stormrage",
@@ -238,12 +238,12 @@ BigWigsStatsDB = {
 [2987] = {
 [2849] = {
 ["heroic"] = {
-["kills"] = 6,
+["kills"] = 7,
 ["fkDate"] = "2026/08/24",
 ["bestDate"] = "2026/09/08",
 ["fkWipes"] = 1,
 ["best"] = 224.7400000000489,
-["wipes"] = 5,
+["wipes"] = 6,
 ["fkDuration"] = 449.6009999999951,
 },
 ["world"] = {
@@ -447,6 +447,43 @@ BigWigsStatsDB = {
 ["fkDate"] = "2026/10/13",
 },
 },
+[2874] = {
+["heroic"] = {
+["kills"] = 2,
+["fkDate"] = "2026/08/24",
+["bestDate"] = "2026/08/24",
+["fkWipes"] = 5,
+["best"] = 425.4460000000108,
+["wipes"] = 9,
+["fkDuration"] = 425.4460000000108,
+},
+["normal"] = {
+["kills"] = 4,
+["fkDate"] = "2026/08/19",
+["wipes"] = 1,
+["bestDate"] = "2026/08/19",
+["best"] = 354.4259999999777,
+["fkDuration"] = 354.4259999999777,
+},
+["LFR"] = {
+["kills"] = 2,
+["fkDate"] = "2026/08/25",
+["bestDate"] = "2026/08/25",
+["best"] = 205.9290000000037,
+["fkDuration"] = 222.4190000000235,
+},
+},
+[2871] = {
+["normal"] = {
+["kills"] = 3,
+["fkDate"] = "2026/08/19",
+["bestDate"] = "2026/08/19",
+["fkWipes"] = 1,
+["best"] = 377.4539999999688,
+["wipes"] = 9,
+["fkDuration"] = 377.4539999999688,
+},
+},
 [2888] = {
 ["normal"] = {
 ["kills"] = 4,
@@ -474,60 +511,23 @@ BigWigsStatsDB = {
 ["fkDuration"] = 267.2110000000102,
 },
 },
-[2871] = {
-["normal"] = {
-["kills"] = 3,
-["fkDate"] = "2026/08/19",
-["bestDate"] = "2026/08/19",
-["fkWipes"] = 1,
-["best"] = 377.4539999999688,
-["wipes"] = 9,
-["fkDuration"] = 377.4539999999688,
-},
-},
-[2874] = {
-["heroic"] = {
-["kills"] = 2,
-["fkDate"] = "2026/08/24",
-["bestDate"] = "2026/08/24",
-["fkWipes"] = 5,
-["best"] = 425.4460000000108,
-["wipes"] = 9,
-["fkDuration"] = 425.4460000000108,
-},
+[2894] = {
 ["normal"] = {
 ["kills"] = 4,
-["fkDate"] = "2026/08/19",
-["wipes"] = 1,
+["fkDuration"] = 272.8699999999953,
+["best"] = 272.8699999999953,
 ["bestDate"] = "2026/08/19",
-["best"] = 354.4259999999777,
-["fkDuration"] = 354.4259999999777,
+["wipes"] = 2,
+["fkDate"] = "2026/08/19",
 },
-["LFR"] = {
-["kills"] = 2,
-["fkDate"] = "2026/08/25",
-["bestDate"] = "2026/08/25",
-["best"] = 205.9290000000037,
-["fkDuration"] = 222.4190000000235,
-},
-},
-[2887] = {
-["normal"] = {
-["kills"] = 2,
-["fkDate"] = "2026/08/23",
-["wipes"] = 1,
-["bestDate"] = "2026/08/23",
-["best"] = 478.0889999999999,
-["fkDuration"] = 478.0889999999999,
-},
-["LFR"] = {
-["kills"] = 5,
-["fkDate"] = "2026/08/18",
-["bestDate"] = "2026/10/13",
-["fkWipes"] = 1,
-["best"] = 155.6199999999953,
-["wipes"] = 3,
-["fkDuration"] = 292.4869999999646,
+["heroic"] = {
+["kills"] = 3,
+["fkDuration"] = 386.3110000000015,
+["wipes"] = 10,
+["fkWipes"] = 5,
+["best"] = 273.3429999999935,
+["bestDate"] = "2026/09/01",
+["fkDate"] = "2026/08/24",
 },
 },
 [2895] = {
@@ -557,23 +557,23 @@ BigWigsStatsDB = {
 ["fkDate"] = "2026/10/13",
 },
 },
-[2894] = {
+[2887] = {
 ["normal"] = {
-["kills"] = 4,
-["fkDuration"] = 272.8699999999953,
-["best"] = 272.8699999999953,
-["bestDate"] = "2026/08/19",
-["wipes"] = 2,
-["fkDate"] = "2026/08/19",
+["kills"] = 2,
+["fkDate"] = "2026/08/23",
+["wipes"] = 1,
+["bestDate"] = "2026/08/23",
+["best"] = 478.0889999999999,
+["fkDuration"] = 478.0889999999999,
 },
-["heroic"] = {
-["kills"] = 3,
-["fkDuration"] = 386.3110000000015,
-["wipes"] = 10,
-["fkWipes"] = 5,
-["best"] = 273.3429999999935,
-["bestDate"] = "2026/09/01",
-["fkDate"] = "2026/08/24",
+["LFR"] = {
+["kills"] = 5,
+["fkDate"] = "2026/08/18",
+["bestDate"] = "2026/10/13",
+["fkWipes"] = 1,
+["best"] = 155.6199999999953,
+["wipes"] = 3,
+["fkDuration"] = 292.4869999999646,
 },
 },
 },

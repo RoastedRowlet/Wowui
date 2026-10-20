@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'DeathKnight-Frost','Unknown-Unknown',}
-local provider = {region='US',realm='Duskwood',name='US',type='subscribers',zone=53,date='2026-10-13',data={Ae='Aegondk:BAEBNQAFFH8GAAIBAAMK0xnfDQD1AAOODQAAAwBRAHUNAAABABYAqQ0AAAIAXQABAAMK0xnfDQD1AAOODQAAAwBRAHUNAAABABYAqQ0AAAIAXQAAAA==.',Da='Damitsu:BAEANQADCggIHQABNQAECgUIDgACAAAAAA==.Damnitsu:BAEANQAECgUIDgAAAA==.',Wa='Watevr:BAEANQADCgcIDgABNQAECgUIDgACAAAAAA==.',},}
+local lookup = {'DeathKnight-Frost','Rogue-Subtlety','Rogue-Assassination',}
+local provider = {region='US',realm='Duskwood',name='US',type='subscribers',zone=53,date='2026-10-20',data={Ae='Aegondk:BAEBNQAFFH8GAAIBAAMK0xlqDgD0AAOODQAAAwBRAHUNAAABABYAqQ0AAAIAXQABAAMK0xlqDgD0AAOODQAAAwBRAHUNAAABABYAqQ0AAAIAXQAAAA==.',Da='Damitsu:BAEANQADCggIHQABNQAECgYIFQACAIEPAA==.Damnitsu:BAEBNQAECn8VAAMCAAYKgQ9xKACBAQaODQAABQAnAHUNAAAEAB0Afw0AAAIAPQCpDQAABAAmAFwNAAABADMAMw0AAAUAKwACAAYKXQ5xKACBAQaODQAABAAdAHUNAAACABwAfw0AAAEAPQCpDQAAAwAmAFwNAAABADMAMw0AAAQAKwADAAUKBgtBZwAVAQWODQAAAQAnAHUNAAACAB0Afw0AAAEAEwCpDQAAAQAPADMNAAABABcAAAA=.',Wa='Watevr:BAEANQADCgcIDgABNQAECgYIFQACAIEPAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

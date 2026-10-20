@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Druid-Restoration',}
-local provider = {region='US',realm='Feathermoon',name='US',type='subscribers',zone=53,date='2026-10-13',data={As='Ashkinassi:BAEANQADCgUIBgAAAA==.',Ta='Talön:BAEANQAECgUJBQAAAA==.',['Êc']='Êclipse:BAEBNQAECn8kAAIBAAkKKhrXEQC/AgmODQAABwBIAHUNAAAHAEgAfw0AAAUAWgCpDQAABQBEAFwNAAACABgAXQ0AAAMAUwBlDQAAAwA9AKQNAAABACsAMw0AAAMAVgABAAkKKhrXEQC/AgmODQAABwBIAHUNAAAHAEgAfw0AAAUAWgCpDQAABQBEAFwNAAACABgAXQ0AAAMAUwBlDQAAAwA9AKQNAAABACsAMw0AAAMAVgAAAA==.',},}
+local provider = {region='US',realm='Feathermoon',name='US',type='subscribers',zone=53,date='2026-10-20',data={As='Ashkinassi:BAEANQADCgUIBgAAAA==.',Ta='Talön:BAEANQAECgUJBQAAAA==.',['Êc']='Êclipse:BAEBNQAECn8uAAIBAAoKTRz5AQDaAgqODQAABwBIAHUNAAAIAFcAfw0AAAYAWgCpDQAABgBEAFwNAAADAB8AXQ0AAAQAUwBlDQAABQA+AKQNAAACADMAMw0AAAQAVgC5DQAAAQBaAAEACgpNHPkBANoCCo4NAAAHAEgAdQ0AAAgAVwB/DQAABgBaAKkNAAAGAEQAXA0AAAMAHwBdDQAABABTAGUNAAAFAD4ApA0AAAIAMwAzDQAABABWALkNAAABAFoAAAA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

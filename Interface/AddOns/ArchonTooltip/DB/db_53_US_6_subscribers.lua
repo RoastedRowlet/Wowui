@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Shaman-Elemental',}
-local provider = {region='US',realm='Alexstrasza',name='US',type='subscribers',zone=53,date='2026-10-13',data={Em='Emokins:BAEBNQAECn8ZAAIBAAgK0iGRJgDnAgiODQAABQBbAHUNAAADAGEAfw0AAAQAWQCpDQAABABZAFwNAAADAFIAXQ0AAAIAVQBlDQAAAQBIADMNAAADAEMAAQAICtIhkSYA5wIIjg0AAAUAWwB1DQAAAwBhAH8NAAAEAFkAqQ0AAAQAWQBcDQAAAwBSAF0NAAACAFUAZQ0AAAEASAAzDQAAAwBDAAAA.',Ki='Kippo:BAEANQAECgcICAAAAA==.',Mo='Moltres:BAEANQAECggIBQAAAA==.',},}
+local provider = {region='US',realm='Alexstrasza',name='US',type='subscribers',zone=53,date='2026-10-20',data={Em='Emokins:BAEBNQAECn8ZAAIBAAgK0iEyJwDmAgiODQAABQBbAHUNAAADAGEAfw0AAAQAWQCpDQAABABZAFwNAAADAFIAXQ0AAAIAVQBlDQAAAQBIADMNAAADAEMAAQAICtIhMicA5gIIjg0AAAUAWwB1DQAAAwBhAH8NAAAEAFkAqQ0AAAQAWQBcDQAAAwBSAF0NAAACAFUAZQ0AAAEASAAzDQAAAwBDAAAA.',Ki='Kippo:BAEANQAECgcICAAAAA==.',Mo='Moltres:BAEANQAECggIBQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

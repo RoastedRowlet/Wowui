@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Monk-Windwalker','Monk-Brewmaster','Monk-Mistweaver',}
-local provider = {region='US',realm='Spinebreaker',name='US',type='subscribers',zone=53,date='2026-10-13',data={Di='Diddycated:BAEANQAECgUIBQABNQAFFAMIBgABAGUIAA==.',Pa='Pandicated:BAECNQAFFH8GAAIBAAMKZQheDQC+AAOODQAAAwAoAHUNAAABABEAqQ0AAAIABQABAAMKZQheDQC+AAOODQAAAwAoAHUNAAABABEAqQ0AAAIABQA1AAQKfzAABAEACQrwF00ZAHUCAAEACQpdFE0ZAHUCAAIABwrXFgMSAMIBAAMAAQpbACpXABMAAAAA.',},}
+local lookup = {'Monk-Windwalker','Monk-Brewmaster','Monk-Mistweaver','Unknown-Unknown',}
+local provider = {region='US',realm='Spinebreaker',name='US',type='subscribers',zone=53,date='2026-10-19',data={Di='Diddycated:BAEANQAECgUICQABNQAFFAMICAABAIkIAA==.',Pa='Pandicated:BAECNQAFFH8IAAIBAAMKiQjaBQCOAAOODQAABAAoAHUNAAACABIAqQ0AAAIABQABAAMKiQjaBQCOAAOODQAABAAoAHUNAAACABIAqQ0AAAIABQA1AAQKfzQABAEACgo6FaMZAHYCAAEACgoZEqMZAHYCAAIABwrXFjwSAMEBAAMAAQpbAHVYABMAAAAA.',Vl='Vlannpire:BAEANQADCgcIBwABNQAECgYIDwAEAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data
