@@ -1,39 +1,20 @@
 
 RaiderIO_Config = {
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["hide"] = false,
-["lock"] = false,
-},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["lock"] = false,
+["hide"] = false,
+},
 }
-RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
+RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Sharkfins-stormrage"] = true,
-["us-Ivanrolando-ragnaros"] = true,
-["us-Abalyon-thrall"] = true,
-["us-Acerpilk-dentarg"] = true,
-["us-Fuzzyy-eredar"] = true,
-["us-Thardabim-dalaran"] = true,
-["us-Mplusonly-bleeding-hollow"] = true,
-["us-Schevlina-quelthalas"] = true,
-["us-Herathor-malganis"] = true,
-["us-party5-stormrage"] = true,
-["us-Fallenherald-sargeras"] = true,
-["us-Captmoolol-stormrage"] = true,
-["us-Bathmats-illidan"] = true,
-["us-Rancidone-stormrage"] = true,
-["us-Maidfrills-stormrage"] = true,
-["us-Greenbeef-stormrage"] = true,
-["us-Skerrit-blood-furnace"] = true,
-["us-Moonrei-norgannon"] = true,
-["us-Kobê-malganis"] = true,
-["us-Deadnamed-stormrage"] = true,
+["us-Napole-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }
