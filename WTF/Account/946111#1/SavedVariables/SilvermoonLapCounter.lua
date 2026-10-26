@@ -43,9 +43,9 @@ SilvermoonLapCounterDB = {
 },
 ["Zappyxatu-Stormrage"] = {
 ["bestLapTime"] = 6.986000000004424,
-["lastLapDate"] = "2026-10-17 02:08",
-["lapCount"] = 121,
-["lastLapTime"] = 10.78599999999278,
+["lastLapDate"] = "2026-10-22 00:56",
+["lapCount"] = 124,
+["lastLapTime"] = 11.58499999999913,
 ["firstLapDate"] = "2026-05-09 22:09",
 ["class"] = "SHAMAN",
 ["bestLapDate"] = "2026-05-10 13:03",

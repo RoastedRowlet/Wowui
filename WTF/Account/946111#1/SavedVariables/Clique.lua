@@ -343,21 +343,6 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["type"] = "menu",
-["sets"] = {
-["default"] = true,
-},
-["key"] = "SHIFT-BUTTON2",
-["icon"] = 132212,
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["spell"] = "Healing Wave",
 ["key"] = "BUTTON2",
 ["sets"] = {
@@ -367,6 +352,21 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["sets"] = {
+["default"] = true,
+},
+["type"] = "menu",
+["icon"] = 132212,
+["key"] = "SHIFT-BUTTON2",
+},
+{
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["type"] = "target",
 ["key"] = "CTRL-BUTTON1",
 ["sets"] = {
@@ -374,6 +374,15 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
+},
+{
+["spell"] = "Ancestral Spirit",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136077,
+["type"] = "spell",
 },
 {
 ["spell"] = "Riptide",
@@ -391,15 +400,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 236288,
-["type"] = "spell",
-},
-{
-["spell"] = "Ancestral Spirit",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136077,
 ["type"] = "spell",
 },
 {

@@ -14,12 +14,13 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Chilia-blood-furnace"] = true,
-["us-Maverec-area-52"] = true,
-["us-Shaokeg-area-52"] = true,
-["us-Organthyr-area-52"] = true,
-["us-Sollevente-area-52"] = true,
-["us-Sikagtar-area-52"] = true,
+["us-Shinealight-stormrage"] = true,
+["us-Giggles-stormrage"] = true,
+["us-Xuv-stormrage"] = true,
+["us-Evennel-stormrage"] = true,
+["us-Bugonia-stormrage"] = true,
+["us-Alìna-stormrage"] = true,
+["us-Heävenstrike-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

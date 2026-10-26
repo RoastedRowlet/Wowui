@@ -34,7 +34,7 @@ PremadeGroupsFilterState = {
 },
 ["dungeon7"] = false,
 ["dungeon6"] = false,
-["dungeon1"] = false,
+["dungeon4"] = false,
 ["dps"] = {
 ["max"] = "",
 ["min"] = "",
@@ -45,10 +45,10 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["expression"] = "",
+["dungeon5"] = false,
 ["difficulty"] = {
 },
-["dungeon4"] = false,
+["dungeon1"] = false,
 ["dungeon2"] = false,
 ["dungeon3"] = false,
 ["dungeon8"] = false,
@@ -57,12 +57,58 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["dungeon5"] = false,
+["expression"] = "",
 ["partyfit"] = true,
 },
 },
 ["c9f8"] = {
 ["enabled"] = true,
+},
+["c121f4"] = {
+["enabled"] = true,
+["delve"] = {
+["delve3"] = false,
+["delve10"] = false,
+["expression"] = "",
+["delve1"] = false,
+["delve5"] = false,
+["delve2"] = false,
+["delve9"] = false,
+["heals"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["delve4"] = false,
+["delve13"] = false,
+["dps"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["members"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["delve11"] = false,
+["delve12"] = false,
+["delve14"] = false,
+["delvetier"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["delve15"] = false,
+["tanks"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["delve6"] = false,
+["delve7"] = false,
+["delve8"] = false,
+},
 },
 ["c3f6"] = {
 ["enabled"] = true,
@@ -97,52 +143,6 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 },
 },
-["c121f4"] = {
-["enabled"] = true,
-["delve"] = {
-["delve3"] = false,
-["delve10"] = false,
-["expression"] = "",
-["delve1"] = false,
-["delve5"] = false,
-["delve2"] = false,
-["delve9"] = false,
-["heals"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
-["delve4"] = false,
-["delve13"] = false,
-["dps"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
-["members"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
-["delve11"] = false,
-["delve12"] = false,
-["delve14"] = false,
-["delve6"] = false,
-["delve15"] = false,
-["tanks"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
-["delvetier"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
-["delve7"] = false,
-["delve8"] = false,
-},
-},
 ["version"] = 8,
 ["c2f101"] = {
 ["role"] = {
@@ -160,9 +160,6 @@ PremadeGroupsFilterState = {
 ["c114f6"] = {
 ["enabled"] = true,
 },
-["c114f5"] = {
-["enabled"] = true,
-},
 ["c6f4"] = {
 ["role"] = {
 ["heals"] = {
@@ -175,6 +172,9 @@ PremadeGroupsFilterState = {
 },
 ["expression"] = "",
 },
+},
+["c114f5"] = {
+["enabled"] = true,
 },
 ["c3f5"] = {
 ["enabled"] = true,

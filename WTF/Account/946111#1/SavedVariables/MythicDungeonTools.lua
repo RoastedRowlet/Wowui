@@ -11,7 +11,8 @@ MythicDungeonToolsDB = {
 ["Minimeditite - Area 52"] = "Minimeditite - Area 52",
 },
 ["global"] = {
-["devMode"] = false,
+["anchorTo"] = "LEFT",
+["scale"] = 1.4,
 ["colorPaletteInfo"] = {
 ["customPaletteValues"] = {
 {
@@ -76,12 +77,8 @@ MythicDungeonToolsDB = {
 },
 },
 },
-["currentDungeonIdx"] = 42,
 ["anchorFrom"] = "LEFT",
-["minimap"] = {
-["minimapPos"] = 158.5007881808067,
-["showInCompartment"] = true,
-},
+["latestDungeonSeen"] = 160,
 ["currentPreset"] = {
 [11] = 24,
 [17] = 6,
@@ -150,6 +147,10 @@ MythicDungeonToolsDB = {
 ["difficulty"] = 19,
 ["uid"] = "XWpy(rc7kIT",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 5,
 ["currentSublevel"] = 1,
@@ -381,10 +382,10 @@ nil,
 [11] = {
 1,
 },
-[20] = {
+[12] = {
 1,
 },
-[12] = {
+[20] = {
 1,
 },
 },
@@ -444,10 +445,6 @@ nil,
 ["riftOffsets"] = {
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["text"] = "The Seat of the Triumvirate",
 ["objects"] = {
 },
@@ -461,6 +458,10 @@ nil,
 ["difficulty"] = 19,
 ["uid"] = "X0xq817V2Mt",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["pulls"] = {
 {
@@ -690,10 +691,10 @@ nil,
 [11] = {
 1,
 },
-[20] = {
+[12] = {
 1,
 },
-[12] = {
+[20] = {
 1,
 },
 },
@@ -756,10 +757,6 @@ nil,
 },
 ["riftOffsets"] = {
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "The Seat of the Triumvirate 2",
 ["objects"] = {
@@ -972,11 +969,11 @@ nil,
 7,
 },
 ["color"] = "ff9b3e",
-[5] = {
-5,
-},
 [16] = {
 7,
+},
+[5] = {
+5,
 },
 [2] = {
 },
@@ -1100,13 +1097,6 @@ nil,
 ["week"] = 1,
 ["addonVersion"] = 6011,
 ["uid"] = "kXdN)K4Vka9",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "CasinoRoyaleSeat 2",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 3,
 ["currentSublevel"] = 1,
@@ -1272,14 +1262,14 @@ nil,
 [15] = {
 4,
 },
-[14] = {
-20,
-21,
-},
-["color"] = "ff3e9e",
 [4] = {
 5,
 6,
+},
+["color"] = "ff3e9e",
+[14] = {
+20,
+21,
 },
 [16] = {
 4,
@@ -1291,9 +1281,10 @@ nil,
 {
 1,
 },
-[14] = {
-22,
-23,
+[4] = {
+7,
+8,
+9,
 },
 [13] = {
 },
@@ -1301,17 +1292,16 @@ nil,
 },
 [16] = {
 },
-[22] = {
-},
-[4] = {
-7,
-8,
-9,
+["color"] = "3effff",
+[14] = {
+22,
+23,
 },
 [5] = {
 2,
 },
-["color"] = "3effff",
+[22] = {
+},
 },
 {
 nil,
@@ -1399,14 +1389,14 @@ nil,
 },
 [3] = {
 },
-[12] = {
-1,
-},
+["color"] = "ff3eff",
 [14] = {
 },
 [5] = {
 },
-["color"] = "ff3eff",
+[12] = {
+1,
+},
 },
 {
 [6] = {
@@ -1447,12 +1437,23 @@ nil,
 },
 },
 },
+["text"] = "CasinoRoyaleSeat 2",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 },
 {
 ["objects"] = {
 },
 ["week"] = 1,
 ["uid"] = "NHosdmfdjMp",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 12,
 ["currentSublevel"] = 1,
@@ -1515,23 +1516,8 @@ nil,
 {
 6,
 },
-[8] = {
-},
-[7] = {
-},
 [15] = {
 2,
-},
-[22] = {
-},
-["color"] = "ff3e3e",
-[14] = {
-8,
-11,
-10,
-},
-[16] = {
-1,
 },
 [13] = {
 31,
@@ -1544,6 +1530,21 @@ nil,
 10,
 9,
 11,
+},
+[8] = {
+},
+[22] = {
+},
+["color"] = "ff3e3e",
+[14] = {
+8,
+11,
+10,
+},
+[16] = {
+1,
+},
+[7] = {
 },
 },
 {
@@ -1592,8 +1593,10 @@ nil,
 },
 },
 {
-["color"] = "3eff3e",
-[13] = {
+[22] = {
+},
+[2] = {
+3,
 },
 [15] = {
 4,
@@ -1602,8 +1605,7 @@ nil,
 20,
 21,
 },
-[22] = {
-},
+["color"] = "3eff3e",
 [4] = {
 6,
 5,
@@ -1611,8 +1613,7 @@ nil,
 [16] = {
 4,
 },
-[2] = {
-3,
+[13] = {
 },
 },
 {
@@ -1753,14 +1754,14 @@ nil,
 },
 [13] = {
 },
-[14] = {
-24,
-25,
-},
-["color"] = "a1ff3e",
 [4] = {
 13,
 12,
+},
+["color"] = "a1ff3e",
+[14] = {
+24,
+25,
 },
 [5] = {
 3,
@@ -1843,10 +1844,6 @@ nil,
 ["color"] = "3eff9e",
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Route 2",
 ["difficulty"] = 14,
@@ -2107,10 +2104,8 @@ nil,
 ["color"] = "fffb3e",
 },
 {
-[22] = {
-},
-[2] = {
-2,
+["color"] = "3eff3e",
+[13] = {
 },
 [15] = {
 6,
@@ -2119,7 +2114,8 @@ nil,
 27,
 26,
 },
-["color"] = "3eff3e",
+[22] = {
+},
 [4] = {
 4,
 3,
@@ -2127,7 +2123,8 @@ nil,
 [16] = {
 6,
 },
-[13] = {
+[2] = {
+2,
 },
 },
 {
@@ -2219,11 +2216,11 @@ nil,
 7,
 },
 ["color"] = "3e3eff",
-[5] = {
-5,
-},
 [16] = {
 7,
+},
+[5] = {
+5,
 },
 [2] = {
 4,
@@ -2626,10 +2623,10 @@ nil,
 7,
 },
 ["color"] = "a1ff3e",
-[16] = {
-},
 [5] = {
 5,
+},
+[16] = {
 },
 [13] = {
 44,
@@ -2655,10 +2652,10 @@ nil,
 1,
 },
 ["color"] = "3eff9e",
-[20] = {
+[12] = {
 1,
 },
-[12] = {
+[20] = {
 1,
 },
 },
@@ -2731,11 +2728,6 @@ nil,
 ["uid"] = "D8jQkom5Uct",
 ["objects"] = {
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "skip",
 ["value"] = {
 ["currentPull"] = 9,
 ["currentSublevel"] = 1,
@@ -2909,11 +2901,11 @@ nil,
 7,
 },
 ["color"] = "ff3e9e",
-[16] = {
-7,
-},
 [5] = {
 5,
+},
+[16] = {
+7,
 },
 [13] = {
 34,
@@ -3024,6 +3016,11 @@ nil,
 },
 },
 },
+["text"] = "skip",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["createdBy"] = {
 ["classIdx"] = 11,
 ["name"] = "Dathrun",
@@ -3035,6 +3032,10 @@ nil,
 },
 ["uid"] = "Ot905QVrQJw",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["selection"] = {
 10,
@@ -3198,14 +3199,14 @@ nil,
 [15] = {
 4,
 },
-[14] = {
-20,
-21,
-},
-["color"] = "ff3e9e",
 [4] = {
 5,
 6,
+},
+["color"] = "ff3e9e",
+[14] = {
+20,
+21,
 },
 [16] = {
 4,
@@ -3327,25 +3328,25 @@ nil,
 {
 {
 },
-["color"] = "3eff9e",
+[22] = {
+},
 [13] = {
 },
-[8] = {
-4,
+[15] = {
+10,
+11,
 },
 [4] = {
 },
-[22] = {
-},
+["color"] = "3eff9e",
 [14] = {
 },
 [16] = {
 10,
 11,
 },
-[15] = {
-10,
-11,
+[8] = {
+4,
 },
 },
 {
@@ -3421,10 +3422,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "G50 ",
 ["difficulty"] = 35,
@@ -3538,7 +3535,24 @@ true,
 {
 {
 },
+[8] = {
+},
+[17] = {
+2,
+1,
+3,
+},
 [15] = {
+},
+[10] = {
+1,
+},
+["color"] = "ff3e3e",
+[14] = {
+13,
+12,
+},
+[16] = {
 },
 [13] = {
 20,
@@ -3551,23 +3565,6 @@ true,
 16,
 13,
 15,
-},
-[8] = {
-},
-[10] = {
-1,
-},
-["color"] = "ff3e3e",
-[14] = {
-13,
-12,
-},
-[16] = {
-},
-[17] = {
-2,
-1,
-3,
 },
 },
 {
@@ -4666,22 +4663,22 @@ nil,
 [15] = {
 4,
 },
+[4] = {
+5,
+6,
+},
+["color"] = "3eff3e",
 [14] = {
 22,
 23,
 21,
 20,
 },
-["color"] = "3eff3e",
-[4] = {
-5,
-6,
+[16] = {
+4,
 },
 [5] = {
 2,
-},
-[16] = {
-4,
 },
 },
 {
@@ -4691,22 +4688,22 @@ nil,
 [15] = {
 6,
 },
+[4] = {
+4,
+3,
+},
+["color"] = "ff3e9e",
 [14] = {
 26,
 27,
 24,
 25,
 },
-["color"] = "ff3e9e",
-[4] = {
-4,
-3,
+[16] = {
+6,
 },
 [5] = {
 3,
-},
-[16] = {
-6,
 },
 },
 {
@@ -4850,6 +4847,11 @@ nil,
 ["week"] = 1,
 ["uid"] = "hcEIoqxIEFS",
 ["difficulty"] = 2,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "triple subj",
 ["value"] = {
 ["currentPull"] = 3,
 ["currentSublevel"] = 1,
@@ -4974,14 +4976,14 @@ nil,
 [15] = {
 6,
 },
-[4] = {
-4,
-3,
-},
-["color"] = "fffb3e",
 [14] = {
 27,
 26,
+},
+["color"] = "fffb3e",
+[4] = {
+4,
+3,
 },
 [16] = {
 6,
@@ -5070,21 +5072,21 @@ nil,
 44,
 43,
 },
-[16] = {
-7,
-},
 [5] = {
 5,
+},
+[16] = {
+7,
 },
 },
 {
 [11] = {
 1,
 },
-[20] = {
+[12] = {
 1,
 },
-[12] = {
+[20] = {
 1,
 },
 ["color"] = "3e3eff",
@@ -5158,11 +5160,6 @@ nil,
 },
 },
 },
-["text"] = "triple subj",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["createdBy"] = {
 ["classIdx"] = 11,
 ["name"] = "Diverdown",
@@ -5204,6 +5201,10 @@ true,
 },
 ["week"] = 1,
 ["uid"] = "3ygpjmluc4n",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["selection"] = {
 17,
@@ -5365,14 +5366,14 @@ true,
 [15] = {
 4,
 },
-[4] = {
-5,
-6,
-},
-["color"] = "3effff",
 [14] = {
 20,
 21,
+},
+["color"] = "3effff",
+[4] = {
+5,
+6,
 },
 [16] = {
 4,
@@ -5420,11 +5421,11 @@ true,
 7,
 },
 ["color"] = "3e3eff",
-[5] = {
-5,
-},
 [16] = {
 7,
+},
+[5] = {
+5,
 },
 [2] = {
 4,
@@ -5435,10 +5436,10 @@ true,
 [11] = {
 1,
 },
-[20] = {
+[12] = {
 1,
 },
-[12] = {
+[20] = {
 1,
 },
 },
@@ -5519,10 +5520,6 @@ true,
 ["color"] = "3eff3e",
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Balk Route Advanced",
 ["difficulty"] = 2,
@@ -5675,22 +5672,22 @@ true,
 [15] = {
 4,
 },
-[5] = {
-2,
-},
-["color"] = "3eff3e",
-[4] = {
-6,
-5,
-},
 [16] = {
 4,
 },
+["color"] = "3eff3e",
 [14] = {
 22,
 23,
 20,
 21,
+},
+[5] = {
+2,
+},
+[4] = {
+6,
+5,
 },
 },
 {
@@ -5736,11 +5733,11 @@ nil,
 35,
 1,
 },
-[16] = {
-7,
-},
 [5] = {
 5,
+},
+[16] = {
+7,
 },
 },
 {
@@ -5834,6 +5831,10 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "CsDJV5hSOyI",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 1,
+},
 ["value"] = {
 ["currentPull"] = 4,
 ["currentSublevel"] = 1,
@@ -6017,11 +6018,11 @@ nil,
 7,
 },
 ["color"] = "ff3e9e",
-[5] = {
-5,
-},
 [16] = {
 7,
+},
+[5] = {
+5,
 },
 [13] = {
 33,
@@ -6139,10 +6140,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 1,
 },
 ["text"] = "iceman",
 ["difficulty"] = 21,
@@ -6437,15 +6434,15 @@ nil,
 [20] = {
 1,
 },
-[11] = {
-1,
+[3] = {
 },
 [6] = {
 },
 [12] = {
 1,
 },
-[3] = {
+[11] = {
+1,
 },
 },
 {
@@ -7246,6 +7243,10 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "bSPv(NbPMFE",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -7297,11 +7298,6 @@ nil,
 {
 6,
 },
-[17] = {
-1,
-2,
-3,
-},
 [13] = {
 7,
 8,
@@ -7314,11 +7310,15 @@ nil,
 15,
 11,
 },
+[17] = {
+1,
+2,
+3,
+},
 [15] = {
 2,
 },
-[10] = {
-1,
+[3] = {
 },
 ["color"] = "3eff9e",
 [14] = {
@@ -7331,7 +7331,8 @@ nil,
 [16] = {
 1,
 },
-[3] = {
+[10] = {
+1,
 },
 },
 {
@@ -7473,11 +7474,11 @@ nil,
 7,
 },
 ["color"] = "ff3e9e",
-[16] = {
-7,
-},
 [5] = {
 5,
+},
+[16] = {
+7,
 },
 [13] = {
 44,
@@ -7525,10 +7526,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Route 10",
 ["difficulty"] = 23,
@@ -7674,11 +7671,6 @@ true,
 ["week"] = 1,
 ["uid"] = "NQLhThyvFTl",
 ["difficulty"] = 2,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 1,
-},
-["text"] = "poosh",
 ["value"] = {
 ["selection"] = {
 14,
@@ -7823,10 +7815,10 @@ nil,
 },
 },
 {
+[13] = {
+},
 [2] = {
 3,
-},
-[13] = {
 },
 [15] = {
 4,
@@ -7835,18 +7827,18 @@ nil,
 2,
 },
 ["color"] = "9e9eff",
+[4] = {
+6,
+5,
+},
+[16] = {
+4,
+},
 [14] = {
 20,
 21,
 22,
 23,
-},
-[16] = {
-4,
-},
-[4] = {
-6,
-5,
 },
 },
 {
@@ -7905,19 +7897,19 @@ nil,
 [2] = {
 4,
 },
-[16] = {
-7,
-},
 [5] = {
 5,
+},
+[16] = {
+7,
 },
 },
 {
 ["color"] = "ff9b3e",
-[20] = {
+[12] = {
 1,
 },
-[12] = {
+[20] = {
 1,
 },
 [11] = {
@@ -7971,10 +7963,10 @@ nil,
 [8] = {
 4,
 },
-[4] = {
+[14] = {
 },
 ["color"] = "3eff9e",
-[14] = {
+[4] = {
 },
 [16] = {
 10,
@@ -8005,6 +7997,11 @@ nil,
 },
 },
 },
+["text"] = "poosh",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 1,
+},
 ["createdBy"] = {
 ["classIdx"] = 11,
 ["name"] = "Starmanity",
@@ -8027,11 +8024,6 @@ true,
 ["n"] = true,
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 3,
-},
-["text"] = "skip last pack",
 ["value"] = {
 ["currentPull"] = 12,
 ["currentSublevel"] = 1,
@@ -8290,11 +8282,11 @@ nil,
 ["color"] = "da0f26",
 [13] = {
 },
-[5] = {
-5,
-},
 [16] = {
 7,
+},
+[5] = {
+5,
 },
 },
 {
@@ -8359,6 +8351,11 @@ nil,
 },
 },
 },
+["text"] = "skip last pack",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 3,
+},
 ["createdBy"] = {
 ["classIdx"] = 11,
 ["name"] = "Bús",
@@ -8371,11 +8368,6 @@ nil,
 ["week"] = 1,
 ["uid"] = "YtgFHBQx8hB",
 ["difficulty"] = 21,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 4",
 ["value"] = {
 ["currentPull"] = 12,
 ["currentSublevel"] = 1,
@@ -8664,6 +8656,11 @@ nil,
 },
 },
 },
+["text"] = "Route 4",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["createdBy"] = {
 ["classIdx"] = 11,
 ["name"] = "Akfourtysevn",
@@ -8675,6 +8672,10 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "ojHCRBdHF6M",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 12,
 ["currentSublevel"] = 1,
@@ -8756,16 +8757,14 @@ nil,
 },
 {
 },
-[8] = {
-},
-[13] = {
-12,
-14,
-16,
-13,
-15,
-},
 [15] = {
+},
+[17] = {
+1,
+2,
+3,
+},
+[8] = {
 },
 [10] = {
 1,
@@ -8777,10 +8776,12 @@ nil,
 },
 [16] = {
 },
-[17] = {
-1,
-2,
-3,
+[13] = {
+12,
+14,
+16,
+13,
+15,
 },
 },
 {
@@ -8836,22 +8837,22 @@ nil,
 [15] = {
 4,
 },
+[4] = {
+5,
+6,
+},
+["color"] = "3eff3e",
 [14] = {
 20,
 21,
 22,
 23,
 },
-["color"] = "3eff3e",
-[4] = {
-5,
-6,
+[16] = {
+4,
 },
 [5] = {
 2,
-},
-[16] = {
-4,
 },
 },
 {
@@ -8922,11 +8923,11 @@ nil,
 [2] = {
 4,
 },
-[16] = {
-7,
-},
 [5] = {
 5,
+},
+[16] = {
+7,
 },
 },
 {
@@ -9001,10 +9002,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "gunkboy racist pedo 3rd world straw hut dweller",
 ["difficulty"] = 10,
@@ -9242,19 +9239,19 @@ nil,
 45,
 42,
 },
-[5] = {
-5,
-},
 [16] = {
 7,
+},
+[5] = {
+5,
 },
 },
 {
 ["color"] = "3e3eff",
-[20] = {
+[12] = {
 1,
 },
-[12] = {
+[20] = {
 1,
 },
 [11] = {
@@ -9523,10 +9520,10 @@ true,
 14,
 15,
 },
+[16] = {
+},
 [30] = {
 1,
-},
-[16] = {
 },
 },
 {
@@ -9764,10 +9761,6 @@ true,
 4,
 3,
 },
-[17] = {
-1,
-2,
-},
 [26] = {
 7,
 1,
@@ -9786,6 +9779,10 @@ true,
 13,
 14,
 15,
+},
+[17] = {
+1,
+2,
 },
 ["color"] = "fffb3e",
 },
@@ -10004,10 +10001,6 @@ true,
 4,
 3,
 },
-[17] = {
-1,
-2,
-},
 [26] = {
 7,
 1,
@@ -10026,6 +10019,10 @@ true,
 13,
 14,
 15,
+},
+[17] = {
+1,
+2,
 },
 ["color"] = "fffb3e",
 },
@@ -10287,9 +10284,6 @@ nil,
 1,
 2,
 },
-[17] = {
-1,
-},
 [26] = {
 7,
 1,
@@ -10301,6 +10295,9 @@ nil,
 3,
 6,
 },
+[17] = {
+1,
+},
 ["color"] = "3eff3e",
 },
 {
@@ -10309,9 +10306,6 @@ nil,
 3,
 },
 ["color"] = "ff3e9e",
-[17] = {
-2,
-},
 [26] = {
 11,
 16,
@@ -10321,6 +10315,9 @@ nil,
 13,
 14,
 15,
+},
+[17] = {
+2,
 },
 },
 {
@@ -10561,6 +10558,9 @@ nil,
 1,
 2,
 },
+[17] = {
+1,
+},
 [26] = {
 6,
 1,
@@ -10572,15 +10572,15 @@ nil,
 3,
 7,
 },
-[17] = {
-1,
-},
 ["color"] = "ff9b3e",
 },
 {
 [37] = {
 4,
 3,
+},
+[17] = {
+2,
 },
 [26] = {
 17,
@@ -10591,9 +10591,6 @@ nil,
 13,
 14,
 15,
-},
-[17] = {
-2,
 },
 ["color"] = "3e3eff",
 },
@@ -12597,6 +12594,12 @@ nil,
 },
 ["uid"] = "4sl(ainya81",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Default 2",
+["difficulty"] = 2,
 ["value"] = {
 ["currentPull"] = 2,
 ["currentSublevel"] = 1,
@@ -12806,24 +12809,11 @@ nil,
 },
 },
 },
-["text"] = "Default 2",
-["difficulty"] = 2,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 },
 {
 ["difficulty"] = 2,
 ["uid"] = "3aH(1vunwu)",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 2",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 9,
 ["currentSublevel"] = 1,
@@ -13009,18 +12999,18 @@ nil,
 },
 },
 },
+["text"] = "Route 2",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 },
 {
 ["difficulty"] = 2,
 ["uid"] = "RQTWuU22hZE",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 2 2",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 9,
 ["currentSublevel"] = 1,
@@ -13208,14 +13198,17 @@ nil,
 },
 },
 },
+["text"] = "Route 2 2",
+["objects"] = {
 },
-{
-["difficulty"] = 2,
-["uid"] = "kQjmwAUkcwY",
 ["colorPaletteInfo"] = {
 ["autoColoring"] = true,
 ["colorPaletteIdx"] = 4,
 },
+},
+{
+["difficulty"] = 2,
+["uid"] = "kQjmwAUkcwY",
 ["value"] = {
 ["currentPull"] = 9,
 ["currentSublevel"] = 1,
@@ -13401,6 +13394,10 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "Route 2 3",
 ["objects"] = {
 },
@@ -13410,13 +13407,6 @@ nil,
 ["difficulty"] = 8,
 ["uid"] = "WzBXMpxgLG0",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Default 3",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 10,
 ["currentSublevel"] = 1,
@@ -13639,18 +13629,18 @@ nil,
 },
 },
 },
+["text"] = "Default 3",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 },
 {
 ["difficulty"] = 2,
 ["uid"] = "Ar4K2wIqCEj",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 2 4",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 9,
 ["currentSublevel"] = 1,
@@ -13839,6 +13829,13 @@ nil,
 },
 },
 },
+},
+["text"] = "Route 2 4",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 },
 {
@@ -14049,10 +14046,6 @@ nil,
 {
 ["difficulty"] = 16,
 ["uid"] = "H01I2xrt1b9",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 5,
 ["currentSublevel"] = 1,
@@ -14295,6 +14288,10 @@ nil,
 },
 },
 },
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "SKIP",
 ["objects"] = {
@@ -14304,10 +14301,6 @@ nil,
 {
 ["difficulty"] = 16,
 ["uid"] = "ToWjTBtsnXs",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 5,
 ["currentSublevel"] = 1,
@@ -14550,6 +14543,10 @@ nil,
 },
 },
 },
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "SKIP 2",
 ["objects"] = {
@@ -14560,6 +14557,13 @@ nil,
 ["difficulty"] = 30,
 ["uid"] = "VMBwmVATW6E",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 3",
+["objects"] = {
+},
 ["value"] = {
 ["currentPull"] = 12,
 ["currentSublevel"] = 1,
@@ -14802,18 +14806,18 @@ nil,
 },
 },
 },
-["text"] = "Route 3",
-["objects"] = {
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 },
 {
 ["difficulty"] = 30,
 ["uid"] = "Wjj)DHs0V0k",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 3 2",
+["objects"] = {
+},
 ["value"] = {
 ["currentPull"] = 3,
 ["currentSublevel"] = 1,
@@ -15059,104 +15063,11 @@ nil,
 },
 },
 },
-["text"] = "Route 3 2",
-["objects"] = {
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 },
 {
 ["difficulty"] = 10,
 ["uid"] = "7JPOqKioVru",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 5,
-},
-["text"] = "Gate Skip",
-["objects"] = {
-{
-["d"] = {
-4,
-1.1,
-1,
-true,
-"ffffff",
--7,
-true,
-},
-["l"] = {
-"525.9",
-"-447.9",
-"525.9",
-"-440.4",
-"525.9",
-"-440.4",
-"525.3",
-"-447.9",
-"525.3",
-"-447.9",
-"532.8",
-"-449.1",
-"532.8",
-"-449.1",
-"540.2",
-"-449.1",
-"540.2",
-"-449.1",
-"541.5",
-"-449.1",
-},
-},
-{
-["d"] = {
-12,
-1,
-1,
-true,
-"ffffff",
--7,
-},
-["l"] = {
-"546.5",
-"-428.6",
-},
-["t"] = {
-0,
-},
-},
-{
-["d"] = {
-4,
-1.1,
-1,
-true,
-"ffffff",
--8,
-true,
-},
-["l"] = {
-"549.6",
-"-427.9",
-"542.1",
-"-434.1",
-"542.1",
-"-434.1",
-"534.6",
-"-439.8",
-"534.6",
-"-439.8",
-"527.8",
-"-447.3",
-"527.8",
-"-447.3",
-"527.8",
-"-447.9",
-},
-},
-},
 ["value"] = {
 ["currentPull"] = 9,
 ["currentSublevel"] = 1,
@@ -15373,18 +15284,97 @@ nil,
 },
 },
 },
+["text"] = "Gate Skip",
+["objects"] = {
+{
+["d"] = {
+4,
+1.1,
+1,
+true,
+"ffffff",
+-7,
+true,
+},
+["l"] = {
+"525.9",
+"-447.9",
+"525.9",
+"-440.4",
+"525.9",
+"-440.4",
+"525.3",
+"-447.9",
+"525.3",
+"-447.9",
+"532.8",
+"-449.1",
+"532.8",
+"-449.1",
+"540.2",
+"-449.1",
+"540.2",
+"-449.1",
+"541.5",
+"-449.1",
+},
+},
+{
+["d"] = {
+12,
+1,
+1,
+true,
+"ffffff",
+-7,
+},
+["l"] = {
+"546.5",
+"-428.6",
+},
+["t"] = {
+0,
+},
+},
+{
+["d"] = {
+4,
+1.1,
+1,
+true,
+"ffffff",
+-8,
+true,
+},
+["l"] = {
+"549.6",
+"-427.9",
+"542.1",
+"-434.1",
+"542.1",
+"-434.1",
+"534.6",
+"-439.8",
+"534.6",
+"-439.8",
+"527.8",
+"-447.3",
+"527.8",
+"-447.3",
+"527.8",
+"-447.9",
+},
+},
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 5,
+},
 },
 {
 ["difficulty"] = 10,
 ["uid"] = "V4USc2xhT3A",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 5,
-},
-["text"] = "invis",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 9,
 ["currentSublevel"] = 1,
@@ -15575,12 +15565,66 @@ nil,
 },
 },
 },
+["text"] = "invis",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 5,
+},
 },
 {
 ["difficulty"] = 2,
 ["uid"] = "h32hfEaEBju",
 ["addonVersion"] = 6011,
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 2 5",
+["objects"] = {
+{
+["d"] = {
+556.1907555615263,
+-291.6667120611019,
+1,
+true,
+"lust",
+},
+["n"] = true,
+},
+{
+["d"] = {
+557.9764426393164,
+-466.6667704683334,
+1,
+true,
+"lust",
+},
+["n"] = true,
+},
+{
+["d"] = {
+443.7850086320331,
+-485.0126319880781,
+1,
+true,
+"Para one, then para falls onto boss",
+},
+["n"] = true,
+},
+{
+["d"] = {
+542.3938970613913,
+-427.9854117324887,
+1,
+true,
+"gate/invis",
+},
+["n"] = true,
+},
+},
 ["value"] = {
 ["currentPull"] = 6,
 ["currentSublevel"] = 1,
@@ -15777,53 +15821,6 @@ nil,
 },
 },
 },
-},
-["text"] = "Route 2 5",
-["objects"] = {
-{
-["d"] = {
-556.1907555615263,
--291.6667120611019,
-1,
-true,
-"lust",
-},
-["n"] = true,
-},
-{
-["d"] = {
-557.9764426393164,
--466.6667704683334,
-1,
-true,
-"lust",
-},
-["n"] = true,
-},
-{
-["d"] = {
-443.7850086320331,
--485.0126319880781,
-1,
-true,
-"Para one, then para falls onto boss",
-},
-["n"] = true,
-},
-{
-["d"] = {
-542.3938970613913,
--427.9854117324887,
-1,
-true,
-"gate/invis",
-},
-["n"] = true,
-},
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 },
 {
@@ -16324,6 +16321,11 @@ nil,
 ["week"] = 1,
 ["uid"] = "njYDjcGmfPl",
 ["difficulty"] = 10,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 7",
 ["value"] = {
 ["selection"] = {
 8,
@@ -16544,11 +16546,6 @@ nil,
 },
 },
 },
-},
-["text"] = "Route 7",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["createdBy"] = {
 ["classIdx"] = 10,
@@ -16781,6 +16778,11 @@ nil,
 ["uid"] = "1qTAVynaQIk",
 ["objects"] = {
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "sorta easy",
 ["value"] = {
 ["currentPull"] = 6,
 ["currentSublevel"] = 1,
@@ -17005,11 +17007,6 @@ nil,
 },
 },
 },
-["text"] = "sorta easy",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["createdBy"] = {
 ["classIdx"] = 10,
 ["name"] = "Lokumshark",
@@ -17021,10 +17018,6 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "C8qDmKxWr4K",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 10,
 ["currentSublevel"] = 1,
@@ -17242,6 +17235,10 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "wwwwwwwwwwwwwwww",
 ["difficulty"] = 1,
 ["createdBy"] = {
@@ -17254,10 +17251,6 @@ nil,
 ["difficulty"] = 10,
 ["week"] = 1,
 ["uid"] = "f43pPb1yhxA",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 6,
 ["currentSublevel"] = 1,
@@ -17478,6 +17471,10 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "The voices are too loud",
 ["objects"] = {
 },
@@ -17492,10 +17489,6 @@ nil,
 },
 ["uid"] = "bz6(RPapk9S",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 11,
 ["currentSublevel"] = 1,
@@ -17741,6 +17734,10 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "route academy",
 ["difficulty"] = 17,
 ["createdBy"] = {
@@ -17754,10 +17751,6 @@ nil,
 },
 ["uid"] = "K66VILaZlHy",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 13,
 ["currentSublevel"] = 1,
@@ -17996,6 +17989,10 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "routewins",
 ["difficulty"] = 20,
 ["createdBy"] = {
@@ -18009,10 +18006,6 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "HfF7xPJjXJe",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 1,
-},
 ["value"] = {
 ["currentPull"] = 9,
 ["currentSublevel"] = 1,
@@ -18237,6 +18230,10 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 1,
+},
 ["text"] = "nr",
 ["difficulty"] = 30,
 ["createdBy"] = {
@@ -18351,12 +18348,12 @@ nil,
 1,
 },
 ["color"] = "3e9eff",
+[16] = {
+},
 [9] = {
 1,
 3,
 2,
-},
-[16] = {
 },
 [15] = {
 },
@@ -18507,11 +18504,6 @@ nil,
 ["uid"] = "dY3tMg39Owy",
 ["objects"] = {
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 7 2",
 ["value"] = {
 ["currentPull"] = 13,
 ["currentSublevel"] = 1,
@@ -18731,6 +18723,11 @@ nil,
 },
 },
 },
+},
+["text"] = "Route 7 2",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["createdBy"] = {
 ["classIdx"] = 2,
@@ -18995,11 +18992,6 @@ nil,
 ["week"] = 1,
 ["uid"] = "8C6eXnPVYIp",
 ["difficulty"] = 20,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 6",
 ["value"] = {
 ["currentPull"] = 9,
 ["currentSublevel"] = 1,
@@ -19236,6 +19228,11 @@ nil,
 },
 },
 },
+["text"] = "Route 6",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["createdBy"] = {
 ["classIdx"] = 10,
 ["name"] = "Ravstagger",
@@ -19470,6 +19467,10 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "4mxf9mtsa4b",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["selection"] = {
 2,
@@ -19684,10 +19685,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "High Key Route",
 ["difficulty"] = 2,
@@ -20014,6 +20011,10 @@ true,
 ["difficulty"] = 20,
 ["uid"] = "VtpJ1XcrBJn",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["pulls"] = {
 {
@@ -20171,13 +20172,13 @@ nil,
 19,
 },
 ["color"] = "fffb3e",
+[5] = {
+3,
+},
 [9] = {
 39,
 40,
 12,
-},
-[5] = {
-3,
 },
 [7] = {
 7,
@@ -20303,12 +20304,12 @@ nil,
 1,
 3,
 },
+[23] = {
+1,
+},
 [9] = {
 3,
 4,
-},
-[23] = {
-1,
 },
 },
 {
@@ -20343,9 +20344,6 @@ nil,
 [14] = {
 5,
 },
-[15] = {
-1,
-},
 [9] = {
 30,
 28,
@@ -20354,6 +20352,9 @@ nil,
 27,
 32,
 29,
+},
+[15] = {
+1,
 },
 },
 {
@@ -20383,10 +20384,6 @@ nil,
 ["riftOffsets"] = {
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["text"] = "Pit of Saron",
 ["objects"] = {
 },
@@ -20400,6 +20397,10 @@ nil,
 ["difficulty"] = 10,
 ["uid"] = "gLTnJIPddrf",
 ["addonVersion"] = 6011,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 2,
 ["currentSublevel"] = 1,
@@ -20428,13 +20429,13 @@ nil,
 [4] = {
 15,
 },
-[5] = {
-24,
-11,
-},
 [9] = {
 34,
 35,
+},
+[5] = {
+24,
+11,
 },
 },
 {
@@ -20546,14 +20547,6 @@ nil,
 [13] = {
 19,
 },
-[5] = {
-3,
-},
-[10] = {
-},
-["color"] = "fffb3e",
-[4] = {
-},
 [9] = {
 12,
 40,
@@ -20563,6 +20556,14 @@ nil,
 9,
 11,
 },
+[10] = {
+},
+["color"] = "fffb3e",
+[4] = {
+},
+[5] = {
+3,
+},
 [7] = {
 7,
 6,
@@ -20570,8 +20571,8 @@ nil,
 },
 },
 {
-[4] = {
-1,
+[14] = {
+8,
 },
 [9] = {
 6,
@@ -20583,16 +20584,16 @@ nil,
 [10] = {
 2,
 },
-["color"] = "3eff3e",
-[14] = {
-8,
+[12] = {
+2,
+},
+[4] = {
+1,
 },
 [5] = {
 2,
 },
-[12] = {
-2,
-},
+["color"] = "3eff3e",
 },
 {
 {
@@ -20624,15 +20625,15 @@ nil,
 [7] = {
 4,
 },
-[5] = {
-26,
+[9] = {
+5,
 },
 ["color"] = "3effff",
 [14] = {
 7,
 },
-[9] = {
-5,
+[5] = {
+26,
 },
 [13] = {
 1,
@@ -20706,17 +20707,17 @@ nil,
 },
 [8] = {
 },
-[14] = {
-},
-["color"] = "ff3eff",
 [4] = {
 },
-[5] = {
+["color"] = "ff3eff",
+[14] = {
 },
 [9] = {
 24,
 25,
 26,
+},
+[5] = {
 },
 },
 {
@@ -20774,10 +20775,6 @@ nil,
 },
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["text"] = "ToasterBathInc.",
 ["objects"] = {
 {
@@ -20807,13 +20804,6 @@ true,
 ["difficulty"] = 20,
 ["uid"] = "W2jQorjIPjj",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 2",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 6,
 ["currentSublevel"] = 1,
@@ -20880,11 +20870,11 @@ true,
 7,
 },
 ["color"] = "3eff9e",
-[5] = {
-21,
-},
 [9] = {
 22,
+},
+[5] = {
+21,
 },
 [13] = {
 12,
@@ -20997,14 +20987,14 @@ nil,
 [4] = {
 2,
 },
+[5] = {
+25,
+3,
+},
 [9] = {
 12,
 40,
 39,
-},
-[5] = {
-25,
-3,
 },
 },
 {
@@ -21117,11 +21107,11 @@ nil,
 1,
 3,
 },
-[16] = {
+[23] = {
 1,
 },
 ["color"] = "a1ff3e",
-[23] = {
+[16] = {
 1,
 },
 [9] = {
@@ -21144,12 +21134,6 @@ nil,
 [8] = {
 13,
 },
-[5] = {
-},
-["color"] = "ff3eff",
-[4] = {
-14,
-},
 [9] = {
 24,
 25,
@@ -21160,11 +21144,20 @@ nil,
 43,
 45,
 },
+["color"] = "ff3eff",
 [14] = {
+},
+[5] = {
+},
+[4] = {
+14,
 },
 },
 {
 ["color"] = "3eff9e",
+[15] = {
+1,
+},
 [9] = {
 27,
 28,
@@ -21174,20 +21167,28 @@ nil,
 30,
 31,
 },
-[15] = {
-1,
-},
 [14] = {
 5,
 },
 },
 },
 },
+["text"] = "Route 2",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 },
 {
 ["difficulty"] = 21,
 ["uid"] = "80pY3i)9TOg",
 ["week"] = 2,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -21238,12 +21239,12 @@ nil,
 [4] = {
 13,
 },
+[9] = {
+22,
+},
 [5] = {
 20,
 21,
-},
-[9] = {
-22,
 },
 },
 {
@@ -21291,20 +21292,20 @@ nil,
 [8] = {
 3,
 },
+["color"] = "3e9eff",
 [12] = {
 3,
 },
-["color"] = "3e9eff",
 [4] = {
 3,
-},
-[5] = {
-7,
 },
 [9] = {
 38,
 36,
 37,
+},
+[5] = {
+7,
 },
 },
 {
@@ -21325,14 +21326,14 @@ nil,
 [4] = {
 2,
 },
-[5] = {
-25,
-3,
-},
 [9] = {
 39,
 12,
 40,
+},
+[5] = {
+25,
+3,
 },
 },
 {
@@ -21449,12 +21450,12 @@ nil,
 1,
 3,
 },
+[23] = {
+1,
+},
 [9] = {
 3,
 4,
-},
-[23] = {
-1,
 },
 },
 {
@@ -21467,20 +21468,20 @@ nil,
 12,
 9,
 },
+[5] = {
+27,
+},
+["color"] = "a1ff3e",
+[4] = {
+14,
+},
 [9] = {
 24,
 25,
 26,
 },
-["color"] = "a1ff3e",
 [14] = {
 6,
-},
-[5] = {
-27,
-},
-[4] = {
-14,
 },
 },
 {
@@ -21539,10 +21540,6 @@ nil,
 ["riftOffsets"] = {
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["text"] = "Pit of Saron 2",
 ["objects"] = {
 },
@@ -21556,6 +21553,10 @@ nil,
 ["difficulty"] = 21,
 ["uid"] = "9BO2X1Z4(Cs",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -21621,11 +21622,11 @@ nil,
 7,
 },
 ["color"] = "3eff9e",
-[5] = {
-21,
-},
 [9] = {
 22,
+},
+[5] = {
+21,
 },
 [13] = {
 12,
@@ -21647,13 +21648,13 @@ nil,
 [5] = {
 8,
 },
-[7] = {
-10,
-11,
-},
 [9] = {
 15,
 16,
+},
+[7] = {
+10,
+11,
 },
 ["color"] = "ff3e3e",
 },
@@ -21734,9 +21735,6 @@ nil,
 5,
 6,
 },
-[5] = {
-3,
-},
 [9] = {
 11,
 9,
@@ -21746,13 +21744,14 @@ nil,
 12,
 8,
 },
+[5] = {
+3,
+},
 },
 {
-[12] = {
-2,
-},
-[7] = {
-30,
+["color"] = "ff3e9e",
+[13] = {
+20,
 },
 [8] = {
 2,
@@ -21760,15 +21759,17 @@ nil,
 [10] = {
 2,
 },
-["color"] = "ff3e9e",
+[12] = {
+2,
+},
 [14] = {
 8,
 },
 [5] = {
 2,
 },
-[13] = {
-20,
+[7] = {
+30,
 },
 },
 {
@@ -21776,12 +21777,12 @@ nil,
 [18] = {
 1,
 },
+[4] = {
+1,
+},
 [9] = {
 6,
 7,
-},
-[4] = {
-1,
 },
 },
 {
@@ -21855,12 +21856,12 @@ nil,
 1,
 3,
 },
+[23] = {
+1,
+},
 [9] = {
 4,
 3,
-},
-[23] = {
-1,
 },
 },
 {
@@ -21934,10 +21935,6 @@ nil,
 ["riftOffsets"] = {
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["text"] = "Pit of Saron 3",
 ["objects"] = {
 },
@@ -21951,6 +21948,10 @@ nil,
 ["difficulty"] = 21,
 ["uid"] = "XK9FDqNLyKv",
 ["week"] = 2,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -22001,12 +22002,12 @@ nil,
 [4] = {
 13,
 },
+[9] = {
+22,
+},
 [5] = {
 20,
 21,
-},
-[9] = {
-22,
 },
 },
 {
@@ -22054,20 +22055,20 @@ nil,
 [8] = {
 3,
 },
+["color"] = "3e9eff",
 [12] = {
 3,
 },
-["color"] = "3e9eff",
 [4] = {
 3,
-},
-[5] = {
-7,
 },
 [9] = {
 38,
 36,
 37,
+},
+[5] = {
+7,
 },
 },
 {
@@ -22088,14 +22089,14 @@ nil,
 [4] = {
 2,
 },
-[5] = {
-25,
-3,
-},
 [9] = {
 39,
 12,
 40,
+},
+[5] = {
+25,
+3,
 },
 },
 {
@@ -22212,12 +22213,12 @@ nil,
 1,
 3,
 },
+[23] = {
+1,
+},
 [9] = {
 3,
 4,
-},
-[23] = {
-1,
 },
 },
 {
@@ -22230,20 +22231,20 @@ nil,
 12,
 9,
 },
+[5] = {
+27,
+},
+["color"] = "a1ff3e",
+[4] = {
+14,
+},
 [9] = {
 24,
 25,
 26,
 },
-["color"] = "a1ff3e",
 [14] = {
 6,
-},
-[5] = {
-27,
-},
-[4] = {
-14,
 },
 },
 {
@@ -22302,10 +22303,6 @@ nil,
 ["riftOffsets"] = {
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["text"] = "Pit of Saron 2 2",
 ["objects"] = {
 },
@@ -22320,6 +22317,13 @@ nil,
 ["uid"] = "r2R5uAH8Grp",
 ["addonVersion"] = 6011,
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 3",
+["objects"] = {
+},
 ["value"] = {
 ["currentPull"] = 11,
 ["currentSublevel"] = 1,
@@ -22340,17 +22344,17 @@ nil,
 [8] = {
 10,
 },
-[9] = {
-34,
-35,
+[5] = {
+24,
+11,
 },
 ["color"] = "ff3eff",
 [4] = {
 15,
 },
-[5] = {
-24,
-11,
+[9] = {
+34,
+35,
 },
 [7] = {
 28,
@@ -22378,11 +22382,11 @@ nil,
 7,
 },
 ["color"] = "3eff9e",
-[5] = {
-21,
-},
 [9] = {
 22,
+},
+[5] = {
+21,
 },
 [13] = {
 12,
@@ -22495,14 +22499,14 @@ nil,
 [4] = {
 2,
 },
-[5] = {
-25,
-3,
-},
 [9] = {
 12,
 40,
 39,
+},
+[5] = {
+25,
+3,
 },
 },
 {
@@ -22656,9 +22660,6 @@ nil,
 [14] = {
 5,
 },
-[15] = {
-1,
-},
 [9] = {
 30,
 27,
@@ -22668,16 +22669,12 @@ nil,
 29,
 31,
 },
+[15] = {
+1,
+},
 ["color"] = "3eff9e",
 },
 },
-},
-["text"] = "Route 3",
-["objects"] = {
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 },
 {
@@ -22685,398 +22682,9 @@ nil,
 ["uid"] = "L3Lu3v8rgmk",
 ["addonVersion"] = 6011,
 ["week"] = 1,
-["value"] = {
-["currentPull"] = 8,
-["currentSublevel"] = 1,
-["enemyAssignments"] = {
-},
-["currentDungeonIdx"] = 150,
-["selection"] = {
-8,
-},
-["pulls"] = {
-{
-{
-},
-{
-},
-{
-},
-{
-15,
-},
-{
-24,
-11,
-},
-{
-2,
-},
-{
-28,
-29,
-},
-{
-10,
-},
-{
-34,
-35,
-},
-[13] = {
-18,
-17,
-9,
-},
-["color"] = "ff3eff",
-},
-{
-{
-6,
-},
-{
-16,
-15,
-},
-{
-6,
-},
-[6] = {
-5,
-},
-[7] = {
-23,
-},
-[10] = {
-7,
-},
-["color"] = "3eff9e",
-[5] = {
-21,
-},
-[9] = {
-22,
-},
-[13] = {
-12,
-13,
-},
-},
-{
-{
-7,
-},
-{
-17,
-18,
-19,
-},
-{
-7,
-},
-{
-3,
-},
-{
-8,
-7,
-},
-["color"] = "ff3e3e",
-[13] = {
-5,
-},
-[7] = {
-10,
-11,
-},
-[9] = {
-16,
-15,
-},
-},
-{
-{
-3,
-},
-{
-8,
-6,
-7,
-},
-{
-3,
-},
-nil,
-{
-23,
-},
-nil,
-{
-24,
-},
-{
-8,
-},
-["color"] = "3e9eff",
-[13] = {
-16,
-},
-[10] = {
-8,
-},
-},
-{
-[7] = {
-12,
-},
-[8] = {
-3,
-},
-[10] = {
-5,
-},
-["color"] = "fffb3e",
-[12] = {
-3,
-},
-[9] = {
-38,
-36,
-37,
-17,
-},
-[13] = {
-3,
-4,
-6,
-},
-},
-{
-[6] = {
-10,
-},
-[13] = {
-19,
-21,
-2,
-},
-[7] = {
-7,
-},
-[10] = {
-3,
-},
-["color"] = "3eff3e",
-[4] = {
-2,
-},
-[5] = {
-25,
-3,
-},
-[9] = {
-12,
-40,
-39,
-},
-},
-{
-[13] = {
-20,
-},
-[7] = {
-6,
-5,
-30,
-},
-[14] = {
-8,
-},
-["color"] = "ff3e9e",
-[4] = {
-},
-[8] = {
-2,
-},
-[9] = {
-8,
-10,
-9,
-11,
-},
-[5] = {
-2,
-},
-[10] = {
-2,
-},
-[12] = {
-2,
-},
-},
-{
-["color"] = "3effff",
-[4] = {
-1,
-},
-[9] = {
-6,
-7,
-},
-[18] = {
-1,
-},
-},
-{
-{
-2,
-},
-{
-4,
-5,
-3,
-},
-{
-2,
-},
-[5] = {
-26,
-},
-[6] = {
-9,
-},
-["color"] = "ff9b3e",
-[14] = {
-7,
-},
-},
-{
-{
-1,
-},
-{
-1,
-2,
-},
-{
-1,
-},
-nil,
-{
-1,
-},
-nil,
-{
-4,
-},
-{
-1,
-},
-{
-5,
-},
-nil,
-nil,
-{
-1,
-},
-{
-1,
-},
-{
-2,
-},
-["color"] = "3e3eff",
-},
-{
-[7] = {
-2,
-1,
-3,
-},
-[16] = {
-1,
-},
-["color"] = "a1ff3e",
-[23] = {
-1,
-},
-[9] = {
-3,
-4,
-},
-[17] = {
-1,
-},
-},
-{
-[6] = {
-7,
-},
-[7] = {
-26,
-25,
-27,
-},
-[8] = {
-13,
-},
-[9] = {
-24,
-25,
-26,
-41,
-42,
-44,
-43,
-45,
-},
-["color"] = "ff3eff",
-[14] = {
-},
-[5] = {
-},
-[4] = {
-14,
-},
-},
-{
-["color"] = "3eff9e",
-[15] = {
-1,
-},
-[9] = {
-27,
-28,
-32,
-33,
-29,
-30,
-31,
-},
-[14] = {
-5,
-},
-},
-{
-[20] = {
-1,
-},
-[21] = {
-1,
-2,
-},
-[22] = {
-1,
-2,
-3,
-},
-[19] = {
-1,
-},
-["color"] = "ff3e3e",
-},
-},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "Route 2 2",
 ["objects"] = {
@@ -23091,16 +22699,6 @@ true,
 ["n"] = true,
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-},
-{
-["difficulty"] = 20,
-["uid"] = "YC1ZXKxh9n8",
-["addonVersion"] = 6011,
-["week"] = 1,
 ["value"] = {
 ["currentPull"] = 8,
 ["currentSublevel"] = 1,
@@ -23167,11 +22765,11 @@ true,
 7,
 },
 ["color"] = "3eff9e",
-[5] = {
-21,
-},
 [9] = {
 22,
+},
+[5] = {
+21,
 },
 [13] = {
 12,
@@ -23286,14 +22884,14 @@ nil,
 [4] = {
 2,
 },
-[5] = {
-25,
-3,
-},
 [9] = {
 12,
 40,
 39,
+},
+[5] = {
+25,
+3,
 },
 },
 {
@@ -23332,12 +22930,12 @@ nil,
 },
 {
 ["color"] = "3effff",
-[4] = {
-1,
-},
 [9] = {
 6,
 7,
+},
+[4] = {
+1,
 },
 [18] = {
 1,
@@ -23410,11 +23008,11 @@ nil,
 1,
 3,
 },
-[16] = {
+[23] = {
 1,
 },
 ["color"] = "a1ff3e",
-[23] = {
+[16] = {
 1,
 },
 [9] = {
@@ -23437,6 +23035,12 @@ nil,
 [8] = {
 13,
 },
+[5] = {
+},
+["color"] = "ff3eff",
+[4] = {
+14,
+},
 [9] = {
 24,
 25,
@@ -23447,20 +23051,11 @@ nil,
 43,
 45,
 },
-["color"] = "ff3eff",
 [14] = {
-},
-[5] = {
-},
-[4] = {
-14,
 },
 },
 {
 ["color"] = "3eff9e",
-[15] = {
-1,
-},
 [9] = {
 27,
 28,
@@ -23469,6 +23064,9 @@ nil,
 29,
 30,
 31,
+},
+[15] = {
+1,
 },
 [14] = {
 5,
@@ -23494,6 +23092,16 @@ nil,
 },
 },
 },
+},
+{
+["difficulty"] = 20,
+["uid"] = "YC1ZXKxh9n8",
+["addonVersion"] = 6011,
+["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "Route 2 3",
 ["objects"] = {
 {
@@ -23507,9 +23115,398 @@ true,
 ["n"] = true,
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
+["value"] = {
+["currentPull"] = 8,
+["currentSublevel"] = 1,
+["enemyAssignments"] = {
+},
+["currentDungeonIdx"] = 150,
+["selection"] = {
+8,
+},
+["pulls"] = {
+{
+{
+},
+{
+},
+{
+},
+{
+15,
+},
+{
+24,
+11,
+},
+{
+2,
+},
+{
+28,
+29,
+},
+{
+10,
+},
+{
+34,
+35,
+},
+[13] = {
+18,
+17,
+9,
+},
+["color"] = "ff3eff",
+},
+{
+{
+6,
+},
+{
+16,
+15,
+},
+{
+6,
+},
+[6] = {
+5,
+},
+[7] = {
+23,
+},
+[10] = {
+7,
+},
+["color"] = "3eff9e",
+[9] = {
+22,
+},
+[5] = {
+21,
+},
+[13] = {
+12,
+13,
+},
+},
+{
+{
+7,
+},
+{
+17,
+18,
+19,
+},
+{
+7,
+},
+{
+3,
+},
+{
+8,
+7,
+},
+["color"] = "ff3e3e",
+[13] = {
+5,
+},
+[7] = {
+10,
+11,
+},
+[9] = {
+16,
+15,
+},
+},
+{
+{
+3,
+},
+{
+8,
+6,
+7,
+},
+{
+3,
+},
+nil,
+{
+23,
+},
+nil,
+{
+24,
+},
+{
+8,
+},
+["color"] = "3e9eff",
+[13] = {
+16,
+},
+[10] = {
+8,
+},
+},
+{
+[7] = {
+12,
+},
+[8] = {
+3,
+},
+[10] = {
+5,
+},
+["color"] = "fffb3e",
+[12] = {
+3,
+},
+[9] = {
+38,
+36,
+37,
+17,
+},
+[13] = {
+3,
+4,
+6,
+},
+},
+{
+[6] = {
+10,
+},
+[13] = {
+19,
+21,
+2,
+},
+[7] = {
+7,
+},
+[10] = {
+3,
+},
+["color"] = "3eff3e",
+[4] = {
+2,
+},
+[9] = {
+12,
+40,
+39,
+},
+[5] = {
+25,
+3,
+},
+},
+{
+[13] = {
+20,
+},
+[7] = {
+6,
+5,
+30,
+},
+[14] = {
+8,
+},
+["color"] = "ff3e9e",
+[4] = {
+},
+[8] = {
+2,
+},
+[9] = {
+8,
+10,
+9,
+11,
+},
+[5] = {
+2,
+},
+[10] = {
+2,
+},
+[12] = {
+2,
+},
+},
+{
+["color"] = "3effff",
+[9] = {
+6,
+7,
+},
+[4] = {
+1,
+},
+[18] = {
+1,
+},
+},
+{
+{
+2,
+},
+{
+4,
+5,
+3,
+},
+{
+2,
+},
+[5] = {
+26,
+},
+[6] = {
+9,
+},
+["color"] = "ff9b3e",
+[14] = {
+7,
+},
+},
+{
+{
+1,
+},
+{
+1,
+2,
+},
+{
+1,
+},
+nil,
+{
+1,
+},
+nil,
+{
+4,
+},
+{
+1,
+},
+{
+5,
+},
+nil,
+nil,
+{
+1,
+},
+{
+1,
+},
+{
+2,
+},
+["color"] = "3e3eff",
+},
+{
+[7] = {
+2,
+1,
+3,
+},
+[23] = {
+1,
+},
+["color"] = "a1ff3e",
+[16] = {
+1,
+},
+[9] = {
+3,
+4,
+},
+[17] = {
+1,
+},
+},
+{
+[6] = {
+7,
+},
+[7] = {
+26,
+25,
+27,
+},
+[8] = {
+13,
+},
+[5] = {
+},
+["color"] = "ff3eff",
+[4] = {
+14,
+},
+[9] = {
+24,
+25,
+26,
+41,
+42,
+44,
+43,
+45,
+},
+[14] = {
+},
+},
+{
+["color"] = "3eff9e",
+[9] = {
+27,
+28,
+32,
+33,
+29,
+30,
+31,
+},
+[15] = {
+1,
+},
+[14] = {
+5,
+},
+},
+{
+[20] = {
+1,
+},
+[21] = {
+1,
+2,
+},
+[22] = {
+1,
+2,
+3,
+},
+[19] = {
+1,
+},
+["color"] = "ff3e3e",
+},
+},
 },
 },
 {
@@ -23517,9 +23514,386 @@ true,
 ["uid"] = "94E6TCKPzlf",
 ["addonVersion"] = 6011,
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
+["value"] = {
+["selection"] = {
+3,
+},
+["currentSublevel"] = 1,
+["currentDungeonIdx"] = 150,
+["currentPull"] = 3,
+["pulls"] = {
+{
+{
+},
+{
+},
+{
+},
+{
+15,
+},
+{
+24,
+11,
+},
+{
+3,
+},
+{
+28,
+29,
+},
+{
+10,
+},
+{
+34,
+35,
+},
+[13] = {
+18,
+17,
+9,
+},
+["color"] = "ff3eff",
+},
+{
+{
+6,
+},
+{
+},
+{
+},
+{
+13,
+},
+{
+21,
+20,
+},
+{
+5,
+},
+{
+23,
+},
+[11] = {
+},
+[13] = {
+12,
+13,
+},
+[10] = {
+7,
+},
+["color"] = "3eff9e",
+[9] = {
+22,
+},
+},
+{
+{
+7,
+},
+{
+17,
+18,
+19,
+},
+{
+7,
+},
+{
+},
+{
+23,
+22,
+},
+{
+},
+{
+24,
+},
+{
+8,
+},
+{
+},
+{
+8,
+},
+{
+4,
+},
+[13] = {
+16,
+14,
+},
+["color"] = "ff3e3e",
+},
+{
+{
+3,
+},
+{
+8,
+6,
+7,
+},
+{
+3,
+},
+{
+3,
+},
+{
+7,
+},
+nil,
+nil,
+{
+3,
+},
+["color"] = "3e9eff",
+[13] = {
+5,
+},
+[12] = {
+3,
+},
+},
+{
+[7] = {
+7,
+},
+[13] = {
+21,
+2,
+},
+[10] = {
+3,
+},
+["color"] = "fffb3e",
+[4] = {
+2,
+},
+[9] = {
+12,
+40,
+39,
+},
+[5] = {
+25,
+},
+},
+{
+[6] = {
+10,
+},
+[13] = {
+19,
+},
+["color"] = "3eff3e",
+[5] = {
+3,
+},
+[9] = {
+8,
+10,
+9,
+11,
+},
+[7] = {
+6,
+5,
+},
+},
+{
+[7] = {
+30,
+},
+[13] = {
+20,
+},
+[8] = {
+2,
+},
+[10] = {
+2,
+},
+[12] = {
+2,
+},
+[14] = {
+8,
+},
+[5] = {
+2,
+},
+["color"] = "ff3e9e",
+},
+{
+{
+2,
+},
+{
+4,
+5,
+3,
+},
+{
+2,
+},
+["color"] = "3effff",
+[18] = {
+1,
+},
+},
+{
+[6] = {
+9,
+},
+[7] = {
+4,
+},
+[9] = {
+5,
+},
+["color"] = "ff9b3e",
+[14] = {
+7,
+},
+[5] = {
+26,
+},
+[13] = {
+1,
+},
+},
+{
+{
+1,
+},
+{
+1,
+2,
+},
+{
+1,
+},
+nil,
+{
+1,
+},
+nil,
+nil,
+{
+1,
+},
+["color"] = "3e3eff",
+[12] = {
+1,
+},
+[14] = {
+2,
+},
+},
+{
+[7] = {
+2,
+1,
+3,
+},
+[17] = {
+1,
+},
+[9] = {
+3,
+4,
+},
+["color"] = "a1ff3e",
+[16] = {
+1,
+},
+[23] = {
+1,
+},
+[13] = {
+},
+},
+{
+[7] = {
+26,
+25,
+27,
+},
+[8] = {
+9,
+12,
+},
+[4] = {
+14,
+},
+["color"] = "ff3eff",
+[14] = {
+6,
+},
+[9] = {
+24,
+25,
+26,
+},
+[5] = {
+27,
+},
+},
+{
+["color"] = "3eff9e",
+[6] = {
+7,
+},
+[9] = {
+45,
+41,
+42,
+44,
+43,
+},
+[8] = {
+13,
+},
+},
+{
+["color"] = "ff3e3e",
+[9] = {
+32,
+27,
+28,
+33,
+29,
+30,
+31,
+},
+[14] = {
+5,
+},
+},
+{
+[7] = {
+},
+[15] = {
+1,
+},
+["color"] = "3e9eff",
+[5] = {
+},
+[9] = {
+},
+[13] = {
+},
+},
+},
 },
 ["text"] = "we dorkin it",
 ["objects"] = {
@@ -23610,396 +23984,15 @@ true,
 ["n"] = true,
 },
 },
-["value"] = {
-["selection"] = {
-3,
-},
-["currentSublevel"] = 1,
-["currentDungeonIdx"] = 150,
-["currentPull"] = 3,
-["pulls"] = {
-{
-{
-},
-{
-},
-{
-},
-{
-15,
-},
-{
-24,
-11,
-},
-{
-3,
-},
-{
-28,
-29,
-},
-{
-10,
-},
-{
-34,
-35,
-},
-[13] = {
-18,
-17,
-9,
-},
-["color"] = "ff3eff",
-},
-{
-{
-6,
-},
-{
-},
-{
-},
-{
-13,
-},
-{
-21,
-20,
-},
-{
-5,
-},
-{
-23,
-},
-[11] = {
-},
-[13] = {
-12,
-13,
-},
-[10] = {
-7,
-},
-["color"] = "3eff9e",
-[9] = {
-22,
-},
-},
-{
-{
-7,
-},
-{
-17,
-18,
-19,
-},
-{
-7,
-},
-{
-},
-{
-23,
-22,
-},
-{
-},
-{
-24,
-},
-{
-8,
-},
-{
-},
-{
-8,
-},
-{
-4,
-},
-[13] = {
-16,
-14,
-},
-["color"] = "ff3e3e",
-},
-{
-{
-3,
-},
-{
-8,
-6,
-7,
-},
-{
-3,
-},
-{
-3,
-},
-{
-7,
-},
-nil,
-nil,
-{
-3,
-},
-["color"] = "3e9eff",
-[13] = {
-5,
-},
-[12] = {
-3,
-},
-},
-{
-[7] = {
-7,
-},
-[13] = {
-21,
-2,
-},
-[10] = {
-3,
-},
-["color"] = "fffb3e",
-[4] = {
-2,
-},
-[5] = {
-25,
-},
-[9] = {
-12,
-40,
-39,
-},
-},
-{
-[6] = {
-10,
-},
-[13] = {
-19,
-},
-["color"] = "3eff3e",
-[9] = {
-8,
-10,
-9,
-11,
-},
-[5] = {
-3,
-},
-[7] = {
-6,
-5,
-},
-},
-{
-[13] = {
-20,
-},
-[7] = {
-30,
-},
-[8] = {
-2,
-},
-[10] = {
-2,
-},
-["color"] = "ff3e9e",
-[14] = {
-8,
-},
-[5] = {
-2,
-},
-[12] = {
-2,
-},
-},
-{
-{
-2,
-},
-{
-4,
-5,
-3,
-},
-{
-2,
-},
-["color"] = "3effff",
-[18] = {
-1,
-},
-},
-{
-[6] = {
-9,
-},
-[7] = {
-4,
-},
-[5] = {
-26,
-},
-["color"] = "ff9b3e",
-[14] = {
-7,
-},
-[9] = {
-5,
-},
-[13] = {
-1,
-},
-},
-{
-{
-1,
-},
-{
-1,
-2,
-},
-{
-1,
-},
-nil,
-{
-1,
-},
-nil,
-nil,
-{
-1,
-},
-["color"] = "3e3eff",
-[12] = {
-1,
-},
-[14] = {
-2,
-},
-},
-{
-[7] = {
-2,
-1,
-3,
-},
-[17] = {
-1,
-},
-[9] = {
-3,
-4,
-},
-["color"] = "a1ff3e",
-[16] = {
-1,
-},
-[23] = {
-1,
-},
-[13] = {
-},
-},
-{
-[7] = {
-26,
-25,
-27,
-},
-[8] = {
-9,
-12,
-},
-[14] = {
-6,
-},
-["color"] = "ff3eff",
-[4] = {
-14,
-},
-[5] = {
-27,
-},
-[9] = {
-24,
-25,
-26,
-},
-},
-{
-["color"] = "3eff9e",
-[6] = {
-7,
-},
-[9] = {
-45,
-41,
-42,
-44,
-43,
-},
-[8] = {
-13,
-},
-},
-{
-["color"] = "ff3e3e",
-[9] = {
-32,
-27,
-28,
-33,
-29,
-30,
-31,
-},
-[14] = {
-5,
-},
-},
-{
-[7] = {
-},
-[15] = {
-1,
-},
-["color"] = "3e9eff",
-[9] = {
-},
-[5] = {
-},
-[13] = {
-},
-},
-},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 },
 {
 ["difficulty"] = 20,
 ["uid"] = "iG433nJGvMs",
 ["addonVersion"] = 6011,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 10,
 ["currentSublevel"] = 1,
@@ -24070,11 +24063,11 @@ nil,
 12,
 13,
 },
-[9] = {
-22,
-},
 [5] = {
 21,
+},
+[9] = {
+22,
 },
 },
 {
@@ -24175,18 +24168,18 @@ nil,
 21,
 2,
 },
-[9] = {
-12,
-40,
-39,
+[5] = {
+3,
 },
 [10] = {
 },
 ["color"] = "3eff3e",
 [4] = {
 },
-[5] = {
-3,
+[9] = {
+12,
+40,
+39,
 },
 [7] = {
 7,
@@ -24331,10 +24324,10 @@ nil,
 3,
 4,
 },
-[23] = {
+[16] = {
 1,
 },
-[16] = {
+[23] = {
 1,
 },
 },
@@ -24350,11 +24343,13 @@ nil,
 [8] = {
 13,
 },
+[14] = {
+},
+["color"] = "ff3eff",
 [4] = {
 14,
 },
-["color"] = "ff3eff",
-[14] = {
+[5] = {
 },
 [9] = {
 24,
@@ -24366,16 +24361,11 @@ nil,
 43,
 45,
 },
-[5] = {
-},
 },
 {
 ["color"] = "3eff9e",
 [14] = {
 5,
-},
-[15] = {
-1,
 },
 [9] = {
 27,
@@ -24385,6 +24375,9 @@ nil,
 29,
 30,
 31,
+},
+[15] = {
+1,
 },
 },
 {
@@ -24407,6 +24400,10 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "Route 2 4",
 ["objects"] = {
 {
@@ -24425,10 +24422,6 @@ true,
 {
 ["difficulty"] = 20,
 ["uid"] = "xQ)cSWFMxs3",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 2,
 ["currentSublevel"] = 1,
@@ -24494,11 +24487,11 @@ true,
 7,
 },
 ["color"] = "3eff9e",
-[5] = {
-21,
-},
 [9] = {
 22,
+},
+[5] = {
+21,
 },
 [7] = {
 23,
@@ -24603,9 +24596,6 @@ nil,
 19,
 },
 ["color"] = "3eff3e",
-[5] = {
-3,
-},
 [9] = {
 12,
 40,
@@ -24615,6 +24605,9 @@ nil,
 9,
 11,
 },
+[5] = {
+3,
+},
 [7] = {
 7,
 6,
@@ -24622,11 +24615,11 @@ nil,
 },
 },
 {
-[7] = {
-30,
-},
 [13] = {
 20,
+},
+[7] = {
+30,
 },
 [8] = {
 2,
@@ -24634,27 +24627,27 @@ nil,
 [10] = {
 2,
 },
-[12] = {
-2,
-},
+["color"] = "ff3e9e",
 [14] = {
 8,
 },
 [5] = {
 2,
 },
-["color"] = "ff3e9e",
+[12] = {
+2,
+},
 },
 {
 [18] = {
 1,
 },
+[4] = {
+1,
+},
 [9] = {
 6,
 7,
-},
-[4] = {
-1,
 },
 ["color"] = "3effff",
 },
@@ -24733,10 +24726,10 @@ nil,
 3,
 4,
 },
-[23] = {
+[16] = {
 1,
 },
-[16] = {
+[23] = {
 1,
 },
 },
@@ -24772,9 +24765,6 @@ nil,
 [14] = {
 5,
 },
-[15] = {
-1,
-},
 [9] = {
 27,
 28,
@@ -24784,8 +24774,15 @@ nil,
 30,
 31,
 },
+[15] = {
+1,
 },
 },
+},
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "Route 7",
 ["objects"] = {
@@ -24795,10 +24792,6 @@ nil,
 {
 ["difficulty"] = 20,
 ["uid"] = "yF698AGzDgt",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 3,
 ["currentSublevel"] = 1,
@@ -24862,11 +24855,11 @@ nil,
 7,
 },
 ["color"] = "3eff9e",
-[5] = {
-21,
-},
 [9] = {
 22,
+},
+[5] = {
+21,
 },
 [7] = {
 23,
@@ -24973,9 +24966,6 @@ nil,
 19,
 },
 ["color"] = "3eff3e",
-[5] = {
-3,
-},
 [9] = {
 12,
 40,
@@ -24985,6 +24975,9 @@ nil,
 9,
 11,
 },
+[5] = {
+3,
+},
 [7] = {
 7,
 6,
@@ -24992,11 +24985,11 @@ nil,
 },
 },
 {
-[7] = {
-30,
-},
 [13] = {
 20,
+},
+[7] = {
+30,
 },
 [8] = {
 2,
@@ -25004,27 +24997,27 @@ nil,
 [10] = {
 2,
 },
-[12] = {
-2,
-},
+["color"] = "ff3e9e",
 [14] = {
 8,
 },
 [5] = {
 2,
 },
-["color"] = "ff3e9e",
+[12] = {
+2,
+},
 },
 {
 [18] = {
 1,
 },
+[4] = {
+1,
+},
 [9] = {
 6,
 7,
-},
-[4] = {
-1,
 },
 ["color"] = "3effff",
 },
@@ -25103,10 +25096,10 @@ nil,
 3,
 4,
 },
-[23] = {
+[16] = {
 1,
 },
-[16] = {
+[23] = {
 1,
 },
 },
@@ -25142,9 +25135,6 @@ nil,
 [14] = {
 5,
 },
-[15] = {
-1,
-},
 [9] = {
 27,
 28,
@@ -25154,8 +25144,15 @@ nil,
 30,
 31,
 },
+[15] = {
+1,
 },
 },
+},
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "Route 7 2",
 ["objects"] = {
@@ -25165,6 +25162,10 @@ nil,
 {
 ["difficulty"] = 2,
 ["uid"] = "R)g0hRebU09",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 6,
 ["currentSublevel"] = 1,
@@ -25331,13 +25332,13 @@ nil,
 ["color"] = "fffb3e",
 [4] = {
 },
-[5] = {
-3,
-},
 [9] = {
 12,
 40,
 39,
+},
+[5] = {
+3,
 },
 },
 {
@@ -25416,11 +25417,11 @@ nil,
 [14] = {
 7,
 },
-[5] = {
-26,
-},
 [9] = {
 5,
+},
+[5] = {
+26,
 },
 },
 {
@@ -25457,11 +25458,11 @@ nil,
 2,
 3,
 },
-[23] = {
+[16] = {
 1,
 },
 ["color"] = "3e3eff",
-[16] = {
+[23] = {
 1,
 },
 [9] = {
@@ -25482,20 +25483,20 @@ nil,
 9,
 12,
 },
+[5] = {
+27,
+},
+["color"] = "a1ff3e",
+[4] = {
+14,
+},
 [9] = {
 24,
 25,
 26,
 },
-["color"] = "a1ff3e",
 [14] = {
 6,
-},
-[5] = {
-27,
-},
-[4] = {
-14,
 },
 },
 {
@@ -25536,10 +25537,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Route 2 5",
 ["objects"] = {
@@ -25789,6 +25786,10 @@ nil,
 [4] = {
 2,
 },
+[5] = {
+25,
+3,
+},
 [9] = {
 39,
 12,
@@ -25797,10 +25798,6 @@ nil,
 10,
 9,
 11,
-},
-[5] = {
-25,
-3,
 },
 },
 {
@@ -25858,15 +25855,15 @@ nil,
 [7] = {
 4,
 },
-[9] = {
-5,
+[5] = {
+26,
 },
 ["color"] = "ff9b3e",
 [14] = {
 7,
 },
-[5] = {
-26,
+[9] = {
+5,
 },
 [13] = {
 1,
@@ -25906,13 +25903,13 @@ nil,
 1,
 2,
 },
-[16] = {
-1,
-},
-["color"] = "a1ff3e",
 [9] = {
 3,
 4,
+},
+["color"] = "a1ff3e",
+[16] = {
+1,
 },
 [23] = {
 1,
@@ -25931,20 +25928,20 @@ nil,
 12,
 9,
 },
+[14] = {
+6,
+},
+["color"] = "ff3eff",
 [4] = {
 14,
 },
-["color"] = "ff3eff",
-[14] = {
-6,
+[5] = {
+27,
 },
 [9] = {
 24,
 25,
 26,
-},
-[5] = {
-27,
 },
 },
 {
@@ -25975,12 +25972,12 @@ nil,
 },
 {
 ["color"] = "ff3e3e",
-[7] = {
-},
 [9] = {
 },
 [15] = {
 1,
+},
+[7] = {
 },
 },
 },
@@ -25998,10 +25995,6 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "37G2IfYjQ)M",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 7,
 ["currentSublevel"] = 1,
@@ -26065,11 +26058,11 @@ nil,
 7,
 },
 ["color"] = "3eff9e",
-[5] = {
-21,
-},
 [9] = {
 22,
+},
+[5] = {
+21,
 },
 [7] = {
 23,
@@ -26176,13 +26169,13 @@ nil,
 19,
 },
 ["color"] = "3eff3e",
-[5] = {
-3,
-},
 [9] = {
 12,
 40,
 39,
+},
+[5] = {
+3,
 },
 [7] = {
 7,
@@ -26226,12 +26219,12 @@ nil,
 [18] = {
 1,
 },
+[4] = {
+1,
+},
 [9] = {
 6,
 7,
-},
-[4] = {
-1,
 },
 ["color"] = "3effff",
 },
@@ -26305,10 +26298,10 @@ nil,
 ["color"] = "a1ff3e",
 [9] = {
 },
-[23] = {
+[16] = {
 1,
 },
-[16] = {
+[23] = {
 1,
 },
 },
@@ -26344,9 +26337,6 @@ nil,
 [14] = {
 5,
 },
-[15] = {
-1,
-},
 [9] = {
 27,
 28,
@@ -26356,8 +26346,15 @@ nil,
 30,
 31,
 },
+[15] = {
+1,
 },
 },
+},
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "Route 7 3",
 ["difficulty"] = 20,
@@ -26383,11 +26380,6 @@ true,
 ["week"] = 1,
 ["uid"] = "4sqJlABZaJ9",
 ["difficulty"] = 20,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 8",
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -26506,7 +26498,9 @@ nil,
 ["color"] = "ff3e3e",
 },
 {
-["color"] = "3e9eff",
+[12] = {
+3,
+},
 [13] = {
 5,
 3,
@@ -26519,21 +26513,19 @@ nil,
 [10] = {
 3,
 },
-[12] = {
-3,
-},
+["color"] = "3e9eff",
 [4] = {
 3,
 2,
+},
+[5] = {
+7,
+25,
 },
 [9] = {
 38,
 36,
 37,
-},
-[5] = {
-7,
-25,
 },
 },
 {
@@ -26547,13 +26539,13 @@ nil,
 [7] = {
 7,
 },
-[5] = {
-3,
-},
 [9] = {
 12,
 40,
 39,
+},
+[5] = {
+3,
 },
 },
 {
@@ -26676,11 +26668,11 @@ nil,
 2,
 3,
 },
-[16] = {
+[23] = {
 1,
 },
 ["color"] = "3e3eff",
-[23] = {
+[16] = {
 1,
 },
 [9] = {
@@ -26705,13 +26697,6 @@ nil,
 9,
 12,
 },
-[5] = {
-27,
-},
-["color"] = "a1ff3e",
-[4] = {
-14,
-},
 [9] = {
 24,
 25,
@@ -26722,8 +26707,15 @@ nil,
 43,
 45,
 },
+["color"] = "a1ff3e",
 [14] = {
 6,
+},
+[5] = {
+27,
+},
+[4] = {
+14,
 },
 },
 {
@@ -26776,6 +26768,11 @@ nil,
 },
 },
 },
+["text"] = "Route 8",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["createdBy"] = {
 ["classIdx"] = 10,
 ["name"] = "Highwaym",
@@ -26806,6 +26803,10 @@ true,
 },
 ["week"] = 1,
 ["uid"] = "Qkxo02hQKlU",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 9,
 ["currentSublevel"] = 1,
@@ -26866,9 +26867,8 @@ true,
 [7] = {
 23,
 },
-[5] = {
-20,
-21,
+[9] = {
+22,
 },
 [10] = {
 7,
@@ -26877,8 +26877,9 @@ true,
 [4] = {
 13,
 },
-[9] = {
-22,
+[5] = {
+20,
+21,
 },
 [13] = {
 10,
@@ -26936,20 +26937,20 @@ nil,
 [8] = {
 3,
 },
+["color"] = "3e9eff",
 [12] = {
 3,
 },
-["color"] = "3e9eff",
 [4] = {
 3,
-},
-[5] = {
-7,
 },
 [9] = {
 38,
 36,
 37,
+},
+[5] = {
+7,
 },
 },
 {
@@ -26959,9 +26960,10 @@ nil,
 [13] = {
 19,
 },
-[5] = {
-25,
-3,
+[9] = {
+12,
+40,
+39,
 },
 [10] = {
 3,
@@ -26970,10 +26972,9 @@ nil,
 [4] = {
 2,
 },
-[9] = {
-12,
-40,
-39,
+[5] = {
+25,
+3,
 },
 [7] = {
 7,
@@ -27134,10 +27135,10 @@ nil,
 3,
 4,
 },
-[23] = {
+[16] = {
 1,
 },
-[16] = {
+[23] = {
 1,
 },
 },
@@ -27173,6 +27174,9 @@ nil,
 [14] = {
 5,
 },
+[15] = {
+1,
+},
 [9] = {
 27,
 28,
@@ -27182,15 +27186,8 @@ nil,
 30,
 31,
 },
-[15] = {
-1,
 },
 },
-},
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "wyrn skip",
 ["difficulty"] = 20,
@@ -27247,14 +27244,14 @@ nil,
 15,
 4,
 },
-[9] = {
-34,
-35,
-},
 [5] = {
 24,
 12,
 11,
+},
+[9] = {
+34,
+35,
 },
 },
 {
@@ -27378,10 +27375,9 @@ nil,
 21,
 2,
 },
-[9] = {
-12,
-40,
-39,
+[5] = {
+25,
+3,
 },
 [10] = {
 3,
@@ -27390,9 +27386,10 @@ nil,
 [4] = {
 2,
 },
-[5] = {
-25,
-3,
+[9] = {
+12,
+40,
+39,
 },
 [7] = {
 7,
@@ -27516,13 +27513,13 @@ nil,
 [17] = {
 1,
 },
-[23] = {
+[16] = {
 1,
 },
 [10] = {
 },
 ["color"] = "3e3eff",
-[16] = {
+[23] = {
 1,
 },
 [9] = {
@@ -27547,11 +27544,13 @@ nil,
 [8] = {
 13,
 },
+[14] = {
+},
+["color"] = "a1ff3e",
 [4] = {
 14,
 },
-["color"] = "a1ff3e",
-[14] = {
+[5] = {
 },
 [9] = {
 24,
@@ -27562,8 +27561,6 @@ nil,
 44,
 43,
 45,
-},
-[5] = {
 },
 },
 {
@@ -28564,6 +28561,10 @@ true,
 },
 ["week"] = 1,
 ["uid"] = "A1BsPwQPDqF",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -28652,11 +28653,11 @@ true,
 7,
 },
 ["color"] = "3eff9e",
-[9] = {
-22,
-},
 [5] = {
 21,
+},
+[9] = {
+22,
 },
 [13] = {
 13,
@@ -28835,11 +28836,11 @@ nil,
 1,
 3,
 },
-[23] = {
+[16] = {
 1,
 },
 ["color"] = "3effff",
-[16] = {
+[23] = {
 1,
 },
 [9] = {
@@ -28919,10 +28920,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Default 2 2",
 ["difficulty"] = 22,
@@ -29246,11 +29243,11 @@ nil,
 [14] = {
 7,
 },
-[5] = {
-26,
-},
 [9] = {
 5,
+},
+[5] = {
+26,
 },
 },
 {
@@ -29308,10 +29305,10 @@ nil,
 3,
 4,
 },
-[16] = {
+[23] = {
 1,
 },
-[23] = {
+[16] = {
 1,
 },
 },
@@ -29325,20 +29322,20 @@ nil,
 12,
 9,
 },
+[5] = {
+27,
+},
+["color"] = "a1ff3e",
+[14] = {
+6,
+},
 [9] = {
 25,
 26,
 24,
 },
-["color"] = "a1ff3e",
 [4] = {
 14,
-},
-[5] = {
-27,
-},
-[14] = {
-6,
 },
 },
 {
@@ -29424,6 +29421,10 @@ nil,
 },
 ["uid"] = "fkP0PjxS(3E",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 3,
 ["currentSublevel"] = 1,
@@ -29743,11 +29744,11 @@ nil,
 1,
 2,
 },
-[16] = {
+[23] = {
 1,
 },
 ["color"] = "ff9b3e",
-[23] = {
+[16] = {
 1,
 },
 [9] = {
@@ -29763,14 +29764,14 @@ nil,
 },
 [8] = {
 },
-[5] = {
-},
-["color"] = "3e3eff",
-[4] = {
-},
 [9] = {
 },
+["color"] = "3e3eff",
 [14] = {
+},
+[5] = {
+},
+[4] = {
 },
 },
 {
@@ -29785,12 +29786,12 @@ nil,
 [15] = {
 1,
 },
-[4] = {
-14,
-},
-["color"] = "a1ff3e",
 [14] = {
 5,
+},
+["color"] = "a1ff3e",
+[4] = {
+14,
 },
 [9] = {
 41,
@@ -29814,10 +29815,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Aug Skip",
 ["difficulty"] = 10,
@@ -30124,15 +30121,15 @@ nil,
 [17] = {
 1,
 },
-[23] = {
-1,
+[9] = {
+3,
+4,
 },
 ["color"] = "ff9b3e",
 [14] = {
 },
-[9] = {
-3,
-4,
+[23] = {
+1,
 },
 [7] = {
 2,
@@ -30169,6 +30166,9 @@ nil,
 },
 {
 ["color"] = "a1ff3e",
+[15] = {
+1,
+},
 [9] = {
 28,
 32,
@@ -30177,9 +30177,6 @@ nil,
 33,
 29,
 27,
-},
-[15] = {
-1,
 },
 [14] = {
 5,
@@ -30241,13 +30238,6 @@ nil,
 ["difficulty"] = 2,
 ["uid"] = "lcezRkHu)3X",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Default 2",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 10,
 ["currentSublevel"] = 1,
@@ -30428,11 +30418,11 @@ nil,
 [21] = {
 5,
 },
-[9] = {
-1,
-},
 [17] = {
 6,
+},
+[9] = {
+1,
 },
 },
 {
@@ -30454,19 +30444,19 @@ nil,
 ["color"] = "3e3eff",
 },
 },
+},
+["text"] = "Default 2",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 },
 {
 ["difficulty"] = 2,
 ["uid"] = "qJVTzB1YxIx",
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Default 3",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 10,
 ["currentSublevel"] = 1,
@@ -30647,11 +30637,11 @@ nil,
 [21] = {
 5,
 },
-[9] = {
-1,
-},
 [17] = {
 6,
+},
+[9] = {
+1,
 },
 },
 {
@@ -30674,10 +30664,21 @@ nil,
 },
 },
 },
+["text"] = "Default 3",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 },
 {
 ["difficulty"] = 2,
 ["uid"] = "7omMUTal)3t",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 15,
 ["currentSublevel"] = 1,
@@ -30773,6 +30774,10 @@ nil,
 [5] = {
 3,
 },
+[9] = {
+2,
+4,
+},
 [4] = {
 4,
 5,
@@ -30781,23 +30786,19 @@ nil,
 9,
 10,
 },
-[9] = {
-2,
-4,
-},
 ["color"] = "3eff3e",
 },
 {
 ["color"] = "ff3e9e",
-[7] = {
-4,
-},
 [9] = {
 3,
 },
 [4] = {
 7,
 8,
+},
+[7] = {
+4,
 },
 },
 {
@@ -30933,10 +30934,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Route 2",
 ["objects"] = {
@@ -30946,6 +30943,10 @@ nil,
 {
 ["difficulty"] = 2,
 ["uid"] = "FdbxSsnzPtc",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 15,
 ["currentSublevel"] = 1,
@@ -31041,6 +31042,10 @@ nil,
 [5] = {
 3,
 },
+[9] = {
+2,
+4,
+},
 [4] = {
 4,
 5,
@@ -31049,23 +31054,19 @@ nil,
 9,
 10,
 },
-[9] = {
-2,
-4,
-},
 ["color"] = "3eff3e",
 },
 {
 ["color"] = "ff3e9e",
-[7] = {
-4,
-},
 [9] = {
 3,
 },
 [4] = {
 7,
 8,
+},
+[7] = {
+4,
 },
 },
 {
@@ -31201,10 +31202,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Route 2 2",
 ["objects"] = {
@@ -31215,10 +31212,6 @@ nil,
 ["difficulty"] = 2,
 ["week"] = 1,
 ["addonVersion"] = 608,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 6,
 ["currentSublevel"] = 1,
@@ -31286,11 +31279,11 @@ nil,
 1,
 },
 ["color"] = "ff3e3e",
-[7] = {
-2,
+[12] = {
 1,
 },
-[12] = {
+[7] = {
+2,
 1,
 },
 },
@@ -31517,6 +31510,10 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "Default 2 2",
 ["objects"] = {
 },
@@ -31527,13 +31524,6 @@ nil,
 ["week"] = 1,
 ["addonVersion"] = 6017,
 ["uid"] = "QeVETWwmaTk",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Default 2 3",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 11,
 ["currentSublevel"] = 1,
@@ -31631,11 +31621,11 @@ nil,
 [5] = {
 1,
 },
-[12] = {
-1,
-},
 [7] = {
 2,
+1,
+},
+[12] = {
 1,
 },
 ["color"] = "3e9eff",
@@ -31681,14 +31671,14 @@ nil,
 },
 [8] = {
 },
-["color"] = "3eff3e",
 [22] = {
 },
+["color"] = "3eff3e",
 [4] = {
 },
-[5] = {
-},
 [9] = {
+},
+[5] = {
 },
 },
 {
@@ -31916,16 +31906,23 @@ nil,
 [2] = {
 7,
 },
-[22] = {
-},
+["color"] = "3e9eff",
 [19] = {
 1,
 },
 [5] = {
 },
-["color"] = "3e9eff",
+[22] = {
 },
 },
+},
+},
+["text"] = "Default 2 3",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 },
 {
@@ -31933,13 +31930,6 @@ nil,
 ["week"] = 1,
 ["addonVersion"] = 6017,
 ["uid"] = "xvSJFawGyOC",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Default 2 4",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 10,
 ["currentSublevel"] = 1,
@@ -32038,11 +32028,11 @@ nil,
 1,
 },
 ["color"] = "3e9eff",
-[7] = {
-2,
+[12] = {
 1,
 },
-[12] = {
+[7] = {
+2,
 1,
 },
 },
@@ -32087,15 +32077,15 @@ nil,
 },
 [8] = {
 },
+[9] = {
+},
+["color"] = "3eff3e",
+[4] = {
+},
 [5] = {
 },
 [22] = {
 },
-[4] = {
-},
-[9] = {
-},
-["color"] = "3eff3e",
 },
 {
 nil,
@@ -32314,9 +32304,9 @@ nil,
 },
 [8] = {
 },
+["color"] = "3e9eff",
 [22] = {
 },
-["color"] = "3e9eff",
 [19] = {
 1,
 },
@@ -32327,6 +32317,13 @@ nil,
 },
 },
 },
+},
+["text"] = "Default 2 4",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 },
 {
@@ -32432,6 +32429,15 @@ nil,
 [7] = {
 4,
 },
+[14] = {
+1,
+2,
+3,
+},
+[5] = {
+3,
+},
+["color"] = "fffb3e",
 [4] = {
 4,
 5,
@@ -32441,15 +32447,6 @@ nil,
 10,
 7,
 8,
-},
-[5] = {
-3,
-},
-["color"] = "fffb3e",
-[14] = {
-1,
-2,
-3,
 },
 [9] = {
 2,
@@ -32569,11 +32566,11 @@ nil,
 [21] = {
 5,
 },
-[17] = {
-6,
-},
 [9] = {
 1,
+},
+[17] = {
+6,
 },
 },
 },
@@ -32688,6 +32685,15 @@ nil,
 [7] = {
 4,
 },
+[14] = {
+1,
+2,
+3,
+},
+[5] = {
+3,
+},
+["color"] = "fffb3e",
 [4] = {
 4,
 5,
@@ -32697,15 +32703,6 @@ nil,
 10,
 7,
 8,
-},
-[5] = {
-3,
-},
-["color"] = "fffb3e",
-[14] = {
-1,
-2,
-3,
 },
 [9] = {
 2,
@@ -32825,11 +32822,11 @@ nil,
 [21] = {
 5,
 },
-[17] = {
-6,
-},
 [9] = {
 1,
+},
+[17] = {
+6,
 },
 },
 },
@@ -32845,6 +32842,13 @@ nil,
 ["difficulty"] = 2,
 ["uid"] = ")mXLalFdq7R",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 2 5",
+["objects"] = {
+},
 ["value"] = {
 ["currentPull"] = 6,
 ["currentSublevel"] = 1,
@@ -32938,17 +32942,17 @@ nil,
 [8] = {
 1,
 },
+["color"] = "fffb3e",
 [22] = {
 4,
 },
-["color"] = "fffb3e",
 [4] = {
-},
-[9] = {
 },
 [5] = {
 1,
 2,
+},
+[9] = {
 },
 },
 {
@@ -33112,13 +33116,6 @@ nil,
 },
 },
 },
-},
-["text"] = "Route 2 5",
-["objects"] = {
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 },
 {
@@ -33239,6 +33236,10 @@ true,
 },
 ["week"] = 1,
 ["uid"] = "i2J5e7tpvYN",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 4,
 ["currentSublevel"] = 1,
@@ -33394,11 +33395,8 @@ true,
 },
 },
 {
-[22] = {
-2,
-},
-[17] = {
-4,
+["color"] = "ff9b3e",
+[2] = {
 5,
 },
 [8] = {
@@ -33408,7 +33406,9 @@ true,
 9,
 8,
 },
-["color"] = "ff9b3e",
+[22] = {
+2,
+},
 [7] = {
 6,
 7,
@@ -33416,7 +33416,8 @@ true,
 [5] = {
 4,
 },
-[2] = {
+[17] = {
+4,
 5,
 },
 },
@@ -33432,11 +33433,11 @@ true,
 8,
 },
 ["color"] = "3e3eff",
-[9] = {
-1,
-},
 [5] = {
 5,
+},
+[9] = {
+1,
 },
 [17] = {
 7,
@@ -33482,10 +33483,6 @@ true,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "wyrm/walk",
 ["difficulty"] = 2,
@@ -33611,10 +33608,6 @@ true,
 },
 ["week"] = 1,
 ["uid"] = "uOnyefleWwT",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 4,
 ["currentSublevel"] = 1,
@@ -33735,20 +33728,20 @@ nil,
 },
 },
 {
-[22] = {
-},
+["color"] = "fffb3e",
 [7] = {
 },
-[8] = {
+[21] = {
 },
 [9] = {
 },
-["color"] = "fffb3e",
+[22] = {
+},
 [4] = {
 },
 [5] = {
 },
-[21] = {
+[8] = {
 },
 },
 {
@@ -33820,15 +33813,15 @@ nil,
 [17] = {
 7,
 },
-[22] = {
-},
+["color"] = "3effff",
 [9] = {
 1,
 },
 [5] = {
 5,
 },
-["color"] = "3effff",
+[22] = {
+},
 },
 {
 {
@@ -33876,6 +33869,10 @@ nil,
 ["color"] = "ff9b3e",
 },
 },
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "Pyro route",
 ["difficulty"] = 2,
@@ -34015,11 +34012,6 @@ true,
 },
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "aug skip",
 ["value"] = {
 ["currentPull"] = 12,
 ["currentSublevel"] = 1,
@@ -34181,11 +34173,11 @@ true,
 },
 },
 {
-[2] = {
-5,
-},
 [17] = {
 4,
+5,
+},
+[2] = {
 5,
 },
 [8] = {
@@ -34195,9 +34187,7 @@ true,
 8,
 9,
 },
-[22] = {
-2,
-},
+["color"] = "3e3eff",
 [7] = {
 6,
 7,
@@ -34205,7 +34195,9 @@ true,
 [5] = {
 4,
 },
-["color"] = "3e3eff",
+[22] = {
+2,
+},
 },
 {
 {
@@ -34227,10 +34219,10 @@ true,
 7,
 6,
 },
-[5] = {
-},
 [9] = {
 1,
+},
+[5] = {
 },
 },
 {
@@ -34264,6 +34256,11 @@ true,
 },
 },
 },
+},
+["text"] = "aug skip",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["createdBy"] = {
 ["classIdx"] = 11,
@@ -34300,6 +34297,13 @@ true,
 ["difficulty"] = 2,
 ["uid"] = "OAFpHoZf13U",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 2",
+["objects"] = {
+},
 ["value"] = {
 ["currentPull"] = 5,
 ["currentSublevel"] = 1,
@@ -34594,13 +34598,6 @@ true,
 },
 },
 },
-["text"] = "Route 2",
-["objects"] = {
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 },
 {
 ["addonVersion"] = 6011,
@@ -34663,13 +34660,13 @@ true,
 },
 [20] = {
 },
-[12] = {
-1,
-},
+["color"] = "3eff9e",
 [10] = {
 1,
 },
-["color"] = "3eff9e",
+[12] = {
+1,
+},
 [19] = {
 },
 [30] = {
@@ -34944,14 +34941,14 @@ nil,
 1,
 2,
 },
-[29] = {
-1,
-2,
-},
 [17] = {
 1,
 2,
 3,
+},
+[29] = {
+1,
+2,
 },
 ["color"] = "3e9eff",
 },
@@ -35015,13 +35012,13 @@ nil,
 },
 [20] = {
 },
-["color"] = "3eff9e",
-[10] = {
-1,
-},
 [12] = {
 1,
 },
+[10] = {
+1,
+},
+["color"] = "3eff9e",
 [19] = {
 },
 [30] = {
@@ -35317,18 +35314,18 @@ nil,
 },
 [21] = {
 },
-[19] = {
-3,
-},
-["color"] = "ff3e3e",
 [26] = {
 1,
+},
+[22] = {
+},
+[19] = {
+3,
 },
 [30] = {
 5,
 },
-[22] = {
-},
+["color"] = "ff3e3e",
 },
 },
 },
@@ -36430,7 +36427,9 @@ nil,
 },
 [24] = {
 },
-[25] = {
+[18] = {
+1,
+2,
 },
 ["color"] = "3e3eff",
 [4] = {
@@ -36444,9 +36443,7 @@ nil,
 1,
 2,
 },
-[18] = {
-1,
-2,
+[25] = {
 },
 },
 {
@@ -36783,9 +36780,9 @@ nil,
 ["color"] = "fffb3e",
 [14] = {
 },
-[16] = {
-},
 [5] = {
+},
+[16] = {
 },
 },
 {
@@ -36978,17 +36975,17 @@ nil,
 [20] = {
 2,
 },
+[16] = {
+},
+["color"] = "ff3e3e",
+[19] = {
+3,
+1,
+},
 [30] = {
 5,
 },
-["color"] = "ff3e3e",
 [26] = {
-1,
-},
-[16] = {
-},
-[19] = {
-3,
 1,
 },
 },
@@ -37033,10 +37030,6 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "YMgks4Rsefv",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 4,
 ["currentSublevel"] = 1,
@@ -37354,6 +37347,10 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "阿诺",
 ["difficulty"] = 35,
 ["createdBy"] = {
@@ -37377,6 +37374,10 @@ true,
 },
 ["week"] = 1,
 ["uid"] = "9ZOYCNSMLkl",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 4,
 ["currentSublevel"] = 1,
@@ -37606,10 +37607,10 @@ nil,
 [25] = {
 },
 ["color"] = "3effff",
+[9] = {
+},
 [5] = {
 4,
-},
-[9] = {
 },
 [24] = {
 },
@@ -37711,10 +37712,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "With skip",
 ["difficulty"] = 10,
@@ -38009,22 +38006,22 @@ nil,
 2,
 3,
 },
+["color"] = "a1ff3e",
 [22] = {
 1,
-},
-["color"] = "a1ff3e",
-[14] = {
-},
-[30] = {
-1,
-4,
-5,
 },
 [19] = {
 2,
 4,
 3,
 1,
+},
+[30] = {
+1,
+4,
+5,
+},
+[14] = {
 },
 },
 {
@@ -38517,11 +38514,6 @@ nil,
 },
 ["objects"] = {
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Magisters' Terrace",
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -38890,12 +38882,21 @@ nil,
 },
 },
 },
+["text"] = "Magisters' Terrace",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["week"] = 1,
 },
 {
 ["difficulty"] = 20,
 ["uid"] = "fpsCHEnVTZD",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["pulls"] = {
 {
@@ -39267,10 +39268,6 @@ nil,
 ["riftOffsets"] = {
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["text"] = "Magisters' Terrace 2",
 ["objects"] = {
 },
@@ -39285,72 +39282,6 @@ nil,
 ["uid"] = "V5Qv0W6W1)2",
 ["addonVersion"] = 6010,
 ["week"] = 1,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 1",
-["objects"] = {
-{
-["d"] = {
-111.1339424123779,
--193.660367053692,
-1,
-true,
-"Lust",
-},
-["n"] = true,
-},
-{
-["d"] = {
-11,
-1,
-1,
-true,
-"75fbff",
--8,
-},
-["l"] = {
-"207.5",
-"-125.6",
-"189.5",
-"-137.1",
-},
-["t"] = {
-0.5649047421469049,
-},
-},
-{
-["d"] = {
-429.0670213170383,
--168.8078985806471,
-1,
-true,
-"Inside",
-},
-["n"] = true,
-},
-{
-["d"] = {
-441.243440538336,
--169.9294231812984,
-1,
-true,
-"Focus Pynomancer on boss and after chain pull 6",
-},
-["n"] = true,
-},
-{
-["d"] = {
-685.7912390687308,
--114.7967629220307,
-1,
-true,
-"Lust",
-},
-["n"] = true,
-},
-},
 ["value"] = {
 ["currentPull"] = 3,
 ["currentSublevel"] = 1,
@@ -39524,18 +39455,8 @@ true,
 },
 [6] = {
 },
-[10] = {
-},
-[8] = {
-},
 [25] = {
 12,
-},
-["color"] = "3effff",
-[4] = {
-2,
-},
-[9] = {
 },
 [15] = {
 43,
@@ -39550,6 +39471,16 @@ true,
 39,
 37,
 45,
+},
+[10] = {
+},
+["color"] = "3effff",
+[4] = {
+2,
+},
+[9] = {
+},
+[8] = {
 },
 },
 {
@@ -39783,12 +39714,144 @@ true,
 },
 },
 },
+["text"] = "Route 1",
+["objects"] = {
+{
+["d"] = {
+111.1339424123779,
+-193.660367053692,
+1,
+true,
+"Lust",
+},
+["n"] = true,
+},
+{
+["d"] = {
+11,
+1,
+1,
+true,
+"75fbff",
+-8,
+},
+["l"] = {
+"207.5",
+"-125.6",
+"189.5",
+"-137.1",
+},
+["t"] = {
+0.5649047421469049,
+},
+},
+{
+["d"] = {
+429.0670213170383,
+-168.8078985806471,
+1,
+true,
+"Inside",
+},
+["n"] = true,
+},
+{
+["d"] = {
+441.243440538336,
+-169.9294231812984,
+1,
+true,
+"Focus Pynomancer on boss and after chain pull 6",
+},
+["n"] = true,
+},
+{
+["d"] = {
+685.7912390687308,
+-114.7967629220307,
+1,
+true,
+"Lust",
+},
+["n"] = true,
+},
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 },
 {
 ["difficulty"] = 23,
 ["week"] = 1,
 ["addonVersion"] = 6010,
 ["uid"] = "hSJcaZsgEB4",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 1 2",
+["objects"] = {
+{
+["d"] = {
+111.1339424123779,
+-193.660367053692,
+1,
+true,
+"Lust",
+},
+["n"] = true,
+},
+{
+["d"] = {
+11,
+1,
+1,
+true,
+"75fbff",
+-8,
+},
+["l"] = {
+"207.5",
+"-125.6",
+"189.5",
+"-137.1",
+},
+["t"] = {
+0.5649047421469049,
+},
+},
+{
+["d"] = {
+429.0670213170383,
+-168.8078985806471,
+1,
+true,
+"Inside",
+},
+["n"] = true,
+},
+{
+["d"] = {
+441.243440538336,
+-169.9294231812984,
+1,
+true,
+"Focus Pynomancer on boss and after chain pull 6",
+},
+["n"] = true,
+},
+{
+["d"] = {
+685.7912390687308,
+-114.7967629220307,
+1,
+true,
+"Lust",
+},
+["n"] = true,
+},
+},
 ["value"] = {
 ["currentPull"] = 4,
 ["currentSublevel"] = 1,
@@ -39962,18 +40025,7 @@ true,
 },
 [6] = {
 },
-[25] = {
-12,
-},
-[8] = {
-},
 [10] = {
-},
-["color"] = "3effff",
-[4] = {
-2,
-},
-[9] = {
 },
 [15] = {
 43,
@@ -39988,6 +40040,17 @@ true,
 39,
 37,
 45,
+},
+[25] = {
+12,
+},
+["color"] = "3effff",
+[4] = {
+2,
+},
+[9] = {
+},
+[8] = {
 },
 },
 {
@@ -40221,84 +40284,11 @@ true,
 },
 },
 },
-["text"] = "Route 1 2",
-["objects"] = {
-{
-["d"] = {
-111.1339424123779,
--193.660367053692,
-1,
-true,
-"Lust",
-},
-["n"] = true,
-},
-{
-["d"] = {
-11,
-1,
-1,
-true,
-"75fbff",
--8,
-},
-["l"] = {
-"207.5",
-"-125.6",
-"189.5",
-"-137.1",
-},
-["t"] = {
-0.5649047421469049,
-},
-},
-{
-["d"] = {
-429.0670213170383,
--168.8078985806471,
-1,
-true,
-"Inside",
-},
-["n"] = true,
-},
-{
-["d"] = {
-441.243440538336,
--169.9294231812984,
-1,
-true,
-"Focus Pynomancer on boss and after chain pull 6",
-},
-["n"] = true,
-},
-{
-["d"] = {
-685.7912390687308,
--114.7967629220307,
-1,
-true,
-"Lust",
-},
-["n"] = true,
-},
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 },
 {
 ["difficulty"] = 2,
 ["week"] = 1,
 ["uid"] = "9ji564aO5cN",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 3",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 7,
 ["currentSublevel"] = 1,
@@ -40425,7 +40415,7 @@ true,
 },
 [6] = {
 },
-[10] = {
+[18] = {
 },
 [15] = {
 42,
@@ -40441,14 +40431,14 @@ true,
 37,
 45,
 },
-[18] = {
+[25] = {
 },
 ["color"] = "ff3e9e",
 [8] = {
 },
 [9] = {
 },
-[25] = {
+[10] = {
 },
 },
 {
@@ -40657,9 +40647,6 @@ true,
 ["color"] = "fffb3e",
 [15] = {
 },
-[9] = {
-4,
-},
 [5] = {
 58,
 54,
@@ -40672,21 +40659,24 @@ true,
 52,
 53,
 },
+[9] = {
+4,
 },
 },
+},
+},
+["text"] = "Route 3",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 },
 {
 ["difficulty"] = 2,
 ["week"] = 1,
 ["uid"] = "QTt61MVXHa9",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Route 3 2",
-["objects"] = {
-},
 ["value"] = {
 ["currentPull"] = 12,
 ["currentSublevel"] = 1,
@@ -41047,9 +41037,6 @@ true,
 ["color"] = "fffb3e",
 [15] = {
 },
-[9] = {
-4,
-},
 [5] = {
 58,
 54,
@@ -41062,13 +41049,27 @@ true,
 52,
 53,
 },
+[9] = {
+4,
 },
 },
+},
+},
+["text"] = "Route 3 2",
+["objects"] = {
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 },
 {
 ["difficulty"] = 23,
 ["uid"] = "wtA(PMMYFtU",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 4,
 ["currentSublevel"] = 1,
@@ -41133,18 +41134,18 @@ true,
 {
 {
 },
-[25] = {
+[18] = {
 },
 [15] = {
 },
-[18] = {
+[3] = {
 },
 ["color"] = "3e9eff",
 [19] = {
 },
 [5] = {
 },
-[3] = {
+[25] = {
 },
 },
 {
@@ -41212,6 +41213,9 @@ true,
 14,
 15,
 },
+[4] = {
+1,
+},
 [15] = {
 41,
 38,
@@ -41225,9 +41229,6 @@ true,
 43,
 37,
 45,
-},
-[4] = {
-1,
 },
 ["color"] = "3effff",
 },
@@ -41439,10 +41440,6 @@ true,
 },
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["text"] = "Route 3 3",
 ["objects"] = {
 },
@@ -41453,6 +41450,72 @@ true,
 ["week"] = 1,
 ["addonVersion"] = 6011,
 ["uid"] = "YFKgnxjfHKL",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "KiraTank Push",
+["objects"] = {
+{
+["d"] = {
+11,
+1,
+1,
+true,
+"75fbff",
+-8,
+},
+["l"] = {
+"207.5",
+"-125.6",
+"189.5",
+"-137.1",
+},
+["t"] = {
+0.5649047421469049,
+},
+},
+{
+["d"] = {
+185.1828741898312,
+-141.8464580069269,
+1,
+true,
+"Pull back and kill here",
+},
+["n"] = true,
+},
+{
+["d"] = {
+429.0670213170383,
+-168.8078985806471,
+1,
+true,
+"Inside",
+},
+["n"] = true,
+},
+{
+["d"] = {
+441.243440538336,
+-169.9294231812984,
+1,
+true,
+"Focus Pynomancer on boss and after chain pull 6",
+},
+["n"] = true,
+},
+{
+["d"] = {
+685.7912390687308,
+-114.7967629220307,
+1,
+true,
+"Lust",
+},
+["n"] = true,
+},
+},
 ["value"] = {
 ["currentPull"] = 13,
 ["currentSublevel"] = 1,
@@ -41599,18 +41662,8 @@ true,
 },
 [6] = {
 },
-[10] = {
-},
-[8] = {
-},
 [25] = {
 12,
-},
-["color"] = "3effff",
-[4] = {
-2,
-},
-[9] = {
 },
 [15] = {
 43,
@@ -41625,6 +41678,16 @@ true,
 39,
 37,
 45,
+},
+[10] = {
+},
+["color"] = "3effff",
+[4] = {
+2,
+},
+[9] = {
+},
+[8] = {
 },
 },
 {
@@ -41728,6 +41791,8 @@ true,
 6,
 },
 ["color"] = "3eff9e",
+[9] = {
+},
 [5] = {
 27,
 20,
@@ -41739,8 +41804,6 @@ true,
 26,
 19,
 23,
-},
-[9] = {
 },
 [8] = {
 },
@@ -41869,77 +41932,18 @@ true,
 },
 },
 },
-["text"] = "KiraTank Push",
-["objects"] = {
-{
-["d"] = {
-11,
-1,
-1,
-true,
-"75fbff",
--8,
-},
-["l"] = {
-"207.5",
-"-125.6",
-"189.5",
-"-137.1",
-},
-["t"] = {
-0.5649047421469049,
-},
-},
-{
-["d"] = {
-185.1828741898312,
--141.8464580069269,
-1,
-true,
-"Pull back and kill here",
-},
-["n"] = true,
-},
-{
-["d"] = {
-429.0670213170383,
--168.8078985806471,
-1,
-true,
-"Inside",
-},
-["n"] = true,
-},
-{
-["d"] = {
-441.243440538336,
--169.9294231812984,
-1,
-true,
-"Focus Pynomancer on boss and after chain pull 6",
-},
-["n"] = true,
-},
-{
-["d"] = {
-685.7912390687308,
--114.7967629220307,
-1,
-true,
-"Lust",
-},
-["n"] = true,
-},
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 },
 {
 ["difficulty"] = 23,
 ["uid"] = "hOr5svabFcI",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 3 4",
+["objects"] = {
+},
 ["value"] = {
 ["currentPull"] = 6,
 ["currentSublevel"] = 1,
@@ -42076,6 +42080,9 @@ true,
 15,
 },
 ["color"] = "3effff",
+[4] = {
+1,
+},
 [15] = {
 41,
 38,
@@ -42089,9 +42096,6 @@ true,
 43,
 37,
 45,
-},
-[4] = {
-1,
 },
 },
 {
@@ -42308,21 +42312,10 @@ true,
 },
 },
 },
-["text"] = "Route 3 4",
-["objects"] = {
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 },
 {
 ["difficulty"] = 23,
 ["uid"] = "r07H(1oX7aY",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 16,
 ["currentSublevel"] = 1,
@@ -42460,9 +42453,6 @@ true,
 14,
 15,
 },
-[4] = {
-1,
-},
 [15] = {
 41,
 38,
@@ -42476,6 +42466,9 @@ true,
 43,
 37,
 45,
+},
+[4] = {
+1,
 },
 ["color"] = "3effff",
 },
@@ -42693,6 +42686,10 @@ true,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "Route 3 5",
 ["objects"] = {
 },
@@ -42703,6 +42700,10 @@ true,
 },
 ["week"] = 1,
 ["uid"] = "VO9z9wWAs2S",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 7,
 ["currentSublevel"] = 1,
@@ -42846,10 +42847,10 @@ true,
 15,
 },
 ["color"] = "3effff",
+[15] = {
+},
 [4] = {
 1,
-},
-[15] = {
 },
 },
 {
@@ -43020,12 +43021,12 @@ true,
 [13] = {
 1,
 },
-["color"] = "3e9eff",
-[10] = {
-},
 [22] = {
 1,
 },
+[10] = {
+},
+["color"] = "3e9eff",
 [20] = {
 1,
 },
@@ -43101,10 +43102,6 @@ true,
 },
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["text"] = "Route 3",
 ["difficulty"] = 23,
 ["createdBy"] = {
@@ -43118,6 +43115,12 @@ true,
 },
 ["uid"] = "qZIpiTyRA5p",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Default 2",
+["difficulty"] = 10,
 ["value"] = {
 ["currentPull"] = 7,
 ["currentSublevel"] = 1,
@@ -43495,12 +43498,6 @@ true,
 },
 },
 },
-},
-["text"] = "Default 2",
-["difficulty"] = 10,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 },
 {
@@ -44577,20 +44574,20 @@ nil,
 },
 [6] = {
 },
-[4] = {
-2,
+[19] = {
 },
 [9] = {
 },
-[25] = {
-12,
+[10] = {
 },
 ["color"] = "ff3e9e",
-[19] = {
+[4] = {
+2,
 },
 [5] = {
 },
-[10] = {
+[25] = {
+12,
 },
 },
 {
@@ -44634,6 +44631,16 @@ nil,
 [10] = {
 },
 ["color"] = "3e3eff",
+[23] = {
+6,
+2,
+3,
+1,
+4,
+5,
+},
+[9] = {
+},
 [5] = {
 5,
 2,
@@ -44647,16 +44654,6 @@ nil,
 12,
 9,
 11,
-},
-[23] = {
-6,
-2,
-3,
-1,
-4,
-5,
-},
-[9] = {
 },
 },
 {
@@ -44831,10 +44828,6 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "cpcXQIJBEa3",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 3,
 ["currentSublevel"] = 1,
@@ -44991,7 +44984,7 @@ nil,
 },
 [6] = {
 },
-[18] = {
+[10] = {
 },
 [15] = {
 29,
@@ -45007,15 +45000,15 @@ nil,
 35,
 31,
 },
-[10] = {
+[25] = {
+12,
 },
 ["color"] = "ff3e9e",
 [19] = {
 },
 [9] = {
 },
-[25] = {
-12,
+[18] = {
 },
 },
 {
@@ -45198,11 +45191,14 @@ nil,
 21,
 22,
 },
-[18] = {
+[25] = {
 },
 [8] = {
 },
-[25] = {
+[10] = {
+16,
+15,
+17,
 },
 ["color"] = "ff3e3e",
 [5] = {
@@ -45220,13 +45216,14 @@ nil,
 [9] = {
 4,
 },
-[10] = {
-16,
-15,
-17,
+[18] = {
 },
 },
 },
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "15",
 ["difficulty"] = 21,
@@ -45366,9 +45363,7 @@ nil,
 {
 10,
 },
-[18] = {
-14,
-15,
+[25] = {
 },
 [7] = {
 },
@@ -45398,7 +45393,7 @@ nil,
 35,
 31,
 },
-[25] = {
+[10] = {
 },
 ["color"] = "3eff3e",
 [4] = {
@@ -45407,7 +45402,9 @@ nil,
 [19] = {
 10,
 },
-[10] = {
+[18] = {
+14,
+15,
 },
 },
 {
@@ -45601,7 +45598,7 @@ nil,
 21,
 22,
 },
-[25] = {
+[18] = {
 },
 [5] = {
 57,
@@ -45615,7 +45612,10 @@ nil,
 53,
 54,
 },
-[18] = {
+[10] = {
+15,
+16,
+17,
 },
 ["color"] = "ff3e3e",
 [19] = {
@@ -45623,10 +45623,7 @@ nil,
 [9] = {
 4,
 },
-[10] = {
-15,
-16,
-17,
+[25] = {
 },
 },
 {
@@ -45692,6 +45689,11 @@ true,
 ["week"] = 1,
 ["uid"] = "uyVcdoj0bnz",
 ["difficulty"] = 2,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "yo",
 ["value"] = {
 ["currentPull"] = 11,
 ["currentSublevel"] = 1,
@@ -45797,8 +45799,22 @@ true,
 10,
 9,
 },
+[19] = {
+9,
+},
+[8] = {
+},
+[18] = {
+14,
+15,
+12,
+13,
+},
+["color"] = "3eff3e",
 [4] = {
 1,
+},
+[23] = {
 },
 [15] = {
 42,
@@ -45825,20 +45841,6 @@ true,
 36,
 35,
 31,
-},
-[18] = {
-14,
-15,
-12,
-13,
-},
-["color"] = "3eff3e",
-[19] = {
-9,
-},
-[23] = {
-},
-[8] = {
 },
 },
 {
@@ -46026,6 +46028,9 @@ nil,
 [18] = {
 },
 ["color"] = "ff3e3e",
+[9] = {
+3,
+},
 [5] = {
 61,
 38,
@@ -46044,9 +46049,6 @@ nil,
 46,
 43,
 45,
-},
-[9] = {
-3,
 },
 [10] = {
 10,
@@ -46092,11 +46094,6 @@ nil,
 },
 },
 },
-},
-["text"] = "yo",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["createdBy"] = {
 ["classIdx"] = 11,
@@ -46539,6 +46536,10 @@ nil,
 ["difficulty"] = 10,
 ["week"] = 1,
 ["uid"] = "vXxf08CJNLw",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 7,
 ["currentSublevel"] = 1,
@@ -46873,10 +46874,6 @@ nil,
 },
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["text"] = "andy",
 ["objects"] = {
 },
@@ -46915,6 +46912,10 @@ nil,
 ["difficulty"] = 20,
 ["uid"] = "8jRZL9wuEJF",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["pulls"] = {
 {
@@ -47049,14 +47050,14 @@ nil,
 8,
 },
 ["color"] = "3eff3e",
+[7] = {
+18,
+15,
+},
 [9] = {
 15,
 18,
 16,
-},
-[7] = {
-18,
-15,
 },
 [11] = {
 5,
@@ -47208,13 +47209,13 @@ nil,
 34,
 33,
 },
-[26] = {
-13,
-14,
-},
 [15] = {
 21,
 20,
+},
+[26] = {
+13,
+14,
 },
 },
 {
@@ -47257,10 +47258,6 @@ nil,
 },
 ["riftOffsets"] = {
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Maisara Caverns",
 ["objects"] = {
@@ -47275,6 +47272,10 @@ nil,
 ["difficulty"] = 20,
 ["uid"] = "lMA3zAMuE0F",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["pulls"] = {
 {
@@ -47409,14 +47410,14 @@ nil,
 8,
 },
 ["color"] = "3eff3e",
+[7] = {
+18,
+15,
+},
 [9] = {
 15,
 18,
 16,
-},
-[7] = {
-18,
-15,
 },
 [11] = {
 5,
@@ -47568,13 +47569,13 @@ nil,
 34,
 33,
 },
-[26] = {
-13,
-14,
-},
 [15] = {
 21,
 20,
+},
+[26] = {
+13,
+14,
 },
 },
 {
@@ -47617,10 +47618,6 @@ nil,
 },
 ["riftOffsets"] = {
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Maisara Caverns 2",
 ["objects"] = {
@@ -48017,31 +48014,31 @@ nil,
 [21] = {
 1,
 },
-[4] = {
-18,
-},
-[12] = {
-},
 [14] = {
 23,
 24,
 25,
 26,
 },
+["color"] = "3eff9e",
+[4] = {
+18,
+},
 [23] = {
 1,
 },
-["color"] = "3eff9e",
+[12] = {
+},
 },
 {
 ["color"] = "ff3e3e",
-[15] = {
-18,
-19,
-},
 [26] = {
 7,
 8,
+},
+[15] = {
+18,
+19,
 },
 [14] = {
 30,
@@ -48488,31 +48485,31 @@ nil,
 [21] = {
 1,
 },
-[4] = {
-18,
-},
-[12] = {
-},
 [14] = {
 23,
 24,
 25,
 26,
 },
+["color"] = "3eff9e",
+[4] = {
+18,
+},
 [23] = {
 1,
 },
-["color"] = "3eff9e",
+[12] = {
+},
 },
 {
 ["color"] = "ff3e3e",
-[15] = {
-18,
-19,
-},
 [26] = {
 7,
 8,
+},
+[15] = {
+18,
+19,
 },
 [14] = {
 30,
@@ -49731,8 +49728,8 @@ nil,
 [7] = 1,
 [22] = 5,
 [13] = 1,
-[23] = 1,
 [5] = 1,
+[23] = 1,
 },
 [18] = {
 8,
@@ -51373,8 +51370,8 @@ nil,
 [7] = 1,
 [22] = 5,
 [13] = 1,
-[23] = 1,
 [5] = 1,
+[23] = 1,
 },
 [18] = {
 8,
@@ -53020,8 +53017,8 @@ nil,
 [7] = 1,
 [22] = 5,
 [13] = 1,
-[23] = 1,
 [5] = 1,
+[23] = 1,
 },
 [18] = {
 8,
@@ -53512,6 +53509,10 @@ nil,
 {
 ["difficulty"] = 10,
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 14,
 ["currentSublevel"] = 1,
@@ -53699,10 +53700,10 @@ nil,
 [28] = {
 1,
 },
-["color"] = "3effff",
 [12] = {
 1,
 },
+["color"] = "3effff",
 [14] = {
 2,
 1,
@@ -53736,11 +53737,11 @@ nil,
 6,
 },
 ["color"] = "ff9b3e",
-[14] = {
+[26] = {
 },
 [8] = {
 },
-[26] = {
+[14] = {
 },
 },
 {
@@ -53923,10 +53924,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Default 2",
 ["objects"] = {
@@ -54160,10 +54157,10 @@ nil,
 [28] = {
 1,
 },
+["color"] = "ff9b3e",
 [12] = {
 1,
 },
-["color"] = "ff9b3e",
 [14] = {
 1,
 2,
@@ -54265,20 +54262,20 @@ nil,
 17,
 16,
 },
-[14] = {
-},
-[18] = {
-},
-["color"] = "3eff9e",
 [26] = {
 3,
 1,
 2,
 },
+[10] = {
+},
+["color"] = "3eff9e",
+[14] = {
+},
 [17] = {
 3,
 },
-[10] = {
+[18] = {
 },
 },
 {
@@ -54340,12 +54337,12 @@ nil,
 37,
 39,
 },
+[17] = {
+6,
+},
 [15] = {
 25,
 24,
-},
-[17] = {
-6,
 },
 ["color"] = "3eff3e",
 },
@@ -54693,11 +54690,6 @@ true,
 },
 },
 ["difficulty"] = 2,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Eleiko Midnight S1",
 ["value"] = {
 ["riftOffsets"] = {
 },
@@ -55047,16 +55039,16 @@ nil,
 },
 [15] = {
 },
-[26] = {
-3,
-2,
-},
-["color"] = "a1ff3e",
 [14] = {
 18,
 16,
 17,
 15,
+},
+["color"] = "a1ff3e",
+[26] = {
+3,
+2,
 },
 [12] = {
 3,
@@ -55109,19 +55101,19 @@ nil,
 [15] = {
 13,
 },
-[21] = {
+[11] = {
+16,
 },
 [23] = {
 },
 [12] = {
 5,
 },
-[11] = {
-16,
+[21] = {
 },
 },
 {
-[4] = {
+[26] = {
 },
 [13] = {
 36,
@@ -55133,12 +55125,12 @@ nil,
 [18] = {
 },
 ["color"] = "ff3e3e",
-[26] = {
+[14] = {
 },
 [23] = {
 1,
 },
-[14] = {
+[4] = {
 },
 },
 {
@@ -55194,6 +55186,11 @@ nil,
 },
 },
 },
+["text"] = "Eleiko Midnight S1",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["uid"] = "lbhCg2VoAMF",
 },
 {
@@ -55206,11 +55203,6 @@ nil,
 },
 ["objects"] = {
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Maisara Caverns 2 2",
 ["value"] = {
 ["riftOffsets"] = {
 },
@@ -55548,6 +55540,11 @@ nil,
 },
 },
 },
+["text"] = "Maisara Caverns 2 2",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["week"] = 2,
 },
 {
@@ -55728,9 +55725,9 @@ nil,
 [11] = {
 },
 ["color"] = "3eff3e",
-[7] = {
-},
 [9] = {
+},
+[7] = {
 },
 },
 {
@@ -55840,6 +55837,11 @@ nil,
 3,
 },
 ["color"] = "a1ff3e",
+[26] = {
+},
+[12] = {
+3,
+},
 [14] = {
 21,
 17,
@@ -55847,11 +55849,6 @@ nil,
 18,
 22,
 15,
-},
-[12] = {
-3,
-},
-[26] = {
 },
 },
 {
@@ -55915,9 +55912,9 @@ nil,
 [14] = {
 },
 ["color"] = "ff3e3e",
-[15] = {
-},
 [17] = {
+},
+[15] = {
 },
 },
 {
@@ -55952,6 +55949,11 @@ nil,
 ["week"] = 1,
 ["uid"] = "le870Vasofv",
 ["difficulty"] = 2,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "1 jug route",
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -56131,10 +56133,10 @@ nil,
 [28] = {
 1,
 },
-["color"] = "ff3e9e",
 [12] = {
 1,
 },
+["color"] = "ff3e9e",
 [14] = {
 2,
 1,
@@ -56267,11 +56269,11 @@ nil,
 34,
 35,
 },
-[26] = {
-},
 [15] = {
 20,
 21,
+},
+[26] = {
 },
 },
 {
@@ -56282,12 +56284,12 @@ nil,
 40,
 37,
 },
-[17] = {
-6,
-},
 [15] = {
 24,
 25,
+},
+[17] = {
+6,
 },
 },
 {
@@ -56306,11 +56308,6 @@ nil,
 },
 },
 },
-},
-["text"] = "1 jug route",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["createdBy"] = {
 ["classIdx"] = 11,
@@ -56533,12 +56530,12 @@ nil,
 [15] = {
 3,
 },
-[26] = {
-},
-["color"] = "ff3e9e",
 [14] = {
 1,
 2,
+},
+["color"] = "ff3e9e",
+[26] = {
 },
 [16] = {
 1,
@@ -56592,23 +56589,23 @@ nil,
 17,
 18,
 },
-[12] = {
-3,
-},
 ["color"] = "ff9b3e",
-[14] = {
-15,
-18,
-17,
-16,
-},
-[17] = {
+[12] = {
 3,
 },
 [26] = {
 4,
 6,
 5,
+},
+[17] = {
+3,
+},
+[14] = {
+15,
+18,
+17,
+16,
 },
 },
 {
@@ -56720,6 +56717,11 @@ nil,
 ["week"] = 1,
 ["uid"] = "kYlCXYIYHRw",
 ["difficulty"] = 20,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 7",
 ["value"] = {
 ["currentPull"] = 10,
 ["currentSublevel"] = 1,
@@ -56959,17 +56961,9 @@ nil,
 [17] = {
 3,
 },
+["color"] = "3e3eff",
 [12] = {
 3,
-},
-["color"] = "3e3eff",
-[26] = {
-4,
-},
-[13] = {
-16,
-17,
-18,
 },
 [14] = {
 18,
@@ -56977,10 +56971,21 @@ nil,
 17,
 15,
 },
+[13] = {
+16,
+17,
+18,
+},
+[26] = {
+4,
+},
 },
 {
-[4] = {
-18,
+[14] = {
+24,
+25,
+26,
+23,
 },
 [17] = {
 },
@@ -56992,14 +56997,9 @@ nil,
 },
 [18] = {
 },
-[12] = {
-4,
-},
-[14] = {
-24,
-25,
-26,
-23,
+["color"] = "a1ff3e",
+[4] = {
+18,
 },
 [13] = {
 20,
@@ -57016,7 +57016,9 @@ nil,
 30,
 31,
 },
-["color"] = "a1ff3e",
+[12] = {
+4,
+},
 },
 {
 [21] = {
@@ -57035,16 +57037,16 @@ nil,
 22,
 23,
 },
+[26] = {
+9,
+10,
+},
+["color"] = "3eff9e",
 [14] = {
 41,
 42,
 44,
 43,
-},
-["color"] = "3eff9e",
-[26] = {
-9,
-10,
 },
 [7] = {
 },
@@ -57059,11 +57061,6 @@ nil,
 },
 },
 },
-["text"] = "Route 7",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["createdBy"] = {
 ["classIdx"] = 11,
 ["name"] = "Diverdown",
@@ -57074,10 +57071,6 @@ nil,
 ["difficulty"] = 21,
 ["week"] = 1,
 ["uid"] = "zp(jxAwajGJ",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 6,
 ["currentSublevel"] = 1,
@@ -57123,9 +57116,9 @@ nil,
 },
 [11] = {
 },
-[17] = {
-},
 [26] = {
+},
+[17] = {
 },
 ["color"] = "ff3eff",
 },
@@ -57382,14 +57375,14 @@ nil,
 },
 },
 {
+[17] = {
+},
 [13] = {
 21,
 20,
 19,
 23,
 22,
-},
-[17] = {
 },
 [15] = {
 9,
@@ -57400,12 +57393,12 @@ nil,
 [18] = {
 },
 ["color"] = "3e3eff",
-[14] = {
+[26] = {
 },
 [12] = {
 4,
 },
-[26] = {
+[14] = {
 },
 },
 {
@@ -57469,6 +57462,10 @@ nil,
 },
 },
 },
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "4 bats 6 shades",
 ["objects"] = {
@@ -57829,16 +57826,16 @@ false,
 {
 1,
 },
+[15] = {
+},
+[17] = {
+},
 [8] = {
 2,
 3,
 1,
 19,
 20,
-},
-[13] = {
-},
-[15] = {
 },
 [12] = {
 },
@@ -57849,7 +57846,7 @@ false,
 1,
 2,
 },
-[17] = {
+[13] = {
 },
 },
 {
@@ -58122,12 +58119,12 @@ nil,
 },
 },
 {
+[17] = {
+},
 [13] = {
 20,
 21,
 19,
-},
-[17] = {
 },
 [15] = {
 9,
@@ -58137,15 +58134,15 @@ nil,
 },
 [18] = {
 },
-["color"] = "3e3eff",
+[12] = {
+4,
+},
 [26] = {
 1,
 },
 [14] = {
 },
-[12] = {
-4,
-},
+["color"] = "3e3eff",
 },
 {
 [13] = {
@@ -58511,17 +58508,17 @@ nil,
 [17] = {
 3,
 },
+[26] = {
+5,
+4,
+6,
+},
+["color"] = "3effff",
 [14] = {
 17,
 16,
 15,
 18,
-},
-["color"] = "3effff",
-[26] = {
-5,
-4,
-6,
 },
 [12] = {
 3,
@@ -58533,8 +58530,7 @@ nil,
 },
 },
 {
-[12] = {
-},
+["color"] = "ff9b3e",
 [17] = {
 4,
 },
@@ -58543,9 +58539,11 @@ nil,
 [18] = {
 3,
 },
-["color"] = "ff9b3e",
-[26] = {
-1,
+[12] = {
+},
+[14] = {
+21,
+22,
 },
 [13] = {
 20,
@@ -58554,9 +58552,8 @@ nil,
 23,
 22,
 },
-[14] = {
-21,
-22,
+[26] = {
+1,
 },
 },
 {
@@ -58569,20 +58566,20 @@ nil,
 [21] = {
 1,
 },
+[4] = {
+18,
+},
+["color"] = "3e3eff",
+[26] = {
+},
+[23] = {
+1,
+},
 [14] = {
 24,
 25,
 26,
 23,
-},
-["color"] = "3e3eff",
-[4] = {
-18,
-},
-[23] = {
-1,
-},
-[26] = {
 },
 },
 {
@@ -58597,18 +58594,18 @@ nil,
 [13] = {
 },
 ["color"] = "a1ff3e",
-[26] = {
-13,
-14,
-},
-[7] = {
-},
 [14] = {
 36,
 32,
 33,
 34,
 35,
+},
+[7] = {
+},
+[26] = {
+13,
+14,
 },
 },
 {
@@ -58651,6 +58648,10 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "IBkau99ESbq",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 12,
 ["currentSublevel"] = 1,
@@ -58884,19 +58885,19 @@ nil,
 18,
 },
 ["color"] = "3effff",
+[26] = {
+4,
+6,
+5,
+},
+[12] = {
+3,
+},
 [14] = {
 18,
 16,
 17,
 15,
-},
-[12] = {
-3,
-},
-[26] = {
-4,
-6,
-5,
 },
 },
 {
@@ -58983,10 +58984,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "new 2",
 ["difficulty"] = 24,
@@ -59302,15 +59299,15 @@ nil,
 [21] = {
 1,
 },
+[4] = {
+18,
+},
+["color"] = "3e3eff",
 [14] = {
 26,
 24,
 25,
 23,
-},
-["color"] = "3e3eff",
-[4] = {
-18,
 },
 [23] = {
 1,
@@ -59665,11 +59662,12 @@ nil,
 },
 },
 {
-[7] = {
-},
 [13] = {
 },
-[8] = {
+[7] = {
+},
+[21] = {
+1,
 },
 [14] = {
 23,
@@ -59683,8 +59681,7 @@ nil,
 [23] = {
 1,
 },
-[21] = {
-1,
+[8] = {
 },
 },
 {
@@ -59745,10 +59742,6 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "8Q36TskEZ8s",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 13,
 ["currentSublevel"] = 1,
@@ -60154,6 +60147,10 @@ nil,
 },
 },
 },
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "mc rout",
 ["difficulty"] = 2,
@@ -60577,11 +60574,6 @@ nil,
 ["freeholdJoined"] = false,
 ["beguiling"] = 1,
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "Nexus-Point Xenas 2 3",
 ["value"] = {
 ["riftOffsets"] = {
 },
@@ -60898,6 +60890,11 @@ nil,
 },
 },
 },
+},
+["text"] = "Nexus-Point Xenas 2 3",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["week"] = 1,
 },
@@ -60911,6 +60908,11 @@ nil,
 ["freeholdJoined"] = false,
 ["beguiling"] = 1,
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Nexus-Point Xenas 2 3 2",
 ["value"] = {
 ["riftOffsets"] = {
 },
@@ -61228,21 +61230,12 @@ nil,
 },
 },
 },
-["text"] = "Nexus-Point Xenas 2 3 2",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["week"] = 1,
 },
 {
 ["difficulty"] = 2,
 ["week"] = 1,
 ["addonVersion"] = 6011,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -61575,6 +61568,10 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["text"] = "Phil High Key no Engi",
 ["objects"] = {
 },
@@ -61583,6 +61580,10 @@ nil,
 {
 ["difficulty"] = 20,
 ["uid"] = "018AA6k92Yv",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 10,
 ["currentSublevel"] = 1,
@@ -61926,10 +61927,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Pug Push",
 ["objects"] = {
@@ -62277,10 +62274,6 @@ nil,
 ["week"] = 1,
 ["objects"] = {
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["pulls"] = {
 {
@@ -62620,18 +62613,18 @@ nil,
 [15] = {
 5,
 },
-[14] = {
-9,
-10,
-},
-["color"] = "3eff3e",
 [19] = {
 1,
+},
+["color"] = "3eff3e",
+[34] = {
 },
 [16] = {
 3,
 },
-[34] = {
+[14] = {
+9,
+10,
 },
 },
 },
@@ -62646,6 +62639,10 @@ nil,
 },
 ["riftOffsets"] = {
 },
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "Gwoz Nexus v4",
 ["mdi"] = {
@@ -63343,6 +63340,10 @@ nil,
 },
 ["uid"] = "IAKPiky3nxs",
 ["week"] = 1,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 8,
 ["currentSublevel"] = 1,
@@ -63550,8 +63551,7 @@ nil,
 },
 },
 {
-[12] = {
-3,
+[29] = {
 },
 [2] = {
 16,
@@ -63564,8 +63564,7 @@ nil,
 [10] = {
 4,
 },
-[29] = {
-},
+["color"] = "ff9b3e",
 [4] = {
 16,
 17,
@@ -63573,7 +63572,9 @@ nil,
 },
 [18] = {
 },
-["color"] = "ff9b3e",
+[12] = {
+3,
+},
 },
 {
 {
@@ -63657,10 +63658,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Left side run",
 ["difficulty"] = 30,
@@ -64879,9 +64876,9 @@ nil,
 },
 [14] = {
 },
-[12] = {
-},
 [15] = {
+},
+[12] = {
 },
 ["color"] = "3eff9e",
 },
@@ -65112,22 +65109,22 @@ nil,
 1,
 2,
 },
-[4] = {
-},
-["color"] = "3e3eff",
 [14] = {
 4,
 3,
 1,
 2,
 },
+[12] = {
+},
+[4] = {
+},
 [16] = {
 4,
 2,
 1,
 },
-[12] = {
-},
+["color"] = "3e3eff",
 },
 {
 [6] = {
@@ -65448,15 +65445,15 @@ nil,
 1,
 },
 ["color"] = "a1ff3e",
-[29] = {
-1,
-2,
-3,
-},
 [4] = {
 14,
 10,
 11,
+},
+[29] = {
+1,
+2,
+3,
 },
 },
 {
@@ -65523,13 +65520,10 @@ nil,
 },
 },
 {
-[14] = {
-13,
-14,
-12,
-11,
+[19] = {
 },
-[24] = {
+[13] = {
+6,
 },
 [15] = {
 6,
@@ -65537,13 +65531,16 @@ nil,
 [32] = {
 },
 ["color"] = "3e9eff",
-[19] = {
+[14] = {
+13,
+14,
+12,
+11,
 },
 [16] = {
 5,
 },
-[13] = {
-6,
+[24] = {
 },
 },
 },
@@ -65607,11 +65604,6 @@ true,
 },
 },
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 3,
-},
-["text"] = "High keys",
 ["value"] = {
 ["currentPull"] = 13,
 ["currentSublevel"] = 1,
@@ -65901,15 +65893,9 @@ nil,
 },
 },
 {
-[14] = {
-15,
-16,
-9,
-10,
+[19] = {
 },
-[24] = {
-1,
-2,
+[13] = {
 },
 [15] = {
 5,
@@ -65919,12 +65905,18 @@ nil,
 2,
 },
 ["color"] = "007fff",
-[19] = {
+[14] = {
+15,
+16,
+9,
+10,
 },
 [16] = {
 3,
 },
-[13] = {
+[24] = {
+1,
+2,
 },
 },
 {
@@ -65945,6 +65937,11 @@ nil,
 },
 },
 },
+["text"] = "High keys",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 3,
+},
 ["createdBy"] = {
 ["classIdx"] = 11,
 ["name"] = "Bús",
@@ -65955,6 +65952,10 @@ nil,
 ["difficulty"] = 10,
 ["week"] = 1,
 ["uid"] = "HRyaRDCPXo9",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -65990,10 +65991,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "instabrick",
 ["objects"] = {
@@ -66687,6 +66684,10 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "0Oaw35jXnom",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 8,
 ["currentSublevel"] = 1,
@@ -67010,11 +67011,10 @@ nil,
 },
 },
 {
-[14] = {
-},
-[24] = {
+[19] = {
 1,
-2,
+},
+[13] = {
 },
 [15] = {
 },
@@ -67023,19 +67023,16 @@ nil,
 2,
 },
 ["color"] = "ff3e3e",
-[19] = {
-1,
+[14] = {
 },
 [16] = {
 },
-[13] = {
+[24] = {
+1,
+2,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "123 2",
 ["difficulty"] = 10,
@@ -67070,10 +67067,6 @@ true,
 },
 ["week"] = 1,
 ["uid"] = "jRiAxX)Zpc1",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -67373,6 +67366,10 @@ nil,
 },
 },
 },
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "22+",
 ["difficulty"] = 20,
@@ -68242,8 +68239,7 @@ nil,
 },
 },
 {
-[29] = {
-},
+["color"] = "3e9eff",
 [13] = {
 },
 [15] = {
@@ -68251,20 +68247,24 @@ nil,
 },
 [18] = {
 },
-["color"] = "3e9eff",
+[29] = {
+},
 [14] = {
 13,
 14,
 },
+[5] = {
+},
 [16] = {
 5,
 },
-[5] = {
-},
 },
 {
-[19] = {
-1,
+[14] = {
+9,
+10,
+15,
+16,
 },
 [24] = {
 1,
@@ -68278,16 +68278,13 @@ nil,
 2,
 },
 ["color"] = "fffb3e",
-[14] = {
-9,
-10,
-15,
-16,
+[4] = {
 },
 [16] = {
 3,
 },
-[4] = {
+[19] = {
+1,
 },
 },
 },
@@ -68335,6 +68332,10 @@ true,
 },
 ["week"] = 1,
 ["uid"] = "8sas469luk2",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["selection"] = {
 8,
@@ -68623,11 +68624,11 @@ nil,
 },
 },
 {
+[7] = {
+},
 [24] = {
 1,
 2,
-},
-[7] = {
 },
 [15] = {
 6,
@@ -68637,22 +68638,18 @@ nil,
 2,
 },
 ["color"] = "fffb3e",
-[14] = {
-13,
-14,
+[19] = {
+1,
 },
 [16] = {
 5,
 },
-[19] = {
-1,
+[14] = {
+13,
+14,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "Purple Dungeon",
 ["difficulty"] = 2,
@@ -68668,6 +68665,11 @@ nil,
 ["week"] = 1,
 ["uid"] = "Idvj0UrF(vE",
 ["difficulty"] = 2,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Route 5",
 ["value"] = {
 ["currentPull"] = 8,
 ["currentSublevel"] = 1,
@@ -68851,7 +68853,9 @@ nil,
 },
 },
 {
-["color"] = "3effff",
+[12] = {
+3,
+},
 [2] = {
 16,
 17,
@@ -68863,7 +68867,9 @@ nil,
 [10] = {
 4,
 },
-[12] = {
+[29] = {
+1,
+2,
 3,
 },
 [4] = {
@@ -68877,11 +68883,7 @@ nil,
 [18] = {
 1,
 },
-[29] = {
-1,
-2,
-3,
-},
+["color"] = "3effff",
 },
 {
 {
@@ -68978,11 +68980,6 @@ nil,
 },
 },
 },
-["text"] = "Route 5",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["createdBy"] = {
 ["classIdx"] = 11,
 ["name"] = "Heyryan",
@@ -68994,6 +68991,10 @@ nil,
 },
 ["week"] = 1,
 ["uid"] = "AO3oQ0Dqn5e",
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["currentPull"] = 12,
 ["currentSublevel"] = 1,
@@ -69217,6 +69218,11 @@ nil,
 [18] = {
 1,
 },
+[29] = {
+1,
+2,
+3,
+},
 [4] = {
 15,
 12,
@@ -69224,11 +69230,6 @@ nil,
 14,
 10,
 11,
-},
-[29] = {
-1,
-2,
-3,
 },
 },
 {
@@ -69307,10 +69308,6 @@ nil,
 },
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "dreadflails are fun ",
 ["difficulty"] = 20,
@@ -69898,15 +69895,15 @@ true,
 [18] = {
 1,
 },
-[29] = {
-1,
-2,
-3,
-},
 [4] = {
 12,
 13,
 15,
+},
+[29] = {
+1,
+2,
+3,
 },
 },
 {
@@ -69957,10 +69954,10 @@ nil,
 },
 },
 {
-[24] = {
-},
 [13] = {
 6,
+},
+[24] = {
 },
 [15] = {
 1,
@@ -69969,14 +69966,14 @@ nil,
 [32] = {
 },
 ["color"] = "ff3e3e",
-[19] = {
+[14] = {
+14,
+13,
 },
 [16] = {
 5,
 },
-[14] = {
-14,
-13,
+[19] = {
 },
 },
 {
@@ -71234,10 +71231,10 @@ nil,
 2,
 1,
 },
+[12] = {
+},
 [23] = {
 1,
-},
-[12] = {
 },
 },
 {
@@ -71362,18 +71359,15 @@ nil,
 {
 [11] = {
 },
-[14] = {
+[19] = {
 },
 [15] = {
 },
 [18] = {
 1,
 },
-[12] = {
-15,
-16,
-},
-[19] = {
+["color"] = "ff9b3e",
+[14] = {
 },
 [16] = {
 17,
@@ -71381,7 +71375,10 @@ nil,
 15,
 14,
 },
-["color"] = "ff9b3e",
+[12] = {
+15,
+16,
+},
 },
 {
 [20] = {
@@ -71511,25 +71508,25 @@ nil,
 },
 },
 {
+[24] = {
+},
 [13] = {
 2,
 3,
 },
-[24] = {
-},
-[12] = {
-7,
-8,
-},
+["color"] = "ff3e3e",
 [25] = {
 },
-["color"] = "ff3e3e",
-[34] = {
+[33] = {
 },
 [19] = {
 7,
 },
-[33] = {
+[34] = {
+},
+[12] = {
+7,
+8,
 },
 },
 {
@@ -72059,12 +72056,12 @@ nil,
 },
 [13] = {
 },
-["color"] = "3eff9e",
+[12] = {
+},
 [39] = {
 1,
 },
-[12] = {
-},
+["color"] = "3eff9e",
 [14] = {
 },
 [16] = {
@@ -72125,14 +72122,14 @@ nil,
 {
 [36] = {
 },
-[22] = {
-1,
-},
+["color"] = "fffb3e",
 [10] = {
 1,
 2,
 },
-["color"] = "fffb3e",
+[22] = {
+1,
+},
 [26] = {
 2,
 3,
@@ -72164,17 +72161,17 @@ nil,
 7,
 5,
 },
-[12] = {
-10,
-9,
-},
+["color"] = "3eff3e",
 [14] = {
 8,
 9,
 },
 [16] = {
 },
-["color"] = "3eff3e",
+[12] = {
+10,
+9,
+},
 },
 {
 [13] = {
@@ -72229,10 +72226,7 @@ nil,
 12,
 10,
 },
-[12] = {
-14,
-13,
-},
+["color"] = "3effff",
 [14] = {
 },
 [16] = {
@@ -72245,7 +72239,10 @@ nil,
 15,
 14,
 },
-["color"] = "3effff",
+[12] = {
+14,
+13,
+},
 },
 {
 [15] = {
@@ -72334,26 +72331,26 @@ nil,
 },
 },
 {
+[24] = {
+},
 [13] = {
 2,
 3,
-},
-[24] = {
-},
-[33] = {
-},
-[25] = {
 },
 [12] = {
 7,
 8,
 },
+[25] = {
+},
+["color"] = "3eff9e",
+[34] = {
+},
 [19] = {
 7,
 },
-[34] = {
+[33] = {
 },
-["color"] = "3eff9e",
 },
 {
 [24] = {
@@ -72781,16 +72778,16 @@ nil,
 3,
 },
 ["color"] = "3eff9e",
-[17] = {
-9,
-8,
-10,
-},
 [15] = {
 9,
 6,
 7,
 8,
+},
+[17] = {
+9,
+8,
+10,
 },
 [24] = {
 7,
@@ -73410,6 +73407,11 @@ nil,
 ["beguiling"] = 1,
 ["freeholdJoined"] = false,
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Den of Nalorakk",
 ["value"] = {
 ["pulls"] = {
 {
@@ -73711,11 +73713,6 @@ nil,
 ["riftOffsets"] = {
 },
 },
-["text"] = "Den of Nalorakk",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["createdBy"] = {
 ["classIdx"] = 1,
 ["name"] = "Jugjuggies",
@@ -73785,14 +73782,14 @@ nil,
 [24] = {
 7,
 },
-[15] = {
-6,
-7,
+[17] = {
+10,
 8,
 9,
 },
-[17] = {
-10,
+[15] = {
+6,
+7,
 8,
 9,
 },
@@ -73836,13 +73833,13 @@ nil,
 {
 },
 ["color"] = "3e9eff",
-[15] = {
-},
 [7] = {
 },
 [17] = {
 12,
 11,
+},
+[15] = {
 },
 },
 {
@@ -73860,11 +73857,11 @@ nil,
 1,
 2,
 },
-[9] = {
-1,
-},
 [17] = {
 13,
+},
+[9] = {
+1,
 },
 [12] = {
 },
@@ -73963,12 +73960,10 @@ nil,
 [13] = {
 1,
 },
-[22] = {
-1,
-},
 [12] = {
 3,
 },
+["color"] = "3e3eff",
 [14] = {
 1,
 2,
@@ -73979,7 +73974,9 @@ nil,
 3,
 2,
 },
-["color"] = "3e3eff",
+[22] = {
+1,
+},
 },
 {
 [11] = {
@@ -73990,20 +73987,20 @@ nil,
 3,
 2,
 },
-[22] = {
-2,
-3,
-},
 ["color"] = "a1ff3e",
+[12] = {
+5,
+4,
+},
 [14] = {
 4,
 },
 [23] = {
 4,
 },
-[12] = {
-5,
-4,
+[22] = {
+2,
+3,
 },
 },
 {
@@ -74571,10 +74568,6 @@ nil,
 ["uid"] = "JHFezyJxxKG",
 ["objects"] = {
 },
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
 ["value"] = {
 ["riftOffsets"] = {
 },
@@ -74832,11 +74825,11 @@ nil,
 [12] = {
 2,
 },
-[5] = {
-3,
-},
 [23] = {
 1,
+},
+[5] = {
+3,
 },
 ["color"] = "ff3eff",
 },
@@ -74879,6 +74872,10 @@ nil,
 ["color"] = "ff3e3e",
 },
 },
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["text"] = "The Blinding Vale",
 ["difficulty"] = 20,
@@ -75045,20 +75042,17 @@ nil,
 ["color"] = "3e9eff",
 },
 {
-[3] = {
+[10] = {
+11,
+10,
 },
 [8] = {
 12,
 11,
 },
-[10] = {
-11,
-10,
+[3] = {
 },
-[12] = {
-4,
-5,
-},
+["color"] = "fffb3e",
 [5] = {
 },
 [9] = {
@@ -75068,7 +75062,10 @@ nil,
 30,
 39,
 },
-["color"] = "fffb3e",
+[12] = {
+4,
+5,
+},
 },
 {
 ["color"] = "3eff3e",
@@ -75083,19 +75080,18 @@ nil,
 },
 },
 {
-["color"] = "ff3e9e",
+[12] = {
+3,
+},
 [7] = {
 17,
 },
 [8] = {
 10,
 },
-[10] = {
-9,
+[3] = {
 },
-[12] = {
-3,
-},
+["color"] = "ff3e9e",
 [9] = {
 22,
 20,
@@ -75106,7 +75102,8 @@ nil,
 [23] = {
 1,
 },
-[3] = {
+[10] = {
+9,
 },
 },
 {
@@ -75135,10 +75132,10 @@ nil,
 [10] = {
 },
 ["color"] = "3effff",
-[23] = {
-},
 [5] = {
 3,
+},
+[23] = {
 },
 [12] = {
 2,
@@ -75170,13 +75167,13 @@ nil,
 },
 [19] = {
 },
-[22] = {
-},
-[11] = {
-},
 [6] = {
 2,
 3,
+},
+[11] = {
+},
+[22] = {
 },
 [12] = {
 },
@@ -75398,6 +75395,8 @@ nil,
 10,
 },
 ["color"] = "ff3e9e",
+[5] = {
+},
 [9] = {
 20,
 21,
@@ -75409,8 +75408,6 @@ nil,
 30,
 39,
 31,
-},
-[5] = {
 },
 [12] = {
 4,
@@ -75430,10 +75427,10 @@ nil,
 [8] = {
 13,
 },
-[9] = {
-},
 [16] = {
 1,
+},
+[9] = {
 },
 },
 {
@@ -75458,8 +75455,6 @@ nil,
 3,
 },
 ["color"] = "ff9b3e",
-[12] = {
-},
 [7] = {
 4,
 2,
@@ -75467,6 +75462,8 @@ nil,
 },
 [23] = {
 1,
+},
+[12] = {
 },
 },
 {
@@ -75550,6 +75547,10 @@ true,
 ["freehold"] = 1,
 ["freeholdJoined"] = false,
 ["beguiling"] = 1,
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
 },
 ["value"] = {
 ["riftOffsets"] = {
@@ -75796,16 +75797,16 @@ nil,
 13,
 },
 ["color"] = "ff9b3e",
-[7] = {
-5,
-6,
-7,
-},
 [23] = {
 1,
 },
 [12] = {
 3,
+},
+[7] = {
+5,
+6,
+7,
 },
 },
 {
@@ -75845,10 +75846,6 @@ nil,
 ["color"] = "a1ff3e",
 },
 },
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "The Blinding Vale 2",
 ["difficulty"] = 20,
@@ -76145,10 +76142,10 @@ nil,
 [10] = {
 },
 ["color"] = "3effff",
+[9] = {
+},
 [16] = {
 1,
-},
-[9] = {
 },
 [21] = {
 1,
@@ -76175,9 +76172,6 @@ nil,
 14,
 },
 ["color"] = "ff9b3e",
-[12] = {
-3,
-},
 [7] = {
 5,
 6,
@@ -76185,6 +76179,9 @@ nil,
 },
 [23] = {
 1,
+},
+[12] = {
+3,
 },
 },
 {
@@ -76241,6 +76238,15 @@ nil,
 {
 ["difficulty"] = 20,
 ["uid"] = "PZw50eOTxB3",
+["mdi"] = {
+["freehold"] = 1,
+["freeholdJoined"] = false,
+["beguiling"] = 1,
+},
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
 ["value"] = {
 ["riftOffsets"] = {
 },
@@ -76488,16 +76494,16 @@ nil,
 13,
 },
 ["color"] = "ff9b3e",
-[7] = {
-5,
-6,
-7,
-},
 [23] = {
 1,
 },
 [12] = {
 3,
+},
+[7] = {
+5,
+6,
+7,
 },
 },
 {
@@ -76535,15 +76541,6 @@ nil,
 ["color"] = "a1ff3e",
 },
 },
-},
-["mdi"] = {
-["freehold"] = 1,
-["freeholdJoined"] = false,
-["beguiling"] = 1,
-},
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["text"] = "BV",
 ["objects"] = {
@@ -76763,8 +76760,6 @@ nil,
 [12] = {
 5,
 },
-[5] = {
-},
 [9] = {
 30,
 31,
@@ -76772,17 +76767,19 @@ nil,
 33,
 39,
 },
+[5] = {
+},
 ["color"] = "3effff",
 },
 {
 [20] = {
 1,
 },
-[21] = {
-1,
-},
 [8] = {
 13,
+},
+[21] = {
+1,
 },
 [10] = {
 },
@@ -76790,14 +76787,14 @@ nil,
 [16] = {
 1,
 },
+[5] = {
+},
 [9] = {
 34,
 35,
 36,
 37,
 38,
-},
-[5] = {
 },
 },
 {
@@ -76839,9 +76836,9 @@ nil,
 [11] = {
 },
 ["color"] = "a1ff3e",
-[12] = {
-},
 [7] = {
+},
+[12] = {
 },
 },
 {
@@ -76877,21 +76874,21 @@ nil,
 },
 [17] = {
 },
-[26] = {
+[4] = {
+7,
 },
 [3] = {
 15,
 16,
 },
-["color"] = "3eff9e",
-[4] = {
-7,
+[22] = {
+},
+[26] = {
 },
 [12] = {
 2,
 },
-[22] = {
-},
+["color"] = "3eff9e",
 },
 {
 ["color"] = "ff3e3e",
@@ -77426,13 +77423,13 @@ nil,
 13,
 12,
 },
-["color"] = "a1ff3e",
-[18] = {
-8,
-},
 [22] = {
 1,
 },
+[18] = {
+8,
+},
+["color"] = "a1ff3e",
 [23] = {
 32,
 38,
@@ -77481,12 +77478,12 @@ nil,
 },
 [5] = {
 },
-[22] = {
-2,
+[6] = {
 },
 [21] = {
 },
-[6] = {
+[22] = {
+2,
 },
 [23] = {
 },
@@ -77817,13 +77814,13 @@ nil,
 [18] = {
 14,
 },
-[22] = {
-1,
+[6] = {
+14,
 },
 [23] = {
 },
-[6] = {
-14,
+[22] = {
+1,
 },
 },
 {
@@ -78102,9 +78099,7 @@ nil,
 7,
 8,
 },
-[22] = {
-3,
-},
+["color"] = "ff9b3e",
 [24] = {
 6,
 5,
@@ -78121,7 +78116,9 @@ nil,
 60,
 53,
 },
-["color"] = "ff9b3e",
+[22] = {
+3,
+},
 },
 {
 [6] = {
@@ -78137,9 +78134,7 @@ nil,
 [18] = {
 13,
 },
-[22] = {
-1,
-},
+["color"] = "3e3eff",
 [23] = {
 41,
 48,
@@ -78155,7 +78150,9 @@ nil,
 [5] = {
 11,
 },
-["color"] = "3e3eff",
+[22] = {
+1,
+},
 },
 {
 {
@@ -78169,11 +78166,11 @@ nil,
 13,
 15,
 },
-[18] = {
-14,
-},
 [32] = {
 1,
+},
+[18] = {
+14,
 },
 ["color"] = "a1ff3e",
 [3] = {
@@ -78373,13 +78370,13 @@ nil,
 6,
 5,
 },
-[22] = {
-3,
-},
+["color"] = "3e9eff",
 [18] = {
 15,
 },
-["color"] = "3e9eff",
+[22] = {
+3,
+},
 [19] = {
 },
 [23] = {
@@ -78441,11 +78438,11 @@ nil,
 },
 [19] = {
 },
-[22] = {
-2,
-},
 [6] = {
 11,
+},
+[22] = {
+2,
 },
 [23] = {
 19,
@@ -79044,9 +79041,7 @@ nil,
 7,
 8,
 },
-[22] = {
-3,
-},
+["color"] = "ff9b3e",
 [24] = {
 6,
 5,
@@ -79063,7 +79058,9 @@ nil,
 60,
 53,
 },
-["color"] = "ff9b3e",
+[22] = {
+3,
+},
 },
 {
 {
@@ -79076,13 +79073,13 @@ nil,
 },
 [17] = {
 },
-["color"] = "3e3eff",
-[18] = {
-8,
-},
 [22] = {
 1,
 },
+[18] = {
+8,
+},
+["color"] = "3e3eff",
 [23] = {
 35,
 31,
@@ -79122,8 +79119,8 @@ nil,
 12,
 13,
 },
-[18] = {
-14,
+[32] = {
+1,
 },
 ["color"] = "a1ff3e",
 [23] = {
@@ -79141,8 +79138,8 @@ nil,
 [5] = {
 4,
 },
-[32] = {
-1,
+[18] = {
+14,
 },
 },
 {
@@ -79259,9 +79256,9 @@ nil,
 },
 [21] = {
 },
-[23] = {
-},
 [12] = {
+},
+[23] = {
 },
 [11] = {
 1,
@@ -79348,7 +79345,9 @@ nil,
 7,
 8,
 },
-["color"] = "ff9b3e",
+[22] = {
+3,
+},
 [24] = {
 6,
 5,
@@ -79365,9 +79364,7 @@ nil,
 59,
 60,
 },
-[22] = {
-3,
-},
+["color"] = "ff9b3e",
 },
 {
 {
@@ -79380,13 +79377,13 @@ nil,
 [17] = {
 14,
 },
-["color"] = "3e3eff",
-[18] = {
-13,
-},
 [22] = {
 1,
 },
+[18] = {
+13,
+},
+["color"] = "3e3eff",
 [23] = {
 48,
 41,
@@ -79499,8 +79496,8 @@ nil,
 12,
 13,
 },
-[32] = {
-1,
+[18] = {
+14,
 },
 ["color"] = "3eff9e",
 [23] = {
@@ -79508,8 +79505,8 @@ nil,
 [5] = {
 4,
 },
-[18] = {
-14,
+[32] = {
+1,
 },
 },
 },
@@ -79869,9 +79866,7 @@ nil,
 14,
 8,
 },
-[22] = {
-1,
-},
+["color"] = "a1ff3e",
 [5] = {
 4,
 },
@@ -79887,15 +79882,17 @@ nil,
 39,
 40,
 },
-["color"] = "a1ff3e",
+[22] = {
+1,
+},
 },
 {
 ["color"] = "ff3eff",
 [5] = {
 },
-[23] = {
-},
 [17] = {
+},
+[23] = {
 },
 },
 {
@@ -80124,12 +80121,12 @@ nil,
 },
 {
 ["color"] = "3e3eff",
-[15] = {
-1,
-},
 [17] = {
 1,
 2,
+},
+[15] = {
+1,
 },
 [21] = {
 1,
@@ -80982,12 +80979,12 @@ nil,
 },
 {
 ["color"] = "ff9b3e",
+[15] = {
+1,
+},
 [17] = {
 1,
 2,
-},
-[15] = {
-1,
 },
 [21] = {
 1,
@@ -81273,12 +81270,12 @@ nil,
 2,
 },
 ["color"] = "a1ff3e",
+[15] = {
+1,
+},
 [17] = {
 1,
 2,
-},
-[15] = {
-1,
 },
 },
 {
@@ -81575,12 +81572,12 @@ nil,
 2,
 },
 ["color"] = "a1ff3e",
+[15] = {
+1,
+},
 [17] = {
 1,
 2,
-},
-[15] = {
-1,
 },
 },
 {
@@ -81936,12 +81933,12 @@ true,
 1,
 2,
 },
-[15] = {
-1,
-},
 [17] = {
 1,
 2,
+},
+[15] = {
+1,
 },
 },
 {
@@ -82536,12 +82533,12 @@ true,
 1,
 2,
 },
+[15] = {
+1,
+},
 [17] = {
 1,
 2,
-},
-[15] = {
-1,
 },
 ["color"] = "3e3eff",
 },
@@ -82644,6 +82641,11 @@ true,
 ["objects"] = {
 },
 ["difficulty"] = 20,
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "Altar of Fangs 4",
 ["value"] = {
 ["pulls"] = {
 {
@@ -82900,11 +82902,6 @@ true,
 ["currentPull"] = 13,
 ["riftOffsets"] = {
 },
-},
-["text"] = "Altar of Fangs 4",
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
 },
 ["createdBy"] = {
 ["classIdx"] = 11,
@@ -83333,11 +83330,11 @@ true,
 ["difficulty"] = 24,
 ["value"] = {
 ["selection"] = {
-4,
+5,
 },
 ["currentSublevel"] = 1,
 ["currentDungeonIdx"] = 164,
-["currentPull"] = 4,
+["currentPull"] = 5,
 ["pulls"] = {
 {
 {
@@ -83394,23 +83391,14 @@ true,
 },
 {
 {
-4,
 },
 [6] = {
-13,
-14,
 },
 [7] = {
-17,
-18,
 13,
 12,
-19,
-20,
 },
 [10] = {
-2,
-3,
 },
 ["color"] = "ff3e3e",
 [11] = {
@@ -83422,15 +83410,10 @@ true,
 },
 {
 {
-3,
 },
 [6] = {
-11,
-12,
 },
 [7] = {
-14,
-15,
 },
 [10] = {
 },
@@ -83443,16 +83426,8 @@ true,
 },
 {
 [11] = {
-16,
-17,
-18,
 },
 [7] = {
-2,
-1,
-3,
-4,
-5,
 },
 [10] = {
 },
@@ -83810,12 +83785,12 @@ true,
 1,
 2,
 },
+[15] = {
+1,
+},
 [17] = {
 1,
 2,
-},
-[15] = {
-1,
 },
 ["color"] = "3effff",
 },
@@ -85161,17 +85136,17 @@ true,
 },
 [10] = {
 },
-[3] = {
-9,
-},
 [21] = {
 1,
 2,
 },
+[11] = {
+},
 [6] = {
 },
 ["color"] = "ff3e9e",
-[11] = {
+[3] = {
+9,
 },
 },
 {
@@ -85885,12 +85860,15 @@ nil,
 },
 },
 },
-["latestDungeonSeen"] = 160,
-["anchorTo"] = "LEFT",
-["version"] = 636,
+["currentDungeonIdx"] = 164,
+["minimap"] = {
+["minimapPos"] = 158.5007881808067,
+["showInCompartment"] = true,
+},
+["currentDifficulty"] = 24,
 ["xoffset"] = 178.6670227050781,
-["scale"] = 1.4,
-["currentDifficulty"] = 2,
+["version"] = 636,
+["devMode"] = false,
 ["yoffset"] = 50.66677856445313,
 },
 }
