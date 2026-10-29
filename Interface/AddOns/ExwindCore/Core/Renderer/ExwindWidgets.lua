@@ -508,6 +508,13 @@ TextWidgetSetDurationBinding = function(widget, durationObject, options)
     binding:SetExpiredText((options and options.expiredText) or "0")
     binding:SetZeroDurationText((options and options.zeroDurationText) or "0")
     binding:SetUpdateInterval((options and options.updateInterval) or 0)
+    -- 可选：按时间换文字颜色的原生颜色曲线（例如剩余时间少于几秒变红）；不读计时数值。
+    if options and options.colorCurve then
+        binding:SetTextColorCurve(options.colorCurve,
+            options.colorProperty or Enum.DurationTextBindingProperty.RemainingDuration)
+    else
+        binding:ClearTextColorCurve()
+    end
     binding:SetDuration(durationObject)
     widget._durationBindingActive = true
     widget._measureText = false
@@ -556,6 +563,16 @@ local function ExtraTextureWidgetSetColorComponents(widget, components)
     return widget
 end
 
+-- 呼吸（presentation.pulse = { scale = 放大到几倍, duration = 放大或缩回一段的秒数 }，可选）：
+-- 动画本身是公共的 EXUI:StartBreath（ExwindAnimation.lua）；不写时停住。
+local function ExtraTextureWidgetApplyPulse(widget, pulse)
+    if type(pulse) ~= "table" then
+        EXUI:StopBreath(widget)
+        return
+    end
+    EXUI:StartBreath(widget, pulse.scale, pulse.duration)
+end
+
 -- 单材质的完整视觉合同只能通过 Widget API 应用。Collection / 模块不得拿到
 -- 内部 Texture 后各自 SetTexture、SetBlendMode 或 SetRotation；否则 panel、
 -- world 与 runtime 很容易变成三份不同的实现。
@@ -597,6 +614,7 @@ local function ExtraTextureWidgetApplyPresentation(widget, presentation)
         color.b or color[3] or presentation.colorB or 1,
         color.a or color[4] or presentation.colorA or presentation.alpha or 1)
     widget:SetVisible(presentation.shown ~= false and (atlas ~= nil and atlas ~= "" or file ~= nil and file ~= ""))
+    ExtraTextureWidgetApplyPulse(widget, presentation.pulse)
     return widget
 end
 
@@ -608,6 +626,7 @@ local function ExtraTextureWidgetClear(widget)
     widget.texture:SetAlpha(1)
     widget.texture:SetBlendMode("BLEND")
     widget.texture:SetRotation(0)
+    ExtraTextureWidgetApplyPulse(widget, nil)
     widget:Hide()
     return widget
 end
@@ -992,6 +1011,61 @@ local function ResolveBorderTexture(name)
     return "Interface\\Buttons\\UI-EmptySlot-White"
 end
 
+-- 纯色像素边框：样式写了 pixelBorder = true 才走（没写的照旧 Backdrop + 边框材质）。
+-- 四条纯白贴图上顶点色；粗细、间距都按物理像素算，按目标的有效缩放换成界面单位。
+-- 粗细按 1080p 等效：物理像素 = round(粗细 × 屏幕物理高 / 1080)，至少 1（1080p 下 1/2/4，1440p 下 1/3/5，4K 下 2/4/8），
+-- 不同分辨率下看起来一样粗；间距仍是物理像素。
+-- 边框画在“目标往外扩间距”的矩形里、往内画粗细；左右两条夹在上下之间，半透明时四角不叠色。
+-- 只用锚点、不读宽高，目标是秘密几何也能用。edges = { 上, 下, 左, 右 }。
+local PIXEL_BORDER_TEXTURE = "Interface\\Buttons\\WHITE8X8"
+function EXUI:LayoutPixelBorder(edges, target, size, padding, r, g, b, a)
+    local unit = PixelUtil.GetPixelToUIUnitFactor() / math.max(0.01, target:GetEffectiveScale())
+    local _, screenHeight = GetPhysicalScreenSize()
+    local thick = math.max(1, math.floor((tonumber(size) or 1) * (screenHeight or 1080) / 1080 + 0.5)) * unit
+    local pad = math.floor((tonumber(padding) or 0) + 0.5) * unit
+    for _, edge in ipairs(edges) do
+        edge:SetTexture(PIXEL_BORDER_TEXTURE)
+        edge:SetVertexColor(r or 0, g or 0, b or 0, a or 1)
+        edge:ClearAllPoints()
+        edge:Show()
+    end
+    local top, bottom, left, right = edges[1], edges[2], edges[3], edges[4]
+    top:SetPoint("TOPLEFT", target, "TOPLEFT", -pad, pad)
+    top:SetPoint("TOPRIGHT", target, "TOPRIGHT", pad, pad)
+    top:SetHeight(thick)
+    bottom:SetPoint("BOTTOMLEFT", target, "BOTTOMLEFT", -pad, -pad)
+    bottom:SetPoint("BOTTOMRIGHT", target, "BOTTOMRIGHT", pad, -pad)
+    bottom:SetHeight(thick)
+    left:SetPoint("TOPLEFT", target, "TOPLEFT", -pad, pad - thick)
+    left:SetPoint("BOTTOMLEFT", target, "BOTTOMLEFT", -pad, -pad + thick)
+    left:SetWidth(thick)
+    right:SetPoint("TOPRIGHT", target, "TOPRIGHT", pad, pad - thick)
+    right:SetPoint("BOTTOMRIGHT", target, "BOTTOMRIGHT", pad, -pad + thick)
+    right:SetWidth(thick)
+end
+
+-- 控件自己的像素边框框体（第一次用到才建）；value(键) 取样式值。
+local function ApplyPixelBorder(widget, target, value)
+    local frame = widget.pixelBorder
+    if not frame then
+        frame = CreateFrame("Frame", nil, widget)
+        frame:EnableMouse(false)
+        frame:SetAllPoints(widget)
+        frame.edges = {}
+        for index = 1, 4 do frame.edges[index] = EXUI:CreateVisualTexture(frame, _G.EXBORDERFRAME) end
+        widget.pixelBorder = frame
+    end
+    EXUI:ApplyVisualLayer(frame, _G.EXBORDERFRAME, widget)
+    if value("showBorder") == false then
+        frame:Hide()
+        return
+    end
+    EXUI:LayoutPixelBorder(frame.edges, target, value("borderSize"), value("borderPadding"),
+        NumberOr(value("borderColorR"), 0), NumberOr(value("borderColorG"), 0),
+        NumberOr(value("borderColorB"), 0), NumberOr(value("borderColorA"), 1))
+    frame:Show()
+end
+
 -- swipeTexture 只属于静态 preview 样本。正常 runtime 的 IconWidget 样式没有此入口；
 -- 此处仅在一个曾套用过静态样本的 pooled Cooldown 上恢复模板等价的纯白扇形。
 local function ResetStaticCooldownSwipeTexture(widget)
@@ -1121,6 +1195,13 @@ end
 
 local function ApplyIconBorder(widget)
     local iconStyle = widget.iconStyle
+    if IconStyleValue(iconStyle, "pixelBorder") == true then
+        widget.border:Hide()
+        if widget.secretSafeBorder then widget.secretSafeBorder:Hide() end
+        ApplyPixelBorder(widget, widget, function(key) return IconStyleValue(iconStyle, key) end)
+        return
+    end
+    if widget.pixelBorder then widget.pixelBorder:Hide() end
     if widget._useSecretSafeBorder then
         ApplySecretSafeIconBorder(widget)
         return
@@ -1455,6 +1536,8 @@ local function IconWidgetSetNativeDuration(widget, durationObject, clearIfZero, 
             expiredText = options.expiredText,
             zeroDurationText = options.zeroDurationText,
             updateInterval = options.updateInterval,
+            colorCurve = options.colorCurve,
+            colorProperty = options.colorProperty,
         })
         widget.countdownText:Show()
     else
@@ -1500,6 +1583,20 @@ local function IconWidgetSetStaticCooldown(widget, remaining, duration, formatRu
     -- 使 panel/world 只有扇形却没有与 runtime 同源的时间文字。
     UpdateCountdownText(widget, numericRemaining)
     widget.secretCountdown:Clear()
+    return widget
+end
+
+-- 时长对象挂在不走的样本时钟上时（编辑样本），原生扇形不认那只时钟：数字仍由时长绑定画，
+-- 扇形按普通值停在已过 elapsed 的一刻（同 SetStaticCooldown）。下次 SetDurationObject / ClearCooldown 会解除暂停。
+local function IconWidgetFreezeCooldownSwipe(widget, elapsed, total)
+    local numericElapsed, numericTotal = tonumber(elapsed), tonumber(total)
+    if not numericElapsed or not numericTotal or numericTotal <= 0 then return widget end
+    if not widget.cooldown.SetPaused then
+        error("EXUI IconWidget: Cooldown:SetPaused is required for frozen swipe", 2)
+    end
+    widget.cooldown:SetPaused(false)
+    widget.cooldown:SetCooldown(GetTime() - math.max(0, math.min(numericTotal, numericElapsed)), numericTotal, 1)
+    widget.cooldown:SetPaused(true)
     return widget
 end
 
@@ -1668,6 +1765,7 @@ local function IconWidgetRelease(widget)
     widget.icon:SetRotation(0)
     widget.border:Hide()
     if widget.secretSafeBorder then widget.secretSafeBorder:Hide() end
+    if widget.pixelBorder then widget.pixelBorder:Hide() end
     widget:Hide()
     widget:ClearAllPoints()
     if widget.countdownText then widget.countdownText:Release(); widget.countdownText = nil end
@@ -1769,6 +1867,7 @@ EXFactory:InitPool(ICON_WIDGET_POOL, "Frame", nil, function(widget)
     widget.SetCooldown = IconWidgetSetCooldown
     widget.SetDurationObject = IconWidgetSetDurationObject
     widget.SetStaticCooldown = IconWidgetSetStaticCooldown
+    widget.FreezeCooldownSwipe = IconWidgetFreezeCooldownSwipe
     widget.SetSecretCooldown = IconWidgetSetSecretCooldown
     widget.SetCooldownDoneCallback = IconWidgetSetCooldownDoneCallback
     widget.ClearCooldown = IconWidgetClearCooldown
@@ -1807,7 +1906,7 @@ function EXUI:CreateIconWidget(parent, style)
 end
 
 -- =========================================================
--- TimerBarWidget：横向计时条（StatusBar + 显示型 IconWidget + TextWidget）
+-- TimerBarWidget：计时条（StatusBar + 显示型 IconWidget + TextWidget）
 -- =========================================================
 
 local TIMER_BAR_WIDGET_POOL = "RuntimeTimerBarWidget"
@@ -1815,6 +1914,7 @@ local DEFAULT_TIMER_BAR_STYLE = {
     width = 240,
     height = 24,
     texture = "Clean",
+    textureFileID = "",
     barColorR = 1, barColorG = 0.7, barColorB = 0, barColorA = 1,
     barBgColorR = 0, barBgColorG = 0, barBgColorB = 0, barBgColorA = 0.5,
     showBorder = true,
@@ -1822,7 +1922,7 @@ local DEFAULT_TIMER_BAR_STYLE = {
     borderSize = 1,
     borderPadding = 0,
     borderColorR = 1, borderColorG = 1, borderColorB = 1, borderColorA = 1,
-    fillDirection = "LEFT_TO_RIGHT",
+    fillDirection = "LEFT_TO_RIGHT", -- RIGHT_TO_LEFT / BOTTOM_TO_TOP / TOP_TO_BOTTOM
     progressMode = "REMAINING",
     showIcon = true,
     iconWidth = 24,
@@ -1881,7 +1981,10 @@ local function ResolveTimerStyle(style)
     return type(style) == "table" and style or DEFAULT_TIMER_BAR_STYLE
 end
 
-local function ResolveStatusBarTexture(name)
+local function ResolveStatusBarTexture(name, fileID)
+    if type(fileID) == "number" or (type(fileID) == "string" and fileID ~= "") then
+        return tonumber(fileID) or fileID
+    end
     local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
     if LSM and type(name) == "string" and name ~= "" then
         local path = LSM:Fetch("statusbar", name, true)
@@ -1892,12 +1995,20 @@ end
 
 local function IsTimerReverseFill(widget)
     local direction = tostring(TimerStyleValue(widget.timerStyle, "fillDirection") or "LEFT_TO_RIGHT"):upper()
-    return direction == "RIGHT_TO_LEFT" or direction == "RTL" or direction == "REVERSE"
+    return direction == "RIGHT_TO_LEFT" or direction == "TOP_TO_BOTTOM"
+        or direction == "RTL" or direction == "REVERSE"
+end
+
+local function IsTimerVerticalFill(widget)
+    local direction = tostring(TimerStyleValue(widget.timerStyle, "fillDirection") or "LEFT_TO_RIGHT"):upper()
+    return direction == "BOTTOM_TO_TOP" or direction == "TOP_TO_BOTTOM"
 end
 
 local function ApplyTimerFillDirection(widget)
     local reverse = IsTimerReverseFill(widget)
+    local orientation = IsTimerVerticalFill(widget) and "VERTICAL" or "HORIZONTAL"
     for _, bar in ipairs({ widget.bar, widget.secretBar }) do
+        if bar then bar:SetOrientation(orientation) end
         if bar and bar.SetFillStyle and _G.Enum and Enum.StatusBarFillStyle then
             bar:SetFillStyle(reverse and Enum.StatusBarFillStyle.Reverse or Enum.StatusBarFillStyle.Standard)
         elseif bar and bar.SetReverseFill then
@@ -1925,6 +2036,12 @@ end
 
 local function ApplyTimerBarBorder(widget)
     local timerStyle = widget.timerStyle
+    if TimerStyleValue(timerStyle, "pixelBorder") == true then
+        widget.border:Hide()
+        ApplyPixelBorder(widget, widget.bar, function(key) return TimerStyleValue(timerStyle, key) end)
+        return
+    end
+    if widget.pixelBorder then widget.pixelBorder:Hide() end
     local configuredSize = NumberOr(TimerStyleValue(timerStyle, "borderSize"), 1)
     if TimerStyleValue(timerStyle, "showBorder") == false or configuredSize <= 0 then
         widget.border:Hide()
@@ -1959,7 +2076,8 @@ end
 local function ApplyTimerBarVisual(widget)
     ResetTimerBarSecretFillColors(widget)
     local timerStyle = widget.timerStyle
-    local texture = ResolveStatusBarTexture(TimerStyleValue(timerStyle, "texture"))
+    local texture = ResolveStatusBarTexture(TimerStyleValue(timerStyle, "texture"),
+        TimerStyleValue(timerStyle, "textureFileID"))
     local r = NumberOr(TimerStyleValue(timerStyle, "barColorR"), 1)
     local g = NumberOr(TimerStyleValue(timerStyle, "barColorG"), 0.7)
     local b = NumberOr(TimerStyleValue(timerStyle, "barColorB"), 0)
@@ -2095,16 +2213,29 @@ local function LayoutTimerBar(widget)
         widget.icon:Hide()
     end
 
+    -- Optional points only; text style x/y remain the sole content offset.
+    local textAnchors = widget.style.textAnchors
+    if textAnchors ~= nil and type(textAnchors) ~= "table" then
+        error("TimerBarWidget textAnchors must be table", 2)
+    end
+    local function AnchorText(slot, textWidget)
+        local anchor = textAnchors and textAnchors[slot]
+        if anchor ~= nil and type(anchor) ~= "table" then
+            error("TimerBarWidget textAnchors." .. slot .. " must be table", 2)
+        end
+        textWidget:SetAnchor(anchor and anchor.point or "CENTER", widget.bar,
+            anchor and anchor.relativePoint or "CENTER")
+    end
     widget.labelText:SetBounds(barWidth, barHeight)
-    widget.labelText:SetAnchor("CENTER", widget.bar, "CENTER")
+    AnchorText("label", widget.labelText)
     widget.timeText:SetBounds(barWidth, barHeight)
-    widget.timeText:SetAnchor("CENTER", widget.bar, "CENTER")
+    AnchorText("time", widget.timeText)
     widget.secretCountdown:ClearAllPoints()
     widget.secretCountdown:SetAllPoints(widget.bar)
     -- 固定 Bounds 是必须的：Secret 层数文字不能测量宽高，没有 Bounds 会退化成 1x1 像素
     -- 不可见（同 IconWidget 踩过的坑，见 EXUI_组合控件规范.md 0.3.2）。
     widget.stackText:SetBounds(barWidth, barHeight)
-    widget.stackText:SetAnchor("CENTER", widget.bar, "CENTER")
+    AnchorText("stacks", widget.stackText)
 
     local rootRect = NewSelectionRect(-totalWidth * 0.5, totalWidth * 0.5, -totalHeight * 0.5, totalHeight * 0.5)
     local barLeft, barRight
@@ -2127,12 +2258,19 @@ local function LayoutTimerBar(widget)
         end
     end
     local labelStyle, timeStyle = widget.textStyles.label or {}, widget.textStyles.time or {}
+    local function TextRect(slot, style)
+        local anchor = textAnchors and textAnchors[slot]
+        local rect = anchor and BuildAnchoredSelectionRect(barRect,
+            { point = anchor.point or "CENTER", relativePoint = anchor.relativePoint or "CENTER" },
+            barWidth, barHeight) or barRect
+        return TranslateSelectionRect(rect, NumberOr(style.x, 0), NumberOr(style.y, 0))
+    end
     widget.declaredSelectionRects = {
         ["core.root"] = rootRect,
         ["core.bar"] = barRect,
         ["core.icon"] = iconRect,
-        ["core.spellName"] = TranslateSelectionRect(barRect, NumberOr(labelStyle.x, 0), NumberOr(labelStyle.y, 0)),
-        ["core.time"] = TranslateSelectionRect(barRect, NumberOr(timeStyle.x, 0), NumberOr(timeStyle.y, 0)),
+        ["core.spellName"] = TextRect("label", labelStyle),
+        ["core.time"] = TextRect("time", timeStyle),
     }
 end
 
@@ -2158,6 +2296,7 @@ end
 local function ApplyTimerMarkers(widget, markerList)
     markerList = type(markerList) == "table" and markerList or {}
     local reverse = IsTimerReverseFill(widget)
+    local vertical = IsTimerVerticalFill(widget)
     for index, entry in ipairs(markerList) do
         local marker = EnsureTimerMarker(widget, index)
         local value = type(entry) == "table" and (entry.value or entry.percent) or entry
@@ -2168,6 +2307,7 @@ local function ApplyTimerMarkers(widget, markerList)
         local b = NumberOr(type(entry) == "table" and entry.b, 1)
         local a = NumberOr(type(entry) == "table" and entry.a, 0.65)
 
+        marker.track:SetOrientation(vertical and "VERTICAL" or "HORIZONTAL")
         if marker.track.SetFillStyle and _G.Enum and Enum.StatusBarFillStyle then
             marker.track:SetFillStyle(reverse and Enum.StatusBarFillStyle.Reverse or Enum.StatusBarFillStyle.Standard)
         elseif marker.track.SetReverseFill then
@@ -2175,11 +2315,17 @@ local function ApplyTimerMarkers(widget, markerList)
         end
         marker.track:SetMinMaxValues(0, 1)
         marker.track:SetValue(value)
-        marker.line:SetWidth(lineWidth)
-        marker.line:SetHeight(widget.bar:GetHeight())
+        marker.line:SetWidth(vertical and widget.bar:GetWidth() or lineWidth)
+        marker.line:SetHeight(vertical and lineWidth or widget.bar:GetHeight())
         marker.line:SetVertexColor(r, g, b, a)
         marker.line:ClearAllPoints()
-        if reverse then
+        if vertical then
+            if reverse then
+                marker.line:SetPoint("TOP", marker.track:GetStatusBarTexture(), "BOTTOM")
+            else
+                marker.line:SetPoint("BOTTOM", marker.track:GetStatusBarTexture(), "TOP")
+            end
+        elseif reverse then
             marker.line:SetPoint("RIGHT", marker.track:GetStatusBarTexture(), "LEFT")
         else
             marker.line:SetPoint("LEFT", marker.track:GetStatusBarTexture(), "RIGHT")
@@ -2855,6 +3001,7 @@ local function TimerBarWidgetApplyStyle(widget, style)
     iconAppearance.height = TimerStyleValue(widget.timerStyle, "iconHeight")
     iconAppearance.showCooldown = false -- 计时条图标固定为纯显示，倒数只走 TimeText。
     iconAppearance.showBorder = TimerStyleValue(widget.timerStyle, "showIconBorder") ~= false
+    iconAppearance.pixelBorder = TimerStyleValue(widget.timerStyle, "pixelBorder")
     iconAppearance.borderTexture = TimerStyleValue(widget.timerStyle, "iconBorderTexture")
     iconAppearance.borderSize = TimerStyleValue(widget.timerStyle, "iconBorderSize")
     iconAppearance.borderPadding = TimerStyleValue(widget.timerStyle, "iconBorderPadding")
@@ -3027,7 +3174,7 @@ EXFactory:InitPool(TIMER_BAR_WIDGET_POOL, "Frame", nil, function(widget)
     widget.Release = TimerBarWidgetRelease
 end)
 
--- 初版 TimerBarWidget：横向条，默认含纯显示图标；不会在图标上显示第二套倒数。
+-- TimerBarWidget 默认横向，含纯显示图标；不会在图标上显示第二套倒数。
 function EXUI:CreateTimerBarWidget(parent, style)
     local widget = EXFactory:Acquire(TIMER_BAR_WIDGET_POOL, parent)
     widget._released = false

@@ -181,34 +181,40 @@ end
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
 local function EX_RegisterLayout()
-    -- [声明迁移边界：设置页] 三个复合控件与原多选控件各只声明一次。
-    -- key/type/opts、筛选字段、世界/运行/面板 Collection 与回调禁止修改。
     local layout = {
-        version = 1,
-        sections = {
+        version = 2,
+        cards = {
             {
-                kind = "composite", id = "common", title = L["玩家角色定位标记"],
-                component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS,
-            },
-            {
-                kind = "settings", id = "visibility", title = L["显示场景"],
-                items = {
-                    { key = "visibility", type = "select", multiple = true, label = L["触发场景"], options = VISIBILITY_OPTIONS },
-                    { key = "enabledSpecs", type = "select", multiple = true, label = L["启用专精"], options = SPEC_OPTIONS },
+                kind = "card", id = "card.common", title = L["玩家角色定位标记"],
+                children = {
+                    { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", opts = COMMON_OPTS },
                 },
             },
             {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchorGroup", opts = PLAYER_POSITION_ANCHOR_OPTS,
+                kind = "card", id = "card.visibility", title = L["显示场景"],
+                children = {
+                    { kind = "control", id = "visibility", path = "visibility", controlType = "select", multiple = true, label = L["触发场景"], options = VISIBILITY_OPTIONS },
+                    { kind = "control", id = "enabledSpecs", path = "enabledSpecs", controlType = "select", multiple = true, label = L["启用专精"], options = SPEC_OPTIONS },
+                },
             },
             {
-                kind = "composite", id = "icon", title = L["图标外观"],
-                component = "icongroup", key = "icon", opts = {},
+                kind = "card", id = "card.anchor", title = L["锚点设置"],
+                children = {
+                    { kind = "component", id = "anchorGroup", component = "anchorgroup", path = "anchorGroup", optionsRef = "anchor" },
+                },
+            },
+            {
+                kind = "card", id = "card.icon", title = L["图标外观"],
+                children = {
+                    { kind = "component", id = "icon", component = "icongroup", path = "icon" },
+                },
             },
         },
     }
 
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, layout, function()
+        return { options = { anchor = PLAYER_POSITION_ANCHOR_OPTS } }
+    end)
 end
 EX_RegisterLayout()
 
@@ -431,9 +437,8 @@ EnsureAnchorController = function()
             -- 世界拖动已写入本模块 root DB 的 offsetX/offsetY。通过唯一
             -- 正式通知重套已有表面，并让编辑世界样本立即采用该 DB 坐标。
             EXUI:NotifyModuleValueChanged(EXWIND_MODULE_KEY, "offsetX", "committed")
-            if EXUI.CurrentModule == EXWIND_MODULE_KEY and EXUI.MainFrame and EXUI.MainFrame:IsShown() then
-                EXUI:RefreshContent()
-            end
+            local page = EXUI:GetModulePage(EXWIND_MODULE_KEY)
+            if page then page:Refresh() end
         end,
     })
     return anchorController

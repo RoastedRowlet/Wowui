@@ -2,7 +2,7 @@
 -- =============================================================
 -- ExBossGUI/PanelFrame.lua
 -- 主面板骨架：窗口 + 顶部 Tab + 左侧导航框架 + 右侧内容区
--- 无任何外部依赖（不需要 ExwindTools / ExwindGrid / ExwindFactory）
+-- 使用 Core 统一宿主与 EXUI 控件；页面内容由各 V2 owner 管理。
 -- =============================================================
 
 
@@ -25,7 +25,7 @@ local CONTENT_X = LEFT_W + 10
 local OUTER_STRIP_W = 140
 local EMBED_TOP_Y    = -36
 
--- [卡片/Grid 迁移边界：顶级路由]
+-- [V2 页面边界：顶级路由]
 -- TABS/redirect/dispatch 顺序与 key 是导航业务合同，禁止因卡片外观迁移改名、重排、恢复历史页或改变可达性。
 -- 页面内容卡片只在各 Page 内迁移；本文件继续只拥有 Unified/fallback 宿主与切页释放。
 local TABS = {
@@ -231,14 +231,10 @@ local function CreateSidebarCategoryHeader(parent)
     return EXUI:CreateSidebarNavigationHeader(parent, "", { height = 26 })
 end
 
--- opts.selectedPresentation 直接转给公共侧栏导航按钮（nil/"rail" = 默认的淡底+左侧指示条，
--- "outline" = 只描边）。按钮来自共享池，呈现选项每次创建都要重新传，所以不在这里写死默认值。
-local function CreateSidebarModuleButton(parent, opts)
-    local config = type(opts) == "table" and opts or {}
+local function CreateSidebarModuleButton(parent)
     local btn = EXUI:CreateSidebarNavigationButton(parent, "", nil, {
         level = 1,
         height = 28,
-        selectedPresentation = config.selectedPresentation,
     })
     btn:SetHeight(28)
     return btn
@@ -402,14 +398,21 @@ local function ApplySpecialPageHostGeometry()
     end
 end
 
+local function HideContentPages()
+    for _, key in ipairs({
+        "TimerBarPage", "BunBarPage", "CountdownPage", "FlashTextMediumPage",
+        "RingProgressPage", "IconAlertPage", "CastProgressBarPage", "ExtraShieldBarPage",
+        "DungeonExtrasPage", "BossPage", "FixedTimelinePage", "HomePage",
+        "GlobalSettingsPage", "ImportExportPage", "VoicePackPage", "MDTPage",
+        "OtherVoicePage", "ToolsPage", "TrashCDPage",
+    }) do
+        local page = Panel[key]
+        if page and page.Hide then page:Hide() end
+    end
+end
+
 local function RefreshContent()
     if not contentFrame then return end
-
-    -- TrashCD 在 Unified 模式会把既有“副本/法术列表”挂到 Shell B；离开该页
-    -- 必须主动收起，不能依赖原 content root 的 Hide（两个 pane 已不再是其 child）。
-    if currentTab ~= "trash" and TrashCDPage and TrashCDPage.Hide then
-        TrashCDPage:Hide()
-    end
 
     if IsEmbedTab(currentTab) then
         SetOwnTopTabBarShown(false)
@@ -467,7 +470,7 @@ local function RefreshContent()
         contentFrame._placeholder:Hide()
     end
 
-    -- 隐藏各设置页的 scrollFrame（切 Tab 时清理）
+    -- 切页与关闭窗口共用各页面的释放入口。
     local BossPage       = ExBoss.UI.Panel.BossPage
     local FixedTimelinePage = ExBoss.UI.Panel.FixedTimelinePage
     local HomePage       = ExBoss.UI.Panel.HomePage
@@ -476,43 +479,12 @@ local function RefreshContent()
     local MDTPage = ExBoss.UI.Panel.MDTPage
     local OtherVoicePage = ExBoss.UI.Panel.OtherVoicePage
     local ToolsPage = ExBoss.UI.Panel.ToolsPage
-    local TimerBarPage   = ExBoss.UI.Panel.TimerBarPage
-    local BunBarPage     = ExBoss.UI.Panel.BunBarPage
-    local CountdownPage  = ExBoss.UI.Panel.CountdownPage
-    local FlashTextMediumPage = ExBoss.UI.Panel.FlashTextMediumPage
-    local RingProgressPage = ExBoss.UI.Panel.RingProgressPage
-    local IconAlertPage = ExBoss.UI.Panel.IconAlertPage
-    local CastProgressBarPage = ExBoss.UI.Panel.CastProgressBarPage
-    local ExtraShieldBarPage = ExBoss.UI.Panel.ExtraShieldBarPage
     local VoicePackPage  = ExBoss.UI.Panel.VoicePackPage
     local TrashCDPage    = ExBoss.UI.Panel.TrashCDPage
-    for _, page in ipairs({
-        TimerBarPage,
-        BunBarPage,
-        CountdownPage,
-        FlashTextMediumPage,
-        RingProgressPage,
-        IconAlertPage,
-        CastProgressBarPage,
-        ExtraShieldBarPage,
-        ExBoss.UI.Panel.DungeonExtrasPage,
-    }) do
-        if page and page._scrollFrame then page._scrollFrame:Hide() end
-        if page and page.Hide then page:Hide() end
-    end
-    if BossPage and BossPage.Hide then BossPage:Hide() end
-    if FixedTimelinePage and FixedTimelinePage.Hide then FixedTimelinePage:Hide() end
-    if HomePage and HomePage.Hide then HomePage:Hide() end
-    if GlobalSettingsPage and GlobalSettingsPage.Hide then GlobalSettingsPage:Hide() end
-    if ImportExportPage and ImportExportPage.Hide then ImportExportPage:Hide() end
-    if VoicePackPage and VoicePackPage.Hide then VoicePackPage:Hide() end
-    if MDTPage and MDTPage.Hide then MDTPage:Hide() end
-    if OtherVoicePage and OtherVoicePage.Hide then OtherVoicePage:Hide() end
-    if ToolsPage and ToolsPage.Hide then ToolsPage:Hide() end
-    if TrashCDPage and TrashCDPage.Hide then TrashCDPage:Hide() end
+    HideContentPages()
 
     -- 分发各 Tab
-    if currentTab == "home" then
+    if currentTab == "home" or currentTab == "about" then
         leftFrame:Hide()
         if HomePage and HomePage.Render then
             HomePage:Render(contentFrame)
@@ -683,6 +655,11 @@ local function FlushFocusedEditBox()
     end
 end
 
+local function OnPanelHidden()
+    FlushFocusedEditBox()
+    HideContentPages()
+end
+
 -- =============================================================
 -- 窗口创建（懒加载，只执行一次）
 -- =============================================================
@@ -691,9 +668,9 @@ local function CreateUnifiedPanel()
     if mainFrame then return end
     local shellFrame = unifiedHosts.contentHost:GetParent()
     mainFrame = CreateFrame("Frame", nil, shellFrame, "BackdropTemplate")
-    mainFrame:SetPoint("TOPLEFT", unifiedHosts.navHost, "TOPLEFT", 0, 0)
-    mainFrame:SetPoint("BOTTOMRIGHT", unifiedHosts.contentHost, "BOTTOMRIGHT", 0, 0)
+    mainFrame:SetAllPoints(unifiedHosts.fullContentHost)
     mainFrame:SetFrameStrata(shellFrame:GetFrameStrata())
+    mainFrame:SetScript("OnHide", OnPanelHidden)
     mainFrame:Hide()
 
     leftFrame = CreateFrame("Frame", nil, mainFrame, "BackdropTemplate")
@@ -737,11 +714,7 @@ local function CreatePanel()
     mainFrame:RegisterForDrag("LeftButton")
     mainFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
     mainFrame:SetScript("OnDragStop",  function(self) self:StopMovingOrSizing() end)
-    mainFrame:SetScript("OnHide", function()
-        FlushFocusedEditBox()
-        local HomePage = ExBoss.UI.Panel.HomePage
-        if HomePage then HomePage:Hide() end
-    end)
+    mainFrame:SetScript("OnHide", OnPanelHidden)
     mainFrame:Hide()
 
     -- 支持 ESC 关闭
@@ -999,8 +972,13 @@ end
 
 function Panel:RelayoutUnified()
     if not IsUnifiedMode() or not mainFrame then return end
-    mainFrame:SetPoint("TOPLEFT", unifiedHosts.navHost, "TOPLEFT", 0, 0)
-    mainFrame:SetPoint("BOTTOMRIGHT", unifiedHosts.contentHost, "BOTTOMRIGHT", 0, 0)
+    mainFrame:ClearAllPoints()
+    if unifiedPanel.LayoutMode == "tabs_split" then
+        mainFrame:SetPoint("TOPLEFT", unifiedHosts.navHost, "TOPLEFT", 0, 0)
+        mainFrame:SetPoint("BOTTOMRIGHT", unifiedHosts.contentHost, "BOTTOMRIGHT", 0, 0)
+    else
+        mainFrame:SetAllPoints(unifiedHosts.fullContentHost)
+    end
     ApplySpecialPageHostGeometry()
 end
 
@@ -1111,6 +1089,13 @@ function Panel:SetTab(tabKey)
     currentTab = ResolveSafeTab(requested)
     if IsUnifiedMode() then
         unifiedPanel:SaveActiveRoute("boss", { tab = currentTab })
+        if unifiedPanel.ActiveProvider == "boss" then
+            local provider = unifiedPanel.Providers.boss
+            local mode = provider:GetLayoutMode({ tab = currentTab })
+            if unifiedPanel.LayoutMode ~= mode then
+                unifiedPanel:ApplyLayout(mode, { showTabs = provider.hasTopTabs, navRatio = provider.navRatio })
+            end
+        end
         Panel:RefreshUnifiedTabs()
     end
     if mainFrame and mainFrame:IsShown() then

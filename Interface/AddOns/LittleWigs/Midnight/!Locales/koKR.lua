@@ -24,10 +24,24 @@ BigWigsAPI.SetBossModuleLocale("Voidscorned Vagrant", {
 	voidscorned_vagrant = "공허멸시 부랑자",
 })
 
+-- Delves: Gnarldor Isle
+
+BigWigsAPI.SetBossModuleLocale("Gralka Snake-Eater", {
+	gralka_snake_eater = "그랄카 뱀포식자",
+})
+
+BigWigsAPI.SetBossModuleLocale("Osseous Amalgamation", {
+	osseous_amalgamation = "골화 융합체",
+})
+
 -- Delves: Labyrinth of Kindo'jan
 
+BigWigsAPI.SetBossModuleLocale("Den'Zara", {
+	denzara = "덴자라",
+})
+
 BigWigsAPI.SetBossModuleLocale("Kindo'jan", {
-	--kindojan = "Kindo'jan",
+	kindojan = "킨도잔",
 })
 
 -- Delves: Parhelion Plaza
@@ -76,6 +90,20 @@ BigWigsAPI.SetBossModuleLocale("Lumenia", {
 
 BigWigsAPI.SetBossModuleLocale("Mul'tha'ul", {
 	multhaul = "물타울",
+})
+
+-- Delves: The Ring of Glory
+
+BigWigsAPI.SetBossModuleLocale("Gnok", {
+	gnok = "똑똑",
+})
+
+BigWigsAPI.SetBossModuleLocale("Gnok?", {
+	gnok2 = "똑똑?",
+})
+
+BigWigsAPI.SetBossModuleLocale("Drakta", {
+	drakta = "드락타",
 })
 
 -- Delves: The Shadow Enclave

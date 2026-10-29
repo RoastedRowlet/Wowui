@@ -32,9 +32,8 @@ local L = ExwindTools.L
 --=======================================================================
 ExwindTools.name = addonName
 -- [Core] 版本信息 (从 ExwindTools_Metadata.lua 读取)
-local meta = _G.ExwindTools_MetaData or { version = "DEV-Build", gridEngineVersion = "DEV" }
+local meta = _G.ExwindTools_MetaData or { version = "DEV-Build" }
 ExwindTools.VERSION = meta.version
-ExwindTools.GridEngineVersion = meta.gridEngineVersion
 
 --=======================================================================
 --========================== 全局字体准则 ===============================
@@ -156,6 +155,7 @@ ExwindTools.ModuleList = {
     { Key = "ExClass.NoMoveSkillAlert", Name = L["位移技能CD提示"], Desc = L["当位移技能冷却中时提示。"], Category = 6 },
     { Key = "ExClass.DKBloodBoil", Name = L["DK血沸普通版"], Desc = L["血沸冷却更新时显示 3 秒倒数图标。"], Category = 6 },
     { Key = "ExClass.DKBloodBoilSmart", Name = L["DK血沸智能版"], Desc = L["仅在需要手动施放高亮血沸时显示图标。"], Category = 6, DefaultEnabled = false },
+    { Key = "ExClass.EXYSF01", Name = L["盗贼隐秘之刃监控(临时版)"], Desc = L["技能计数与覆盖技能音效提示，并显示指定增益的层数。"], Category = 6, DefaultEnabled = false },
 
     { Key = "ExClass.BrewmasterStagger", Name = L["酒仙酒池监控"], Desc = L["显示酒仙武僧的酒池百分比，并支持独立满条上限与阈值变色。"], Category = 6 },
     { Key = "ExTools.TransformTimer", Name = L["噬灭变身计时"], Desc = L["玩家施放指定变身法术后，在屏幕显示持续秒数。"], Category = 6 },
@@ -428,7 +428,6 @@ _G.EXDebug = EXDebug
 --========================== 模块状态报告 ===============================
 --=======================================================================
 ExwindTools.ModuleStatus = {}
-ExwindTools.RegisteredLayouts = {}
 -- 模块默认值声明是源码唯一真源：模块作者可直接粘贴 Grid 导出的 EX_DEFAULTS。
 -- 它只在首次取得 ModuleDB 时编译为运行时扁平结构；运行时不存在第二份映射或转发。
 ExwindTools.ModuleDefaultDeclarations = {}
@@ -467,14 +466,6 @@ local function CheckLibs()
             name = "LibSharedMedia-3.0",
             check = function()
                 return LibStub and LibStub:GetLibrary("LibSharedMedia-3.0", true) ~= nil
-            end
-        },
-        { name = "LibAsync", check = function() return LibStub and LibStub:GetLibrary("LibAsync", true) ~= nil end },
-        {
-            name = "LibCustomGlow-1.0",
-            check = function()
-                return LibStub and
-                    LibStub:GetLibrary("LibCustomGlow-1.0", true) ~= nil
             end
         },
         {
@@ -580,6 +571,13 @@ end
 --=======================================================================
 --========================== 模块管理 ===================================
 --=======================================================================
+-- 设置表首次读取时补一次默认值即可：战斗中各模块高频取 ModuleDB，每次都递归整棵
+-- 默认值太贵。记录挂在"这一份设置表 + 这一份默认值来源"上（都用弱键），所以整份
+-- 重置、切配置、导入换进来的新表没有记录，会照常补；声明一经注册不可再改，
+-- compiled 表不变，同一份表不会重复补。
+local WEAK_KEYS_MT = { __mode = "k" }
+local mergedDefaultSources = setmetatable({}, WEAK_KEYS_MT)
+
 local function MergeDefaults(dst, src)
     if type(dst) ~= "table" or type(src) ~= "table" then return end
     for k, v in pairs(src) do
@@ -848,18 +846,33 @@ function ExwindTools:GetModuleDB(moduleKey, defaults)
         error("GetModuleDB[" .. moduleKey .. "]: declared module must not pass a second defaults table", 2)
     end
     local storage = self:GetModuleDBStorage(moduleKey)
-    storage.ModuleDB[moduleKey] = storage.ModuleDB[moduleKey] or {}
-    if declared then
-        MergeDefaults(storage.ModuleDB[moduleKey], declared.compiled)
-    elseif type(defaults) == "table" then
-        MergeDefaults(storage.ModuleDB[moduleKey], defaults)
+    local db = storage.ModuleDB[moduleKey]
+    if not db then
+        db = {}
+        storage.ModuleDB[moduleKey] = db
     end
-    return storage.ModuleDB[moduleKey]
+    local source = declared and declared.compiled or (type(defaults) == "table" and defaults or nil)
+    if source then
+        local merged = mergedDefaultSources[db]
+        if not merged then
+            merged = setmetatable({}, WEAK_KEYS_MT)
+            mergedDefaultSources[db] = merged
+        end
+        if not merged[source] then
+            MergeDefaults(db, source)
+            merged[source] = true
+        end
+    end
+    return db
 end
 
-function ExwindTools:RegisterModuleLayout(moduleKey, layoutData)
-    if type(moduleKey) == "string" and type(layoutData) == "table" then
-        self.RegisteredLayouts[moduleKey] = layoutData
+-- 原地清空并整份换内容（模块持有设置表引用，不能换新表）之后调用：
+-- 让下一次 GetModuleDB 对这份表重新补默认值。
+function ExwindTools:InvalidateModuleDBDefaults(moduleKey)
+    local storage = self:GetModuleDBStorage(moduleKey)
+    local db = storage and storage.ModuleDB and storage.ModuleDB[moduleKey]
+    if db then
+        mergedDefaultSources[db] = nil
     end
 end
 

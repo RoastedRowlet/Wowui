@@ -21,6 +21,7 @@ local backupBars = {}
 local durationEventCount = {}
 local warnStageThree = false
 local stageThreeEventCount = 0
+local encounterStart = 0
 local spellCount = {}
 
 local gapTimer do
@@ -63,7 +64,7 @@ local gapTimer do
 		[1286573] = { [2] = { [33] = 52 } }, -- Soul Sever
 	}
 	function gapTimer(spellId, duration)
-		local timers = mod:Mythic() and timersMythic or mod:Heroic() and timersHeroic or mod:Normal() and timersNormal
+		local timers = mod:Mythic() and timersMythic or mod:Heroic() and timersHeroic or (mod:Normal() or mod:Story()) and timersNormal
 		if timers and timers[spellId] then
 			if duration == true then
 				return true
@@ -223,12 +224,15 @@ function mod:OnEncounterStart()
 	self:ResetCounts()
 	warnStageThree = false
 	stageThreeEventCount = 0
+	encounterStart = GetTime()
 
 	-- Starts the encounter by casting Fangs of the Coiled Altar
-	self:Message(1282487, "red")
+	if self:ShouldShowBars() then
+		self:Message(1282487, "red")
 
-	self:SendMessage("BigWigs_BlockBlizzMessages")
-	self:RegisterEvent("ENCOUNTER_WARNING")
+		self:SendMessage("BigWigs_BlockBlizzMessages")
+		self:RegisterEvent("ENCOUNTER_WARNING")
+	end
 	self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", nil, "boss2")
 end
 
@@ -399,7 +403,7 @@ function mod:OtherTimeline(_, eventInfo)
 
 	local stage = self:GetStage()
 	if stage == 1 then
-		if rounded == 2 then
+		if rounded == 2 or (rounded == 42 and self:Story()) then -- no Guillotine in story
 			barInfo = self:ToxicDeluge()
 		elseif rounded == 12 then
 			barInfo = self:Axegrinder()
@@ -414,6 +418,9 @@ function mod:OtherTimeline(_, eventInfo)
 			end
 		elseif rounded == 20 or rounded == 17 or rounded == 21 or rounded == 16 then
 			barInfo = self:Sever()
+			if self:Story() then -- canceled instead of finished
+				barInfo.timer = self:ScheduleTimer(function() self:StopTimelineBar(barInfo, true) end, duration)
+			end
 		elseif rounded == 85 then
 			barInfo = self:FangsOfTheCoiledAltar()
 		end
@@ -445,10 +452,16 @@ function mod:OtherTimeline(_, eventInfo)
 				barInfo = self:EternalNightfall()
 			elseif rounded == 6 or rounded == 34 then -- 5.5
 				barInfo = self:Dreadmarch(duration)
+				if self:Story() then -- canceled instead of finished
+					barInfo.timer = self:ScheduleTimer(function() self:StopTimelineBar(barInfo, true) end, duration)
+				end
 			elseif rounded == 20 or rounded == 40 then
 				barInfo = self:Gloombomb()
 			elseif rounded == 32 or rounded == 33 then
 				barInfo = self:SoulSever()
+				if self:Story() then -- canceled instead of finished
+					barInfo.timer = self:ScheduleTimer(function() self:StopTimelineBar(barInfo, true) end, duration)
+				end
 			end
 		end
 
@@ -496,6 +509,9 @@ function mod:OtherTimeline(_, eventInfo)
 				barInfo = self:ToxicDeluge()
 			elseif rounded == 29 or rounded == 28 or rounded == 30 or rounded == 33 then
 				barInfo = self:BlightedSever()
+				if self:Story() then -- canceled instead of finished
+					barInfo.timer = self:ScheduleTimer(function() self:StopTimelineBar(barInfo, true) end, duration)
+				end
 			elseif rounded == 92 or rounded == 91 then
 				barInfo = self:DefilementOfTheCoiledAltar()
 			elseif rounded == 34 then
@@ -553,13 +569,17 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 		-- mythic typically fires the next event before canceling
 		if spellCount[1282487] > barInfo.count then
 			-- next bar started, so it finished
-			barInfo:onFinished()
+			if self:ShouldShowBars() then
+				barInfo:onFinished()
+			end
 		else
 			-- normal and heroic typically cancel and delay the next event
 			self:SimpleTimer(function()
 				if spellCount[1282487] > barInfo.count then
 					-- next bar started, so it finished
-					barInfo:onFinished()
+					if self:ShouldShowBars() then
+						barInfo:onFinished()
+					end
 				else
 					-- actually ended early, so trigger next phase
 					self:StartPhaseTwo()
@@ -570,23 +590,11 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 		return
 	end
 
-	if barInfo and barInfo.gapTimer and state == 2 then -- Finished (reuse the eventID to set the spell indicator for the next bar)
-		self:Bar(barInfo.key, barInfo.gapTimer, CL.count:format(self:GetRename(barInfo.key, barInfo.renamePosition), spellCount[barInfo.key]), nil, eventID)
-	end
-
 	if barInfo and not barInfo.ignoreState then
 		if state == 2 then -- Finished
-			activeBars[eventID] = nil
-			self:StopBar(barInfo.msg)
-			if barInfo.onFinished and self:ShouldShowBars() then
-				barInfo:onFinished()
-			end
+			self:StopTimelineBar(barInfo, true)
 		elseif state == 3 then -- Canceled
-			activeBars[eventID] = nil
-			self:StopBar(barInfo.msg)
-			if barInfo.onCanceled and self:ShouldShowBars() then
-				barInfo:onCanceled()
-			end
+			self:StopTimelineBar(barInfo, false, true)
 		end
 	elseif backupBars[eventID] then
 		if state == 0 then -- Enum.EncounterTimelineEventState.Active
@@ -602,6 +610,31 @@ end
 function mod:ENCOUNTER_TIMELINE_EVENT_REMOVED(_, eventID)
 	activeBars[eventID] = nil
 	backupBars[eventID] = nil
+end
+
+function mod:StopTimelineBar(barInfo, isFinished, runCanceled)
+	if not barInfo then return end
+	if barInfo.state and barInfo.state >= 2 then return end -- already ended
+
+	-- Start the next bar if there is a gap timer
+	if isFinished and barInfo.gapTimer and self:ShouldShowBars() and not self:IsWiping() then
+		-- reuse the eventID to set the spell indicator for the next bar
+		self:Bar(barInfo.key, barInfo.gapTimer, CL.count:format(self:GetRename(barInfo.key, barInfo.renamePosition), spellCount[barInfo.key]), nil, barInfo.eventID)
+	end
+
+	self:StopBar(barInfo.msg)
+	if isFinished and barInfo.onFinished and self:ShouldShowBars() and not self:IsWiping() then
+		barInfo:onFinished()
+	end
+
+	if not isFinished and runCanceled and barInfo.onCanceled then
+		barInfo:onCanceled()
+	end
+
+	barInfo.state = isFinished and 2 or 3 -- Finished/Canceled
+	if barInfo.eventID then
+		activeBars[barInfo.eventID] = nil
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -891,7 +924,14 @@ do
 
 	function mod:DreadmarchMessage()
 		-- Dreadmarch and Unnerving Fixation are both 4s Medium
-		if dreadmarchAboutToCast and not dreadmarchOnMe then
+		local onMe
+		if self:Story() then
+			-- the only Dreadmarch debuff in story is from the enrage, a 10s cast 10 minutes into the fight
+			onMe = GetTime() - encounterStart > 600
+		else
+			onMe = dreadmarchAboutToCast
+		end
+		if onMe and not dreadmarchOnMe then
 			-- Malacrass is about to afflict you with [Dreadmarch]!
 			dreadmarchOnMe = true
 			self:PersonalMessage(1289900, false, self:GetRename(1289900, 2))

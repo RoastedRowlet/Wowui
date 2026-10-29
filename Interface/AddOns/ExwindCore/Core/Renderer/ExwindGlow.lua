@@ -1,6 +1,6 @@
 -- =========================================================
 -- ExwindGlow.lua
--- Core 级原生发光引擎：取代 LibCustomGlow 的运行时职责。
+-- Core 级原生发光引擎：Core 内所有发光都走这里。
 -- 设计约束：不读取宿主 GetWidth/GetHeight/IsShown；调用方传入已知普通尺寸。
 -- =========================================================
 
@@ -9,7 +9,6 @@ local EXUI = ExwindTools and ExwindTools.UI
 local EXFactory = _G.ExwindFactory
 if not EXUI or not EXFactory then return end
 
-local GLOW_WIDGET_POOL = "RuntimeGlowWidget"
 local EDGE_ORDER = { "top", "right", "bottom", "left" }
 local MAX_EDGE_TRAINS = 36
 
@@ -25,6 +24,7 @@ local DEFAULT_STYLE = {
     thickness = 2,
     direction = "CLOCKWISE",
     scale = 1,
+    desaturate = false, -- PROC_FLIPBOOK：true 时翻书图去色后再着色（调用方显式开）
     r = 1, g = 0.82, b = 0.20, a = 1,
 }
 
@@ -61,10 +61,21 @@ local function StopGroup(group)
     if group and group.Stop then group:Stop() end
 end
 
+-- 当前已播着的样式：同一份参数再设一次时直接跳过（动画由暴雪自己继续播）；任何停掉画面的地方都要清掉它。
+local STYLE_KEYS = { "style", "width", "height", "offset", "frequency", "particles", "length",
+    "thickness", "direction", "scale", "desaturate", "r", "g", "b", "a" }
+local function StyleKey(style)
+    local parts = {}
+    for index, key in ipairs(STYLE_KEYS) do parts[index] = tostring(StyleValue(style, key)) end
+    return table.concat(parts, "|")
+end
+
 local function HideAllVisuals(widget)
+    widget._appliedKey = nil
     StopGroup(widget.pulseGroup)
     StopGroup(widget.procStartGroup)
     StopGroup(widget.procLoopGroup)
+    StopGroup(widget.procRevealGroup)
     widget.pulseTexture:Hide()
     widget.procStart:Hide()
     widget.procLoop:Hide()
@@ -88,7 +99,7 @@ local function ConfigurePulse(widget, style)
     local height = NumberOr(StyleValue(style, "height"), width)
     local offset = NumberOr(StyleValue(style, "offset"), 0)
     local scale = math.max(0.25, NumberOr(StyleValue(style, "scale"), 1))
-    local frequency = math.max(0.1, NumberOr(StyleValue(style, "frequency"), 1))
+    local frequency = math.max(0.05, NumberOr(StyleValue(style, "frequency"), 1))
     local areaWidth = math.max(1, width + offset * 2)
     local areaHeight = math.max(1, height + offset * 2)
     local durationIn = 0.35 / frequency
@@ -109,13 +120,43 @@ local function ConfigurePulse(widget, style)
     widget.pulseGroup:Play()
 end
 
+-- 线条按要用的条数才建（最多 MAX_EDGE_TRAINS 条），建过的留着复用。
+local function EnsureEdgeTrains(widget, count)
+    for trainIndex = #widget.edgeTrains + 1, count do
+        local train = {}
+        for _, edgeName in ipairs(EDGE_ORDER) do
+            local edge = CreateFrame("Frame", nil, widget.flowClip)
+            edge.core = EXUI:CreateVisualTexture(edge, _G.EXGLOWFRAME)
+            edge.core:SetTexture("Interface\\Buttons\\WHITE8X8")
+            edge.core:SetBlendMode("BLEND")
+            if edgeName == "top" or edgeName == "bottom" then
+                edge.core:SetPoint("CENTER", edge, "CENTER")
+                edge.core:SetPoint("LEFT", edge, "LEFT")
+                edge.core:SetPoint("RIGHT", edge, "RIGHT")
+            else
+                edge.core:SetPoint("CENTER", edge, "CENTER")
+                edge.core:SetPoint("TOP", edge, "TOP")
+                edge.core:SetPoint("BOTTOM", edge, "BOTTOM")
+            end
+            edge.group = edge:CreateAnimationGroup()
+            edge.group:SetLooping("REPEAT")
+            edge.translation = edge.group:CreateAnimation("Translation")
+            edge.translation:SetOrder(1)
+            edge.translation:SetSmoothing("NONE")
+            edge:Hide()
+            train[edgeName] = edge
+        end
+        widget.edgeTrains[trainIndex] = train
+    end
+end
+
 local function ConfigureEdgeFlow(widget, style)
     local width = math.max(1, NumberOr(StyleValue(style, "width"), 40))
     local height = math.max(1, NumberOr(StyleValue(style, "height"), width))
     -- offset 是有方向的：正值向外扩，负值向内收。这里绝不能取绝对值。
     local offset = NumberOr(StyleValue(style, "offset"), 0)
     local scale = math.max(0.25, NumberOr(StyleValue(style, "scale"), 1))
-    local frequency = math.max(0.1, NumberOr(StyleValue(style, "frequency"), 1))
+    local frequency = math.max(0.05, NumberOr(StyleValue(style, "frequency"), 1))
     local areaWidth = math.max(1, width + offset * 2)
     local areaHeight = math.max(1, height + offset * 2)
     local totalDuration = 1 / frequency
@@ -140,6 +181,7 @@ local function ConfigureEdgeFlow(widget, style)
         right = { length = areaHeight, delayDistance = areaWidth * 2 + areaHeight, dx = 0, dy = areaHeight + lineLength * 2, horizontal = false, point = "BOTTOM", relative = "BOTTOMRIGHT", x = 0, y = -lineLength },
     }
     local edgeConfig = direction == "COUNTERCLOCKWISE" and counterClockwise or clockwise
+    EnsureEdgeTrains(widget, lineCount)
 
     for trainIndex, train in ipairs(widget.edgeTrains) do
         local trainPhase = totalDuration * ((trainIndex - 1) / lineCount)
@@ -166,15 +208,12 @@ local function ConfigureEdgeFlow(widget, style)
                 end
                 edge:Show()
 
+                -- 每条边一个平移动画，建一次后只改参数（不 RemoveAnimations 再新建）。
                 edge.group:Stop()
-                edge.group:RemoveAnimations()
-                edge.group:SetLooping("REPEAT")
-                local translation = edge.group:CreateAnimation("Translation")
-                translation:SetOrder(1)
+                local translation = edge.translation
                 translation:SetStartDelay(startDelay)
                 translation:SetEndDelay(endDelay)
                 translation:SetDuration(travelDuration)
-                translation:SetSmoothing("NONE")
                 translation:SetOffset(cfg.dx, cfg.dy)
                 edge.group:Play(false, trainPhase)
             else
@@ -189,7 +228,7 @@ local function ConfigureProcFlipbook(widget, style)
     local height = NumberOr(StyleValue(style, "height"), width)
     local offset = NumberOr(StyleValue(style, "offset"), 0)
     local scale = math.max(0.25, NumberOr(StyleValue(style, "scale"), 1))
-    local frequency = math.max(0.1, NumberOr(StyleValue(style, "frequency"), 1))
+    local frequency = math.max(0.05, NumberOr(StyleValue(style, "frequency"), 1))
     local areaWidth = math.max(1, width + offset * 2)
     local areaHeight = math.max(1, height + offset * 2)
     local colorR, colorG, colorB, colorA = StyleValue(style, "r"), StyleValue(style, "g"), StyleValue(style, "b"), StyleValue(style, "a")
@@ -199,6 +238,10 @@ local function ConfigureProcFlipbook(widget, style)
     local startSizeW = areaWidth * (150 / 42 / 1.4) * scale
     local startSizeH = areaHeight * (150 / 42 / 1.4) * scale
 
+    -- 暴雪触发光环翻书图自带金黄底色，乘顶点色会把所选颜色染黄：调用方开了 desaturate 才去色成灰白再着色。
+    local desaturate = StyleValue(style, "desaturate") == true
+    widget.procStart:SetDesaturated(desaturate)
+    widget.procLoop:SetDesaturated(desaturate)
     widget.procStart:ClearAllPoints()
     widget.procStart:SetPoint("CENTER", widget, "CENTER")
     widget.procStart:SetSize(startSizeW, startSizeH)
@@ -213,7 +256,10 @@ local function ConfigureProcFlipbook(widget, style)
     widget.procStartFlip:SetFlipBookFrames(30)
     widget.procStartFlip:SetFlipBookFrameWidth(0)
     widget.procStartFlip:SetFlipBookFrameHeight(0)
-    widget.procStartFlip:SetDuration(0.7 / frequency)
+    local startDuration = 0.7 / frequency
+    widget.procStartFlip:SetDuration(startDuration)
+    widget.procStartFade:SetStartDelay(startDuration)
+    widget.procRevealFade:SetStartDelay(startDuration)
 
     widget.procLoopFlip:SetFlipBookRows(6)
     widget.procLoopFlip:SetFlipBookColumns(5)
@@ -222,15 +268,29 @@ local function ConfigureProcFlipbook(widget, style)
     widget.procLoopFlip:SetFlipBookFrameHeight(0)
     widget.procLoopFlip:SetDuration(1 / frequency)
 
-    widget.procLoopGroup:Stop()
-    widget.procStartGroup:Stop()
-    widget.procLoop:Hide()
+    -- 宿主子树可能不执行 Lua 脚本，不能靠 OnFinished 衔接：两段同时播放，循环段延迟显形。
+    widget.procStart:SetAlpha(1)
+    widget.procLoop:SetAlpha(0)
     widget.procStart:Show()
+    widget.procLoop:Show()
     widget.procStartGroup:Play()
+    widget.procLoopGroup:Play()
+    widget.procRevealGroup:Play()
+end
+
+-- 跳过前确认动画还在播（被别处停掉的就照常重设）。
+local function StillPlaying(widget)
+    local name = widget._styleName
+    if name == "PULSE" then return widget.pulseGroup:IsPlaying() end
+    if name == "PROC_FLIPBOOK" then return widget.procLoopGroup:IsPlaying() end
+    local train = widget.edgeTrains[1]
+    return train ~= nil and train.top.group:IsPlaying()
 end
 
 local function ApplyGlowStyle(widget, style)
     widget.style = style or DEFAULT_STYLE
+    local key = StyleKey(widget.style)
+    if widget._appliedKey == key and StillPlaying(widget) then return widget end
     local width = math.max(1, NumberOr(StyleValue(widget.style, "width"), 40))
     local height = math.max(1, NumberOr(StyleValue(widget.style, "height"), width))
     local offset = NumberOr(StyleValue(widget.style, "offset"), 0)
@@ -247,6 +307,7 @@ local function ApplyGlowStyle(widget, style)
     else
         ConfigureEdgeFlow(widget, widget.style)
     end
+    widget._appliedKey = key
     return widget
 end
 
@@ -265,16 +326,22 @@ local function HideGlowWidget(widget)
     return widget
 end
 
+-- 发光框按父级就地创建、就地复用：部分宿主（如暴雪 AuraButton）的子树禁止 SetParent 进入，
+-- 所以不能从全局池借出再挂过去。释放时只隐藏并记进父级自己的空闲表。
 local function ReleaseGlowWidget(widget)
     if not widget or widget._released then return end
     widget._released = true
     StopGlowWidget(widget)
     widget:ClearAllPoints()
     widget.style = nil
-    EXFactory:Release(GLOW_WIDGET_POOL, widget)
+    local parent = widget:GetParent()
+    if parent then
+        parent._exGlowFree = parent._exGlowFree or {}
+        table.insert(parent._exGlowFree, widget)
+    end
 end
 
-EXFactory:InitPool(GLOW_WIDGET_POOL, "Frame", nil, function(widget)
+local function InitGlowWidget(widget)
     widget:SetClipsChildren(false)
     widget:EnableMouse(false)
 
@@ -313,54 +380,40 @@ EXFactory:InitPool(GLOW_WIDGET_POOL, "Frame", nil, function(widget)
     widget.procStartGroup:SetToFinalAlpha(true)
     widget.procStartFlip = widget.procStartGroup:CreateAnimation("FlipBook")
     widget.procStartFlip:SetOrder(1)
+    widget.procStartFade = widget.procStartGroup:CreateAnimation("Alpha")
+    widget.procStartFade:SetFromAlpha(1)
+    widget.procStartFade:SetToAlpha(0)
+    widget.procStartFade:SetDuration(0.01)
     widget.procLoopGroup = widget.procLoop:CreateAnimationGroup()
     widget.procLoopGroup:SetLooping("REPEAT")
     widget.procLoopFlip = widget.procLoopGroup:CreateAnimation("FlipBook")
     widget.procLoopFlip:SetOrder(1)
-    widget.procStartGroup:SetScript("OnFinished", function()
-        if widget._styleName == "PROC_FLIPBOOK" and widget._isShown then
-            widget.procStart:Hide()
-            widget.procLoop:Show()
-            widget.procLoopGroup:Play()
-        end
-    end)
+    widget.procRevealGroup = widget.procLoop:CreateAnimationGroup()
+    widget.procRevealGroup:SetToFinalAlpha(true)
+    widget.procRevealFade = widget.procRevealGroup:CreateAnimation("Alpha")
+    widget.procRevealFade:SetFromAlpha(0)
+    widget.procRevealFade:SetToAlpha(1)
+    widget.procRevealFade:SetDuration(0.01)
 
     widget.flowClip = CreateFrame("Frame", nil, widget)
     widget.flowClip:SetAllPoints(widget)
     widget.flowClip:SetClipsChildren(true)
-    widget.edgeTrains = {}
-    for trainIndex = 1, MAX_EDGE_TRAINS do
-        local train = {}
-        for _, edgeName in ipairs(EDGE_ORDER) do
-            local edge = CreateFrame("Frame", nil, widget.flowClip)
-            edge.core = EXUI:CreateVisualTexture(edge, _G.EXGLOWFRAME)
-            edge.core:SetTexture("Interface\\Buttons\\WHITE8X8")
-            edge.core:SetBlendMode("BLEND")
-            if edgeName == "top" or edgeName == "bottom" then
-                edge.core:SetPoint("CENTER", edge, "CENTER")
-                edge.core:SetPoint("LEFT", edge, "LEFT")
-                edge.core:SetPoint("RIGHT", edge, "RIGHT")
-            else
-                edge.core:SetPoint("CENTER", edge, "CENTER")
-                edge.core:SetPoint("TOP", edge, "TOP")
-                edge.core:SetPoint("BOTTOM", edge, "BOTTOM")
-            end
-            edge.group = edge:CreateAnimationGroup()
-            edge:Hide()
-            train[edgeName] = edge
-        end
-        widget.edgeTrains[trainIndex] = train
-    end
+    widget.edgeTrains = {} -- 线条用到才建，见 EnsureEdgeTrains
 
     widget.ApplyStyle = ApplyGlowStyle
     widget.ShowGlow = ShowGlowWidget
     widget.HideGlow = HideGlowWidget
     widget.Release = ReleaseGlowWidget
-end)
+end
 
 --- 创建独立 Overlay；parent 必须是调用方可安全持有的宿主，宽高必须通过 style 传入。
 function EXUI:CreateGlowWidget(parent, style)
-    local widget = EXFactory:Acquire(GLOW_WIDGET_POOL, parent)
+    local free = parent and parent._exGlowFree
+    local widget = free and table.remove(free)
+    if not widget then
+        widget = CreateFrame("Frame", nil, parent or UIParent)
+        InitGlowWidget(widget)
+    end
     widget._released = false
     widget._isShown = false
     widget.style = style or DEFAULT_STYLE
@@ -412,7 +465,7 @@ function EXUI:ApplyCollectionItemVisualEffects(root, effects, width, height, bas
         offset = glow.offset, frequency = glow.frequency,
         particles = glow.particles, length = glow.length,
         thickness = glow.thickness, direction = glow.direction,
-        scale = glow.scale,
+        scale = glow.scale, desaturate = glow.desaturate == true,
         r = color.r, g = color.g, b = color.b, a = color.a,
     })
 end

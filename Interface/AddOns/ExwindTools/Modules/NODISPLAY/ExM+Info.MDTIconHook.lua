@@ -11,8 +11,6 @@ local EXUI = ExwindTools.UI
 local L = (ExwindTools and ExwindTools.L) or setmetatable({}, { __index = function(_, key) return key end })
 
 local EXWIND_MODULE_KEY = "ExM+Info.MDTIconHook"
-local CUSTOM_ICONS_RENDERER = EXWIND_MODULE_KEY .. ".CustomIcons"
-local BLACKLIST_RENDERER = EXWIND_MODULE_KEY .. ".Blacklist"
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 
 -- =========================================================
@@ -113,27 +111,6 @@ end
 -- =========================================================
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
-local function GetRawTableColumns(kind)
-    return {
-        { title = kind == "custom" and L["NPC ID = 法术 ID"] or L["NPC ID"] },
-        { title = L["操作"] },
-    }
-end
-
-local function ReleaseRawTableControl(control)
-    if not control then return end
-    if EXUI.RestoreSettingsListControl then EXUI:RestoreSettingsListControl(control) end
-    local factory = _G.ExwindFactory
-    if factory and control._isCompositeHost then
-        factory:ReleaseCompositeHost(control)
-    elseif factory then
-        factory:ReleaseGridWidget(control)
-    else
-        control:Hide()
-        control:SetParent(nil)
-    end
-end
-
 local function TokenizeLines(raw)
     raw = type(raw) == "string" and raw or tostring(raw or "")
     if raw == "" then return {} end
@@ -276,182 +253,131 @@ local function AppendRawRecord(kind, text)
     return true
 end
 
-local function ClearRawTableRows(controls)
-    for index = #controls.rows, 1, -1 do
-        local row = controls.rows[index]
-        if row.inputIsEditBox then
-            -- OnEditFocusLost 槽位上有 Core 的焦点画器，走 ClearControlScript
-            -- 清槽位时一并丢掉安装记录，下一次借用才会重装画器。
-            EXUI:ClearControlScript(row.input, "OnEditFocusLost")
-            row.input:SetScript("OnEnterPressed", nil)
-        end
-        ReleaseRawTableControl(row.action)
-        ReleaseRawTableControl(row.input)
-        controls.rows[index] = nil
-    end
-end
-
-local RebuildRawTable
-
-local function QueueRawTableRebuild(host, ctx, kind)
-    if host._exRawTableRefreshQueued then return end
-    local lease = host._exRawTableLease
-    host._exRawTableRefreshQueued = true
-    C_Timer.After(0, function()
-        if host._exRawTableLease ~= lease or not host._exRawTableControls then return end
-        host._exRawTableRefreshQueued = nil
-        RebuildRawTable(host, ctx, kind)
-        ctx:RequestReflow()
-    end)
-end
-
-RebuildRawTable = function(host, ctx, kind)
-    local controls = host._exRawTableControls
-    if not controls then return end
-    ctx:ReleaseTablePresentation()
-    ClearRawTableRows(controls)
-    local records = GetRawTableRecords(kind)
-
-    local addRow = {
-        input = EXUI:CreateEditBox(host, "", 1, 28, nil, {
-            placeholder = kind == "custom" and L["NPCID = SpellID"] or L["NPC ID"],
-        }),
-        inputIsEditBox = true,
-    }
-    addRow.action = EXUI:CreateButton(host, 1, 28, L["添加"], function()
-        if AppendRawRecord(kind, addRow.input:GetText()) then
-            RebuildRawTable(host, ctx, kind)
-            ctx:RequestReflow()
-        end
-    end, { variant = "primary", compact = true })
-    controls.rows[#controls.rows + 1] = addRow
-
-    for _, record in ipairs(records) do
-        local target = record
-        local row = {}
-        if record.editable then
-            row.input = EXUI:CreateEditBox(host, record.text, 1, 28, nil, {})
-            row.inputIsEditBox = true
-            local committedText = record.text
-            local function Commit(self)
-                local text = self:GetText()
-                if text == committedText then return end
-                if ReplaceRawRecord(kind, target, text) then
-                    committedText = text
-                    QueueRawTableRebuild(host, ctx, kind)
-                else
-                    self:SetText(committedText)
-                end
-            end
-            -- 焦点画器就在这个槽位上，用 HookScript 把提交逻辑叠加上去。
-            row.input:HookScript("OnEditFocusLost", function(self)
-                if self._exSkipLostCommit then self._exSkipLostCommit = nil return end
-                Commit(self)
-            end)
-            row.input:SetScript("OnEnterPressed", function(self)
-                Commit(self)
-                self._exSkipLostCommit = true
-                self:ClearFocus()
-            end)
-            row.action = EXUI:CreateButton(host, 1, 28, L["删除"], function()
-                if DeleteRawRecord(kind, target) then
-                    RebuildRawTable(host, ctx, kind)
-                    ctx:RequestReflow()
-                end
-            end, { variant = "danger", compact = true })
-        else
-            row.input = EXUI:CreateDescription(host, record.displayText, 1)
-            row.action = EXUI:CreateDescription(host, "—", 1)
-        end
-        controls.rows[#controls.rows + 1] = row
-    end
-
-    local presentedRecords = {}
-    for index = 2, #controls.rows do
-        local row = controls.rows[index]
-        presentedRecords[#presentedRecords + 1] = {
-            cells = {
-                { widget = row.input, type = row.inputIsEditBox and "input" or "text" },
-                { widget = row.action, type = row.inputIsEditBox and "button" or "text" },
-            },
-        }
-    end
-    ctx:SetTableControls({
-        add = {
-            cells = {
-                { widget = addRow.input, type = "input" },
-                { widget = addRow.action, type = "button" },
-            },
-        },
-        records = presentedRecords,
-    })
-end
-
 -- =========================================================
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
-local Grid = ExwindTools.Grid
-if not Grid then error("MDTIconHook requires ExwindGrid", 2) end
-
-local function RegisterRawTableControls(rendererKey, kind)
-    Grid:RegisterTableControls(rendererKey, {
-        mount = function(host, ctx)
-            host._exRawTableLease = {}
-            host._exRawTableControls = {
-                rows = {},
-            }
-            RebuildRawTable(host, ctx, kind)
-        end,
-        update = function(host, ctx)
-            RebuildRawTable(host, ctx, kind)
-        end,
-        release = function(host)
-            local controls = host._exRawTableControls
-            if controls then ClearRawTableRows(controls) end
-            host._exRawTableControls = nil
-            host._exRawTableRefreshQueued = nil
-            host._exRawTableLease = nil
-        end,
-    })
-end
-
-RegisterRawTableControls(CUSTOM_ICONS_RENDERER, "custom")
-RegisterRawTableControls(BLACKLIST_RENDERER, "blacklist")
-
-local function EX_RegisterLayout()
-    -- [声明迁移边界：设置页] 两组原始控件由唯一 shared table 承载，其余控件改为 typed sections。
-    -- key/type、apply.func 与 NPC/法术解析顺序均属业务合同，禁止修改。
-    local layout = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings", id = "common", title = L["通用设置"],
-                items = {
-                    { key = "enabled", type = "switch", label = L["开启功能"] },
-                },
-            },
-            {
-                kind = "table", id = "custom_icons", title = L["自定义图标"],
-                key = "customIconsRecords", controlFactory = CUSTOM_ICONS_RENDERER,
-                columns = GetRawTableColumns("custom"), supportsAdd = true,
-            },
-            {
-                kind = "table", id = "blacklist", title = L["黑名单 NPC"],
-                key = "blacklistRecords", controlFactory = BLACKLIST_RENDERER,
-                columns = GetRawTableColumns("blacklist"), supportsAdd = true,
-            },
-            {
-                kind = "settings", id = "apply", title = L["保存并刷新"],
-                items = {
-                    { key = "apply", type = "button", label = L["保存并刷新"], func = ApplyCustomSettings },
-                },
-            },
+local function BuildRawTableCard(id, title, kind, recordsID)
+    return {
+        id = id, kind = "card", title = title, children = {
+            { id = id .. ".table", kind = "table", columns = {
+                { title = kind == "custom" and L["NPC ID = 法术 ID"] or L["NPC ID"] }, { title = L["操作"] },
+            }, children = {
+                { id = id .. ".addRow", kind = "row", children = {
+                    { id = id .. ".addValue", kind = "cell", children = {
+                        { id = id .. ".addInput", kind = "control", controlType = "input", ref = kind .. "AddInput" },
+                    } },
+                    { id = id .. ".addAction", kind = "cell", children = {
+                        { id = id .. ".add", kind = "button", text = L["添加"], action = kind .. "Add", presentation = "primary" },
+                    } },
+                } },
+                { id = recordsID, kind = "repeat", source = kind, template = {
+                    id = id .. ".record", kind = "row", children = {
+                        { id = id .. ".recordValue", kind = "cell", children = {
+                            { id = id .. ".input", kind = "control", controlType = "input",
+                                ref = kind .. "Input", visible = "editable" },
+                            { id = id .. ".raw", kind = "text", textSource = "rawText", visible = "readonly" },
+                        } },
+                        { id = id .. ".recordAction", kind = "cell", children = {
+                            { id = id .. ".delete", kind = "button", text = L["删除"],
+                                action = kind .. "Delete", presentation = "danger", visible = "editable" },
+                            { id = id .. ".noAction", kind = "text", text = "—", visible = "readonly" },
+                        } },
+                    },
+                } },
+            } },
         },
     }
-
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
 end
-EX_RegisterLayout()
+
+local function CreateV2Owner()
+    local owner = { controls = {}, actions = {}, sources = {}, texts = {}, predicates = {} }
+    local records, drafts, addInputs, refreshQueued = {}, {}, {}, {}
+    function owner:AttachSession(session) self.session = session end
+
+    -- 原始文本是唯一编辑源；记录只作呈现，保存按钮才重建 NPC 数字键映射。
+    local function QueueRefresh(kind)
+        if refreshQueued[kind] then return end
+        refreshQueued[kind] = true
+        local session = owner.session
+        C_Timer.After(0, function()
+            refreshQueued[kind] = nil
+            if not session or not session.alive then return end
+            records[kind] = GetRawTableRecords(kind)
+            drafts[kind] = ""
+            session:Refresh()
+        end)
+    end
+    local function NotifyRawChange(kind)
+        EXUI:NotifyModuleValueChanged(EXWIND_MODULE_KEY,
+            kind == "custom" and "customIconsText" or "blacklistText", "committed")
+        QueueRefresh(kind)
+    end
+
+    for _, tableKind in ipairs({ "custom", "blacklist" }) do
+        local kind = tableKind
+        records[kind], drafts[kind] = GetRawTableRecords(kind), ""
+        owner.sources[kind] = function() return records[kind] end
+        owner.controls[kind .. "Input"] = EXUI:CreateSettingsV2Control({ controlType = "input", height = 28 }, function(context)
+            local record = context.scope.item
+            return {
+                Read = function() return record.text end,
+                Write = function(_, text)
+                    if not context:IsCurrent() or not record.editable or text == record.text then return false end
+                    if not ReplaceRawRecord(kind, record, text) then return false end
+                    record.text = text
+                    NotifyRawChange(kind)
+                    return true
+                end,
+            }
+        end)
+        local addInput = EXUI:CreateSettingsV2Control({ controlType = "input", height = 28 }, function(context)
+            return {
+                Read = function() return drafts[kind] end,
+                Write = function(_, text)
+                    if context:IsCurrent() then drafts[kind] = text end
+                end,
+            }
+        end)
+        local mount, release = addInput.mount, addInput.release
+        addInput.mount = function(host, context)
+            local widget = mount(host, context)
+            widget.placeholder:SetText(kind == "custom" and L["NPCID = SpellID"] or L["NPC ID"])
+            addInputs[kind] = widget
+            return widget
+        end
+        addInput.release = function(widget, context)
+            addInputs[kind] = nil
+            release(widget, context)
+        end
+        owner.controls[kind .. "AddInput"] = addInput
+        owner.actions[kind .. "Add"] = function()
+            if AppendRawRecord(kind, addInputs[kind]:GetText()) then NotifyRawChange(kind) end
+        end
+        owner.actions[kind .. "Delete"] = function(context)
+            if DeleteRawRecord(kind, context.scope.item) then NotifyRawChange(kind) end
+        end
+    end
+    owner.predicates.editable = function(scope) return scope.item.editable end
+    owner.predicates.readonly = function(scope) return not scope.item.editable end
+    owner.texts.rawText = function(scope) return scope.item.displayText or scope.item.text end
+    owner.actions.apply = ApplyCustomSettings
+    return owner
+end
+
+EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, {
+    version = 2, cards = {
+        { id = "common", kind = "card", title = L["通用设置"], children = {
+            { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["开启功能"] },
+        } },
+        BuildRawTableCard("custom_icons", L["自定义图标"], "custom", "customIconsRecords"),
+        BuildRawTableCard("blacklist", L["黑名单 NPC"], "blacklist", "blacklistRecords"),
+        { id = "applySection", kind = "card", title = L["保存并刷新"], children = {
+            { id = "applyRow", kind = "setting", label = L["保存并刷新"], children = {
+                { id = "apply", kind = "button", text = L["保存并刷新"], action = "apply" },
+            } },
+        } },
+    },
+}, CreateV2Owner)
 
 local function InitializeMDTVisuals()
     if MDT_HOOK_INSTALLED then return true end

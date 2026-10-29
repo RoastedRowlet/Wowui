@@ -131,53 +131,28 @@ local MODULE_SPEC = {
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        sections = {
-            {
-                kind = "composite",
-                id = "common",
-                title = L["模块通用设置"],
-                component = "modulecommonsettings",
-                key = "moduleCommon",
-                opts = {
-                        bindRoot = true,
-                        presentation = "settings-list",
-                        fields = {
-                            { column = 1, label = L["启用"], path = "enabled", presentation = "switch", row = 1, type = "checkbox", },
-                            { column = 2, label = L["数值为零时隐藏"], path = "hideWhenZero", presentation = "switch", row = 1, type = "checkbox", },
-                            { column = 3, label = L["数字缩写"], path = "abbreviateNumber", presentation = "switch", row = 1, type = "checkbox", },
-                        },
-                        fixedLayout = {
-                            controlH = 6,
-                            controlW = 46,
-                            firstY = 0,
-                            logicalWidth = 200,
-                            rowStep = 14,
-                            slotX = { 3, 53, 103, 153, },
-                        },
-                },
-            },
-            {
-                kind = "composite",
-                id = "anchor",
-                title = L["锚点设置"],
-                component = "anchorgroup",
-                key = "anchor",
-            },
-            {
-                kind = "composite",
-                id = "icon",
-                title = L["护盾图标样式"],
-                component = "icongroup",
-                key = "icon",
-            },
-            {
-                kind = "composite",
-                id = "font_text",
-                title = L["护盾文字样式"],
-                component = "fontgroup",
-                key = "font_text",
-            },
+        version = 2,
+        cards = {
+            { id = "card.common", kind = "card", title = L["模块通用设置"], children = {
+                { id = "moduleCommon", kind = "component", component = "modulecommonsettings", path = "moduleCommon", opts = {
+                    bindRoot = true,
+                    presentation = "settings-list",
+                    fields = {
+                        { label = L["启用"], path = "enabled", presentation = "switch", type = "checkbox", },
+                        { label = L["数值为零时隐藏"], path = "hideWhenZero", presentation = "switch", type = "checkbox", },
+                        { label = L["数字缩写"], path = "abbreviateNumber", presentation = "switch", type = "checkbox", },
+                    },
+                } },
+            } },
+            { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
+                { id = "anchor", kind = "component", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+            { id = "card.icon", kind = "card", title = L["护盾图标样式"], children = {
+                { id = "icon", kind = "component", component = "icongroup", path = "icon", optionsRef = "icon" },
+            } },
+            { id = "card.font_text", kind = "card", title = L["护盾文字样式"], children = {
+                { id = "font_text", kind = "component", component = "fontgroup", path = "font_text" },
+            } },
         },
     },
 }

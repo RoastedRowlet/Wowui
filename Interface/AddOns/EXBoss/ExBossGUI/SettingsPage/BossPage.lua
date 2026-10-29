@@ -26,14 +26,12 @@ local C = {
         height = 34,
         titleFontSizes = { ExwindTools.GUIMetrics.font.exboss.navigationTitle, ExwindTools.GUIMetrics.font.title, ExwindTools.GUIMetrics.font.exboss.previewText, ExwindTools.GUIMetrics.font.text },
     },
-    -- 右侧技能卡片列表最多显示两行；实际只有一行时不预留空白行。
-    SPELL_LIST_VISIBLE_ROWS = 2,
+    -- 右侧技能卡片列表最多两行（按实际行数缩，见 ApplyBossRightPanelLayout）；更多技能只在列表内部滚动。
     -- 原型右侧技能导航是 5 列 × 2 行；字号与图标需要在实机缩放下仍然清楚。
     -- 页面高度始终取宿主实际可用高度，不把原型的 1050px 画布写回游戏窗口。
     SPELL_LIST_HEIGHT = 72,
     SPELL_DETAIL_HEIGHT = 148,
     SPELL_LIST_TOP_INSET = 6,
-    SPELL_SETTINGS_GRID_COLS = 200,
     PREALERT_FIXED_SECS = 5,
     SPELL_TEXT_KEYS = {
         "centralText",
@@ -70,16 +68,13 @@ local C = {
     MAP_ICON_RENDER_OVERRIDES = {},
 }
 
--- [卡片/Grid 迁移边界：Boss 主页面]
+-- [页面边界：Boss 主页面]
 -- C 中的卡片几何可由共享规范承接，但事件/extra/副本/首领的业务顺序、稳定选择身份与两行视口语义禁止修改。
 -- 普通技能、encounter extra、DungeonCommon 三种详情共享同一右侧宿主；不得为迁移复制宿主或新增第二套选择状态。
 
--- Grid 的颜色方案由函数路径在渲染时解析。
-local EVENT_COLOR_ITEMS_FUNC = "func:ExBoss.Voice.ColorSchemes.BuildDropdownItems"
-
--- Boss 法术编辑器会在切换技能后复用 Grid 控件，因此语音标签不能只在
+-- Boss 法术编辑器会在切换技能后复用 V2 控件，因此语音标签不能只在
 -- 布局里写一次 items；每次绑定到新法术时都要重新取目录并写回控件。
-local function GetVoiceLabelDropdownItems()
+function Page.GetVoiceLabelDropdownItems()
     local catalog = ExBoss and ExBoss.Voice and ExBoss.Voice.LabelCatalog
     if type(catalog) == "table" and type(catalog.GetDropdownItems) == "function" then
         local ok, items = pcall(catalog.GetDropdownItems, catalog)
@@ -110,7 +105,7 @@ end
 local function RefreshVoiceLabelDropdown(dropdown, value)
     if not dropdown then return end
     local selected = tostring(value or "")
-    local items = GetVoiceLabelDropdownItems()
+    local items = Page.GetVoiceLabelDropdownItems()
     dropdown._items = items
     dropdown._currentValue = selected
     local display = selected
@@ -183,7 +178,6 @@ local selectedEventID
 local selectedExtraKey
 local selectedBossCommonSettings
 local STATE = {
-    asyncHandler = nil,
     -- Render 和同帧的外部 RefreshSpellUI 都可能排入 After(0)。只允许当前
     -- 页面实例的回调继续，避免切 Tab 后旧回调在重开页面上重复重建卡片。
     pageRenderGeneration = 0,
@@ -206,7 +200,7 @@ local STATE = {
     spellTextContextEventID = nil,
     spellTextContextConfigID = nil,
     spellTextContextSlotKey = nil,
-    spellSettingsGridBound = false,
+    spellSettingsMounted = false,
     -- 当前法术的纯内存控件状态；它只承载正在显示的字段，不能作为
     -- 配置快照或持久化中间层。
     spellEditorDraft = nil,
@@ -236,7 +230,6 @@ local StartVoiceSequencePreview
 local CancelVoiceSequencePreview
 local RefreshCountdownSegmentedControl
 local RefreshVoicePreviewTimeline
-local ApplyBossCustomCardLayouts
 
 local function GetWidgetEditText(widget)
     if type(widget) ~= "table" then
@@ -283,46 +276,38 @@ local function IsCurrentSpellTextContext()
         and tonumber(selectedEventID) == tonumber(context.eventID)
 end
 
-local function IsSpellTextKey(key)
-    if type(key) ~= "string" then
-        return false
-    end
-    for i = 1, #C.SPELL_TEXT_KEYS do
-        if C.SPELL_TEXT_KEYS[i] == key then
-            return true
-        end
-    end
-    return false
-end
-
 local function GetSpellSettingsWidgets()
-    local Grid = _G.ExwindGrid
-    if not (Grid and Grid.FindMountedWidget and UI.spellSettingsGridChild) then
-        return nil
-    end
-    return setmetatable({}, { __index = function(t, key)
-        local widget = Grid:FindMountedWidget(UI.spellSettingsGridChild, key)
-        rawset(t, key, widget)
-        return widget
-    end })
+    local modulePage = EXUI:GetModulePage(SETTINGS.EDITOR_KEY, UI.spellSettingsChild)
+    if not modulePage then return nil end
+    local widgets = {}
+    modulePage.owner:ForEachNode(function(node)
+        if node.instance or node.button then
+            widgets[node.spec.id] = modulePage:Find(node.spec.id)
+        end
+    end)
+    return widgets
 end
 
-local function RegisterSpellSettingsGridAsActive(moduleKey)
-    if not (Page._visible and UI.spellSettingsGridChild and ExwindTools.UI) then
+local function RegisterSpellSettingsAsActive(moduleKey)
+    if not (Page._visible and UI.spellSettingsChild and ExwindTools.UI) then
         return
     end
-    ExwindTools.UI.ActivePageFrame = UI.spellSettingsGridChild
+    ExwindTools.UI.ActivePageFrame = UI.spellSettingsChild
+    ExwindTools.UI.ActivePageScrollFrame = UI.spellSettingsScroll
     if type(moduleKey) == "string" and moduleKey ~= "" then
         ExwindTools.UI.CurrentModule = moduleKey
     end
 end
 
-local function ClearSpellSettingsGridActiveRegistration()
-    if not (ExwindTools.UI and UI.spellSettingsGridChild) then
+local function ClearSpellSettingsActiveRegistration()
+    if not (ExwindTools.UI and UI.spellSettingsChild) then
         return
     end
-    if ExwindTools.UI.ActivePageFrame == UI.spellSettingsGridChild then
+    if ExwindTools.UI.ActivePageFrame == UI.spellSettingsChild then
         ExwindTools.UI.ActivePageFrame = nil
+        if ExwindTools.UI.ActivePageScrollFrame == UI.spellSettingsScroll then
+            ExwindTools.UI.ActivePageScrollFrame = nil
+        end
         ExwindTools.UI.CurrentModule = nil
     end
 end
@@ -424,7 +409,17 @@ CommitSpellTextFormState = function(changedKey)
         return
     end
     STATE.spellSettingsDirty = true
-    local persisted = PersistSpellEditorDraftToSelectedSpell(changedKey)
+    local persisted = true
+    for _, key in ipairs(C.SPELL_TEXT_KEYS) do
+        local before = key == "centralText" and beforeCentral
+            or key == "preAlertText" and beforePreAlert
+            or key == "timerBarRenameText" and beforeTimerRename or beforeCastProgressRename
+        if before ~= tostring(draft[key] or "") then
+            STATE.spellLastCommitSucceeded = false
+            EXUI:NotifyModuleValueChanged(SETTINGS.EDITOR_KEY, key, "committed")
+            persisted = STATE.spellLastCommitSucceeded == true and persisted
+        end
+    end
     if persisted then
         STATE.spellTextCommittedRevision = draftRevision
     end
@@ -475,7 +470,7 @@ local function InvalidateSpellEditorContext()
     STATE.spellEditorRevision = STATE.spellEditorRevision + 1
     STATE.spellEditorContext = nil
     STATE.currentSpellSlotKey = nil
-    if not STATE.spellSettingsGridBound then
+    if not STATE.spellSettingsMounted then
         STATE.spellEditorDraft = nil
     end
     STATE.spellTextContextRevision = nil
@@ -569,7 +564,7 @@ local function RunSilentSpellSettingsPopulate(fn)
     STATE.suspendSpellSettingPersist = true
     if coroutine.running() then
         -- 协程内不能跨 pcall 边界 yield（Lua 5.1 限制）
-        -- 错误由 LibAsync errorHandler 捕获
+        -- 错误由分帧任务交给 geterrorhandler()
         fn()
         STATE.suspendSpellSettingPersist = false
     else
@@ -581,7 +576,7 @@ local function RunSilentSpellSettingsPopulate(fn)
     end
 end
 
--- 该 key 只用于 Grid 的 UI 事件命名；它不是持久化配置 owner。
+-- 该 key 用于 V2 编辑字段通知；持久化由当前技能身份的 owner 负责。
 SETTINGS.EDITOR_KEY = "ExBoss.BossPage.SpellEditor"
 SETTINGS.DEFAULTS = {
     enabled = true,
@@ -670,7 +665,6 @@ local function ShouldShowBossTargetAlertTestIcon(eventID)
     return BOSS_TEST_TARGET_ALERT_EVENT_IDS[tonumber(eventID)] == true
 end
 local SETTINGS_LAYOUT = {}
-local _spellDescMeasureFS
 
 
 -- 固定使用你确认的映射（EncounterEventIconmask）
@@ -756,10 +750,10 @@ local function GetRuntimeEventConfig(eventID, slotKey)
     return nil
 end
 
--- Grid writes its display state before Core dispatches the module refresh. This
+-- V2 writes its display state before Core dispatches the module refresh. This
 -- state belongs only to the current controls; it is never a configuration
 -- snapshot and is immediately persisted through the current Runtime path.
-local GRID_DRAFT_FIELDS = {
+local SPELL_DRAFT_FIELDS = {
     enabled = true, centralEnabled = true, centralLead = true, centralText = true,
     countdownEnabled = true, tr2CountdownLead = true, preAlertText = true,
     timerBarRenameEnabled = true, timerBarRenameText = true,
@@ -769,25 +763,12 @@ local GRID_DRAFT_FIELDS = {
     tr0Enabled = true, tr0Source = true, tr0Label = true, tr0LSM = true, tr0Path = true, tr0TtsText = true,
     tr1Enabled = true, tr1Source = true, tr1Label = true, tr1LSM = true, tr1Path = true, tr1TtsText = true,
     tr2Enabled = true, tr2PlayTextEnabled = true, tr2Source = true, tr2Label = true, tr2LSM = true, tr2Path = true, tr2TtsText = true,
-    eventColorEnabled = true, eventColorMode = true,
+    eventColorEnabled = true, eventColorMode = true, eventColor = true,
     targetAlertStartEnabled = true, targetAlertStartSource = true, targetAlertStartLabel = true,
     targetAlertStartLSM = true, targetAlertStartPath = true, targetAlertStartTtsText = true,
     targetAlertVoiceEnabled = true, targetAlertRingEnabled = true, targetAlertIconEnabled = true,
     targetAlertTextEnabledV2 = true, targetAlertStealthEnabledV2 = true,
 }
-
-local function ApplyGridChangeToSpellEditorDraft(info)
-    local key, value = type(info) == "table" and info.key or nil, type(info) == "table" and info.value
-    local draft = STATE.spellEditorDraft
-    if GRID_DRAFT_FIELDS[key] ~= true or type(draft) ~= "table" or value == nil then return end
-    if IsSpellTextKey(key) then
-        local stored = tostring(ResolveDisplayedSpellTextForStorage(key, value) or "")
-        draft[key] = stored
-        STATE.spellTextFormState[key] = stored
-    else
-        draft[key] = value
-    end
-end
 
 local function SetCurrentEventPath(eventID, slotKey, suffix, value)
     if value == nil then return false, "nil cannot be saved as a user value" end
@@ -810,7 +791,10 @@ local function GetColorSchemeModule()
     return ExBoss and ExBoss.Voice and ExBoss.Voice.ColorSchemes
 end
 
-local function ResolveVoiceEventBorderColor(eventID)
+local GetCurrentSpellSlotKey -- 定义在下方，颜色读取要先用到
+
+-- slotKey 由调用方传入：卡片分帧任务早于右侧面板赋值 currentSpellSlotKey，不能读它。
+local function ResolveVoiceEventBorderColor(eventID, slotKey)
     local function ClampColor(v, fallback)
         local n = tonumber(v)
         if n == nil then
@@ -826,7 +810,7 @@ local function ResolveVoiceEventBorderColor(eventID)
         return nil
     end
 
-    local slotKey = STATE.currentSpellSlotKey
+    slotKey = slotKey or GetCurrentSpellSlotKey()
     local category = GetSlotCategory(slotKey)
     local bossConfig = GetBossConfig()
     local runtime = bossConfig and category and bossConfig:GetRuntimeConfig(category, slotKey)
@@ -1101,23 +1085,8 @@ local function GetModeDisplay(mode)
     return L["自动"]
 end
 
-local function GetAsyncHandler()
-    if STATE.asyncHandler and STATE.asyncHandler ~= false then
-        return STATE.asyncHandler
-    end
-    local lib = LibStub and LibStub("LibAsync", true)
-    if not lib then
-        STATE.asyncHandler = nil
-        return nil
-    end
-    STATE.asyncHandler = lib:GetHandler({
-        type = "everyFrame",
-        maxTime = 6,
-        maxTimeCombat = 4,
-        errorHandler = geterrorhandler(),
-    })
-    return STATE.asyncHandler
-end
+-- 页面分帧任务的每帧预算（毫秒）。
+local FRAME_TASK_BUDGET_MS = 6
 
 local _eventDataCache
 local _eventDataSource
@@ -1606,7 +1575,7 @@ local function GetVoiceEventColorConfig(eventID)
     if not eid then
         return nil
     end
-    local cfg = GetRuntimeEventConfig(eid, STATE.currentSpellSlotKey)
+    local cfg = GetRuntimeEventConfig(eid, STATE.currentSpellSlotKey or GetCurrentSpellSlotKey())
     if type(cfg) ~= "table" or type(cfg.color) ~= "table" or cfg.color.enabled == false then
         return nil
     end
@@ -1869,14 +1838,14 @@ function Page:GetCurrentDungeonCommonBosses()
     return out
 end
 
-local function GetCurrentSpellSlotKey()
+GetCurrentSpellSlotKey = function()
     local cfg = GetBossConfig()
     if not (cfg and type(cfg.GetRuntimeSlotForScene) == "function") then
         return nil
     end
     -- Map UI 分类使用 `dungeon` / `raid`；配置合同使用 `mplus` / `raid`。
     -- 不能把 dungeon 直接交给 Boss Store：它没有 dungeon_* 槽位，会让
-    -- M+ event 读取返回 nil，继而跳过完整编辑 Grid。
+    -- M+ event 读取返回 nil，继而跳过完整编辑 V2。
     local category = GetMapCategoryKey(GetCurrentMapInfo()) == "raid" and "raid" or "mplus"
     return cfg:GetRuntimeSlotForScene(category)
 end
@@ -2151,35 +2120,6 @@ local function GetSpellSummaryFacts(spellID)
     return cast, range
 end
 
-local function ComputeSpellDescRows(descText)
-    local text = tostring(descText or "")
-    if text == "" then
-        return 5
-    end
-    local gw = (UI.spellSettingsGridChild and UI.spellSettingsGridChild:GetWidth()) or 760
-    local cell = (gw - 20) / C.SPELL_SETTINGS_GRID_COLS
-    if cell < 6 then cell = 6 end
-    local descWidthPx = math.max(200, math.floor(77 * cell - 2))
-    local descRowsMin = 5
-
-    if not _spellDescMeasureFS then
-        _spellDescMeasureFS = EXUI:CreateVisualFontString(UIParent, EXFONTFRAME, "GameFontDisableSmall")
-        _spellDescMeasureFS:Hide()
-        _spellDescMeasureFS:SetWordWrap(true)
-        _spellDescMeasureFS:SetJustifyH("LEFT")
-        _spellDescMeasureFS:SetSpacing(0)
-    end
-    _spellDescMeasureFS:SetWidth(descWidthPx)
-    _spellDescMeasureFS:SetText(text)
-
-    local h = _spellDescMeasureFS:GetStringHeight() or 0
-    local rows = math.ceil((h + 6) / cell)
-    if rows < descRowsMin then
-        rows = descRowsMin
-    end
-    return rows
-end
-
 RefreshSpellDetailHeaderLayout = function()
     if not (UI.spellDetailHeader and UI.spellDetailTitle and UI.spellDetailMeta and UI.spellDetailCast and UI.spellDetailBody) then
         return
@@ -2212,7 +2152,7 @@ RefreshSpellDetailHeaderLayout = function()
     local actionWidth = compact and 246 or 286
     local chipGap = 6
     local identityWidth = math.max(140, headerW - contentX - inset - actionWidth - 12)
-    local bodyWidth = math.max(1, headerW - contentX - inset)
+    local bodyWidth = math.max(1, headerW - contentX - inset - 18)
 
     UI.spellDetailTitle:ClearAllPoints()
     UI.spellDetailTitle:SetPoint("TOPLEFT", UI.spellDetailHeader, "TOPLEFT", contentX, -topInset - 1)
@@ -2256,11 +2196,10 @@ RefreshSpellDetailHeaderLayout = function()
     end
     UI.spellDetailBodyScroll:ClearAllPoints()
     UI.spellDetailBodyScroll:SetPoint("TOPLEFT", UI.spellDetailCastChip, "BOTTOMLEFT", 0, -8)
-    UI.spellDetailBodyScroll:SetPoint("BOTTOMRIGHT", UI.spellDetailHeader, "BOTTOMRIGHT", -inset, 10)
+    UI.spellDetailBodyScroll:SetPoint("BOTTOMRIGHT", UI.spellDetailHeader, "BOTTOMRIGHT", -inset - 18, 10)
     UI.spellDetailBody:SetWidth(bodyWidth)
     local bodyTextHeight = math.max(20, math.ceil(UI.spellDetailBody:GetStringHeight() or 0))
-    local detailHeight = math.max(C.SPELL_DETAIL_HEIGHT, 83 + bodyTextHeight)
-    UI.spellDetailHeader:SetHeight(detailHeight)
+    UI.spellDetailHeader:SetHeight(C.SPELL_DETAIL_HEIGHT)
     if UI.spellDetailBodyChild then
         UI.spellDetailBodyChild:SetSize(bodyWidth,
             math.max(bodyTextHeight, math.max(1, UI.spellDetailBodyScroll:GetHeight())))
@@ -2269,12 +2208,7 @@ RefreshSpellDetailHeaderLayout = function()
     end
 end
 
-local function GetSpellListViewportHeight()
-    return math.max(C.SPELL_CARD.height,
-        math.min(C.SPELL_LIST_HEIGHT, tonumber(UI.spellListMeasuredHeight) or C.SPELL_LIST_HEIGHT))
-end
-
--- [混合函数边界] 这里仅 SetPoint/尺寸属于可迁移布局；描述区边界、共享 Grid 宿主和滚动层级禁止改义。
+-- [混合函数边界] 这里仅 SetPoint/尺寸属于可迁移布局；描述区边界、共享 V2 宿主和滚动层级禁止改义。
 local function SyncBossRightViewport()
     if not (UI.rightViewport and UI.rightRoot) then return end
     local viewport = UI.rightViewport
@@ -2289,185 +2223,99 @@ end
 local function ApplyBossRightPanelLayout()
     SyncBossRightViewport()
     if not (UI.rightRoot and UI.spellSettingsFrame) then return end
-    -- 法术少于六个时只占一行；原有启用控件直接放进说明卡左下角。
-    UI.spellDetailHeader:SetPoint("TOPLEFT", UI.rightRoot, "TOPLEFT", 16, -(GetSpellListViewportHeight() + 8 + C.SPELL_LIST_TOP_INSET))
-    UI.spellDetailHeader:SetPoint("TOPRIGHT", UI.rightRoot, "TOPRIGHT", -16, -(GetSpellListViewportHeight() + 8 + C.SPELL_LIST_TOP_INSET))
+    -- 列表高度按实际卡片行数算，最多两行（更多在列表内滚动）；只有一行时不再空出第二行。
+    local rows = math.min(2, math.max(1, math.ceil((STATE.spellCardCount or 0) / C.SPELL_CARD.cols)))
+    -- 末尾 +2：卡片边框按像素对齐会外扩不到 1 像素，列表正好等高时最后一行底边被裁掉。
+    local listHeight = rows * C.SPELL_CARD.height + (rows - 1) * C.SPELL_CARD.gapY + 2
+    UI.spellScrollFrame:ClearAllPoints()
+    UI.spellScrollFrame:SetPoint("TOPLEFT", UI.rightRoot, "TOPLEFT", 16, -C.SPELL_LIST_TOP_INSET)
+    UI.spellScrollFrame:SetPoint("TOPRIGHT", UI.rightRoot, "TOPRIGHT", -34, -C.SPELL_LIST_TOP_INSET)
+    UI.spellScrollFrame:SetHeight(listHeight)
+    UI.spellDetailHeader:SetPoint("TOPLEFT", UI.rightRoot, "TOPLEFT", 16, -(listHeight + 8 + C.SPELL_LIST_TOP_INSET))
+    UI.spellDetailHeader:SetPoint("TOPRIGHT", UI.rightRoot, "TOPRIGHT", -16, -(listHeight + 8 + C.SPELL_LIST_TOP_INSET))
+    UI.spellDetailHeader:SetHeight(C.SPELL_DETAIL_HEIGHT)
     if UI.spellSummaryEnableHost then
         UI.spellSummaryEnableHost:SetPoint("BOTTOMLEFT", UI.spellDetailHeader, "BOTTOMLEFT", 8, 7)
     end
-    UI.spellSettingsFrame:SetPoint("TOPLEFT", UI.spellDetailHeader, "BOTTOMLEFT", 0, -8)
+    -- V2 页顶留白 12 加卡片节标题上方 16 已在设置区内，这里上移 18，让节标题离详情卡约 10。
+    -- 重叠的是节标题上方的透明区；详情卡层级抬到设置区之上，ON/OFF 仍可点。
+    UI.spellSettingsFrame:SetPoint("TOPLEFT", UI.spellDetailHeader, "BOTTOMLEFT", 0, 18)
     UI.spellSettingsFrame:SetPoint("BOTTOMRIGHT", UI.rightRoot, "BOTTOMRIGHT", -16, 0)
+    local settingsLevel = UI.spellSettingsFrame:GetFrameLevel() or 1
+    if (UI.spellDetailHeader:GetFrameLevel() or 0) <= settingsLevel + 20 then
+        UI.spellDetailHeader:SetFrameLevel(settingsLevel + 30)
+    end
 end
 
--- [卡片/Grid 迁移边界：普通技能设置]
--- 允许：只按共享规范调整五组现有声明的 x/y/w/h 与外层卡片呈现。
--- 禁止：修改 key/type/items、同槽来源显隐、字段/语音触发业务顺序、draft/Store 回调或试听行为。
--- 五组内容只使用共享 SettingsCard；原控件 key 与回调保持不变。
-local function BuildSpellSettingsLayout(spellName, spellIdentifier, eventID, spellIcon, iconFlags)
-    for i = #SETTINGS_LAYOUT, 1, -1 do
-        SETTINGS_LAYOUT[i] = nil
+
+-- 普通字段直接声明真实编辑字段，提交仍由当前技能身份的唯一 owner 处理。
+-- 四张卡全部是 Core 标准行：勾选标签行（toggle = 原有开关字段）、多选 / 单选分段、连体声音选择；
+-- 只有语音时间轴是登记过的自定义件。
+local function BuildSpellSettingsLayout()
+    local function Field(key, kind, extra)
+        local node = { kind="control", id=key, path=key, controlType=kind }
+        for name, value in pairs(extra or {}) do node[name] = value end
+        return node
     end
-
-    local rows = {
-        { key = "enabled", type = "checkbox", x = 3, y = 1, w = 36, h = 5, label = L["启用"], labelSize = ExwindTools.GUIMetrics.font.cardTitle },
-
-        { key = "eventColorEnabled", type = "checkbox", x = 4, y = 16, w = 26, h = 5, label = L["颜色"] },
-        { key = "eventColorMode", type = "dropdown", x = 33, y = 16, w = 35, h = 5, label = "", labelPos = "left", items = EVENT_COLOR_ITEMS_FUNC, search = true },
-        { key = "eventColor", type = "color", x = 73, y = 16, w = 33, h = 5, label = L["自定义颜色"] },
-        { key = "centralEnabled", type = "checkbox", x = 4, y = 23, w = 26, h = 5, label = L["中央文本"] },
-        { key = "centralLead", type = "input", x = 34, y = 23, w = 12, h = 5, label = L["(秒)"], labelPos = "right" },
-        { key = "centralText", type = "input", x = 57, y = 23, w = 49, h = 5, label = "" },
-        { key = "countdownEnabled", type = "checkbox", x = 4, y = 30, w = 26, h = 5, label = L["倒数文本"] },
-        { key = "preAlertText", type = "input", x = 34, y = 30, w = 72, h = 5, label = "" },
-        { key = "timerBarRenameEnabled", type = "checkbox", x = 4, y = 37, w = 26, h = 5, label = L["计时条改名"] },
-        { key = "timerBarRenameText", type = "input", x = 34, y = 37, w = 72, h = 5, label = "" },
-
-        { key = "ringEnabled", type = "checkbox", x = 112, y = 16, w = 28, h = 5, label = L["显示圆环"] },
-        { key = "castProgressBarEnabled", type = "checkbox", x = 112, y = 23, w = 28, h = 5, label = L["显示读条"] },
-        { key = "ringCastCheckEnabled", type = "checkbox", x = 112, y = 30, w = 28, h = 5, label = L["施法检测"] },
-        { key = "description_cast_check", type = "description", x = 112, y = 34, w = 82, h = 5,
-            label = L["检测当前读条能否完成，来不及时以红色提示。"] },
-        { key = "castProgressBarRenameEnabled", type = "checkbox", x = 112, y = 37, w = 28, h = 5, label = L["读条改名"] },
-        { key = "castProgressBarRenameText", type = "input", x = 143, y = 37, w = 54, h = 5, label = "" },
-
-        { key = "tr0Enabled", type = "checkbox", x = 4, y = 58, w = 26, h = 5, label = L["中央文本"] },
-        { key = "tr0Source", type = "dropdown", x = 34, y = 58, w = 27, h = 5, label = "", items = C.TRIGGER_SOURCE_ITEMS, search = true },
-        { key = "tr0Label", type = "dropdown", previewPath = Page.ResolvePackPreviewPath, x = 61, y = 58, w = 33, h = 5, label = "", items = {}, search = true },
-        { key = "tr0LSM", type = "lsm_sound", x = 61, y = 58, w = 33, h = 5, label = "", search = true },
-        { key = "tr0Path", type = "input", x = 61, y = 58, w = 33, h = 5, label = "" },
-        { key = "tr0TtsText", type = "input", x = 61, y = 58, w = 33, h = 5, label = "" },
-        { key = "tr0ValueTest", type = "button", x = 95, y = 58, w = 11, h = 6, label = "", tooltip = L["试听"] },
-        { key = "tr1Enabled", type = "checkbox", x = 4, y = 65, w = 26, h = 5, label = L["施法开始"] },
-        { key = "tr1Source", type = "dropdown", x = 34, y = 65, w = 27, h = 5, label = "", items = C.TRIGGER_SOURCE_ITEMS, search = true },
-        { key = "tr1Label", type = "dropdown", previewPath = Page.ResolvePackPreviewPath, x = 61, y = 65, w = 33, h = 5, label = "", items = {}, search = true },
-        { key = "tr1LSM", type = "lsm_sound", x = 61, y = 65, w = 33, h = 5, label = "", search = true },
-        { key = "tr1Path", type = "input", x = 61, y = 65, w = 33, h = 5, label = "" },
-        { key = "tr1TtsText", type = "input", x = 61, y = 65, w = 33, h = 5, label = "" },
-        { key = "tr1ValueTest", type = "button", x = 95, y = 65, w = 11, h = 6, label = "", tooltip = L["试听"] },
-        { key = "description_countdown_group", type = "description", x = 4, y = 71, w = 102, h = 5,
-            label = L["倒数播报"] },
-        { key = "description_countdown_note", type = "description", x = 70, y = 71, w = 36, h = 5,
-            label = L["数字倒数与名称播报都在这里设置"] },
-        { key = "tr2Enabled", type = "checkbox", x = 4, y = 72, w = 26, h = 5, label = L["播放数字"] },
-        { key = "tr2CountdownLead", type = "segmented", x = 34, y = 72, w = 27, h = 5, label = "", items = C.COUNTDOWN_LEAD_ITEMS },
-        { key = "tr2PlayTextEnabled", type = "checkbox", x = 4, y = 79, w = 26, h = 5, label = L["播放名称"] },
-        { key = "tr2Source", type = "dropdown", x = 34, y = 79, w = 27, h = 5, label = "", items = C.TRIGGER_SOURCE_ITEMS, search = true },
-        { key = "tr2Label", type = "dropdown", previewPath = Page.ResolvePackPreviewPath, x = 61, y = 79, w = 33, h = 5, label = "", items = {}, search = true },
-        { key = "tr2LSM", type = "lsm_sound", x = 61, y = 79, w = 33, h = 5, label = "", search = true },
-        { key = "tr2Path", type = "input", x = 61, y = 79, w = 33, h = 5, label = "" },
-        { key = "tr2TtsText", type = "input", x = 61, y = 79, w = 33, h = 5, label = "" },
-        { key = "tr2ValueTest", type = "button", x = 95, y = 79, w = 11, h = 6, label = "", tooltip = L["试听"] },
-        { key = "description_voice_preview_heading", type = "description", x = 4, y = 86, w = 68, h = 5,
-            label = L["你将听到"] },
-        { key = "voiceSequencePreview", type = "button", x = 76, y = 86, w = 30, h = 6,
-            label = L["播放预览"] },
-        { key = "description_voice_preview_sequence", type = "description", x = 4, y = 93, w = 102, h = 8,
-            label = L["静默"] },
-
-        { key = "targetAlertStartEnabled", type = "checkbox", x = 112, y = 58, w = 28, h = 5, label = L["启用"] },
-        { key = "targetAlertRingEnabled", type = "checkbox", x = 112, y = 66, w = 25, h = 5, label = L["圆环"] },
-        { key = "targetAlertTextEnabledV2", type = "checkbox", x = 142, y = 66, w = 25, h = 5, label = L["文本"] },
-        { key = "targetAlertIconEnabled", type = "checkbox", x = 112, y = 73, w = 25, h = 5, label = L["图标"] },
-        { key = "targetAlertStealthEnabledV2", type = "checkbox", x = 142, y = 73, w = 43, h = 5, label = "|T132089:18:18|t " .. L["隐遁提示"] },
-        { key = "targetAlertVoiceEnabled", type = "checkbox", x = 112, y = 80, w = 20, h = 5, label = L["语音"] },
-        { key = "targetAlertStartSource", type = "dropdown", x = 134, y = 80, w = 24, h = 5, label = "", items = C.TRIGGER_SOURCE_ITEMS, search = true },
-        { key = "targetAlertStartLabel", type = "dropdown", x = 158, y = 80, w = 30, h = 5, label = "", items = {}, search = true },
-        { key = "targetAlertStartLSM", type = "lsm_sound", x = 158, y = 80, w = 30, h = 5, label = "", search = true },
-        { key = "targetAlertStartPath", type = "input", x = 158, y = 80, w = 30, h = 5, label = "" },
-        { key = "targetAlertStartTtsText", type = "input", x = 158, y = 80, w = 30, h = 5, label = "" },
-        { key = "targetAlertStartValueTest", type = "button", x = 190, y = 80, w = 9, h = 6, label = "", tooltip = L["试听"] },
-    }
-
-    local groups = { master = {}, text = {}, display = {}, voice = {}, target = {} }
-    for _, row in ipairs(rows) do
-        local group
-        if row.key == "enabled" then group = "master"
-        elseif (tonumber(row.x) or 0) >= 109 then group = (tonumber(row.y) or 0) < 50 and "display" or "target"
-        else group = (tonumber(row.y) or 0) < 50 and "text" or "voice" end
-        local xOffset = (group == "display" or group == "target") and 111 or (group == "text" or group == "voice") and 3 or 2
-        local yOffset = group == "text" and 15 or group == "display" and 15 or group == "voice" and 57 or group == "target" and 57 or 0
-        row.x = math.max(1, (tonumber(row.x) or 1) - xOffset)
-        row.y = math.max(1, (tonumber(row.y) or 1) - yOffset)
-        groups[group][#groups[group] + 1] = row
+    local function Setting(id, label, toggle, children, extra)
+        local node = { kind="setting", id=id, label=label, toggle=toggle, children=children }
+        for name, value in pairs(extra or {}) do node[name] = value end
+        return node
     end
-    local cardGap = 6
-    local topRowBodyHeight = 176
-    local wideColumnRatio = 1.57 / 2.57
-    -- 右列稍窄，给卡片右边线留出可见间距，避免贴住 Grid 裁剪边界。
-    local narrowColumnRatio = (1 / 2.57) * 0.975
-    local wideColumn = { ratio = wideColumnRatio, offset = -cardGap * wideColumnRatio }
-    local narrowColumn = { ratio = narrowColumnRatio, offset = -cardGap * narrowColumnRatio }
-    local settingsWidth = math.max(1, (UI.spellSettingsGridChild and UI.spellSettingsGridChild:GetWidth()) or 760)
-    local wideCardWidth = math.max(1, (settingsWidth - cardGap) * wideColumnRatio)
-    local narrowCardWidth = math.max(1, (settingsWidth - cardGap) * narrowColumnRatio)
-    local textLabelWidth = math.max(150, math.floor((wideCardWidth - 36) * 0.60))
-    local voiceLabelWidth = math.max(150, math.floor((wideCardWidth - 36) * 0.46))
-    local displayLabelWidth = math.max(112, math.floor((narrowCardWidth - 36) * 0.42))
-    local displayChoiceWidth = math.max(88, math.floor((narrowCardWidth - 50) / 2))
-    -- The spell title already belongs to the compact description card above.
-    SETTINGS_LAYOUT = { version = 1,
-        settingsListWidthPercent = 100, settingsLayoutBreakpoint = 1, cards = {
-        { id = "master", title = L["通用设置"], collapsible = false,
-            placement = { target = "$container", point = "TOPLEFT", relativePoint = "TOPLEFT" },
-            content = { kind = "grid", items = groups.master },
-            settingsList = { summaryEnabled = true } },
-        { id = "text", title = L["文本设置"], collapsible = false,
-            equalHeightGroup = "boss-settings-top",
-            minBodyHeight = topRowBodyHeight,
-            placement = { target = "$container", point = "TOPLEFT", relativePoint = "TOPLEFT", width = wideColumn,
-                narrow = { target = "$container", width = { ratio = 1 } } },
-            content = { kind = "grid", items = groups.text },
-            settingsList = { cardPresentation = "exbossSkill", preserveHeader = true, rows = {
-                { controls = { { key = "eventColorEnabled", width = textLabelWidth }, { key = "eventColorMode" }, { key = "eventColor" } } },
-                { controls = { { key = "centralEnabled", width = textLabelWidth }, { key = "centralLead", width = 56 }, { key = "centralText" } } },
-                { controls = { { key = "countdownEnabled", width = textLabelWidth }, { key = "preAlertText" } } },
-                { controls = { { key = "timerBarRenameEnabled", width = textLabelWidth }, { key = "timerBarRenameText" } } },
-            } } },
-        { id = "display", title = L["施法设置"], collapsible = false,
-            equalHeightGroup = "boss-settings-top",
-            minBodyHeight = topRowBodyHeight,
-            placement = { target = "text", side = "right", align = "start", gap = cardGap, width = narrowColumn,
-                narrow = { target = "text", side = "below", align = "start", gap = cardGap, width = { ratio = 1 } } },
-            content = { kind = "grid", items = groups.display },
-            settingsList = { cardPresentation = "exbossSkill", preserveHeader = true, rows = {
-                { controls = { { key = "ringEnabled", width = displayChoiceWidth, presentation = "card" },
-                    { key = "castProgressBarEnabled", width = displayChoiceWidth, presentation = "card" } } },
-                { key = "ringCastCheckEnabled", presentation = "card", descriptionKey = "description_cast_check" },
-                { controls = { { key = "castProgressBarRenameEnabled", width = displayLabelWidth }, { key = "castProgressBarRenameText" } } },
-            } } },
-        { id = "voice", title = L["语音设置"], collapsible = false,
-            equalHeightGroup = "boss-settings-bottom",
-            placement = { target = "text", side = "below", align = "start", gap = cardGap + 10, width = wideColumn,
-                rowAfter = { "text", "display" },
-                narrow = { target = "display", side = "below", align = "start", gap = cardGap, width = { ratio = 1 } } },
-            content = { kind = "grid", items = groups.voice },
-            settingsList = { cardPresentation = "exbossSkill", preserveHeader = true, rows = {
-                { controls = { { key = "tr0Enabled", width = voiceLabelWidth }, { key = "tr0Source" }, { key = "tr0Label" }, { key = "tr0LSM" }, { key = "tr0Path" }, { key = "tr0TtsText" }, { key = "tr0ValueTest", width = 35 } } },
-                { controls = { { key = "tr1Enabled", width = voiceLabelWidth }, { key = "tr1Source" }, { key = "tr1Label" }, { key = "tr1LSM" }, { key = "tr1Path" }, { key = "tr1TtsText" }, { key = "tr1ValueTest", width = 35 } } },
-                { controls = { { key = "description_countdown_group", role = "label" },
-                    { key = "description_countdown_note", align = "right" } } },
-                { controls = { { key = "tr2Enabled", width = voiceLabelWidth }, { key = "tr2CountdownLead" } } },
-                { controls = { { key = "tr2PlayTextEnabled", width = voiceLabelWidth }, { key = "tr2Source" }, { key = "tr2Label" }, { key = "tr2LSM" }, { key = "tr2Path" }, { key = "tr2TtsText" }, { key = "tr2ValueTest", width = 35 } } },
-                { controls = { { key = "description_voice_preview_heading", role = "label" },
-                    { key = "voiceSequencePreview", width = 130, presentation = "primary", align = "right" } } },
-                { key = "description_voice_preview_sequence", informational = true },
-            } } },
-        { id = "target", title = L["被点名提示"], collapsible = false,
-            equalHeightGroup = "boss-settings-bottom",
-            placement = { target = "voice", side = "right", align = "start", gap = cardGap, width = narrowColumn,
-                narrow = { target = "voice", side = "below", align = "start", gap = cardGap, width = { ratio = 1 } } },
-            content = { kind = "grid", items = groups.target },
-            settingsList = { cardPresentation = "exbossSkill", preserveHeader = true, rows = {
-                { controls = { { key = "targetAlertStartEnabled", presentation = "switch" } } },
-                { controls = { { key = "targetAlertRingEnabled", presentation = "card" },
-                    { key = "targetAlertTextEnabledV2", presentation = "card" },
-                    { key = "targetAlertIconEnabled", presentation = "card" } } },
-                { controls = { { key = "targetAlertStealthEnabledV2", presentation = "card" } } },
-                { controls = { { key = "targetAlertVoiceEnabled" } } },
-                { controls = { { key = "targetAlertStartSource" }, { key = "targetAlertStartLabel" }, { key = "targetAlertStartLSM" }, { key = "targetAlertStartPath" }, { key = "targetAlertStartTtsText" }, { key = "targetAlertStartValueTest", width = 35 } } },
-            } } },
-    } }
-    ExwindTools:RegisterModuleLayout(SETTINGS.EDITOR_KEY, SETTINGS_LAYOUT)
+    local sources = {}
+    for _, item in ipairs(C.TRIGGER_SOURCE_ITEMS) do sources[#sources+1] = item[2] end
+    local function Sound(prefix)
+        return { kind="component", id=prefix .. "Sound", component="soundselector", path=prefix,
+            optionsRef="sound." .. prefix,
+            opts={ sources=sources, labelSource="ExBoss.UI.Panel.BossPage.GetVoiceLabelDropdownItems" } }
+    end
+    local leadOptions = {}
+    for _, item in ipairs(C.COUNTDOWN_LEAD_ITEMS) do leadOptions[#leadOptions+1] = { label=tostring(item[1]), value=item[2] } end
+    SETTINGS_LAYOUT = { version=2, layout="grid", columns={{weight=1.57},{weight=1}}, cards={
+        { kind="card", id="text", title=L["文本设置"], row=1, column=1, children={
+            Setting("colorRow", L["颜色"], "eventColorEnabled", {
+                Field("eventColorMode", "select", { optionsSource="ExBoss.Voice.ColorSchemes.BuildDropdownItems", search=true }),
+                Field("eventColor", "color", { visible="customColor" }),
+            }),
+            Setting("centralRow", L["中央文本"], "centralEnabled", {
+                Field("centralLead", "input", { size="short" }),
+                { kind="text", id="centralLeadUnit", text=L["秒"] },
+                Field("centralText", "input"),
+            }),
+            Setting("countdownTextRow", L["倒数文本"], "countdownEnabled", { Field("preAlertText", "input") }),
+            Setting("renameTimerRow", L["计时条改名"], "timerBarRenameEnabled", { Field("timerBarRenameText", "input") }),
+        }},
+        { kind="card", id="display", title=L["施法设置"], row=1, column=2, children={
+            { kind="control", id="castChoices", controlType="toggles", label=L["显示"], items={
+                { label=L["圆环"], path="ringEnabled" }, { label=L["读条"], path="castProgressBarEnabled" },
+            } },
+            Field("ringCastCheckEnabled", "switch", { label=L["施法检测"],
+                description=L["检测当前读条能否完成，来不及时以红色提示。"] }),
+            Setting("renameCastRow", L["读条改名"], "castProgressBarRenameEnabled", { Field("castProgressBarRenameText", "input") }),
+        }},
+        { kind="card", id="voice", title=L["语音设置"], row=2, column=1, children={
+            Setting("tr0Row", L["中央文本"], "tr0Enabled", { Sound("tr0") }),
+            Setting("tr1Row", L["施法开始"], "tr1Enabled", { Sound("tr1") }),
+            Setting("countdownDigitsRow", L["播放数字"], "tr2Enabled", {
+                Field("tr2CountdownLead", "segment", { options=leadOptions }),
+            }),
+            Setting("countdownNameRow", L["播放名称"], "tr2PlayTextEnabled", { Sound("tr2") }),
+            -- 时间轴直接放卡片里铺满整行；▶ 试听按钮在组件内部右下角（普通页卡片不能直接放按钮）。
+            { kind="component", id="voiceTimeline", ref="voiceTimeline", custom="EXBoss.VoiceTimeline" },
+        }},
+        { kind="card", id="target", title=L["被点名提示"], row=2, column=2, children={
+            Field("targetAlertStartEnabled", "switch", { label=L["启用"] }),
+            { kind="control", id="targetChoices", controlType="toggles", label=L["提示方式"], enabled="targetEnabled", items={
+                { label=L["圆环"], path="targetAlertRingEnabled" },
+                { label=L["文本"], path="targetAlertTextEnabledV2" },
+                { label=L["图标"], path="targetAlertIconEnabled" },
+            } },
+            Setting("stealthRow", L["隐遁提示"], nil, { Field("targetAlertStealthEnabledV2", "switch") },
+                { icon=132089, enabled="targetEnabled" }),
+            Setting("targetVoiceRow", L["语音"], "targetAlertVoiceEnabled", { Sound("targetAlertStart") },
+                { enabled="targetEnabled" }),
+        }},
+    }}
 end
 
 local function UpdateSpellDetailHeader(spellName, spellIdentifier, eventID, spellIcon, iconFlags, alertMarkupOverride)
@@ -2532,39 +2380,41 @@ local function SetSpellDetailHeaderEmpty(message)
     UI.spellDetailHeader:SetHeight(C.SPELL_DETAIL_HEIGHT)
 end
 
--- 副本通用设置没有“法术卡片 + 描述卡”这一层级：右侧只保留一块 Grid 容器。
--- [共享宿主边界] 只可迁移下列宿主锚点；三模式切换、同一 grid child、title/scroll 显隐和 DungeonCommon 释放顺序禁止修改。
+-- 副本通用设置没有“法术卡片 + 描述卡”这一层级：右侧只保留一块 V2 容器。
+-- [共享宿主边界] 三模式共用同一设置容器，title/scroll 显隐和 DungeonCommon 释放顺序保持现状。
 local function SetRightSettingsPresentation(isDungeonCommon)
     if not (UI.rightRoot and UI.spellSettingsFrame and UI.spellDetailHeader
-            and UI.spellSettingsGridScroll and UI.spellScrollFrame) then
+            and UI.spellSettingsScroll and UI.spellScrollFrame) then
         return
     end
 
-    local useSingleGridPanel = isDungeonCommon == true
-    if UI.rightPanelSingleGrid == useSingleGridPanel then
+    local useSingleSettingsPanel = isDungeonCommon == true
+    if UI.rightPanelSingleSettings == useSingleSettingsPanel then
         return
     end
-    UI.rightPanelSingleGrid = useSingleGridPanel
+    UI.rightPanelSingleSettings = useSingleSettingsPanel
     SyncBossRightViewport()
 
     UI.spellSettingsFrame:ClearAllPoints()
-    if useSingleGridPanel then
+    if useSingleSettingsPanel then
         UI.spellSettingsFrame:SetPoint("TOPLEFT", UI.rightRoot, "TOPLEFT", 8, -8)
         UI.spellSettingsFrame:SetPoint("BOTTOMRIGHT", UI.rightRoot, "BOTTOMRIGHT", -8, 8)
         UI.spellDetailHeader:Hide()
         UI.spellScrollFrame:Hide()
         if UI.titleControlHost then UI.titleControlHost:Hide() end
-        UI.spellSettingsGridScroll:ClearAllPoints()
-        UI.spellSettingsGridScroll:SetPoint("TOPLEFT", UI.spellSettingsFrame, "TOPLEFT", 8, -8)
-        UI.spellSettingsGridScroll:SetPoint("BOTTOMRIGHT", UI.spellSettingsFrame, "BOTTOMRIGHT", -8, 8)
+        UI.spellSettingsScroll:ClearAllPoints()
+        -- V2 页顶留白 12 与首个卡片节标题上方 16 已在页内；滚动区上提 30，让首个标题离顶约 6，
+        -- 与普通技能页的技能卡片列表一致。上提部分超出右侧视口，由视口裁掉。
+        UI.spellSettingsScroll:SetPoint("TOPLEFT", UI.spellSettingsFrame, "TOPLEFT", 8, 30)
+        UI.spellSettingsScroll:SetPoint("BOTTOMRIGHT", UI.spellSettingsFrame, "BOTTOMRIGHT", -8, 8)
     else
         ApplyBossRightPanelLayout()
         UI.spellDetailHeader:Show()
         UI.spellScrollFrame:Show()
         if UI.titleControlHost then UI.titleControlHost:Show() end
-        UI.spellSettingsGridScroll:ClearAllPoints()
-        UI.spellSettingsGridScroll:SetPoint("TOPLEFT", UI.spellSettingsFrame, "TOPLEFT", 0, 0)
-        UI.spellSettingsGridScroll:SetPoint("BOTTOMRIGHT", UI.spellSettingsFrame, "BOTTOMRIGHT", 0, 0)
+        UI.spellSettingsScroll:ClearAllPoints()
+        UI.spellSettingsScroll:SetPoint("TOPLEFT", UI.spellSettingsFrame, "TOPLEFT", 0, 0)
+        UI.spellSettingsScroll:SetPoint("BOTTOMRIGHT", UI.spellSettingsFrame, "BOTTOMRIGHT", 0, 0)
     end
 end
 
@@ -2594,9 +2444,9 @@ BuildSpellEditorDraftFromSelectedSpell = function(expectedRevision)
     local configID = cfg and cfg.GetSelectedUser and cfg:GetSelectedUser(slotKey) or ""
     local voiceCfg = GetEventVoiceConfig(eventID, slotKey)
 
-    -- Grid 的控件回调在首次创建时绑定到这个 table。切技能时保持 table
+    -- V2 的控件回调在首次创建时绑定到这个 table。切技能时保持 table
     -- identity、仅原地替换字段，才能复用控件而不把输入写回上一技能。
-    local boundDraft = STATE.spellSettingsGridBound and STATE.spellEditorDraft or nil
+    local boundDraft = STATE.spellSettingsMounted and STATE.spellEditorDraft or nil
     local draft = DeepCopy(SETTINGS.DEFAULTS)
     if type(draft) ~= "table" then return end
 
@@ -2851,7 +2701,7 @@ PersistSpellEditorDraftToSelectedSpell = function(changedKey)
 end
 
 local function SyncSpellSettingsFrameHeight()
-    if UI.rightPanelSingleGrid ~= true then
+    if UI.rightPanelSingleSettings ~= true then
         ApplyBossRightPanelLayout()
     end
 end
@@ -3037,13 +2887,6 @@ local function AcquireBossCard()
     b.navDivider:SetPoint("TOPLEFT", b, "BOTTOMLEFT", 9, -1)
     b.navDivider:SetPoint("TOPRIGHT", b, "BOTTOMRIGHT", -9, -1)
 
-    b.activeBar = EXUI:CreateVisualTexture(b, EXBORDERFRAME)
-    b.activeBar:SetPoint("TOPLEFT", 0, 0)
-    b.activeBar:SetPoint("BOTTOMLEFT", 0, 0)
-    b.activeBar:SetWidth(3)
-    b.activeBar:SetColorTexture(unpack(GC.accent))
-    b.activeBar:Hide()
-
     b.creature = CreateFrame("PlayerModel", nil, b)
     b.creature:SetSize(54, 58)
     b.creature:SetPoint("LEFT", 9, 0)
@@ -3134,14 +2977,8 @@ local function AcquireSpellCard()
     card = CreateFrame("Button", nil, UI.spellScrollChild, "BackdropTemplate")
     EXUI:SetControlSurface(card, 4, GC.card, GC.panelBorder)
 
-    card.leftBar = EXUI:CreateVisualTexture(card, EXBACKGROUNDFRAME)
-    card.leftBar:SetWidth(5)
-    card.leftBar:SetPoint("TOPLEFT", 2, -7)
-    card.leftBar:SetPoint("BOTTOMLEFT", 2, 7)
-    card.leftBar:Hide()
-
     -- 选中内环：技能卡的外框一圈已经被业务分类色占用（GUI-03 不统一），
-    -- 所以选中的主色描边压在外框内侧 1 像素处，底色与外框分类色都不动。
+    -- 所以 Core 公共选中外观画在外框内侧 1 像素处的这一层上，底色与外框分类色都不动。
     card.selectionRing = CreateFrame("Frame", nil, card)
     card.selectionRing:EnableMouse(false)
     card.selectionRing:SetFrameLevel(card:GetFrameLevel() + 1)
@@ -3482,7 +3319,7 @@ local function EnsureUI(leftFrame, contentFrame)
     end)
 
     UI.spellSettingsFrame = CreateFrame("Frame", nil, UI.rightRoot, "BackdropTemplate")
-    UI.spellSettingsFrame:SetPoint("TOPLEFT", UI.rightRoot, "TOPLEFT", 8, -(GetSpellListViewportHeight() + 10))
+    UI.spellSettingsFrame:SetPoint("TOPLEFT", UI.rightRoot, "TOPLEFT", 8, -(C.SPELL_LIST_HEIGHT + 10))
     UI.spellSettingsFrame:SetPoint("BOTTOMRIGHT", UI.rightRoot, "BOTTOMRIGHT", -8, 8)
     UI.spellSettingsFrame:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -3496,8 +3333,8 @@ local function EnsureUI(leftFrame, contentFrame)
     UI.spellSettingsFrame:SetBackdropBorderColor(0, 0, 0, 0)
 
     UI.spellDetailHeader = CreateFrame("Frame", nil, UI.rightRoot, "BackdropTemplate")
-    UI.spellDetailHeader:SetPoint("TOPLEFT", UI.rightRoot, "TOPLEFT", 16, -(GetSpellListViewportHeight() + 8))
-    UI.spellDetailHeader:SetPoint("TOPRIGHT", UI.rightRoot, "TOPRIGHT", -16, -(GetSpellListViewportHeight() + 8))
+    UI.spellDetailHeader:SetPoint("TOPLEFT", UI.rightRoot, "TOPLEFT", 16, -(C.SPELL_LIST_HEIGHT + 8))
+    UI.spellDetailHeader:SetPoint("TOPRIGHT", UI.rightRoot, "TOPRIGHT", -16, -(C.SPELL_LIST_HEIGHT + 8))
     UI.spellDetailHeader:SetHeight(C.SPELL_DETAIL_HEIGHT)
     UI.spellDetailHeader:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -3602,14 +3439,18 @@ local function EnsureUI(leftFrame, contentFrame)
     UI.spellDetailSpellIDChip, UI.spellDetailSpellIDValue = CreateDetailIDChip("Spell ID")
     UI.spellDetailEventIDChip, UI.spellDetailEventIDValue = CreateDetailIDChip("Event ID")
 
-    -- 描述区固定在信息卡内部；右侧只有最上方法术列表允许滚动。
+    -- 描述卡固定高度，长描述在卡片内部滚动。
     UI.spellDetailBodyScroll = CreateFrame("ScrollFrame", nil, UI.spellDetailHeader, "ScrollFrameTemplate")
     if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then
         ExBoss.UI.ApplyModernScrollBarSkin(UI.spellDetailBodyScroll)
     end
     UI.spellDetailBodyScroll:SetPoint("TOPLEFT", UI.spellDetailCast, "BOTTOMLEFT", 0, -5)
     UI.spellDetailBodyScroll:SetPoint("BOTTOMRIGHT", UI.spellDetailHeader, "BOTTOMRIGHT", -34, 10)
-    DisableVerticalScroll(UI.spellDetailBodyScroll)
+    UI.spellDetailBodyScroll:EnableMouseWheel(true)
+    UI.spellDetailBodyScroll:SetScript("OnMouseWheel", function(self, delta)
+        local maximum = math.max(0, self:GetVerticalScrollRange())
+        self:SetVerticalScroll(math.max(0, math.min(maximum, self:GetVerticalScroll() - delta * 32)))
+    end)
     UI.spellDetailBodyChild = CreateFrame("Frame", nil, UI.spellDetailBodyScroll)
     UI.spellDetailBodyChild:SetSize(1, 1)
     UI.spellDetailBodyScroll:SetScrollChild(UI.spellDetailBodyChild)
@@ -3627,20 +3468,19 @@ local function EnsureUI(leftFrame, contentFrame)
     UI.spellDetailDivider:SetPoint("BOTTOMRIGHT", UI.spellDetailHeader, "BOTTOMRIGHT", -14, 10)
     UI.spellDetailDivider:Hide()
 
-    UI.spellSettingsGridScroll = CreateFrame("ScrollFrame", nil, UI.spellSettingsFrame, "ScrollFrameTemplate")
+    UI.spellSettingsScroll = CreateFrame("ScrollFrame", nil, UI.spellSettingsFrame, "ScrollFrameTemplate")
     if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then
-        ExBoss.UI.ApplyModernScrollBarSkin(UI.spellSettingsGridScroll)
+        ExBoss.UI.ApplyModernScrollBarSkin(UI.spellSettingsScroll)
     end
-    UI.spellSettingsGridScroll:SetPoint("TOPLEFT", UI.spellSettingsFrame, "TOPLEFT", 0, 0)
-    UI.spellSettingsGridScroll:SetPoint("BOTTOMRIGHT", UI.spellSettingsFrame, "BOTTOMRIGHT", 0, 0)
-    DisableVerticalScroll(UI.spellSettingsGridScroll)
+    UI.spellSettingsScroll:SetPoint("TOPLEFT", UI.spellSettingsFrame, "TOPLEFT", 0, 0)
+    UI.spellSettingsScroll:SetPoint("BOTTOMRIGHT", UI.spellSettingsFrame, "BOTTOMRIGHT", 0, 0)
+    DisableVerticalScroll(UI.spellSettingsScroll)
 
-    UI.spellSettingsGridChild = CreateFrame("Frame", nil, UI.spellSettingsGridScroll)
-    UI.spellSettingsGridChild:SetSize(760, 1)
-    UI.spellSettingsGridScroll:SetScrollChild(UI.spellSettingsGridChild)
-    Page._spellSettingsGridChild = UI.spellSettingsGridChild
+    UI.spellSettingsChild = CreateFrame("Frame", nil, UI.spellSettingsScroll)
+    UI.spellSettingsChild:SetSize(760, 1)
+    UI.spellSettingsScroll:SetScrollChild(UI.spellSettingsChild)
 
-    UI.spellSettingsEmptyText = EXUI:CreateVisualFontString(UI.spellSettingsGridChild, EXFONTFRAME, "GameFontDisableSmall")
+    UI.spellSettingsEmptyText = EXUI:CreateVisualFontString(UI.spellSettingsChild, EXFONTFRAME, "GameFontDisableSmall")
     UI.spellSettingsEmptyText:SetPoint("TOPLEFT", 6, -6)
     UI.spellSettingsEmptyText:SetPoint("RIGHT", -6, 0)
     UI.spellSettingsEmptyText:SetJustifyH("LEFT")
@@ -3652,7 +3492,8 @@ local function EnsureUI(leftFrame, contentFrame)
         ExBoss.UI.ApplyModernScrollBarSkin(UI.spellScrollFrame)
     end
     UI.spellScrollFrame:SetPoint("TOPLEFT", UI.rightRoot, "TOPLEFT", 16, -C.SPELL_LIST_TOP_INSET)
-    UI.spellScrollFrame:SetPoint("BOTTOMRIGHT", UI.spellDetailHeader, "TOPRIGHT", -18, 4)
+    UI.spellScrollFrame:SetPoint("TOPRIGHT", UI.rightRoot, "TOPRIGHT", -34, -C.SPELL_LIST_TOP_INSET)
+    UI.spellScrollFrame:SetHeight(C.SPELL_LIST_HEIGHT)
     UI.spellScrollFrame:EnableMouseWheel(true)
     UI.spellScrollFrame:SetScript("OnMouseWheel", function(self, delta)
         local maximum = math.max(0, self:GetVerticalScrollRange())
@@ -3824,10 +3665,10 @@ local function SyncScrollChildWidth()
         C.SPELL_CARD.cols = 5
         UI.spellScrollChild:SetWidth(sw)
     end
-    if UI.spellSettingsGridScroll and UI.spellSettingsGridChild then
-        local gw = UI.spellSettingsGridScroll:GetWidth() or 0
+    if UI.spellSettingsScroll and UI.spellSettingsChild then
+        local gw = UI.spellSettingsScroll:GetWidth() or 0
         gw = math.max(1, gw)
-        UI.spellSettingsGridChild:SetWidth(gw)
+        UI.spellSettingsChild:SetWidth(gw)
     end
 end
 
@@ -3924,7 +3765,7 @@ function Page:RelayoutPrototype()
     RelayoutMapNavigation()
     RelayoutBossNavigation()
     -- DungeonCommon owns the full-height host while this existing flag is set.
-    if UI.rightPanelSingleGrid == true then return end
+    if UI.rightPanelSingleSettings == true then return end
     ApplyBossRightPanelLayout()
     local width = math.max(1, UI.spellScrollChild:GetWidth())
     local columns = C.SPELL_CARD.cols
@@ -3936,7 +3777,7 @@ function Page:RelayoutPrototype()
         local row = math.floor((i - 1) / columns) + 1
         rowHeights[row] = C.SPELL_CARD.height
     end
-    local y, visibleHeight = 0, 0
+    local y = 0
     local totalRows = math.max(1, math.ceil((STATE.spellCardCount or #CARD_CACHE.activeSpellCards) / columns))
     for row = 1, totalRows do
         local height = rowHeights[row] or C.SPELL_CARD.height
@@ -3947,20 +3788,14 @@ function Page:RelayoutPrototype()
                 ((i - 1) % columns) * (cardWidth + C.SPELL_CARD.gapX), -y)
             card:SetSize(cardWidth, height)
         end
-        if row <= C.SPELL_LIST_VISIBLE_ROWS then visibleHeight = y + height end
         y = y + height + C.SPELL_CARD.gapY
     end
     UI.spellScrollChild:SetHeight(math.max(1, y - C.SPELL_CARD.gapY))
-    local visibleRows = math.min(C.SPELL_LIST_VISIBLE_ROWS, totalRows)
-    UI.spellListMeasuredHeight = visibleRows * C.SPELL_CARD.height
-        + math.max(0, visibleRows - 1) * C.SPELL_CARD.gapY
+    UI.spellScrollFrame:UpdateScrollChildRect()
     ApplyBossRightPanelLayout()
     RefreshSpellDetailHeaderLayout()
     if UI.spellSettingsCardSession then
-        UI.spellSettingsCardSession:Relayout()
-        if ApplyBossCustomCardLayouts then
-            ApplyBossCustomCardLayouts(UI.spellSettingsCardSession)
-        end
+        UI.spellSettingsCardSession:Invalidate()
     end
 end
 
@@ -4047,7 +3882,7 @@ local function SetWidgetInteractable(widget, enabled)
     end
 end
 
--- 复选框标签在自己的 Grid 标签列内换行，由共享呈现测量行高。
+-- 复选框标签在自己的 V2 标签列内换行，由共享呈现测量行高。
 -- 保留原 Tooltip 宽度判断与事件脚本，不改变控件及配置行为。
 local function ApplyBossSettingsLabelSafety(widgets)
     if type(widgets) ~= "table" then return end
@@ -4097,205 +3932,25 @@ local function ApplyBossSettingsLabelSafety(widgets)
 end
 
 RefreshSettingsDynamicWidgets = function(mdb)
-    local widgets = GetSpellSettingsWidgets()
-    if not (type(widgets) == "table" and type(mdb) == "table") then
+    if type(mdb) ~= "table" then
         return
     end
-    ApplyBossSettingsLabelSafety(widgets)
     local spellDisabled = mdb.enabled == false
     if UI.spellDetailIcon then
         UI.spellDetailIcon:SetDesaturated(spellDisabled)
         UI.spellDetailIcon:SetAlpha(spellDisabled and 0.65 or 1)
     end
-
-    local modeDropdownWidget = widgets["eventColorMode"]
-    local customColor = widgets["eventColor"]
-    local centralLeadWidget = widgets["centralLead"]
-    local centralTextWidget = widgets["centralText"]
-    local preAlertTextWidget = widgets["preAlertText"]
-    local timerRenameTextWidget = widgets["timerBarRenameText"]
-    local castProgressRenameTextWidget = widgets["castProgressBarRenameText"]
-    local targetAlertSourceWidget = widgets["targetAlertStartSource"]
-    local targetAlertLabelWidget = widgets["targetAlertStartLabel"]
-    local targetAlertLSMWidget = widgets["targetAlertStartLSM"]
-    local targetAlertPathWidget = widgets["targetAlertStartPath"]
-    local targetAlertTtsWidget = widgets["targetAlertStartTtsText"]
-    local targetAlertValueTestWidget = widgets["targetAlertStartValueTest"]
-    local targetAlertVoiceWidget = widgets["targetAlertVoiceEnabled"]
-    RefreshVoiceLabelDropdown(targetAlertLabelWidget, mdb.targetAlertStartLabel)
-    if centralLeadWidget then
-        centralLeadWidget:Show()
-        SetWidgetUsable(centralLeadWidget, true)
-    end
-    if centralTextWidget then
-        centralTextWidget:Show()
-        SetWidgetUsable(centralTextWidget, true)
-    end
-    if preAlertTextWidget then
-        preAlertTextWidget:Show()
-        SetWidgetUsable(preAlertTextWidget, true)
-    end
-    if timerRenameTextWidget then
-        timerRenameTextWidget:Show()
-        SetWidgetUsable(timerRenameTextWidget, true)
-    end
-    if castProgressRenameTextWidget then
-        castProgressRenameTextWidget:Show()
-        SetWidgetUsable(castProgressRenameTextWidget, mdb.castProgressBarRenameEnabled == true)
-    end
-    local targetAlertVoiceUsable = mdb.targetAlertStartEnabled == true and mdb.targetAlertVoiceEnabled == true
-    local targetAlertSource = NormalizeTriggerSource(mdb.targetAlertStartSource)
-    if targetAlertSourceWidget then
-        targetAlertSourceWidget:Show()
-        SetWidgetUsable(targetAlertSourceWidget, targetAlertVoiceUsable)
-    end
-    EXUI:RefreshSoundSelector({
-        contents = { pack = targetAlertLabelWidget, lsm = targetAlertLSMWidget,
-            file = targetAlertPathWidget, tts = targetAlertTtsWidget },
-        value = targetAlertSource, preview = targetAlertValueTestWidget,
-        enabled = targetAlertVoiceUsable, setUsable = SetWidgetUsable, updateInactive = true,
-    })
-    if targetAlertVoiceWidget then
-        targetAlertVoiceWidget:Show()
-        SetWidgetUsable(targetAlertVoiceWidget, mdb.targetAlertStartEnabled == true)
-    end
-    local targetAlertRingWidget = widgets.targetAlertRingEnabled
-    if targetAlertRingWidget then
-        targetAlertRingWidget:Show()
-        SetWidgetUsable(targetAlertRingWidget, mdb.targetAlertStartEnabled == true)
-    end
-    local targetAlertIconWidget = widgets.targetAlertIconEnabled
-    if targetAlertIconWidget then
-        targetAlertIconWidget:Show()
-        SetWidgetUsable(targetAlertIconWidget, mdb.targetAlertStartEnabled == true)
-    end
-    local targetAlertTextWidget = widgets.targetAlertTextEnabledV2
-    if targetAlertTextWidget then
-        targetAlertTextWidget:Show()
-        SetWidgetUsable(targetAlertTextWidget, mdb.targetAlertStartEnabled == true)
-    end
-    local targetAlertStealthWidget = widgets.targetAlertStealthEnabledV2
-    if targetAlertStealthWidget then
-        targetAlertStealthWidget:Show()
-        SetWidgetUsable(targetAlertStealthWidget, mdb.targetAlertStartEnabled == true)
-    end
-
-    local colorOn = (mdb.eventColorEnabled == true)
-    local colorMode = NormalizeEventColorMode(mdb.eventColorMode)
-    SetWidgetUsable(modeDropdownWidget, colorOn)
-    if customColor then
-        if colorOn and colorMode == "__custom" then
-            customColor:Show()
-            SetWidgetUsable(customColor, true)
-        else
-            customColor:Hide()
-        end
-    end
-
-    for i = 0, 2 do
-        local prefix = "tr" .. tostring(i)
-        local enabled = (mdb[prefix .. "Enabled"] == true)
-        local configEnabled = enabled
-        if i == 2 then
-            configEnabled = (mdb[prefix .. "PlayTextEnabled"] == true)
-        end
-        local source = NormalizeTriggerSource(mdb[prefix .. "Source"])
-
-        local sourceWidget = widgets[prefix .. "Source"]
-        local packWidget = widgets[prefix .. "Label"]
-        local lsmWidget = widgets[prefix .. "LSM"]
-        local pathWidget = widgets[prefix .. "Path"]
-        local ttsWidget = widgets[prefix .. "TtsText"]
-        local valueTestWidget = widgets[prefix .. "ValueTest"]
-        local countdownLeadWidget = widgets[prefix .. "CountdownLead"]
-        local playTextWidget = widgets[prefix .. "PlayTextEnabled"]
-
-        RefreshVoiceLabelDropdown(packWidget, mdb[prefix .. "Label"])
-
-        SetWidgetUsable(sourceWidget, configEnabled)
-        if countdownLeadWidget then
-            countdownLeadWidget:Show()
-            SetWidgetUsable(countdownLeadWidget, enabled)
-        end
-        if playTextWidget then
-            playTextWidget:Show()
-            -- “播放名称”与“播放数字”是两项独立设置；关闭数字不能让名称失去操作权。
-            SetWidgetUsable(playTextWidget, true)
-        end
-
-        EXUI:RefreshSoundSelector({
-            contents = { pack = packWidget, lsm = lsmWidget, file = pathWidget, tts = ttsWidget },
-            value = source, preview = valueTestWidget, enabled = configEnabled,
-            setUsable = SetWidgetUsable,
-        })
-
-        SetWidgetInteractable(widgets[prefix .. "Enabled"], true)
-        SetWidgetInteractable(sourceWidget, configEnabled)
-        SetWidgetInteractable(packWidget, configEnabled)
-        SetWidgetInteractable(lsmWidget, configEnabled)
-        SetWidgetInteractable(pathWidget, configEnabled)
-        SetWidgetInteractable(ttsWidget, configEnabled)
-        SetWidgetInteractable(valueTestWidget, configEnabled)
-        SetWidgetInteractable(countdownLeadWidget, true)
-        SetWidgetInteractable(playTextWidget, true)
-    end
-    RefreshCountdownSegmentedControl(mdb)
+    Page._BindSpellSummarySwitch(mdb)
     if RefreshVoicePreviewDisplay then RefreshVoicePreviewDisplay() end
 end
 
-local function FindBossGridDropdownText(items, value)
-    for _, item in ipairs(type(items) == "table" and items or {}) do
-        if type(item) == "table" then
-            if item.isMenu then
-                local found = FindBossGridDropdownText(item.menu, value)
-                if found ~= nil then return found end
-            elseif item[2] == value or tostring(item[2]) == tostring(value) then
-                return item[1]
-            end
-        elseif item == value or tostring(item) == tostring(value) then
-            return item
-        end
-    end
-    return nil
-end
 
-local function RebindSpellSettingsGrid(mdb)
-    local Grid = _G.ExwindGrid
-    local container = UI.spellSettingsGridChild
-    local widgets = GetSpellSettingsWidgets()
-    if not (STATE.spellSettingsGridBound and type(mdb) == "table" and type(widgets) == "table"
-            and UI.spellSettingsCardConfig == mdb) then
-        return false
-    end
-
-    -- 固定 schema 的控件保留其原有回调；BuildSpellEditorDraft 已原地刷新
-    -- 同一张 mdb，因此这些回调继续指向当前技能，而不需要 Grid:Render。
-    for _, card in ipairs(SETTINGS_LAYOUT.cards or {}) do
-        for _, item in ipairs((card.content and card.content.items) or {}) do
-            local widget = widgets[item.key]
-            if widget then
-            local value = mdb[item.key]
-            if item.type == "checkbox" and widget.SetChecked then
-                widget:SetChecked(value == true)
-            elseif item.type == "input" and widget.SetText then
-                local text = tostring(value or "")
-                if GetWidgetEditText(widget) ~= text then
-                    widget:SetText(text)
-                end
-            elseif item.type == "dropdown" then
-                widget._currentValue = value
-                SetDropdownText(widget, FindBossGridDropdownText(widget._items, value) or tostring(value or L["请选择..."]))
-            elseif item.type == "lsm_sound" then
-                widget._selectedValue = value
-                SetDropdownText(widget, tostring(value or L["请选择..."]))
-            elseif item.type == "color" then
-                widget._currentDb = mdb
-                widget._currentKey = item.key
-                if widget.UpdateColor then widget:UpdateColor() end
-            end
-            end
-        end
-    end
+local function RebindSpellSettings(mdb)
+    if not (STATE.spellSettingsMounted and UI.spellSettingsCardConfig == mdb) then return false end
+    local modulePage = EXUI:GetModulePage(SETTINGS.EDITOR_KEY, UI.spellSettingsChild)
+    if not modulePage then return false end
+    UI.spellSettingsRevision = STATE.spellEditorRevision
+    modulePage:Refresh()
     RefreshSettingsDynamicWidgets(mdb)
     return true
 end
@@ -4479,33 +4134,18 @@ RefreshVoicePreviewTimeline = function(sequence)
     if timeline._layout then timeline:_layout() end
 end
 
+
 RefreshVoicePreviewDisplay = function()
-    local widgets = GetSpellSettingsWidgets()
-    local preview = type(widgets) == "table" and widgets["description_voice_preview_sequence"] or nil
-    local sequence = BuildVoicePreviewSequence(STATE.spellEditorDraft)
-    local parts = {}
-    for _, entry in ipairs(sequence) do
-        if entry.seconds == 0 then
-            parts[#parts + 1] = string.format("0 %s：%s", L["秒"], entry.text)
-        else
-            parts[#parts + 1] = string.format("%s %d %s：%s", L["前"], entry.seconds, L["秒"], entry.text)
-        end
+    if RefreshVoicePreviewTimeline then
+        RefreshVoicePreviewTimeline(BuildVoicePreviewSequence(STATE.spellEditorDraft))
     end
-    if preview then
-        local textTarget = preview.SetText and preview or preview.text
-        if textTarget and textTarget.SetText then
-            textTarget:SetText(UI.voicePreviewTimeline and " " or table.concat(parts, "  ›  "))
-        end
-    end
-    if RefreshVoicePreviewTimeline then RefreshVoicePreviewTimeline(sequence) end
 end
 
 -- 序列预览播的是一串 C_Timer.After，没有单一声音句柄，用不了 RunSoundPreview；
 -- 播放态只能由调用方用 SetSoundPreviewPlaying 告知公共试听按钮。只改外观，不碰播放。
 -- 挂在 Page 上而不是新增顶层 local：本文件已贴着 Lua 5.1 主函数 200 个 local 的上限。
 function Page._SetVoiceSequencePreviewPlaying(playing)
-    local widgets = GetSpellSettingsWidgets()
-    local button = type(widgets) == "table" and widgets["voiceSequencePreview"] or nil
+    local button = UI.voicePreviewTimeline and UI.voicePreviewTimeline.playButton
     if button then
         EXUI:SetSoundPreviewPlaying(button, playing)
     end
@@ -4559,560 +4199,134 @@ StartVoiceSequencePreview = function()
     end)
 end
 
+
 local function ReleaseSpellSettingsCardSession()
-    if UI.spellSettingsCardSession and UI.spellSettingsCardSession.byId then
-        local centralLead = UI.spellSettingsCardSession:GetWidget("text", "centralLead")
-        if centralLead and centralLead._exBossUnitInside then
-            centralLead:SetTextInsets(9, 9, 0, 0)
-            if centralLead.label then
-                centralLead.label:ClearAllPoints()
-                centralLead.label:SetPoint("LEFT", centralLead, "RIGHT", 5, 0)
-                centralLead.label:SetJustifyH("LEFT")
-                centralLead.label:SetText(centralLead._exBossUnitOriginalText or L["(秒)"])
-            end
-            centralLead._exBossUnitInside = nil
-            centralLead._exBossUnitOriginalText = nil
-        end
-        local enabled = UI.spellSettingsCardSession:GetWidget("master", "enabled")
-        if enabled then EXUI:ReleaseCheckboxOnOffVisual(enabled) end
-        for _, spec in ipairs({ { "voice", "tr0ValueTest" }, { "voice", "tr1ValueTest" },
-            { "voice", "tr2ValueTest" }, { "voice", "voiceSequencePreview" },
-            { "target", "targetAlertStartValueTest" } }) do
-            local button = UI.spellSettingsCardSession:GetWidget(spec[1], spec[2])
-            if button and button._exBossPreviewOriginalFrameLevel then
-                button:SetFrameLevel(button._exBossPreviewOriginalFrameLevel)
-                button._exBossPreviewOriginalFrameLevel = nil
+    if CancelVoiceSequencePreview then CancelVoiceSequencePreview() end
+    local widgets = GetSpellSettingsWidgets()
+    if UI.spellSettingsCardSession then
+        local session = UI.spellSettingsCardSession
+        if widgets then
+            for _, key in ipairs({"tr0Label","tr1Label","tr2Label"}) do
+                if widgets[key] then widgets[key]._previewPath = nil end
             end
         end
-        for _, state in pairs(UI.spellSettingsCardSession.byId) do
-            local card = state and state.card
-            if card and card._exBossLegendBacking then
-                card._exBossLegendBacking:Hide()
-            end
-            if card and card._exBossVoiceTimingSurface then
-                card._exBossVoiceTimingSurface:Hide()
-            end
-            if card and card._exBossTextDividers then
-                for _, divider in ipairs(card._exBossTextDividers) do divider:Hide() end
-            end
-            if card and card._exBossVoicePrimaryDividers then
-                for _, divider in ipairs(card._exBossVoicePrimaryDividers) do divider:Hide() end
-            end
-            if card and card._exBossVoiceRuleDivider then
-                card._exBossVoiceRuleDivider:Hide()
-            end
-            if card and card._exBossTargetDividers then
-                for _, divider in ipairs(card._exBossTargetDividers) do divider:Hide() end
-            end
-            if card and card._exBossVoicePreviewDivider then
-                card._exBossVoicePreviewDivider:Hide()
-            end
-            if card and card._exBossCastCheckHelp then
-                card._exBossCastCheckHelp:Hide()
-            end
-            if card and card._exBossVoicePreviewTimeline then
-                card._exBossVoicePreviewTimeline:Hide()
-                card._exBossVoicePreviewTimeline._exBossCardSession = nil
-                card._exBossVoicePreviewTimeline._exBossCardState = nil
-                card._exBossVoicePreviewTimeline._layoutBusy = nil
-            end
+        session:Release()
+        if UI.spellSettingsChild._exV2Session == session then
+            UI.spellSettingsChild._exV2Session = nil
+            UI.spellSettingsChild._exV2Owner = nil
         end
-    end
-    UI.voiceCountdownSelector = nil
-    UI.voicePreviewTimeline = nil
-    if UI.spellSettingsCardSession and type(UI.spellSettingsCardSession.Release) == "function" then
-        UI.spellSettingsCardSession:Release()
     end
     UI.spellSettingsCardSession = nil
+    UI.spellSettingsCardConfig = nil
+    UI.spellSettingsRevision = nil
+    UI.voiceCountdownSelector = nil
+    UI.voicePreviewTimeline = nil
+    STATE.spellSettingsMounted = false
 end
 
-local function AnchorBossWidget(widget, parent, left, top, width, height, right)
-    if not widget then return end
-    widget:ClearAllPoints()
-    widget:SetPoint("TOPLEFT", parent, "TOPLEFT", left, -top)
-    if right then
-        widget:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -right, -top)
-    elseif width then
-        widget:SetWidth(width)
-    end
-    if height then widget:SetHeight(height) end
-    widget:Show()
-end
-
-local function SetBossPlayButtonVisual(button)
-    if button then EXUI:ApplySoundPreviewAppearance(button) end
-end
-
-local function LayoutBossAudioControls(session, cardID, prefix, parent, top, left, sourceWidth, rightPad)
-    EXUI:LayoutSoundSelector(parent, {
-        source = session:GetWidget(cardID, prefix .. "Source"),
-        preview = session:GetWidget(cardID, prefix .. "ValueTest"),
-        contents = { pack = session:GetWidget(cardID, prefix .. "Label"),
-            lsm = session:GetWidget(cardID, prefix .. "LSM"),
-            file = session:GetWidget(cardID, prefix .. "Path"),
-            tts = session:GetWidget(cardID, prefix .. "TtsText") },
-        top = top, left = left, sourceWidth = sourceWidth, right = rightPad or 12,
-        height = 30, previewWidth = 28, paintPreview = SetBossPlayButtonVisual,
-    })
-end
-
-local function LayoutBossAudioRow(session, cardID, prefix, parent, top, labelWidth, sourceWidth, rightPad)
-    AnchorBossWidget(session:GetWidget(cardID, prefix .. "Enabled"), parent, 14, top, labelWidth, 30)
-    LayoutBossAudioControls(session, cardID, prefix, parent, top, 14 + labelWidth, sourceWidth, rightPad)
-end
-
-local function LayoutTextSettingsCard(session)
-    local state = session.byId.text
-    local card, body = state and state.card, state and state.body
-    if not (card and body) then return end
-
-    local list = _G.ExwindGrid:GetSettingsListSession(body)
-    for _, entry in ipairs(list and list.entries or {}) do
-        local divider = entry.host and entry.host._exSettingsRowDivider
-        if divider then divider:Hide() end
-    end
-    for index, top in ipairs({ 43, 91, 139 }) do
-        local divider = card._exBossTextDividers and card._exBossTextDividers[index]
-        if divider then
-            divider:ClearAllPoints()
-            divider:SetPoint("TOPLEFT", body, "TOPLEFT", 14, -top)
-            divider:SetPoint("TOPRIGHT", body, "TOPRIGHT", -14, -top)
-            divider:Show()
-        end
-    end
-
-    local inset, gap = 14, 8
-    local bodyWidth = math.max(1, body:GetWidth() or 600)
-    local labelWidth = math.max(150, math.floor((bodyWidth - inset * 2) * 0.46))
-    local controlLeft = inset + labelWidth
-    local controlWidth = math.max(180, bodyWidth - controlLeft - inset)
-    local modeWidth = math.max(132, math.floor((controlWidth - gap) * 0.56))
-    local leadWidth = 70
-
-    local eventColorEnabled = session:GetWidget("text", "eventColorEnabled")
-    local eventColorMode = session:GetWidget("text", "eventColorMode")
-    local eventColor = session:GetWidget("text", "eventColor")
-    local centralEnabled = session:GetWidget("text", "centralEnabled")
-    local centralLead = session:GetWidget("text", "centralLead")
-    local centralText = session:GetWidget("text", "centralText")
-    local countdownEnabled = session:GetWidget("text", "countdownEnabled")
-    local preAlertText = session:GetWidget("text", "preAlertText")
-    local timerBarRenameEnabled = session:GetWidget("text", "timerBarRenameEnabled")
-    local timerBarRenameText = session:GetWidget("text", "timerBarRenameText")
-
-    AnchorBossWidget(eventColorEnabled, body, inset, 4, labelWidth, 30)
-    AnchorBossWidget(eventColorMode, body, controlLeft, 4, modeWidth, 30)
-    if eventColor then
-        -- 保留 RefreshSettingsDynamicWidgets 对自定义色控件的原显隐判断。
-        eventColor:ClearAllPoints()
-        eventColor:SetPoint("TOPLEFT", body, "TOPLEFT", controlLeft + modeWidth + gap, -4)
-        eventColor:SetSize(math.max(1, controlWidth - modeWidth - gap), 30)
-    end
-
-    AnchorBossWidget(centralEnabled, body, inset, 52, labelWidth, 30)
-    AnchorBossWidget(centralLead, body, controlLeft, 52, leadWidth, 30)
-    AnchorBossWidget(centralText, body, controlLeft + leadWidth + gap, 52,
-        math.max(1, controlWidth - leadWidth - gap), 30)
-    if centralLead and centralLead.label then
-        if not centralLead._exBossUnitInside then
-            centralLead._exBossUnitOriginalText = centralLead.label:GetText()
-        end
-        centralLead._exBossUnitInside = true
-        centralLead:SetTextInsets(9, 30, 0, 0)
-        centralLead.label:ClearAllPoints()
-        centralLead.label:SetPoint("RIGHT", centralLead, "RIGHT", -8, 0)
-        centralLead.label:SetJustifyH("RIGHT")
-        centralLead.label:SetText(L["秒"])
-        centralLead.label:Show()
-    end
-
-    AnchorBossWidget(countdownEnabled, body, inset, 100, labelWidth, 30)
-    AnchorBossWidget(preAlertText, body, controlLeft, 100, controlWidth, 30)
-    AnchorBossWidget(timerBarRenameEnabled, body, inset, 148, labelWidth, 30)
-    AnchorBossWidget(timerBarRenameText, body, controlLeft, 148, controlWidth, 30)
-
-    local contentHeight = 196
-    state.reportedHeight = contentHeight
-    return contentHeight
-end
-
-local function LayoutDisplaySettingsCard(session)
-    local state = session.byId.display
-    local card, body = state and state.card, state and state.body
-    if not (card and body) then return end
-    local ring = session:GetWidget("display", "ringEnabled")
-    local castBar = session:GetWidget("display", "castProgressBarEnabled")
-    local castCheck = session:GetWidget("display", "ringCastCheckEnabled")
-    local castDescription = session:GetWidget("display", "description_cast_check")
-    local rename = session:GetWidget("display", "castProgressBarRenameEnabled")
-    local renameText = session:GetWidget("display", "castProgressBarRenameText")
-    local inset, gap = 14, 8
-    local choiceWidth = math.max(1, ((body:GetWidth() or 400) - inset * 2 - gap) / 2)
-
-    AnchorBossWidget(ring, body, inset, 6, choiceWidth, 40)
-    AnchorBossWidget(castBar, body, inset + choiceWidth + gap, 6, choiceWidth, 40)
-    local list = _G.ExwindGrid:GetSettingsListSession(body)
-    for _, entry in ipairs(list and list.entries or {}) do
-        local divider = entry.host and entry.host._exSettingsRowDivider
-        if divider then divider:Hide() end
-    end
-    if not card._exBossCastCheckHelp then
-        local ringTexture = "Interface\\AddOns\\EXBoss\\Core\\Media\\Textures\\RingWhiteThin2.tga"
-        local help = EXUI:CreatePicButton(body, 11, 11,
-            ringTexture, ringTexture, ringTexture, nil, true)
-        card._exBossCastCheckHelp = help
-        help.label = EXUI:CreateVisualFontString(help, EXFONTFRAME, "GameFontDisableSmall")
-        help.label:SetPoint("CENTER", 0, 0)
-        help.label:SetFont(ExwindTools.MAIN_FONT, ExwindTools.GUIMetrics.font.exboss.micro, "")
-        help.label:SetText("?")
-        help.label:SetTextColor(unpack(GC.textDim))
-        card._exBossCastCheckHelp:SetScript("OnEnter", function(self)
-            if not GameTooltip then return end
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:AddLine(L["检测当前读条能否完成，来不及时以红色提示。"], 1, 1, 1, true)
-            GameTooltip:Show()
+-- 特殊业务控件独立持有租约；页面和普通字段由原生 V2 负责布局与回读。
+-- 技能头的 ON/OFF 属于技能头（自定义区），不进 V2 声明：同一个开关常驻技能头，
+-- 每次挂载换绑到当前技能草稿，写值仍走 V2 binding → NotifyModuleValueChanged。
+function Page._BindSpellSummarySwitch(mdb)
+    local host = UI.spellSummaryEnableHost
+    if not host then return end
+    local switch = UI.spellSummarySwitch
+    if not switch then
+        switch = EXUI:CreateCheckbox(host, L["启用"], false, function(checked)
+            local draft = UI.spellSummarySwitch and UI.spellSummarySwitch._exDraft
+            if type(draft) ~= "table" then return end
+            EXUI:CreateSettingsV2Binding(SETTINGS.EDITOR_KEY, draft, "enabled"):Write(checked == true, "commit")
+            local session = UI.spellSettingsCardSession
+            if session and session.alive then session:Refresh() end
         end)
-        card._exBossCastCheckHelp:SetScript("OnLeave", function()
-            if GameTooltip then GameTooltip:Hide() end
-        end)
+        switch:SetAllPoints(host)
+        EXUI:PrepareSettingsListControl(switch, {presentation="card",cardCheckSize=14,cardTextSize=12})
+        EXUI:ApplyCheckboxOnOffVisual(switch)
+        UI.spellSummarySwitch = switch
     end
-    AnchorBossWidget(castCheck, body, inset, 62, nil, 64, inset)
-    if castDescription then
-        AnchorBossWidget(castDescription, castCheck, 0, 33, nil, 23, 14)
-        if castDescription.text then
-            castDescription.text:SetFont(ExwindTools.MAIN_FONT, ExwindTools.GUIMetrics.font.hint, "")
-            castDescription.text:SetTextColor(unpack(GC.textDim))
-        end
-        EXUI:LayoutCheckboxCardDescription(castCheck, castDescription, 23)
-    end
-    card._exBossCastCheckHelp:ClearAllPoints()
-    card._exBossCastCheckHelp:SetPoint("TOPRIGHT", castCheck, "TOPRIGHT", -8, -7)
-    card._exBossCastCheckHelp:SetFrameLevel(castCheck:GetFrameLevel() + 3)
-    card._exBossCastCheckHelp:Hide() -- 用户要求删除施法检测右上角问号（原 Show()）
-
-    local renameWidth = choiceWidth
-    AnchorBossWidget(rename, body, inset, 148, renameWidth, 30)
-    if renameText then
-        renameText:ClearAllPoints()
-        renameText:SetPoint("TOPLEFT", body, "TOPLEFT", inset + renameWidth + gap, -148)
-        renameText:SetPoint("TOPRIGHT", body, "TOPRIGHT", -inset, -148)
-        renameText:SetHeight(30)
-        renameText:Show()
-    end
-    return 196
+    switch._exDraft = mdb
+    switch:SetChecked(mdb.enabled ~= false)
+    EXUI:ApplyControlAppearance(switch)
 end
 
-local function LayoutTargetSettingsCard(session)
-    local state = session.byId.target
-    local card, body = state and state.card, state and state.body
-    if not (card and body) then return end
-    local list = _G.ExwindGrid:GetSettingsListSession(body)
-    for _, entry in ipairs(list and list.entries or {}) do
-        local divider = entry.host and entry.host._exSettingsRowDivider
-        if divider then divider:Hide() end
+function Page._BuildSpellSettingsOwner(mdb)
+    local owner = { binding={ moduleKey=SETTINGS.EDITOR_KEY, config=mdb },
+        controls={}, components={}, predicates={} }
+    owner.predicates.colorEnabled = function() return mdb.eventColorEnabled == true end
+    owner.predicates.customColor = function()
+        return mdb.eventColorEnabled == true and NormalizeEventColorMode(mdb.eventColorMode) == "__custom"
     end
-    local start = session:GetWidget("target", "targetAlertStartEnabled")
-    local ring = session:GetWidget("target", "targetAlertRingEnabled")
-    local textChoice = session:GetWidget("target", "targetAlertTextEnabledV2")
-    local icon = session:GetWidget("target", "targetAlertIconEnabled")
-    local stealth = session:GetWidget("target", "targetAlertStealthEnabledV2")
-    local voice = session:GetWidget("target", "targetAlertVoiceEnabled")
-
-    AnchorBossWidget(start, body, 12, 8, nil, 34, 12)
-    if start and start.checkbox then
-        start.checkbox:ClearAllPoints()
-        start.checkbox:SetPoint("RIGHT", start, "RIGHT", -2, 0)
-        if start.label then
-            start.label:ClearAllPoints()
-            start.label:SetPoint("LEFT", start, "LEFT", 0, 0)
-            start.label:SetPoint("RIGHT", start.checkbox, "LEFT", -8, 0)
-        end
+    owner.predicates.castRenameEnabled = function() return mdb.castProgressBarRenameEnabled == true end
+    owner.predicates.targetEnabled = function() return mdb.targetAlertStartEnabled == true end
+    owner.predicates.targetVoiceUsable = function()
+        return mdb.targetAlertStartEnabled == true and mdb.targetAlertVoiceEnabled == true
     end
-    local choiceWidth = math.max(68, ((body:GetWidth() or 380) - 40) / 3)
-    for index, widget in ipairs({ ring, textChoice, icon }) do
-        AnchorBossWidget(widget, body, 12 + (index - 1) * (choiceWidth + 8), 64, choiceWidth, 36)
-    end
-    AnchorBossWidget(stealth, body, 12, 118, nil, 44, 12)
-    AnchorBossWidget(voice, body, 12, 186, nil, 30, 12)
-    LayoutBossAudioControls(session, "target", "targetAlertStart", body, 232, 12, 110, 12)
-    if voice then
-        voice:ClearAllPoints()
-        voice:SetPoint("TOPLEFT", body, "TOPLEFT", 12, -186)
-        voice:SetPoint("TOPRIGHT", body, "TOPRIGHT", -12, -186)
-        voice:SetHeight(32)
-    end
-
-    if not card._exBossTargetDividers then
-        card._exBossTargetDividers = {}
-        for index = 1, 2 do
-            card._exBossTargetDividers[index] = EXUI:CreateSettingsSeparator(body, 1)
-        end
-    end
-    for index, top in ipairs({ 118, 174 }) do
-        local divider = card._exBossTargetDividers[index]
-        divider:ClearAllPoints()
-        divider:SetPoint("TOPLEFT", body, "TOPLEFT", 12, -top)
-        divider:SetPoint("TOPRIGHT", body, "TOPRIGHT", -12, -top)
-        divider:SetShown(index == 2)
-    end
-    return 274
-end
-
-local function SetBossVoicePreviewVisibility(session)
-    local state = session and session.byId.voice
-    local card = state and state.card
-    if not card then return false end
-    -- 预览区属于只读说明，始终保留；未启用的时刻由现有 sequence 显示为空。
-    local visible = true
-    local previewHeading = session:GetWidget("voice", "description_voice_preview_heading")
-    if previewHeading then previewHeading:Hide() end
-    local previewButton = session:GetWidget("voice", "voiceSequencePreview")
-    if previewButton then previewButton:SetShown(visible) end
-    if card._exBossVoicePreviewDivider then card._exBossVoicePreviewDivider:Hide() end
-    if card._exBossVoicePreviewBackground then card._exBossVoicePreviewBackground:SetShown(visible) end
-    if card._exBossVoicePreviewTimeline then card._exBossVoicePreviewTimeline:SetShown(visible) end
-    if card._exBossVoiceBranchV then card._exBossVoiceBranchV:Hide() end
-    if card._exBossVoiceBranchH then card._exBossVoiceBranchH:Hide() end
-    return visible
-end
-
-local function GetBossVoiceContentHeight(visible, timelineHeight)
-    return visible and (200 + (timelineHeight or 70)) or 218
-end
-
-local function LayoutVoiceSettingsCard(session)
-    local state = session.byId.voice
-    local card, body = state and state.card, state and state.body
-    if not (card and body) then return end
-    local list = _G.ExwindGrid:GetSettingsListSession(body)
-    for _, entry in ipairs(list and list.entries or {}) do
-        local divider = entry.host and entry.host._exSettingsRowDivider
-        if divider then divider:Hide() end
-    end
-    local labelWidth = math.max(128, math.floor((body:GetWidth() or 600) * 0.36))
-    local sourceWidth = math.max(78, math.floor((body:GetWidth() - labelWidth - 56) * 0.25))
-    LayoutBossAudioRow(session, "voice", "tr0", body, 4, labelWidth, sourceWidth, 12)
-    LayoutBossAudioRow(session, "voice", "tr1", body, 48, labelWidth, sourceWidth, 12)
-    for index, top in ipairs({ 41, 85 }) do
-        local line = card._exBossVoicePrimaryDividers and card._exBossVoicePrimaryDividers[index]
-        if line then
-            line:ClearAllPoints()
-            line:SetPoint("TOPLEFT", body, "TOPLEFT", 12, -top)
-            line:SetPoint("TOPRIGHT", body, "TOPRIGHT", -12, -top)
-            line:Show()
-        end
-    end
-
-    local surface = card._exBossVoiceTimingSurface
-    if not surface then return end
-    surface:ClearAllPoints()
-    surface:SetPoint("TOPLEFT", body, "TOPLEFT", 12, -94)
-    surface:SetPoint("BOTTOMRIGHT", body, "BOTTOMRIGHT", -12, 10)
-    surface:SetFrameLevel(body:GetFrameLevel() or 1)
-    EXUI:ClearControlSurface(surface)
-    surface:Show()
-
-    local heading = session:GetWidget("voice", "description_countdown_group")
-    local note = session:GetWidget("voice", "description_countdown_note")
-    local digit = session:GetWidget("voice", "tr2Enabled")
-    local segmented = session:GetWidget("voice", "tr2CountdownLead")
-    local playName = session:GetWidget("voice", "tr2PlayTextEnabled")
-    local previewHeading = session:GetWidget("voice", "description_voice_preview_heading")
-    local previewButton = session:GetWidget("voice", "voiceSequencePreview")
-    local previewSequence = session:GetWidget("voice", "description_voice_preview_sequence")
-    if heading then heading:Hide() end
-    if note then note:Hide() end
-    local controlLeft = labelWidth + 2
-    AnchorBossWidget(digit, surface, 2, 4, controlLeft - 2, 30)
-    if segmented then
-        segmented:ClearAllPoints()
-        segmented:SetPoint("TOPLEFT", surface, "TOPLEFT", controlLeft, -4)
-        segmented:SetPoint("TOPRIGHT", surface, "TOPRIGHT", 0, -4)
-        -- Keep the shared control's relayout at the same height as this card's inputs.
-        segmented.itemHeight = 30
-        segmented:SetHeight(30)
-        segmented:Show()
-    end
-    AnchorBossWidget(playName, surface, 2, 44, controlLeft - 2, 30)
-    LayoutBossAudioControls(session, "voice", "tr2", surface, 44, controlLeft, sourceWidth, 0)
-    if card._exBossVoiceRuleDivider then
-        card._exBossVoiceRuleDivider:Hide()
-    end
-
-    local previewVisible = SetBossVoicePreviewVisibility(session)
-    local divider = card._exBossVoicePreviewDivider
-    if divider then
-        divider:Hide()
-    end
-    if previewHeading then previewHeading:Hide() end
-    local background = card._exBossVoicePreviewBackground
-    if background then
-        background:ClearAllPoints()
-        background:SetPoint("TOPLEFT", surface, "TOPLEFT", 0, -82)
-        background:SetPoint("BOTTOMRIGHT", surface, "BOTTOMRIGHT", 0, 0)
-        EXUI:SetControlSurface(background, 5, GC.panel, GC.cardBorder)
-        background:SetShown(previewVisible)
-    end
-    if previewSequence then previewSequence:Hide() end
-    local timeline = card._exBossVoicePreviewTimeline
-    local timelineHeight = 68
-    if timeline then
-        timeline:ClearAllPoints()
-        timeline:SetPoint("TOPLEFT", surface, "TOPLEFT", 10, -94)
-        timeline:SetPoint("TOPRIGHT", surface, "TOPRIGHT", -10, -94)
-        if timeline._layout then timeline:_layout() end
-        timelineHeight = timeline:GetHeight() or timelineHeight
-    end
-    if previewButton then
-        previewButton:ClearAllPoints()
-        previewButton:SetPoint("BOTTOMRIGHT", surface, "BOTTOMRIGHT", -8, 8)
-        previewButton._exBossPreviewOriginalFrameLevel = previewButton._exBossPreviewOriginalFrameLevel
-            or previewButton:GetFrameLevel()
-        previewButton:SetFrameLevel(surface:GetFrameLevel() + 6)
-        previewButton._exButtonVariant = "secondary"
-        EXUI:ApplyControlAppearance(previewButton)
-        SetBossPlayButtonVisual(previewButton)
-        previewButton:SetSize(28, 28)
-        previewButton:SetShown(previewVisible)
-    end
-    local contentHeight = GetBossVoiceContentHeight(previewVisible, timelineHeight)
-    -- The existing geometry report must track resize measurements as well as
-    -- text changes, so its next comparison cannot use an older narrow width.
-    state.reportedHeight = contentHeight
-    return contentHeight
-end
-
-ApplyBossCustomCardLayouts = function(session)
-    if not (session and session.byId and session.GetWidget) then return end
-    LayoutTextSettingsCard(session)
-    LayoutDisplaySettingsCard(session)
-    LayoutVoiceSettingsCard(session)
-    LayoutTargetSettingsCard(session)
-    local summaryEnabled = session:GetWidget("master", "enabled")
-    if summaryEnabled and UI.spellSummaryEnableHost then
-        UI.spellSummaryEnableHost:SetSize(76, 26)
-        summaryEnabled:ClearAllPoints()
-        summaryEnabled:SetAllPoints(UI.spellSummaryEnableHost)
-    end
-end
-
-local function ApplyPrototypeSettingsCardSurfaces(session)
-    if not (session and session.byId) then return end
-    for _, id in ipairs({ "text", "display", "voice", "target" }) do
-        local state = session.byId[id]
-        local card = state and state.card
-        local body = state and state.body
-        if card and body then
-            local header = card._exSettingsCardHeader
-            local title = card._exSettingsCardTitle
-            if card._exSettingsListExternalHeader then
-                card._exSettingsListExternalHeader.height = 13
-                card._exSettingsListExternalHeader.footerPadding = 0
+    for _, prefix in ipairs({"tr0","tr1","tr2","targetAlertStart"}) do
+        local key = prefix
+        for source, suffix in pairs({pack="Pack",lsm="LSMVisible",file="File",tts="TTS"}) do
+            local value = source
+            owner.predicates[key .. suffix] = function()
+                return NormalizeTriggerSource(mdb[key .. "Source"]) == value
             end
-            if header then
-                header:SetHeight(24)
-                header:EnableMouse(false)
-                local icon = card._exSettingsCardIcon
-                if icon then icon:Hide() end
-                if title then
-                    title:ClearAllPoints()
-                    title:SetPoint("LEFT", header, "LEFT", 18, 12)
-                    title:SetWidth(math.ceil(title:GetUnboundedStringWidth() or 0) + 2)
+        end
+        if key ~= "targetAlertStart" then
+            owner.predicates[key .. "Usable"] = function()
+                return mdb[key .. (key == "tr2" and "PlayTextEnabled" or "Enabled")] == true
+            end
+        end
+    end
+    -- 声音选择的 ▶：由本页播放，并让 Core 的试听按钮显示播放状态。
+    owner.options = {}
+    for index = 0, 2 do
+        owner.options["sound.tr" .. index] = { onTest = function(_, button)
+            EXUI:RunSoundPreview(button, function() return PlayTriggerPreviewByIndex(index) end,
+                mdb["tr" .. index .. "Source"] == "tts")
+        end }
+    end
+    owner.options["sound.targetAlertStart"] = { onTest = function(_, button)
+        EXUI:RunSoundPreview(button, function() return PlayTargetAlertStartPreview(mdb) end,
+            mdb.targetAlertStartSource == "tts")
+    end }
+    owner.components.voiceTimeline = {
+        mount=function(host,context)
+            ExwindFactory:InitCompositePool("ExBossVoicePreviewTimeline")
+            local timeline = ExwindFactory:AcquireCompositeHost("ExBossVoicePreviewTimeline",host)
+            -- 池里取出时宽为 0，V2 以挂载时的宽作自然宽；先给声音选择器的宽，布局时再铺满。
+            timeline:SetWidth(ExwindTools.GUIMetrics.settings.soundSelectorWidth)
+            timeline:SetFrameLevel((host:GetFrameLevel() or 1) + 3)
+            if not timeline.nodes then
+                timeline.axis = EXUI:CreateVisualTexture(timeline, EXBASEFRAME)
+                timeline.axis:SetColorTexture(unpack(GC.cardBorder))
+                timeline.axis:SetHeight(PixelUtil.GetNearestPixelSize(1, timeline:GetEffectiveScale(), 1))
+                timeline.nodes = {}
+                for index = 1, 7 do
+                    local node = CreateFrame("Frame", nil, timeline)
+                    node.time = EXUI:CreateVisualFontString(node, EXFONTFRAME, "GameFontDisableSmall")
+                    node.time:SetPoint("TOPLEFT", node, "TOPLEFT", 0, 0)
+                    node.time:SetPoint("TOPRIGHT", node, "TOPRIGHT", 0, 0)
+                    node.time:SetJustifyH("CENTER")
+                    node.time:SetWordWrap(false)
+                    node.time:SetFont(ExwindTools.MAIN_FONT, ExwindTools.GUIMetrics.font.hint, "")
+                    node.valueHost = CreateFrame("Frame", nil, node, "BackdropTemplate")
+                    node.valueHost:SetPoint("TOPLEFT", node.time, "BOTTOMLEFT", 0, -5)
+                    node.valueHost:SetHeight(26)
+                    node.value = EXUI:CreateVisualFontString(node.valueHost, EXFONTFRAME, "GameFontHighlightSmall")
+                    node.value:SetPoint("TOPLEFT", node.valueHost, "TOPLEFT", 5, -5)
+                    node.value:SetPoint("TOPRIGHT", node.valueHost, "TOPRIGHT", -5, -5)
+                    node.value:SetJustifyH("CENTER")
+                    node.value:SetWordWrap(true)
+                    node.value:SetNonSpaceWrap(true)
+                    node.tick = EXUI:CreateVisualTexture(timeline, EXBASEFRAME)
+                    node.tick:SetColorTexture(unpack(GC.cardBorder))
+                    node.tick:SetSize(PixelUtil.GetNearestPixelSize(1, timeline:GetEffectiveScale(), 1), 6)
+                    timeline.nodes[index] = node
                 end
-                if not card._exBossLegendBacking then
-                    card._exBossLegendBacking = EXUI:CreateVisualTexture(header, EXBASEFRAME)
-                end
-                local backing = card._exBossLegendBacking
-                backing:ClearAllPoints()
-                backing:SetPoint("LEFT", header, "LEFT", 12, 12)
-                backing:SetSize(math.ceil((title and title:GetUnboundedStringWidth()) or 0) + 14,
-                    PixelUtil.GetNearestPixelSize(2, header:GetEffectiveScale(), 1))
-                backing:SetColorTexture(unpack(GC.panel))
-                backing:Show()
+                timeline.playButton = EXUI:CreateButton(timeline, 26, 26, "", function()
+                    if StartVoiceSequencePreview then StartVoiceSequencePreview() end
+                end, { variant="secondary", compact=true })
+                timeline.playButton:SetPoint("BOTTOMRIGHT", timeline, "BOTTOMRIGHT", -6, 6)
             end
-            body:ClearAllPoints()
-            body:SetPoint("TOPLEFT", card, "TOPLEFT", 0, -13)
-            body:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT", 0, 0)
-            EXUI:SetControlSurface(card, 10, GC.card, GC.cardBorder)
-            EXUI:ClearControlSurface(body)
-        end
-    end
-    local textState = session.byId.text
-    local textCard = textState and textState.card
-    local textBody = textState and textState.body
-    if textCard and textBody and not textCard._exBossTextDividers then
-        textCard._exBossTextDividers = {}
-        for index = 1, 3 do
-            textCard._exBossTextDividers[index] = EXUI:CreateSettingsSeparator(textBody, 1)
-        end
-    end
-    local summaryEnabled = session:GetWidget("master", "enabled")
-    if summaryEnabled and summaryEnabled.checkbox and summaryEnabled._exSettingsPresentation ~= "card" then
-        -- 只改变原控件的呈现方式；控件对象、字段、setter 与通知通道保持不变。
-        EXUI:RestoreSettingsListControl(summaryEnabled)
-        EXUI:PrepareSettingsListControl(summaryEnabled, {
-            presentation = "card", cardCheckSize = 14, cardTextSize = 12,
-        })
-    end
-    if summaryEnabled and summaryEnabled.checkbox then
-        EXUI:ApplyCheckboxOnOffVisual(summaryEnabled)
-    end
-    local voiceState = session.byId.voice
-    local voiceCard = voiceState and voiceState.card
-    local voiceBody = voiceState and voiceState.body
-    if voiceCard and voiceBody then
-        voiceCard._exBossVoiceTimingSurface = voiceCard._exBossVoiceTimingSurface
-            or CreateFrame("Frame", nil, voiceBody, "BackdropTemplate")
-        voiceCard._exBossVoiceTimingSurface:EnableMouse(false)
-        local voiceSurface = voiceCard._exBossVoiceTimingSurface
-        if voiceCard._exBossVoicePreviewDivider then
-            voiceCard._exBossVoicePreviewDivider:Hide()
-        end
-        if not voiceCard._exBossVoicePreviewBackground then
-            local background = CreateFrame("Frame", nil, voiceSurface)
-            background:EnableMouse(false)
-            voiceCard._exBossVoicePreviewBackground = background
-        end
-        voiceCard._exBossVoicePreviewBackground:SetParent(voiceSurface)
-        if voiceCard._exBossVoiceRuleDivider then
-            voiceCard._exBossVoiceRuleDivider:Hide()
-        end
-        if not voiceCard._exBossVoicePrimaryDividers then
-            voiceCard._exBossVoicePrimaryDividers = {}
-            for index = 1, 2 do
-                voiceCard._exBossVoicePrimaryDividers[index] = EXUI:CreateSettingsSeparator(voiceBody, 1)
-            end
-        end
-        UI.voiceCountdownSelector = session:GetWidget("voice", "tr2CountdownLead")
-        if not voiceCard._exBossVoicePreviewTimeline then
-            local timeline = CreateFrame("Frame", nil, voiceBody)
-            timeline:SetFrameLevel((voiceBody:GetFrameLevel() or 1) + 3)
-            timeline.axis = EXUI:CreateVisualTexture(timeline, EXBASEFRAME)
-            timeline.axis:SetColorTexture(unpack(GC.cardBorder))
-            timeline.axis:SetHeight(PixelUtil.GetNearestPixelSize(1, timeline:GetEffectiveScale(), 1))
-            timeline.nodes = {}
-            for index = 1, 7 do
-                local node = CreateFrame("Frame", nil, timeline)
-                node.time = EXUI:CreateVisualFontString(node, EXFONTFRAME, "GameFontDisableSmall")
-                node.time:SetPoint("TOPLEFT", node, "TOPLEFT", 0, 0)
-                node.time:SetPoint("TOPRIGHT", node, "TOPRIGHT", 0, 0)
-                node.time:SetJustifyH("CENTER")
-                node.time:SetWordWrap(false)
-                node.time:SetFont(ExwindTools.MAIN_FONT, ExwindTools.GUIMetrics.font.hint, "")
-                node.valueHost = CreateFrame("Frame", nil, node, "BackdropTemplate")
-                node.valueHost:SetPoint("TOPLEFT", node.time, "BOTTOMLEFT", 0, -5)
-                node.valueHost:SetHeight(26)
-                node.value = EXUI:CreateVisualFontString(node.valueHost, EXFONTFRAME, "GameFontHighlightSmall")
-                node.value:SetPoint("TOPLEFT", node.valueHost, "TOPLEFT", 5, -5)
-                node.value:SetPoint("TOPRIGHT", node.valueHost, "TOPRIGHT", -5, -5)
-                node.value:SetJustifyH("CENTER")
-                node.value:SetWordWrap(true)
-                node.value:SetNonSpaceWrap(true)
-                node.tick = EXUI:CreateVisualTexture(timeline, EXBASEFRAME)
-                node.tick:SetColorTexture(unpack(GC.cardBorder))
-                node.tick:SetSize(PixelUtil.GetNearestPixelSize(1, timeline:GetEffectiveScale(), 1), 6)
-                timeline.nodes[index] = node
-            end
+            EXUI:ApplySoundPreviewAppearance(timeline.playButton)
             timeline._layout = function(self)
                 if self._layoutBusy then return end
                 self._layoutBusy = true
@@ -5185,7 +4399,7 @@ local function ApplyPrototypeSettingsCardSurfaces(session)
                 for _, placement in ipairs(placements) do
                     local node = placement.node
                     node.valueHost:ClearAllPoints()
-                    node.valueHost:SetPoint("TOPLEFT", self, "TOPLEFT", placement.left, 0)
+                    node.valueHost:SetPoint("TOPLEFT", self, "TOPLEFT", placement.left, -6)
                     node.valueHost:SetSize(placement.width, rowHeight)
                     node.value:ClearAllPoints()
                     node.value:SetPoint("TOPLEFT", node.valueHost, "TOPLEFT", 5, -5)
@@ -5196,7 +4410,7 @@ local function ApplyPrototypeSettingsCardSurfaces(session)
                     node.valueHost:Show()
                 end
 
-                local axisTop = rowHeight + 10
+                local axisTop = rowHeight + 16 -- 上方留白 6，与左右、下方一致
                 self.axis:ClearAllPoints()
                 self.axis:SetPoint("TOPLEFT", self, "TOPLEFT", slotWidth / 2, -axisTop)
                 self.axis:SetPoint("TOPRIGHT", self, "TOPRIGHT",
@@ -5214,36 +4428,51 @@ local function ApplyPrototypeSettingsCardSurfaces(session)
                 local heightChanged = self:GetHeight() ~= timelineHeight
                 if heightChanged then self:SetHeight(timelineHeight) end
                 self._layoutBusy = nil
-                local list = _G.ExwindGrid:GetSettingsListSession(voiceBody)
-                local owner = self._exBossCardSession
-                local visible = owner and SetBossVoicePreviewVisibility(owner)
-                local contentHeight = GetBossVoiceContentHeight(visible, timelineHeight)
-                local state = self._exBossCardState
-                if state and state.reportedHeight ~= contentHeight and list and owner and not owner.released
-                    and not list.visualLayoutBusy and not owner.reflowBusy then
-                    _G.ExwindGrid:RequestReflow(voiceBody)
-                end
+                if context:IsCurrent() then context:ReportHeight(timelineHeight) end
             end
-            timeline:SetScript("OnSizeChanged", function(self) self:_layout() end)
-            voiceCard._exBossVoicePreviewTimeline = timeline
-        end
-        voiceCard._exBossVoicePreviewTimeline._exBossCardSession = session
-        voiceCard._exBossVoicePreviewTimeline._exBossCardState = voiceState
-        UI.voicePreviewTimeline = voiceCard._exBossVoicePreviewTimeline
+
+            timeline:SetScript("OnSizeChanged",function(self) self:_layout() end)
+            UI.voicePreviewTimeline = timeline
+            RefreshVoicePreviewTimeline(BuildVoicePreviewSequence(mdb))
+            return timeline
+        end,
+        update=function()
+            RefreshVoicePreviewTimeline(BuildVoicePreviewSequence(mdb))
+        end,
+        measure=function(timeline,context,width)
+            timeline:SetWidth(width)
+            timeline:_layout()
+            return math.max(68,timeline:GetHeight())
+        end,
+        layout=function(timeline,context,width,height)
+            timeline:ClearAllPoints()
+            timeline:SetPoint("TOPLEFT",timeline:GetParent(),"TOPLEFT")
+            timeline:SetSize(width,height)
+            EXUI:SetControlSurface(timeline,5,GC.panel,GC.cardBorder)
+        end,
+        setEnabled=function() end,
+        setVisible=function(timeline,context,visible) timeline:SetShown(visible) end,
+        release=function(timeline)
+            timeline:SetScript("OnSizeChanged",nil)
+            EXUI:SetSoundPreviewPlaying(timeline.playButton, false)
+            timeline._layout = nil
+            timeline._layoutBusy = nil
+            if UI.voicePreviewTimeline == timeline then UI.voicePreviewTimeline = nil end
+            ExwindFactory:ReleaseCompositeHost(timeline)
+        end,
+    }
+    return owner
+end
+
+local function ApplySpellSettingsPreviewAppearance(session)
+    if not (session and session.alive) then return end
+    local widgets = GetSpellSettingsWidgets()
+    for _, key in ipairs({"tr0Label","tr1Label","tr2Label"}) do
+        if widgets and widgets[key] then widgets[key]._previewPath = Page.ResolvePackPreviewPath end
     end
-    for id, layout in pairs({ text = LayoutTextSettingsCard, display = LayoutDisplaySettingsCard, voice = LayoutVoiceSettingsCard,
-        target = LayoutTargetSettingsCard }) do
-        local state = session.byId[id]
-        local list = state and _G.ExwindGrid:GetSettingsListSession(state.body)
-        if list then
-            list.onVisualLayout = function()
-                if session.released then return end
-                return layout(session)
-            end
-        end
+    for _, key in ipairs({"tr0ValueTest","tr1ValueTest","tr2ValueTest","targetAlertStartValueTest"}) do
+        if widgets and widgets[key] then EXUI:ApplySoundPreviewAppearance(widgets[key]) end
     end
-    session:Relayout()
-    ApplyBossCustomCardLayouts(session)
 end
 
 -- [三模式边界] 这里只允许各模式完成后的宿主尺寸/reflow 接线；revision/context、extra isCurrent、DungeonCommon Hide/Render 和普通 draft 绑定禁止修改。
@@ -5251,39 +4480,35 @@ local function RefreshSpellSettingsPanel(expectedRevision)
     if expectedRevision ~= nil and expectedRevision ~= STATE.spellEditorRevision then
         return
     end
-    if not (UI.spellSettingsGridChild and UI.spellSettingsEmptyText) then
+    if not (UI.spellSettingsChild and UI.spellSettingsEmptyText) then
         return
     end
 
     if Page.Extras then Page.Extras:Hide() end
+    -- 普通技能之间切换（含跨首领/副本）不释放 V2 会话：草稿表保持同一张，
+    -- 由 RebindSpellSettings 原地换数据并 Refresh；写回仍由 spellEditorContext 守卫。
+    if selectedBossCommonSettings or selectedExtraKey then
+        ReleaseSpellSettingsCardSession()
+    end
 
     if selectedBossCommonSettings then
         STATE.currentSpellSlotKey = nil
         local common = Page.DungeonCommon
         if common and common.HasContent and common:HasContent() then
             SetRightSettingsPresentation(true)
-            local Grid = _G.ExwindGrid
-            if not Grid then
-                ClearSpellSettingsGridActiveRegistration()
-                UI.spellSettingsEmptyText:SetText(L["ExwindGrid 不可用，无法渲染副本通用设置。"])
-                UI.spellSettingsEmptyText:SetShown(true)
-                UI.spellSettingsGridChild:SetHeight(1)
-                return
-            end
             UI.spellSettingsEmptyText:Hide()
-            UI.spellSettingsGridScroll:SetVerticalScroll(0)
-            -- 副本通用页会释放同一宿主上的 Boss Grid 控件。必须同步作废
-            -- 复用标记，否则返回 Boss 时会把空 widgets 误认为已绑定并跳过重建。
-            STATE.spellSettingsGridBound = false
+            UI.spellSettingsScroll:SetVerticalScroll(0)
+            -- 先交还普通技能会话，再挂副本通用区域，复用标记与租约一并清理。
+            STATE.spellSettingsMounted = false
             ReleaseSpellSettingsCardSession()
-            if common:Render(UI.spellSettingsGridChild) then
+            if common:Render(UI.spellSettingsChild) then
                 return
             end
         end
         selectedBossCommonSettings = nil
     end
 
-    -- 退出副本通用设置后，先卸载它的独立覆盖层，再恢复 Boss 的标准 Grid。
+    -- 退出副本通用设置后，先卸载它的独立覆盖层，再恢复 Boss 的标准 V2。
     -- 否则 Aura/BUFF 行仍会留在同一块右侧区域上方。
     if Page.DungeonCommon and Page.DungeonCommon.Hide then
         Page.DungeonCommon:Hide()
@@ -5297,9 +4522,9 @@ local function RefreshSpellSettingsPanel(expectedRevision)
         local slot = GetCurrentSpellSlotKey()
         local scene = GetSlotCategory(slot)
         local revision = STATE.spellEditorRevision
-        STATE.spellSettingsGridBound = false
+        STATE.spellSettingsMounted = false
         STATE.currentSpellSlotKey = nil
-        UI.spellSettingsGridScroll:SetVerticalScroll(0)
+        UI.spellSettingsScroll:SetVerticalScroll(0)
         ReleaseSpellSettingsCardSession()
         UI.spellDetailHeader:Show()
         UI.spellDetailPlaceholder:Hide()
@@ -5321,17 +4546,16 @@ local function RefreshSpellSettingsPanel(expectedRevision)
         if UI.spellSummaryEnableHost then UI.spellSummaryEnableHost:Hide() end
         if UI.titleControlHost then UI.titleControlHost:Hide() end
         RefreshSpellDetailHeaderLayout()
-        local rendered = Page.Extras:Render(UI.spellSettingsGridChild, scene, slot, encounterID, extraKey, function()
+        local rendered = Page.Extras:Render(UI.spellSettingsChild, scene, slot, encounterID, extraKey, function()
             return revision == STATE.spellEditorRevision and selectedExtraKey == extraKey
                 and GetCurrentEncounterID() == encounterID and GetCurrentSpellSlotKey() == slot
         end)
         UI.spellSettingsEmptyText:SetShown(not rendered)
         if rendered then
-            RegisterSpellSettingsGridAsActive(Page.Extras.MODULE_KEY)
+            RegisterSpellSettingsAsActive(Page.Extras.MODULE_KEY)
         else
-            ClearSpellSettingsGridActiveRegistration()
-            local Grid = _G.ExwindGrid
-            if Grid then Grid:ReleaseContainerWidgets(UI.spellSettingsGridChild) end
+            ClearSpellSettingsActiveRegistration()
+            Page.Extras:Hide()
             UI.spellSettingsEmptyText:SetText(L["配置不可用"])
         end
         return
@@ -5341,10 +4565,11 @@ local function RefreshSpellSettingsPanel(expectedRevision)
     local event = FindEventByID(eventID)
     if not encounterID or not eventID or not event then
         STATE.currentSpellSlotKey = nil
-        ClearSpellSettingsGridActiveRegistration()
+        ReleaseSpellSettingsCardSession()
+        ClearSpellSettingsActiveRegistration()
         SetSpellDetailHeaderEmpty(L["点击上方法术卡片后，可在此查看法术描述。"])
         UI.spellSettingsEmptyText:SetShown(true)
-        UI.spellSettingsGridChild:SetHeight(1)
+        UI.spellSettingsChild:SetHeight(1)
         return
     end
 
@@ -5361,17 +4586,8 @@ local function RefreshSpellSettingsPanel(expectedRevision)
 
     UpdateSpellDetailHeader(spellName, spellIdentifier, eventID, spellIcon, GetEventIconFlags(event))
 
-    local Grid = _G.ExwindGrid
-    if not Grid then
-        ClearSpellSettingsGridActiveRegistration()
-        UI.spellSettingsEmptyText:SetText(L["ExwindGrid 不可用，无法渲染设置区。"])
-        UI.spellSettingsEmptyText:SetShown(true)
-        UI.spellSettingsGridChild:SetHeight(1)
-        return
-    end
-
     UI.spellSettingsEmptyText:Hide()
-    UI.spellSettingsGridScroll:SetVerticalScroll(0)
+    UI.spellSettingsScroll:SetVerticalScroll(0)
     RunSilentSpellSettingsPopulate(function()
         if expectedRevision ~= nil and expectedRevision ~= STATE.spellEditorRevision then
             return
@@ -5383,26 +4599,27 @@ local function RefreshSpellSettingsPanel(expectedRevision)
         if type(mdb) ~= "table" then
             return
         end
-        RegisterSpellSettingsGridAsActive(SETTINGS.EDITOR_KEY)
-        if RebindSpellSettingsGrid(mdb) then
+        RegisterSpellSettingsAsActive(SETTINGS.EDITOR_KEY)
+        if RebindSpellSettings(mdb) then
             return
         end
-        BuildSpellSettingsLayout(spellName, spellIdentifier, eventID, spellIcon, GetEventIconFlags(event))
-        -- Boss 页右下设置区现在作为标准 Grid 页面接入：
-        -- 编辑模式必须显式绑定当前容器和模块，不能再借用别页的 live edit 状态。
+
+        BuildSpellSettingsLayout()
         ReleaseSpellSettingsCardSession()
-        UI.spellSettingsCardSession = Grid:MountCards(UI.spellSettingsGridChild, SETTINGS_LAYOUT, {
-            pageId = SETTINGS.EDITOR_KEY,
-            regionId = "boss-spell-editor",
-            layoutDefaults = { left = 0, right = 0, top = 12, bottom = 0, gap = 6 },
-            config = mdb,
-            moduleKey = SETTINGS.EDITOR_KEY,
-            scrollFrame = UI.spellSettingsGridScroll,
-            exbossSummaryEnableHost = UI.spellSummaryEnableHost,
-        })
-        ApplyPrototypeSettingsCardSurfaces(UI.spellSettingsCardSession)
+        local owner = Page._BuildSpellSettingsOwner(mdb)
+        owner.onHeightChanged = function(height)
+            UI.spellSettingsChild:SetHeight(math.max(1,height))
+        end
+        local session, issue = EXUI:MountSettingsDeclarationV2(UI.spellSettingsChild, SETTINGS_LAYOUT, owner)
+        if not session then error(issue and issue.message or "Boss spell V2 page could not be mounted") end
+        UI.spellSettingsCardSession = session
+        UI.spellSettingsChild._exV2Owner = owner
+        UI.spellSettingsChild._exV2Session = session
+        UI.spellSettingsChild:SetHeight(math.max(1,session:GetHeight()))
         UI.spellSettingsCardConfig = mdb
-        STATE.spellSettingsGridBound = true
+        UI.spellSettingsRevision = STATE.spellEditorRevision
+        STATE.spellSettingsMounted = true
+        ApplySpellSettingsPreviewAppearance(session)
         EnsureSpellTextInputPersistHooks()
         RefreshSettingsDynamicWidgets(mdb)
     end)
@@ -5412,32 +4629,19 @@ local function ScheduleRefreshSpellSettingsPanel()
     -- 取消旧协程前先复位 flag，防止旧协程被丢弃时 flag 卡在 true
     STATE.suspendSpellSettingPersist = false
     local revision = STATE.spellEditorRevision
-    local async = GetAsyncHandler()
-    -- 副本通用页只有固定的五个 Grid 项和至多 15 条虚拟行，完全不需要
-    -- 交给 LibAsync 分帧。Grid 在协程内会每渲染一个 item 就 yield；旧项已
-    -- 被释放而新项逐帧出现，正是该页连续闪烁的直接原因。改为下一帧同步
-    -- 渲染，既不会阻塞，也能让释放和挂载在一次绘制提交前完成。
+    -- 副本通用页下一帧同步挂载，释放与新会话在同一次绘制前完成。
     if selectedBossCommonSettings then
-        if async and type(async.CancelAsync) == "function" then
-            async:CancelAsync("EXBoss_BossPage_SpellSettings")
-        end
+        EXUI:StopFrameTask("EXBoss_BossPage_SpellSettings")
         C_Timer.After(0, function()
             if not Page._visible or revision ~= STATE.spellEditorRevision then return end
             RefreshSpellSettingsPanel(revision)
         end)
         return
     end
-    if async then
-        async:Async(function()
-            if not Page._visible or revision ~= STATE.spellEditorRevision then return end
-            RefreshSpellSettingsPanel(revision)
-        end, "EXBoss_BossPage_SpellSettings", true)
-    else
-        C_Timer.After(0, function()
-            if not Page._visible or revision ~= STATE.spellEditorRevision then return end
-            RefreshSpellSettingsPanel(revision)
-        end)
-    end
+    EXUI:StartFrameTask("EXBoss_BossPage_SpellSettings", FRAME_TASK_BUDGET_MS, function()
+        if not Page._visible or revision ~= STATE.spellEditorRevision then return end
+        RefreshSpellSettingsPanel(revision)
+    end)
 end
 
 -- [业务排序边界] 普通 events 维持源数组顺序，extras 维持 Registry 顺序并追加；迁移只能改变卡片几何/皮肤，不能重排或合并数据。
@@ -5458,7 +4662,7 @@ RefreshSpellCards = function()
         selectedBossCommonSettings = nil
     end
     if selectedBossCommonSettings then
-        -- 通用设置直接占满右侧 Grid；不再生成一张重复的“副本通用设置”法术卡。
+        -- 通用设置直接占满右侧 V2；不再生成一张重复的“副本通用设置”法术卡。
         SetRightSettingsPresentation(true)
         UI.spellScrollChild:SetHeight(1)
         ScheduleRefreshSpellSettingsPanel()
@@ -5491,6 +4695,7 @@ RefreshSpellCards = function()
     end
     UI.spellEmptyText:Hide()
     local encounterID = GetCurrentEncounterID()
+    local cardSlotKey = GetCurrentSpellSlotKey()
     EnsureSelectedEvent()
 
     local entries = {}
@@ -5503,9 +4708,6 @@ RefreshSpellCards = function()
     end
     -- 分帧创建前就按完整列表占位，说明卡不跟着已创建的卡片数量上下移动。
     STATE.spellCardCount = #entries
-    local visibleRows = math.min(C.SPELL_LIST_VISIBLE_ROWS, math.max(1, math.ceil(#entries / C.SPELL_CARD.cols)))
-    UI.spellListMeasuredHeight = visibleRows * C.SPELL_CARD.height
-        + math.max(0, visibleRows - 1) * C.SPELL_CARD.gapY
     ApplyBossRightPanelLayout()
 
     local function BuildOneCard(event, index, cardW)
@@ -5527,11 +4729,11 @@ RefreshSpellCards = function()
         local spellName, icon = GetSpellNameAndIcon(spellID)
         local displayName = spellName or (event and event.name) or (L["未知技能 "] .. tostring(index))
         if extra then displayName, icon = extra.label, extra.icon end
-        local override = eventID and GetRuntimeSpellConfig(eventID, GetCurrentSpellSlotKey()) or nil
+        local override = eventID and GetRuntimeSpellConfig(eventID, cardSlotKey) or nil
         local spellEnabled = not (override and override.enabled == false)
 
         local flags = GetEventIconFlags(event)
-        local borderR, borderG, borderB = ResolveVoiceEventBorderColor(eventID)
+        local borderR, borderG, borderB = ResolveVoiceEventBorderColor(eventID, cardSlotKey)
         if borderR == nil or borderG == nil or borderB == nil then
             borderR, borderG, borderB =
                 C.DEFAULT_EVENT_BORDER_COLOR.r,
@@ -5598,8 +4800,6 @@ RefreshSpellCards = function()
         SetAdaptiveSpellCardTitle(card, string.format("%s%s", tostring(displayName), disableText))
         card.desc:SetText("")
         card.desc:Hide()
-        -- 分类色已经由卡片边框表达，不再重复绘制左侧装饰竖条。
-        card.leftBar:Hide()
         card:SetAlpha(1)
 
         local h = ComputeSpellCardHeight(card)
@@ -5623,15 +4823,9 @@ RefreshSpellCards = function()
             end
             EXUI:SetControlSurface(self, 4, fill, { br, bg, bb, 1 })
             if self.selectionRing then
-                if self._selected then
-                    if self._layoutSelectionRing then self:_layoutSelectionRing() end
-                    EXUI:SetControlSurface(self.selectionRing, 3, { 0, 0, 0, 0 },
-                        self._hovered and GC.primaryFillHover or GC.primaryFill)
-                    self.selectionRing:Show()
-                else
-                    self.selectionRing:Hide()
-                    EXUI:ClearControlSurface(self.selectionRing)
-                end
+                if self._selected and self._layoutSelectionRing then self:_layoutSelectionRing() end
+                EXUI:PaintSelectCell(self.selectionRing, self._selected, 3)
+                self.selectionRing:SetShown(self._selected == true)
             end
         end
         card:SetScript("OnClick", function(self)
@@ -5650,24 +4844,6 @@ RefreshSpellCards = function()
 
         table.insert(CARD_CACHE.activeSpellCards, card)
         return card
-    end
-
-    local function BuildSync(entries)
-        local totalW = (UI.spellScrollChild:GetWidth() or 760)
-        totalW = math.max(1, totalW)
-        local cardW = (totalW - ((C.SPELL_CARD.cols - 1) * C.SPELL_CARD.gapX)) / C.SPELL_CARD.cols
-        cardW = math.max(1, cardW)
-
-        for i, entry in ipairs(entries) do
-            local card = BuildOneCard(entry, i, cardW)
-            if not card then return end
-        end
-        if token == STATE.buildToken and UI.spellScrollChild then
-            local rows = math.max(1, math.ceil(#entries / C.SPELL_CARD.cols))
-            local totalH = rows * C.SPELL_CARD.height + (rows - 1) * C.SPELL_CARD.gapY + 8
-            UI.spellScrollChild:SetHeight(math.max(1, totalH))
-            Page:RelayoutPrototype()
-        end
     end
 
     local function BuildAsync(entries)
@@ -5690,16 +4866,11 @@ RefreshSpellCards = function()
     end
 
     PrimeSpellCache(events)
-    local async = GetAsyncHandler()
-    if async then
-        async:Async(function()
-            BuildAsync(entries)
-        end, "EXBoss_BossPage_SpellCards", true)
-    else
-        BuildSync(entries)
-    end
+    EXUI:StartFrameTask("EXBoss_BossPage_SpellCards", FRAME_TASK_BUDGET_MS, function()
+        BuildAsync(entries)
+    end)
 
-    -- 右侧设置面板通过 LibAsync 分帧渲染，彻底规避 script ran too long
+    -- 右侧设置面板分帧渲染，彻底规避 script ran too long
     -- 保存目标由 currentSpellSlotKey 决定，不因分帧而改变写入语义
     ScheduleRefreshSpellSettingsPanel()
 end
@@ -5733,27 +4904,14 @@ RefreshBossList = function(resetScroll)
     local function ApplyVisual(self)
         local selected = self._selected
         local hovered = self._hovered
-        if selected then
-            -- 选中只描边：底色沿用各自原底（未选中为列表底，悬停时沿用悬停底），
-            -- 只加一圈实心主色轮廓；不加淡底、不抬底、不显示左侧指示条。
-            if hovered then
-                PaintBossNavigationSurface(self,
-                    GC.menuHover[1], GC.menuHover[2], GC.menuHover[3], GC.menuHover[4],
-                    GC.primaryFillHover)
-            else
-                PaintBossNavigationSurface(self, 0, 0, 0, 0, GC.primaryFill)
-            end
-            self.activeBar:Hide()
-            self.nameText:SetTextColor(unpack(GC.text))
-        elseif hovered then
+        -- 悬停抬底；选中走 Core 公共选中外观（底色不随选中改变）。
+        if hovered then
             PaintBossNavigationSurface(self, unpack(GC.menuHover))
-            self.activeBar:Hide()
-            self.nameText:SetTextColor(unpack(GC.text))
         else
             PaintBossNavigationSurface(self, 0, 0, 0, 0)
-            self.activeBar:Hide()
-            self.nameText:SetTextColor(unpack(GC.textDim))
         end
+        EXUI:PaintSelectCell(self, selected, 10)
+        self.nameText:SetTextColor(unpack((selected or hovered) and GC.text or GC.textDim))
         -- 「光环语音」行的耳机图标跟随本行名称色（常态 textDim、悬停 text、
         -- 选中 selectedText），原来恒定 GC.text，和同一行的文字状态不一致。
         if self.auraIcon then
@@ -5940,13 +5098,6 @@ RefreshBossList = function(resetScroll)
         end
 
         local cards = CARD_CACHE.activeBossCards
-        local function RenderPortraitsSync()
-            for i = 1, #cards do
-                if not ApplyPortrait(cards[i]) then
-                    return
-                end
-            end
-        end
         local function RenderPortraitsAsync()
             for i = 1, #cards do
                 if not ApplyPortrait(cards[i]) then
@@ -5955,26 +5106,7 @@ RefreshBossList = function(resetScroll)
                 coroutine.yield()
             end
         end
-        local async = GetAsyncHandler()
-        if async then
-            async:Async(function()
-                RenderPortraitsAsync()
-            end, "EXBoss_BossPage_BossPortraits", true)
-        else
-            RenderPortraitsSync()
-        end
-    end
-
-    local function BuildSync(entries)
-        for _, entry in ipairs(entries) do
-            if not BuildOne(entry) then
-                return
-            end
-        end
-        if not BuildDungeonCommonEntry() then
-            return
-        end
-        Finalize()
+        EXUI:StartFrameTask("EXBoss_BossPage_BossPortraits", FRAME_TASK_BUDGET_MS, RenderPortraitsAsync)
     end
 
     local function BuildAsync(entries)
@@ -5990,14 +5122,9 @@ RefreshBossList = function(resetScroll)
         Finalize()
     end
 
-    local async = GetAsyncHandler()
-    if async then
-        async:Async(function()
-            BuildAsync(list)
-        end, "EXBoss_BossPage_BossList", true)
-    else
-        BuildSync(list)
-    end
+    EXUI:StartFrameTask("EXBoss_BossPage_BossList", FRAME_TASK_BUDGET_MS, function()
+        BuildAsync(list)
+    end)
 end
 
 RefreshMapTabs = function()
@@ -6027,12 +5154,10 @@ RefreshMapTabs = function()
         -- 外层按钮完全透明；选中和 hover 只作用于图标方框。
         self:SetBackdropColor(0, 0, 0, 0)
         self:SetBackdropBorderColor(0, 0, 0, 0)
+        -- 选中走 Core 公共选中外观：图标框底色沿用各自原底（未选中 GC.input／悬停时沿用悬停底）。
+        EXUI:PaintSelectCell(self.iconFrame, selected, 10)
         if selected then
-            -- 选中只描边：图标框底色沿用各自原底（未选中 GC.input／悬停时沿用悬停底），
-            -- 只换成一圈实心主色轮廓；不加淡底、不抬底、不加左侧指示条。
-            EXUI:SetControlSurface(self.iconFrame, 10,
-                hovered and GC.secondaryHoverFill or GC.input,
-                hovered and GC.primaryFillHover or GC.primaryFill)
+            EXUI:SetControlSurface(self.iconFrame, 10, hovered and GC.secondaryHoverFill or GC.input, GC.transparent)
             self.icon:SetDesaturated(false)
             self.text:SetTextColor(unpack(GC.text))
         elseif hovered then
@@ -6131,15 +5256,6 @@ RefreshMapTabs = function()
         RelayoutMapNavigation()
     end
 
-    local function BuildSync(entries)
-        for i, mapID in ipairs(entries) do
-            if not BuildOne(i, mapID) then
-                return
-            end
-        end
-        Finalize()
-    end
-
     local function BuildAsync(entries)
         for i, mapID in ipairs(entries) do
             if not BuildOne(i, mapID) then
@@ -6150,14 +5266,9 @@ RefreshMapTabs = function()
         Finalize()
     end
 
-    local async = GetAsyncHandler()
-    if async then
-        async:Async(function()
-            BuildAsync(mapList)
-        end, "EXBoss_BossPage_MapTabs", true)
-    else
-        BuildSync(mapList)
-    end
+    EXUI:StartFrameTask("EXBoss_BossPage_MapTabs", FRAME_TASK_BUDGET_MS, function()
+        BuildAsync(mapList)
+    end)
 end
 
 RefreshSeasonDropdown = function(seasons)
@@ -6229,7 +5340,7 @@ function Page:Render(leftFrame, contentFrame)
     end)
 end
 
--- [释放边界] 必须保持先作废 revision/token，再释放 Grid 与三类池/覆盖层；卡片容器不能重复释放内容或截断 DungeonCommon Hide。
+-- [释放边界] 必须保持先作废 revision/token，再释放 V2 与三类池/覆盖层；卡片容器不能重复释放内容或截断 DungeonCommon Hide。
 function Page:Hide()
     STATE.pageRenderGeneration = STATE.pageRenderGeneration + 1
     CommitSpellTextFormState()
@@ -6241,23 +5352,9 @@ function Page:Hide()
     STATE.spellUIRefreshPending = false
     STATE.spellUIRefreshToken = STATE.spellUIRefreshToken + 1
 
-    local Grid = _G.ExwindGrid
-    if Grid and Grid.IsLiveEditing and Grid.LiveContainer == UI.spellSettingsGridChild then
-        Grid:ToggleLiveEdit(UI.spellSettingsGridChild)
-    end
     ReleaseSpellSettingsCardSession()
-    if Grid and Grid.ReleaseContainerWidgets and UI.spellSettingsGridChild then
-        Grid:ReleaseContainerWidgets(UI.spellSettingsGridChild)
-    end
-    if Grid and Grid.ClearContainerPadding and UI.spellSettingsGridChild then
-        Grid:ClearContainerPadding(UI.spellSettingsGridChild)
-    end
-    if Grid and Grid.ClearContainerCols and UI.spellSettingsGridChild then
-        Grid:ClearContainerCols(UI.spellSettingsGridChild)
-    end
-    STATE.spellSettingsGridBound = false
     STATE.spellEditorDraft = nil
-    ClearSpellSettingsGridActiveRegistration()
+    ClearSpellSettingsActiveRegistration()
 
     ReleaseMapTabs()
     ReleaseBossCards()
@@ -6296,10 +5393,6 @@ if not Page._settingsEventsRegistered then
             end
             return
         end
-        if info.key == "voiceSequencePreview" then
-            if StartVoiceSequencePreview then StartVoiceSequencePreview() end
-            return
-        end
     end)
 
     local function HandleSpellEditorIdentityChanged()
@@ -6326,16 +5419,13 @@ if not Page._settingsEventsRegistered then
     Page._settingsEventsRegistered = true
 end
 
--- Core deliberately does not route changedPath.  This editor therefore
--- persists the current draft as one module transaction, rather than restoring
--- a field-level state bus or rebuilding its Grid.
-local function RefreshActiveSurfaces()
+-- V2 使用真实编辑字段通知；唯一控制器仍经当前技能身份提交运行配置。
+local function RefreshActiveSurfaces(_, changedPath, phase)
     if STATE.suspendSpellSettingPersist or not Page._visible then return end
     if CancelVoiceSequencePreview then CancelVoiceSequencePreview() end
+    if phase == "changing" or SPELL_DRAFT_FIELDS[changedPath] ~= true then return end
     STATE.spellSettingsDirty = true
-    for key in pairs(GRID_DRAFT_FIELDS) do
-        PersistSpellEditorDraftToSelectedSpell(key)
-    end
+    STATE.spellLastCommitSucceeded = PersistSpellEditorDraftToSelectedSpell(changedPath)
     STATE.spellSettingsDirty = false
     RefreshSettingsDynamicWidgets(STATE.spellEditorDraft)
 end
@@ -6376,7 +5466,7 @@ if not Page._eventsRegistered then
     ExwindTools:RegisterEvent("SPELL_TEXT_UPDATE", "ExBoss.BossPage.SpellText", function()
         wipe(CARD_CACHE.spellTextCache)
         -- 光环通用页不使用 Boss 法术卡的文本缓存。该事件会随客户端逐步
-        -- 加载法术资料连发；若仍整页刷新，会反复释放并重建 Aura Grid，造成
+        -- 加载法术资料连发；若仍整页刷新，会反复释放并重建 Aura V2，造成
         -- 闪屏与大量短命投影表。可见行已有静态名称/图标后备，不必为此重渲染。
         if Page._visible and not selectedBossCommonSettings then
             QueueSpellUIRefresh(0.10)

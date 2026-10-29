@@ -29,15 +29,11 @@ local CreateColor              = _G.CreateColor
 local anchorFrame              = nil
 local anchorController         = nil
 local EX_DB                    = nil
-local GUIPage                  = nil
 local runtimeCollection        = nil
 local worldCollection          = nil
 local playerSelfRecord         = nil
 local worldEditing             = false
 local STANDARD_CONFIG_BINDING  = nil
-local STANDARD_PREVIEW_SURFACE = nil
-local STANDARD_PAGE            = nil
-local RefreshStandardPreviewSurface = nil
 
 ExBoss.UI = ExBoss.UI or {}
 ExBoss.UI.InterruptTracker = ExBoss.UI.InterruptTracker or {}
@@ -64,13 +60,6 @@ end
 
 -- 使用 EXDB.InterruptData
 local SPEC_INTERRUPT_DB = EXDB.InterruptData
-
-
--- =============================================================
--- Grid 布局
--- =============================================================
-
-
 
 
 local EX_DEFAULTS = {
@@ -250,31 +239,7 @@ for _, field in ipairs(TIMER_FIELDS) do
     end
 end
 
-local COMMON_FIELDS = {
-    { path = "enabled", type = "checkbox", label = L["启用"] },
-    { path = "useClassColorName", type = "checkbox", label = L["名称使用职业颜色"] },
-}
-
-local COMMON_POOL_TYPE = "InterruptTrackerModuleCommonSettingsGroup"
-local COMMON_OPTS = { bindRoot = true, poolType = COMMON_POOL_TYPE, columns = 3, fields = COMMON_FIELDS }
-local RAID_MARKER_EXTRA_OPTS = ExwindTools:BuildStandardTimerBarAlertIconsGroupOptions({
-    timerBarKey = "timerGroup",
-}, {
-    paths = {
-        show = "elements.raidMarker.texture.enabled",
-        width = "elements.raidMarker.texture.width",
-        height = "elements.raidMarker.texture.height",
-        x = "elements.raidMarker.texture.x",
-        y = "elements.raidMarker.texture.y",
-    },
-    ranges = {
-        width = { min = 8, max = 128, step = 1 }, height = { min = 8, max = 128, step = 1 },
-        x = { min = -1000, max = 1000, step = 1 }, y = { min = -1000, max = 1000, step = 1 },
-    },
-})
--- AnchorController 与 AnchorGroup 必须由同一份正式声明生成；页面不再手写
--- 第二套 key/default/picker 映射，也不保留人工 SavePosition fallback。
-anchorController, ANCHOR_OPTS = EXUI:CreateStandardModuleAnchor({
+anchorController = EXUI:CreateStandardModuleAnchor({
     moduleKey = EXWIND_MODULE_KEY,
     frameName = "ExBossInterruptTrackerAnchor",
     title = L["队友打断监控"],
@@ -298,33 +263,6 @@ anchorController, ANCHOR_OPTS = EXUI:CreateStandardModuleAnchor({
     relativePoint = "CENTER",
     onCreateFrame = function(_, frame) frame:Hide() end,
 })
-local LAYOUT_OPTS = {
-    allowedDirections = { GROW_DIRECTION_DOWN, GROW_DIRECTION_UP },
-    includeMaxPerRow = false,
-    maxVisibleMin = 1,
-    maxVisibleMax = 10,
-    defaultMaxVisible = EX_DEFAULTS.layout.maxVisible,
-}
-local GridExporter = ExwindTools.Grid
-if GridExporter and GridExporter.RegisterExportReference then
-    GridExporter:RegisterExportReference(COMMON_OPTS, "COMMON_OPTS")
-    GridExporter:RegisterExportReference(RAID_MARKER_EXTRA_OPTS, "RAID_MARKER_EXTRA_OPTS")
-    GridExporter:RegisterExportReference(ANCHOR_OPTS, "ANCHOR_OPTS")
-    GridExporter:RegisterExportReference(LAYOUT_OPTS, "LAYOUT_OPTS")
-end
-
-local EX_LAYOUT = {
-    { key = "header", type = "header", x = 1, y = 1, w = 200, h = 6, label = L["打断监控"], labelSize = 25 },
-    { key = "moduleCommon", type = "modulecommonsettings", x = 1, y = 10, w = 200, h = 50, label = L["模块通用设置"], opts = COMMON_OPTS },
-    { key = "raidMarkerExtra", type = "modulecommonsettings", x = 1, y = 62, w = 200, h = 50, label = L["额外子元素－团队标记"], opts = RAID_MARKER_EXTRA_OPTS },
-    { key = "anchor", type = "anchorgroup", x = 1, y = 114, w = 200, h = 20, label = L["锚点设置"], opts = ANCHOR_OPTS },
-    { key = "layout", type = "widgetlayout", x = 1, y = 136, w = 200, h = 20, label = L["排列设置"], opts = LAYOUT_OPTS },
-    { key = "timerGroup", type = "timerBarGroup", x = 1, y = 158, w = 200, h = 52, label = L["计时条外观"] },
-    { key = "font_spell", type = "fontgroup", x = 1, y = 212, w = 200, h = 50, label = L["玩家名字"] },
-    { key = "font_timer", type = "fontgroup", x = 1, y = 264, w = 200, h = 50, label = L["冷却时间"] },
-}
-ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, EX_LAYOUT)
-
 -- 打断条只声明标准 TimerBar 的 A（玩家名）与 C（冷却时间）语义；B 为明确禁用的
 -- 可选槽位。条体、图标、文字、时间和释放均由 EXUI 管理。
 local INTERRUPT_TIMER_BAR_SCHEMA = {
@@ -896,20 +834,8 @@ ExBoss.ResetModuleConfig[EXWIND_MODULE_KEY] = function()
 end
 
 -- =============================================================
--- 标准显示合同：唯一配置绑定、Panel surface、Slider 生命周期与页面外壳
+-- 标准显示合同：唯一配置绑定与既有显示刷新
 -- =============================================================
-ExBoss.UI = ExBoss.UI or {}
-ExBoss.UI.Panel = ExBoss.UI.Panel or {}
-ExBoss.UI.Panel.InterruptTrackerPage = ExBoss.UI.Panel.InterruptTrackerPage or {}
-GUIPage = ExBoss.UI.Panel.InterruptTrackerPage
-
-local function RefreshStandardInterruptVisuals(options)
-    Module:RefreshVisuals()
-    if (options == nil or options.rebuildPanelPreview == true) and RefreshStandardPreviewSurface then
-        RefreshStandardPreviewSurface()
-    end
-end
-
 for _, path in ipairs({ "posX", "posY", "attachToCustom", "customAttachTarget" }) do STANDARD_SCHEMA_PATHS[path] = true end
 STANDARD_CONFIG_BINDING = EXUI:RegisterStandardConfigBinding({
     moduleKey = EXWIND_MODULE_KEY,
@@ -950,9 +876,6 @@ STANDARD_CONFIG_BINDING = EXUI:RegisterStandardConfigBinding({
             return record and BuildInterruptPresentation(record, "runtime") or nil
         end
         local layout = GetSemanticLayout()
-        if STANDARD_PREVIEW_SURFACE and type(STANDARD_PREVIEW_SURFACE.ReapplyPanelPresentation) == "function" then
-            STANDARD_PREVIEW_SURFACE:ReapplyPanelPresentation()
-        end
         reapplyCollection(worldCollection, samplePresentation("world"), layout)
         reapplyCollection(runtimeCollection, runtimePresentation, layout)
     end,
@@ -962,66 +885,3 @@ local function RefreshActiveSurfaces(_, _, phase)
     return STANDARD_CONFIG_BINDING.reapplyExisting(phase)
 end
 EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = RefreshActiveSurfaces })
-
-STANDARD_PREVIEW_SURFACE = EXUI:CreateStandardPreviewSurface({
-    moduleKey = EXWIND_MODULE_KEY,
-    kind = "timerbar",
-    binding = STANDARD_CONFIG_BINDING,
-    collectionOptions = { schema = INTERRUPT_TIMER_BAR_SCHEMA, contentCenter = true },
-    buildPresentation = function(_, mode)
-        if mode ~= "panel" then error("InterruptTracker preview surface only supports panel", 2) end
-        local entries, layout = BuildInterruptPreviewEntries(mode)
-        return { entries = entries, layout = layout }
-    end,
-    interactionSchema = INTERRUPT_INTERACTION_SCHEMA,
-    requiredPositionGuiKeys = { "font_spell", "font_timer", "raidMarkerExtra" },
-})
-
-RefreshStandardPreviewSurface = function()
-    if not STANDARD_PAGE or not STANDARD_PAGE.previewDock or not STANDARD_PAGE.previewDock:IsShown() then return end
-    local session = STANDARD_PREVIEW_SURFACE:Render({
-        dock = STANDARD_PAGE.previewDock,
-        ruleKey = EXWIND_MODULE_KEY,
-        state = { kind = "interrupt-preview" },
-    })
-    local _, height = session:GetBounds()
-    if height then STANDARD_PAGE:SetDockHeight(math.max(60, height + 28)) end
-end
-
-STANDARD_PAGE = EXUI:CreateStandardModulePage({
-    moduleKey = EXWIND_MODULE_KEY,
-    page = GUIPage,
-    binding = STANDARD_CONFIG_BINDING,
-    layout = EX_LAYOUT,
-    preview = {
-        height = 160,
-        render = function() RefreshStandardPreviewSurface() end,
-        refresh = function() RefreshStandardPreviewSurface() end,
-        release = function() STANDARD_PREVIEW_SURFACE:Release() end,
-    },
-    getColumns = 200,
-    applyScrollSkin = function(scrollFrame)
-        if ExBoss.UI and type(ExBoss.UI.ApplyModernScrollBarSkin) == "function" then
-            ExBoss.UI.ApplyModernScrollBarSkin(scrollFrame)
-        end
-    end,
-    sliderContract = function()
-        return {
-            groupPaths = {
-                raidMarkerExtra = "",
-                layout = "layout",
-                timerGroup = "timerGroup",
-                font_spell = "font_spell",
-                font_timer = "font_timer",
-            },
-        }
-    end,
-})
-
-function GUIPage:Render(contentFrame)
-    return STANDARD_PAGE:Render(contentFrame)
-end
-
-function GUIPage:Hide()
-    return STANDARD_PAGE:Hide()
-end

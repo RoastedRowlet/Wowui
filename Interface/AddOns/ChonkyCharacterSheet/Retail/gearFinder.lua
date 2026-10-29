@@ -24,6 +24,10 @@ CCS.Modules[module.Name] = module
 CCS.AscendantVoidforgedBonusIDs = {
     [13653] = {tier = "Hero", icon = "Interface\\ICONS\\INV_1205_Voidforge_SovereignVoidcores_CosmicVoid.blp",},
     [13654] = {tier = "Myth", icon = "Interface\\ICONS\\INV_1205_Voidforge_SovereignVoidcores_CosmicVoid.blp",},
+	-- Ascendant Venomforged
+    [12848] = {tier = "Hero", icon = "Interface\\ICONS\\Inv_1205_voidforge_sovereignvoidcorefragments_green.blp",},
+	[12856] = {tier = "Myth", icon = "Interface\\ICONS\\Inv_1205_voidforge_sovereignvoidcorefragments_green.blp",},
+	[13852] = {tier = "Myth", icon = "Interface\\ICONS\\Inv_1205_voidforge_sovereignvoidcorefragments_green.blp",},
 }
 
 function CCS.GetAscendantVoidforgedTag(link)
@@ -2905,6 +2909,7 @@ function module:Initialize(onlyStyle)
 	--ccsgf_btn:SetPoint("RIGHT", PaperDollSidebarTabs, "RIGHT", -0.5, -15)
 	ccsgf_btn:SetPoint("TOPRIGHT", CharacterFrameCloseButton, "BOTTOMRIGHT", 0, -41)
 	ccsgf_btn:SetFrameStrata("HIGH")
+	ccsgf_btn:SetFrameLevel(999)
 
 	ccsgf_btn._ccs_OnEnter = function(self)
 		CCS.tooltip:SetOwner(self, "ANCHOR_RIGHT", -7, -11)
@@ -2942,7 +2947,7 @@ function module:Initialize(onlyStyle)
 		if C_AddOns.IsAddOnLoaded("ClassCodex") == true then
 			if ClassCodexPanel and ClassCodexPanel:IsVisible() then ClassCodexPanel:Hide() end
 		end
-
+		CCS.MoveModelLeft()
 		local sm  = _G.ccsm_sf
 		local rf  = _G.ccsrf_sf
 		local gf  = _G.ccsgf_sf
@@ -2988,8 +2993,9 @@ function module:Initialize(onlyStyle)
     rf_topbar:SetPoint("TOPLEFT", ccsgf_sf, "TOPLEFT")
     rf_topbar:SetPoint("TOPRIGHT", ccsgf_sf, "TOPRIGHT")
     rf_topbar:SetHeight(16)
-    rf_topbar:SetTexture("1723833")
-    rf_topbar:SetTexCoord(0, 1, 0.586, .734)
+    --rf_topbar:SetTexture("1723833")
+    --rf_topbar:SetTexCoord(0, 1, 0.586, .734)
+	rf_topbar:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Frame\\parchment.png")
 
     rf_topstreaks:ClearAllPoints()
     rf_topstreaks:SetPoint("TOPLEFT", rf_topbar, "BOTTOMLEFT")
@@ -3003,9 +3009,13 @@ function module:Initialize(onlyStyle)
     rf_bottombar:SetPoint("BOTTOMRIGHT", ccsgf_sf, "BOTTOMRIGHT")
     rf_bottombar:SetHeight(16)
 
-    rf_bottombar:SetTexture("4556093")
-    rf_bottombar:SetTexCoord(0, .75, 0, .082) 
+	rf_bottombar:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Frame\\parchment.png")
+    --rf_bottombar:SetTexture("4556093")
+    --rf_bottombar:SetTexCoord(0, .75, 0, .082) 
 	
+	rf_topbar:SetVertexColor(unpack(CCS.StyleColor.highlight))
+	rf_bottombar:SetVertexColor(unpack(CCS.StyleColor.highlight))
+
     -------------------------------------------------
     -- FauxScrollFrame + fixed rows
     -------------------------------------------------

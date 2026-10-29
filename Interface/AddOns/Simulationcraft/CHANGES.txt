@@ -1,10 +1,10 @@
-lightweight tag 8741352777a1d22ec7c89cbd051cd736f6025c6e 12.1.5-01
+lightweight tag cb3e3af298e3124162c6bf44d1bebac53435eaec 12.1.5-03
 Author:	Dave Hendler <sollaires@gmail.com>
-Date:	Mon Oct 12 11:38:35 2026 -0700
+Date:	Thu Oct 22 14:56:03 2026 -0700
 
-commit 8741352777a1d22ec7c89cbd051cd736f6025c6e
+commit cb3e3af298e3124162c6bf44d1bebac53435eaec
 Author: Dave Hendler <sollaires@gmail.com>
-Date:   Mon Oct 12 11:38:35 2026 -0700
+Date:   Thu Oct 22 14:56:03 2026 -0700
 
-    12.1.5 release
+    forever: Export hunter pet info
 

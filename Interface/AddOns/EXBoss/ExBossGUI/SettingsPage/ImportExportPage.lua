@@ -5,39 +5,29 @@
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
 local EXUI = ExwindTools.UI
-local GC = ExwindTools.GUIColors
 
 ExBoss.UI.Panel.ImportExportPage = ExBoss.UI.Panel.ImportExportPage or {}
 local Page = ExBoss.UI.Panel.ImportExportPage
 local L = (ExBoss and ExBoss.L) or setmetatable({}, { __index = function(_, key) return key end })
 
-local THEME = {
-    Background = GC.popup, Border = GC.popupBorder,
-    Primary = GC.accent, Success = { 0.13, 0.77, 0.37 },
-    TextMain = GC.text, TextSub = GC.textDim,
-}
+local MODULE_KEY = "ExBoss.ImportExport"
 local ROLE_LABELS = {
     mplus_tank = L["大秘境坦克"], mplus_heal = L["大秘境治疗"], mplus_dps = L["大秘境 DPS"],
     raid_tank = L["团本坦克"], raid_heal = L["团本治疗"], raid_dps = L["团本 DPS"],
 }
 local ROLE_ORDER = { "mplus_tank", "mplus_heal", "mplus_dps", "raid_tank", "raid_heal", "raid_dps" }
 
-local scrollFrame, scrollChild, uiBuilt
-local exportFormSession, RelayoutExportPresentation
-local importFormSession, importParseButton, RelayoutImportPresentation
+local scrollFrame, scrollChild, pageSession
 local exportNameInput, exportAppearanceCheck, exportAppearanceDropdown, exportMplusCheck, exportRaidCheck, exportResultInput
-local importInputBox, importAppearanceCheck, importLegacyCheck, exportSection, importSection, importButton, apiImportButton
+local importInputBox, importAppearanceCheck, importLegacyCheck
 local importRoleChecks, parsedTransfer
 local importNameRows = {}
-local LayoutTransferColumns
+local transferState = { exportName = "", exportAppearance = true, exportAppearanceProfile = "", exportResult = "", importText = "" }
+local importAvailable = {}
+local RefreshPage
 
 local function Trim(value)
     return tostring(value or ""):gsub("^%s+", ""):gsub("%s+$", "")
-end
-
-local function CreateActionButton(parent, text, onClick)
-    return EXUI:CreateButton(parent, 180, 28, text, onClick,
-        { variant = "primary", compact = true })
 end
 
 -- Import/export fields must use the shared EXUI factory.  Apart from visual
@@ -47,46 +37,12 @@ local function GetNativeEditBox(control)
     return control and (control.editBox or control.EditBox or control) or nil
 end
 
-local function StyleInput(control)
-    if control and control.SetBackdropColor then
-        control:SetBackdropColor(unpack(GC.input))
-        control:SetBackdropBorderColor(unpack(GC.panelBorder))
-    end
-    local edit = GetNativeEditBox(control)
-    if edit and edit.SetTextColor then
-        edit:SetTextColor(unpack(GC.text))
-    end
-    return control
-end
-
-local function CreateMultiLineEditBox(parent, width, height)
-    return StyleInput(EXUI:CreateEditBox(parent, "", width, height, nil, {}))
-end
-
-local function CreateSingleLineEditBox(parent, width)
-    return StyleInput(EXUI:CreateEditBox(parent, "", width, 28, nil, {}))
-end
-
 local function FocusAndHighlight(control)
     local edit = GetNativeEditBox(control)
     if edit and edit.SetFocus then
         edit:SetFocus()
         if edit.HighlightText then edit:HighlightText() end
     end
-end
-
-local function SectionBg(parent, title, color)
-    local card = EXUI:CreateSettingsCard(parent, { title = "", collapsible = false })
-    card._sectionHeading = EXUI:CreateSettingsSection(parent, { kind = "section", title = title })
-    local body = card:GetBody()
-    body._settingsCard = card
-    return body
-end
-
-local function MakeLabel(parent, text)
-    local label = EXUI:CreateVisualFontString(parent, EXFONTFRAME, "GameFontHighlightSmall")
-    label:SetText(text or ""); label:SetTextColor(unpack(THEME.TextSub)); label:SetJustifyH("LEFT")
-    return label
 end
 
 local function Profiles()
@@ -111,25 +67,7 @@ local function IsChecked(check)
     return check and check.GetChecked and check:GetChecked() == true
 end
 
-local function SetVisible(frame, visible)
-    if frame then
-        if visible then frame:Show() else frame:Hide() end
-    end
-end
-
-local function IsVisible(frame)
-    return frame and frame.IsShown and frame:IsShown() == true
-end
-
 local function ClearImportNameRows()
-    if importFormSession then
-        importFormSession:Release()
-        importFormSession = nil
-    end
-    for _, row in ipairs(importNameRows or {}) do
-        row.label:Hide()
-        row.input:Hide()
-    end
     importNameRows = {}
 end
 
@@ -170,91 +108,31 @@ local function SuggestedPairImportName(bundleName, scene, pair)
 end
 
 local function AddImportNameRow(kind, title, data)
-    if not importSection then return end
-    local width = math.max(200, (importSection:GetWidth() or 500) - 28)
     local row = {
         kind = kind,
         title = title,
         data = data or {},
-        label = MakeLabel(importSection, title .. " " .. L["名称（必填）"]),
-        input = CreateSingleLineEditBox(importSection, width),
     }
-    row.input:SetText(Trim(row.data.suggestedName))
-    row.label:Hide()
-    row.input:Hide()
+    row.name = Trim(row.data.suggestedName)
     importNameRows[#importNameRows + 1] = row
 end
 
 local function IsImportNameRowSelected(row)
-    if row.kind == "appearance" then return IsChecked(importAppearanceCheck) end
-    if row.kind == "legacy" then return IsChecked(importLegacyCheck) end
+    if row.kind == "appearance" then return transferState.importAppearance == true end
+    if row.kind == "legacy" then return transferState.importLegacy == true end
     if row.kind ~= "pair" then return false end
     local assignments = row.data.assignments or {}
     for _, slot in ipairs(ROLE_ORDER) do
         if tostring(assignments[slot] or "") == tostring(row.data.pairID)
-            and IsChecked(importRoleChecks and importRoleChecks[slot]) then
+            and transferState[slot] == true then
             return true
         end
     end
     return false
 end
 
-RelayoutImportPresentation = function()
-    if not importFormSession or not importSection then return end
-    local height = importFormSession:Relayout(math.max(1, importSection:GetWidth() or 1))
-    importSection._settingsCard:SetContentHeight(height)
-    if scrollChild then
-        local exportHeight = exportSection and exportSection._settingsCard and exportSection._settingsCard:GetHeight() or 0
-        scrollChild:SetHeight(math.max(1, math.max(exportHeight, importSection._settingsCard:GetHeight()) + 80))
-    end
-end
-
-local function LayoutImportControls()
-    -- 只重排原同parent控件；原选择、显隐、职责顺序及输入对象保持。
-    if not importSection then return end
-    if importFormSession then
-        importFormSession:Release()
-        importFormSession = nil
-    end
-    local rows = {}
-    rows[#rows + 1] = { controls = { { widget = importInputBox } } }
-    rows[#rows + 1] = { controls = { { widget = importParseButton, width = 100 } } }
-    for _, row in ipairs(importNameRows) do
-        local visible = IsImportNameRowSelected(row)
-        SetVisible(row.label, visible)
-        SetVisible(row.input, visible)
-        if visible then
-            rows[#rows + 1] = { widget = row.input, label = row.label:GetText() }
-            row.label:Hide()
-        end
-    end
-
-    for _, entry in ipairs({
-        { importAppearanceCheck, L["导入并启用外观配置"] },
-        { importLegacyCheck, L["导入旧版 Author + User（不自动启用）"] },
-    }) do
-        if IsVisible(entry[1]) then
-            rows[#rows + 1] = { widget = entry[1], label = entry[2], presentation = "switch" }
-        end
-    end
-    for _, slot in ipairs(ROLE_ORDER) do
-        local check = importRoleChecks and importRoleChecks[slot]
-        if IsVisible(check) then
-            rows[#rows + 1] = { widget = check, label = L["导入并切换："] .. ROLE_LABELS[slot], presentation = "switch" }
-        end
-    end
-    local actions = { controls = {} }
-    if importButton then actions.controls[#actions.controls + 1] = { widget = importButton, width = 116 } end
-    if apiImportButton then actions.controls[#actions.controls + 1] = { widget = apiImportButton, width = 220 } end
-    rows[#rows + 1] = actions
-    EXUI:PrepareSettingsListCard(importSection._settingsCard, { preserveHeader = false })
-    importFormSession = _G.ExwindGrid:MountSettingsList(importSection, { sections = { { rows = rows } } })
-    importFormSession.card = importSection._settingsCard
-    RelayoutImportPresentation()
-end
-
 local function RefreshImportNameRows()
-    LayoutImportControls()
+    if RefreshPage then RefreshPage() end
 end
 
 local function BuildImportNameRows(decoded)
@@ -350,6 +228,7 @@ local function RefreshAppearanceDropdown(preferredID)
     for _, item in ipairs(items) do if tostring(item[2]) == selected then found = true break end end
     if not found then selected = tostring(active or (items[1] and items[1][2]) or "") end
     exportAppearanceDropdown._value, exportAppearanceDropdown._currentValue = selected, selected
+    transferState.exportAppearanceProfile = selected
     for _, item in ipairs(items) do
         if tostring(item[2]) == selected then exportAppearanceDropdown:SetText(item[1]); return end
     end
@@ -370,6 +249,7 @@ local function ExportBundle()
     local encoded, reason = ie:ExportBundle(options)
     if not encoded then SetStatus(L["导出失败："] .. tostring(reason), false); return end
     SetStatus(L["已导出所选配置"], true)
+    transferState.exportResult = encoded
     exportResultInput:SetText(encoded)
     FocusAndHighlight(exportResultInput)
 end
@@ -377,31 +257,28 @@ end
 local function ClearImportChoices()
     parsedTransfer = nil
     ClearImportNameRows()
-    SetVisible(importAppearanceCheck, false)
-    SetVisible(importLegacyCheck, false)
-    for _, check in pairs(importRoleChecks or {}) do SetVisible(check, false) end
-    LayoutImportControls()
+    importAvailable = {}
+    RefreshImportNameRows()
 end
 
 local function ShowParsedTransfer(decoded)
     ClearImportChoices()
     parsedTransfer = decoded
     if decoded.kind == "appearance" then
-        importAppearanceCheck:SetChecked(true); SetVisible(importAppearanceCheck, true)
+        transferState.importAppearance, importAvailable.importAppearance = true, true
     elseif decoded.kind == "legacyBoss" then
-        importLegacyCheck:SetChecked(true); SetVisible(importLegacyCheck, true)
+        transferState.importLegacy, importAvailable.importLegacy = true, true
     elseif decoded.kind == "bundle" then
         local bundle = decoded.bundle
         if bundle.appearance then
-            importAppearanceCheck:SetChecked(true); SetVisible(importAppearanceCheck, true)
+            transferState.importAppearance, importAvailable.importAppearance = true, true
         end
         for _, category in ipairs({ "mplus", "raid" }) do
             local scene = bundle.scenes[category]
             if scene then
                 for _, slot in ipairs(ROLE_ORDER) do
                     if scene.assignments[slot] then
-                        local check = importRoleChecks[slot]
-                        check:SetChecked(true); SetVisible(check, true)
+                        transferState[slot], importAvailable[slot] = true, true
                     end
                 end
             end
@@ -555,137 +432,239 @@ local function DefaultExportChecks()
     return true, false
 end
 
--- [卡片/Grid 迁移边界：导入导出页]
--- 允许：只按共享规范替换导出/导入两块的外观、锚点、宽高与动态高度报告。
--- 导出结果只写本页展示框；格式、生成、解析、导入与职责选择保持原处理链。
--- SectionBg 当前是真实 parent；若换共享卡必须整体承接其 children，不能只把背景当容器声明后遗留子控件。
-RelayoutExportPresentation = function()
-    if not exportFormSession or not exportSection then return end
-    local height = exportFormSession:Relayout(math.max(1, exportSection:GetWidth() or 1))
-    exportSection._settingsCard:SetContentHeight(height)
-    if scrollChild and importSection and importSection._settingsCard then
-        scrollChild:SetHeight(math.max(1, math.max(exportSection._settingsCard:GetHeight(), importSection._settingsCard:GetHeight()) + 80))
+local importChildren = {
+    { id = "importText", kind = "control", controlType = "multiline", ref = "importText" },
+    { id = "parse", kind = "setting", label = L["解析"], children = {
+        { id = "parseButton", kind = "button", text = L["解析"], action = "parse" },
+    } },
+    { id = "importNames", kind = "repeat", source = "importNames", template = {
+        id = "importName", kind = "control", controlType = "input", ref = "importName", visible = "nameSelected",
+    } },
+    { id = "importAppearance", kind = "control", controlType = "switch", ref = "importAppearance", visible = "importAppearance" },
+    { id = "importLegacy", kind = "control", controlType = "switch", ref = "importLegacy", visible = "importLegacy" },
+}
+for _, slot in ipairs(ROLE_ORDER) do
+    importChildren[#importChildren + 1] = {
+        id = slot, kind = "control", controlType = "switch", ref = slot, visible = slot,
+    }
+end
+importChildren[#importChildren + 1] = { id = "importActions", kind = "setting", label = L["导入"], children = {
+    { id = "importButton", kind = "button", text = L["执行导入"], action = "import" },
+    { id = "apiImportButton", kind = "button", text = L["测试：通过 Wago API 导入"], action = "apiImport" },
+} }
+
+local LAYOUT = {
+    version = 2, layout = "grid",
+    columns = { { weight = 1 }, { weight = 1 } },
+    cards = {
+        { id = "export", kind = "card", title = L["导出"], row = 1, column = 1,
+            children = {
+                { id = "exportName", kind = "control", controlType = "input", ref = "exportName" },
+                { id = "exportAppearance", kind = "control", controlType = "switch", ref = "exportAppearance" },
+                { id = "exportAppearanceProfile", kind = "control", controlType = "select", ref = "exportAppearanceProfile" },
+                { id = "exportMplus", kind = "control", controlType = "switch", ref = "exportMplus" },
+                { id = "exportRaid", kind = "control", controlType = "switch", ref = "exportRaid" },
+                { id = "exportAction", kind = "setting", label = L["导出"], children = {
+                    { id = "exportButton", kind = "button", text = L["生成导出字符串"], action = "export" },
+                } },
+                { id = "exportResult", kind = "control", controlType = "multiline", ref = "exportResult" },
+            } },
+        { id = "import", kind = "card", title = L["导入"], row = 1, column = 2,
+            children = importChildren },
+    },
+}
+
+-- These controls edit transfer choices, not saved module configuration. Reuse
+-- the standard binding/control presentation with silent, page-local writes.
+local function TransferBinding(root, key)
+    local binding = EXUI:CreateSettingsV2Binding(MODULE_KEY, root, key)
+    local write = binding.Write
+    function binding:Write(value)
+        return write(self, value, "silent")
     end
+    return binding
 end
 
--- Borrow the ordinary settings-row presentation; original controls keep their
--- parents, values and callbacks. Only the two outer columns own coordinates.
-LayoutTransferColumns = function()
-    if not (scrollChild and exportSection and importSection) then return end
-    local width = math.max(600, scrollChild:GetWidth() or 600)
-    local columnWidth = (width - 36) * 0.5
-    for index, section in ipairs({ exportSection, importSection }) do
-        local card = section._settingsCard
-        local heading = card._sectionHeading
-        heading:ClearAllPoints()
-        heading:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 10 + (index - 1) * (columnWidth + 16), -16)
-        EXUI:UpdateSettingsSectionLayout(heading, columnWidth)
-        card:ClearAllPoints()
-        card:SetPoint("TOPLEFT", heading, "BOTTOMLEFT", 0, 0)
-        card:SetWidth(columnWidth)
-    end
-end
-
-local function EnsureUI(contentFrame)
-    if uiBuilt and scrollFrame and scrollFrame:GetParent() == contentFrame then return end
-    if exportFormSession then
-        exportFormSession:Release()
-        exportFormSession = nil
-    end
-    if importFormSession then
-        importFormSession:Release()
-        importFormSession = nil
-    end
-    if scrollFrame then scrollFrame:Hide(); scrollFrame:SetParent(UIParent) end
-    scrollFrame = CreateFrame("ScrollFrame", nil, contentFrame, "ScrollFrameTemplate")
-    if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then ExBoss.UI.ApplyModernScrollBarSkin(scrollFrame) end
-    scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4); scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
-    scrollChild = CreateFrame("Frame", nil, scrollFrame); scrollFrame:SetScrollChild(scrollChild)
-    local width = math.max(600, (contentFrame:GetWidth() or 1100) - 50)
-    local columnWidth = (width - 36) * 0.5
-    local defaultMplus, defaultRaid = DefaultExportChecks()
-
-    exportSection = SectionBg(scrollChild, L["导出"], THEME.Primary)
-    exportSection._settingsCard:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 10, -16)
-    exportSection._settingsCard:SetWidth(columnWidth)
-    exportSection:SetHeight(300); exportSection._settingsCard:SetContentHeight(300)
-    local y = -42
-    local exportNameLabel = MakeLabel(exportSection, L["导出包名称（可选，供接收方识别）"])
-    exportNameLabel:SetPoint("TOPLEFT", 14, y); y = y - 20
-    exportNameInput = CreateSingleLineEditBox(exportSection, columnWidth - 28)
-    exportNameInput:SetPoint("TOPLEFT", 14, y); y = y - 44
-    exportAppearanceCheck = EXUI:CreateCheckbox(exportSection, L["是否导出外观配置"], true, function() end)
-    exportAppearanceCheck:SetPoint("TOPLEFT", 14, y); y = y - 32
-    exportAppearanceDropdown = EXUI:CreateDropdown(exportSection, columnWidth - 42, L["选择外观配置"], {}, "", function(value)
-        exportAppearanceDropdown._value, exportAppearanceDropdown._currentValue = value, value
+local function RememberInput(widget, context, binding)
+    local edit = GetNativeEditBox(widget)
+    edit:HookScript("OnTextChanged", function(self, userInput)
+        if userInput and context:IsCurrent() then binding:Write(self:GetText()) end
     end)
-    exportAppearanceDropdown:SetPoint("TOPLEFT", 28, y); y = y - 48
-    exportMplusCheck = EXUI:CreateCheckbox(exportSection, L["是否导出大秘境配置"], defaultMplus, function() end)
-    exportMplusCheck:SetPoint("TOPLEFT", 14, y); y = y - 34
-    exportRaidCheck = EXUI:CreateCheckbox(exportSection, L["是否导出团本配置"], defaultRaid, function() end)
-    exportRaidCheck:SetPoint("TOPLEFT", 14, y); y = y - 52
-    local exportButton = CreateActionButton(exportSection, L["生成导出字符串"], ExportBundle)
-    exportButton:SetSize(170, 28); exportButton:SetPoint("TOPLEFT", 14, y); y = y - 52
-    exportResultInput = CreateMultiLineEditBox(exportSection, columnWidth - 48, 240)
+end
 
-    importSection = SectionBg(scrollChild, L["导入"], THEME.Success)
-    importSection._settingsCard:SetPoint("TOPLEFT", exportSection._settingsCard, "TOPRIGHT", 16, 0)
-    importSection._settingsCard:SetWidth(columnWidth)
-    importSection:SetHeight(700); importSection._settingsCard:SetContentHeight(700)
-    local iy = -42
-    importInputBox = CreateMultiLineEditBox(importSection, columnWidth - 48, 240)
-    importInputBox:SetPoint("TOPLEFT", 14, iy); iy = iy - 252
-    importParseButton = CreateActionButton(importSection, L["解析"], ParseImport)
-    importParseButton:SetSize(100, 28); importParseButton:SetPoint("TOPLEFT", 14, iy); iy = iy - 46
-    importAppearanceCheck = EXUI:CreateCheckbox(importSection, L["导入并启用外观配置"], true, RefreshImportNameRows)
-    importAppearanceCheck:SetPoint("TOPLEFT", 14, iy); iy = iy - 28
-    importLegacyCheck = EXUI:CreateCheckbox(importSection, L["导入旧版 Author + User（不自动启用）"], true, RefreshImportNameRows)
-    importLegacyCheck:SetPoint("TOPLEFT", 14, iy); iy = iy - 28
-    importRoleChecks = {}
-    for _, slot in ipairs(ROLE_ORDER) do
-        local check = EXUI:CreateCheckbox(importSection, L["导入并切换："] .. ROLE_LABELS[slot], true, RefreshImportNameRows)
-        check:SetPoint("TOPLEFT", 14, iy); iy = iy - 25
-        importRoleChecks[slot] = check
+local function TransferControl(key, controlType, label)
+    local binding = TransferBinding(transferState, key)
+    local adapter = EXUI:CreateSettingsV2Control({
+        controlType = controlType, label = label, options = controlType == "select" and {} or nil,
+        size = controlType == "multiline" and "tall" or nil,
+    }, function() return binding end)
+    local mount, update, release = adapter.mount, adapter.update, adapter.release
+    function adapter.mount(host, context)
+        local widget = mount(host, context)
+        if controlType == "input" then
+            RememberInput(widget, context, binding)
+        end
+        if key == "exportAppearanceProfile" then
+            exportAppearanceDropdown = widget
+            RefreshAppearanceDropdown(binding:Read())
+        end
+        return widget
     end
-    importButton = CreateActionButton(importSection, L["执行导入"], DoImport)
-    importButton:SetSize(140, 28); importButton:SetPoint("BOTTOMLEFT", 14, 46)
-    apiImportButton = CreateActionButton(importSection, L["测试：通过 Wago API 导入"], DoPublicAPIImport)
-    apiImportButton:SetSize(220, 28); apiImportButton:SetPoint("BOTTOMLEFT", 164, 46)
+    function adapter.update(widget, context)
+        if key == "exportAppearanceProfile" then
+            RefreshAppearanceDropdown(binding:Read())
+            return
+        end
+        update(widget, context)
+    end
+    function adapter.release(widget, context)
+        if key == "exportAppearanceProfile" then exportAppearanceDropdown = nil end
+        release(widget, context)
+    end
+    return adapter
+end
 
-    scrollChild:SetSize(width, math.max(exportSection._settingsCard:GetHeight(), importSection._settingsCard:GetHeight()) + 80)
-    LayoutTransferColumns()
-    EXUI:PrepareSettingsListCard(exportSection._settingsCard, { preserveHeader = false })
-    exportNameLabel:Hide()
-    exportFormSession = _G.ExwindGrid:MountSettingsList(exportSection, {
-        sections = { { rows = {
-            { widget = exportNameInput, label = exportNameLabel:GetText() },
-            { widget = exportAppearanceCheck, label = L["是否导出外观配置"], presentation = "switch" },
-            { widget = exportAppearanceDropdown, label = L["选择外观配置"] },
-            { widget = exportMplusCheck, label = L["是否导出大秘境配置"], presentation = "switch" },
-            { widget = exportRaidCheck, label = L["是否导出团本配置"], presentation = "switch" },
-            { controls = { { widget = exportButton, width = 170 } } },
-            -- The shared action row supplies the single divider above this result.
-            { controls = { { widget = exportResultInput } } },
-        } } },
-    })
-    exportFormSession.card = exportSection._settingsCard
-    RelayoutExportPresentation()
-    uiBuilt = true
-    RefreshAppearanceDropdown()
-    ClearImportChoices()
+local function ImportNameControl()
+    local adapters = {}
+    local standard = EXUI:CreateSettingsV2Control({ controlType = "input" }, function(context)
+        return TransferBinding(context.scope.item, "name")
+    end)
+    local methods = {
+        mount = function(host, context)
+            local row = context.scope.item
+            local binding = TransferBinding(row, "name")
+            local adapter = EXUI:CreateSettingsV2Control({
+                controlType = "input", label = row.title .. " " .. L["名称（必填）"],
+            }, function() return binding end)
+            local widget = adapter.mount(host, context)
+            RememberInput(widget, context, binding)
+            row.input = widget
+            adapters[widget] = adapter
+            return widget
+        end,
+        update = function(widget, context) adapters[widget].update(widget, context) end,
+        measure = function(widget, context, width) return adapters[widget].measure(widget, context, width) end,
+        layout = function(widget, context, width, height) adapters[widget].layout(widget, context, width, height) end,
+        setEnabled = function(widget, context, enabled) adapters[widget].setEnabled(widget, context, enabled) end,
+        setVisible = function(widget, context, visible) adapters[widget].setVisible(widget, context, visible) end,
+        release = function(widget, context)
+            context.scope.item.input = nil
+            adapters[widget].release(widget, context)
+            adapters[widget] = nil
+        end,
+    }
+    for key, method in pairs(methods) do standard[key] = method end
+    return standard
+end
+
+local function CreateTransferOwner()
+    local owner = {
+        binding = { moduleKey = MODULE_KEY, config = transferState },
+        controls = {
+            exportName = TransferControl("exportName", "input", L["导出包名称（可选，供接收方识别）"]),
+            exportAppearance = TransferControl("exportAppearance", "switch", L["是否导出外观配置"]),
+            exportAppearanceProfile = TransferControl("exportAppearanceProfile", "select", L["选择外观配置"]),
+            exportMplus = TransferControl("exportMplus", "switch", L["是否导出大秘境配置"]),
+            exportRaid = TransferControl("exportRaid", "switch", L["是否导出团本配置"]),
+            exportResult = TransferControl("exportResult", "multiline", L["生成导出字符串"]),
+            importText = TransferControl("importText", "multiline", L["请先粘贴导出字符串"]),
+            importName = ImportNameControl(),
+            importAppearance = TransferControl("importAppearance", "switch", L["导入并启用外观配置"]),
+            importLegacy = TransferControl("importLegacy", "switch", L["导入旧版 Author + User（不自动启用）"]),
+        },
+        predicates = { nameSelected = function(scope) return IsImportNameRowSelected(scope.item) end },
+        sources = { importNames = function() return importNameRows end },
+        actions = { export = ExportBundle, parse = ParseImport, import = DoImport, apiImport = DoPublicAPIImport },
+        onHeightChanged = function(height) scrollChild:SetHeight(math.max(1, height)) end,
+    }
+    for _, key in ipairs({ "importAppearance", "importLegacy" }) do
+        owner.predicates[key] = function() return importAvailable[key] == true end
+    end
+    for _, slot in ipairs(ROLE_ORDER) do
+        owner.controls[slot] = TransferControl(slot, "switch", L["导入并切换："] .. ROLE_LABELS[slot])
+        owner.predicates[slot] = function() return importAvailable[slot] == true end
+    end
+    return owner
+end
+
+local function FindControl(id)
+    local modulePage = EXUI:GetModulePage(MODULE_KEY, scrollChild)
+    return modulePage and modulePage:Find(id)
+end
+
+local function CaptureControls()
+    exportNameInput = FindControl("exportName")
+    exportAppearanceCheck = FindControl("exportAppearance")
+    exportAppearanceDropdown = FindControl("exportAppearanceProfile")
+    exportMplusCheck, exportRaidCheck = FindControl("exportMplus"), FindControl("exportRaid")
+    exportResultInput, importInputBox = FindControl("exportResult"), FindControl("importText")
+    importAppearanceCheck, importLegacyCheck = FindControl("importAppearance"), FindControl("importLegacy")
+    importRoleChecks = {}
+    for _, slot in ipairs(ROLE_ORDER) do importRoleChecks[slot] = FindControl(slot) end
+end
+
+RefreshPage = function()
+    if pageSession and pageSession.alive then pageSession:Refresh() end
+end
+
+local function ReleasePage()
+    if pageSession then
+        pageSession:Release()
+        pageSession = nil
+    end
+    if scrollChild then
+        scrollChild._exV2Session, scrollChild._exV2Owner = nil, nil
+        if EXUI.ActivePageFrame == scrollChild then
+            EXUI.ActivePageFrame = nil
+            if EXUI.CurrentModule == MODULE_KEY then EXUI.CurrentModule = nil end
+        end
+    end
+    if EXUI.ActivePageScrollFrame == scrollFrame then EXUI.ActivePageScrollFrame = nil end
+    exportNameInput, exportAppearanceCheck, exportAppearanceDropdown, exportMplusCheck, exportRaidCheck, exportResultInput = nil, nil, nil, nil, nil, nil
+    importInputBox, importAppearanceCheck, importLegacyCheck, importRoleChecks = nil, nil, nil, nil
+end
+
+local function SyncWidth()
+    if not scrollFrame or not scrollChild then return end
+    scrollChild:SetWidth(scrollFrame:GetWidth())
+    if pageSession then pageSession:Invalidate() end
 end
 
 function Page:Render(contentFrame)
-    EnsureUI(contentFrame)
-    scrollFrame:SetParent(contentFrame); scrollFrame:ClearAllPoints(); scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4); scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
-    scrollChild:SetWidth(math.max(600, (contentFrame:GetWidth() or 1100) - 50))
-    LayoutTransferColumns()
-    RelayoutExportPresentation()
-    RelayoutImportPresentation()
+    if not contentFrame then return end
+    if not scrollFrame then
+        scrollFrame = EXUI:CreateScrollFrame(contentFrame)
+        scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT")
+        scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT")
+        scrollChild = CreateFrame("Frame", nil, scrollFrame)
+        scrollChild:SetPoint("TOPLEFT")
+        scrollChild:SetHeight(1)
+        scrollFrame:SetScrollChild(scrollChild)
+        scrollFrame:HookScript("OnHide", ReleasePage)
+        scrollFrame:HookScript("OnSizeChanged", SyncWidth)
+    end
+    scrollFrame:SetParent(contentFrame)
+    scrollFrame:ClearAllPoints()
+    scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT")
+    scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT")
+    SyncWidth()
     scrollFrame:Show()
+    scrollChild:Show()
+    if not pageSession then
+        if transferState.exportMplus == nil then
+            transferState.exportMplus, transferState.exportRaid = DefaultExportChecks()
+        end
+        local owner = CreateTransferOwner()
+        pageSession = EXUI:MountSettingsDeclarationV2(scrollChild, LAYOUT, owner)
+        scrollChild._exV2Session, scrollChild._exV2Owner = pageSession, owner
+        CaptureControls()
+    end
+    EXUI.ActivePageFrame, EXUI.ActivePageScrollFrame, EXUI.CurrentModule = scrollChild, scrollFrame, MODULE_KEY
     RefreshAppearanceDropdown()
+    RefreshPage()
 end
 
 function Page:Hide()
+    ReleasePage()
     if scrollFrame then scrollFrame:Hide() end
 end

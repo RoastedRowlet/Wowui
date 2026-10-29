@@ -7,6 +7,11 @@ if EUI_CLIENT_BLOCKED then return end -- pre-12.1 client failsafe (EllesmereUI_C
 -------------------------------------------------------------------------------
 local ns = EllesmereUI._ModuleNS["EllesmereUIActionBars"]
 if not ns then return end  -- module disabled: no options page
+-- Options page pool (EllesmereUI_FramePool.lua, first in this addon): a frame
+-- made here on a pool host (a kept page and every frame it hands out) is reset
+-- and dressed again by the next build instead of made anew; on any other
+-- parent this is CreateFrame.
+local CreateFrame = EllesmereUI._Pool.CreateFrame
 
 local function BuildBarVisibilityLayout(parent, y, ctx)
     local env = ns._ABO_OptEnv
@@ -23,7 +28,7 @@ local function BuildBarVisibilityLayout(parent, y, ctx)
     local function RefreshPageCycle()
         ns.RefreshPagingCycleMacros()
     end
-    local _, h
+    local _, h, hdr
     local row
     -- Declared out here, not in the `do` block that builds it: the Toggle Action Bar
     -- keybind lives past that block's end and anchors into this row's right slot.
@@ -54,7 +59,10 @@ local function BuildBarVisibilityLayout(parent, y, ctx)
     -----------------------------------------------------------------------
     --  VISIBILITY
     -----------------------------------------------------------------------
-    _, h = W:SectionHeader(parent, SECTION_VISIBILITY, y);  y = y - h
+    hdr, h = W:SectionHeader(parent, SECTION_VISIBILITY, y);  y = y - h
+    -- The Move in Unlock Mode button on the selected bar's first section: the
+    -- key is read at the click, so it highlights the bar the selector shows.
+    EllesmereUI.BuildSectionUnlockJump(hdr, { key = SelectedKey })
 
     do
         local _visBlizzDis
@@ -357,9 +365,12 @@ local function BuildBarVisibilityLayout(parent, y, ctx)
                 w = 126, h = 29, level = 4,
                 get = function() return SB().toggleVisKey end,
                 set = function(v)
+                    -- Spec Overrides: the slot is read before the write, as
+                    -- a rebuild may dress this row again for another setting.
+                    local snap = EllesmereUI._SOAttribution(rgn)
                     SB().toggleVisKey = v
                     EAB:RebuildVisToggleBindings()
-                    EllesmereUI._NotifySettingWrite(rgn)
+                    EllesmereUI._NotifySettingWrite(rgn, snap)
                 end,
                 disabled = function()
                     local v = SB().barVisibility or "always"

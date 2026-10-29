@@ -32,23 +32,33 @@ local ANCHOR_OPTS = GetFlashText():GetStandardAnchorGroupOptions()
 if type(ANCHOR_OPTS) ~= "table" then
     error("FlashTextMediumPage requires standard AnchorController group options", 2)
 end
--- [普通 sections 声明边界：FlashTextMedium 设置页]
--- Core 统一测量和排列；本页仅声明原复合控件及其语义选项。
--- 禁止：修改 key/type/path、语义 opts、测试按钮回调、预览、Slider 或释放合同。
--- modulecommonsettings/anchorgroup/fontgroup 是完整组合，不能拆成原子控件重拼。
+-- 保留原设置块次序与组合控件身份；带回调的运行期选项由 owner 提供。
 local LAYOUT = {
-    version = 1,
-    title = L["文字公告(中)"],
-    sections = {
-        { kind = "composite", id = "module-common", title = L["通用设置"],
-            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
-        { kind = "composite", id = "anchor", title = L["锚点设置"],
-            component = "anchorgroup", key = "anchor", opts = ANCHOR_OPTS },
-        { kind = "composite", id = "text-font", title = L["外观"],
-            component = "fontgroup", key = "font_text", opts = { unboundedWidth = true } },
+    version = 2,
+    cards = {
+        { kind = "card", id = "module-common", title = L["通用设置"],
+            children = {
+                { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", optionsRef = "common" },
+            } },
+        { kind = "card", id = "anchor-card", title = L["锚点设置"],
+            children = {
+                { kind = "component", id = "anchor", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+        { kind = "card", id = "text-font", title = L["外观"],
+            children = {
+                { kind = "component", id = "font_text", component = "fontgroup", path = "font_text", opts = { unboundedWidth = true } },
+            } },
     },
 }
-ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
+
+local function CreatePageOwner()
+    return { options = { common = COMMON_OPTS, anchor = ANCHOR_OPTS } }
+end
+
+local function RebindModuleCommon(context)
+    local common = context.modulePage and context.modulePage:Find("moduleCommon")
+    if common and type(common.RebindDB) == "function" then common:RebindDB(context.config) end
+end
 
 -- 页面只声明既有布局、样本入口和 Slider 合同；Dock、Scroll、Watch、延迟
 -- Render、ActivePage 所有权与 OnHide/release 均由 StandardModulePage 统一拥有。
@@ -65,7 +75,9 @@ end
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,
+    title = L["文字公告(中)"],
     layout = LAYOUT,
+    ownerFactory = CreatePageOwner,
     preview = {
         height = 160,
         render = RenderStandardPreview,
@@ -85,6 +97,7 @@ local StandardPage = EXUI:CreateStandardModulePage({
             groupPaths = contract.groupPaths,
         }
     end,
+    afterLayout = RebindModuleCommon,
 })
 
 function Page:Render(contentFrame)

@@ -824,13 +824,8 @@ local function RefreshActiveSurfaces()
     ApplyEffectAlpha()
     UpdatePhysicalLayout()
     UpdateOverlayTestVisual()
-    -- [优化] 定向更新 UI 元素，避免全量刷新导致滚动条重置
-    if ExwindTools.Grid and ExwindTools.Grid.Widgets then
-        local w = ExwindTools.Grid.Widgets["live_status"]
-        if w and w.text then -- GridDescription 组件包含 .text
-            w.text:SetText(GetStatusText())
-        end
-    end
+    local page = EXUI:GetModulePage(EXWIND_MODULE_KEY)
+    if page then page:Refresh() end
 end
 
 EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = RefreshActiveSurfaces })
@@ -838,14 +833,11 @@ EXUI:RegisterModuleValueController(EXWIND_MODULE_KEY, { RefreshActiveSurfaces = 
 -- 监听天赋/职业变动 (核心框架广播)
 local function OnIdentityChanged()
     TryInstallOverlayHook()
-    EX_RegisterLayout() -- 重新生成布局以更新当前状态文字
     ApplyEffectAlpha()
     UpdateOverlayTestVisual()
 
-    -- 如果主 UI 正在显示当前模块，则强制刷新以更新界面文字 (切换专精时需要全刷新)
-    if ExwindTools.UI and ExwindTools.UI.MainFrame and ExwindTools.UI.MainFrame:IsShown() and ExwindTools.UI.CurrentModule == EXWIND_MODULE_KEY then
-        ExwindTools.UI:RefreshContent()
-    end
+    local page = EXUI:GetModulePage(EXWIND_MODULE_KEY)
+    if page then page:Refresh() end
 end
 
 ExwindTools:WatchState("SpecID", EXWIND_MODULE_KEY, OnIdentityChanged)
@@ -889,7 +881,7 @@ end)
 ExwindTools:ReportReady(EXWIND_MODULE_KEY)
 
 -- =============================================================
--- 第六部分：Grid 布局
+-- 第六部分：V2 设置页
 -- =============================================================
 local function MakeSpecLabel(icon, colorHex, specName)
     return string.format("|T%d:16:16:0:0|t |cff%s%s|r", icon, colorHex, L[specName])
@@ -898,116 +890,6 @@ end
 -- =========================================================
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
-local function EX_RegisterLegacyLayout()
-    local currentInfo = GetStatusText()
-
-    -- [声明迁移边界：设置页] 控件只声明一次；专精滑杆紧凑行由 Core 按原 moduleKey/parentKey/key 语义呈现。
-    -- 专精显示顺序、key/type/parentKey、slider 参数、测试按钮、CVar/overlay 回调及动态刷新禁止修改。
-    local liveStatus = { key = "live_status", type = "description", label = GetStatusText() }
-    local commonItems = {
-        { key = "enabled", type = "switch", label = L["开启功能"] },
-        { key = "globalDefault", type = "slider", label = L["全局默认透明度 (%)"], min = 0, max = 100 },
-    }
-    local plateItems = {
-        { key = "250", type = "slider", label = MakeSpecLabel(135770, "ff2628", "鲜血"), min = 0, max = 100, parentKey = "specs" },
-        { key = "251", type = "slider", label = MakeSpecLabel(135773, "ff2628", "冰霜"), min = 0, max = 100, parentKey = "specs" },
-        { key = "252", type = "slider", label = MakeSpecLabel(135775, "ff2628", "邪恶"), min = 0, max = 100, parentKey = "specs" },
-        { key = "73", type = "slider", label = MakeSpecLabel(132341, "c69b6d", "防护"), min = 0, max = 100, parentKey = "specs" },
-        { key = "71", type = "slider", label = MakeSpecLabel(132355, "c69b6d", "武器"), min = 0, max = 100, parentKey = "specs" },
-        { key = "72", type = "slider", label = MakeSpecLabel(132347, "c69b6d", "狂怒"), min = 0, max = 100, parentKey = "specs" },
-        { key = "66", type = "slider", label = MakeSpecLabel(236264, "f48cba", "防护"), min = 0, max = 100, parentKey = "specs" },
-        { key = "70", type = "slider", label = MakeSpecLabel(135873, "f48cba", "惩戒"), min = 0, max = 100, parentKey = "specs" },
-        { key = "65", type = "slider", label = MakeSpecLabel(135920, "f48cba", "神圣"), min = 0, max = 100, parentKey = "specs" },
-    }
-    local mailItems = {
-        { key = "255", type = "slider", label = MakeSpecLabel(461113, "aad372", "生存"), min = 0, max = 100, parentKey = "specs" },
-        { key = "254", type = "slider", label = MakeSpecLabel(236179, "aad372", "射击"), min = 0, max = 100, parentKey = "specs" },
-        { key = "253", type = "slider", label = MakeSpecLabel(461112, "aad372", "野兽控制"), min = 0, max = 100, parentKey = "specs" },
-        { key = "262", type = "slider", label = MakeSpecLabel(136048, "0070dd", "元素"), min = 0, max = 100, parentKey = "specs" },
-        { key = "263", type = "slider", label = MakeSpecLabel(237581, "0070dd", "增强"), min = 0, max = 100, parentKey = "specs" },
-        { key = "264", type = "slider", label = MakeSpecLabel(136052, "0070dd", "恢复"), min = 0, max = 100, parentKey = "specs" },
-        { key = "1467", type = "slider", label = MakeSpecLabel(4511811, "33937f", "湮灭"), min = 0, max = 100, parentKey = "specs" },
-        { key = "1473", type = "slider", label = MakeSpecLabel(5198700, "33937f", "增辉"), min = 0, max = 100, parentKey = "specs" },
-        { key = "1468", type = "slider", label = MakeSpecLabel(4511812, "33937f", "恩护"), min = 0, max = 100, parentKey = "specs" },
-    }
-    local leatherItems = {
-        { key = "581", type = "slider", label = MakeSpecLabel(1247265, "a330c9", "复仇"), min = 0, max = 100, parentKey = "specs" },
-        { key = "577", type = "slider", label = MakeSpecLabel(1247264, "a330c9", "浩劫"), min = 0, max = 100, parentKey = "specs" },
-        { key = "1480", type = "slider", label = MakeSpecLabel(7455385, "a330c9", "噬灭"), min = 0, max = 100, parentKey = "specs" },
-        { key = "260", type = "slider", label = MakeSpecLabel(236286, "fff468", "狂徒"), min = 0, max = 100, parentKey = "specs" },
-        { key = "259", type = "slider", label = MakeSpecLabel(236270, "fff468", "奇袭"), min = 0, max = 100, parentKey = "specs" },
-        { key = "261", type = "slider", label = MakeSpecLabel(132320, "fff468", "敏锐"), min = 0, max = 100, parentKey = "specs" },
-        { key = "268", type = "slider", label = MakeSpecLabel(608951, "00ff98", "酒仙"), min = 0, max = 100, parentKey = "specs" },
-        { key = "269", type = "slider", label = MakeSpecLabel(608953, "00ff98", "踏风"), min = 0, max = 100, parentKey = "specs" },
-        { key = "270", type = "slider", label = MakeSpecLabel(608952, "00ff98", "织雾"), min = 0, max = 100, parentKey = "specs" },
-        { key = "104", type = "slider", label = MakeSpecLabel(132276, "ff7c0a", "守护"), min = 0, max = 100, parentKey = "specs" },
-        { key = "103", type = "slider", label = MakeSpecLabel(132115, "ff7c0a", "野性"), min = 0, max = 100, parentKey = "specs" },
-        { key = "102", type = "slider", label = MakeSpecLabel(136096, "ff7c0a", "平衡"), min = 0, max = 100, parentKey = "specs" },
-        { key = "105", type = "slider", label = MakeSpecLabel(136041, "ff7c0a", "恢复"), min = 0, max = 100, parentKey = "specs" },
-    }
-    local clothItems = {
-        { key = "64", type = "slider", label = MakeSpecLabel(135846, "3fc7eb", "冰霜"), min = 0, max = 100, parentKey = "specs" },
-        { key = "63", type = "slider", label = MakeSpecLabel(135810, "3fc7eb", "火焰"), min = 0, max = 100, parentKey = "specs" },
-        { key = "62", type = "slider", label = MakeSpecLabel(135932, "3fc7eb", "奥术"), min = 0, max = 100, parentKey = "specs" },
-        { key = "267", type = "slider", label = MakeSpecLabel(136186, "8788ee", "毁灭"), min = 0, max = 100, parentKey = "specs" },
-        { key = "265", type = "slider", label = MakeSpecLabel(136145, "8788ee", "痛苦"), min = 0, max = 100, parentKey = "specs" },
-        { key = "266", type = "slider", label = MakeSpecLabel(136172, "8788ee", "恶魔学识"), min = 0, max = 100, parentKey = "specs" },
-        { key = "256", type = "slider", label = MakeSpecLabel(135940, "ffffff", "戒律"), min = 0, max = 100, parentKey = "specs" },
-        { key = "257", type = "slider", label = MakeSpecLabel(237542, "ffffff", "神圣"), min = 0, max = 100, parentKey = "specs" },
-        { key = "258", type = "slider", label = MakeSpecLabel(136207, "ffffff", "暗影"), min = 0, max = 100, parentKey = "specs" },
-    }
-    local advancedDescription = {
-        key = "desc_layout",
-        type = "description",
-        label = "|cffff173b" .. L["注意 : 选择的材质只是方便你调整测试预览而以 所有设置都是通用 "] .. "|r",
-    }
-    local advancedItems = {
-        { key = "advancedEnabled", type = "switch", label = L["启用 |cffff173b(为了安全! 需重载后生效)|r"] },
-        { key = "btn_test_stop", type = "button", label = L["停止测试"] },
-        { key = "btn_test", type = "button", label = L["启用测试"] },
-        { key = "globalScale", type = "slider", label = L["整体缩放"], min = 0.4, max = 2.5, step = 0.05 },
-        { key = "offsetX", type = "slider", label = L["整体水平(Y) 偏移"], min = -500, max = 500 },
-        { key = "offsetY", type = "slider", label = L["整体垂直(X)偏移"], min = -500, max = 500 },
-        { key = "overlayScale", type = "slider", label = L["材质特效缩放"], min = 0.5, max = 3, step = 0.05 },
-        { key = "sideSpacing", type = "slider", label = L["左右间距调整"], min = -300, max = 300 },
-        { key = "vertSpacing", type = "slider", label = L["上下间距调整"], min = -300, max = 300 },
-        { key = "pulseMagnitude", type = "slider", label = L["呼吸动画幅度 (0禁用)"], min = 0, max = 300 },
-        { key = "pulseSpeed", type = "slider", label = L["呼吸动画速度"], min = 10, max = 500 },
-        { key = "fadeSpeed", type = "slider", label = L["触发时动画(淡入)速度"], min = 10, max = 500 },
-        { key = "fadeOutSpeed", type = "slider", label = L["结束时动画(淡出)速度"], min = 10, max = 500 },
-        { key = "btn_pick_lr_tex", type = "button", label = L["选择左右材质(仅预览用)"] },
-        { key = "btn_pick_tb_tex", type = "button", label = L["选择上方测试材质(仅预览用)"] },
-    }
-
-    local layout = {
-        version = 1,
-        description = L["根据当前专精自动调整屏幕中心法术触发特效的透明度。"],
-        sections = {
-            {
-                kind = "settings",
-                id = "overview",
-                title = L["法术触发透明度 (SpellActivationOverlay)"],
-                description = liveStatus,
-                items = {},
-            },
-            { kind = "settings", id = "common", title = L["常用设置"], items = commonItems },
-            { kind = "settings", id = "plate", title = L["板甲职业"], items = plateItems },
-            { kind = "settings", id = "mail", title = L["锁甲职业"], items = mailItems },
-            { kind = "settings", id = "leather", title = L["皮甲职业"], items = leatherItems },
-            { kind = "settings", id = "cloth", title = L["布甲职业"], items = clothItems },
-            {
-                kind = "settings",
-                id = "advanced",
-                title = L["法术触发特效调整"],
-                description = advancedDescription,
-                items = advancedItems,
-            },
-        },
-    }
-
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
-end
-
 local SPEC_GROUPS = {
     plate = {
         { class = "死亡骑士", specs = { { 250, 135770, "ff2628", "鲜血" }, { 251, 135773, "ff2628", "冰霜" }, { 252, 135775, "ff2628", "邪恶" } } },
@@ -1032,56 +914,42 @@ local SPEC_GROUPS = {
     },
 }
 
+-- 一个职业一行：左职业名，右每个专精一个滑条（滑条自带“图标+名称”标题）。
+-- 每行滑条总宽相同（德鲁伊 4 个专精同一行），专精少的职业把总宽平分给自己的滑条，行的左右两端对齐。
+local SPEC_ROW_WIDTH, SPEC_GAP = 4 * 124 + 3 * 8, 8
 local function BuildSpecCard(id, title, source)
-    local columns = { { width = 104 } }
-    local cells = {
-        { id = id .. ".classCell", kind = "cell", children = {
-            { id = id .. ".className", kind = "text", textSource = "className" },
-        } },
-    }
-    for slot = 1, source == "leather" and 4 or 3 do
-        columns[#columns + 1] = { weight = 1 }
-        cells[#cells + 1] = { id = id .. ".specCell" .. slot, kind = "cell", children = {
-            { id = id .. ".spec" .. slot, kind = "control", ref = "spec" .. slot,
-                controlType = "slider", visible = slot == 4 and "hasFourthSpec" or nil },
-        } }
+    local children = {}
+    for index, class in ipairs(SPEC_GROUPS[source]) do
+        local rowId = id .. ".row" .. index
+        local specs = {}
+        local count = #class.specs
+        local width = math.floor((SPEC_ROW_WIDTH - (count - 1) * SPEC_GAP) / count)
+        for slot, spec in ipairs(class.specs) do
+            specs[#specs + 1] = { id = rowId .. ".spec" .. slot, kind = "control", controlType = "slider",
+                ref = "spec" .. spec[1], width = width }
+        end
+        children[#children + 1] = { id = rowId, kind = "setting", label = L[class.class], children = specs }
     end
-    return {
-        id = id, kind = "card", title = title, children = {
-            { id = id .. ".columns", kind = "columns",
-                columns = columns,
-                children = {
-                    { id = id .. ".rows", kind = "repeat", source = source,
-                        template = { id = id .. ".row", kind = "row", separator = true, children = cells } },
-                },
-            },
-        },
-    }
+    return { id = id, kind = "card", title = title, children = children }
 end
 
-local function AdvancedSliderRow(id, label, ref, isLast)
-    return { id = id, kind = "row", separator = not isLast, children = {
-        { id = id .. ".labelCell", kind = "cell", children = {
-            { id = id .. ".label", kind = "text", text = label },
-        } },
-        { id = id .. ".controlCell", kind = "cell", children = {
-            { id = id .. ".control", kind = "control", ref = ref, controlType = "slider" },
-        } },
-    } }
+local function AdvancedSlider(id, label, minValue, maxValue, stepValue)
+    return { id = id, kind = "control", path = id, controlType = "slider", label = label,
+        min = minValue, max = maxValue, step = stepValue or 1 }
 end
 
 local function BuildV2Declaration()
     return {
         version = 2,
+        freeform = "ExClass.SpellEffectAlpha", -- Core 例外名单：本页按行对齐，不走标准设置行
         cards = {
             {
                 id = "alpha.core", kind = "card", title = L["法术触发透明度 (SpellActivationOverlay)"], children = {
-                    { id = "alpha.status", kind = "hint", textSource = "status" },
+                    { id = "live_status", kind = "hint", textSource = "status" },
                     { id = "alpha.help", kind = "hint", text = L["根据当前专精自动调整屏幕中心法术触发特效的透明度。"] },
-                    { id = "alpha.coreRow", kind = "row", children = {
-                        { id = "alpha.enabled", kind = "control", ref = "enabled", controlType = "checkbox", width = 150 },
-                        { id = "alpha.globalDefault", kind = "control", ref = "globalDefault", controlType = "slider", weight = 1 },
-                    } },
+                    { id = "enabled", kind = "control", path = "enabled", label = L["开启功能"], controlType = "switch" },
+                    { id = "globalDefault", kind = "control", path = "globalDefault", label = L["全局默认透明度 (%)"],
+                        controlType = "slider", min = 0, max = 100, step = 1 },
                 },
             },
             BuildSpecCard("alpha.plate", L["板甲职业"], "plate"),
@@ -1090,33 +958,27 @@ local function BuildV2Declaration()
             BuildSpecCard("alpha.cloth", L["布甲职业"], "cloth"),
             {
                 id = "alpha.advanced", kind = "card", title = L["法术触发特效调整"], collapsible = true, children = {
-                    { id = "alpha.advancedWarning", kind = "hint",
+                    { id = "desc_layout", kind = "hint",
                         text = "|cffff173b" .. L["注意 : 选择的材质只是方便你调整测试预览而以 所有设置都是通用 "] .. "|r" },
-                    { id = "alpha.advancedEnabledRow", kind = "row", separator = true, children = {
-                        { id = "alpha.advancedEnabledLabel", kind = "text",
-                            text = L["启用 |cffff173b(为了安全! 需重载后生效)|r"], width = 220 },
-                        { id = "alpha.advancedEnabled", kind = "control", ref = "advancedEnabled", controlType = "checkbox", weight = 1 },
-                    } },
+                    { id = "advancedEnabled", kind = "control", path = "advancedEnabled",
+                        label = L["启用 |cffff173b(为了安全! 需重载后生效)|r"], controlType = "switch" },
                     { id = "alpha.testActions", kind = "row", children = {
-                        { id = "alpha.test", kind = "button", text = L["启用测试"], action = "test", presentation = "primary", width = 120 },
-                        { id = "alpha.testStop", kind = "button", text = L["停止测试"], action = "testStop", width = 120 },
+                        { id = "btn_test", kind = "button", text = L["启用测试"], clickKey = "btn_test", presentation = "primary", width = 120 },
+                        { id = "btn_test_stop", kind = "button", text = L["停止测试"], clickKey = "btn_test_stop", width = 120 },
                     } },
-                    { id = "alpha.advancedSettings", kind = "columns",
-                        columns = { { weight = 3 }, { weight = 1 } }, children = {
-                            AdvancedSliderRow("alpha.globalScaleRow", L["整体缩放"], "globalScale"),
-                            AdvancedSliderRow("alpha.overlayScaleRow", L["材质特效缩放"], "overlayScale"),
-                            AdvancedSliderRow("alpha.offsetXRow", L["整体水平(Y) 偏移"], "offsetX"),
-                            AdvancedSliderRow("alpha.offsetYRow", L["整体垂直(X)偏移"], "offsetY"),
-                            AdvancedSliderRow("alpha.sideSpacingRow", L["左右间距调整"], "sideSpacing"),
-                            AdvancedSliderRow("alpha.vertSpacingRow", L["上下间距调整"], "vertSpacing"),
-                            AdvancedSliderRow("alpha.pulseMagnitudeRow", L["呼吸动画幅度 (0禁用)"], "pulseMagnitude"),
-                            AdvancedSliderRow("alpha.pulseSpeedRow", L["呼吸动画速度"], "pulseSpeed"),
-                            AdvancedSliderRow("alpha.fadeSpeedRow", L["触发时动画(淡入)速度"], "fadeSpeed"),
-                            AdvancedSliderRow("alpha.fadeOutSpeedRow", L["结束时动画(淡出)速度"], "fadeOutSpeed", true),
-                        } },
+                    AdvancedSlider("globalScale", L["整体缩放"], 0.4, 2.5, 0.05),
+                    AdvancedSlider("overlayScale", L["材质特效缩放"], 0.5, 3, 0.05),
+                    AdvancedSlider("offsetX", L["整体水平(Y) 偏移"], -500, 500),
+                    AdvancedSlider("offsetY", L["整体垂直(X)偏移"], -500, 500),
+                    AdvancedSlider("sideSpacing", L["左右间距调整"], -300, 300),
+                    AdvancedSlider("vertSpacing", L["上下间距调整"], -300, 300),
+                    AdvancedSlider("pulseMagnitude", L["呼吸动画幅度 (0禁用)"], 0, 300),
+                    AdvancedSlider("pulseSpeed", L["呼吸动画速度"], 10, 500),
+                    AdvancedSlider("fadeSpeed", L["触发时动画(淡入)速度"], 10, 500),
+                    AdvancedSlider("fadeOutSpeed", L["结束时动画(淡出)速度"], 10, 500),
                     { id = "alpha.textureActions", kind = "row", children = {
-                        { id = "alpha.pickLR", kind = "button", text = L["选择左右材质(仅预览用)"], action = "pickLR", width = 220 },
-                        { id = "alpha.pickTB", kind = "button", text = L["选择上方测试材质(仅预览用)"], action = "pickTB", width = 220 },
+                        { id = "btn_pick_lr_tex", kind = "button", text = L["选择左右材质(仅预览用)"], clickKey = "btn_pick_lr_tex", width = 220 },
+                        { id = "btn_pick_tb_tex", kind = "button", text = L["选择上方测试材质(仅预览用)"], clickKey = "btn_pick_tb_tex", width = 220 },
                     } },
                 },
             },
@@ -1125,117 +987,34 @@ local function BuildV2Declaration()
 end
 
 local function CreateV2Owner()
-    local owner = { controls = {}, components = {}, actions = {}, predicates = {}, sources = {}, texts = {} }
-    local session
-    function owner:AttachSession(value) session = value end
-    local function RefreshPage() if session then session:Refresh() end end
-    local function ReleaseControl(widget)
-        if _G.ExwindGrid and _G.ExwindGrid.ReleaseWidgetInstance then
-            _G.ExwindGrid:ReleaseWidgetInstance(widget)
-        end
-    end
-    local function Commit(binding, value, phase)
-        if binding.read() == value and phase ~= "changing" then
-            RefreshPage()
-            return false
-        end
-        binding.write(value)
-        EXUI:NotifyModuleValueChanged(EXWIND_MODULE_KEY, binding.path,
-            phase == "changing" and "changing" or "committed")
-        if phase ~= "changing" then RefreshPage() end
-        return true
-    end
-    local function RootBinding(key)
-        return { path = key, read = function() return EX_DB[key] end,
-            write = function(value) EX_DB[key] = value end }
-    end
-    local function Checkbox(label, key)
-        return {
-            mount = function(host)
-                return EXUI:CreateCheckbox(host, label, EX_DB[key] == true, function(value)
-                    Commit(RootBinding(key), value == true, "committed")
-                end)
-            end,
-            update = function(widget) widget:SetChecked(EX_DB[key] == true) end,
-            release = ReleaseControl,
-        }
-    end
-    local function Slider(bindingFor, labelFor, minValue, maxValue, stepValue)
-        return {
-            mount = function(host, context)
-                local binding = bindingFor(context.scope)
-                return EXUI:CreateSlider(host, 180, labelFor and labelFor(context.scope) or "", minValue, maxValue,
-                    tonumber(binding.read()) or minValue, stepValue or 1, nil, {
-                        numberInputPosition = labelFor and "title" or nil,
-                        onLive = function(value) Commit(bindingFor(context.scope), value, "changing") end,
-                        onCommit = function(value) Commit(bindingFor(context.scope), value, "committed") end,
-                    })
-            end,
-            update = function(widget, context)
-                local binding = bindingFor(context.scope)
-                if widget.Title then widget.Title:SetText(labelFor and labelFor(context.scope) or "") end
-                local value = tonumber(binding.read()) or minValue
-                if widget.SetEXUIValue then widget:SetEXUIValue(value, "silent") end
-            end,
-            measure = function(widget, context, width)
-                widget:SetWidth(width)
-                return widget:GetHeight()
-            end,
-            release = ReleaseControl,
-        }
-    end
-
-    owner.controls.enabled = Checkbox(L["开启功能"], "enabled")
-    owner.controls.advancedEnabled = Checkbox("", "advancedEnabled")
-    owner.controls.globalDefault = Slider(function() return RootBinding("globalDefault") end,
-        function() return L["全局默认透明度 (%)"] end, 0, 100, 1)
-    for slot = 1, 4 do
-        local specSlot = slot
-        owner.controls["spec" .. specSlot] = Slider(function(scope)
-            local spec = scope.item.specs[specSlot]
-            if not spec then
-                return { path = "specs.__unused", read = function() return 0 end, write = function() end }
-            end
-            return { path = "specs." .. spec[1], read = function() return EX_DB.specs[spec[1]] end,
-                write = function(value) EX_DB.specs[spec[1]] = value end }
-        end, function(scope)
-            local spec = scope.item.specs[specSlot]
-            return spec and MakeSpecLabel(spec[2], spec[3], spec[4]) or ""
-        end, 0, 100, 1)
-    end
-    local advanced = {
-        globalScale = { 0.4, 2.5, 0.05 },
-        overlayScale = { 0.5, 3, 0.05 },
-        offsetX = { -500, 500, 1 },
-        offsetY = { -500, 500, 1 },
-        sideSpacing = { -300, 300, 1 },
-        vertSpacing = { -300, 300, 1 },
-        pulseMagnitude = { 0, 300, 1 },
-        pulseSpeed = { 10, 500, 1 },
-        fadeSpeed = { 10, 500, 1 },
-        fadeOutSpeed = { 10, 500, 1 },
-    }
-    for key, info in pairs(advanced) do
-        local field, settings = key, info
-        owner.controls[field] = Slider(function() return RootBinding(field) end,
-            nil, settings[1], settings[2], settings[3])
-    end
-    owner.sources.plate = function() return SPEC_GROUPS.plate end
-    owner.sources.mail = function() return SPEC_GROUPS.mail end
-    owner.sources.leather = function() return SPEC_GROUPS.leather end
-    owner.sources.cloth = function() return SPEC_GROUPS.cloth end
+    local owner = { texts = {}, controls = {} }
     owner.texts.status = function() return GetStatusText() end
-    owner.texts.className = function(scope) return L[scope.item.class] end
-    owner.predicates.hasFourthSpec = function(scope) return scope.item.specs[4] ~= nil end
-    owner.actions.test = function() ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", { key = "btn_test", ts = GetTime() }) end
-    owner.actions.testStop = function() ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", { key = "btn_test_stop", ts = GetTime() }) end
-    owner.actions.pickLR = function() ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", { key = "btn_pick_lr_tex", ts = GetTime() }) end
-    owner.actions.pickTB = function() ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", { key = "btn_pick_tb_tex", ts = GetTime() }) end
+    -- 专精滑条：标准滑条加专精标题；读写仍是 specs.<专精ID>。
+    for _, group in pairs(SPEC_GROUPS) do
+        for _, class in ipairs(group) do
+            for _, spec in ipairs(class.specs) do
+                local label = MakeSpecLabel(spec[2], spec[3], spec[4])
+                local adapter = EXUI:CreateSettingsV2Control({ controlType = "slider", min = 0, max = 100, step = 1 },
+                    function() return EXUI:CreateSettingsV2Binding(EXWIND_MODULE_KEY, EX_DB, "specs." .. spec[1]) end)
+                local mount, update = adapter.mount, adapter.update
+                adapter.mount = function(host, context)
+                    local widget = mount(host, context)
+                    widget.Title:SetText(label)
+                    return widget
+                end
+                adapter.update = function(widget, context)
+                    widget.Title:SetText(label)
+                    update(widget, context)
+                end
+                owner.controls["spec" .. spec[1]] = adapter
+            end
+        end
+    end
     return owner
 end
 
 local layoutRegistered = false
-function EX_RegisterLayout()
+local function EX_RegisterLayout()
     if layoutRegistered then return end
     EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, BuildV2Declaration(), CreateV2Owner)
     layoutRegistered = true

@@ -2,12 +2,14 @@
 
 TalentLoadoutEx = TalentLoadoutEx or {};
 
-local localizedClass, englishClass = UnitClass("player");
-Addon.className = localizedClass;
-Addon.classColor = RAID_CLASS_COLORS[englishClass];
+local className, classFilename, classId = UnitClass("player");
+Addon.playerClassName = className;
+Addon.playerClassFilename = classFilename;
+Addon.playerClassId = classId;
+Addon.playerClassColor = RAID_CLASS_COLORS[classFilename];
 
 function Addon:GetSpecTable(class, spec)
-	class = class or englishClass;
+	class = class or Addon.playerClassFilename;
 	spec = spec or C_SpecializationInfo.GetSpecialization();
 	TalentLoadoutEx[class] = TalentLoadoutEx[class] or {};
 	TalentLoadoutEx[class][spec] = TalentLoadoutEx[class][spec] or {};

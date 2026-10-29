@@ -80,15 +80,16 @@ local function ResolveRoot(item)
     if not item then return nil end
     if item.GetRoot then
         local root = item:GetRoot()
-        if root then return root end
+        if root then return not root._exCollectionVisualRetiring and root or nil end
     end
-    return item.root or item
+    local root = item.root or item
+    return not root._exCollectionVisualRetiring and root or nil
 end
 
 local function HideTrackedItems(widget)
     for _, item in ipairs(widget.items or {}) do
         local root = ResolveRoot(item)
-        if root and root.ClearAllPoints then
+        if root and root.ClearAllPoints and not root._exCollectionVisualAnimation then
             root:ClearAllPoints()
             root:Hide()
         end

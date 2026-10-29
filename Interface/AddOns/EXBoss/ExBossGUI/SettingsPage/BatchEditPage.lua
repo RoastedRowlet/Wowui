@@ -11,10 +11,6 @@ local TrashData = ExBoss and ExBoss.TrashCD and ExBoss.TrashCD.Data or nil
 
 local MODULE_KEY = "ExBoss.BatchEdit"
 local L = (ExBoss and ExBoss.L) or setmetatable({}, { __index = function(_, k) return k end })
-local BASE_GRID_COLS = 200
-local MATCH_TEXT_ITEMS_FUNC = "func:ExBoss.UI.Panel.BatchEditPage.GetPreAlertTextDropdownItems"
-local MATCH_VOICE_ITEMS_FUNC = "func:ExBoss.UI.Panel.BatchEditPage.GetVoiceMatchDropdownItems"
-local LABEL_ITEMS_FUNC = "func:ExBoss.Voice.LabelCatalog.GetDropdownItems"
 
 local function T(key)
     local v = L[key]
@@ -95,71 +91,61 @@ local TRASH_VOICE_SOURCE_ITEMS = {
 }
 
 
--- [卡片/Grid 迁移边界：批量修改]
--- 允许：只按共享规范调整下列声明的 x/y/w/h、来源/目标卡片和当前可见分支高度。
--- 禁止：修改 key/type、范围/筛选/动作业务顺序、预览→确认应用两阶段回调或 Store 写回。
--- 多组控件共享同一坐标槽位；高度只能累计当前可见分支一次，不能把隐藏分支重复相加。
+local function ChoiceOptions(items)
+    local options = {}
+    for i, item in ipairs(items) do
+        options[i] = { label = item[1], value = item[2] }
+    end
+    return options
+end
+
 local LAYOUT = {
-    version = 1, title = T("批量修改"), sections = {
-        { kind = "settings", id = "source", title = T("通用"),
-            items = {
-                { key = "scope", type = "select", label = T("作用范围"), options = { { value = "allMplus", label = T("全部大秘境BOSS") }, { value = "allTrash", label = T("全部小怪法术") } } },
-                { key = "targetFilter", type = "select", label = T("目标筛选"), options = { { value = "allEvents", label = T("全部事件") }, { value = "enabledOnly", label = T("仅当前已启用") }, { value = "disabledOnly", label = T("仅当前已禁用") } } },
-                { key = "field1", type = "select", label = T("批量动作"), options = { { value = "enabled", label = T("[启用/禁用] 启用") }, { value = "centralEnabled", label = T("[启用/禁用] 中央文本") }, { value = "preAlertEnabled", label = T("[启用/禁用] 提前5秒") }, { value = "timerBarRenameEnabled", label = T("[启用/禁用] 计时条改名") }, { value = "trigger0", label = T("[启用/禁用] 中央警告语音") }, { value = "trigger1", label = T("[启用/禁用] 施法开始语音") }, { value = "trigger2", label = T("[启用/禁用] 提前5秒语音") }, { value = "ringEnabled", label = T("[启用/禁用] BOSS施法时显示圆环") }, { value = "eventColorCombined", label = T("[启用/禁用] 颜色覆盖") }, { value = "preAlertTextReplace", label = T("[文本替换] 倒数文本") }, { value = "centralTextReplace", label = T("[文本替换] 中央文本") }, { value = "timerBarRenameTextReplace", label = T("[文本替换] 计时条改名") }, { value = "trigger0VoiceReplace", label = T("[语音替换] 中央警告语音") }, { value = "trigger1VoiceReplace", label = T("[语音替换] 施法开始语音") }, { value = "trigger2VoiceReplace", label = T("[语音替换] 提前5秒语音") }, { value = "targetAlertConfig", label = T("[被点名提示] 整体配置") } } },
+    version = 2, layout = "stack", cards = {
+        { id = "source", kind = "card", title = T("通用"), children = {
+            { id = "scope", kind = "control", controlType = "select", path = "scope", label = T("作用范围"), options = ChoiceOptions(SCOPE_ITEMS) },
+            { id = "targetFilter", kind = "control", controlType = "select", path = "targetFilter", label = T("目标筛选"), options = ChoiceOptions(FILTER_ITEMS) },
+            { id = "field1", kind = "control", controlType = "select", ref = "field1" },
+        } },
+        { id = "target", kind = "card", title = T("变更为"), children = {
+            { id = "matchText", kind = "control", controlType = "select", ref = "matchText", visible = "textReplace" },
+            { id = "matchVoice", kind = "control", controlType = "select", ref = "matchVoice", visible = "voiceReplace" },
+            { id = "action1", kind = "control", controlType = "select", path = "action1", label = T("操作"), options = ChoiceOptions(ACTION_ITEMS), visible = "action" },
+            { id = "voiceSource", kind = "control", controlType = "select", ref = "voiceSource", visible = "voiceReplace" },
+            { id = "taEnabled", kind = "control", controlType = "switch", path = "taEnabled", label = T("被点名提示"), visible = "targetAlert" },
+            { id = "voiceLabel", kind = "control", controlType = "select", ref = "voiceLabel", visible = "voicePack" },
+            { id = "voiceLSM", kind = "control", controlType = "select", path = "voiceLSM", media = "sound", label = T("LSM音效"), visible = "voiceLSM" },
+            { id = "voicePath", kind = "control", controlType = "input", path = "voicePath", label = T("文件路径"), visible = "voiceFile" },
+            { id = "voiceTtsText", kind = "control", controlType = "input", path = "voiceTtsText", label = T("TTS文本"), visible = "voiceTTS" },
+            { id = "taLSM", kind = "control", controlType = "select", path = "taLSM", media = "sound", label = T("音效"), search = true, visible = "targetAlert" },
+            { id = "taValueTest_row", kind = "setting", label = T("试听"), visible = "targetAlert", children = {
+                { id = "taValueTest", kind = "button", text = T("试听"), action = "taValueTest", visible = "targetAlert" },
             } },
-        { kind = "settings", id = "target", title = T("变更为"),
-            footerDescription = { key = "previewText", type = "description", label = "" },
-            items = {
-                { key = "matchText", type = "select", label = T("匹配文本"), optionsSource = "ExBoss.UI.Panel.BatchEditPage.GetPreAlertTextDropdownItems" },
-                { key = "matchVoice", type = "select", label = T("匹配语音"), optionsSource = "ExBoss.UI.Panel.BatchEditPage.GetVoiceMatchDropdownItems" },
-                { key = "action1", type = "select", label = T("操作"), options = { { value = "enable", label = T("启用") }, { value = "disable", label = T("禁用") } } },
-                { key = "voiceSource", type = "select", label = T("替换来源"), options = { { value = "pack", label = T("语音包标签") }, { value = "lsm", label = T("LSM音效") }, { value = "file", label = T("自定义路径") }, { value = "tts", label = T("TTS语音") } } },
-                { key = "taEnabled", type = "switch", label = T("被点名提示") },
-                { key = "voiceLabel", type = "select", label = T("语音标签"), optionsSource = "ExBoss.Voice.LabelCatalog.GetDropdownItems" },
-                { key = "voiceLSM", type = "select", media = "sound", label = T("LSM音效") },
-                { key = "voicePath", type = "input", label = T("文件路径") },
-                { key = "voiceTtsText", type = "input", label = T("TTS文本") },
-                { key = "taLSM", type = "select", media = "sound", label = T("音效"), search = true },
-                { key = "taValueTest", type = "button", label = T("试听") },
-                { key = "replaceText", type = "input", label = T("替换为") },
-                { key = "taRingEnabled", type = "switch", label = T("圆环") },
-                { key = "taIconEnabled", type = "switch", label = T("图标") },
-                { key = "taTextEnabled", type = "switch", label = T("文本") },
-                { key = "taStealthEnabled", type = "switch", label = T("隐遁提示") },
-                { key = "btn_preview", type = "button", label = T("生成预览") },
-                { key = "btn_apply", type = "button", label = T("确认应用") },
+            { id = "replaceText", kind = "control", controlType = "input", path = "replaceText", label = T("替换为"), visible = "textReplace" },
+            { id = "taRingEnabled", kind = "control", controlType = "switch", path = "taRingEnabled", label = T("圆环"), visible = "targetAlert" },
+            { id = "taIconEnabled", kind = "control", controlType = "switch", path = "taIconEnabled", label = T("图标"), visible = "targetAlert" },
+            { id = "taTextEnabled", kind = "control", controlType = "switch", path = "taTextEnabled", label = T("文本"), visible = "targetAlert" },
+            { id = "taStealthEnabled", kind = "control", controlType = "switch", path = "taStealthEnabled", label = T("隐遁提示"), visible = "targetAlert" },
+            { id = "btn_preview_row", kind = "setting", label = T("生成预览"), children = {
+                { id = "btn_preview", kind = "button", text = T("生成预览"), action = "preview" },
             } },
+            { id = "btn_apply_row", kind = "setting", label = T("确认应用"), children = {
+                { id = "btn_apply", kind = "button", text = T("确认应用"), action = "apply" },
+            } },
+            { id = "previewTable", kind = "table", columns = { { title = T("预览") } }, visible = "previewHidden", children = {
+                { id = "previewRow", kind = "row", children = {
+                    { id = "previewCell", kind = "cell", children = {
+                        { id = "previewText", kind = "text", textSource = "preview" },
+                    } },
+                } },
+            } },
+        } },
     },
 }
 
-local function GetBatchWidgets(Grid)
-    if not (Grid and Grid.FindMountedWidget and Page._scrollChild) then return nil end
-    Page._mountedWidgets = Page._mountedWidgets or setmetatable({}, { __index = function(t, key)
-        local widget = Grid:FindMountedWidget(Page._scrollChild, key)
-        rawset(t, key, widget)
-        return widget
-    end })
-    return Page._mountedWidgets
-end
+EXUI:RegisterSettingsPageV2(MODULE_KEY, LAYOUT)
 
-local function BuildBatchTargetContent(mode)
-    local keep = { btn_preview = true, btn_apply = true, previewText = true }
-    if mode == "text" then
-        keep.matchText, keep.replaceText = true, true
-    elseif mode == "voice" then
-        keep.matchVoice, keep.voiceSource = true, true
-        keep.voiceLabel, keep.voiceLSM, keep.voicePath, keep.voiceTtsText = true, true, true, true
-    elseif mode == "target-alert" then
-        keep.taEnabled, keep.taLSM, keep.taValueTest = true, true, true
-        keep.taRingEnabled, keep.taIconEnabled, keep.taTextEnabled, keep.taStealthEnabled = true, true, true, true
-    else
-        keep.action1 = true
-    end
-    local items = {}
-    for _, item in ipairs(LAYOUT.sections[2].items) do
-        if keep[item.key] then items[#items + 1] = item end
-    end
-    return { kind = "settings", id = LAYOUT.sections[2].id, title = LAYOUT.sections[2].title, items = items, footerDescription = LAYOUT.sections[2].footerDescription }
+local function GetBatchPage()
+    return EXUI:GetModulePage(MODULE_KEY, Page._scrollChild)
 end
 
 local function DeepCopy(v)
@@ -1389,43 +1375,6 @@ local function BuildPreviewText(db, applied)
     return table.concat(lines, "\n")
 end
 
-local function UpdatePreviewWidget(applied)
-    local Grid = _G.ExwindGrid
-    local widgets = GetBatchWidgets(Grid)
-    if not widgets then
-        return
-    end
-    if ExwindTools.UI and ExwindTools.UI.CurrentModule ~= MODULE_KEY then
-        return
-    end
-    local db = ExwindTools:GetModuleDB(MODULE_KEY, DEFAULTS)
-    local widget = widgets["previewText"]
-    if widget and widget.text and widget.text.SetText then
-        widget.text:SetText(BuildPreviewText(db, applied))
-    end
-end
-
-local function SetWidgetVisible(widget, visible)
-    if not widget then
-        return
-    end
-    if visible then
-        if widget.Show then widget:Show() end
-        if widget.label and widget.label.Show then widget.label:Show() end
-        if widget.text and widget.text.Show then widget.text:Show() end
-        if widget.input and widget.input.Show then widget.input:Show() end
-        if widget.button and widget.button.Show then widget.button:Show() end
-        if widget.dropdown and widget.dropdown.Show then widget.dropdown:Show() end
-    else
-        if widget.Hide then widget:Hide() end
-        if widget.label and widget.label.Hide then widget.label:Hide() end
-        if widget.text and widget.text.Hide then widget.text:Hide() end
-        if widget.input and widget.input.Hide then widget.input:Hide() end
-        if widget.button and widget.button.Hide then widget.button:Hide() end
-        if widget.dropdown and widget.dropdown.Hide then widget.dropdown:Hide() end
-    end
-end
-
 FindDropdownDisplayText = function(items, value)
     local target = tostring(value or "")
     for _, item in ipairs(items or {}) do
@@ -1438,56 +1387,6 @@ FindDropdownDisplayText = function(items, value)
         end
     end
     return nil
-end
-
-local function RefreshDropdownWidget(widget, items, db, dbKey, emptyLabel)
-    if not widget then
-        return
-    end
-
-    widget._items = items
-    local currentValue = NormalizeText(db[dbKey])
-    local displayText = FindDropdownDisplayText(items, currentValue)
-    if displayText then
-        widget._currentValue = currentValue
-        if widget.SetText then
-            widget:SetText(displayText)
-        end
-        return
-    end
-
-    local firstLabel = emptyLabel or L["请选择..."]
-    local firstValue = ""
-    local firstItem = items and items[1] or nil
-    if type(firstItem) == "table" then
-        firstLabel = tostring(firstItem[1] or firstLabel)
-        firstValue = NormalizeText(firstItem[2])
-    elseif firstItem ~= nil then
-        firstLabel = tostring(firstItem)
-        firstValue = NormalizeText(firstItem)
-    end
-
-    db[dbKey] = firstValue
-    widget._currentValue = firstValue
-    if widget.SetText then
-        widget:SetText(firstLabel)
-    end
-end
-
-local function RefreshMatchTextDropdown()
-    local Grid = _G.ExwindGrid
-    local widgets = GetBatchWidgets(Grid)
-    if not widgets then
-        return
-    end
-    local widget = widgets["matchText"]
-    if not widget then
-        return
-    end
-
-    local db = ExwindTools:GetModuleDB(MODULE_KEY, DEFAULTS)
-    local items = BuildTextDropdownItems()
-    RefreshDropdownWidget(widget, items, db, "matchText", T("当前范围无可替换文本"))
 end
 
 local function BuildLabelDropdownItems()
@@ -1508,158 +1407,68 @@ local function GetVoiceSourceItemsForScope(scopeKey)
     return VOICE_SOURCE_ITEMS
 end
 
-local function RefreshFieldDropdown()
-    local Grid = _G.ExwindGrid
-    local widgets = GetBatchWidgets(Grid)
-    if not widgets then
-        return
-    end
-    local widget = widgets["field1"]
-    if not widget then
-        return
-    end
-
-    local db = ExwindTools:GetModuleDB(MODULE_KEY, DEFAULTS)
-    RefreshDropdownWidget(widget, GetFieldItemsForScope(db.scope), db, "field1", T("请选择..."))
+local function UpdatePreviewWidget(applied)
+    if EXUI.CurrentModule ~= MODULE_KEY then return end
+    Page._previewApplied = applied == true
+    local page = GetBatchPage()
+    if page then page:Refresh() end
 end
 
-local function RefreshMatchVoiceDropdown()
-    local Grid = _G.ExwindGrid
-    local widgets = GetBatchWidgets(Grid)
-    if not widgets then
-        return
-    end
-    local widget = widgets["matchVoice"]
-    if not widget then
-        return
-    end
+local function CreateBatchOwner(db)
+    local owner = { binding = { moduleKey = MODULE_KEY, config = db }, controls = {}, predicates = {}, actions = {}, texts = {} }
+    local predicates = owner.predicates
+    predicates.previewHidden = function() return false end
+    predicates.textReplace = function() return IsTextReplaceField(tostring(db.field1 or "")) end
+    predicates.voiceReplace = function() return IsVoiceReplaceField(tostring(db.field1 or "")) end
+    predicates.targetAlert = function() return IsTargetAlertConfigField(tostring(db.field1 or "")) end
+    predicates.action = function() return not predicates.textReplace() and not predicates.voiceReplace() and not predicates.targetAlert() end
+    predicates.voicePack = function() return predicates.voiceReplace() and NormalizeVoiceSource(db.voiceSource) == "pack" end
+    predicates.voiceLSM = function() return predicates.voiceReplace() and NormalizeVoiceSource(db.voiceSource) == "lsm" end
+    predicates.voiceFile = function() return predicates.voiceReplace() and NormalizeVoiceSource(db.voiceSource) == "file" end
+    predicates.voiceTTS = function() return predicates.voiceReplace() and NormalizeVoiceSource(db.voiceSource) == "tts" end
 
-    local db = ExwindTools:GetModuleDB(MODULE_KEY, DEFAULTS)
-    local items = BuildVoiceDropdownItems()
-    RefreshDropdownWidget(widget, items, db, "matchVoice", T("当前范围无可替换语音"))
-end
-
-local function RefreshVoiceReplaceInputs()
-    local Grid = _G.ExwindGrid
-    local widgets = GetBatchWidgets(Grid)
-    if not widgets then
-        return
-    end
-
-    local db = ExwindTools:GetModuleDB(MODULE_KEY, DEFAULTS)
-    local sourceType = NormalizeVoiceSource(db.voiceSource)
-    local voiceSourceWidget = widgets["voiceSource"]
-    if voiceSourceWidget then
-        RefreshDropdownWidget(voiceSourceWidget, GetVoiceSourceItemsForScope(db.scope), db, "voiceSource", T("语音包标签"))
-        sourceType = NormalizeVoiceSource(db.voiceSource)
-    end
-
-    local labelWidget = widgets["voiceLabel"]
-    if labelWidget then
-        RefreshDropdownWidget(labelWidget, BuildLabelDropdownItems(), db, "voiceLabel", T("当前无可用语音标签"))
-    end
-
-    SetWidgetVisible(labelWidget, sourceType == "pack")
-    SetWidgetVisible(widgets["voiceLSM"], sourceType == "lsm")
-    SetWidgetVisible(widgets["voicePath"], sourceType == "file")
-    SetWidgetVisible(widgets["voiceTtsText"], sourceType == "tts")
-end
-
-local function RefreshReplaceCopy()
-    local Grid = _G.ExwindGrid
-    local widgets = GetBatchWidgets(Grid)
-    if not widgets then
-        return
-    end
-    local db = ExwindTools:GetModuleDB(MODULE_KEY, DEFAULTS)
-    local field = tostring(db.field1 or "")
-    local subheader = widgets["sub_replace"]
-    local tip = widgets["replaceTip"]
-    local titleMap = {
-        preAlertTextReplace = T("倒数文本替换"),
-        centralTextReplace = T("中央文本替换"),
-        timerBarRenameTextReplace = T("计时条改名替换"),
-        trigger0VoiceReplace = T("中央警告语音替换"),
-        trigger1VoiceReplace = T("施法开始语音替换"),
-        trigger2VoiceReplace = T("提前5秒语音替换"),
-    }
-    local tipMap = {
-        preAlertTextReplace = T("当批量动作选择“倒数文本替换”时，会按当前生效配置的倒数文本匹配，再写入当前 author override。"),
-        centralTextReplace = T("当批量动作选择“中央文本替换”时，会按当前生效配置的中央文本匹配，再写入当前 author override。"),
-        timerBarRenameTextReplace = T("当批量动作选择“计时条改名替换”时，会按当前生效配置的计时条改名匹配，再写入当前 author override。"),
-        trigger0VoiceReplace = T("当批量动作选择“中央警告语音替换”时，会按当前生效配置的语音匹配，再写入当前 author override。"),
-        trigger1VoiceReplace = T("当批量动作选择“施法开始语音替换”时，会按当前生效配置的语音匹配，再写入当前 author override。"),
-        trigger2VoiceReplace = T("当批量动作选择“提前5秒语音替换”时，会按当前生效配置的语音匹配，再写入当前 author override。"),
-    }
-    if subheader then
-        if subheader.SetText then
-            subheader:SetText(titleMap[field] or T("批量替换"))
-        elseif subheader.text and subheader.text.SetText then
-            subheader.text:SetText(titleMap[field] or T("批量替换"))
+    -- Keep the standard V2 binding, row layout and release; only the choices are owner data.
+    local function AddDropdown(key, label, itemsFor, active, size)
+        local binding = EXUI:CreateSettingsV2Binding(MODULE_KEY, db, key)
+        local adapter = EXUI:CreateSettingsV2Control({ controlType = "select", label = label, options = {}, size = size }, function() return binding end)
+        local mount = adapter.mount
+        function adapter.mount(host, context)
+            local widget = mount(host, context)
+            local resolveEntry = widget._exResolveEntry
+            widget._exResolveEntry = function(value) return resolveEntry(value, widget._items) end
+            return widget
         end
+        local update = adapter.update
+        function adapter.update(widget, context)
+            if not active or active() then
+                local items = itemsFor()
+                widget._items = items
+                if not FindDropdownDisplayText(items, NormalizeText(binding:Read())) then
+                    local first = items[1]
+                    binding:Write(type(first) == "table" and NormalizeText(first[2]) or NormalizeText(first), "silent")
+                end
+            end
+            update(widget, context)
+        end
+        owner.controls[key] = adapter
     end
-    if tip and tip.text and tip.text.SetText then
-        tip.text:SetText(tipMap[field] or T("当批量动作选择替换类动作时，会按当前生效配置匹配，再写入当前 author override。"))
-    end
-end
+    AddDropdown("field1", T("批量动作"), function() return GetFieldItemsForScope(db.scope) end, nil, "wide")
+    AddDropdown("matchText", T("匹配文本"), BuildTextDropdownItems, predicates.textReplace)
+    AddDropdown("matchVoice", T("匹配语音"), BuildVoiceDropdownItems, predicates.voiceReplace)
+    AddDropdown("voiceSource", T("替换来源"), function() return GetVoiceSourceItemsForScope(db.scope) end, predicates.voiceReplace)
+    AddDropdown("voiceLabel", T("语音标签"), BuildLabelDropdownItems, predicates.voiceReplace)
 
-local function RefreshActionUI()
-    -- 这里只允许迁移显隐后的几何/高度反馈；字段选择、互斥条件和每个稳定 key 均属业务合同。
-    local Grid = _G.ExwindGrid
-    local widgets = GetBatchWidgets(Grid)
-    if not widgets then
-        return
+    owner.texts.preview = function() return BuildPreviewText(db, Page._previewApplied) end
+    owner.actions.preview = function() UpdatePreviewWidget(false) end
+    owner.actions.apply = function()
+        local ok = ApplyBatch(db)
+        UpdatePreviewWidget(ok == true)
     end
-    if ExwindTools.UI and ExwindTools.UI.CurrentModule ~= MODULE_KEY then
-        return
-    end
-    local db = ExwindTools:GetModuleDB(MODULE_KEY, DEFAULTS)
-    RefreshFieldDropdown()
-    local field = tostring(db.field1 or "")
-    local isTextReplaceMode = IsTextReplaceField(field)
-    local isVoiceReplaceMode = IsVoiceReplaceField(field)
-    local isReplaceMode = isTextReplaceMode or isVoiceReplaceMode
-    local isTargetAlertMode = IsTargetAlertConfigField(field)
-    local targetMode = isTextReplaceMode and "text"
-        or isVoiceReplaceMode and "voice"
-        or isTargetAlertMode and "target-alert"
-        or "action"
-    if Page._cardSession and Page._targetContentMode ~= targetMode then
-        Page._targetContentMode = targetMode
-        Page._cardSession:ReplaceSettingsSection("target", BuildBatchTargetContent(targetMode))
-        Page._mountedWidgets = nil
-        widgets = GetBatchWidgets(Grid)
-    end
-
-    if isTextReplaceMode then
-        RefreshMatchTextDropdown()
-    elseif isVoiceReplaceMode then
-        RefreshMatchVoiceDropdown()
-        RefreshVoiceReplaceInputs()
-    end
-    RefreshReplaceCopy()
-
-    SetWidgetVisible(widgets["action1"], not isReplaceMode and not isTargetAlertMode)
-    SetWidgetVisible(widgets["matchText"], isTextReplaceMode)
-    SetWidgetVisible(widgets["replaceText"], isTextReplaceMode)
-    SetWidgetVisible(widgets["matchVoice"], isVoiceReplaceMode)
-    SetWidgetVisible(widgets["voiceSource"], isVoiceReplaceMode)
-    SetWidgetVisible(widgets["voiceLabel"], isVoiceReplaceMode and NormalizeVoiceSource(db.voiceSource) == "pack")
-    SetWidgetVisible(widgets["voiceLSM"], isVoiceReplaceMode and NormalizeVoiceSource(db.voiceSource) == "lsm")
-    SetWidgetVisible(widgets["voicePath"], isVoiceReplaceMode and NormalizeVoiceSource(db.voiceSource) == "file")
-    SetWidgetVisible(widgets["voiceTtsText"], isVoiceReplaceMode and NormalizeVoiceSource(db.voiceSource) == "tts")
-    SetWidgetVisible(widgets["taEnabled"], isTargetAlertMode)
-    SetWidgetVisible(widgets["taLSM"], isTargetAlertMode)
-    SetWidgetVisible(widgets["taValueTest"], isTargetAlertMode)
-    SetWidgetVisible(widgets["taRingEnabled"], isTargetAlertMode)
-    SetWidgetVisible(widgets["taIconEnabled"], isTargetAlertMode)
-    SetWidgetVisible(widgets["taTextEnabled"], isTargetAlertMode)
-    SetWidgetVisible(widgets["taStealthEnabled"], isTargetAlertMode)
-    SetWidgetVisible(widgets["previewText"], false)
+    owner.actions.taValueTest = function() PlayTargetAlertLSMPreview(db.taLSM) end
+    return owner
 end
 
 local function RefreshActiveSurfaces()
-    RefreshActionUI()
     UpdatePreviewWidget(false)
 end
 
@@ -1667,40 +1476,22 @@ EXUI:RegisterModuleValueController(MODULE_KEY, {
     RefreshActiveSurfaces = RefreshActiveSurfaces,
 })
 
-ExwindTools:WatchState(MODULE_KEY .. ".ButtonClicked", MODULE_KEY .. "_btn", function(info)
-    if not info or not info.key then
-        return
-    end
-    local db = ExwindTools:GetModuleDB(MODULE_KEY, DEFAULTS)
-    if info.key == "btn_preview" then
-        UpdatePreviewWidget(false)
-        return
-    end
-    if info.key == "btn_apply" then
-        local ok = ApplyBatch(db)
-        UpdatePreviewWidget(ok == true)
-    end
-    if info.key == "taValueTest" then
-        PlayTargetAlertLSMPreview(db.taLSM)
-    end
-end)
-
-local function ResolveGridCols()
-    return BASE_GRID_COLS
+local function ReleaseBatchSession()
+    Page._renderGeneration = (Page._renderGeneration or 0) + 1
+    Page._cardSession = nil
+    Page._previewApplied = nil
+    local sc, sf = Page._scrollChild, Page._scrollFrame
+    if sc then EXUI:ReleaseModuleSettingsPage(sc) end
+    if EXUI.ActivePageFrame == sc then EXUI.ActivePageFrame = nil end
+    if EXUI.ActivePageScrollFrame == sf then EXUI.ActivePageScrollFrame = nil end
+    if EXUI.CurrentModule == MODULE_KEY then EXUI.CurrentModule = nil end
 end
 
--- [混合函数边界] Page:Render 内只可替换 Scroll/Grid 与背景卡的几何语句；DB 默认、按钮 WatchState、业务回调和写回禁止修改。
 function Page:Render(contentFrame)
-    local Grid = _G.ExwindGrid
-    if not Grid then
-        return
-    end
-
+    ReleaseBatchSession()
     local db = ExwindTools:GetModuleDB(MODULE_KEY, DEFAULTS)
     for k, v in pairs(DEFAULTS) do
-        if db[k] == nil then
-            db[k] = v
-        end
+        if db[k] == nil then db[k] = v end
     end
 
     if not Page._scrollFrame then
@@ -1711,46 +1502,36 @@ function Page:Render(contentFrame)
         local sc = CreateFrame("Frame", nil, sf)
         sc:SetHeight(1)
         sf:SetScrollChild(sc)
-        Page._scrollFrame = sf
-        Page._scrollChild = sc
+        sf:SetScript("OnHide", ReleaseBatchSession)
+        sf:SetScript("OnSizeChanged", function(_, width)
+            sc:SetWidth(math.max(1, width))
+            if Page._cardSession then Page._cardSession:Invalidate() end
+        end)
+        Page._scrollFrame, Page._scrollChild = sf, sc
     end
 
-    local sf = Page._scrollFrame
-    local sc = Page._scrollChild
+    local sf, sc = Page._scrollFrame, Page._scrollChild
     sf:SetParent(contentFrame)
     sf:ClearAllPoints()
     sf:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4)
     sf:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
     sf:SetVerticalScroll(0)
     sf:Show()
+    local generation = Page._renderGeneration
 
     C_Timer.After(0, function()
-        if not sf:IsShown() then return end
-        local w = contentFrame:GetWidth()
-        if w < 100 then w = 820 end
-        sc:SetWidth(w - 16)
+        if generation ~= Page._renderGeneration or not sf:IsShown() then return end
+        local width = sf:GetWidth()
+        if width < 100 then width = 798 end
+        sc:SetWidth(width)
         sc:SetParent(sf)
         sc:ClearAllPoints()
         sc:SetPoint("TOPLEFT", 0, 0)
         sc:Show()
-        if ExwindTools.UI then
-            ExwindTools.UI.ActivePageFrame = sc
-            ExwindTools.UI.CurrentModule = MODULE_KEY
-        end
-        if Page._cardSession and type(Page._cardSession.Release) == "function" then
-            Page._cardSession:Release()
-            Page._cardSession = nil
-        end
-        Page._mountedWidgets = nil
-        Page._targetContentMode = nil
-        Page._cardSession = Grid:MountCards(sc, LAYOUT, {
-            pageId = MODULE_KEY,
-            regionId = "batch-edit",
-            config = db,
-            moduleKey = MODULE_KEY,
-            scrollFrame = sf,
-        })
-        RefreshActionUI()
-        UpdatePreviewWidget(false)
+        EXUI.ActivePageFrame, EXUI.ActivePageScrollFrame, EXUI.CurrentModule = sc, sf, MODULE_KEY
+        Page._previewApplied = false
+        local owner = CreateBatchOwner(db)
+        Page._cardSession = EXUI:MountModuleSettingsDeclarationV2(sc, MODULE_KEY, owner,
+            L["批量修改"], L["批量启用/禁用事件功能，并真实写入 override。"], sf)
     end)
 end

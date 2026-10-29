@@ -21,7 +21,12 @@ local function ConvertToImportLoadoutEntryInfo(specID, configID, treeID, loadout
 end
 
 local function CommitTalent(configID)
-	if configID and Addon.ApplyButton.isShown and Addon.ApplyButton.isEnabled then
+	if not configID then
+		return;
+	end
+
+	local applyButton = Addon.TalentsFrame.ApplyButton;
+	if applyButton and applyButton:IsShown() and applyButton:IsEnabled() then
 		-- When applying Talent from an addon, a taint error may occur.
 		-- If there are too many reports of this occurring, I will discontinue this feature.
 		-- Addon.TalentsFrame:CommitConfig();

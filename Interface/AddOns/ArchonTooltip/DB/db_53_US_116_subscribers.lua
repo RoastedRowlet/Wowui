@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Warlock-Demonology','Warlock-Destruction','Hunter-Marksmanship','Warrior-Arms','Unknown-Unknown',}
-local provider = {region='US',realm='Gurubashi',name='US',type='subscribers',zone=53,date='2026-10-20',data={Ma='Mathrim:BAECNQAFFH8JAAMBAAMKdxt2JgDSAAOODQAABABaAHUNAAACABwAqQ0AAAMAWwABAAIKtyN2JgDSAAKODQAABABaAKkNAAADAFsAAgABCvcKcgkAUgABdQ0AAAIAHAA1AAQKfzIAAwEACgqkIwAEALgDAAEACgqkIwAEALgDAAIAAgqOFbMPAFkAAAAA.',Ra='Radiance:BAEANQAECgYICgABNQAFFAUICgADABQfAA==.',Va='Vaskie:BAEANQAECggIBAABNQAFFAUIEQAEAHkRAA==.',Ze='Zeddoc:BAEANQAECgEIBAAAAA==.Zedward:BAEANQADCgMIBQABNQAECgEIBAAFAAAAAA==.',},}
+local lookup = {'Warlock-Demonology','Warlock-Destruction','Warlock-Affliction','Hunter-Marksmanship','Warrior-Arms','Unknown-Unknown',}
+local provider = {region='US',realm='Gurubashi',name='US',type='subscribers',zone=53,date='2026-10-27',data={Ma='Mathrim:BAECNQAFFH8OAAQBAAUKtxwXFQCnAAWODQAABQBaAHUNAAADACUAfw0AAAEAWwCpDQAABABbADMNAAABAAUAAQADCrcjFxUApwADjg0AAAUAWgB/DQAAAQBbAKkNAAAEAFsAAgABCrkO2QwATgABdQ0AAAMAJQADAAEKAAAgDwAAAAEzDQAAAQAFADUABAp/OgADAQAKCj4lAAQAuAMAAQAKCj4lAAQAuAMAAgACCo4VElQAggAAAAA=.',Ra='Radiance:BAEANQAECgYIDAABNQAFFAYICwAEAJkeAA==.',Va='Vaskie:BAEANQAECggIDgABNQAFFAYIEgAFAHsUAA==.',Ze='Zeddoc:BAEANQAECgEIBQAAAA==.Zedward:BAEANQADCgMIBQABNQAECgEIBQAGAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

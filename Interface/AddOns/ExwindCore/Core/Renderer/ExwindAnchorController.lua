@@ -166,63 +166,7 @@ local function ResolvePointPosition(frame, point)
     return x, y
 end
 
-local function SyncGridWidget(moduleKey, widgetKey, value, rangeInfo)
-    if type(widgetKey) ~= "string" or widgetKey == "" then
-        return
-    end
-
-    local Grid = _G.ExwindGrid
-    if not Grid or type(Grid.Widgets) ~= "table" then
-        return
-    end
-    if not ExwindTools.UI or ExwindTools.UI.CurrentModule ~= moduleKey then
-        return
-    end
-
-    local widget = Grid.Widgets[widgetKey]
-    if not widget then
-        return
-    end
-
-    if type(value) == "boolean" then
-        if widget.SetChecked then
-            widget:SetChecked(value)
-        end
-        return
-    end
-
-    if type(value) == "string" then
-        local editBox = widget.editBox or widget
-        if editBox and editBox.SetText then
-            editBox:SetText(value)
-        end
-        return
-    end
-
-    if type(value) ~= "number" then
-        return
-    end
-
-    if rangeInfo and widget.Init then
-        local minValue = tonumber(rangeInfo.min)
-        local maxValue = tonumber(rangeInfo.max)
-        local stepValue = tonumber(rangeInfo.step) or 1
-        if minValue and maxValue and maxValue ~= minValue then
-            widget:Init(value, minValue, maxValue, (maxValue - minValue) / stepValue)
-            return
-        end
-    end
-
-    if widget.SetValue then
-        widget:SetValue(value)
-        if widget.ValueText then
-            widget.ValueText:SetText(tostring(value))
-        end
-    end
-end
-
--- 选择器写入锚点 DB 后，标准 AnchorGroup 内的输入框不在旧的 Grid.Widgets
--- 顶层索引中；只对当前显示的同模块容器走 Grid 已有的组合控件回读入口。
+-- 选择器写入锚点 DB 后，由当前模块的 V2 会话回读绑定控件。
 local function SyncActiveModuleContainer(moduleKey)
     local ui = ExwindTools.UI
     if not ui or ui.CurrentModule ~= moduleKey then
@@ -231,22 +175,7 @@ local function SyncActiveModuleContainer(moduleKey)
 
     -- V2 页面：所有绑定控件统一从存档回读。
     local page = ui:GetModulePage(moduleKey)
-    if page and not page.grid then
-        page:Refresh()
-        return
-    end
-
-    local Grid = _G.ExwindGrid
-    if not Grid then
-        return
-    end
-
-    local container = ui.ActivePageFrame
-    if not container or type(Grid.RefreshContainerControlsFromDB) ~= "function" then
-        return
-    end
-
-    Grid:RefreshContainerControlsFromDB(container)
+    if page then page:Refresh() end
 end
 
 -- One and only one post-anchor mutation path.  Standard modules must never
@@ -347,24 +276,7 @@ function AnchorController:SyncWidgets(keys)
     -- V2 页面没有按 key 的旧控件索引；整页从存档回读即可覆盖这些字段。
     local ui = ExwindTools.UI
     local page = ui and ui.CurrentModule == self.options.moduleKey and ui:GetModulePage(self.options.moduleKey)
-    if page and not page.grid then
-        page:Refresh()
-        return
-    end
-
-    local widgetRanges = self.options.widgetRanges or {}
-    local widgetKeys = keys or self.options.syncWidgets or {
-        self.options.offsetXKey,
-        self.options.offsetYKey,
-        self.options.attachEnabledKey,
-        self.options.attachTargetKey,
-    }
-
-    for _, key in ipairs(widgetKeys) do
-        if type(key) == "string" and key ~= "" then
-            SyncGridWidget(self.options.moduleKey, key, db[key], widgetRanges[key])
-        end
-    end
+    if page then page:Refresh() end
 end
 
 function AnchorController:ApplyPosition()

@@ -1,6 +1,6 @@
 ---@diagnostic disable: undefined-global, undefined-field, need-check-nil
 -- BunBar settings is a declaration-only StandardModulePage.  EXUI owns its
--- external PreviewDock, lifecycle, state watch, Grid focus and Slider paths.
+-- standard top PreviewDock, lifecycle, state watch, V2 focus and Slider paths.
 
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
@@ -45,38 +45,54 @@ local COMMON_OPTS = {
     fields = COMMON_FIELDS,
 }
 
--- [卡片/Grid 迁移边界：BunBar 设置页]
--- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
--- 禁止：修改 key/type/path/opts、字段业务次序、external-left 预览、回调或释放链。
--- modulecommonsettings/anchorgroup/icongroup/fontgroup 必须整体引用；旧背景/标题项不自动拥有相邻控件。
+-- 保留原设置块次序与组合控件身份；运行期锚点选项由 owner 提供。
 local LAYOUT = {
-    version = 1,
-    title = L["束状条设置"],
-    sections = {
-        { kind = "settings", id = "timeline-enabled", title = L["时间轴样式选择"],
-            binding = { moduleKey = "ExBoss.GeneralOverview", getConfig = function() return _G.EXBOSS12S2 end },
-            items = { { key = "bun", type = "switch", label = L["启用"], parentKey = "ui.general.timelineBars" } } },
-        { kind = "composite", id = "module-common", title = L["通用设置"],
-            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
-        { kind = "composite", id = "anchor", title = L["锚点设置"],
-            component = "anchorgroup", key = "anchor", opts = ANCHOR_OPTS },
-        { kind = "composite", id = "main-icon", title = L["外观"],
-            component = "icongroup", key = "icon", opts = {} },
-        { kind = "composite", id = "alert-icons", title = L["业务提示 Atlas"],
-            component = "icongroup", key = "alertIcons", opts = { enableOffset = true } },
-        { kind = "composite", id = "spell-font", title = L["法术名称"],
-            component = "fontgroup", key = "font_spell", opts = {} },
-        { kind = "composite", id = "timer-font", title = L["图标倒数时间"],
-            component = "fontgroup", key = "font_timer", opts = {} },
+    version = 2,
+    cards = {
+        { kind = "card", id = "timeline-enabled", title = L["时间轴样式选择"],
+            children = {
+                { kind = "control", id = "bun", controlType = "switch", ref = "timelineEnabled" },
+            } },
+        { kind = "card", id = "module-common", title = L["通用设置"],
+            children = {
+                { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", opts = COMMON_OPTS },
+            } },
+        { kind = "card", id = "anchor-card", title = L["锚点设置"],
+            children = {
+                { kind = "component", id = "anchor", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+        { kind = "card", id = "main-icon", title = L["外观"],
+            children = {
+                { kind = "component", id = "icon", component = "icongroup", path = "icon", opts = {} },
+            } },
+        { kind = "card", id = "alert-icons", title = L["业务提示 Atlas"],
+            children = {
+                { kind = "component", id = "alertIcons", component = "icongroup", path = "alertIcons", opts = { enableOffset = true } },
+            } },
+        { kind = "card", id = "spell-font", title = L["法术名称"],
+            children = {
+                { kind = "component", id = "font_spell", component = "fontgroup", path = "font_spell", opts = {} },
+            } },
+        { kind = "card", id = "timer-font", title = L["图标倒数时间"],
+            children = {
+                { kind = "component", id = "font_timer", component = "fontgroup", path = "font_timer", opts = {} },
+            } },
     },
 }
 
-ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
+local function CreatePageOwner()
+    return {
+        options = { anchor = ANCHOR_OPTS },
+        controls = {
+            timelineEnabled = EXUI:CreateSettingsV2Control({ controlType = "switch", label = L["启用"] }, function()
+                return EXUI:CreateSettingsV2Binding("ExBoss.GeneralOverview", _G.EXBOSS12S2, "ui.general.timelineBars.bun")
+            end),
+        },
+    }
+end
 
 local function RebindModuleCommon(context)
-    -- state.widgets 的 moduleCommon key 是组合控件身份；迁移后仍按同 key 查找，不能按视觉位置推断。
-    local common = context.grid and context.grid.FindMountedWidget
-        and context.grid:FindMountedWidget(context.scrollChild, "moduleCommon")
+    local common = context.modulePage and context.modulePage:Find("moduleCommon")
     if common and type(common.RebindDB) == "function" then common:RebindDB(context.config) end
 end
 
@@ -91,21 +107,14 @@ local function ReleasePreview()
     if module then module:ReleasePanelPreview() end
 end
 
--- [生命周期边界] StandardModulePage 继续拥有 Dock、Scroll、Watch、Grid focus 与 preview release；布局迁移不得改这些回调。
+-- StandardModulePage 继续拥有 Dock、Scroll、回读、定位与 preview release。
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,
+    title = L["束状条设置"],
     layout = LAYOUT,
-    getColumns = 200,
-    preview = { height = 1, render = RenderPreview, refresh = RenderPreview, release = ReleasePreview },
-    previewDock = {
-        dockPolicy = "external-left",
-        anchorResolver = function(contentFrame)
-            local panel = ExBoss.UI and ExBoss.UI.Panel
-            return (panel and panel._frame) or contentFrame:GetParent() or contentFrame
-        end,
-        width = 310, offsetX = -8, offsetY = 0,
-    },
+    ownerFactory = CreatePageOwner,
+    preview = { height = 320, render = RenderPreview, refresh = RenderPreview, release = ReleasePreview },
     applyScrollSkin = function(scrollFrame)
         if ExBoss.UI and type(ExBoss.UI.ApplyModernScrollBarSkin) == "function" then
             ExBoss.UI.ApplyModernScrollBarSkin(scrollFrame)
@@ -119,7 +128,7 @@ local StandardPage = EXUI:CreateStandardModulePage({
             groupPaths = contract.groupPaths,
         }
     end,
-    afterGridLayout = function(context)
+    afterLayout = function(context)
         RebindModuleCommon(context)
     end,
 })
@@ -133,6 +142,5 @@ function Page:Hide()
 end
 
 function Page:RefreshTimelineBarControls()
-    local control = StandardPage.cardSession and StandardPage.cardSession:GetWidget("timeline-enabled", "bun")
-    if control then control:SetChecked(ExBoss.DisplayPolicy.IsTimelineBarEnabled("bun")) end
+    return StandardPage:RefreshControls()
 end

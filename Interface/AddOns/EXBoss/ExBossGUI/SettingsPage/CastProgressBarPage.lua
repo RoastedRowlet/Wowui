@@ -1,7 +1,7 @@
 ---@diagnostic disable: undefined-global, undefined-field, need-check-nil
 -- =============================================================
 -- ExBossGUI/SettingsPage/CastProgressBarPage.lua
--- 设置页只承载 Grid 与 EXUI 唯一标准预览面板。
+-- 设置页只承载 V2 声明与 EXUI 唯一标准预览面板。
 -- =============================================================
 
 local ExwindTools = _G.ExwindTools
@@ -17,14 +17,6 @@ local MODULE_KEY = "ExBoss.CastProgressBar"
 
 local function GetCastProgressBar()
     return ExBoss.UI and ExBoss.UI.CastProgressBar
-end
-
-local function GetDB()
-    local module = GetCastProgressBar()
-    if not module or type(module.GetDB) ~= "function" then
-        error("CastProgressBarPage requires CastProgressBar:GetDB", 2)
-    end
-    return module:GetDB()
 end
 
 local function GetAnchorGroupOptions()
@@ -61,33 +53,39 @@ local COMMON_OPTS = {
     },
 }
 
--- [卡片/Grid 迁移边界：CastProgressBar 设置页]
--- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
--- 禁止：修改 key/type/path/opts、字段业务次序、顶部预览内容、回调或释放链。
--- modulecommonsettings/anchorgroup/timerBarGroup/fontgroup 必须整体引用；旧背景/标题项不自动拥有相邻控件。
-local GRID_LAYOUT = {
-    version = 1,
-    title = L["施法进度条设置"],
-    sections = {
-        { kind = "composite", id = "module-common", title = L["通用"],
-            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
-        { kind = "composite", id = "anchor", title = L["锚点"],
-            component = "anchorgroup", key = "anchor", opts = ANCHOR_GROUP_OPTS },
-        { kind = "composite", id = "timer-bar", title = L["外观"],
-            component = "timerbargroup", key = "timerGroup" },
-        { kind = "composite", id = "spell-font", title = L["法术名称"],
-            component = "fontgroup", key = "font_spell" },
-        { kind = "composite", id = "timer-font", title = L["时间文本"],
-            component = "fontgroup", key = "font_timer" },
+-- 保留原设置块次序与组合控件身份；运行期锚点选项由 owner 提供。
+local LAYOUT = {
+    version = 2,
+    cards = {
+        { kind = "card", id = "module-common", title = L["通用"],
+            children = {
+                { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", opts = COMMON_OPTS },
+            } },
+        { kind = "card", id = "anchor-card", title = L["锚点"],
+            children = {
+                { kind = "component", id = "anchor", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+        { kind = "card", id = "timer-bar", title = L["外观"],
+            children = {
+                { kind = "component", id = "timerGroup", component = "timerbargroup", path = "timerGroup", opts = {} },
+            } },
+        { kind = "card", id = "spell-font", title = L["法术名称"],
+            children = {
+                { kind = "component", id = "font_spell", component = "fontgroup", path = "font_spell", opts = {} },
+            } },
+        { kind = "card", id = "timer-font", title = L["时间文本"],
+            children = {
+                { kind = "component", id = "font_timer", component = "fontgroup", path = "font_timer", opts = {} },
+            } },
     },
 }
 
-ExwindTools:RegisterModuleLayout(MODULE_KEY, GRID_LAYOUT)
+local function CreatePageOwner()
+    return { options = { anchor = ANCHOR_GROUP_OPTS } }
+end
 
 local function RebindModuleCommon(context)
-    -- state.widgets.moduleCommon 是稳定组合控件入口，迁移后必须保留 key 查找语义。
-    local common = context.grid and context.grid.FindMountedWidget
-        and context.grid:FindMountedWidget(context.scrollChild, "moduleCommon")
+    local common = context.modulePage and context.modulePage:Find("moduleCommon")
     if common and type(common.RebindDB) == "function" then common:RebindDB(context.config) end
 end
 
@@ -116,8 +114,9 @@ end
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,
-    layout = GRID_LAYOUT,
-    getColumns = 200,
+    title = L["施法进度条设置"],
+    layout = LAYOUT,
+    ownerFactory = CreatePageOwner,
     preview = { height = 1, render = RenderCastProgressPanelPreview, refresh = RefreshCastProgressPanelPreview, release = ReleaseCastProgressPanelPreview },
     applyScrollSkin = function(scrollFrame)
         if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then
@@ -129,7 +128,7 @@ local StandardPage = EXUI:CreateStandardModulePage({
             groupPaths = SLIDER_GROUP_PATHS,
         }
     end,
-    afterGridLayout = function(context)
+    afterLayout = function(context)
         RebindModuleCommon(context)
     end,
 })

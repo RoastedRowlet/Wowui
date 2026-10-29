@@ -218,55 +218,46 @@ local MODULE_SPEC = {
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings", id = "common", title = L["通用设置"],
-                items = {
-                    { key = "enabled", label = L["启用"], type = "switch" },
-                    { key = "alertHostileOnly", label = L["仅敌方单位"], type = "switch" },
-                    { key = "hideWhenNotInterruptible", label = L["|cffff080a隐藏不能打断的条 (隐藏钢条)|r"], type = "switch" },
-                    { key = "nonInterruptColor", label = L["无法打断颜色"], type = "color" },
-                    { key = "hideOnInterruptCD", label = L["打断CD时隐藏可断条"], type = "switch" },
-                    { key = "showInterruptCDThreshold", label = L["打断CD剩余几秒时显示(左边颜色)"], min = 0, max = 10, type = "slider" },
-                    { key = "interruptCDColor", label = L["打断CD时颜色"], type = "color" },
-                    { key = "muteSoundOnInterruptCD", label = L["打断CD时不播放音效"], type = "switch" },
-                    { key = "showInterruptMarkerLine", label = L["显示打断冷却标线"], type = "switch" },
-                    { key = "interruptMarkerColor", label = L["标线颜色"], type = "color" },
-                    { key = "interruptMarkerWidth", label = L["标线粗细"], min = 1, max = 16, step = 1, type = "slider" },
-                },
-            },
-            {
-                kind = "composite", id = "sound", title = L["提示音设置"],
-                component = "soundgroup", key = "alert", opts = {
+        version = 2,
+        cards = {
+            { id = "card.common", kind = "card", title = L["通用设置"], children = {
+                { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用"] },
+                { id = "alertHostileOnly", kind = "control", controlType = "switch", path = "alertHostileOnly", label = L["仅敌方单位"] },
+                { id = "hideWhenNotInterruptible", kind = "control", controlType = "switch", path = "hideWhenNotInterruptible", label = L["|cffff080a隐藏不能打断的条 (隐藏钢条)|r"] },
+                { id = "nonInterruptColor", kind = "control", controlType = "color", path = "nonInterruptColor", label = L["无法打断颜色"] },
+                { id = "hideOnInterruptCD", kind = "control", controlType = "switch", path = "hideOnInterruptCD", label = L["打断CD时隐藏可断条"] },
+                { id = "showInterruptCDThreshold", kind = "control", controlType = "slider", path = "showInterruptCDThreshold", label = L["打断CD剩余几秒时显示(左边颜色)"], min = 0, max = 10 },
+                { id = "interruptCDColor", kind = "control", controlType = "color", path = "interruptCDColor", label = L["打断CD时颜色"] },
+                { id = "muteSoundOnInterruptCD", kind = "control", controlType = "switch", path = "muteSoundOnInterruptCD", label = L["打断CD时不播放音效"] },
+                { id = "showInterruptMarkerLine", kind = "control", controlType = "switch", path = "showInterruptMarkerLine", label = L["显示打断冷却标线"] },
+                { id = "interruptMarkerColor", kind = "control", controlType = "color", path = "interruptMarkerColor", label = L["标线颜色"] },
+                { id = "interruptMarkerWidth", kind = "control", controlType = "slider", path = "interruptMarkerWidth", label = L["标线粗细"], min = 1, max = 16, step = 1 }
+            } },
+            { id = "card.sound", kind = "card", title = L["提示音设置"], children = {
+                { id = "alert", kind = "component", component = "soundgroup", path = "alert", opts = {
                     sources = {
                         "lsm",
                         "file",
                         "tts",
                     },
                     testButtonKey = "btn_testSound",
-                },
-            },
-            {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchor",
-            },
-            {
-                kind = "composite", id = "timer", title = L["计时条外观"],
-                component = "timerbargroup", key = "timerGroup",
-            },
-            {
-                kind = "composite", id = "font_spell", title = L["法术名称"],
-                component = "fontgroup", key = "font_spell",
-            },
-            {
-                kind = "composite", id = "font_target", title = L["目标名称"],
-                component = "fontgroup", key = "font_target",
-            },
-            {
-                kind = "composite", id = "font_timer", title = L["时间"],
-                component = "fontgroup", key = "font_timer",
-            },
+                } }
+            } },
+            { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
+                { id = "anchor", kind = "component", component = "anchorgroup", path = "anchor", optionsRef = "anchor" }
+            } },
+            { id = "card.timer", kind = "card", title = L["计时条外观"], children = {
+                { id = "timerGroup", kind = "component", component = "timerbargroup", path = "timerGroup" }
+            } },
+            { id = "card.font_spell", kind = "card", title = L["法术名称"], children = {
+                { id = "font_spell", kind = "component", component = "fontgroup", path = "font_spell" }
+            } },
+            { id = "card.font_target", kind = "card", title = L["目标名称"], children = {
+                { id = "font_target", kind = "component", component = "fontgroup", path = "font_target" }
+            } },
+            { id = "card.font_timer", kind = "card", title = L["时间"], children = {
+                { id = "font_timer", kind = "component", component = "fontgroup", path = "font_timer" }
+            } }
         },
     },
 }

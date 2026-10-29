@@ -4,6 +4,7 @@
     <Script file="NODISPLAY/ExM+Info.MDTIconHook.lua"/>
     <Script file="NODISPLAY/ExM+Info.MythicIcon.lua"/>
     <Script file="NODISPLAY/ExM+Info.RunHistory.lua"/>
+    <Frame name="ExwindToolsRunHistoryCellTemplate" mixin="ExwindToolsRunHistoryCellMixin" virtual="true"/>
     <Script file="NODISPLAY/ExM+.MythicDamage.lua"/>
     <Script file="NODISPLAY/ExM+Info.SpellInfo.lua"/>
     <Script file="NODISPLAY/ExM+Info.TeleMsg.lua"/>
@@ -45,6 +46,7 @@
     <Script file="ICON/ExTools.YYSound.lua"/>
     <Script file="SPECIAL/ExTools.PlayerPosition.lua"/>
     <Script file="SPECIAL/ExTools.CooldownFlash.lua"/>
+    <Script file="SPECIAL/ExClass.EXYSF01.lua"/>
     <!-- 个人保留旧模块：保持原功能，不纳入 EXUI 标准重构。 -->
 
     <Script file="TEXT/ExTools.CombatTimer.lua"/>

@@ -209,18 +209,8 @@ local MODULE_SPEC = {
         version = 2,
         cards = {
             { id = "card.common", kind = "card", title = L["模块通用设置"], children = {
-                { id = "description", kind = "hint", text = L["战复次数与充能倒数由中央显示层渲染"] },
-                { id = "moduleCommon", kind = "component", component = "modulecommonsettings", path = "moduleCommon", opts = {
-                    bindRoot = true,
-                    presentation = "settings-list",
-                    fields = {
-                        { label = L["启用战复监控"], path = "enabled", presentation = "switch", type = "checkbox" },
-                    },
-                    fixedLayout = {
-                        controlH = 6, controlW = 46, firstY = 0, logicalWidth = 200,
-                        rowStep = 14, slotX = { 3, 53, 103, 153 },
-                    },
-                } },
+                { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用"],
+                    description = L["战复次数与充能倒数由中央显示层渲染"] },
             } },
             { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
                 { id = "anchor", kind = "component", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },

@@ -19,7 +19,7 @@ do
 
     local shieldWatchFrame = nil
     local watchedBossUnit = nil
-    local watchedCastGUID = nil
+    local watchedCastBarID = nil
     local watchActive = false
     local refreshTimer = nil
     local startWatchTimer = nil
@@ -100,7 +100,7 @@ do
     local function HideShieldBar()
         watchActive = false
         watchedBossUnit = nil
-        watchedCastGUID = nil
+        watchedCastBarID = nil
         shieldMaxValue = nil
         CancelTimer(refreshTimer)
         CancelTimer(startWatchTimer)
@@ -129,6 +129,7 @@ do
         if type(watchedBossUnit) == "string" and UnitExists and UnitExists(watchedBossUnit) then
             return watchedBossUnit
         end
+        if watchedCastBarID ~= nil then return nil end
         for i = 1, 5 do
             local unit = "boss" .. tostring(i)
             if UnitExists and UnitExists(unit) then
@@ -194,9 +195,11 @@ do
             return shieldWatchFrame
         end
         shieldWatchFrame = CreateFrame("Frame")
-        shieldWatchFrame:SetScript("OnEvent", function(_, event, unit, castGUID, spellID)
+        shieldWatchFrame:SetScript("OnEvent", function(_, event, unit, _castGUID, _spellID, arg4, arg5)
+            local castBarID = arg4
+            if event == "UNIT_SPELLCAST_CHANNEL_STOP" then castBarID = arg5 end
             if event == "UNIT_ABSORB_AMOUNT_CHANGED" or event == "PLAYER_TARGET_CHANGED" then
-                if event == "PLAYER_TARGET_CHANGED" then
+                if event == "PLAYER_TARGET_CHANGED" and FORCE_TARGET_TEST == true then
                     watchedBossUnit = nil
                     shieldMaxValue = nil
                 end
@@ -209,14 +212,15 @@ do
                     and unit:match("^boss%d$") then
                     waitingForShieldChannelStart = false
                     watchedBossUnit = unit
-                    watchedCastGUID = castGUID
+                    watchedCastBarID = castBarID
+                    shieldWatchFrame:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "boss1", "boss2", "boss3", "boss4", "boss5")
                     CancelTimer(startWatchTimer)
                     startWatchTimer = nil
                     if C_Timer and type(C_Timer.NewTimer) == "function" then
                         startWatchTimer = C_Timer.NewTimer(0.1, function()
                             startWatchTimer = nil
                             if IsRaviActive() then
-                                StartShieldWatch(unit, castGUID)
+                                StartShieldWatch(unit, castBarID)
                             end
                         end)
                     elseif C_Timer and type(C_Timer.After) == "function" then
@@ -224,18 +228,17 @@ do
                         C_Timer.After(0.1, function()
                             startWatchTimer = nil
                             if IsRaviActive() then
-                                StartShieldWatch(unit, castGUID)
+                                StartShieldWatch(unit, castBarID)
                             end
                         end)
                     else
-                        StartShieldWatch(unit, castGUID)
+                        StartShieldWatch(unit, castBarID)
                     end
                 end
             elseif event == "UNIT_SPELLCAST_CHANNEL_STOP" then
-                if watchActive
-                    and type(unit) == "string"
+                if type(unit) == "string"
                     and unit == watchedBossUnit
-                    and (watchedCastGUID == nil or castGUID == watchedCastGUID) then
+                    and (castBarID ~= nil and castBarID == watchedCastBarID) then
                     HideShieldBar()
                 end
             elseif event == "ENCOUNTER_END" or event == "PLAYER_ENTERING_WORLD" then
@@ -250,11 +253,11 @@ do
         return shieldWatchFrame
     end
 
-    StartShieldWatch = function(unit, castGUID)
+    StartShieldWatch = function(unit, castBarID)
         HideShieldBar()
         watchActive = true
         watchedBossUnit = unit or watchedBossUnit
-        watchedCastGUID = castGUID or watchedCastGUID
+        watchedCastBarID = castBarID or watchedCastBarID
         shieldMaxValue = nil
         EnsureWatchFrame():RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
         EnsureWatchFrame():RegisterEvent("PLAYER_TARGET_CHANGED")

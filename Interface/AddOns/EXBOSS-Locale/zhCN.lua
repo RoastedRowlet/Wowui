@@ -6,6 +6,9 @@ if not L then
 end
 
 -- GUI reload confirmation.
+L["搜索"] = "搜索"
+L["选择"] = "选择"
+L["分类管理"] = "分类管理"
 L["重载界面"] = true
 L["现在重载"] = true
 L["取消切换"] = true
@@ -2120,6 +2123,7 @@ L["被点名提示"] = true
 L["音效"] = true
 L["文本"] = true
 L["隐遁提示"] = true
+L["提示方式"] = true
 L["倒数提示"] = true
 L["启用单点音效"] = true
 L["启用双点音效"] = true
@@ -2224,3 +2228,12 @@ L["洞穴"] = true
 L["夺目"] = true
 L["虚空"] = true
 L["毒牙"] = true
+
+L["保留配置数据"] = true
+L["保留外观"] = true
+L["恢复全部设置"] = true
+
+-- Settings and home page text.
+L["感谢以下人员在插件发展过程中给予的协助。每次打开首页时，上下两组名单均随机排序。感谢不代表本插件支持或反对任何立场。如有遗漏，请私聊我提醒。"] = true
+L["首页依赖 ExwindTools.UI 与 SettingsV2，当前未就绪。请确认 ExwindCore 已正确加载后重开面板。"] = true
+L["默认"] = true

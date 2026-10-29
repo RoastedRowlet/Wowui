@@ -215,11 +215,8 @@ local function NormalizeUnitToken(unit)
 end
 
 local function NormalizeCastBarID(value)
-    local id = tonumber(value)
-    if not id then
-        return nil
-    end
-    return id
+    -- UnitCastBarID is an opaque, non-secret identifier scoped to a unit token.
+    return value
 end
 
 local function SafeNum(v, def)
@@ -408,7 +405,7 @@ local function GetNormalBarColor(db)
         Clamp01(group.barColorA, DEFAULTS.timerGroup.barColorA)
 end
 
-local function ResolveSlotActiveColor(slot, db)
+local function ResolveSlotActiveColor(slot, cfg)
     if type(slot) == "table" and type(slot.state) == "table" and slot.state.castCheckEnabled == true then
         local c = ResolveCastCheckColor(slot)
         if IsBadCheckColor(c) then
@@ -416,7 +413,8 @@ local function ResolveSlotActiveColor(slot, db)
         end
         return CAST_CHECK_GOOD.r, CAST_CHECK_GOOD.g, CAST_CHECK_GOOD.b, 1
     end
-    return GetNormalBarColor(db)
+    local color = cfg.normalColor
+    return color[1], color[2], color[3], color[4]
 end
 
 local function HasActiveCastCheckSlots()
@@ -568,13 +566,45 @@ local function CopyTable(source)
     return result
 end
 
+-- 呈现与布局只依赖这几项设置。运行中的条每 0.05 秒重排一次，读缓存的一份；
+-- 设置页样本照旧每次现取。缓存在 RefreshVisuals / reapplyExisting（各改设置
+-- 路径的共同出口）里失效。
+local function BuildPresentationConfig(db)
+    return {
+        timerGroup = db.timerGroup,
+        fontSpell = db.font_spell,
+        fontTimer = db.font_timer,
+        interaction = BuildStandardCastInteraction(db),
+        normalColor = { GetNormalBarColor(db) },
+        direction = GetGrowDir(db),
+        spacing = GetConfiguredSpacing(db),
+        maxVisible = GetConfiguredMaxBars(db),
+    }
+end
+
+local _runtimeConfig = nil
+
+local function InvalidateRuntimeConfig()
+    _runtimeConfig = nil
+end
+
+local function GetPresentationConfig(runtime)
+    if not runtime then
+        return BuildPresentationConfig(DB())
+    end
+    if not _runtimeConfig then
+        _runtimeConfig = BuildPresentationConfig(DB())
+    end
+    return _runtimeConfig
+end
+
 local function BuildPresentation(slot, runtime)
-    local db = DB()
+    local cfg = GetPresentationConfig(runtime)
     local state = slot and slot.state or {}
     local phase = state.phase or {}
     local duration = math.max(0.1, SafeNum(state.duration, 0.1))
-    local timerStyle = CopyTable(db.timerGroup)
-    local r, g, b, a = ResolveSlotActiveColor(slot, db)
+    local timerStyle = CopyTable(cfg.timerGroup)
+    local r, g, b, a = ResolveSlotActiveColor(slot, cfg)
     timerStyle.barColorR, timerStyle.barColorG = r, g
     timerStyle.barColorB, timerStyle.barColorA = b, a
     timerStyle.fillDirection = UsesReverseFillStyle(state.mode) and "RIGHT_TO_LEFT" or "LEFT_TO_RIGHT"
@@ -583,13 +613,13 @@ local function BuildPresentation(slot, runtime)
         style = {
             timerBar = timerStyle,
             text = {
-                label = db.font_spell,
-                time = db.font_timer,
+                label = cfg.fontSpell,
+                time = cfg.fontTimer,
             },
         },
         icon = { value = ResolveIcon(phase) },
         label = ResolveDisplayName(phase),
-        interaction = BuildStandardCastInteraction(db),
+        interaction = cfg.interaction,
     }
 
     if runtime then
@@ -611,7 +641,7 @@ local function BuildPresentation(slot, runtime)
         local elapsed = duration - remaining
         presentation.time = {
             text = FormatTime(remaining),
-            shown = db.font_timer == nil or db.font_timer.enabled ~= false,
+            shown = cfg.fontTimer == nil or cfg.fontTimer.enabled ~= false,
         }
         presentation.progress = {
             value = ResolveValue(duration, elapsed, state.mode),
@@ -658,12 +688,12 @@ local function ApplyCollectionItems(collection, slots, runtime)
         local item = ApplyRecord(collection, slot, runtime)
         if item then items[#items + 1] = item end
     end
-    local db = DB()
+    local cfg = GetPresentationConfig(runtime)
     collection:SetItems(items, {
         mode = "FLOW",
-        direction = GetGrowDir(db),
-        spacing = GetConfiguredSpacing(db),
-        maxVisible = GetConfiguredMaxBars(db),
+        direction = cfg.direction,
+        spacing = cfg.spacing,
+        maxVisible = cfg.maxVisible,
     })
 end
 
@@ -828,6 +858,7 @@ local function DoesOwnerMatch(state, owner)
     if owner.castKind and tostring(state.ownerCastKind or "") ~= tostring(owner.castKind or "") then
         return false
     end
+    if owner.unit and owner.castKind and owner.castBarID == nil then return false end
     local ownerCastBarID = NormalizeCastBarID(owner.castBarID)
     local stateCastBarID = NormalizeCastBarID(state.ownerCastBarID)
     if ownerCastBarID ~= nil and stateCastBarID ~= ownerCastBarID then
@@ -842,29 +873,10 @@ local function DoesOwnerMatch(state, owner)
     if owner.eventID ~= nil and tonumber(state.ownerEventID) ~= tonumber(owner.eventID) then
         return false
     end
-    if (owner.encounterID ~= nil or owner.eventID ~= nil)
-        and tostring(state.ownerSource or "") == "boss"
-        and tostring(owner.source or "") == "boss"
-    then
-        return true
-    end
-
     local ownerUnit = NormalizeUnitToken(owner.unit)
-    local stateUnit = NormalizeUnitToken(state.ownerUnit)
-    if ownerUnit ~= nil then
-        if stateUnit == ownerUnit then
-            return true
-        end
-        if tostring(state.ownerSource or "") == "boss"
-            and tostring(owner.source or "") == "boss"
-            and ownerCastBarID ~= nil
-            and stateCastBarID == ownerCastBarID
-        then
-            return true
-        end
+    if ownerUnit ~= nil and NormalizeUnitToken(state.ownerUnit) ~= ownerUnit then
         return false
     end
-
     return true
 end
 
@@ -1132,6 +1144,14 @@ function CastBar:Hide()
     end
 end
 
+function CastBar:UpdateOwnerCastBarID(owner, castBarID)
+    for _, slot in ipairs(activeSlots) do
+        if DoesOwnerMatch(slot.state, owner) then
+            slot.state.ownerCastBarID = castBarID
+        end
+    end
+end
+
 function CastBar:StopByOwner(owner)
     if type(owner) ~= "table" then
         return 0
@@ -1154,6 +1174,7 @@ function CastBar:StopByOwner(owner)
 end
 
 function CastBar:StopByUnitCastBar(unit, castBarID, castKind)
+    if castBarID == nil then return false end
     return self:StopByOwner({
         source = "boss",
         unit = NormalizeUnitToken(unit),
@@ -1167,6 +1188,7 @@ function CastBar:IsPlaying()
 end
 
 function CastBar:RefreshVisuals(options)
+    InvalidateRuntimeConfig()
     if not anchorFrame then
         return
     end
@@ -1289,6 +1311,7 @@ local STANDARD_CONFIG_BINDING = EXUI:RegisterStandardConfigBinding({
     moduleKey = MODULE_KEY,
     getConfig = DB,
     reapplyExisting = function()
+        InvalidateRuntimeConfig()
         local sampleSlots = BuildSampleSlots()
         local db = DB()
         local layout = {

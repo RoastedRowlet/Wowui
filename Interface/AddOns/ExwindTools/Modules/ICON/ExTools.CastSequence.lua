@@ -15,27 +15,7 @@ local RefreshActiveSurfaces
 local PublishRecords
 local DB
 
-local IGNORED_SPELLS_RENDERER = MODULE_KEY .. ".IgnoredSpells"
-local IGNORED_SPELL_COLUMNS = {
-    { title = L["法术 ID"], width = 120 },
-    { title = L["法术名称"], weight = 1 },
-    { title = L["操作"], width = 96 },
-}
-local ignoredRendererHost, ignoredRendererContext
-
-local function ReleaseIgnoredRendererControl(control)
-    if not control then return end
-    if EXUI.RestoreSettingsListControl then EXUI:RestoreSettingsListControl(control) end
-    local factory = _G.ExwindFactory
-    if factory and control._isCompositeHost then
-        factory:ReleaseCompositeHost(control)
-    elseif factory then
-        factory:ReleaseGridWidget(control)
-    else
-        control:Hide()
-        control:SetParent(nil)
-    end
-end
+local ignoredSettingsSession
 
 local function GetSortedIgnoredSpellEntries(db)
     local entries = {}
@@ -66,80 +46,40 @@ local function GetSortedIgnoredSpellEntries(db)
     return entries
 end
 
-local function LayoutIgnoredSpellRenderer(host, ctx, width)
-    local controls = host._exIgnoredSpellControls
-    if not controls then return end
-    width = math.max(1, tonumber(width) or ctx:GetContentWidth())
-    local headerHeight, columnRects = EXUI:UpdateSettingsTableHeaderLayout(controls.header, width)
-    controls.header:ClearAllPoints()
-    controls.header:SetPoint("TOPLEFT", host, "TOPLEFT", 0, 0)
-
-    local top = headerHeight
-    for _, record in ipairs(controls.rows) do
-        local metrics = {
-            { height = record.idText:GetHeight(), visible = true },
-            { height = record.nameText:GetHeight(), visible = true },
-            { height = record.delete:GetHeight(), visible = true },
-        }
-        local rowHeight, rects = EXUI:UpdateSettingsTableRowLayout(record.host, width, columnRects, metrics)
-        record.host:ClearAllPoints()
-        record.host:SetPoint("TOPLEFT", host, "TOPLEFT", 0, -top)
-        for index, control in ipairs({ record.idText, record.nameText, record.delete }) do
-            control:ClearAllPoints()
-            control:SetPoint("TOPLEFT", record.host, "TOPLEFT", rects[index].x, -rects[index].y)
-            EXUI:UpdateSettingsListControlLayout(control, rects[index].width)
-            if control._gridType == "GridButton" then EXUI:ApplyControlAppearance(control) end
-        end
-        top = top + rowHeight
-    end
-    host:SetHeight(math.max(1, top))
-end
-
-local function RebuildIgnoredSpellRenderer(host, ctx)
-    local controls = host and host._exIgnoredSpellControls
-    if not controls then return end
-    for index = #controls.rows, 1, -1 do
-        local record = controls.rows[index]
-        ReleaseIgnoredRendererControl(record.delete)
-        ReleaseIgnoredRendererControl(record.nameText)
-        ReleaseIgnoredRendererControl(record.idText)
-        ReleaseIgnoredRendererControl(record.host)
-        controls.rows[index] = nil
-    end
-
-    local entries = GetSortedIgnoredSpellEntries(DB)
-    for index, entry in ipairs(entries) do
-        local rawID = entry.rawID
-        local info = entry.spellID and _G.C_Spell and _G.C_Spell.GetSpellInfo
-            and _G.C_Spell.GetSpellInfo(entry.spellID)
-        local spellText = info and info.name or L["未知法术"]
-        if info and info.iconID then
-            spellText = string.format("|T%s:20:20:0:0|t %s", tostring(info.iconID), spellText)
-        end
-        local record = {
-            host = EXUI:CreateSettingsTableRow(host, { isLast = index == #entries }),
-            idText = EXUI:CreateDescription(host, entry.displayID, 1),
-            nameText = EXUI:CreateDescription(host, spellText, 1),
-        }
-        EXUI:PrepareSettingsListControl(record.idText, { role = "label" })
-        EXUI:PrepareSettingsListControl(record.nameText, { role = "label" })
-        record.delete = EXUI:CreateButton(host, 1, 28, L["删除"], function()
-            if type(DB.ignoredSpellIds) == "table" then DB.ignoredSpellIds[rawID] = nil end
-            if PublishRecords then PublishRecords() end
-            RebuildIgnoredSpellRenderer(host, ctx)
-            ctx:RequestReflow()
-        end, { variant = "danger", compact = true })
-        EXUI:PrepareSettingsListControl(record.delete, {})
-        controls.rows[#controls.rows + 1] = record
-    end
-    LayoutIgnoredSpellRenderer(host, ctx)
-end
-
 local function RefreshIgnoredSpellRenderer()
-    if ignoredRendererHost and ignoredRendererContext then
-        RebuildIgnoredSpellRenderer(ignoredRendererHost, ignoredRendererContext)
-        ignoredRendererContext:RequestReflow()
+    if ignoredSettingsSession and ignoredSettingsSession.alive then ignoredSettingsSession:Refresh() end
+end
+
+local function CreateIgnoredSpellSettingsOwner()
+    local owner = { sources = {}, texts = {}, actions = {} }
+    function owner:AttachSession(session) ignoredSettingsSession = session end
+    local records = {}
+    owner.sources.ignoredSpells = function()
+        local entries = GetSortedIgnoredSpellEntries(DB)
+        local current = {}
+        for _, entry in ipairs(entries) do
+            local record = records[entry.rawID]
+            if not record then record = entry end
+            record.displayID = entry.displayID
+            current[entry.rawID] = record
+        end
+        records = current
+        for index, entry in ipairs(entries) do entries[index] = records[entry.rawID] end
+        return entries
     end
+    owner.texts.ignoredSpellID = function(scope) return scope.item.displayID end
+    owner.texts.ignoredSpellName = function(scope)
+        local spellID = scope.item.spellID
+        local info = spellID and C_Spell.GetSpellInfo(spellID)
+        if info and info.iconID then return "|T" .. info.iconID .. ":0|t " .. info.name end
+        return info and info.name or L["未知法术"]
+    end
+    owner.actions.deleteIgnoredSpell = function(context)
+        DB.ignoredSpellIds[context.scope.item.rawID] = nil
+        PublishRecords()
+        context:RefreshPage()
+    end
+    return owner
 end
 
 -- 所有预设、所有 Grid 几何以及全部可见元素的类型均在本模块声明。
@@ -149,6 +89,7 @@ end
 -- =========================================================
 local MODULE_SPEC = {
     RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
+    SettingsOwner = CreateIgnoredSpellSettingsOwner,
     moduleKey = MODULE_KEY,
     kind = "icon",
     version = 1,
@@ -277,50 +218,55 @@ local MODULE_SPEC = {
             { spellId = 31661, icon = 135812, spellName = "龙息术", previewRemaining = 5, previewDuration = 5 },
         },
     },
-    -- [卡片迁移边界：设置页] 仅可按统一规范调整下列 gui.static/gui.fields 的 x/y/w/h 与卡片分组。
-    -- key/type/opts、DB path、anchor/preview/defaults 及刷新回调均属绑定或业务合同，禁止修改；复合控件必须整体引用，header 本身不等于卡片容器。
     -- =========================================================
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        sections = {
-            {
-                kind = "composite", id = "common", title = L["模块通用设置"],
-                component = "modulecommonsettings", key = "moduleCommon", opts = {
+        version = 2,
+        cards = {
+            { id = "card.common", kind = "card", title = L["模块通用设置"], children = {
+                { id = "moduleCommon", kind = "component", component = "modulecommonsettings", path = "moduleCommon", opts = {
                     bindRoot = true,
                     presentation = "settings-list",
                     fields = {
-                        { column = 1, label = L["启用"], path = "enabled", presentation = "switch", row = 1, type = "checkbox" },
-                        { column = 2, label = L["运行时悬停提示"], path = "showTooltip", presentation = "switch", row = 1, type = "checkbox" },
-                        { column = 3, label = L["保留施法数量"], max = 20, min = 3, path = "squareAmount", row = 1, step = 1, type = "slider" },
+                        { label = L["启用"], path = "enabled", presentation = "switch", type = "checkbox" },
+                        { label = L["运行时悬停提示"], path = "showTooltip", presentation = "switch", type = "checkbox" },
+                        { label = L["保留施法数量"], max = 20, min = 3, path = "squareAmount", step = 1, type = "slider" },
                     },
-                    fixedLayout = {
-                        controlH = 6, controlW = 46, firstY = 0, logicalWidth = 200,
-                        rowStep = 14, slotX = { 3, 53, 103, 153 },
-                    },
-                },
-            },
-            {
-                kind = "settings", id = "ignored_spells", title = L["忽略法术"],
-                items = {
-                    { key = "ignoreSpellId", label = L["法术ID"], type = "input" },
-                    { key = "btn_addIgnore", label = L["添加/移除"], type = "button" },
-                    { key = "btn_showIgnore", label = L["显示列表"], type = "button" },
-                    { key = "btn_clearIgnore", label = L["清空列表"], type = "button" },
-                },
-            },
-            {
-                kind = "custom", id = "ignored_spell_records", title = L["忽略法术列表"],
-                renderer = IGNORED_SPELLS_RENDERER, key = "ignoredSpellRecords",
-            },
-            {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchor",
-            },
-            {
-                kind = "composite", id = "layout", title = L["排列设置"],
-                component = "widgetlayout", key = "layout", opts = {
+                } },
+            } },
+            { id = "card.ignored_spells", kind = "card", title = L["忽略法术"], children = {
+                { id = "ignoreSpellId", kind = "control", controlType = "input", path = "ignoreSpellId", label = L["法术ID"] },
+                { id = "row_showIgnore", kind = "setting", label = L["显示列表"], children = {
+                    { id = "btn_showIgnore", kind = "button", text = L["显示列表"], clickKey = "btn_showIgnore" },
+                } },
+                { id = "row_clearIgnore", kind = "setting", label = L["清空列表"], children = {
+                    { id = "btn_clearIgnore", kind = "button", text = L["清空列表"], clickKey = "btn_clearIgnore" },
+                } },
+            } },
+            { id = "card.ignored_spell_records", kind = "card", title = L["忽略法术列表"], children = {
+                { id = "ignoredSpellRecords", kind = "table", columns = {
+                    { title = L["法术 ID"] }, { title = L["法术名称"] },
+                }, addAction = { id = "btn_addIgnore", text = L["添加/移除"], clickKey = "btn_addIgnore" },
+                rowActions = { { id = "ignoredSpellDelete", text = L["删除"], action = "deleteIgnoredSpell", presentation = "danger" } },
+                children = {
+                    { id = "ignoredSpellEntries", kind = "repeat", source = "ignoredSpells", template = {
+                        id = "ignoredSpellRow", kind = "row", children = {
+                            { id = "ignoredSpellIDCell", kind = "cell", children = {
+                                { id = "ignoredSpellID", kind = "text", textSource = "ignoredSpellID" },
+                            } },
+                            { id = "ignoredSpellNameCell", kind = "cell", children = {
+                                { id = "ignoredSpellName", kind = "text", textSource = "ignoredSpellName" },
+                            } },
+                        },
+                    } },
+                } },
+            } },
+            { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
+                { id = "anchor", kind = "component", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+            { id = "card.layout", kind = "card", title = L["排列设置"], children = {
+                { id = "layout", kind = "component", component = "widgetlayout", path = "layout", opts = {
                     allowedDirections = {
                         "RIGHT",
                         "LEFT",
@@ -333,61 +279,20 @@ local MODULE_SPEC = {
                     includeMaxPerRow = false,
                     maxVisibleMax = 20,
                     maxVisibleMin = 1,
-                },
-            },
-            {
-                kind = "composite", id = "icon", title = L["图标本体"],
-                component = "icongroup", key = "icon",
-            },
-            {
-                kind = "composite", id = "font_time", title = L["倒数文字"],
-                component = "fontgroup", key = "font_time",
-            },
+                } },
+            } },
+            { id = "card.icon", kind = "card", title = L["图标本体"], children = {
+                { id = "icon", kind = "component", component = "icongroup", path = "icon", optionsRef = "icon" },
+            } },
+            { id = "card.font_time", kind = "card", title = L["倒数文字"], children = {
+                { id = "font_time", kind = "component", component = "fontgroup", path = "font_time" },
+            } },
         },
     },
 }
 
 ExwindTools:DeclareModuleSpecDefaults(MODULE_KEY, MODULE_SPEC.defaults)
 DB = ExwindTools:GetModuleDB(MODULE_KEY)
-local Grid = ExwindTools.Grid
-if not Grid then error("CastSequence requires ExwindGrid", 2) end
-Grid:RegisterCustomRenderer(IGNORED_SPELLS_RENDERER, {
-    measure = function()
-        return 38 + #GetSortedIgnoredSpellEntries(DB) * 48
-    end,
-    mount = function(host, ctx)
-        ignoredRendererHost, ignoredRendererContext = host, ctx
-        host._exIgnoredSpellControls = {
-            header = EXUI:CreateSettingsTableHeader(host, { columns = IGNORED_SPELL_COLUMNS }),
-            rows = {},
-        }
-        RebuildIgnoredSpellRenderer(host, ctx)
-    end,
-    update = function(host, ctx)
-        ignoredRendererHost, ignoredRendererContext = host, ctx
-        RebuildIgnoredSpellRenderer(host, ctx)
-    end,
-    layout = function(host, ctx, width)
-        LayoutIgnoredSpellRenderer(host, ctx, width)
-    end,
-    release = function(host)
-        local controls = host._exIgnoredSpellControls
-        if controls then
-            for index = #controls.rows, 1, -1 do
-                local record = controls.rows[index]
-                ReleaseIgnoredRendererControl(record.delete)
-                ReleaseIgnoredRendererControl(record.nameText)
-                ReleaseIgnoredRendererControl(record.idText)
-                ReleaseIgnoredRendererControl(record.host)
-            end
-            ReleaseIgnoredRendererControl(controls.header)
-        end
-        host._exIgnoredSpellControls = nil
-        if ignoredRendererHost == host then
-            ignoredRendererHost, ignoredRendererContext = nil, nil
-        end
-    end,
-})
 local central = EXUI:RegisterIconModule(MODULE_SPEC)
 local LAYOUT = DB.layout
 if not ExwindTools:IsModuleEnabled(MODULE_KEY) then return end

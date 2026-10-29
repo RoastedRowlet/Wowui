@@ -6,7 +6,7 @@ local Shell = ET.UnifiedPanel
 local BossPanel = ExBoss.UI and ExBoss.UI.Panel
 if not BossPanel then return end
 
--- [卡片/Grid 迁移边界：共享宿主] Provider 只声明 Shell 路由、22:78 宿主比例与 Mount/Relayout/Hide 生命周期；页面卡片不得在此创建。
+-- [V2 页面边界：共享宿主] Provider 只声明 Shell 路由、22:78 宿主比例与 Mount/Relayout/Hide 生命周期；页面卡片不得在此创建。
 -- Boss 页面左侧为副本/首领导航，明确采用 B:C=22:78；其他 Provider 仍用 Shell 默认 25:75。
 local Provider = { id = "boss", hasTopTabs = true, navRatio = 0.22 }
 

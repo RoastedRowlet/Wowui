@@ -2,24 +2,25 @@ local _, MDT = ...
 
 MDT.changeLog = {
   {
-    tag = "6.3.6",
-    date = "2026-10-12",
+    tag = "6.3.26",
+    date = "2026-10-28",
     notes = {
-      "Added WoW 12.1.5 PTR support.",
+      "Updated Russian and German translations.",
+      "Long checkbox labels in Settings now wrap instead of being cut off.",
     },
   },
   {
-    tag = "6.3.5",
-    date = "2026-10-08",
+    tag = "6.3.25",
+    date = "2026-10-27",
     notes = {
-      "The Barrel of Apples, Berry Bush and Salmon Pool offerings in Den of Nalorakk can now be assigned to players",
+      "The enemy info card now hides as soon as the cursor leaves the enemy. Hold Ctrl to keep it open.",
     },
   },
   {
-    tag = "6.3.4",
-    date = "2026-10-08",
+    tag = "6.3.24",
+    date = "2026-10-26",
     notes = {
-      "Added one missing Unleashed Imp to group 45.",
+      "New Focus Marker option \"Only focus enemy units\", on by default.",
     },
   },
 }

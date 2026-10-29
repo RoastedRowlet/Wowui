@@ -1,0 +1,5 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="ExwindVirtualTable.lua"/>
+	<!-- 官方表格列单元格池只认 xml 模板；Init / Populate 见 ExwindVirtualTableCellMixin。 -->
+	<Frame name="ExwindVirtualTableCellTemplate" mixin="ExwindVirtualTableCellMixin" virtual="true"/>
+</Ui>

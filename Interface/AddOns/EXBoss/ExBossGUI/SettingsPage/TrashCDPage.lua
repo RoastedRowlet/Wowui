@@ -30,6 +30,7 @@ local C = {
         titleFontSizes = { GM.font.exboss.navigationTitle, GM.font.title, GM.font.exboss.previewText, GM.font.moduleDescription },
     },
     SPELL_DETAIL_HEIGHT = 148,
+    VOICE_TIMELINE_HEIGHT = 84,
 }
 
 -- 在这里写入小怪面板左侧 被点名提示的图标法术ID
@@ -52,17 +53,7 @@ ExBoss.TargetAlert.SupportedTrashSpellIDs = {
 local TEST_THREAT_ATLAS_SPELLS = ExBoss.TargetAlert.SupportedTrashSpellIDs
 local TEST_THREAT_ATLAS_NAME = "Ping_Marker_Icon_Threat"
 local TEST_THREAT_ATLAS_TOOLTIP = "可设置「被点名提示」!"
-local EVENT_COLOR_ITEMS_FUNC = "func:ExBoss.Voice.ColorSchemes.BuildDropdownItems"
-local LABEL_ITEMS_FUNC = "func:ExBoss.Voice.LabelCatalog.GetDropdownItems"
 
-local function ResolvePackPreviewPath(label)
-    local engine = ExBoss and ExBoss.Voice and ExBoss.Voice.Engine
-    if not (engine and engine.ResolveStandaloneSound) then return nil end
-    local info = engine:ResolveStandaloneSound(
-        { enabled = true, sourceType = "pack", label = tostring(label or "") },
-        { triggerIndex = 0, ignoreState = true })
-    return info and info.file or nil
-end
 local TRIGGER_SOURCE_ITEMS = {
     { L["语音包标签"], "pack" },
     { L["LSM音效"], "lsm" },
@@ -75,11 +66,8 @@ local COUNTDOWN_LEAD_ITEMS = {
     { "2", "2" },
     { "1", "1" },
 }
-local TRIGGER_OFFSET_MODE_ITEMS = {
-    { L["延迟"], "delay" },
-    { L["提前"], "early" },
-}
 local SETTINGS_LAYOUT = {}
+local settingsAuthorVoiceNotice
 local CACHE = {
     challengeMapLookup = nil,
     spellTextCache = {},
@@ -92,6 +80,7 @@ local mapPane
 local spellPane
 local spellTitle
 local detailPane
+local detailSurface
 local settingsPane
 local mapScrollFrame
 local mapScrollChild
@@ -121,8 +110,8 @@ local detailCDChip
 local detailCDValue
 local detailSpellIDChip
 local detailSpellIDValue
-local settingsVoiceDisabledNote
 local voicePreviewTimeline
+local voicePreviewSurface
 local voicePreviewGeneration = 0
 
 local activeDungeonButtons = {}
@@ -142,12 +131,11 @@ local GetSpellRows
 local GetRuntimeSpellEntry
 local GetRowSpellDescription
 local GetSelectedSpellRow
-local _asyncHandler
 local _spellListBuildToken = 0
 local _selectionRefreshToken = 0
 local LayoutTrashQuickRow
 
-local function RegisterSpellSettingsGridAsActive(moduleKey)
+local function RegisterSpellSettingsAsActive(moduleKey)
     if not (Page._visible and settingsScrollChild and ExwindTools and ExwindTools.UI) then
         return
     end
@@ -157,7 +145,7 @@ local function RegisterSpellSettingsGridAsActive(moduleKey)
     end
 end
 
-local function ClearSpellSettingsGridActiveRegistration()
+local function ClearSpellSettingsActiveRegistration()
     if not (ExwindTools and ExwindTools.UI and settingsScrollChild) then
         return
     end
@@ -177,23 +165,8 @@ local function GetEffectiveDisplayLocale()
     return "zhCN"
 end
 
-local function GetAsyncHandler()
-    if _asyncHandler and _asyncHandler ~= false then
-        return _asyncHandler
-    end
-    local lib = LibStub and LibStub("LibAsync", true)
-    if not lib then
-        _asyncHandler = nil
-        return nil
-    end
-    _asyncHandler = lib:GetHandler({
-        type = "everyFrame",
-        maxTime = 6,
-        maxTimeCombat = 4,
-        errorHandler = geterrorhandler(),
-    })
-    return _asyncHandler
-end
+-- 页面分帧任务的每帧预算（毫秒）。
+local FRAME_TASK_BUDGET_MS = 6
 
 local function CreateSectionBackdrop(parent)
     local frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
@@ -206,19 +179,6 @@ local function CreateSectionBackdrop(parent)
     frame:SetBackdropColor(unpack(GC.panel))
     frame:SetBackdropBorderColor(unpack(GC.panelBorder))
     return frame
-end
-
-local function DisableVerticalScroll(scrollFrame)
-    if not scrollFrame then return end
-    scrollFrame:EnableMouseWheel(false)
-    scrollFrame:SetScript("OnMouseWheel", function(self) self:SetVerticalScroll(0) end)
-    scrollFrame:SetVerticalScroll(0)
-    local bar = scrollFrame.ScrollBar
-    if bar then
-        bar:Hide()
-        bar:SetAlpha(0)
-        bar:EnableMouse(false)
-    end
 end
 
 local function Clamp01(v, fallback)
@@ -343,48 +303,6 @@ local function GetDisplayMobName(npcID, fallbackName)
         end
     end
     return tostring(fallbackName or ("NPC " .. tostring(npcID or "")))
-end
-
-local function SetWidgetUsable(widget, usable)
-    if not widget then
-        return
-    end
-    usable = usable ~= false
-    if widget.SetDisabled then
-        widget:SetDisabled(not usable)
-        return
-    end
-    widget:SetAlpha(usable and 1 or 0.45)
-    if widget.checkbox and widget.checkbox.Enable then
-        if usable then
-            widget.checkbox:Enable()
-        else
-            widget.checkbox:Disable()
-        end
-    end
-    if widget.editBox and widget.editBox.Enable then
-        if usable then
-            widget.editBox:Enable()
-        else
-            widget.editBox:Disable()
-        end
-    end
-    if widget.button and widget.button.Enable then
-        if usable then
-            widget.button:Enable()
-        else
-            widget.button:Disable()
-        end
-    end
-    if widget.Enable then
-        if usable then
-            widget:Enable()
-        else
-            widget:Disable()
-        end
-    elseif widget.EnableMouse then
-        widget:EnableMouse(usable)
-    end
 end
 
 local function GetMapIcon(mapID)
@@ -665,10 +583,11 @@ local function RefreshDetailCardLayout()
     EXUI:ClearControlSurface(detailIconBorder)
 
     local contentX = inset + iconSize + 12
-    local outputWidth = math.min(330, math.max(270, math.floor(width * 0.36)))
+    local outputWidth = 330
     local outputGap = 12
     local headerWidth = math.max(120, width - contentX - inset)
-    local bodyWidth = math.max(120, width - contentX - inset - outputWidth - outputGap)
+    local bodyWidth = math.max(120, width - contentX - inset - outputWidth - outputGap
+        - detailBodyScroll:GetVerticalScrollInset())
     detailTitle:ClearAllPoints()
     detailTitle:SetPoint("TOPLEFT", detailPane, "TOPLEFT", contentX, -topInset - 1)
     detailTitle:SetWidth(math.max(60, math.min(headerWidth,
@@ -709,7 +628,9 @@ local function RefreshDetailCardLayout()
     detailBodyScroll:SetPoint("BOTTOMRIGHT", detailPane, "BOTTOMRIGHT", -(inset + outputWidth + outputGap),
         detailInfo:IsShown() and 31 or 10)
     detailBody:SetWidth(bodyWidth)
-    detailBodyChild:SetSize(bodyWidth, math.max(1, detailBodyScroll:GetHeight()))
+    detailBody:SetHeight(0)
+    detailBodyChild:SetSize(bodyWidth, math.max(1, detailBodyScroll:GetHeight(),
+        math.ceil(detailBody:GetStringHeight())))
     detailBodyScroll:UpdateScrollChildRect()
     detailBodyScroll:SetVerticalScroll(0)
     detailInfo:ClearAllPoints()
@@ -1072,238 +993,110 @@ local function PlayVoicePreview(sourceType, label, customLSM, customPath)
     end
 end
 
--- [卡片/Grid 迁移边界：TrashCD 技能编辑器]
--- 允许：只按共享规范调整 master/quick/text/voice/cast/target 六组的 x/y/w/h、外层卡片与当前可见高度。
--- 禁止：修改稳定 key/type、地图/NPC/法术业务顺序、draft→Store 提交、试听回调或三个 pane 的选择身份。
--- 来源控件共享同一坐标槽位；高度只累计当前可见来源一次。
+-- The draft keeps its identity while V2 owns controls and layout.
 local function BuildSettingsLayout()
-    if SETTINGS_LAYOUT.version == 1 then
-        return
+    local row = GetSelectedSpellRow()
+    local notice = GetAuthorVoiceDisableText(row and GetRuntimeSpellEntry(row))
+    if SETTINGS_LAYOUT.version == 2 and settingsAuthorVoiceNotice == notice then return false end
+    settingsAuthorVoiceNotice = notice
+    local function Field(id, kind, extra)
+        local node = { id = id, kind = "control", controlType = kind, path = id }
+        for key, value in pairs(extra or {}) do node[key] = value end
+        return node
     end
-    local rows = {
-        { key = "enabled", type = "checkbox", x = 80, y = 1, w = 20, h = 5, label = L["启用"], labelSize = GM.font.cardTitle },
-        { key = "eventColorEnabled", type = "checkbox", x = 6, y = 16, w = 20, h = 5, label = L["颜色"] },
-        { key = "eventColorMode", type = "dropdown", x = 31, y = 16, w = 37, h = 5, label = "", items = EVENT_COLOR_ITEMS_FUNC, labelPos = "left", search = true },
-        { key = "eventColor", type = "color", x = 70, y = 16, w = 30, h = 5, label = L["自定义颜色"] },
-        { key = "description_trash_text_1", type = "description", x = 6, y = 23, w = 35, h = 5, label = GC.markup.accent .. L["中央文本"] .. "|r" },
-        { key = "centralEnabled", type = "checkbox", x = 6, y = 28, w = 25, h = 5, label = L["中央文本"] },
-        { key = "centralLead", type = "input", x = 31, y = 28, w = 17, h = 5, label = L["提前(秒)"], labelPos = "right" },
-        { key = "centralText", type = "input", x = 31, y = 33, w = 54, h = 5, label = "" },
-        { key = "description_trash_text_2", type = "description", x = 6, y = 41, w = 44, h = 5, label = GC.markup.accent .. L["倒数文本"] .. "|r" },
-        { key = "countdownEnabled", type = "checkbox", x = 6, y = 45, w = 25, h = 5, label = L["倒数文本"] },
-        { key = "preAlertText", type = "input", x = 31, y = 45, w = 54, h = 5, label = "" },
-        { key = "description_trash_text_3", type = "description", x = 6, y = 55, w = 44, h = 5, label = GC.markup.accent .. L["计时条改名"] .. "|r" },
-        { key = "timerBarRenameEnabled", type = "checkbox", x = 6, y = 60, w = 25, h = 5, label = L["计时条改名"] },
-        { key = "timerBarRenameText", type = "input", x = 31, y = 60, w = 54, h = 5, label = "" },
-
-        { key = "description_trash_voice_1", type = "description", x = 6, y = 80, w = 44, h = 5, label = GC.markup.accent .. L["施法开始"] .. "|r" },
-        { key = "tr1Enabled", type = "checkbox", x = 6, y = 85, w = 20, h = 5, label = L["施法开始"] },
-        { key = "tr1Source", type = "dropdown", x = 31, y = 85, w = 25, h = 5, label = "", items = TRIGGER_SOURCE_ITEMS, search = true },
-        { key = "tr1Label", type = "dropdown", previewPath = ResolvePackPreviewPath, x = 58, y = 85, w = 30, h = 5, label = "", items = LABEL_ITEMS_FUNC, search = true },
-        { key = "tr1LSM", type = "lsm_sound", x = 58, y = 85, w = 30, h = 5, label = "", search = true },
-        { key = "tr1Path", type = "input", x = 58, y = 85, w = 30, h = 5, label = "" },
-        { key = "tr1ValueTest", type = "button", x = 90, y = 85, w = 10, h = 5, label = "▶", tooltip = L["试听"] },
-        { key = "description_trash_voice_2", type = "description", x = 6, y = 97, w = 44, h = 5, label = GC.markup.accent .. L["倒数播报"] .. "|r" },
-        { key = "tr2Enabled", type = "checkbox", x = 6, y = 102, w = 20, h = 5, label = L["播放数字"] },
-        { key = "tr2CountdownLead", type = "segmented", x = 31, y = 102, w = 25, h = 5, label = "", items = COUNTDOWN_LEAD_ITEMS },
-        { key = "tr2PlayTextEnabled", type = "checkbox", x = 6, y = 110, w = 22, h = 5, label = L["播放名称"] },
-        { key = "tr2Source", type = "dropdown", x = 31, y = 110, w = 25, h = 5, label = "", items = TRIGGER_SOURCE_ITEMS, search = true },
-        { key = "tr2Label", type = "dropdown", previewPath = ResolvePackPreviewPath, x = 58, y = 110, w = 30, h = 5, label = "", items = LABEL_ITEMS_FUNC, search = true },
-        { key = "tr2LSM", type = "lsm_sound", x = 58, y = 110, w = 30, h = 5, label = "", search = true },
-        { key = "tr2Path", type = "input", x = 58, y = 110, w = 30, h = 5, label = "" },
-        { key = "tr2ValueTest", type = "button", x = 90, y = 110, w = 10, h = 5, label = "▶", tooltip = L["试听"] },
-        { key = "description_voice_preview_heading", type = "description", x = 6, y = 117, w = 44, h = 5,
-            label = L["你将听到"] },
-        { key = "voiceSequencePreview", type = "button", x = 76, y = 117, w = 24, h = 6,
-            label = L["播放预览"] },
-        { key = "description_voice_preview_sequence", type = "description", x = 6, y = 124, w = 94, h = 8,
-            label = L["静默"] },
-
-        { key = "showBunBar", type = "checkbox", x = 105, y = 1, w = 15, h = 5, label = L["竖条"] },
-        { key = "showTimerBar", type = "checkbox", x = 134, y = 1, w = 20, h = 5, label = L["计时条"] },
-        { key = "showNameplate", type = "checkbox", x = 166, y = 1, w = 20, h = 5, label = L["纪事条姓名板"] },
-
-        { key = "ringEnabled", type = "checkbox", x = 107, y = 16, w = 59, h = 5, label = L["显示圆环"] },
-        { key = "castProgressBarEnabled", type = "checkbox", x = 107, y = 23, w = 59, h = 5, label = L["显示读条"] },
-        { key = "castProgressBarRenameEnabled", type = "checkbox", x = 107, y = 28, w = 20, h = 5, label = L["读条改名"] },
-        { key = "castProgressBarRenameText", type = "input", x = 132, y = 28, w = 54, h = 5, label = "" },
-        { key = "ringCastCheckEnabled", type = "checkbox", x = 107, y = 36, w = 30, h = 5, label = L["施法检测"] },
-        { key = "description_cast_check", type = "description", x = 107, y = 40, w = 79, h = 5,
-            label = L["检测当前读条能否完成，来不及时以红色提示。"] },
-        { key = "targetAlertStartEnabled", type = "checkbox", x = 107, y = 85, w = 35, h = 5, label = L["启用"] },
-        { key = "targetAlertStartLSM", type = "lsm_sound", x = 144, y = 85, w = 42, h = 5, label = "", labelPos = "left", search = true },
-        { key = "targetAlertStartValueTest", type = "button", x = 189, y = 85, w = 10, h = 5, label = "▶", tooltip = L["试听"] },
-        { key = "targetAlertTankEnabled", type = "checkbox", x = 107, y = 95, w = 44, h = 5, label = L["坦克也生效"] },
-        { key = "targetVisualHeading", type = "description", x = 107, y = 101, w = 79, h = 5,
-            label = GC.markup.textDim .. L["视觉提示"] .. "|r" },
-        { key = "targetAlertRingEnabled", type = "checkbox", x = 107, y = 107, w = 20, h = 7, label = L["圆环"] },
-        { key = "targetAlertIconEnabled", type = "checkbox", x = 127, y = 107, w = 20, h = 7, label = L["图标"] },
-        { key = "targetAlertTextEnabledV2", type = "checkbox", x = 149, y = 107, w = 17, h = 7, label = L["文本"] },
-        { key = "targetAlertStealthEnabledV2", type = "checkbox", x = 166, y = 107, w = 30, h = 7, label = "|T132089:18:18|t " .. L["隐遁提示"] },
-        { key = "targetAudioHeading", type = "description", x = 107, y = 113, w = 79, h = 5,
-            label = GC.markup.textDim .. L["语音提示"] .. "|r" },
-        { key = "targetPresentationNote", type = "description", x = 107, y = 116, w = 92, h = 5,
-            label = L["停用时保留配置，启用后生效。"] },
+    local function Options(items)
+        local result = {}
+        for _, item in ipairs(items) do
+            result[#result + 1] = { label = item[1], value = item[2] }
+        end
+        return result
+    end
+    local function Setting(id, label, toggle, children, extra)
+        local node = { id = id, kind = "setting", label = label, toggle = toggle, children = children }
+        for key, value in pairs(extra or {}) do node[key] = value end
+        return node
+    end
+    local sources = {}
+    for _, item in ipairs(TRIGGER_SOURCE_ITEMS) do sources[#sources + 1] = item[2] end
+    local function Sound(prefix, allowedSources)
+        return { id = prefix .. "Sound", kind = "component", component = "soundselector", path = prefix,
+            optionsRef = "sound." .. prefix,
+            opts = { sources = allowedSources or sources,
+                labelSource = prefix ~= "targetAlertStart" and "ExBoss.Voice.LabelCatalog.GetDropdownItems" or nil } }
+    end
+    SETTINGS_LAYOUT = {
+        version = 2, layout = "grid",
+        columns = { { weight = 1.57 }, { weight = 1 } },
+        cards = {
+            { id = "text", kind = "card", title = L["文本设置"], row = 1, column = 1, children = {
+                    Setting("eventColorRow", L["颜色"], "eventColorEnabled", {
+                        Field("eventColorMode", "select", {
+                            optionsSource = "ExBoss.Voice.ColorSchemes.BuildDropdownItems", search = true }),
+                        Field("eventColor", "color", { visible = "customColor" }),
+                    }),
+                    Setting("centralRow", L["中央文本"], "centralEnabled", {
+                        Field("centralLead", "input", { size = "short" }),
+                        { id = "centralLeadUnit", kind = "text", text = L["秒"] },
+                        Field("centralText", "input"),
+                    }),
+                    Setting("countdownRow", L["倒数文本"], "countdownEnabled", { Field("preAlertText", "input") }),
+                    Setting("timerRenameRow", L["计时条改名"], "timerBarRenameEnabled", { Field("timerBarRenameText", "input") }),
+                } },
+            { id = "cast", kind = "card", title = L["施法设置"], row = 1, column = 2, children = {
+                    { id = "castOutputRow", kind = "control", controlType = "toggles", label = L["显示"], items = {
+                        { label = L["圆环"], path = "ringEnabled" },
+                        { label = L["读条"], path = "castProgressBarEnabled" },
+                    } },
+                    Field("ringCastCheckEnabled", "switch", { label = L["施法检测"],
+                        description = L["检测当前读条能否完成，来不及时以红色提示。"] }),
+                    Setting("castRenameRow", L["读条改名"], "castProgressBarRenameEnabled", { Field("castProgressBarRenameText", "input") }),
+                } },
+            { id = "voice", kind = "card", title = L["语音设置"], row = 2, column = 1, children = {
+                    Setting("tr1Row", L["施法开始"], "tr1Enabled", { Sound("tr1") },
+                        { description = notice, enabled = "voiceAllowed" }),
+                    Setting("countdownVoiceRow", L["播放数字"], "tr2Enabled", {
+                        Field("tr2CountdownLead", "segment", { options = Options(COUNTDOWN_LEAD_ITEMS) }),
+                    }, { enabled = "voiceAllowed" }),
+                    Setting("tr2Row", L["播放名称"], "tr2PlayTextEnabled", { Sound("tr2") }, { enabled = "voiceAllowed" }),
+                    -- 时间轴直接放卡片里铺满整行；▶ 试听按钮在组件内部右下角（普通页卡片不能直接放按钮）。
+                    { id = "voiceTimeline", kind = "component", ref = "voiceTimeline", custom = "EXBoss.VoiceTimeline" },
+                } },
+            { id = "target", kind = "card", title = L["被点名提示"], row = 2, column = 2, children = {
+                    Field("targetAlertStartEnabled", "switch", { label = L["启用"] }),
+                    { id = "targetVisualRow", kind = "control", controlType = "toggles", label = L["提示方式"], enabled = "targetOn", items = {
+                        { label = L["圆环"], path = "targetAlertRingEnabled" },
+                        { label = L["文本"], path = "targetAlertTextEnabledV2" },
+                        { label = L["图标"], path = "targetAlertIconEnabled" },
+                    } },
+                    Setting("stealthRow", L["隐遁提示"], nil, { Field("targetAlertStealthEnabledV2", "switch") },
+                        { icon = 132089, enabled = "targetOn" }),
+                    Field("targetAlertTankEnabled", "switch", { label = L["坦克也生效"], enabled = "targetOn" }),
+                    Setting("targetSoundRow", L["语音"], nil, { Sound("targetAlertStart", { "lsm" }) }, { enabled = "targetOn" }),
+                } },
+        },
     }
-    local masterKeys = { enabled = true }
-    local quickKeys = { showBunBar = true, showTimerBar = true, showNameplate = true }
-    local textKeys = { eventColorEnabled = true, eventColorMode = true, eventColor = true }
-    local castKeys = { ringEnabled = true, castProgressBarEnabled = true, castProgressBarRenameEnabled = true,
-        castProgressBarRenameText = true, ringCastCheckEnabled = true, description_cast_check = true }
-    local targetKeys = { targetAlertStartEnabled = true, targetAlertStartLSM = true, targetAlertStartValueTest = true,
-        targetAlertTankEnabled = true, targetAlertRingEnabled = true, targetAlertIconEnabled = true,
-        targetAlertTextEnabledV2 = true, targetAlertStealthEnabledV2 = true, targetVisualHeading = true,
-        targetAudioHeading = true, targetPresentationNote = true }
-    local groups = { master = {}, quick = {}, text = {}, voice = {}, cast = {}, target = {} }
-    for _, row in ipairs(rows) do
-        local group
-        if tostring(row.key):find("^description_trash_") and row.key ~= "description_trash_voice_2" then
-            group = nil
-        elseif masterKeys[row.key] then group = "master"
-        elseif quickKeys[row.key] then group = "quick"
-        elseif castKeys[row.key] then group = "cast"
-        elseif targetKeys[row.key] then group = "target"
-        elseif textKeys[row.key] or (tonumber(row.y) or 0) < 73 then group = "text"
-        else group = "voice" end
-        if group then
-            local xOffset = group == "quick" and 104
-                or (group == "cast" or group == "target") and 106
-                or (group == "text" or group == "voice") and 5 or 0
-            local yOffset = group == "text" and 15 or group == "voice" and 79
-                or group == "cast" and 15 or group == "target" and 84 or 0
-            row.x = math.max(1, (tonumber(row.x) or 1) - xOffset)
-            row.y = math.max(1, (tonumber(row.y) or 1) - yOffset)
-            groups[group][#groups[group] + 1] = row
-        end
-    end
-    local cardGap = 6
-    local topRowBodyHeight = 196
-    local wideColumnRatio = 1.57 / 2.57
-    local narrowColumnRatio = 1 / 2.57
-    local wideColumn = { ratio = wideColumnRatio, offset = -cardGap * wideColumnRatio }
-    local narrowColumn = { ratio = narrowColumnRatio, offset = -cardGap * narrowColumnRatio }
-    SETTINGS_LAYOUT = { version = 1,
-        settingsListWidthPercent = 100, settingsLayoutBreakpoint = 1, cards = {
-        { id = "master", title = L["通用设置"], collapsible = false,
-            placement = { target = "$container", point = "TOPLEFT", relativePoint = "TOPLEFT" },
-            content = { kind = "grid", items = groups.master },
-            settingsList = { summaryEnabled = true } },
-        { id = "quick", title = "", collapsible = false,
-            placement = { target = "$container", point = "TOPLEFT", relativePoint = "TOPLEFT", width = { ratio = 1 } },
-            content = { kind = "grid", items = groups.quick },
-            settingsList = { rows = {
-                { controls = { { key = "showBunBar", presentation = "card" },
-                    { key = "showTimerBar", presentation = "card" },
-                    { key = "showNameplate", presentation = "card" } } },
-            } } },
-        { id = "text", title = L["文本设置"], collapsible = false,
-            equalHeightGroup = "trash-settings-top", minBodyHeight = topRowBodyHeight,
-            placement = { target = "$container", point = "TOPLEFT", relativePoint = "TOPLEFT", width = wideColumn,
-                narrow = { target = "$container", width = { ratio = 1 } } },
-            content = { kind = "grid", items = groups.text },
-            settingsList = { cardPresentation = "exbossSkill", preserveHeader = true, rows = {
-                    { controlsLayout = "fieldRow", controls = { { key = "eventColorEnabled", role = "label" }, { key = "eventColorMode" }, { key = "eventColor" } } },
-                    { controlsLayout = "fieldRow", controls = { { key = "centralEnabled", role = "label" }, { key = "centralLead", width = 92 }, { key = "centralText" } } },
-                    { controlsLayout = "fieldRow", controls = { { key = "countdownEnabled", role = "label" }, { key = "preAlertText" } } },
-                    { controlsLayout = "fieldRow", controls = { { key = "timerBarRenameEnabled", role = "label" }, { key = "timerBarRenameText" } } },
-                } } },
-        { id = "voice", title = L["语音设置"], collapsible = false,
-            equalHeightGroup = "trash-settings-bottom",
-            placement = { target = "text", side = "below", align = "start", gap = cardGap + 10, width = wideColumn,
-                rowAfter = { "text", "cast" },
-                narrow = { target = "cast", side = "below", align = "start", gap = cardGap, width = { ratio = 1 } } },
-            content = { kind = "grid", items = groups.voice },
-            settingsList = { cardPresentation = "exbossSkill", preserveHeader = true, rows = {
-                    { controlsLayout = "compactVoice", controls = { { key = "tr1Enabled", role = "label" }, { key = "tr1Source" }, { key = "tr1Label" }, { key = "tr1LSM" }, { key = "tr1Path" }, { key = "tr1ValueTest", width = 35 } } },
-                    { key = "description_trash_voice_2", informational = true },
-                    { controlsLayout = "fieldRow", controls = { { key = "tr2Enabled", role = "label" }, { key = "tr2CountdownLead" } } },
-                    { controlsLayout = "compactVoice", controls = { { key = "tr2PlayTextEnabled", role = "label" }, { key = "tr2Source" }, { key = "tr2Label" }, { key = "tr2LSM" }, { key = "tr2Path" }, { key = "tr2ValueTest", width = 35 } } },
-                    { controls = { { key = "description_voice_preview_heading", role = "label" },
-                        { key = "voiceSequencePreview", width = 130, presentation = "primary", align = "right" } } },
-                    { key = "description_voice_preview_sequence", informational = true },
-                } } },
-        { id = "cast", title = L["施法设置"], collapsible = false,
-            equalHeightGroup = "trash-settings-top", minBodyHeight = topRowBodyHeight,
-            placement = { target = "text", side = "right", align = "start", gap = cardGap, width = narrowColumn,
-                narrow = { target = "text", side = "below", align = "start", gap = cardGap, width = { ratio = 1 } } },
-            content = { kind = "grid", items = groups.cast },
-            settingsList = { cardPresentation = "exbossSkill", preserveHeader = true, rows = {
-                { controls = { { key = "ringEnabled", presentation = "card" },
-                    { key = "castProgressBarEnabled", presentation = "card" } } },
-                { key = "ringCastCheckEnabled", presentation = "card", descriptionKey = "description_cast_check" },
-                { key = "castProgressBarRenameEnabled", children = { { key = "castProgressBarRenameText", indent = 28 } } },
-            } } },
-        { id = "target", title = L["被点名提示"], collapsible = false,
-            equalHeightGroup = "trash-settings-bottom",
-            placement = { target = "voice", side = "right", align = "start", gap = cardGap, width = narrowColumn,
-                narrow = { target = "voice", side = "below", align = "start", gap = cardGap, width = { ratio = 1 } } },
-            content = { kind = "grid", items = groups.target },
-            settingsList = { cardPresentation = "exbossSkill", preserveHeader = true, rows = {
-                { key = "targetAlertStartEnabled", presentation = "switch" },
-                { key = "targetVisualHeading", informational = true },
-                { controls = { { key = "targetAlertRingEnabled", presentation = "card" },
-                    { key = "targetAlertTextEnabledV2", presentation = "card" },
-                    { key = "targetAlertIconEnabled", presentation = "card" } } },
-                { key = "targetAlertStealthEnabledV2", presentation = "card" },
-                { key = "targetAlertTankEnabled" },
-                { key = "targetAudioHeading", informational = true },
-                { controls = { { key = "targetAlertStartLSM" }, { key = "targetAlertStartValueTest", width = 35 } } },
-                { key = "targetPresentationNote", informational = true },
-            } } },
-    } }
-    if ExwindTools and ExwindTools.RegisterModuleLayout then
-        ExwindTools:RegisterModuleLayout(SPELL_SETTINGS_MODULE_KEY, SETTINGS_LAYOUT)
+    return true
+end
+
+local function FindTrashWidget(key, session)
+    session = session or Page._settingsCardSession
+    if session then
+        local node = session:FindNode(key)
+        return node and (node.instance or node.button or node.label or node.frame)
     end
 end
 
-local function ApplyTrashSettingsLabelLayout(widgets)
-    for _, card in ipairs(SETTINGS_LAYOUT.cards or {}) do
-        local list = card.settingsList
-        if list and list.cardPresentation == "exbossSkill" then
-            for _, row in ipairs(list.rows or {}) do
-                if row.controlsLayout == "fieldRow" or row.controlsLayout == "compactVoice" then
-                    for _, control in ipairs(row.controls or {}) do
-                        if control.role == "label" then
-                            local widget = widgets[control.key]
-                            if widget and widget.checkbox and widget.label then
-                                local label = widget.label
-                                label:ClearAllPoints()
-                                label:SetPoint("LEFT", widget.checkbox, "RIGHT", 7, 0)
-                                label:SetPoint("RIGHT", widget, "RIGHT", -2, 0)
-                                label:SetJustifyH("LEFT")
-                                label:SetWordWrap(true)
-                                if label.SetMaxLines then label:SetMaxLines(0) end
-                                if widget.SetClipsChildren then widget:SetClipsChildren(false) end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    if Page._settingsCardSession then _G.ExwindGrid:RequestReflow(settingsScrollChild) end
+local function MountTrashDeclaration(parent, declaration, owner)
+    local session, issue = EXUI:MountSettingsDeclarationV2(parent, declaration, owner)
+    if not session then error("TrashCD V2: " .. issue.path .. ": " .. issue.message) end
+    parent._exV2Session, parent._exV2Owner = session, owner
+    return session
 end
 
-local function AnchorTrashWidget(widget, parent, left, top, width, height, right)
-    if not widget then return end
-    widget:ClearAllPoints()
-    widget:SetPoint("TOPLEFT", parent, "TOPLEFT", left, -top)
-    if right then
-        widget:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -right, -top)
-    elseif width then
-        widget:SetWidth(width)
-    end
-    if height then widget:SetHeight(height) end
-    widget:Show()
-end
-
-local function HideTrashSettingsRowDividers(body)
-    local Grid = _G.ExwindGrid
-    local list = Grid and Grid:GetSettingsListSession(body)
-    for _, entry in ipairs(list and list.entries or {}) do
-        local divider = entry.host and entry.host._exSettingsRowDivider
-        if divider then divider:Hide() end
-    end
+local function ReleaseTrashDeclaration(parent)
+    local session = parent and parent._exV2Session
+    if session then session:Release() end
+    if parent then parent._exV2Session, parent._exV2Owner = nil, nil end
 end
 
 local function ResolveTrashVoicePreviewCaption(mdb, triggerIndex)
@@ -1397,9 +1190,7 @@ end
 -- 序列预览播的是一串 C_Timer.After，没有单一声音句柄，用不了 RunSoundPreview；
 -- 播放态只能由调用方用 SetSoundPreviewPlaying 告知公共试听按钮。只改外观，不碰播放。
 local function SetTrashVoiceSequencePreviewPlaying(playing)
-    local session = Page._settingsCardSession
-    local button = session and session.GetWidget
-        and session:GetWidget("voice", "voiceSequencePreview") or nil
+    local button = voicePreviewTimeline and voicePreviewTimeline.playButton
     if button then
         EXUI:SetSoundPreviewPlaying(button, playing)
     end
@@ -1452,469 +1243,120 @@ local function StartTrashVoiceSequencePreview()
     end)
 end
 
-LayoutTrashQuickRow = function(session)
-    local state = session.byId.quick
-    local card, body = state and state.card, state and state.body
-    if not (card and body and detailOutputHost) then return end
-    HideTrashSettingsRowDividers(body)
-    -- The three controls are rendered in the detail card, so keep the source
-    -- card hidden through the CardSession state.  Calling card:Hide() here
-    -- fights Core's relayout (which restores state.visible) and creates an
-    -- endless Show -> OnShow reflow -> Hide loop while this page is visible.
-    if state.visible ~= false then
-        session:SetCardVisible("quick", false)
-    end
-    local inset, gap = 8, 4
-    local width = math.max(1, detailOutputHost:GetWidth() or 330)
-    local itemWidth = math.max(78, (width - inset * 2 - gap * 2) / 3)
-    for index, key in ipairs({ "showBunBar", "showTimerBar", "showNameplate" }) do
-        local widget = session:GetWidget("quick", key)
-        if widget then
-            widget:SetParent(detailOutputHost)
-            if widget.SetFrameLevel then
-                widget:SetFrameLevel((detailOutputHost:GetFrameLevel() or 0) + 1)
-            end
-            if widget.checkbox and widget.checkbox.SetFrameLevel then
-                widget.checkbox:SetFrameLevel((widget:GetFrameLevel() or 0) + 1)
-            end
-            AnchorTrashWidget(widget, detailOutputHost,
-                inset + (index - 1) * (itemWidth + gap), 2, itemWidth, 30)
-        end
-    end
-    state.reportedHeight = 0
-    return 0
-end
-
-local function LayoutTrashTextCard(session)
-    local state = session.byId.text
-    local card, body = state and state.card, state and state.body
-    if not (card and body) then return end
-    HideTrashSettingsRowDividers(body)
-    local inset, gap = 14, 8
-    local bodyWidth = math.max(1, body:GetWidth() or 600)
-    local labelWidth = math.max(150, math.floor((bodyWidth - inset * 2) * 0.46))
-    local controlLeft = inset + labelWidth
-    local controlWidth = math.max(180, bodyWidth - controlLeft - inset)
-    local modeWidth = math.max(132, math.floor((controlWidth - gap) * 0.56))
-    local leadWidth = 70
-
-    for index, top in ipairs({ 43, 91, 139 }) do
-        local divider = card._exTrashTextDividers and card._exTrashTextDividers[index]
-        if divider then
-            divider:ClearAllPoints()
-            divider:SetPoint("TOPLEFT", body, "TOPLEFT", 14, -top)
-            divider:SetPoint("TOPRIGHT", body, "TOPRIGHT", -14, -top)
-            divider:Show()
-        end
-    end
-
-    AnchorTrashWidget(session:GetWidget("text", "eventColorEnabled"), body, inset, 4, labelWidth, 30)
-    AnchorTrashWidget(session:GetWidget("text", "eventColorMode"), body, controlLeft, 4, modeWidth, 30)
-    local eventColor = session:GetWidget("text", "eventColor")
-    if eventColor then
-        eventColor:ClearAllPoints()
-        eventColor:SetPoint("TOPLEFT", body, "TOPLEFT", controlLeft + modeWidth + gap, -4)
-        eventColor:SetSize(math.max(1, controlWidth - modeWidth - gap), 30)
-    end
-    AnchorTrashWidget(session:GetWidget("text", "centralEnabled"), body, inset, 52, labelWidth, 30)
-    local centralLead = session:GetWidget("text", "centralLead")
-    AnchorTrashWidget(centralLead, body, controlLeft, 52, leadWidth, 30)
-    AnchorTrashWidget(session:GetWidget("text", "centralText"), body, controlLeft + leadWidth + gap, 52,
-        math.max(1, controlWidth - leadWidth - gap), 30)
-    if centralLead and centralLead.label then
-        if not centralLead._exTrashUnitInside then
-            centralLead._exTrashUnitOriginalText = centralLead.label:GetText()
-        end
-        centralLead._exTrashUnitInside = true
-        centralLead:SetTextInsets(9, 30, 0, 0)
-        centralLead.label:ClearAllPoints()
-        centralLead.label:SetPoint("RIGHT", centralLead, "RIGHT", -8, 0)
-        centralLead.label:SetJustifyH("RIGHT")
-        centralLead.label:SetText(L["秒"])
-        centralLead.label:Show()
-    end
-    AnchorTrashWidget(session:GetWidget("text", "countdownEnabled"), body, inset, 100, labelWidth, 30)
-    AnchorTrashWidget(session:GetWidget("text", "preAlertText"), body, controlLeft, 100, controlWidth, 30)
-    AnchorTrashWidget(session:GetWidget("text", "timerBarRenameEnabled"), body, inset, 148, labelWidth, 30)
-    AnchorTrashWidget(session:GetWidget("text", "timerBarRenameText"), body, controlLeft, 148, controlWidth, 30)
-    state.reportedHeight = 196
-    return 196
-end
-
-local function LayoutTrashCastCard(session)
-    local state = session.byId.cast
-    local card, body = state and state.card, state and state.body
-    if not (card and body) then return end
-    local inset, gap = 14, 8
-    local choiceWidth = math.max(1, ((body:GetWidth() or 400) - inset * 2 - gap) / 2)
-    AnchorTrashWidget(session:GetWidget("cast", "ringEnabled"), body, inset, 6, choiceWidth, 40)
-    AnchorTrashWidget(session:GetWidget("cast", "castProgressBarEnabled"), body,
-        inset + choiceWidth + gap, 6, choiceWidth, 40)
-    HideTrashSettingsRowDividers(body)
-    local castCheck = session:GetWidget("cast", "ringCastCheckEnabled")
-    local castDescription = session:GetWidget("cast", "description_cast_check")
-    if not card._exTrashCastCheckHelp then
-        local ringTexture = "Interface\\AddOns\\EXBoss\\Core\\Media\\Textures\\RingWhiteThin2.tga"
-        local help = EXUI:CreatePicButton(body, 11, 11,
-            ringTexture, ringTexture, ringTexture, nil, true)
-        card._exTrashCastCheckHelp = help
-        help.label = EXUI:CreateVisualFontString(help, EXFONTFRAME, "GameFontDisableSmall")
-        help.label:SetPoint("CENTER", 0, 0)
-        help.label:SetFont(ExwindTools.MAIN_FONT, GM.font.exboss.micro, "")
-        help.label:SetText("?")
-        help.label:SetTextColor(unpack(GC.textDim))
-        help:SetScript("OnEnter", function(self)
-            if not GameTooltip then return end
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:AddLine(L["检测当前读条能否完成，来不及时以红色提示。"], 1, 1, 1, true)
-            GameTooltip:Show()
-        end)
-        help:SetScript("OnLeave", function()
-            if GameTooltip then GameTooltip:Hide() end
-        end)
-    end
-    AnchorTrashWidget(castCheck, body, inset, 62, nil, 64, inset)
-    if castDescription then
-        AnchorTrashWidget(castDescription, castCheck, 0, 33, nil, 23, 14)
-        if castDescription.text then
-            castDescription.text:SetFont(ExwindTools.MAIN_FONT, GM.font.hint, "")
-            castDescription.text:SetTextColor(unpack(GC.textDim))
-        end
-        EXUI:LayoutCheckboxCardDescription(castCheck, castDescription, 23)
-    end
-    card._exTrashCastCheckHelp:ClearAllPoints()
-    card._exTrashCastCheckHelp:SetPoint("TOPRIGHT", castCheck, "TOPRIGHT", -8, -7)
-    card._exTrashCastCheckHelp:SetFrameLevel(castCheck:GetFrameLevel() + 3)
-    card._exTrashCastCheckHelp:Hide() -- 用户要求删除施法检测右上角问号（原 Show()）
-    AnchorTrashWidget(session:GetWidget("cast", "castProgressBarRenameEnabled"), body, inset, 148, choiceWidth, 30)
-    AnchorTrashWidget(session:GetWidget("cast", "castProgressBarRenameText"), body,
-        inset + choiceWidth + gap, 148, nil, 30, inset)
-    state.reportedHeight = 196
-    return 196
-end
-
 local function SetTrashPlayButtonVisual(button)
-    if not button then return end
-    EXUI:ApplySoundPreviewAppearance(button)
+    if button then EXUI:ApplySoundPreviewAppearance(button) end
 end
 
-local function LayoutTrashAudioControls(session, prefix, parent, top, left, sourceWidth, rightPad)
-    EXUI:LayoutSoundSelector(parent, {
-        source = session:GetWidget("voice", prefix .. "Source"),
-        preview = session:GetWidget("voice", prefix .. "ValueTest"),
-        contents = { pack = session:GetWidget("voice", prefix .. "Label"),
-            lsm = session:GetWidget("voice", prefix .. "LSM"),
-            file = session:GetWidget("voice", prefix .. "Path") },
-        top = top, left = left, sourceWidth = sourceWidth, right = rightPad or 12,
-        height = 30, previewWidth = 28, paintPreview = SetTrashPlayButtonVisual,
-    })
-end
-
-local function LayoutTrashAudioRow(session, prefix, parent, top, labelWidth, sourceWidth)
-    AnchorTrashWidget(session:GetWidget("voice", prefix .. "Enabled"), parent, 14, top, labelWidth, 30)
-    LayoutTrashAudioControls(session, prefix, parent, top, 14 + labelWidth, sourceWidth, 12)
-end
-
-local function GetTrashVoiceContentHeight(timelineHeight)
-    -- Boss 页的语音卡高度减去小怪页唯一缺少的“中央文本”一行（44px）。
-    return 156 + (timelineHeight or 70)
-end
-
-local function LayoutTrashVoiceCard(session)
-    local state = session.byId.voice
-    local card, body = state and state.card, state and state.body
-    if not (card and body) then return end
-    HideTrashSettingsRowDividers(body)
-    local bodyWidth = math.max(1, body:GetWidth() or 600)
-    local labelWidth = math.max(128, math.floor(bodyWidth * 0.36))
-    local sourceWidth = math.max(78, math.floor((bodyWidth - labelWidth - 56) * 0.25))
-    LayoutTrashAudioRow(session, "tr1", body, 4, labelWidth, sourceWidth)
-    if card._exTrashVoicePrimaryDivider then
-        card._exTrashVoicePrimaryDivider:ClearAllPoints()
-        card._exTrashVoicePrimaryDivider:SetPoint("TOPLEFT", body, "TOPLEFT", 12, -41)
-        card._exTrashVoicePrimaryDivider:SetPoint("TOPRIGHT", body, "TOPRIGHT", -12, -41)
-        card._exTrashVoicePrimaryDivider:Show()
+local function CreateTrashSettingsOwner()
+    local db = GetSpellEditorDB()
+    local owner = { binding = { moduleKey = SPELL_SETTINGS_MODULE_KEY, config = db },
+        controls = {}, components = {}, predicates = {}, texts = {} }
+    local function VoiceAllowed()
+        local row = GetSelectedSpellRow()
+        local cfg = row and GetRuntimeSpellEntry(row)
+        return not (type(cfg) == "table" and cfg.authorVoiceDisabled == true)
     end
-
-    local surface = card._exTrashVoiceTimingSurface
-    if not surface then return end
-    surface:ClearAllPoints()
-    surface:SetPoint("TOPLEFT", body, "TOPLEFT", 12, -50)
-    surface:SetPoint("BOTTOMRIGHT", body, "BOTTOMRIGHT", -12, 10)
-    surface:SetFrameLevel(body:GetFrameLevel() or 1)
-    EXUI:ClearControlSurface(surface)
-    surface:Show()
-
-    local heading = session:GetWidget("voice", "description_trash_voice_2")
-    if heading then heading:Hide() end
-    local controlLeft = labelWidth + 2
-    AnchorTrashWidget(session:GetWidget("voice", "tr2Enabled"), surface, 2, 4, controlLeft - 2, 30)
-    local segmented = session:GetWidget("voice", "tr2CountdownLead")
-    if segmented then
-        segmented:SetParent(surface)
-        segmented:SetFrameLevel(surface:GetFrameLevel() + 6)
-        segmented:ClearAllPoints()
-        segmented:SetPoint("TOPLEFT", surface, "TOPLEFT", controlLeft, -4)
-        segmented:SetPoint("TOPRIGHT", surface, "TOPRIGHT", 0, -4)
-        segmented.itemHeight = 30
-        segmented:SetHeight(30)
-        segmented:Show()
+    owner.predicates.customColor = function()
+        return db.eventColorEnabled == true and NormalizeEventColorMode(db.eventColorMode) == "__custom"
     end
-    local playName = session:GetWidget("voice", "tr2PlayTextEnabled")
-    AnchorTrashWidget(playName, surface, 2, 44, controlLeft - 2, 30)
-    LayoutTrashAudioControls(session, "tr2", surface, 44, controlLeft, sourceWidth, 0)
-
-    if card._exTrashVoicePreviewDivider then
-        card._exTrashVoicePreviewDivider:Hide()
+    owner.predicates.targetOn = function() return db.targetAlertStartEnabled == true end
+    owner.predicates.voiceAllowed = VoiceAllowed
+    owner.options = {}
+    for index = 1, 2 do
+        local prefix = "tr" .. index
+        owner.options["sound." .. prefix] = { onTest = function(_, button)
+            EXUI:RunSoundPreview(button, function()
+                return PlayVoicePreview(db[prefix .. "Source"], db[prefix .. "Label"],
+                    db[prefix .. "LSM"], db[prefix .. "Path"])
+            end)
+        end }
     end
-    if card._exTrashVoicePreviewBackground then
-        card._exTrashVoicePreviewBackground:ClearAllPoints()
-        card._exTrashVoicePreviewBackground:SetPoint("TOPLEFT", surface, "TOPLEFT", 0, -82)
-        card._exTrashVoicePreviewBackground:SetPoint("BOTTOMRIGHT", surface, "BOTTOMRIGHT", 0, 0)
-        EXUI:SetControlSurface(card._exTrashVoicePreviewBackground, 5, GC.panel, GC.cardBorder)
-        card._exTrashVoicePreviewBackground:Show()
-    end
-    local previewHeading = session:GetWidget("voice", "description_voice_preview_heading")
-    if previewHeading then previewHeading:Hide() end
-    local previewSequence = session:GetWidget("voice", "description_voice_preview_sequence")
-    if previewSequence then previewSequence:Hide() end
-    local previewButton = session:GetWidget("voice", "voiceSequencePreview")
-    if previewButton then
-        previewButton:ClearAllPoints()
-        previewButton:SetPoint("BOTTOMRIGHT", surface, "BOTTOMRIGHT", -8, 8)
-        previewButton:SetFrameLevel(surface:GetFrameLevel() + 6)
-        previewButton._exButtonVariant = "secondary"
-        EXUI:ApplyControlAppearance(previewButton)
-        previewButton:SetSize(28, 28)
-        SetTrashPlayButtonVisual(previewButton)
-        previewButton:Show()
-    end
-    local timelineHeight = 68
-    if voicePreviewTimeline then
-        voicePreviewTimeline:ClearAllPoints()
-        voicePreviewTimeline:SetPoint("TOPLEFT", surface, "TOPLEFT", 10, -94)
-        voicePreviewTimeline:SetPoint("TOPRIGHT", surface, "TOPRIGHT", -10, -94)
-        voicePreviewTimeline:Show()
-        if voicePreviewTimeline._layout then voicePreviewTimeline:_layout() end
-        timelineHeight = voicePreviewTimeline:GetHeight() or timelineHeight
-    end
-    local contentHeight = GetTrashVoiceContentHeight(timelineHeight)
-    state.reportedHeight = contentHeight
-    return contentHeight
-end
-
-local function LayoutTrashTargetCard(session)
-    local state = session.byId.target
-    local card, body = state and state.card, state and state.body
-    if not (card and body) then return end
-    HideTrashSettingsRowDividers(body)
-    local start = session:GetWidget("target", "targetAlertStartEnabled")
-    AnchorTrashWidget(start, body, 12, 8, nil, 34, 12)
-    if start and start.checkbox then
-        start.checkbox:ClearAllPoints()
-        start.checkbox:SetPoint("RIGHT", start, "RIGHT", -2, 0)
-        if start.label then
-            start.label:ClearAllPoints()
-            start.label:SetPoint("LEFT", start, "LEFT", 0, 0)
-            start.label:SetPoint("RIGHT", start.checkbox, "LEFT", -8, 0)
-        end
-    end
-    local visualHeading = session:GetWidget("target", "targetVisualHeading")
-    if visualHeading then visualHeading:Hide() end
-    local choiceWidth = math.max(68, ((body:GetWidth() or 380) - 40) / 3)
-    for index, key in ipairs({ "targetAlertRingEnabled", "targetAlertTextEnabledV2", "targetAlertIconEnabled" }) do
-        AnchorTrashWidget(session:GetWidget("target", key), body,
-            12 + (index - 1) * (choiceWidth + 8), 64, choiceWidth, 36)
-    end
-    AnchorTrashWidget(session:GetWidget("target", "targetAlertStealthEnabledV2"), body, 12, 118, nil, 44, 12)
-    AnchorTrashWidget(session:GetWidget("target", "targetAlertTankEnabled"), body, 12, 186, nil, 30, 12)
-    local audioHeading = session:GetWidget("target", "targetAudioHeading")
-    if audioHeading then audioHeading:Hide() end
-    local sound = session:GetWidget("target", "targetAlertStartLSM")
-    local test = session:GetWidget("target", "targetAlertStartValueTest")
-    AnchorTrashWidget(sound, body, 12, 232, nil, 30, 52)
-    if test then
-        test:ClearAllPoints()
-        test:SetPoint("TOPRIGHT", body, "TOPRIGHT", -12, -232)
-        test:SetSize(28, 30)
-        SetTrashPlayButtonVisual(test)
-        test:Show()
-    end
-    local note = session:GetWidget("target", "targetPresentationNote")
-    if note then note:Hide() end
-    if not card._exTrashTargetDividers then
-        card._exTrashTargetDividers = {}
-        for index = 1, 2 do
-            card._exTrashTargetDividers[index] = EXUI:CreateSettingsSeparator(body, 1)
-        end
-    end
-    for index, top in ipairs({ 118, 174 }) do
-        local divider = card._exTrashTargetDividers[index]
-        divider:ClearAllPoints()
-        divider:SetPoint("TOPLEFT", body, "TOPLEFT", 12, -top)
-        divider:SetPoint("TOPRIGHT", body, "TOPRIGHT", -12, -top)
-        divider:SetShown(index == 2)
-    end
-    state.reportedHeight = 274
-    return 274
-end
-
-local function AnchorTrashSummaryEnabled(session)
-    if not (session and session.byId and session.GetWidget) then return end
-    local summaryEnabled = session:GetWidget("master", "enabled")
-    if summaryEnabled and detailEnableHost then
-        detailEnableHost:SetSize(90, 28)
-        summaryEnabled:ClearAllPoints()
-        summaryEnabled:SetAllPoints(detailEnableHost)
-    end
-end
-
-local function ApplyTrashSettingsCardSurfaces(session)
-    if not (session and session.byId) then return end
-    local quickState = session.byId.quick
-    local quickCard, quickBody = quickState and quickState.card, quickState and quickState.body
-    if quickCard and quickBody then
-        local header = quickCard._exSettingsCardHeader
-        local title = quickCard._exSettingsCardTitle
-        if header then header:Hide() end
-        if title then title:Hide() end
-        if quickCard._exSettingsListExternalHeader then
-            quickCard._exSettingsListExternalHeader.height = 0
-            quickCard._exSettingsListExternalHeader.footerPadding = 0
-        end
-        quickBody:ClearAllPoints()
-        quickBody:SetAllPoints(quickCard)
-        EXUI:ClearControlSurface(quickCard)
-        EXUI:ClearControlSurface(quickBody)
-        if quickState.visible ~= false then
-            session:SetCardVisible("quick", false)
-        end
-    end
-    for _, id in ipairs({ "text", "cast", "voice", "target" }) do
-        local state = session.byId[id]
-        local card, body = state and state.card, state and state.body
-        if card and body then
-            local header = card._exSettingsCardHeader
-            local title = card._exSettingsCardTitle
-            if card._exSettingsListExternalHeader then
-                card._exSettingsListExternalHeader.height = 13
-                card._exSettingsListExternalHeader.footerPadding = 0
-            end
-            if header then
-                header:Show()
-                header:SetHeight(24)
-                header:EnableMouse(false)
-                local icon = card._exSettingsCardIcon
-                if icon then icon:Hide() end
-                if title then
-                    title:Show()
-                    title:ClearAllPoints()
-                    title:SetPoint("LEFT", header, "LEFT", 18, 12)
-                    title:SetWidth(math.ceil(title:GetUnboundedStringWidth() or 0) + 2)
-                    -- 标题骑在卡片上边框上，必须用同色垫条把边框遮断，否则线会从字中间穿过。
-                    -- 与首领页 legend 垫条同一做法。
-                    if not card._exTrashLegendBacking then
-                        card._exTrashLegendBacking = EXUI:CreateVisualTexture(header, EXBASEFRAME)
-                    end
-                    local backing = card._exTrashLegendBacking
-                    backing:ClearAllPoints()
-                    backing:SetPoint("LEFT", header, "LEFT", 12, 12)
-                    backing:SetSize(math.ceil(title:GetUnboundedStringWidth() or 0) + 14,
-                        PixelUtil.GetNearestPixelSize(2, header:GetEffectiveScale(), 1))
-                    backing:SetColorTexture(unpack(GC.panel))
-                    backing:Show()
+    owner.options["sound.targetAlertStart"] = { onTest = function(_, button)
+        EXUI:RunSoundPreview(button, function()
+            return PlayVoicePreview("lsm", "", db.targetAlertStartLSM, "")
+        end)
+    end }
+    owner.components.voiceTimeline = {
+        mount = function(host, context)
+            local timeline = voicePreviewSurface or CreateFrame("Frame", nil, host)
+            timeline:SetParent(host)
+            timeline:SetSize(GM.settings.soundSelectorWidth, C.VOICE_TIMELINE_HEIGHT)
+            timeline:SetFrameLevel((host:GetFrameLevel() or 1) + 1)
+            EXUI:SetControlSurface(timeline, 5, GC.panel, GC.cardBorder)
+            timeline:SetClipsChildren(true)
+            if not voicePreviewSurface then
+                timeline.axis = EXUI:CreateVisualTexture(timeline, EXBASEFRAME)
+                timeline.axis:SetColorTexture(unpack(GC.cardBorder))
+                timeline.axis:SetHeight(PixelUtil.GetNearestPixelSize(1, timeline:GetEffectiveScale(), 1))
+                timeline.nodes = {}
+                for index = 1, 7 do
+                    local node = CreateFrame("Frame", nil, timeline)
+                    node.time = EXUI:CreateVisualFontString(node, EXFONTFRAME, "GameFontDisableSmall")
+                    node.time:SetPoint("TOPLEFT", node, "TOPLEFT", 0, 0)
+                    node.time:SetPoint("TOPRIGHT", node, "TOPRIGHT", 0, 0)
+                    node.time:SetJustifyH("CENTER")
+                    node.time:SetWordWrap(false)
+                    node.time:SetFont(ExwindTools.MAIN_FONT, GM.font.hint, "")
+                    node.valueHost = CreateFrame("Frame", nil, node, "BackdropTemplate")
+                    node.valueHost:SetPoint("TOPLEFT", node.time, "BOTTOMLEFT", 0, -5)
+                    node.valueHost:SetHeight(26)
+                    node.value = EXUI:CreateVisualFontString(node.valueHost, EXFONTFRAME, "GameFontHighlightSmall")
+                    node.value:SetPoint("TOPLEFT", node.valueHost, "TOPLEFT", 5, -5)
+                    node.value:SetPoint("TOPRIGHT", node.valueHost, "TOPRIGHT", -5, -5)
+                    node.value:SetJustifyH("CENTER")
+                    node.value:SetWordWrap(true)
+                    node.value:SetNonSpaceWrap(true)
+                    node.value:SetMaxLines(2)
+                    node.valueHost:EnableMouse(true)
+                    node.valueHost:SetScript("OnEnter", function(self)
+                        local text = node.value:GetText()
+                        if not GameTooltip or not text or text == "" then return end
+                        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                        GameTooltip:AddLine(text, 1, 1, 1, true)
+                        GameTooltip:Show()
+                    end)
+                    node.valueHost:SetScript("OnLeave", function()
+                        if GameTooltip then GameTooltip:Hide() end
+                    end)
+                    node.tick = EXUI:CreateVisualTexture(timeline, EXBASEFRAME)
+                    node.tick:SetColorTexture(unpack(GC.cardBorder))
+                    node.tick:SetSize(PixelUtil.GetNearestPixelSize(1, timeline:GetEffectiveScale(), 1), 6)
+                    timeline.nodes[index] = node
                 end
-            end
-            body:ClearAllPoints()
-            body:SetPoint("TOPLEFT", card, "TOPLEFT", 0, -13)
-            body:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT", 0, 0)
-            EXUI:SetControlSurface(card, 10, GC.card, GC.cardBorder)
-            EXUI:ClearControlSurface(body)
-        end
-    end
-    local textState = session.byId.text
-    local textCard = textState and textState.card
-    local textBody = textState and textState.body
-    if textCard and textBody and not textCard._exTrashTextDividers then
-        textCard._exTrashTextDividers = {}
-        for index = 1, 3 do
-            textCard._exTrashTextDividers[index] = EXUI:CreateSettingsSeparator(textBody, 1)
-        end
-    end
-    local voiceState = session.byId.voice
-    local voiceCard = voiceState and voiceState.card
-    local voiceBody = voiceState and voiceState.body
-    if voiceCard and voiceBody then
-        voiceCard._exTrashVoiceTimingSurface = voiceCard._exTrashVoiceTimingSurface
-            or CreateFrame("Frame", nil, voiceBody, "BackdropTemplate")
-        voiceCard._exTrashVoiceTimingSurface:EnableMouse(false)
-        local voiceSurface = voiceCard._exTrashVoiceTimingSurface
-        voiceCard._exTrashVoicePrimaryDivider = voiceCard._exTrashVoicePrimaryDivider
-            or EXUI:CreateSettingsSeparator(voiceBody, 1)
-        voiceCard._exTrashVoicePreviewDivider = voiceCard._exTrashVoicePreviewDivider
-            or EXUI:CreateSettingsSeparator(voiceSurface, 1)
-        if not voiceCard._exTrashVoicePreviewBackground then
-            local background = CreateFrame("Frame", nil, voiceSurface, "BackdropTemplate")
-            background:EnableMouse(false)
-            voiceCard._exTrashVoicePreviewBackground = background
-        end
-        voiceCard._exTrashVoicePreviewBackground:SetParent(voiceSurface)
-        if not voiceCard._exTrashVoicePreviewTimeline then
-            local timeline = CreateFrame("Frame", nil, voiceBody)
-            timeline:SetFrameLevel((voiceBody:GetFrameLevel() or 1) + 3)
-            timeline.axis = EXUI:CreateVisualTexture(timeline, EXBASEFRAME)
-            timeline.axis:SetColorTexture(unpack(GC.cardBorder))
-            timeline.axis:SetHeight(PixelUtil.GetNearestPixelSize(1, timeline:GetEffectiveScale(), 1))
-            timeline.nodes = {}
-            for index = 1, 7 do
-                local node = CreateFrame("Frame", nil, timeline)
-                node.time = EXUI:CreateVisualFontString(node, EXFONTFRAME, "GameFontDisableSmall")
-                node.time:SetPoint("TOPLEFT", node, "TOPLEFT", 0, 0)
-                node.time:SetPoint("TOPRIGHT", node, "TOPRIGHT", 0, 0)
-                node.time:SetJustifyH("CENTER")
-                node.time:SetWordWrap(false)
-                node.time:SetFont(ExwindTools.MAIN_FONT, GM.font.hint, "")
-                node.valueHost = CreateFrame("Frame", nil, node, "BackdropTemplate")
-                node.valueHost:SetPoint("TOPLEFT", node.time, "BOTTOMLEFT", 0, -5)
-                node.valueHost:SetHeight(26)
-                node.value = EXUI:CreateVisualFontString(node.valueHost, EXFONTFRAME, "GameFontHighlightSmall")
-                node.value:SetPoint("TOPLEFT", node.valueHost, "TOPLEFT", 5, -5)
-                node.value:SetPoint("TOPRIGHT", node.valueHost, "TOPRIGHT", -5, -5)
-                node.value:SetJustifyH("CENTER")
-                node.value:SetWordWrap(true)
-                node.value:SetNonSpaceWrap(true)
-                node.tick = EXUI:CreateVisualTexture(timeline, EXBASEFRAME)
-                node.tick:SetColorTexture(unpack(GC.cardBorder))
-                node.tick:SetSize(PixelUtil.GetNearestPixelSize(1, timeline:GetEffectiveScale(), 1), 6)
-                timeline.nodes[index] = node
+                timeline.playButton = EXUI:CreateButton(timeline, 26, 26, "", function()
+                    StartTrashVoiceSequencePreview()
+                end, { variant = "secondary", compact = true })
+                timeline.playButton:SetPoint("BOTTOMRIGHT", timeline, "BOTTOMRIGHT", -6, 6)
+                voicePreviewSurface = timeline
             end
             timeline._layout = function(self)
                 if self._layoutBusy then return end
                 self._layoutBusy = true
                 local count = 7
                 local width = math.max(1, self:GetWidth() or 1)
-                local axisWidth = math.max(1, width - 38)
+                -- 右侧 38 留给右下角的试听按钮。
+                local axisWidth = math.max(1, width - 6 - 38)
                 local slotWidth = axisWidth / count
                 local occupied = {}
                 for index, node in ipairs(self.nodes) do
                     node:ClearAllPoints()
-                    node:SetPoint("TOPLEFT", self, "TOPLEFT", (index - 1) * slotWidth, 0)
+                    node:SetPoint("TOPLEFT", self, "TOPLEFT", 6 + (index - 1) * slotWidth, 0)
                     node:SetSize(slotWidth, 1)
                     if node._previewKind == "trigger" or node._previewKind == "digit" then
                         occupied[#occupied + 1] = {
                             node = node,
                             index = index,
-                            center = (index - 0.5) * slotWidth,
+                            center = 6 + (index - 0.5) * slotWidth,
                         }
                     end
                 end
-                local placements, rowHeight = {}, 32
+                local placements, rowHeight = {}, 40
                 for position, item in ipairs(occupied) do
                     local node = item.node
                     local previous = occupied[position - 1]
                     local following = occupied[position + 1]
-                    local leftBound = 0
-                    local rightBound = width
+                    local leftBound = 6
+                    local rightBound = width - 6
                     if previous then
                         if previous.node._previewKind == "digit" then
                             leftBound = previous.center + 21
@@ -1940,9 +1382,7 @@ local function ApplyTrashSettingsCardSurfaces(session)
                     local left = math.max(leftBound,
                         math.min(rightBound - desiredWidth, item.center - desiredWidth / 2))
                     node.valueHost:ClearAllPoints()
-                    node.value:SetHeight(0)
-                    local valueHeight = math.max(32, math.ceil(node.value:GetStringHeight()) + 10)
-                    rowHeight = math.max(rowHeight, valueHeight)
+                    node.value:SetWidth(math.max(1, desiredWidth - 10))
                     placements[#placements + 1] = {
                         node = node,
                         left = left,
@@ -1955,7 +1395,7 @@ local function ApplyTrashSettingsCardSurfaces(session)
                 for _, placement in ipairs(placements) do
                     local node = placement.node
                     node.valueHost:ClearAllPoints()
-                    node.valueHost:SetPoint("TOPLEFT", self, "TOPLEFT", placement.left, 0)
+                    node.valueHost:SetPoint("TOPLEFT", self, "TOPLEFT", placement.left, -6)
                     node.valueHost:SetSize(placement.width, rowHeight)
                     node.value:ClearAllPoints()
                     node.value:SetPoint("TOPLEFT", node.valueHost, "TOPLEFT", 5, -5)
@@ -1965,13 +1405,13 @@ local function ApplyTrashSettingsCardSurfaces(session)
                     node.value:SetJustifyV("MIDDLE")
                     node.valueHost:Show()
                 end
-                local axisTop = rowHeight + 10
+                local axisTop = rowHeight + 14
                 self.axis:ClearAllPoints()
-                self.axis:SetPoint("TOPLEFT", self, "TOPLEFT", slotWidth / 2, -axisTop)
+                self.axis:SetPoint("TOPLEFT", self, "TOPLEFT", 6 + slotWidth / 2, -axisTop)
                 self.axis:SetPoint("TOPRIGHT", self, "TOPRIGHT",
-                    -(width - axisWidth + slotWidth / 2), -axisTop)
+                    -(38 + slotWidth / 2), -axisTop)
                 for index, node in ipairs(self.nodes) do
-                    local centerX = (index - 0.5) * slotWidth
+                    local centerX = 6 + (index - 0.5) * slotWidth
                     node.tick:ClearAllPoints()
                     node.tick:SetPoint("TOP", self, "TOPLEFT", centerX, -axisTop + 2)
                     node.time:ClearAllPoints()
@@ -1979,302 +1419,133 @@ local function ApplyTrashSettingsCardSurfaces(session)
                     node.time:SetWidth(slotWidth)
                     node.time:SetHeight(16)
                 end
-                local timelineHeight = axisTop + 28
+                local timelineHeight = C.VOICE_TIMELINE_HEIGHT
                 if self:GetHeight() ~= timelineHeight then self:SetHeight(timelineHeight) end
                 self._layoutBusy = nil
-                local list = _G.ExwindGrid:GetSettingsListSession(voiceBody)
-                local owner = self._exTrashCardSession
-                local state = self._exTrashCardState
-                local contentHeight = GetTrashVoiceContentHeight(timelineHeight)
-                if state and state.reportedHeight ~= contentHeight and list and owner and not owner.released
-                    and not list.visualLayoutBusy and not owner.reflowBusy then
-                    _G.ExwindGrid:RequestReflow(voiceBody)
-                end
+                context:ReportHeight(timelineHeight)
             end
+            for _, node in ipairs(timeline.nodes) do
+                node:SetFrameLevel(timeline:GetFrameLevel() + 1)
+                node.valueHost:SetFrameLevel(timeline:GetFrameLevel() + 2)
+            end
+            timeline.playButton:SetFrameLevel(timeline:GetFrameLevel() + 3)
             timeline:SetScript("OnSizeChanged", function(self) self:_layout() end)
-            voiceCard._exTrashVoicePreviewTimeline = timeline
-        end
-        voiceCard._exTrashVoicePreviewTimeline._exTrashCardSession = session
-        voiceCard._exTrashVoicePreviewTimeline._exTrashCardState = voiceState
-        voicePreviewTimeline = voiceCard._exTrashVoicePreviewTimeline
-    end
-    local summaryEnabled = session:GetWidget("master", "enabled")
-    if summaryEnabled and summaryEnabled.checkbox and summaryEnabled._exSettingsPresentation ~= "card" then
-        EXUI:RestoreSettingsListControl(summaryEnabled)
-        EXUI:PrepareSettingsListControl(summaryEnabled, {
-            presentation = "card", cardCheckSize = 14, cardTextSize = 12,
-        })
-    end
-    if summaryEnabled and summaryEnabled.checkbox then
-        EXUI:ApplyCheckboxOnOffVisual(summaryEnabled)
-    end
-    local layouts = {
-        quick = LayoutTrashQuickRow,
-        text = LayoutTrashTextCard,
-        cast = LayoutTrashCastCard,
-        voice = LayoutTrashVoiceCard,
-        target = LayoutTrashTargetCard,
-    }
-    for id, layout in pairs(layouts) do
-        local state = session.byId[id]
-        local list = state and _G.ExwindGrid:GetSettingsListSession(state.body)
-        if list then
-            list.onVisualLayout = function()
-                if session.released then return end
-                return layout(session)
+            voicePreviewTimeline = timeline
+            RefreshTrashVoicePreviewDisplay()
+            return timeline
+        end,
+        update = function() RefreshTrashVoicePreviewDisplay() end,
+        measure = function(timeline, context, width)
+            timeline:SetWidth(width)
+            timeline:_layout()
+            return C.VOICE_TIMELINE_HEIGHT
+        end,
+        layout = function(timeline, context, width, height)
+            timeline:ClearAllPoints()
+            timeline:SetPoint("TOPLEFT")
+            timeline:SetSize(width, height)
+            -- 背景按布局给的宽高重画，挂载时画的是初始 320 宽。
+            EXUI:SetControlSurface(timeline, 5, GC.panel, GC.cardBorder)
+            timeline:_layout()
+        end,
+        setEnabled = function() end,
+        setVisible = function(timeline, context, visible) timeline:SetShown(visible) end,
+        release = function(timeline)
+            for _, node in ipairs(timeline.nodes) do
+                if GameTooltip and GameTooltip:GetOwner() == node.valueHost then GameTooltip:Hide() end
             end
-        end
+            if voicePreviewTimeline == timeline then voicePreviewTimeline = nil end
+            timeline:SetScript("OnSizeChanged", nil)
+            EXUI:SetSoundPreviewPlaying(timeline.playButton, false)
+            timeline._layout = nil
+            timeline:Hide()
+            timeline:SetParent(nil)
+        end,
+    }
+    owner.onHeightChanged = function(height)
+        settingsScrollChild:SetHeight(math.max(1, height))
+        settingsScrollFrame:UpdateScrollChildRect()
     end
-    AnchorTrashSummaryEnabled(session)
+    return owner
 end
 
+-- 技能头持有常驻控件，切换技能时只换绑当前草稿。
+function Page._BindSpellSummarySwitch(db)
+    local switch = Page._detailEnableSwitch
+    if not switch then
+        switch = EXUI:CreateCheckbox(detailEnableHost, L["启用"], false, function(checked)
+            local draft = Page._detailEnableSwitch._exDraft
+            if type(draft) ~= "table" then return end
+            EXUI:CreateSettingsV2Binding(SPELL_SETTINGS_MODULE_KEY, draft, "enabled"):Write(checked == true, "commit")
+            if Page._settingsCardSession then Page._settingsCardSession:Refresh() end
+        end)
+        switch:SetAllPoints(detailEnableHost)
+        EXUI:PrepareSettingsListControl(switch, { presentation = "card", cardCheckSize = 14, cardTextSize = 12 })
+        EXUI:ApplyCheckboxOnOffVisual(switch)
+        Page._detailEnableSwitch = switch
+    end
+    switch._exDraft = db
+    switch:SetChecked(db.enabled == true)
+    EXUI:ApplyControlAppearance(switch)
+    Page._detailOutputChecks = Page._detailOutputChecks or {}
+    for _, field in ipairs({
+        { "showBunBar", L["竖条"], 1 }, { "showTimerBar", L["计时条"], 1.2 }, { "showNameplate", L["纪事条姓名板"], 1.8 },
+    }) do
+        local key = field[1]
+        local widget = Page._detailOutputChecks[key]
+        if not widget then
+            widget = EXUI:CreateCheckbox(detailOutputHost, field[2], false, function(checked)
+                local draft = Page._detailOutputChecks[key]._exDraft
+                if type(draft) ~= "table" then return end
+                EXUI:CreateSettingsV2Binding(SPELL_SETTINGS_MODULE_KEY, draft, key):Write(checked == true, "commit")
+                if Page._settingsCardSession then Page._settingsCardSession:Refresh() end
+            end)
+            EXUI:PrepareSettingsListControl(widget, { presentation = "card" })
+            widget._exWeight = field[3]
+            Page._detailOutputChecks[key] = widget
+        end
+        widget._exDraft = db
+        widget:SetChecked(db[key] == true)
+        EXUI:ApplyControlAppearance(widget)
+    end
+    LayoutTrashQuickRow()
+end
+
+LayoutTrashQuickRow = function()
+    local checks = Page._detailOutputChecks
+    if not checks then return end
+    local keys = { "showBunBar", "showTimerBar", "showNameplate" }
+    local totalWeight, precedingWeight = 0, 0
+    for _, key in ipairs(keys) do totalWeight = totalWeight + checks[key]._exWeight end
+    local availableWidth = math.max(1, detailOutputHost:GetWidth() - 16 - 4 * (#keys - 1))
+    for index, key in ipairs(keys) do
+        local widget = checks[key]
+        widget:ClearAllPoints()
+        widget:SetPoint("TOPLEFT", detailOutputHost, "TOPLEFT",
+            8 + availableWidth * precedingWeight / totalWeight + (index - 1) * 4, -2)
+        widget:SetSize(availableWidth * widget._exWeight / totalWeight, 30)
+        precedingWeight = precedingWeight + widget._exWeight
+    end
+end
 local function ReleaseTrashSettingsCardSession()
-    local session = Page._settingsCardSession
-    local quickState = session and session.byId and session.byId.quick
-    local quickBody = quickState and quickState.body
-    if quickBody and session.GetWidget then
-        for _, key in ipairs({ "showBunBar", "showTimerBar", "showNameplate" }) do
-            local widget = session:GetWidget("quick", key)
-            if widget then widget:SetParent(quickBody) end
-        end
-    end
-    if detailOutputHost then detailOutputHost:Hide() end
-    local centralLead = session and session.GetWidget and session:GetWidget("text", "centralLead")
-    if centralLead and centralLead._exTrashUnitInside then
-        centralLead:SetTextInsets(9, 9, 0, 0)
-        if centralLead.label then
-            centralLead.label:ClearAllPoints()
-            centralLead.label:SetPoint("LEFT", centralLead, "RIGHT", 5, 0)
-            centralLead.label:SetJustifyH("LEFT")
-            centralLead.label:SetText(centralLead._exTrashUnitOriginalText or L["提前(秒)"])
-        end
-        centralLead._exTrashUnitInside = nil
-        centralLead._exTrashUnitOriginalText = nil
-    end
-    local summaryEnabled = session and session.GetWidget and session:GetWidget("master", "enabled")
-    if summaryEnabled then EXUI:ReleaseCheckboxOnOffVisual(summaryEnabled) end
-    for _, spec in ipairs({ { "voice", "tr1ValueTest" }, { "voice", "tr2ValueTest" },
-        { "voice", "voiceSequencePreview" }, { "target", "targetAlertStartValueTest" } }) do
-        local button = session and session.GetWidget and session:GetWidget(spec[1], spec[2])
-    end
-    local voiceState = session and session.byId and session.byId.voice
-    local voiceCard = voiceState and voiceState.card
-    if voiceCard then
-        for _, key in ipairs({
-            "_exTrashVoicePrimaryDivider",
-            "_exTrashVoiceTimingSurface",
-            "_exTrashVoicePreviewDivider",
-            "_exTrashVoicePreviewBackground",
-            "_exTrashVoicePreviewTimeline",
-        }) do
-            local visual = voiceCard[key]
-            if visual then
-                visual:Hide()
-                visual._layoutBusy = nil
-            end
-        end
-    end
-    -- 标题遮线垫条在每张卡上都可能存在，释放时一并隐藏。
-    for _, state in pairs((session and session.byId) or {}) do
-        local card = state and state.card
-        if card and card._exTrashLegendBacking then card._exTrashLegendBacking:Hide() end
-    end
-    for _, id in ipairs({ "text", "cast", "target" }) do
-        local state = session and session.byId and session.byId[id]
-        local card = state and state.card
-        if card then
-            for _, key in ipairs({
-                "_exTrashCastCheckHelp",
-            }) do
-                local visual = card[key]
-                if visual then visual:Hide() end
-            end
-            for _, collectionKey in ipairs({ "_exTrashTextDividers", "_exTrashTargetDividers" }) do
-                for _, visual in ipairs(card[collectionKey] or {}) do
-                    visual:Hide()
-                end
-            end
-        end
-    end
-    voicePreviewTimeline = nil
-    if session and type(session.Release) == "function" then
-        session:Release()
-    end
+    ReleaseTrashDeclaration(settingsScrollChild)
     Page._settingsCardSession = nil
+    if Page._detailEnableSwitch then Page._detailEnableSwitch._exDraft = nil end
+    for _, widget in pairs(Page._detailOutputChecks or {}) do widget._exDraft = nil end
+    voicePreviewTimeline = nil
+    if detailOutputHost then detailOutputHost:Hide() end
 end
 
 local function RefreshSettingsDynamicWidgets()
-    local Grid = _G.ExwindGrid
-    local mdb = GetSpellEditorDB()
-    if not (Grid and type(mdb) == "table") then
-        return
-    end
-    if not (settingsScrollChild and Grid.FindMountedWidget) then
-        return
-    end
-    local widgets = setmetatable({}, { __index = function(t, key)
-        local widget = Grid:FindMountedWidget(settingsScrollChild, key)
-        rawset(t, key, widget)
-        return widget
-    end })
-    local selectedRow = GetSelectedSpellRow()
-    local runtimeCfg = selectedRow and GetRuntimeSpellEntry(selectedRow) or nil
-    local authorVoiceDisabled = type(runtimeCfg) == "table" and runtimeCfg.authorVoiceDisabled == true
-    local authorVoiceDisabledText = GetAuthorVoiceDisableText(runtimeCfg)
-
-    if settingsVoiceDisabledNote then
-        if authorVoiceDisabled and authorVoiceDisabledText then
-            settingsVoiceDisabledNote:SetText(authorVoiceDisabledText)
-            settingsVoiceDisabledNote:Show()
-        else
-            settingsVoiceDisabledNote:Hide()
-        end
-    end
-
-    -- Reserve space only for the existing author notice when it is displayed.
+    if not Page._settingsCardSession then return end
     settingsScrollFrame:ClearAllPoints()
-    local noticeHeight = settingsVoiceDisabledNote and settingsVoiceDisabledNote:IsShown()
-        and math.ceil(settingsVoiceDisabledNote:GetStringHeight() or 0) + 8 or 0
-    settingsScrollFrame:SetPoint("TOPLEFT", settingsPane, "TOPLEFT", 0, -noticeHeight)
+    settingsScrollFrame:SetPoint("TOPLEFT", settingsPane, "TOPLEFT", 0, 0)
     settingsScrollFrame:SetPoint("BOTTOMRIGHT", settingsPane, "BOTTOMRIGHT", -18, 0)
-
-    local modeDropdownWidget = widgets["eventColorMode"]
-    local customColor = widgets["eventColor"]
-    local centralLeadWidget = widgets["centralLead"]
-    local centralTextWidget = widgets["centralText"]
-    local preAlertTextWidget = widgets["preAlertText"]
-    local timerRenameTextWidget = widgets["timerBarRenameText"]
-    local ringRenameTextWidget = widgets["ringRenameText"]
-    local castBarRenameTextWidget = widgets["castProgressBarRenameText"]
-    local targetAlertLSMWidget = widgets["targetAlertStartLSM"]
-    local targetAlertValueTestWidget = widgets["targetAlertStartValueTest"]
-    local targetAlertTankWidget = widgets["targetAlertTankEnabled"]
-    local targetAlertRingWidget = widgets["targetAlertRingEnabled"]
-    local targetAlertIconWidget = widgets["targetAlertIconEnabled"]
-    local targetAlertTextWidget = widgets["targetAlertTextEnabledV2"]
-    local targetAlertStealthWidget = widgets["targetAlertStealthEnabledV2"]
-    if centralLeadWidget then
-        centralLeadWidget:Show()
-        SetWidgetUsable(centralLeadWidget, true)
-    end
-    if centralTextWidget then
-        centralTextWidget:Show()
-        SetWidgetUsable(centralTextWidget, true)
-    end
-    if preAlertTextWidget then
-        preAlertTextWidget:Show()
-        SetWidgetUsable(preAlertTextWidget, true)
-    end
-    if timerRenameTextWidget then
-        timerRenameTextWidget:Show()
-        SetWidgetUsable(timerRenameTextWidget, true)
-    end
-    if ringRenameTextWidget then
-        ringRenameTextWidget:Show()
-        SetWidgetUsable(ringRenameTextWidget, mdb.ringRenameEnabled == true)
-    end
-    if castBarRenameTextWidget then
-        castBarRenameTextWidget:Show()
-        SetWidgetUsable(castBarRenameTextWidget, mdb.castProgressBarRenameEnabled == true)
-    end
-    if targetAlertLSMWidget then
-        targetAlertLSMWidget:Show()
-        SetWidgetUsable(targetAlertLSMWidget, mdb.targetAlertStartEnabled == true)
-    end
-    if targetAlertValueTestWidget then
-        targetAlertValueTestWidget:Show()
-        SetWidgetUsable(targetAlertValueTestWidget, mdb.targetAlertStartEnabled == true)
-    end
-    if targetAlertTankWidget then
-        targetAlertTankWidget:Show()
-        SetWidgetUsable(targetAlertTankWidget, mdb.targetAlertStartEnabled == true)
-    end
-    if targetAlertRingWidget then
-        targetAlertRingWidget:Show()
-        SetWidgetUsable(targetAlertRingWidget, mdb.targetAlertStartEnabled == true)
-    end
-    if targetAlertIconWidget then
-        targetAlertIconWidget:Show()
-        SetWidgetUsable(targetAlertIconWidget, mdb.targetAlertStartEnabled == true)
-    end
-    if targetAlertTextWidget then
-        targetAlertTextWidget:Show()
-        SetWidgetUsable(targetAlertTextWidget, mdb.targetAlertStartEnabled == true)
-    end
-    if targetAlertStealthWidget then
-        targetAlertStealthWidget:Show()
-        SetWidgetUsable(targetAlertStealthWidget, mdb.targetAlertStartEnabled == true)
-    end
-    local colorOn = (mdb.eventColorEnabled == true)
-    local colorMode = NormalizeEventColorMode(mdb.eventColorMode)
-    SetWidgetUsable(modeDropdownWidget, colorOn)
-    if customColor then
-        if colorOn and colorMode == "__custom" then
-            customColor:Show()
-            SetWidgetUsable(customColor, true)
-        else
-            customColor:Hide()
-        end
-    end
-
-    for i = 1, 2 do
-        local prefix = "tr" .. tostring(i)
-        local enabled = (mdb[prefix .. "Enabled"] == true)
-        local configEnabled = enabled
-        if i == 2 then
-            configEnabled = (mdb[prefix .. "PlayTextEnabled"] == true)
-        end
-        if authorVoiceDisabled then
-            enabled = false
-            configEnabled = false
-        end
-        local source = NormalizeTriggerSource(mdb[prefix .. "Source"])
-
-        local enabledWidget = widgets[prefix .. "Enabled"]
-        local sourceWidget = widgets[prefix .. "Source"]
-        local packWidget = widgets[prefix .. "Label"]
-        local lsmWidget = widgets[prefix .. "LSM"]
-        local pathWidget = widgets[prefix .. "Path"]
-        local valueTestWidget = widgets[prefix .. "ValueTest"]
-        local countdownLeadWidget = widgets[prefix .. "CountdownLead"]
-        local playTextWidget = widgets[prefix .. "PlayTextEnabled"]
-        local offsetModeWidget = widgets[prefix .. "OffsetMode"]
-        local offsetSecondsWidget = widgets[prefix .. "OffsetSeconds"]
-
-        SetWidgetUsable(enabledWidget, not authorVoiceDisabled)
-        SetWidgetUsable(sourceWidget, configEnabled)
-        if countdownLeadWidget then
-            countdownLeadWidget:Show()
-            SetWidgetUsable(countdownLeadWidget, enabled)
-        end
-        if playTextWidget then
-            playTextWidget:Show()
-            SetWidgetUsable(playTextWidget, not authorVoiceDisabled)
-        end
-
-        EXUI:RefreshSoundSelector({
-            contents = { pack = packWidget, lsm = lsmWidget, file = pathWidget },
-            value = source, preview = valueTestWidget, enabled = configEnabled,
-            setUsable = SetWidgetUsable,
-        })
-
-        if offsetModeWidget then
-            offsetModeWidget:Hide()
-        end
-        if offsetSecondsWidget then
-            offsetSecondsWidget:Hide()
-        end
-    end
-    local countdownSelector = widgets["tr2CountdownLead"]
-    if countdownSelector and countdownSelector.SetValue then
-        countdownSelector:SetValue(tostring(NormalizeCountdownLeadSeconds(
-            mdb.tr2CountdownLead or mdb.countdownLead)))
-    end
-    SetTrashPlayButtonVisual(widgets["tr1ValueTest"])
-    SetTrashPlayButtonVisual(widgets["tr2ValueTest"])
-    SetTrashPlayButtonVisual(widgets["voiceSequencePreview"])
+    Page._settingsCardSession:Refresh()
+    SetTrashPlayButtonVisual(voicePreviewTimeline and voicePreviewTimeline.playButton)
     RefreshTrashVoicePreviewDisplay()
-    ApplyTrashSettingsLabelLayout(widgets)
+    Page._BindSpellSummarySwitch(GetSpellEditorDB())
+    LayoutTrashQuickRow()
 end
 
 local function LoadSelectedSpellToEditor()
@@ -2407,12 +1678,10 @@ local function RefreshDungeonButtonVisuals()
             local hovered = btn._hovered == true
             -- 与 Boss 页面左上副本切换完全同一视觉：外按钮透明，状态只作用于图标框。
             EXUI:SetControlSurface(btn, 10, { 0, 0, 0, 0 }, { 0, 0, 0, 0 })
+            -- 选中走 Core 公共选中外观：图标框底色沿用各自原底（未选中 GC.input／悬停时沿用悬停底）。
+            EXUI:PaintSelectCell(btn.iconFrame, active, 10)
             if active then
-                -- 选中只描边：图标框底色沿用各自原底（未选中 GC.input／悬停时沿用悬停底），
-                -- 只换成一圈实心主色轮廓；不加淡底、不抬底、不加左侧指示条。
-                EXUI:SetControlSurface(btn.iconFrame, 10,
-                    hovered and GC.secondaryHoverFill or GC.input,
-                    hovered and GC.primaryFillHover or GC.primaryFill)
+                EXUI:SetControlSurface(btn.iconFrame, 10, hovered and GC.secondaryHoverFill or GC.input, GC.transparent)
                 btn.icon:SetDesaturated(false)
                 btn.text:SetTextColor(unpack(GC.text))
             elseif hovered then
@@ -2518,11 +1787,6 @@ local function AcquireSpellRow()
     row:EnableMouse(true)
     EXUI:ClearControlSurface(row)
 
-    row.leftBar = EXUI:CreateVisualTexture(row, EXBACKGROUNDFRAME)
-    row.leftBar:SetWidth(4)
-    row.leftBar:SetPoint("TOPLEFT", 2, -7)
-    row.leftBar:SetPoint("BOTTOMLEFT", 2, 7)
-    row.leftBar:Hide()
 
     row.navDivider = EXUI:CreateSettingsSeparator(row, 1)
     row.navDivider:SetPoint("TOPLEFT", row, "BOTTOMLEFT", 9, -1)
@@ -2871,18 +2135,13 @@ function Page:RefreshSpellList()
         row._selected = (rowData.npcID == selectedNPCID and rowData.spellID == selectedSpellID)
         row._hovered = false
         row._applyVisual = function(self)
-            if self._selected then
-                -- 选中只描边：底色沿用各自原底（未选中无底／悬停时沿用悬停底），
-                -- 只加一圈实心主色轮廓；不加淡底、不抬底、不显示左侧指示条。
-                EXUI:SetControlSurface(self, 4,
-                    self._hovered and GC.menuHover or { 0, 0, 0, 0 },
-                    self._hovered and GC.primaryFillHover or GC.primaryFill)
-            elseif self._hovered then
+            -- 悬停抬底；选中走 Core 公共选中外观（底色不随选中改变）。
+            if self._hovered then
                 EXUI:SetControlSurface(self, 4, GC.menuHover, { 0, 0, 0, 0 })
             else
                 EXUI:ClearControlSurface(self)
             end
-            self.leftBar:Hide()
+            EXUI:PaintSelectRow(self, self._selected, 4)
             if self._enabled == true then
                 self.icon:SetVertexColor(1, 1, 1)
                 self.label:SetTextColor(unpack(GC.text))
@@ -2933,18 +2192,6 @@ function Page:RefreshSpellList()
         Page:RefreshSelectedSpell()
     end
 
-    local function BuildSync()
-        local totalW = (spellScrollChild:GetWidth() or 360)
-        totalW = math.max(1, totalW)
-        C.SPELL_CARD.cols = 1
-        local usableW = math.max(1, totalW - 2)
-        local cardW = math.floor((usableW - ((C.SPELL_CARD.cols - 1) * C.SPELL_CARD.gapX)) / C.SPELL_CARD.cols)
-        for i = 1, #orderedRows do
-            BuildOne(orderedRows[i], i, cardW)
-        end
-        Finalize()
-    end
-
     local function BuildAsync()
         local totalW = (spellScrollChild:GetWidth() or 360)
         totalW = math.max(1, totalW)
@@ -2961,38 +2208,24 @@ function Page:RefreshSpellList()
         Finalize()
     end
 
-    local async = GetAsyncHandler()
-    if async then
-        async:Async(function()
-            BuildAsync()
-        end, "EXBoss_TrashCD_SpellList", true)
-    else
-        BuildSync()
-    end
+    EXUI:StartFrameTask("EXBoss_TrashCD_SpellList", FRAME_TASK_BUDGET_MS, BuildAsync)
 end
 
 local function PrepareTrashSettingsSelection()
     CancelTrashVoiceSequencePreview()
-    local session = Page._settingsCardSession
-    if not session or session.released then return end
-    for _, card in ipairs(SETTINGS_LAYOUT.cards) do
-        for _, item in ipairs(card.content.items) do
-            local widget = session:GetWidget(card.id, item.key)
-            if widget then
-                if item.type == "input" then widget:ClearFocus() end
-                if widget.CloseMenu then widget:CloseMenu() end
-            end
+    for _, session in pairs({ Page._settingsCardSession }) do
+        if session.alive then
+            session:ForEachNode(function(node)
+                local widget = node.instance
+                if widget then
+                    if widget.ClearFocus then widget:ClearFocus() end
+                    if widget.CloseMenu then widget:CloseMenu() end
+                end
+            end)
         end
     end
-    for _, spec in ipairs({ { "voice", "tr1ValueTest" }, { "voice", "tr2ValueTest" },
-        { "target", "targetAlertStartValueTest" } }) do
-        local button = session:GetWidget(spec[1], spec[2])
-        if button then button:Hide() end
-    end
-    -- 打开的颜色选择器可能仍持有旧技能的回调；按原释放合同退役它。
-    if ColorPickerFrame and ColorPickerFrame:IsShown() then
-        ReleaseTrashSettingsCardSession()
-    end
+    -- A color picker callback must retire before the selected draft is reloaded.
+    if ColorPickerFrame and ColorPickerFrame:IsShown() then ReleaseTrashSettingsCardSession() end
 end
 
 local function RefreshSelectedSpellSync()
@@ -3001,7 +2234,7 @@ local function RefreshSelectedSpellSync()
     PrepareTrashSettingsSelection()
     LoadSelectedSpellToEditor()
     UpdateDetailCard()
-    Page:RenderSettingsGrid(true)
+    Page:RenderSettingsV2(true)
     _suspendSpellSettingPersist = suspended
 end
 
@@ -3025,95 +2258,26 @@ function Page:RefreshSelectedSpell()
         RefreshSelectedSpellSync()
     end
 
-    local async = GetAsyncHandler()
-    if async then
-        async:Async(function()
-            RunAsync()
-        end, "EXBoss_TrashCD_SelectedSpell", true)
-    else
-        RefreshSelectedSpellSync()
-    end
+    EXUI:StartFrameTask("EXBoss_TrashCD_SelectedSpell", FRAME_TASK_BUDGET_MS, RunAsync)
 end
 
-local function FindTrashDropdownText(items, value)
-    for _, item in ipairs(items or {}) do
-        if type(item) == "table" then
-            if item.isMenu then
-                local text = FindTrashDropdownText(item.menu, value)
-                if text ~= nil then return text end
-            elseif item[2] == value or tostring(item[2]) == tostring(value) then
-                return item[1]
-            end
-        elseif item == value or tostring(item) == tostring(value) then
-            return item
-        end
+-- Re-read the same draft into live V2 controls; selection identity stays in Store.
+function Page:RenderSettingsV2(resetScroll)
+    if not (settingsScrollChild and settingsPane and settingsPane:IsShown()) then return end
+    if BuildSettingsLayout() then
+        ReleaseTrashDeclaration(settingsScrollChild)
+        Page._settingsCardSession = nil
     end
-end
-
-local function RefreshTrashSettingsValues(session, db)
-    if not session or session.released or session.parent ~= settingsScrollChild
-        or session.declaration ~= SETTINGS_LAYOUT or session.context.config ~= db then return false end
-    for _, card in ipairs(SETTINGS_LAYOUT.cards) do
-        if not session.byId[card.id] then return false end
-        for _, item in ipairs(card.content.items) do
-            local widget = session:GetWidget(card.id, item.key)
-            if not widget then return false end
-            local value = db[item.key]
-            if item.type == "checkbox" then
-                widget:SetChecked(value == true)
-            elseif item.type == "input" then
-                local text = tostring(value or "")
-                if widget:GetText() ~= text then widget:SetText(text) end
-            elseif item.type == "dropdown" then
-                widget._currentValue = value
-                widget:OverrideText(FindTrashDropdownText(widget._items, value) or L["请选择..."])
-            elseif item.type == "lsm_sound" then
-                widget._selectedValue = value
-                widget:OverrideText(tostring(value or ""))
-            elseif item.type == "color" then
-                widget._currentDb, widget._currentKey = db, item.key
-                widget:UpdateColor()
-            end
-        end
-    end
-    return true
-end
-
--- 稳定声明和同一草稿只回填已有控件；选择身份与持久字段仍由原提交入口负责。
-function Page:RenderSettingsGrid(resetScroll)
-    if not (settingsScrollChild and settingsPane and settingsPane:IsShown()) then
-        return
-    end
-    local Grid = _G.ExwindGrid
-    if not Grid then
-        return
-    end
-    BuildSettingsLayout()
     local db = GetSpellEditorDB()
-    local w = settingsPane:GetWidth()
-    if w < 100 then
-        w = 860
-    end
     settingsScrollChild:SetWidth(math.max(1, settingsScrollFrame:GetWidth() - 4))
-    if resetScroll == true then
-        settingsScrollFrame:SetVerticalScroll(0)
-    end
-    RegisterSpellSettingsGridAsActive(SPELL_SETTINGS_MODULE_KEY)
+    if resetScroll then settingsScrollFrame:SetVerticalScroll(0) end
+    RegisterSpellSettingsAsActive(SPELL_SETTINGS_MODULE_KEY)
     local suspended = _suspendSpellSettingPersist
     _suspendSpellSettingPersist = true
-    if not RefreshTrashSettingsValues(Page._settingsCardSession, db) then
-        ReleaseTrashSettingsCardSession()
-        Page._settingsCardSession = Grid:MountCards(settingsScrollChild, SETTINGS_LAYOUT, {
-            pageId = SPELL_SETTINGS_MODULE_KEY,
-            regionId = "trash-spell-editor",
-            layoutDefaults = { left = 0, right = 0, top = 12, bottom = 0, gap = 6 },
-            config = db,
-            moduleKey = SPELL_SETTINGS_MODULE_KEY,
-            scrollFrame = settingsScrollFrame,
-            exbossSummaryEnableHost = detailEnableHost,
-        })
-        ApplyTrashSettingsCardSurfaces(Page._settingsCardSession)
+    if not Page._settingsCardSession then
+        Page._settingsCardSession = MountTrashDeclaration(settingsScrollChild, SETTINGS_LAYOUT, CreateTrashSettingsOwner())
     end
+    -- 已挂载的会话由下面的 RefreshSettingsDynamicWidgets 统一 Refresh 一次。
     if detailOutputHost and GetSelectedSpellRow() then
         detailOutputHost:Show()
         RefreshDetailCardLayout()
@@ -3122,7 +2286,7 @@ function Page:RenderSettingsGrid(resetScroll)
     _suspendSpellSettingPersist = suspended
 end
 
--- [混合函数边界] EnsureUI 内只可迁移三 pane、详情卡、Scroll/Grid 的外观与 SetPoint/SetSize；池、OnClick、异步 Spell 数据、预览与回调禁止修改。
+-- [混合函数边界] EnsureUI 内只可迁移三 pane、详情卡、Scroll/V2 的外观与 SetPoint/SetSize；池、OnClick、异步 Spell 数据、预览与回调禁止修改。
 local function EnsureUI(parent)
     if root then
         return
@@ -3149,6 +2313,7 @@ local function EnsureUI(parent)
     mapPane = CreateFrame("Frame", nil, root)
     mapPane:SetPoint("TOPLEFT", 8, -8)
     mapPane:SetSize(leftW, topLeftH)
+    mapPane:SetClipsChildren(true)
 
     -- 左栏下半部与 Boss 页一致：仅作布局宿主，不再套一层可见 Backdrop。
     -- 法术行默认无外框，只在悬停或选中时显示背景状态。
@@ -3156,6 +2321,7 @@ local function EnsureUI(parent)
     spellPane:SetPoint("TOPLEFT", mapPane, "BOTTOMLEFT", 0, -gap)
     spellPane:SetPoint("BOTTOMLEFT", 8, 8)
     spellPane:SetWidth(leftW)
+    spellPane:SetClipsChildren(true)
 
     spellTitle = EXUI:CreateVisualFontString(spellPane, EXFONTFRAME, "GameFontNormal")
     spellTitle:SetPoint("TOPLEFT", 0, 0)
@@ -3171,6 +2337,7 @@ local function EnsureUI(parent)
     detailPane:SetPoint("TOPLEFT", mapPane, "TOPRIGHT", gap, 0)
     detailPane:SetPoint("TOPRIGHT", -8, -8)
     detailPane:SetHeight(topRightH)
+    detailPane:SetClipsChildren(true)
     detailPane._exDetailLayoutWidth = 0
     detailPane._exDetailLayoutPending = false
     detailPane:SetScript("OnSizeChanged", function(self, width)
@@ -3186,6 +2353,9 @@ local function EnsureUI(parent)
             end
         end)
     end)
+
+    detailSurface = CreateFrame("Frame", nil, detailPane)
+    detailSurface:SetAllPoints(detailPane)
 
     settingsPane = CreateSectionBackdrop(root)
     settingsPane:SetBackdropColor(0, 0, 0, 0)
@@ -3210,39 +2380,41 @@ local function EnsureUI(parent)
     spellScrollChild:SetHeight(300)
     spellScrollFrame:SetScrollChild(spellScrollChild)
 
-    detailPlaceholder = EXUI:CreateVisualFontString(detailPane, EXFONTFRAME, "GameFontDisableSmall")
+    detailPlaceholder = EXUI:CreateVisualFontString(detailSurface, EXFONTFRAME, "GameFontDisableSmall")
     detailPlaceholder:SetPoint("CENTER", 0, 0)
     detailPlaceholder:SetTextColor(unpack(GC.textPlaceholder))
     detailPlaceholder:SetText(L["点击左侧技能后，可在此查看法术描述。"])
 
-    detailEnableHost = CreateFrame("Frame", nil, detailPane)
-    detailEnableHost:SetSize(154, 28)
+    detailEnableHost = CreateFrame("Frame", nil, detailSurface)
+    detailEnableHost:SetSize(90, 28)
+    detailEnableHost:SetClipsChildren(true)
     detailEnableHost:SetPoint("TOPRIGHT", detailPane, "TOPRIGHT", -14, -9)
     detailEnableHost:Hide()
 
-    detailOutputHost = CreateFrame("Frame", nil, detailPane, "BackdropTemplate")
+    detailOutputHost = CreateFrame("Frame", nil, detailSurface, "BackdropTemplate")
     detailOutputHost:SetSize(330, 34)
+    detailOutputHost:SetClipsChildren(true)
     detailOutputHost:SetPoint("BOTTOMRIGHT", detailPane, "BOTTOMRIGHT", -12, 9)
     EXUI:SetControlSurface(detailOutputHost, 4, GC.subcard, GC.subcardBorder)
     detailOutputHost:Hide()
 
-    detailIcon = EXUI:CreateRoundedImage(detailPane, 9)
+    detailIcon = EXUI:CreateRoundedImage(detailSurface, 9)
     detailIcon:SetSize(46, 46)
     detailIcon:SetPoint("TOPLEFT", 14, -14)
     detailIcon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-    detailIconBorder = CreateFrame("Frame", nil, detailPane, "BackdropTemplate")
+    detailIconBorder = CreateFrame("Frame", nil, detailSurface, "BackdropTemplate")
     detailIconBorder:SetSize(48, 48)
     detailIconBorder:SetPoint("TOPLEFT", detailIcon, "TOPLEFT", -1, 1)
     EXUI:ClearControlSurface(detailIconBorder)
 
-    detailTitle = EXUI:CreateVisualFontString(detailPane, EXFONTFRAME, "GameFontNormalLarge")
+    detailTitle = EXUI:CreateVisualFontString(detailSurface, EXFONTFRAME, "GameFontNormalLarge")
     detailTitle:SetPoint("TOPLEFT", detailIcon, "TOPRIGHT", 8, -1)
     detailTitle:SetJustifyH("LEFT")
     detailTitle:SetWordWrap(true)
     detailTitle:SetFont(ExwindTools.MAIN_FONT, GM.font.exboss.spellDetailTitle, "")
     detailTitle:SetTextColor(unpack(GC.text))
 
-    detailMeta = EXUI:CreateVisualFontString(detailPane, EXFONTFRAME, "GameFontHighlight")
+    detailMeta = EXUI:CreateVisualFontString(detailSurface, EXFONTFRAME, "GameFontHighlight")
     detailMeta:SetPoint("TOPLEFT", detailTitle, "BOTTOMLEFT", 0, -2)
     detailMeta:SetJustifyH("LEFT")
     detailMeta:SetWordWrap(true)
@@ -3251,7 +2423,7 @@ local function EnsureUI(parent)
     detailMeta:Hide()
 
     local function CreateDetailIDChip(label, color)
-        local chip = CreateFrame("Frame", nil, detailPane, "BackdropTemplate")
+        local chip = CreateFrame("Frame", nil, detailSurface, "BackdropTemplate")
         EXUI:SetControlSurface(chip, 5, GC.input, GC.panelBorder)
         if chip.SetClipsChildren then chip:SetClipsChildren(true) end
         if label then
@@ -3299,11 +2471,7 @@ local function EnsureUI(parent)
     detailCDChip, detailCDValue = CreateDetailIDChip("CD")
     detailSpellIDChip, detailSpellIDValue = CreateDetailIDChip("ID")
 
-    detailBodyScroll = CreateFrame("ScrollFrame", nil, detailPane, "ScrollFrameTemplate")
-    if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then
-        ExBoss.UI.ApplyModernScrollBarSkin(detailBodyScroll)
-    end
-    DisableVerticalScroll(detailBodyScroll)
+    detailBodyScroll = EXUI:CreateScrollFrame(detailSurface)
     detailBodyChild = CreateFrame("Frame", nil, detailBodyScroll)
     detailBodyChild:SetSize(1, 1)
     detailBodyScroll:SetScrollChild(detailBodyChild)
@@ -3316,14 +2484,14 @@ local function EnsureUI(parent)
     detailBody:SetFont(ExwindTools.MAIN_FONT, GM.font.exboss.previewText, "")
     detailBody:SetTextColor(unpack(GC.textDim))
 
-    detailDivider = EXUI:CreateVisualTexture(detailPane, EXBORDERFRAME)
+    detailDivider = EXUI:CreateVisualTexture(detailSurface, EXBORDERFRAME)
     detailDivider:SetPoint("BOTTOMLEFT", detailPane, "BOTTOMLEFT", 14, 10)
     detailDivider:SetPoint("BOTTOMRIGHT", detailPane, "BOTTOMRIGHT", -14, 10)
     detailDivider:SetHeight(1)
     detailDivider:SetColorTexture(unpack(GC.headerDivider))
     detailDivider:Hide()
 
-    detailInfo = EXUI:CreateVisualFontString(detailPane, EXFONTFRAME, "GameFontHighlightSmall")
+    detailInfo = EXUI:CreateVisualFontString(detailSurface, EXFONTFRAME, "GameFontHighlightSmall")
     detailInfo:SetPoint("BOTTOMLEFT", detailPane, "BOTTOMLEFT", 14, 16)
     detailInfo:SetPoint("RIGHT", detailPane, "RIGHT", -18, 0)
     detailInfo:SetJustifyH("LEFT")
@@ -3337,16 +2505,8 @@ local function EnsureUI(parent)
     settingsTitle:SetTextColor(unpack(GC.text))
     settingsTitle:SetFont(ExwindTools.MAIN_FONT, GM.font.exboss.previewText, "OUTLINE")
 
-    settingsVoiceDisabledNote = EXUI:CreateVisualFontString(settingsPane, EXFONTFRAME, "GameFontNormalSmall")
-    settingsVoiceDisabledNote:SetPoint("TOPLEFT", settingsPane, "TOPLEFT", 0, -2)
-    settingsVoiceDisabledNote:SetPoint("RIGHT", settingsPane, "RIGHT", -28, 0)
-    settingsVoiceDisabledNote:SetJustifyH("LEFT")
-    settingsVoiceDisabledNote:SetWordWrap(true)
-    settingsVoiceDisabledNote:SetTextColor(1, 0.82, 0.25)
-    settingsVoiceDisabledNote:Hide()
-
     settingsScrollFrame = CreateFrame("ScrollFrame", nil, settingsPane, "ScrollFrameTemplate")
-    settingsScrollFrame:SetPoint("TOPLEFT", 0, -28)
+    settingsScrollFrame:SetPoint("TOPLEFT", 0, 0)
     settingsScrollFrame:SetPoint("BOTTOMRIGHT", settingsPane, "BOTTOMRIGHT", -18, 0)
     settingsScrollChild = CreateFrame("Frame", nil, settingsScrollFrame)
     settingsScrollChild:SetWidth(900)
@@ -3451,38 +2611,7 @@ function Page:RelayoutPrototype()
     RelayoutDungeonNavigation()
     RefreshDetailCardLayout()
     settingsScrollChild:SetWidth(math.max(1, settingsScrollFrame:GetWidth() - 4))
-    if Page._settingsCardSession then Page._settingsCardSession:Relayout() end
-end
-
-if ExwindTools and type(ExwindTools.WatchState) == "function" then
-    ExwindTools:WatchState(SPELL_SETTINGS_MODULE_KEY .. ".ButtonClicked", "ExBoss.TrashCD.SpellEditorButton",
-        function(info)
-            if Page._visible ~= true then
-                return
-            end
-            local db = GetSpellEditorDB()
-            if type(db) ~= "table" or type(info) ~= "table" then
-                return
-            end
-            if info.key == "tr1ValueTest" or info.key == "tr2ValueTest" then
-                -- 用户 2026-10-05 第五批第 66 项：这两个播放按钮原来直接调
-                -- PlayVoicePreview，没有经过公共试听驱动，所以播放中没有竖线跳动。
-                -- 改走与下面 targetAlertStartValueTest 相同的 RunSoundPreview：
-                -- 播放逻辑、声音来源与返回值不变，Start/Stop 由 Core 按返回的
-                -- 声音句柄接管（内部即 AcquirePlayingIndicator，手册 §2.5.7）。
-                local prefix = (info.key == "tr1ValueTest") and "tr1" or "tr2"
-                EXUI:RunSoundPreview(_G.ExwindGrid:FindMountedWidget(settingsScrollChild, info.key), function()
-                    return PlayVoicePreview(db[prefix .. "Source"], db[prefix .. "Label"],
-                        db[prefix .. "LSM"], db[prefix .. "Path"])
-                end)
-            elseif info.key == "targetAlertStartValueTest" then
-                EXUI:RunSoundPreview(_G.ExwindGrid:FindMountedWidget(settingsScrollChild, info.key), function()
-                    return PlayVoicePreview("lsm", "", db.targetAlertStartLSM, "")
-                end)
-            elseif info.key == "voiceSequencePreview" then
-                StartTrashVoiceSequencePreview()
-            end
-        end)
+    if Page._settingsCardSession then Page._settingsCardSession:Invalidate() end
 end
 
 -- The Core controller intentionally receives no field route.  Persist every
@@ -3494,7 +2623,7 @@ local function RefreshActiveSurfaces()
         "enabled", "showBunBar", "showTimerBar", "showNameplate",
         "eventColorEnabled", "eventColorMode", "eventColor", "centralEnabled",
         "centralLead", "centralText", "countdownEnabled",
-        -- countdownLead 没有自己的 Grid 控件，它由 PersistEditorToSelectedSpell 的互写
+        -- countdownLead 没有自己的 V2 控件，它由 PersistEditorToSelectedSpell 的互写
         -- 与 LoadSelectedSpellToEditor 同步。放进这张表会在 tr2CountdownLead 之前执行，
         -- 用旧值把刚选中的秒数覆盖回去，分段切换因此点不动。
         "tr2CountdownLead", "preAlertText", "timerBarRenameEnabled",
@@ -3584,7 +2713,7 @@ function Page:Render(leftHost, contentFrame)
     self:RefreshSpellList()
 end
 
--- [释放边界] 必须保留 ActivePage 清理、Grid 控件归还、draft/context 作废、三个 pane/屏幕预览停止；卡壳不得重复释放。
+-- [释放边界] 必须保留 ActivePage 清理、V2 控件归还、draft/context 作废、三个 pane/屏幕预览停止；卡壳不得重复释放。
 function Page:Hide()
     Page._visible = false
     -- 作废序列并收回播放态必须在释放卡片会话之前：之后拿不到预览按钮。
@@ -3594,7 +2723,9 @@ function Page:Hide()
     spellEditorDraft = nil
     spellEditorContext = nil
     _suspendSpellSettingPersist = false
-    ClearSpellSettingsGridActiveRegistration()
+    _spellListBuildToken = _spellListBuildToken + 1
+    _selectionRefreshToken = _selectionRefreshToken + 1
+    ClearSpellSettingsActiveRegistration()
     if TrashCore and TrashCore.SetMonitorUIEnabled then
         TrashCore.SetMonitorUIEnabled(false)
     end

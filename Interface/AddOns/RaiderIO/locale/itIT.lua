@@ -786,8 +786,7 @@ L["RAID_TG"] = "Grotta Vincolata alla Marea"
 --[[Translation missing --]]
 --[[ L["RAID_TOT"] = ""--]] 
 L["RAID_TOTFW"] = "Trono dei Quattro Venti"
---[[Translation missing --]]
---[[ L["RAID_UOK"] = ""--]] 
+L["RAID_UOK"] = "Liberazione di Kith'ix"
 L["RAID_VA"] = "Abissi Velenosi"
 L["RAID_VS"] = "Pinnacolo del Vuoto"
 L["RAID_VS_DR_MQD"] = "PdV/FdS/MsQD"

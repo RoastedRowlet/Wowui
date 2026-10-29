@@ -255,11 +255,11 @@ end)
 
 -- ── 显示对象池预热：分帧物化 Runtime TimerBar / BunBar / Nameplate Icon ──
 -- 编辑模式建立的是独立 world preview，不是正式 runtime 实例，不能承担这项
--- 生命周期。这里用独立的 1ms LibAsync handler；不进入 Scheduler，也不读取
+-- 生命周期。这里用每帧 1ms 预算的分帧任务；不进入 Scheduler，也不读取
 -- timer、timeline event 或任何战斗业务数据。
 local DISPLAY_PREWARM_TASK = "ExBoss_DisplayRuntimePrewarm"
+local DISPLAY_PREWARM_BUDGET_MS = 1
 local displayPrewarm = {
-    handler = nil,
     running = false,
     complete = false,
     held = {},
@@ -302,40 +302,17 @@ local function ReleaseHeldDisplayPrewarmObjects()
 end
 
 local function CancelDisplayPrewarm()
-    -- LibAsync 只会在显式 yield 处让出；这里拿到的对象都已经完整构造。
+    -- 分帧任务只会在显式 yield 处让出；这里拿到的对象都已经完整构造。
     -- 先归还完整对象，再丢弃协程，绝不把半物化对象留在 active pool 外。
     ReleaseHeldDisplayPrewarmObjects()
-    if displayPrewarm.handler then
-        displayPrewarm.handler:CancelAsync(DISPLAY_PREWARM_TASK)
-    end
+    ExwindTools.UI:StopFrameTask(DISPLAY_PREWARM_TASK)
     displayPrewarm.running = false
 end
 
-local function EnsureDisplayPrewarmHandler()
-    if displayPrewarm.handler then return displayPrewarm.handler end
-    local asyncLib = LibStub and LibStub("LibAsync", true) or nil
-    if not asyncLib then
-        error("EXBoss display prewarm requires LibAsync", 2)
-    end
-    local errorSink = geterrorhandler()
-    displayPrewarm.handler = asyncLib:GetHandler({
-        type = "everyFrame",
-        maxTime = 1,
-        maxTimeCombat = 1,
-        errorHandler = function(message, stacktrace)
-            ReleaseHeldDisplayPrewarmObjects()
-            displayPrewarm.running = false
-            if displayPrewarm.handler then
-                displayPrewarm.handler:CancelAsync(DISPLAY_PREWARM_TASK)
-            end
-            local detail = tostring(message or "EXBoss display prewarm failed")
-            if type(stacktrace) == "string" and stacktrace ~= "" then
-                detail = detail .. "\n" .. stacktrace
-            end
-            errorSink(detail)
-        end,
-    })
-    return displayPrewarm.handler
+local function OnDisplayPrewarmError(message)
+    ReleaseHeldDisplayPrewarmObjects()
+    displayPrewarm.running = false
+    geterrorhandler()(message)
 end
 
 
@@ -349,9 +326,8 @@ local function StartDisplayPrewarm()
         return
     end
 
-    local handler = EnsureDisplayPrewarmHandler()
     displayPrewarm.running = true
-    handler:Async(function()
+    ExwindTools.UI:StartFrameTask(DISPLAY_PREWARM_TASK, DISPLAY_PREWARM_BUDGET_MS, function()
         -- 所有类型同时持有到创建阶段结束，保证共享的 Icon/Text 子池按
         -- TimerBar + BunBar + 姓名板的并发需求扩容，而不是互相借同一对象。
         for _, owner in ipairs(jobs) do
@@ -378,7 +354,7 @@ local function StartDisplayPrewarm()
         end
         displayPrewarm.complete = true
         displayPrewarm.running = false
-    end, DISPLAY_PREWARM_TASK, true)
+    end, OnDisplayPrewarmError)
 end
 
 ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", "ExBoss_DisplayRuntimePrewarmPEW", function()

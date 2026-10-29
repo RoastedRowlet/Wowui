@@ -1,7 +1,7 @@
 --[[
 	Discover raid and party frames from Blizzard, ElvUI, Grid2,
 	DandersFrames, EllesmereUI, BuzzardFrames, VuhDo, Mich's Raid Frames,
-	Cell, Enhance QoL, and Shadowed Unit Frames. Player/target/focus
+	Cell, Enhance QoL, Shadowed Unit Frames, and Nucleus. Player/target/focus
 	unit frames are ignored.
 ]]
 
@@ -19,6 +19,7 @@ local FRAME_ADDONS = {
 	Cell = true,
 	EnhanceQoLUnitFrames = true,
 	ShadowedUnitFrames = true,
+	Nucleus = true,
 }
 
 local hookedAddons = {}
@@ -259,6 +260,20 @@ local function NameLooksLikeGroup(name)
 		end
 		return false
 	end
+	-- Nucleus SecureGroupHeader children. Holders, pets, and anchors share
+	-- the NucleusHeader prefix. Spotlight and NPC buttons are decided by unit.
+	if n:find("nucleusheader", 1, true) then
+		if n:match("^nucleusheaderpartyunitbutton%d+$")
+			or n:match("^nucleusheaderraidunitbutton%d+$")
+			or n:match("^nucleusheaderraidg%d+unitbutton%d+$") then
+			return true
+		end
+		if n:match("^nucleusheaderspotlightunitbutton%d+$")
+			or n:match("^nucleusheadernpcunitbutton%d+$") then
+			return nil
+		end
+		return false
+	end
 	-- Shadowed Unit Frames. SUFUnit* is player/target/focus. SUFChild* is
 	-- pet or target-of-unit. Split raid groups are SUFHeaderraidNUnitButtonM.
 	if n:find("sufheader", 1, true) or n:find("sufchild", 1, true) or n:find("sufunit", 1, true) then
@@ -336,6 +351,29 @@ function addon.IsMichsRaidButton(frame)
 		return false
 	end
 	return addon.GetFrameUnit(frame) ~= nil
+end
+
+function addon.IsNucleusGroupButton(frame)
+	if not frame then
+		return false
+	end
+	local name = frame.GetName and frame:GetName()
+	if type(name) ~= "string" then
+		return false
+	end
+	if name:match("^NucleusHeaderPartyUnitButton%d+$")
+		or name:match("^NucleusHeaderRaidUnitButton%d+$")
+		or name:match("^NucleusHeaderRaidG%d+UnitButton%d+$") then
+		return true
+	end
+	-- Spotlight can pin target or focus. NPC frames include boss slots.
+	-- Only group tokens belong on the glow.
+	if name:match("^NucleusHeaderSpotlightUnitButton%d+$")
+		or name:match("^NucleusHeaderNpcUnitButton%d+$") then
+		local unit = addon.GetFrameUnit(frame)
+		return unit == "player" or (type(unit) == "string" and (unit:find("^raid%d+$") or unit:find("^party%d+$")) ~= nil)
+	end
+	return false
 end
 
 function addon.IsCellUnitButton(frame)
@@ -462,6 +500,35 @@ local function ShadowedHidesCompact(kind)
 	return hidden[kind] == true
 end
 
+local function NucleusLoaded()
+	return C_AddOns.IsAddOnLoaded("Nucleus") or _G.Nucleus ~= nil
+end
+
+-- Defaults hide Blizzard. A missing db still counts; an explicit false does not.
+local function NucleusHidesCompact(kind)
+	if not NucleusLoaded() then
+		return false
+	end
+	local db = _G.Nucleus and _G.Nucleus.db
+	local cfg = type(db) == "table" and db[kind]
+	if type(cfg) ~= "table" then
+		return true
+	end
+	return cfg.hideBlizzard ~= false
+end
+
+-- Party and raid hides are separate. Only the hidden layout replaces Blizzard.
+function addon.NucleusReplacesCompactFrame(frame)
+	if not frame or not NucleusLoaded() then
+		return false
+	end
+	local kind = CompactFrameKind(frame)
+	if kind ~= "party" and kind ~= "raid" then
+		return false
+	end
+	return NucleusHidesCompact(kind)
+end
+
 -- SUF hides party frames by default and raid frames only when that option is on.
 function addon.ShadowedReplacesCompactFrame(frame)
 	if not frame or not _G.ShadowUF then
@@ -475,8 +542,8 @@ function addon.ShadowedReplacesCompactFrame(frame)
 end
 
 -- ElvUI / Grid2 / Danders / Ellesmere / Buzzard / VuhDo / Mich's / Cell /
--- Enhance QoL / Shadowed Unit Frames replace compact raid/party. Those leftover
--- cells still run PrivateAurasUI on encounter auras.
+-- Enhance QoL / Shadowed Unit Frames / Nucleus replace compact raid/party.
+-- Those leftover cells still run PrivateAurasUI on encounter auras.
 function addon.UsesReplacementGroupFrames()
 	local DF = _G.DandersFrames
 	if type(DF) == "table" then
@@ -520,6 +587,9 @@ function addon.UsesReplacementGroupFrames()
 	if _G.ShadowUF and ShadowedHidesCompact("party") and ShadowedHidesCompact("raid") then
 		return true
 	end
+	if NucleusHidesCompact("party") and NucleusHidesCompact("raid") then
+		return true
+	end
 	return false
 end
 
@@ -551,7 +621,10 @@ function addon.IsGroupUnitFrame(frame)
 	if addon.IsShadowedGroupButton(frame) then
 		return true
 	end
-	if addon.EnhanceQoLReplacesCompactFrame(frame) or addon.ShadowedReplacesCompactFrame(frame) then
+	if addon.IsNucleusGroupButton(frame) then
+		return true
+	end
+	if addon.EnhanceQoLReplacesCompactFrame(frame) or addon.ShadowedReplacesCompactFrame(frame) or addon.NucleusReplacesCompactFrame(frame) then
 		return false
 	end
 	if frame.dfIsDandersFrame then
@@ -1084,6 +1157,45 @@ local function CollectCell(callback, seen)
 	end
 end
 
+local function CollectNucleusHeader(header, callback, seen)
+	if not header then
+		return
+	end
+	WalkHeader(header, callback, seen, 80)
+	WalkChildren(header, callback, seen, 1)
+	local name = header.GetName and header:GetName()
+	if type(name) ~= "string" then
+		return
+	end
+	for i = 1, 80 do
+		local button = _G[name .. "UnitButton" .. i]
+		if not button then
+			break
+		end
+		Consider(button, callback, seen)
+	end
+end
+
+local function CollectNucleus(callback, seen)
+	local headers = _G.Nucleus and _G.Nucleus.headers
+	if type(headers) == "table" then
+		CollectNucleusHeader(headers.party, callback, seen)
+		CollectNucleusHeader(headers.raid, callback, seen)
+		CollectNucleusHeader(headers.spotlight, callback, seen)
+		CollectNucleusHeader(headers.npc, callback, seen)
+		for g = 2, 8 do
+			CollectNucleusHeader(headers["raidG" .. g], callback, seen)
+		end
+	end
+	CollectNucleusHeader(_G.NucleusHeaderParty, callback, seen)
+	CollectNucleusHeader(_G.NucleusHeaderRaid, callback, seen)
+	CollectNucleusHeader(_G.NucleusHeaderSpotlight, callback, seen)
+	CollectNucleusHeader(_G.NucleusHeaderNpc, callback, seen)
+	for g = 2, 8 do
+		CollectNucleusHeader(_G["NucleusHeaderRaidG" .. g], callback, seen)
+	end
+end
+
 local function CollectEnhanceQoLHeader(header, callback, seen)
 	if not header then
 		return
@@ -1212,6 +1324,9 @@ function addon.ForEachUnitFrame(callback)
 	if _G.ShadowUF or _G.SUFHeaderparty or _G.SUFHeaderraid or _G.SUFHeaderraid1 then
 		CollectShadowed(callback, seenScratch)
 	end
+	if NucleusLoaded() or _G.NucleusHeaderParty or _G.NucleusHeaderRaid then
+		CollectNucleus(callback, seenScratch)
+	end
 end
 
 function addon.ForEachPlayerGroupFrame(callback)
@@ -1334,7 +1449,7 @@ local function HookThirdParty(name)
 			end)
 		end
 	end
-	if name == "EllesmereUIRaidFrames" or name == "EllesmereUI" or name == "BuzzardFrames" or name == "VuhDo" or name == "Michs_RaidFrames" or name == "Cell" or name == "EnhanceQoLUnitFrames" or name == "ShadowedUnitFrames" then
+	if name == "EllesmereUIRaidFrames" or name == "EllesmereUI" or name == "BuzzardFrames" or name == "VuhDo" or name == "Michs_RaidFrames" or name == "Cell" or name == "EnhanceQoLUnitFrames" or name == "ShadowedUnitFrames" or name == "Nucleus" then
 		if addon.HookRaidFrameProviders then
 			addon.HookRaidFrameProviders()
 		end
@@ -1366,6 +1481,7 @@ addon.On("LOGIN", function()
 	HookThirdParty("Cell")
 	HookThirdParty("EnhanceQoLUnitFrames")
 	HookThirdParty("ShadowedUnitFrames")
+	HookThirdParty("Nucleus")
 	if addon.HookRaidFrameProviders then
 		addon.HookRaidFrameProviders()
 	end
@@ -1384,4 +1500,5 @@ addon.On("ACTIVATE", function()
 	HookThirdParty("Cell")
 	HookThirdParty("EnhanceQoLUnitFrames")
 	HookThirdParty("ShadowedUnitFrames")
+	HookThirdParty("Nucleus")
 end)

@@ -211,23 +211,12 @@ local function ApplyCoreLayout(item, presentation)
 end
 
 -- Glow is a fixed Icon core visual, not a module-owned child tree.  Modules
--- provide only a pure option table; the collection owns the external library
--- lifecycle and always releases it with the pooled item.
-local function GetGlowLibrary()
-    if not LibStub then return nil end
-    local ok, lib = pcall(LibStub.GetLibrary, LibStub, "LibCustomGlow-1.0", true)
-    return ok and lib or nil
-end
-
+-- provide only a pure option table; the collection owns the Core glow
+-- lifecycle and always releases it with the pooled item.  The glow engine
+-- never reads host geometry, so the known core.icon rect supplies the size.
 local function StopCoreGlow(item)
-    local glow = item.coreGlow
-    if not glow then return end
-    local target, lib = item.widget, GetGlowLibrary()
-    if glow.mode == "pixel" and lib and type(lib.PixelGlow_Stop) == "function" then lib.PixelGlow_Stop(target, glow.key)
-    elseif glow.mode == "autocast" and lib and type(lib.AutoCastGlow_Stop) == "function" then lib.AutoCastGlow_Stop(target, glow.key)
-    elseif glow.mode == "proc" and lib and type(lib.ProcGlow_Stop) == "function" then lib.ProcGlow_Stop(target, glow.key)
-    elseif glow.mode == "action" and lib and type(lib.ButtonGlow_Stop) == "function" then lib.ButtonGlow_Stop(target)
-    elseif glow.fallback then glow.fallback:Hide() end
+    if not item.coreGlow then return end
+    EXUI:ReleaseGlow(item.widget)
     item.coreGlow = nil
 end
 
@@ -235,40 +224,18 @@ local function ApplyCoreGlow(item, presentation)
     StopCoreGlow(item)
     local spec = type(presentation.coreLayout) == "table" and presentation.coreLayout.glow or nil
     if type(spec) ~= "table" or spec.enabled ~= true then return end
-    local color = type(spec.color) == "table" and spec.color or { 1, 1, 1, 1 }
-    local r, g, b, a = tonumber(color.r or color[1]) or 1, tonumber(color.g or color[2]) or 1,
-        tonumber(color.b or color[3]) or 1, tonumber(color.a or color[4]) or 1
-    local lines, frequency = math.max(1, math.floor(tonumber(spec.lines) or 8)), tonumber(spec.frequency) or .25
-    local scale, offset = tonumber(spec.scale) or 1, tonumber(spec.offset) or 0
-    local key = "coreGlow:" .. tostring(item.collection.moduleKey) .. ":" .. tostring(item.id)
-    local target, lib, style = item.widget, GetGlowLibrary(), tostring(spec.style or "Pixel Glow")
-    local mode
-    if lib then
-        if style == "Action Button Glow" and type(lib.ButtonGlow_Start) == "function" then
-            lib.ButtonGlow_Start(target, { r, g, b, a }, frequency, 20); mode = "action"
-        elseif style == "Autocast Shine" and type(lib.AutoCastGlow_Start) == "function" then
-            lib.AutoCastGlow_Start(target, { r, g, b, a }, lines, frequency, scale, offset, offset, key, 20); mode = "autocast"
-        elseif style == "Proc Glow" and type(lib.ProcGlow_Start) == "function" then
-            lib.ProcGlow_Start(target, { key = key, color = { r, g, b, a }, frameLevel = 20, xOffset = offset, yOffset = offset, duration = 1 }); mode = "proc"
-        elseif type(lib.PixelGlow_Start) == "function" then
-            lib.PixelGlow_Start(target, { r, g, b, a }, lines, frequency, nil, scale, offset, offset, false, key, 20); mode = "pixel"
-        end
-    end
-    if mode then item.coreGlow = { mode = mode, key = key }; return end
-    local fallback = item.coreGlowFallback
-    if not fallback then
-        fallback = CreateFrame("Frame", nil, target, "BackdropTemplate")
-        item.coreGlowFallback = fallback
-    end
-    fallback:SetFrameStrata(target:GetFrameStrata())
-    fallback:SetFrameLevel((target:GetFrameLevel() or 1) + 20)
-    fallback:ClearAllPoints()
-    fallback:SetPoint("TOPLEFT", target, "TOPLEFT", -3 - offset, 3 + offset)
-    fallback:SetPoint("BOTTOMRIGHT", target, "BOTTOMRIGHT", 3 + offset, -3 - offset)
-    fallback:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = math.max(1, scale) })
-    fallback:SetBackdropBorderColor(r, g, b, a)
-    fallback:Show()
-    item.coreGlow = { mode = "fallback", fallback = fallback }
+    local color = type(spec.color) == "table" and spec.color or {}
+    local rect = item.coreLayoutRects["core.icon"]
+    EXUI:ShowGlow(item.widget, {
+        enabled = true, style = spec.style or "EDGE_FLOW",
+        width = rect.right - rect.left, height = rect.top - rect.bottom,
+        offset = spec.offset, frequency = spec.frequency,
+        particles = spec.particles or spec.lines, length = spec.length,
+        thickness = spec.thickness, direction = spec.direction,
+        scale = spec.scale,
+        r = color.r or color[1], g = color.g or color[2], b = color.b or color[3], a = color.a or color[4],
+    })
+    item.coreGlow = true
 end
 
 local function ApplyCooldown(collection, widget, cooldown)
@@ -282,6 +249,9 @@ local function ApplyCooldown(collection, widget, cooldown)
     elseif cooldown.mode == "DURATION" then
         widget:SetDurationObject(cooldown.duration, cooldown.clearIfZero, cooldown.durationTextProperty,
             cooldown.durationTextOptions)
+        if type(cooldown.frozen) == "table" then
+            widget:FreezeCooldownSwipe(cooldown.frozen.elapsed, cooldown.frozen.total)
+        end
     elseif cooldown.static == true then
         widget:SetStaticCooldown(cooldown.remaining, cooldown.duration, cooldown.format)
         -- Static editor/world samples have a known ordinary display string.
@@ -977,11 +947,15 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks)
         itemHeight = 1,
     }
     collection.layout = EXUI:CreateWidgetLayout(parent, {})
+    EXUI:InitializeCollectionVisualAnimations(collection)
 
     function collection:AcquireItem(itemID)
         if type(itemID) ~= "string" or itemID == "" then error("IconCollection itemID must be non-empty string", 2) end
         local item = self.itemsByID[itemID]
-        if item then return item end
+        if item then
+            if self:IsItemVisualRetiring(itemID) then self:StopItemVisualAnimation(itemID) end
+            return item
+        end
         item = NewItem(self, itemID)
         self.itemsByID[itemID] = item
         self.geometryRevision = (self.geometryRevision or 0) + 1
@@ -990,6 +964,7 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks)
 
     function collection:ApplyItem(item, presentation)
         if not item or not item.widget then error("IconCollection ApplyItem requires an acquired item", 2) end
+        if self:IsItemVisualRetiring(item.id) then self:StopItemVisualAnimation(item.id) end
         if type(presentation) ~= "table" then error("IconCollection presentation must be table", 2) end
         self.geometryRevision = (self.geometryRevision or 0) + 1
         item.presentation = presentation
@@ -1096,7 +1071,7 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks)
             if item and item.id then wanted[item.id] = true end
         end
         for itemID, item in pairs(self.itemsByID) do
-            if not wanted[itemID] and item.root then item.root:Hide() end
+            if not wanted[itemID] and item.root and not self:IsItemVisualRetiring(itemID) then item.root:Hide() end
         end
         self.geometryRevision = (self.geometryRevision or 0) + 1
         self.layout:ApplyStyle(CopyLayout(layout, self.contentCenter), true)
@@ -1214,12 +1189,14 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks)
     function collection:SetItemClickAction(itemID, spec)
         local item = self.itemsByID[itemID]
         if not item or not item.root then return false end
+        if self:IsItemVisualRetiring(itemID) then return false end
         return EXUI:ApplyCollectionItemClick(item, spec)
     end
 
     function collection:ReleaseItem(itemID)
         local item = self.itemsByID[itemID]
         if not item then return end
+        self:StopItemVisualAnimation(itemID)
         self.itemsByID[itemID] = nil
         self.geometryRevision = (self.geometryRevision or 0) + 1
         StopCoreGlow(item)

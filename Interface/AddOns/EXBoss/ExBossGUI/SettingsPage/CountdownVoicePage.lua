@@ -5,9 +5,6 @@ if not ExwindTools then return end
 local EXUI = ExwindTools.UI
 if not EXUI then return end
 
-local Grid = _G.ExwindGrid
-if not Grid then return end
-
 local L = (ExBoss and ExBoss.L) or setmetatable({}, { __index = function(_, k) return k end })
 
 ExBoss.UI.Panel.CountdownVoicePage = ExBoss.UI.Panel.CountdownVoicePage or {}
@@ -17,7 +14,6 @@ local Runtime = ExBoss and ExBoss.Voice and ExBoss.Voice.Countdown
 if not Runtime then return end
 
 local MODULE_KEY = "ExBoss.CountdownVoiceSettings"
-local GRID_COLS = 200
 local MAX_COUNTDOWN_DIGIT = tonumber(Runtime.GetMaxCountdownDigit and Runtime:GetMaxCountdownDigit()) or 5
 
 local SOURCE_ITEMS = {
@@ -25,43 +21,40 @@ local SOURCE_ITEMS = {
     { value = "lsm", label = L["LSM音效"] },
 }
 
--- [卡片/Grid 迁移边界：数字语音]
--- 允许：只按共享规范调整开怪倒数与数字语音两组的 x/y/w/h、外层卡片和可见高度。
--- 禁止：修改 digit key 生成规则、数字业务顺序、Runtime↔页面 DB 投影、试听回调或来源显隐逻辑。
+local function Cell(id, child)
+    return { id = id, kind = "cell", children = { child } }
+end
+
 local LAYOUT = {
-    version = 1,
-    title = L["语音设置"],
-    sections = {
-        { kind = "settings", id = "pull-countdown", title = L["开怪倒数"], items = {
-            { key = "pullCountdownEnabled", type = "switch", label = L["启用开怪倒数"] },
-            { key = "pullCountdownVoiceEnabled", type = "switch", label = L["为开怪倒数播放语音"] },
+    version = 2,
+    cards = {
+        { kind = "card", id = "pull-countdown", title = L["开怪倒数"], children = {
+            { id = "pullCountdownEnabled", kind = "control", controlType = "switch", path = "pullCountdownEnabled", label = L["启用开怪倒数"] },
+            { id = "pullCountdownVoiceEnabled", kind = "control", controlType = "switch", path = "pullCountdownVoiceEnabled", label = L["为开怪倒数播放语音"] },
         } },
-        { kind = "table", id = "digit-voice", title = L["数字语音"],
-            columns = {
+        { kind = "card", id = "digit-voice", title = L["数字语音"], children = {
+            { kind = "table", id = "digit-voice.table", columns = {
                 { title = L["启用"] }, { title = L["数字"] }, { title = L["来源"] },
                 { title = L["音效选择"] }, { title = L["试听"] },
-            },
-            supportsAdd = false, records = {},
-        },
+            }, children = {
+                { kind = "repeat", id = "digit-voice.rows", source = "digits", template = {
+                    kind = "row", id = "digit-voice.row", children = {
+                        Cell("digit-voice.enabled", { id = "digitEnabled", kind = "control", controlType = "checkbox", ref = "digitEnabled" }),
+                        Cell("digit-voice.number", { id = "digitNumber", kind = "text", textSource = "digitNumber" }),
+                        Cell("digit-voice.source", { id = "digitSource", kind = "control", controlType = "select", ref = "digitSource" }),
+                        Cell("digit-voice.lsm", { id = "digitLSM", kind = "control", controlType = "select", ref = "digitLSM", visible = "usesLSM", enabled = "digitEnabled" }),
+                        Cell("digit-voice.preview", { id = "preview", kind = "button", text = L["试听"], action = "previewDigit" }),
+                    },
+                } },
+            } },
+        } },
     },
 }
 
-local root
 local scrollFrame
 local scrollChild
 local cardSession
 local renderTicket = 0
-
-local function DeepCopy(v)
-    if type(v) ~= "table" then
-        return v
-    end
-    local out = {}
-    for k, x in pairs(v) do
-        out[k] = DeepCopy(x)
-    end
-    return out
-end
 
 local function ApplyDefaults(dst, defaults)
     if type(dst) ~= "table" or type(defaults) ~= "table" then
@@ -77,22 +70,6 @@ local function ApplyDefaults(dst, defaults)
             dst[k] = v
         end
     end
-end
-
-local function BuildLayout()
-    -- 保留原数字顺序、key和原工厂语义；每行只声明一次。
-    local layout = DeepCopy(LAYOUT)
-    local rows = layout.sections[2].records
-    for i = 1, MAX_COUNTDOWN_DIGIT do
-        rows[#rows + 1] = { cells = {
-            { key = "digitEnabled" .. tostring(i), type = "switch", label = string.format(L["数字 %d"], i) },
-            { text = string.format(L["数字 %d"], i) },
-            { key = "digitSource" .. tostring(i), type = "select", label = L["来源"], options = SOURCE_ITEMS },
-            { key = "digitLSM" .. tostring(i), type = "select", media = "sound", label = L["LSM音效"] },
-            { key = "preview" .. tostring(i), type = "button", label = L["试听"] },
-        } }
-    end
-    return layout
 end
 
 local function NormalizeDigitSource(value)
@@ -139,84 +116,97 @@ local function SyncPageDBToRuntimeDB()
     end
 end
 
-local function GetEditorWidgets()
-    -- state.widgets 的 digit* key 是显隐与试听的稳定入口，迁移后必须保留 key 查找语义。
-    local widgets = {}
-    if not (scrollChild and Grid.FindMountedWidget) then
-        return widgets
-    end
+local function CreateOwner()
+    local pageDB, digits = GetPageDB(), {}
     for i = 1, MAX_COUNTDOWN_DIGIT do
-        local suffix = tostring(i)
-        widgets["digitEnabled" .. suffix] = Grid:FindMountedWidget(scrollChild, "digitEnabled" .. suffix)
-        widgets["digitSource" .. suffix] = Grid:FindMountedWidget(scrollChild, "digitSource" .. suffix)
-        widgets["digitLSM" .. suffix] = Grid:FindMountedWidget(scrollChild, "digitLSM" .. suffix)
-        widgets["preview" .. suffix] = Grid:FindMountedWidget(scrollChild, "preview" .. suffix)
+        digits[i] = { digit = i }
     end
-    return widgets
-end
-
-local function SetWidgetShown(widget, shown)
-    if not widget then return end
-    if shown then widget:Show() else widget:Hide() end
-end
-
-local function SetWidgetUsable(widget, usable)
-    if not widget then return end
-    local isInput = widget._gridType == "GridInput" or (widget.IsObjectType and widget:IsObjectType("EditBox"))
-    if isInput then
-        if widget.Enable then widget:Enable() end
-        if widget.EnableMouse then widget:EnableMouse(true) end
-    elseif widget.SetEnabled then
-        widget:SetEnabled(usable == true)
-    elseif widget.Enable and widget.Disable then
-        if usable then widget:Enable() else widget:Disable() end
+    local owner = {
+        binding = { moduleKey = MODULE_KEY, config = pageDB },
+        controls = {}, sources = {}, texts = {}, predicates = {}, actions = {},
+    }
+    owner.sources.digits = function() return digits end
+    owner.texts.digitNumber = function(scope)
+        return string.format(L["数字 %d"], scope.item.digit)
     end
-    widget:SetAlpha(usable and 1 or 0.45)
-    if widget._exLabel then
-        widget._exLabel:SetAlpha(usable and 1 or 0.45)
-    elseif widget.labelText then
-        widget.labelText:SetAlpha(usable and 1 or 0.45)
+    owner.predicates.usesLSM = function(scope)
+        return NormalizeDigitSource(pageDB["digitSource" .. tostring(scope.item.digit)]) == "lsm"
+    end
+    owner.predicates.digitEnabled = function(scope)
+        return pageDB["digitEnabled" .. tostring(scope.item.digit)] == true
+    end
+    local function DigitBinding(context, prefix)
+        return EXUI:CreateSettingsV2Binding(MODULE_KEY, pageDB, prefix .. tostring(context.scope.item.digit))
+    end
+    local function DigitControl(prefix, spec)
+        local adapter = EXUI:CreateSettingsV2Control(spec,
+            function(context) return DigitBinding(context, prefix) end)
+        local mount, layout = adapter.mount, adapter.layout
+        adapter.mount = function(host, context)
+            local widget = mount(host, context)
+            EXUI:PrepareSettingsListControl(widget, {
+                hideLabel = true, ordinaryControl = spec.controlType == "select",
+                presentation = spec.controlType == "checkbox" and "switch" or nil,
+            })
+            return widget
+        end
+        adapter.measure = function(widget, context, width)
+            widget:SetWidth(width)
+            return widget:GetHeight()
+        end
+        adapter.layout = function(widget, context, width, height)
+            layout(widget, context, width, height)
+            EXUI:UpdateSettingsListControlLayout(widget, width)
+        end
+        return adapter
+    end
+    owner.controls.digitEnabled = DigitControl("digitEnabled", { controlType = "checkbox", label = "" })
+    owner.controls.digitSource = DigitControl("digitSource", { controlType = "select", options = SOURCE_ITEMS })
+    owner.controls.digitLSM = DigitControl("digitLSM", { controlType = "select", media = "sound" })
+    local setLSMEnabled = owner.controls.digitLSM.setEnabled
+    owner.controls.digitLSM.setEnabled = function(widget, context, enabled)
+        setLSMEnabled(widget, context, enabled)
+        widget:SetAlpha(enabled and 1 or 0.45)
+    end
+    owner.actions.previewDigit = function(context)
+        ExwindTools:UpdateState(MODULE_KEY .. ".ButtonClicked", {
+            key = "preview" .. tostring(context.scope.item.digit), ts = GetTime(),
+        })
+    end
+    return owner
+end
+
+local function ReleaseSession()
+    cardSession = nil
+    if scrollChild then
+        EXUI:ReleaseModuleSettingsPage(scrollChild)
+        scrollChild:Hide()
     end
 end
 
-local function RefreshDynamicWidgets()
-    local widgets = GetEditorWidgets()
-    local pageDB = GetPageDB()
-    for i = 1, MAX_COUNTDOWN_DIGIT do
-        local source = NormalizeDigitSource(pageDB["digitSource" .. tostring(i)])
-        local lsmWidget = widgets["digitLSM" .. tostring(i)]
-        local enabled = pageDB["digitEnabled" .. tostring(i)] == true
-        SetWidgetShown(lsmWidget, source == "lsm")
-        SetWidgetUsable(lsmWidget, enabled and source == "lsm")
-    end
-end
-
-local function RegisterLayout()
-    ExwindTools:RegisterModuleLayout(MODULE_KEY, BuildLayout())
-end
-
--- [混合函数边界] Page:Render 内只可调整 Scroll/Grid 几何；投影复制、RegisterModuleLayout、WatchState 与 ActivePage 注册禁止修改。
--- Page:Hide 只隐藏 ScrollFrame；从设置目录离开时 ActivePageFrame/CurrentModule 由 GlobalSettingsPage 清理，不能误写为本页 OnHide 释放。
 function Page:Render(contentFrame)
     if not contentFrame then
         return
     end
 
     CopyRuntimeDBToPageDB()
-    RegisterLayout()
     renderTicket = renderTicket + 1
     local ticket = renderTicket
 
     if not scrollFrame then
-        scrollFrame = CreateFrame("ScrollFrame", "ExBoss_CountdownVoiceSettingsScroll", contentFrame, "ScrollFrameTemplate")
-        if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then
-            ExBoss.UI.ApplyModernScrollBarSkin(scrollFrame)
-        end
+        scrollFrame = EXUI:CreateScrollFrame(contentFrame, "ExBoss_CountdownVoiceSettingsScroll")
         scrollChild = CreateFrame("Frame", nil, scrollFrame)
         scrollChild:SetHeight(1)
         scrollFrame:SetScrollChild(scrollChild)
         Page._scrollFrame = scrollFrame
         Page._scrollChild = scrollChild
+        scrollFrame:HookScript("OnHide", function()
+            renderTicket = renderTicket + 1
+            ReleaseSession()
+        end)
+        scrollFrame:HookScript("OnSizeChanged", function()
+            if scrollChild then scrollChild:SetWidth(math.max(1, scrollFrame:GetWidth() + 6)) end
+        end)
     end
 
     scrollFrame:SetParent(contentFrame)
@@ -224,13 +214,7 @@ function Page:Render(contentFrame)
     scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4)
     scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
     scrollFrame:SetVerticalScroll(0)
-    -- Page:Hide retains the mounted GUI session. Do not expose that previous
-    -- lease for one frame while the deferred width pass is still rebuilding it.
-    scrollChild:Hide()
-    if cardSession and type(cardSession.Release) == "function" then
-        cardSession:Release()
-        cardSession = nil
-    end
+    ReleaseSession()
     scrollFrame:Show()
 
     C_Timer.After(0, function()
@@ -241,29 +225,19 @@ function Page:Render(contentFrame)
         if width < 100 then
             width = 820
         end
-        local mounted, failure = pcall(function()
-            scrollChild:SetWidth(width - 16)
-            scrollChild:SetHeight(980)
-            scrollChild:SetParent(scrollFrame)
-            scrollChild:ClearAllPoints()
-            scrollChild:SetPoint("TOPLEFT", 0, 0)
-            if ExwindTools.UI then
-                ExwindTools.UI.ActivePageFrame = scrollChild
-                ExwindTools.UI.CurrentModule = MODULE_KEY
-            end
-            cardSession = Grid:MountCards(scrollChild, BuildLayout(), {
-                pageId = MODULE_KEY,
-                regionId = "countdown-voice",
-                config = GetPageDB(),
-                moduleKey = MODULE_KEY,
-                scrollFrame = scrollFrame,
-            })
-            RefreshDynamicWidgets()
-        end)
+        scrollChild:SetWidth(width - 16)
+        scrollChild:SetHeight(1)
+        scrollChild:SetParent(scrollFrame)
+        scrollChild:ClearAllPoints()
+        scrollChild:SetPoint("TOPLEFT", 0, 0)
+        local owner = CreateOwner()
+        cardSession = EXUI:MountModuleSettingsDeclarationV2(scrollChild, MODULE_KEY, owner,
+            L["语音设置"], L["开怪倒数与数字语音。"], scrollFrame)
+        EXUI.ActivePageFrame = scrollChild
+        EXUI.CurrentModule = MODULE_KEY
         if ticket == renderTicket and scrollFrame:IsShown() then
             scrollChild:Show()
         end
-        if not mounted then error(failure, 0) end
     end)
 end
 
@@ -287,8 +261,11 @@ end
 
 local function RefreshActiveSurfaces()
     SyncPageDBToRuntimeDB()
-    RefreshDynamicWidgets()
+    local page = EXUI:GetModulePage(MODULE_KEY, scrollChild)
+    if page then page:Refresh() end
 end
+
+EXUI:RegisterSettingsPageV2(MODULE_KEY, LAYOUT)
 
 EXUI:RegisterModuleValueController(MODULE_KEY, {
     RefreshActiveSurfaces = RefreshActiveSurfaces,

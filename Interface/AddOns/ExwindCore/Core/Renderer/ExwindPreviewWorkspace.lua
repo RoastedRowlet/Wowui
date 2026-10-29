@@ -550,8 +550,8 @@ function PreviewWorkspace:RefreshInspector()
             local prefix = element.category == "child" and L["子·"] or (element.category == "extension" and L["扩·"] or "")
             button.text:SetText(prefix .. (element.label or element.id))
             button:SetAlpha(element.enabled == false and 0.42 or 1)
-            if session.selectedId == element.id then button:SetBackdropColor(0.16, 0.30, 0.55, 0.95)
-            else button:SetBackdropColor(0.07, 0.09, 0.14, 0.95) end
+            button:SetBackdropColor(0.07, 0.09, 0.14, 0.95)
+            EXUI:PaintSelectRow(button, session.selectedId == element.id)
             button:Show()
         else button:Hide() end
     end

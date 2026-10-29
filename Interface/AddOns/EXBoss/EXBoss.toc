@@ -1,8 +1,9 @@
-## Interface: 120007
+## Interface: 120105, 120100
 ## Title: |cffff4400Ex|r|cff00ccffBoss|r
 ## Notes: BOSS 技能计时 + 语音提醒
 ## Author: Exwind
 ## Version: 1.0.0
+## X-Wago-ID: vNAgrRKo
 ## RequiredDeps: ExwindCore, EXBossData, EXBOSS-Locale
 ## OptionalDeps: LibSharedMedia-3.0
 ## SavedVariables: EXBOSS12S2

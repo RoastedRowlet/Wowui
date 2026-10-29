@@ -133,12 +133,6 @@ local function CreateGridRow(owner)
         cell.thumbnail:SetPoint("TOP", cell, "TOP", 0, -6)
         cell.thumbnail:SetSize(THUMBNAIL_SIZE, THUMBNAIL_SIZE)
 
-        cell.selectionLine = EXUI:CreateVisualTexture(cell, EXBORDERFRAME)
-        cell.selectionLine:SetPoint("TOPLEFT", cell, "TOPLEFT", 4, -3)
-        cell.selectionLine:SetPoint("TOPRIGHT", cell, "TOPRIGHT", -4, -3)
-        cell.selectionLine:SetHeight(2)
-        cell.selectionLine:SetColorTexture(0.26, 0.72, 1, 1)
-
         cell.assetName = EXUI:CreateVisualFontString(cell, EXFONTFRAME, "GameFontHighlightSmall")
         cell.assetName:SetPoint("BOTTOMLEFT", cell, "BOTTOMLEFT", 5, 5)
         cell.assetName:SetPoint("BOTTOMRIGHT", cell, "BOTTOMRIGHT", -5, 5)
@@ -163,11 +157,11 @@ local function BindGridRow(row, assets)
                 cell.thumbnail:SetVertexColor(1, 1, 1, 1)
             end
             cell.assetName:SetText(asset.name or "")
-            cell.selectionLine:SetShown(asset == selectedAsset)
+            EXUI:PaintSelectCell(cell, asset == selectedAsset, ExwindTools.GUIMetrics.radius.control)
         else
             cell.thumbnail:SetTexture(nil)
             cell.assetName:SetText("")
-            cell.selectionLine:Hide()
+            EXUI:PaintSelectCell(cell, false)
         end
     end
 end

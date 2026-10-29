@@ -88,7 +88,7 @@ mod:SetRenames({
 	[1287533] = {CL.adds_spawning}, -- Gravebound Advance
 	[1292036] = {L.possession_barrage, CL.you:format(L.possession_barrage), CL.cast:format(L.possession_barrage), original = {1292036, CL.you:format(mod:SpellName(1292036)), CL.cast:format(mod:SpellName(1292036))}, notes = {CL.generalNote, CL.messageOnYouNote, CL.castTimerNote}}, -- Possession Barrage
 	[1293212] = {1293212}, -- Grasping Depths
-	[1305421] = {CL.soak}, -- Hungering Pyre
+	[1305421] = {CL.soak, CL.cast:format(CL.soak), notes = {CL.generalNote, CL.castTimerNote}, original = {1305421, CL.cast:format(mod:SpellName(1305421))}}, -- Hungering Pyre
 	[1299673] = {1299673, CL.cast:format(mod:SpellName(1299673)), notes = {CL.generalNote, CL.castTimerNote}}, -- Invoke
 })
 
@@ -492,7 +492,7 @@ function mod:PossessionBarrage(duration)
 				self:Message(1292036, "purple", barText)
 				self:PlaySound(1292036, "alert")
 			end, 1)
-			self:PersonalMessageFromBlizzMessage(1284103, 1, false, self:GetRename(1292036, 2), nil, nil, function()
+			self:PersonalMessageFromBlizzMessage(1292036, 1, false, self:GetRename(1292036, 2), nil, nil, function()
 				self:CancelTimer(timer)
 				self:PlaySound(1292036, "warning")
 			end)

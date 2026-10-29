@@ -71,44 +71,48 @@ local MODULE_SPEC = {
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        description = L["实时显示目标距离范围，根据与目标的最小距离自动变色。"],
-        sections = {
+        version = 2,
+        cards = {
             {
-                kind = "settings", id = "general", title = L["基础设置"],
-                items = {
-                    { key = "enabled", type = "switch", label = L["启用"] },
-                    { key = "showText", type = "switch", label = L["显示距离范围"] },
-                    { key = "frameScale", type = "slider", label = L["缩放"], min = 0.5, max = 3 },
-                    { key = "hideThreshold", type = "slider", label = L["隐藏距离阈值"], min = 5, max = 100 },
+                kind = "card", id = "card.general", title = L["基础设置"],
+                children = {
+                    { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用"],
+                        description = L["实时显示目标距离范围，根据与目标的最小距离自动变色。"] },
+                    { id = "showText", kind = "control", controlType = "switch", path = "showText", label = L["显示距离范围"] },
+                    { id = "frameScale", kind = "control", controlType = "slider", path = "frameScale", label = L["缩放"], min = 0.5, max = 3 },
+                    { id = "hideThreshold", kind = "control", controlType = "slider", path = "hideThreshold", label = L["隐藏距离阈值"], min = 5, max = 100 },
                 },
             },
             {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchorGroup",
-            },
-            {
-                kind = "composite", id = "font_text", title = L["距离文本"],
-                component = "fontgroup", key = "font_text",
-            },
-            {
-                kind = "settings", id = "format", title = L["显示格式"],
-                items = {
-                    { key = "rangeFormat", type = "input", label = L["范围格式"] },
-                    { key = "minOnlyFormat", type = "input", label = L["仅最小值格式"] },
+                kind = "card", id = "card.anchor", title = L["锚点设置"],
+                children = {
+                    { id = "anchorGroup", kind = "component", component = "anchorgroup", path = "anchorGroup", optionsRef = "anchor" },
                 },
-                footerDescription = { key = "desc_format", type = "description", label = L["范围格式需要两个 %d (最小/最大，如%d - %d)，仅最小值格式需要一个 %d+。留空使用默认格式。"] },
             },
             {
-                kind = "settings", id = "colors", title = L["距离颜色设置"],
-                items = {
-                    { key = "crColor", type = "color", label = L["< 5 码"] },
-                    { key = "srColor", type = "color", label = L[">= 5 码"] },
-                    { key = "s10Color", type = "color", label = L[">= 10 码"] },
-                    { key = "s15Color", type = "color", label = L[">= 15 码"] },
-                    { key = "mrColor", type = "color", label = L[">= 20 码"] },
-                    { key = "lrColor", type = "color", label = L[">= 30 码"] },
-                    { key = "oorColor", type = "color", label = L[">= 40 码"] },
+                kind = "card", id = "card.font_text", title = L["距离文本"],
+                children = {
+                    { id = "font_text", kind = "component", component = "fontgroup", path = "font_text" },
+                },
+            },
+            {
+                kind = "card", id = "card.format", title = L["显示格式"],
+                children = {
+                    { id = "rangeFormat", kind = "control", controlType = "input", path = "rangeFormat", label = L["范围格式"],
+                        description = L["范围格式需要两个 %d (最小/最大，如%d - %d)，仅最小值格式需要一个 %d+。留空使用默认格式。"] },
+                    { id = "minOnlyFormat", kind = "control", controlType = "input", path = "minOnlyFormat", label = L["仅最小值格式"] },
+                },
+            },
+            {
+                kind = "card", id = "card.colors", title = L["距离颜色设置"],
+                children = {
+                    { id = "crColor", kind = "control", controlType = "color", path = "crColor", label = L["< 5 码"] },
+                    { id = "srColor", kind = "control", controlType = "color", path = "srColor", label = L[">= 5 码"] },
+                    { id = "s10Color", kind = "control", controlType = "color", path = "s10Color", label = L[">= 10 码"] },
+                    { id = "s15Color", kind = "control", controlType = "color", path = "s15Color", label = L[">= 15 码"] },
+                    { id = "mrColor", kind = "control", controlType = "color", path = "mrColor", label = L[">= 20 码"] },
+                    { id = "lrColor", kind = "control", controlType = "color", path = "lrColor", label = L[">= 30 码"] },
+                    { id = "oorColor", kind = "control", controlType = "color", path = "oorColor", label = L[">= 40 码"] },
                 },
             },
         },

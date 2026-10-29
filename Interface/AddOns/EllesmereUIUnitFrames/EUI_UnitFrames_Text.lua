@@ -79,7 +79,9 @@ do
         -- tracker only routes real unit events under that name); the identity
         -- and forced paths still pay the probe.
         if event ~= "UNIT_HEALTH" and not UnitExists(unit) then return end
-        if not ns.Engine.ElementOn(frame, "Health") then return end
+        -- Engine.ElementOn, inlined on this per-tick path.
+        local off = frame._euiElementsOff
+        if off and off.Health then return end
         -- Bar bounds ride the max-health/identity events (Blizzard's own
         -- contract); a pure UNIT_HEALTH value tick pushes only the value.
         if event ~= "UNIT_HEALTH" or not element._maxSet then
@@ -199,19 +201,29 @@ do
     ns.Engine.SetPainter("absorb", PaintAbsorb)
 end
 
--- Global Dark Mode master: exposes darkTheme so the parent addon's master toggle can
--- flip it with other modules. setOn mirrors the individual toggle (write flag + reload).
-EllesmereUI.RegisterDarkModeToggle({
-    id = "unitFrames",
-    isOn = function()
-        return (db and db.profile and db.profile.darkTheme) or false
-    end,
-    setOn = function(on)
-        if not (db and db.profile) then return end
-        db.profile.darkTheme = on
-        if ns.ReloadFrames then ns.ReloadFrames() end
-    end,
-})
+-- The global master reads and sets every frame's effective Dark Mode choice.
+do
+    local UNITS = { "player", "target", "focus", "targettarget", "focustarget", "pet", "boss" }
+    EllesmereUI.RegisterDarkModeToggle({
+        id = "unitFrames",
+        isOn = function()
+            if not (db and db.profile) then return false end
+            for _, key in ipairs(UNITS) do
+                if not ns.UF_DarkThemeOn(db.profile[key]) then return false end
+            end
+            return true
+        end,
+        setOn = function(on)
+            if not (db and db.profile) then return end
+            db.profile.darkTheme = on
+            for _, key in ipairs(UNITS) do
+                local s = db.profile[key]
+                if s then s.darkTheme = on end
+            end
+            if ns.ReloadFrames then ns.ReloadFrames() end
+        end,
+    })
+end
 
 -- Smart power text: percent for healers/prot pally/arcane mage, numeric for the rest.
 -- Shared by the oUF tag and the resource bars renderer. `displayedPowerType` (optional
@@ -264,7 +276,7 @@ EllesmereUI.IsSmartPowerPercent = EUI_IsSmartPowerPercent
 -- one decimal, 100 for two). Ten-thousand-grouping locales (koKR/zhCN/zhTW) take
 -- the shared number engine's thousand/wan/yi units instead of k/m/b, so these
 -- frames read the same as Damage Meters and the gold bar on those clients.
-local function DecimalAbbrevConfig(d)
+local function DecimalAbbrevConfig(d, shortHealth)
     local g = EllesmereUI.NumberAbbrevGlyphs()
     if g then
         return { breakpointData = {
@@ -274,20 +286,30 @@ local function DecimalAbbrevConfig(d)
         } }
     end
     return { breakpointData = {
-        { breakpoint = 1e9, abbreviation = "b", significandDivisor = 1e9 / d, fractionDivisor = d, abbreviationIsGlobal = false },
-        { breakpoint = 1e6, abbreviation = "m", significandDivisor = 1e6 / d, fractionDivisor = d, abbreviationIsGlobal = false },
-        { breakpoint = 1e3, abbreviation = "k", significandDivisor = 1e3 / d, fractionDivisor = d, abbreviationIsGlobal = false },
+        { breakpoint = 1e9, abbreviation = shortHealth and "B" or "b", significandDivisor = 1e9 / d, fractionDivisor = d, abbreviationIsGlobal = false },
+        { breakpoint = 1e6, abbreviation = shortHealth and "M" or "m", significandDivisor = 1e6 / d, fractionDivisor = d, abbreviationIsGlobal = false },
+        { breakpoint = 1e3, abbreviation = shortHealth and "K" or "k", significandDivisor = 1e3 / d, fractionDivisor = d, abbreviationIsGlobal = false },
     } }
 end
 -- WoW Forever: nothing under 10,000 abbreviates, so the k band starts there and
 -- the thousand band goes (the shared engine's trim, EllesmereUI_NumberFormat.lua).
 if EllesmereUI.IS_FOREVER then
     local bands = DecimalAbbrevConfig
-    DecimalAbbrevConfig = function(d)
-        local cfg = bands(d)
-        cfg.breakpointData = EllesmereUI.ForeverAbbrevTiers(cfg.breakpointData)
+    DecimalAbbrevConfig = function(d, shortHealth)
+        local cfg = bands(d, shortHealth)
+        if not shortHealth then
+            cfg.breakpointData = EllesmereUI.ForeverAbbrevTiers(cfg.breakpointData)
+        end
         return cfg
     end
+end
+
+-- Health Short always abbreviates from 1,000 with one decimal.
+function ns.AbbreviateShortHealth(hp)
+    if not ns._shortHealthAbbrevConfig then
+        ns._shortHealthAbbrevConfig = DecimalAbbrevConfig(10, true)
+    end
+    return AbbreviateNumbers(hp, ns._shortHealthAbbrevConfig)
 end
 -- "Hide Trailing Zeros": AbbreviateNumbers drops a zero fraction ("100") but keeps a
 -- real one ("99.5"), which "%.1f" cannot do and a SECRET percent forbids doing with
@@ -352,11 +374,21 @@ end
 -- Shared text-piece functions consumed by the zone formatter table below.
 local TagFns = {}
 
+-- unit token -> is a boss token, filled on first sight (the frames use a handful
+-- of fixed tokens), so the text pieces never slice the token per paint.
+local IS_BOSS_UNIT = setmetatable({}, { __index = function(t, unit)
+    local v = string.sub(unit, 1, 4) == "boss"
+    t[unit] = v
+    return v
+end })
+
 do
-  -- Abbreviated health for the curhpshort / maxhpshort tags. status: an
-  -- offline, dead or ghost unit reads OFFLINE / DEAD. Only the current value
-  -- takes it, so Health # / Max # names the status once ("DEAD / 150 K").
-  local function MakeAbbrevHP(getHP, status)
+  -- Abbreviated health for the curhpshort / healthshort / maxhpshort tags.
+  -- status: an offline, dead or ghost unit reads OFFLINE / DEAD. Only the
+  -- current value takes it, so Health # / Max # names the status once
+  -- ("DEAD / 150 K"). shortHealth (healthshort): always one decimal with an
+  -- uppercase K/M/B (ns.AbbreviateShortHealth), whatever the decimal options say.
+  local function MakeAbbrevHP(getHP, status, shortHealth)
     return function(unit)
       if not unit or not UnitExists(unit) then return "" end
       if status then
@@ -364,9 +396,10 @@ do
         if UnitIsDeadOrGhost(unit) then return "DEAD" end
       end
       local hp = getHP(unit) or 0
+      if shortHealth then return ns.AbbreviateShortHealth(hp) end
       local cfg = _G._EUI_AbbrevDecimalCfg
       -- Boss frames use the 2-decimal config when "Show 2 for Boss" is on.
-      if _G._EUI_BossExtraDecimal and string.sub(unit, 1, 4) == "boss" then
+      if _G._EUI_BossExtraDecimal and IS_BOSS_UNIT[unit] then
         cfg = _G._EUI_AbbrevDecimalCfg2
       end
       return cfg and AbbreviateNumbers(hp, cfg) or AbbreviateNumbers(hp)
@@ -374,6 +407,7 @@ do
   end
 
   TagFns.curhpshort = MakeAbbrevHP(UnitHealth, true)
+  TagFns.healthshort = MakeAbbrevHP(UnitHealth, true, true)
   TagFns.maxhpshort = MakeAbbrevHP(UnitHealthMax)
 end
 
@@ -386,7 +420,7 @@ do
     -- Corpses only, like Blizzard's health paths: a ghost is at full health, and
     -- the neighbouring DEAD zone is the piece that speaks for dead-or-ghost.
     if UnitIsDead(unit) then return "0" end
-    local boss = _G._EUI_BossExtraDecimal and string.sub(unit, 1, 4) == "boss"
+    local boss = _G._EUI_BossExtraDecimal and IS_BOSS_UNIT[unit]
     local trim = _G._EUI_PctTrim
     if boss then trim = _G._EUI_PctTrim2 end
     if trim then
@@ -451,7 +485,15 @@ function EllesmereUI.GetPlayerPowerOverride()
         or (C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo(spec))
         or nil
     local ov = db.profile.player and db.profile.player.powerTypeOverride
-    if sid and ov and ov[sid] and classAlt then
+    local choice = sid and ov and ov[sid]
+    if choice == "astral" then
+        -- Balance "Astral Power (Except Cat & Bear)", saved only under its spec
+        -- ID: Cat and Bear Form (form IDs 1 and 5) keep their own power, every
+        -- other form shows Astral Power.
+        local f = GetShapeshiftFormID()
+        if f ~= 1 and f ~= 5 then return Enum.PowerType.LunarPower end
+        return nil
+    elseif choice and classAlt then
         return classAlt[spec]
     elseif classDef and classDef[spec] ~= nil then
         return classDef[spec]
@@ -820,6 +862,7 @@ do
 
     -- Function-registered tag methods are shared directly: one body, no drift.
     P.curhpshort  = TagFns.curhpshort
+    P.healthshort = TagFns.healthshort
     P.maxhpshort  = TagFns.maxhpshort
     P.perhp       = TagFns.perhp
     P.perhpnosign = TagFns.perhpnosign
@@ -857,6 +900,27 @@ do
     P.maxpp = function(u)
         local pType = _G._EUI_ResolvedPowerType[u] or UnitPowerType(u)
         return AbbreviateNumbers(UnitPowerMax(u, pType))
+    end
+    -- Full numbers for the custom text tags ([hp], [hp:max], [pp], [pp:max]).
+    -- %d formats a secret value like P.perpp does; [hp] names the status as
+    -- curhpshort does.
+    P.curhp = function(u)
+        if not u or not UnitExists(u) then return "" end
+        if not UnitIsConnected(u) then return "OFFLINE" end
+        if UnitIsDeadOrGhost(u) then return "DEAD" end
+        return sf("%d", UnitHealth(u) or 0)
+    end
+    P.maxhp = function(u)
+        if not u or not UnitExists(u) then return "" end
+        return sf("%d", UnitHealthMax(u) or 0)
+    end
+    P.curppfull = function(u)
+        local pType = _G._EUI_ResolvedPowerType[u] or UnitPowerType(u)
+        return sf("%d", UnitPower(u, pType))
+    end
+    P.maxppfull = function(u)
+        local pType = _G._EUI_ResolvedPowerType[u] or UnitPowerType(u)
+        return sf("%d", UnitPowerMax(u, pType))
     end
     P.absorb = function(u)
         if not u or not UnitExists(u) then return "" end
@@ -939,6 +1003,7 @@ do
         perhpnum     = { "%s%% | %s", "perhp", "curhpshort" },
         perhpnumdash = { "%s%% - %s", "perhp", "curhpshort" },
         curhpshort   = { "%s", "curhpshort" },
+        healthshort  = { "%s", "healthshort" },
         curmaxhp     = { "%s / %s", "curhpshort", "maxhpshort" },
         perhp        = { "%s%%", "perhp" },
         perhpnosign  = { "%s", "perhpnosign" },
@@ -959,21 +1024,69 @@ do
     -- listed: nametotarget (target names churn) and group (roster-driven,
     -- repainted by the value ticks it always rode).
     local ZONE_IDENTITY = { name = true, levelname = true, namelevel = true, level = true }
-    -- Value-class events: a static zone skips these and repaints on anything
-    -- else (identity events, ForceUpdate, UnitChanged, PEW, nil = repaint all).
-    -- UNIT_TARGET is here too: only the Name > Target zone (never static)
-    -- reads the unit's target, so the name and level zones sit it out.
-    local VALUE_EVENTS = {
-        UNIT_HEALTH = true, UNIT_MAXHEALTH = true, UNIT_MAX_HEALTH_MODIFIERS_CHANGED = true,
-        UNIT_POWER_UPDATE = true, UNIT_MAXPOWER = true, UNIT_DISPLAYPOWER = true,
-        UNIT_ABSORB_AMOUNT_CHANGED = true, UNIT_HEAL_ABSORB_AMOUNT_CHANGED = true,
-        UNIT_TARGET = true,
-        Resettle = true, EUI_AbsorbEnd = true, EUI_AbsorbBelt = true,
+    -- Value-class events and the value each one moves. A value event repaints
+    -- only the zones that read that value (a static zone none of them); anything
+    -- else (identity events, ForceUpdate, UnitChanged, Poll, PEW, nil) repaints
+    -- every zone. Resettle follows a max-health change; the two absorb-end
+    -- events cover either absorb kind.
+    local VALUE_CLASS = {
+        UNIT_HEALTH = "hp", UNIT_MAXHEALTH = "hp", UNIT_MAX_HEALTH_MODIFIERS_CHANGED = "hp",
+        Resettle = "hp",
+        UNIT_POWER_UPDATE = "pp", UNIT_MAXPOWER = "pp", UNIT_DISPLAYPOWER = "pp",
+        UNIT_ABSORB_AMOUNT_CHANGED = "abs", UNIT_HEAL_ABSORB_AMOUNT_CHANGED = "habs",
+        EUI_AbsorbEnd = "absany", EUI_AbsorbBelt = "absany",
+        UNIT_TARGET = "tgt",
     }
+    -- What each piece reads: "hp" health, "pp" power, "abs" / "habs" the two
+    -- absorb amounts, "id" name or level only (identity events repaint those).
+    -- A piece not listed (the target pieces and separators, the group number,
+    -- the WoW Forever name twins) makes its zone repaint on every value event.
+    local PIECE_READS = {
+        [P.perhp] = "hp", [P.perhpnosign] = "hp", [P.curhpshort] = "hp",
+        [P.healthshort] = "hp", [P.maxhpshort] = "hp", [P.curhp] = "hp", [P.maxhp] = "hp",
+        [P.perpp] = "pp", [P.curpp] = "pp", [P.maxpp] = "pp", [P.curppfull] = "pp", [P.maxppfull] = "pp",
+        [P.absorb] = "abs", [P.absorbshort] = "abs",
+        [P.healabsorb] = "habs", [P.healabsorbshort] = "habs",
+        [P.name] = "id", [P.level] = "id", [P.levelcol] = "id", [P.levelcolall] = "id",
+    }
+
+    -- Custom content: the slot's own format string (<prefix>CustomFormat),
+    -- parsed by EllesmereUI.TextTags against this binding of the unit schema.
+    -- Options, preview and the width estimate read the same catalog.
+    local TAG_CATALOG = EllesmereUI.TextTags.Bind(EllesmereUI.TextTags.UNIT, {
+        ["hp"] = P.curhp, ["hp:abr"] = P.curhpshort, ["hp:max"] = P.maxhp,
+        ["hp:max:abr"] = P.maxhpshort, ["hp:pct"] = P.perhp,
+        ["pp"] = P.curppfull, ["pp:abr"] = P.curpp, ["pp:max"] = P.maxppfull,
+        ["pp:max:abr"] = P.maxpp, ["pp:pct"] = P.perpp,
+        ["absorb"] = P.absorb, ["absorb:abr"] = P.absorbshort,
+        ["healabsorb"] = P.healabsorb, ["healabsorb:abr"] = P.healabsorbshort,
+        ["name"] = P.name, ["target"] = P.tgtname, ["level"] = P.level, ["group"] = P.group,
+    })
+    ns.UF_TextTags = TAG_CATALOG
 
     --- Resolves a content key to (fmt, piecesArray, static) for a zone, or nil
     --- for "none"/unknown. nametotarget builds its settings-closure separator.
     function ns.ContentToZone(content, prefix, settings)
+        if content == "custom" then
+            local parsed = EllesmereUI.TextTags.Parse(TAG_CATALOG, settings and settings[prefix .. "CustomFormat"])
+            if not parsed then return nil end
+            local keys, map, pieces = parsed.keys, TAG_CATALOG.map, {}
+            local lvlCol = settings.levelDifficultyColor
+            for i = 1, #keys do
+                local key = keys[i]
+                if key == "level" and lvlCol then
+                    pieces[i] = settings.levelDifficultyColorFriendly and P.levelcolall or P.levelcol
+                else
+                    pieces[i] = map[key]
+                end
+            end
+            -- Static (identity repaints only) unless a tag reads a value.
+            local static = true
+            for cls in pairs(parsed.reads) do
+                if cls ~= "id" then static = nil; break end
+            end
+            return parsed.fmt, pieces, static
+        end
         if content == "nametotarget" then
             return "%s%s%s%s", { P.name, ns.MakeTgtSepPiece(prefix, settings), P.tgtcol, P.tgtname }
         end
@@ -1031,12 +1144,14 @@ do
         end
     end
 
-    -- The text painter: renders every registered zone on the frame. Piece
-    -- returns route through a scratch table + unpack (tables carry secrets
-    -- fine; nothing inspects them). Identity-only zones (name/level) are
-    -- skipped on value-class events: the nickname provider chain behind the
-    -- name piece was running on every health tick.
+    -- The text painter: renders the frame's zones. Piece returns route through
+    -- a scratch table + unpack (tables carry secrets fine; nothing inspects
+    -- them). A value event repaints only the zones that read its value (a
+    -- health tick leaves power text and name/level zones alone), each at most
+    -- once per hardware frame: the engine does not collapse this channel, since
+    -- a health paint must not swallow a power repaint landing in the same frame.
     local scratch = {}
+    local GetTime = GetTime
     local function PaintText(frame, unit, event)
         local zones = frame._euiTextZones
         if not zones then return end
@@ -1050,10 +1165,12 @@ do
         if event == "UNIT_FACTION" and ns.UF_RecolorTexts then
             ns.UF_RecolorTexts(frame, unit)
         end
-        local valueOnly = event ~= nil and VALUE_EVENTS[event]
+        local cls = event ~= nil and VALUE_CLASS[event]
+        local now = GetTime()
         for i = 1, #zones do
             local z = zones[i]
-            if not (valueOnly and z.static) then
+            if not cls or (not z.static and (z.any or z[cls]) and z.at ~= now) then
+                z.at = now
                 local pieces = z.pieces
                 local n = #pieces
                 for k = 1, n do scratch[k] = pieces[k](unit) end
@@ -1080,14 +1197,22 @@ do
         end
     end
 
-    -- True when a zone's pieces read power (the power text pieces), so the
-    -- power value pass repaints it.
-    local function ReadsPower(pieces)
+    -- Stamps a new zone with the values its pieces read (PIECE_READS): one
+    -- field per value class for PaintText's filter, any = an unlisted piece,
+    -- and power for the power value pass.
+    local function MarkReads(z)
+        local pieces = z.pieces
         for i = 1, #pieces do
-            local p = pieces[i]
-            if p == P.perpp or p == P.curpp or p == P.maxpp then return true end
+            local r = PIECE_READS[pieces[i]]
+            if r == nil then
+                z.any = true
+            elseif r ~= "id" then
+                z[r] = true
+            end
         end
-        return nil
+        if z.abs or z.habs then z.absany = true end
+        z.power = z.pp
+        return z
     end
 
     --- Registers/updates one text zone on a frame: resolves the content key
@@ -1103,14 +1228,13 @@ do
             if zones[i].fs == fs then table.remove(zones, i) end
         end
         if fmt then
-            zones[#zones + 1] = { fs = fs, fmt = fmt, pieces = pieces, static = static,
-                                  power = ReadsPower(pieces) }
+            zones[#zones + 1] = MarkReads({ fs = fs, fmt = fmt, pieces = pieces, static = static })
         else
             fs:SetText("")
         end
         -- A power text zone added or removed can switch the player's power
-        -- value channel.
-        if frame._euiBaseUnit == "player" then ns.UF_PowerValSync(frame) end
+        -- value channel, and a hidden power bar's element (UF_PowerElementSync).
+        ns.UF_PowerElementSync(frame)
     end
 
     --- Raw-zone variant for callers that assemble their own format (the power
@@ -1122,11 +1246,11 @@ do
             if zones[i].fs == fs then table.remove(zones, i) end
         end
         if fmt then
-            zones[#zones + 1] = { fs = fs, fmt = fmt, pieces = pieces, power = ReadsPower(pieces) }
+            zones[#zones + 1] = MarkReads({ fs = fs, fmt = fmt, pieces = pieces })
         else
             fs:SetText("")
         end
-        if frame._euiBaseUnit == "player" then ns.UF_PowerValSync(frame) end
+        ns.UF_PowerElementSync(frame)
     end
 end
 

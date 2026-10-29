@@ -148,50 +148,21 @@ local MODULE_SPEC = {
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        description = L["仅在需要手动施放高亮血沸时显示图标。"],
-        sections = {
-            {
-                kind = "composite",
-                id = "common",
-                title = L["模块通用设置"],
-                component = "modulecommonsettings",
-                key = "moduleCommon",
-                opts = {
-                    bindRoot = true,
-                    presentation = "settings-list",
-                    fields = { { label = L["启用"], path = "enabled", presentation = "switch", type = "checkbox" } },
-                    fixedLayout = {
-                        controlH = 6,
-                        controlW = 46,
-                        firstY = 0,
-                        logicalWidth = 200,
-                        rowStep = 14,
-                        slotX = { 3, 53, 103, 153 },
-                    },
-                },
-            },
-            {
-                kind = "composite",
-                id = "anchor",
-                title = L["锚点设置"],
-                component = "anchorgroup",
-                key = "anchor",
-            },
-            {
-                kind = "composite",
-                id = "icon",
-                title = L["DK血沸图标"],
-                component = "icongroup",
-                key = "icon",
-            },
-            {
-                kind = "composite",
-                id = "font_time",
-                title = L["倒数文字"],
-                component = "fontgroup",
-                key = "font_time",
-            },
+        version = 2,
+        cards = {
+            { id = "card.common", kind = "card", title = L["模块通用设置"], children = {
+                { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用"],
+                    description = L["仅在需要手动施放高亮血沸时显示图标。"] },
+            } },
+            { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
+                { id = "anchor", kind = "component", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+            { id = "card.icon", kind = "card", title = L["DK血沸图标"], children = {
+                { id = "icon", kind = "component", component = "icongroup", path = "icon", optionsRef = "icon" },
+            } },
+            { id = "card.font_time", kind = "card", title = L["倒数文字"], children = {
+                { id = "font_time", kind = "component", component = "fontgroup", path = "font_time" },
+            } },
         },
     },
 }

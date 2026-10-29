@@ -12,6 +12,7 @@ local L = (ExwindTools and ExwindTools.L)
 if not ExwindTools then
     error(L["[ExwindPanelRouter] ExwindTools 核心未加载"])
 end
+local EXUI = ExwindTools.UI
 
 local Router = ExwindTools.PanelRouter or {}
 ExwindTools.PanelRouter = Router

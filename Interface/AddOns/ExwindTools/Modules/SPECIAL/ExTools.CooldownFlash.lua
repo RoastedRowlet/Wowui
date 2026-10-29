@@ -20,7 +20,6 @@ local ExwindTools = _G.ExwindTools
 if not ExwindTools or not ExwindTools.UI then return end
 
 local EXUI = ExwindTools.UI
-local Grid = ExwindTools.Grid
 local L = ExwindTools.L or setmetatable({}, { __index = function(_, key) return key end })
 local CreateFrame = _G.CreateFrame
 local UIParent = _G.UIParent
@@ -30,8 +29,6 @@ local C_Container = _G.C_Container
 local C_DurationUtil = _G.C_DurationUtil
 local GetTime = _G.GetTime
 local MODULE_KEY = "ExTools.CooldownFlash"
-local SPELL_LIST_RENDERER = MODULE_KEY .. ".SpellList"
-local ITEM_LIST_RENDERER = MODULE_KEY .. ".ItemList"
 local FALLBACK_ICON_FILE_ID = 134400
 local MIN_REPLAY_INTERVAL = 0.5
 local ICON_CROP = 0.08
@@ -214,214 +211,138 @@ end
 -- =========================================================
 -- 三、GUI 声明 | GUI Declarations — 列表表格
 -- =========================================================
-local function ReleaseListControl(control)
-    if not control then return end
-    if EXUI.RestoreSettingsListControl then EXUI:RestoreSettingsListControl(control) end
-    local factory = _G.ExwindFactory
-    if factory and control._isCompositeHost then
-        factory:ReleaseCompositeHost(control)
-    elseif factory then
-        factory:ReleaseGridWidget(control)
-    else
-        control:Hide()
-        control:SetParent(nil)
-    end
+local settingsSession
+
+local function RefreshSettingsLists()
+    if settingsSession and settingsSession.alive then settingsSession:Refresh() end
 end
 
-local function ClearListRows(controls)
-    for index = #controls.rows, 1, -1 do
-        local record = controls.rows[index]
-        if record.idControlIsEditBox then
-            -- OnEditFocusLost 槽位上有 Core 的焦点画器，走 ClearControlScript
-            -- 清槽位时一并丢掉安装记录，下一次借用才会重装画器。
-            EXUI:ClearControlScript(record.idControl, "OnEditFocusLost")
-            record.idControl:SetScript("OnEnterPressed", nil)
-        end
-        ReleaseListControl(record.action)
-        ReleaseListControl(record.nameText)
-        ReleaseListControl(record.idControl)
-        controls.rows[index] = nil
-    end
+local function Cell(id, child)
+    return { id = id, kind = "cell", children = { child } }
 end
 
--- 法术表与物品表共用同一套行逻辑，只替换取列表、显示文字与提示文案。
-local function CreateListFactory(spec)
-    local list = { host = nil, ctx = nil }
+-- 两张表只提供原有数组的记录视图，不改写已有 ID 的值或类型。
+local function ListDeclaration(key, title, description, idTitle, nameTitle, hint)
+    return { id = key, kind = "card", title = title, children = {
+        { id = key .. ".add", kind = "setting", label = idTitle, description = description .. " " .. hint,
+            children = {
+                { id = key .. ".input", kind = "control", controlType = "input", ref = key .. "Input" },
+            } },
+        { id = key .. ".table", kind = "table",
+            columns = { { title = idTitle }, { title = nameTitle } },
+            addAction = { id = key .. ".add.button", text = L["添加"], action = key .. "Add" },
+            rowActions = { { id = key .. ".row.delete", text = L["删除"], action = key .. "Delete", presentation = "danger" } },
+            children = {
+            { id = key .. ".rows", kind = "repeat", source = key,
+                template = { id = key .. ".row", kind = "row", children = {
+                    Cell(key .. ".row.id", { id = key .. ".row.id.text", kind = "text", textSource = key .. "ID" }),
+                    Cell(key .. ".row.name", { id = key .. ".row.name.text", kind = "text", textSource = key .. "Name" }),
+                } } },
+        } },
+    } }
+end
 
-    local function Rebuild(host, ctx)
-        local controls = host and host[spec.controlsKey]
-        if not controls then return end
-        ctx:ReleaseTablePresentation()
-        ClearListRows(controls)
+local function CreateSettingsOwner()
+    local owner = { controls = {}, actions = {}, sources = {}, texts = {} }
+    function owner:AttachSession(session) settingsSession = session end
 
-        local addRecord = {
-            idControl = EXUI:CreateEditBox(host, "", 1, 28, nil, { placeholder = spec.placeholder }),
-            idControlIsEditBox = true,
-            nameText = EXUI:CreateDescription(host, spec.hint, 1),
-        }
-
-        -- 添加按钮与输入框回车走同一条路径。
-        local function AddFromInput()
-            local id = ParseEntryID(addRecord.idControl:GetText())
-            if not id then return end
-            local entries = spec.GetList()
-            entries[#entries + 1] = tostring(id)
-            addRecord.idControl:SetText("")
-            Rebuild(host, ctx)
-            ctx:RequestReflow()
-        end
-
-        addRecord.idControl:SetScript("OnEnterPressed", function(self)
-            -- 先交还焦点，再重建行；重建会释放这个输入框本身。
-            self:ClearFocus()
-            AddFromInput()
-        end)
-        addRecord.action = EXUI:CreateButton(host, 1, 28, L["添加"], AddFromInput,
-            { variant = "primary", compact = true })
-        controls.rows[#controls.rows + 1] = addRecord
-
-        for index, value in ipairs(spec.GetList()) do
-            local rowIndex = index
-            local record = {}
-            record.idControl = EXUI:CreateDescription(host, tostring(value), 1)
-            record.nameText = EXUI:CreateDescription(host, spec.GetDisplayText(value), 1)
-            record.action = EXUI:CreateButton(host, 1, 28, L["删除"], function()
-                table.remove(spec.GetList(), rowIndex)
-                Rebuild(host, ctx)
-                ctx:RequestReflow()
-            end, { variant = "danger", compact = true })
-            controls.rows[#controls.rows + 1] = record
-        end
-
-        local presented = {}
-        for index = 2, #controls.rows do
-            local record = controls.rows[index]
-            presented[#presented + 1] = {
-                cells = {
-                    { widget = record.idControl, type = "text" },
-                    { widget = record.nameText, type = "text" },
-                    { widget = record.action, type = "button" },
-                },
-            }
-        end
-
-        ctx:SetTableControls({
-            add = {
-                cells = {
-                    { widget = addRecord.idControl, type = "input" },
-                    { widget = addRecord.nameText, type = "text" },
-                    { widget = addRecord.action, type = "button" },
-                },
-            },
-            records = presented,
-        })
-    end
-
-    if Grid and Grid.RegisterTableControls then
-        Grid:RegisterTableControls(spec.rendererKey, {
-            mount = function(host, ctx)
-                list.host, list.ctx = host, ctx
-                host[spec.controlsKey] = { rows = {} }
-                Rebuild(host, ctx)
-            end,
-            update = function(host, ctx)
-                list.host, list.ctx = host, ctx
-                Rebuild(host, ctx)
-            end,
-            release = function(host)
-                local controls = host[spec.controlsKey]
-                if controls then ClearListRows(controls) end
-                host[spec.controlsKey] = nil
-                if list.host == host then
-                    list.host, list.ctx = nil, nil
+    local function BindList(key, getList, displayText, placeholder)
+        local records, input, draft = {}, nil, ""
+        owner.sources[key] = function()
+            local entries = getList()
+            local view = {}
+            for index, value in ipairs(entries) do
+                local record = records[index]
+                if not record or record.value ~= value then
+                    record = { value = value }
+                    records[index] = record
                 end
-            end,
-        })
+                view[index] = record
+            end
+            for index = #records, #view + 1, -1 do records[index] = nil end
+            return view
+        end
+        owner.texts[key .. "ID"] = function(scope) return tostring(scope.item.value) end
+        owner.texts[key .. "Name"] = function(scope) return displayText(scope.item.value) end
+
+        local function AddFromInput()
+            local id = input and ParseEntryID(input:GetText())
+            if not id then return end
+            local entries = getList()
+            entries[#entries + 1] = tostring(id)
+            draft = ""
+            input:SetText("")
+            EXUI:NotifyModuleValueChanged(MODULE_KEY, key, "committed")
+            RefreshSettingsLists()
+        end
+
+        local control = EXUI:CreateSettingsV2Control({ controlType = "input" }, function(context)
+            return {
+                Read = function() return draft end,
+                Write = function(_, value)
+                    if context:IsCurrent() then draft = value end
+                end,
+            }
+        end)
+        local mount, release = control.mount, control.release
+        control.mount = function(host, context)
+            local widget = mount(host, context)
+            widget.placeholder:SetText(placeholder)
+            input = widget
+            widget:SetScript("OnEnterPressed", context:Guard(function(self)
+                self:ClearFocus()
+                AddFromInput()
+            end))
+            return widget
+        end
+        control.release = function(widget, context)
+            widget:SetScript("OnEnterPressed", nil)
+            if input == widget then input = nil end
+            release(widget, context)
+        end
+        owner.controls[key .. "Input"] = control
+        owner.actions[key .. "Add"] = AddFromInput
+        owner.actions[key .. "Delete"] = function(context)
+            table.remove(getList(), context.scope.index)
+            EXUI:NotifyModuleValueChanged(MODULE_KEY, key, "committed")
+            RefreshSettingsLists()
+        end
     end
 
-    -- 资料异步返回后重画已挂载的那张表；没挂载时什么都不做。
-    function list:Refresh()
-        if self.host and self.ctx then Rebuild(self.host, self.ctx) end
-    end
-
-    return list
+    BindList("spells", GetSpellList, GetSpellDisplayText, L["输入法术 ID"])
+    BindList("items", GetItemList, GetItemDisplayText, L["输入物品 ID"])
+    return owner
 end
-
-local spellList = CreateListFactory({
-    rendererKey = SPELL_LIST_RENDERER,
-    controlsKey = "_exCooldownFlashSpellList",
-    placeholder = L["输入法术 ID"],
-    hint = L["填入法术 ID 后按添加或回车"],
-    GetList = GetSpellList,
-    GetDisplayText = GetSpellDisplayText,
-})
-
-local itemList = CreateListFactory({
-    rendererKey = ITEM_LIST_RENDERER,
-    controlsKey = "_exCooldownFlashItemList",
-    placeholder = L["输入物品 ID"],
-    hint = L["填入物品 ID 后按添加或回车"],
-    GetList = GetItemList,
-    GetDisplayText = GetItemDisplayText,
-})
-
-local SPELL_LIST_COLUMNS = {
-    { title = L["法术 ID"] },
-    { title = L["法术"] },
-    { title = L["操作"] },
-}
-
-local ITEM_LIST_COLUMNS = {
-    { title = L["物品 ID"] },
-    { title = L["物品"] },
-    { title = L["操作"] },
-}
 
 -- =========================================================
 -- 三、GUI 声明 | GUI Declarations — 页面声明
 -- =========================================================
-ExwindTools:RegisterModuleLayout(MODULE_KEY, {
-    version = 1,
-    sections = {
-        {
-            kind = "composite", id = "common", title = L["模块设置"],
-            component = "modulecommonsettings", key = "moduleCommon",
-            opts = {
-                bindRoot = true,
-                fields = { { path = "enabled", type = "checkbox", label = L["启用"] } },
-            },
-        },
-        {
-            kind = "table", id = "spells", title = L["监控法术"],
-            description = L["列表中任一法术冷却结束时播放一次闪现。"],
-            key = "spells", controlFactory = SPELL_LIST_RENDERER,
-            columns = SPELL_LIST_COLUMNS, supportsAdd = true,
-        },
-        {
-            kind = "table", id = "items", title = L["监控物品"],
-            description = L["列表中任一物品冷却结束时播放一次闪现。"],
-            key = "items", controlFactory = ITEM_LIST_RENDERER,
-            columns = ITEM_LIST_COLUMNS, supportsAdd = true,
-        },
-        {
-            kind = "settings", id = "test", title = L["测试"],
-            items = {
-                { key = "btn_test", type = "button", label = L["测试播放"] },
-            },
-        },
-        {
-            kind = "settings", id = "appearance", title = L["闪现外观"],
-            items = {
-                { key = "size", type = "slider", label = L["图标大小"], min = 32, max = 150, step = 2 },
-                { key = "offsetX", type = "slider", label = L["水平偏移"], min = -800, max = 800, step = 1 },
-                { key = "offsetY", type = "slider", label = L["垂直偏移"], min = -600, max = 600, step = 1 },
-                { key = "scaleFrom", type = "slider", label = L["起始缩放"], min = 0.1, max = 3, step = 0.05 },
-                { key = "scaleTo", type = "slider", label = L["结束缩放"], min = 0.1, max = 5, step = 0.05 },
-                { key = "duration", type = "slider", label = L["动画时长"], min = 0.1, max = 3, step = 0.05 },
-            },
-        },
+EXUI:RegisterModuleSettingsPageV2(MODULE_KEY, {
+    version = 2,
+    cards = {
+        { id = "common", kind = "card", title = L["模块设置"], children = {
+            { id = "moduleCommon", kind = "component", component = "modulecommonsettings", path = "moduleCommon",
+                opts = { bindRoot = true, fields = { { path = "enabled", type = "checkbox", label = L["启用"] } } } },
+        } },
+        ListDeclaration("spells", L["监控法术"], L["列表中任一法术冷却结束时播放一次闪现。"],
+            L["法术 ID"], L["法术"], L["填入法术 ID 后按添加或回车"]),
+        ListDeclaration("items", L["监控物品"], L["列表中任一物品冷却结束时播放一次闪现。"],
+            L["物品 ID"], L["物品"], L["填入物品 ID 后按添加或回车"]),
+        { id = "test", kind = "card", title = L["测试"], children = {
+            { id = "btn_test_row", kind = "setting", label = L["测试播放"], children = {
+                { id = "btn_test", kind = "button", text = L["测试播放"], clickKey = "btn_test" },
+            } },
+        } },
+        { id = "appearance", kind = "card", title = L["闪现外观"], children = {
+            { id = "size", kind = "control", controlType = "slider", path = "size", label = L["图标大小"], min = 32, max = 150, step = 2 },
+            { id = "offsetX", kind = "control", controlType = "slider", path = "offsetX", label = L["水平偏移"], min = -800, max = 800, step = 1 },
+            { id = "offsetY", kind = "control", controlType = "slider", path = "offsetY", label = L["垂直偏移"], min = -600, max = 600, step = 1 },
+            { id = "scaleFrom", kind = "control", controlType = "slider", path = "scaleFrom", label = L["起始缩放"], min = 0.1, max = 3, step = 0.05 },
+            { id = "scaleTo", kind = "control", controlType = "slider", path = "scaleTo", label = L["结束缩放"], min = 0.1, max = 5, step = 0.05 },
+            { id = "duration", kind = "control", controlType = "slider", path = "duration", label = L["动画时长"], min = 0.1, max = 3, step = 0.05 },
+        } },
     },
-})
+}, CreateSettingsOwner)
 
 -- 设置变更只重投影已经存在的宿主与动画参数；不在这里创建或播放。
 EXUI:RegisterModuleValueController(MODULE_KEY, {
@@ -611,7 +532,7 @@ end)
 ExwindTools:RegisterEvent("BAG_UPDATE_COOLDOWN", MODULE_KEY, RefreshItemCooldowns)
 ExwindTools:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN", MODULE_KEY, RefreshItemCooldowns)
 
--- Grid 只发布纯点击状态。
+-- 设置页只发布纯点击状态。
 ExwindTools:WatchState(MODULE_KEY .. ".ButtonClicked", MODULE_KEY, function(click)
     if click and click.key == "btn_test" then
         PlayFlash(nil, true)
@@ -632,7 +553,7 @@ ExwindTools:RegisterEvent("SPELL_DATA_LOAD_RESULT", MODULE_KEY, function(_, spel
             cached.iconID = info.iconID
         end
     end
-    spellList:Refresh()
+    RefreshSettingsLists()
 end)
 
 ExwindTools:RegisterEvent("ITEM_DATA_LOAD_RESULT", MODULE_KEY, function(_, itemID, success)
@@ -645,7 +566,7 @@ ExwindTools:RegisterEvent("ITEM_DATA_LOAD_RESULT", MODULE_KEY, function(_, itemI
         if C_Item.GetItemNameByID then cached.name = C_Item.GetItemNameByID(itemID) or cached.name end
         if C_Item.GetItemIconByID then cached.iconID = C_Item.GetItemIconByID(itemID) or cached.iconID end
     end
-    itemList:Refresh()
+    RefreshSettingsLists()
 end)
 
 -- =========================================================

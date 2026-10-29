@@ -209,6 +209,11 @@ function EXUI:CreateSettingsCard(parent, options)
                 + (tonumber(self._exSettingsCardContentHeight) or 0) + SETTINGS_CARD_BODY_PADDING
         end
 
+        -- 当前是否折叠（只读）；可折叠卡片之外恒为 false。
+        function card:IsCollapsed()
+            return self._exSettingsCardCollapsed == true
+        end
+
         function card:SetCollapsed(collapsed, silent)
             collapsed = collapsed == true and self._exSettingsCardCollapsible == true
             local changed = self._exSettingsCardCollapsed ~= collapsed
@@ -242,6 +247,9 @@ function EXUI:CreateSettingsCard(parent, options)
         end
     end
 
+    -- 页面样式（V2 style）挂在池化卡片上的标题条底板与右侧灰字：借出时先收起，只有样式页再画。
+    if card._v2StyleBar then card._v2StyleBar:Hide() end
+    if card._v2StyleNote then card._v2StyleNote:Hide() end
     card._exSettingsCardId = options.id
     card._exSettingsCardCollapsible = options.collapsible == true
     card._exSettingsCardMinBodyHeight = math.max(0, tonumber(options.minBodyHeight) or 0)
@@ -284,24 +292,24 @@ end
 -- binding, getter, setter or notification callback. Grid keeps ownership of
 -- the original controls and only anchors them beside these visual siblings.
 -- =========================================================
-local SETTINGS_LIST_ROW_PADDING_X = GM.space.rowPaddingX
-local SETTINGS_LIST_ROW_PADDING_Y = GM.space.rowPaddingY
-local SETTINGS_LIST_COLUMN_GAP = GM.space.columnGap
+local SETTINGS_LIST_ROW_PADDING_X = GM.settings.rowPaddingX
+local SETTINGS_LIST_ROW_PADDING_Y = GM.settings.rowPaddingY
+local SETTINGS_LIST_COLUMN_GAP = GM.settings.labelControlGap
 local SETTINGS_LIST_MIN_TEXT_WIDTH = GM.size.minTextWidth
-local SETTINGS_LIST_STANDARD_ROW_HEIGHT = GM.size.standardRowHeight
-local SETTINGS_LIST_ORDINARY_CONTROL_HEIGHT = GM.size.ordinaryControlHeight
-local SETTINGS_LIST_DESCRIPTION_MIN_HEIGHT = GM.size.descriptionMinHeight
-local SETTINGS_LIST_DESCRIPTION_GAP = GM.space.descriptionGap
+local SETTINGS_LIST_STANDARD_ROW_HEIGHT = GM.settings.rowMinHeight
+local SETTINGS_LIST_ORDINARY_CONTROL_HEIGHT = GM.settings.controlHeight
+local SETTINGS_LIST_DESCRIPTION_MIN_HEIGHT = GM.settings.rowMinHeight
+local SETTINGS_LIST_DESCRIPTION_GAP = GM.settings.labelDescriptionGap
 local SETTINGS_LIST_EXTERNAL_HEADER_HEIGHT = GM.size.externalHeaderHeight
-local SETTINGS_LIST_SECTION_TOP = GM.space.sectionTop
-local SETTINGS_LIST_SECTION_TITLE_TO_CARD_GAP = GM.space.sectionTitleToCardGap
+local SETTINGS_LIST_SECTION_TOP = GM.settings.sectionHeaderTop
+local SETTINGS_LIST_SECTION_TITLE_TO_CARD_GAP = GM.settings.sectionHeaderBottom
 local SETTINGS_LIST_SECTION_GROUP_GAP = GM.space.sectionGroupGap
 local SETTINGS_LIST_FIELD_ROW_BREAKPOINT = GM.size.fieldRowBreakpoint
 local SETTINGS_LIST_COMPACT_VOICE_BREAKPOINT = GM.size.compactVoiceBreakpoint
 local SETTINGS_LIST_COMPACT_VOICE_SOURCE_BREAKPOINT = GM.size.compactVoiceSourceBreakpoint
 local SETTINGS_LIST_NARROW_CONTROL_INDENT = GM.space.narrowControlIndent
 local SETTINGS_LIST_COMPACT_TEXT_WIDTH = GM.size.settingsRowCompactTextWidth
-local SETTINGS_LIST_STACK_GAP = GM.space.settingsRowStackGap
+local SETTINGS_LIST_STACK_GAP = GM.settings.stackGap
 -- 布局 metrics 未写 height 时的默认控件槽高度；文字行（label/tableText 角色）沿用复选框行高。
 local SETTINGS_LIST_DEFAULT_CONTROL_HEIGHT = GM.size.controlHeight
 local SETTINGS_LIST_TEXT_ROW_HEIGHT = GM.size.checkboxRowHeight
@@ -366,6 +374,44 @@ local function ResolveSettingsRowColumns(innerWidth, explicitWidth, controlKind,
     return math.max(1, stackedWidth), math.max(1, innerWidth), true
 end
 
+-- 可选页面样式（预设写了 labelAutoWidth）的列宽，只有样式行走这里，返回值同上。
+-- 文字列 = 标签实际字宽（labelWidth，已含文字后面的留位）；控件按自然宽占剩下的空间。
+-- 放不下时先把控件压到行的最小可用宽（输入框、下拉、颜色为 controlMinWidth）；
+-- 还放不下：预设写了 noWrap 的行继续压到 controlFloorWidth，否则才上标签、下控件。
+local UpdateSettingsRowLabelHit -- 永不换行样式行的标签悬停全名，定义在 CreateSettingsRow 前
+
+local function ResolveStyledRowColumns(row, innerWidth, style, labelWidth)
+    local requested = row._exSettingsRowControlWidth
+    if not requested then
+        -- 没写宽度的控件沿用原算法的默认宽。
+        requested = math.min(260, innerWidth * 0.42)
+        local kind = row._exSettingsRowControlKind
+        if kind == "ordinary" or kind == "input" or kind == "button" then
+            local percent = row._exSettingsRowInputWidthPercent
+            percent = percent and percent > 0 and percent or 100
+            requested = requested * 0.75 * percent / 100
+        end
+    end
+    -- 占满标签右边的滑杆行（requested 为 math.huge）：标签列至少 sliderLabelWidth，且不窄于同一张卡里
+    -- 其他滑杆行最宽的标签（_exSettingsRowSliderLabelWidth，由 V2 设置行布局给），各行滑杆从同一处起、一样长。
+    if requested == math.huge and labelWidth > 0 then
+        labelWidth = math.max(labelWidth, style.sliderLabelWidth or 0, row._exSettingsRowSliderLabelWidth or 0)
+    end
+    local room = innerWidth - SETTINGS_LIST_COLUMN_GAP - labelWidth
+    if room >= requested then
+        return requested, math.max(1, innerWidth - SETTINGS_LIST_COLUMN_GAP - requested), false
+    end
+    local floor = math.min(requested, row._exSettingsRowMinControlWidth or requested)
+    if style.noWrap then floor = math.min(floor, style.controlFloorWidth or floor) end
+    if room >= floor then
+        return math.max(1, room), math.max(1, labelWidth), false
+    end
+    if style.noWrap then
+        return math.max(1, floor), math.max(1, innerWidth - SETTINGS_LIST_COLUMN_GAP - floor), false
+    end
+    return math.max(1, math.min(innerWidth, requested)), math.max(1, innerWidth), true
+end
+
 local settingsListMeasureHost = CreateFrame("Frame", nil, UIParent)
 settingsListMeasureHost:SetSize(1, 1)
 settingsListMeasureHost:Hide()
@@ -381,7 +427,7 @@ local function MeasureSettingsListText(text, width, role)
     if role == "description" then
         MODERN.Font(region, GM.font.text, MC.muted, "", "GameFontHighlightSmall")
     else
-        MODERN.ApplyTextRole(region, role == "cardTitle" and "cardTitle" or "title")
+        MODERN.ApplyTextRole(region, role == "settingsSection" and "settingsSection" or "title")
     end
     region:SetWidth(math.max(1, tonumber(width) or 1))
     region:SetText(text)
@@ -458,6 +504,12 @@ local function CreateSettingsDivider(parent)
     return divider
 end
 
+-- 设置行线改色：只改各片的顶点色，透明度分配（只露 layer 1）不变。
+local function SetSettingsDividerColor(divider, color)
+    local skin = divider._exModernSurfaces and divider._exModernSurfaces[GM.radius.control]
+    for _, piece in ipairs(skin and skin.pieces or {}) do piece.texture:SetVertexColor(unpack(color)) end
+end
+
 function EXUI:CreateSettingsSeparator(parent, width)
     local divider = CreateSettingsDivider(parent)
     divider:SetWidth(width or 200)
@@ -507,12 +559,16 @@ function EXUI:CreateRoundedImage(parent, radius, matchSurface)
     local function Layout()
         local width, height = image:GetWidth(), image:GetHeight()
         if width <= 0 or height <= 0 then return end
+        -- 尺寸、圆角、贴图坐标都和上次排好的一样（例如窗口重新显示）：片的位置不用重摆。
+        local uv = image._uv
+        local key = width .. "|" .. height .. "|" .. image._radius .. "|" .. uv[1] .. "|" .. uv[2] .. "|" .. uv[3] .. "|" .. uv[4]
+        if image._laidOut == key then return end
+        image._laidOut = key
         if image._border then
             EXUI:SetControlSurface(image._border, image._radius <= GM.radius.control and GM.radius.control or GM.radius.card, {0, 0, 0, 0}, {0, 0, 0, 1})
         end
         local r = math.min(image._radius, width / 2, height / 2)
         local x, y = { 0, r, width - r, width }, { 0, r, height - r, height }
-        local uv = image._uv
         for _, piece in ipairs(image._pieces) do
             local col, row, texture = piece.col, piece.row, piece.texture
             local w, h = x[col + 1] - x[col], y[row + 1] - y[row]
@@ -610,7 +666,7 @@ function EXUI:CreateSettingsSection(parent, options)
     if section._exSettingsSectionKind == "page" then
         MODERN.ApplyTextRole(section._exSettingsSectionTitle, "pageTitle", SETTINGS_LIST_TITLE)
     elseif section._exSettingsSectionKind == "section" then
-        MODERN.ApplyTextRole(section._exSettingsSectionTitle, "cardTitle", SETTINGS_LIST_TITLE)
+        MODERN.ApplyTextRole(section._exSettingsSectionTitle, "settingsSection", SETTINGS_LIST_TITLE)
     else
         MODERN.ApplyTextRole(section._exSettingsSectionTitle, "title", SETTINGS_LIST_TITLE)
     end
@@ -644,7 +700,7 @@ function EXUI:UpdateSettingsSectionLayout(section, width)
         local measured = SettingsTextHeight(title, textWidth)
         if title.GetText then
             measured = math.max(measured, MeasureSettingsListText(title:GetText(), textWidth,
-                cardSection and "cardTitle" or "title"))
+                cardSection and "settingsSection" or "title"))
         end
         height = titleTop + measured
     end
@@ -691,6 +747,38 @@ function EXUI:GetSettingsSectionGroupGap()
     return SETTINGS_LIST_SECTION_GROUP_GAP
 end
 
+-- 永不换行的样式行：标签被截断时盖一块透明感应区，悬停显示全名。感应区只建一次，借出时收起。
+local function SettingsRowLabelHitOnEnter(self)
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:AddLine(self._exRow._exSettingsRowTitle:GetText(), 1, 1, 1, true)
+    GameTooltip:Show()
+end
+
+local function SettingsRowLabelHitOnLeave(self)
+    if GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+end
+
+UpdateSettingsRowLabelHit = function(row, title)
+    local hit = row._exSettingsRowLabelHit
+    local truncated = title:IsShown() and title:GetUnboundedStringWidth() > title:GetWidth() + 0.5
+    if not truncated then
+        if hit then hit:Hide() end
+        return
+    end
+    if not hit then
+        hit = CreateFrame("Frame", nil, row)
+        hit:EnableMouse(true)
+        hit._exRow = row
+        hit:SetScript("OnEnter", SettingsRowLabelHitOnEnter)
+        hit:SetScript("OnLeave", SettingsRowLabelHitOnLeave)
+        row._exSettingsRowLabelHit = hit
+    end
+    hit:ClearAllPoints()
+    hit:SetPoint("TOPLEFT", title, "TOPLEFT", 0, 0)
+    hit:SetSize(title:GetWidth(), math.max(1, title:GetStringHeight() or 1))
+    hit:Show()
+end
+
 function EXUI:CreateSettingsRow(parent, options)
     options = type(options) == "table" and options or {}
     local row, isNew = AcquireCompositeGroup("CompositeSettingsListRow", parent)
@@ -735,14 +823,60 @@ function EXUI:CreateSettingsRow(parent, options)
     -- must not make otherwise identical ordinary rows use different heights.
     row._exSettingsRowMinHeight = options.presentationProfile == SETTINGS_LIST_EXBOSS_SKILL_PROFILE
         and SETTINGS_LIST_EXBOSS_SIMPLE_ROW_HEIGHT or SETTINGS_LIST_STANDARD_ROW_HEIGHT
+    -- 可选页面样式（GM.settings.styles 的预设表）：每次借出都重设，没给就是 nil，行为照旧。
+    -- 有样式时行内距、最小行高、行线缩进与颜色、标签字号颜色描边取预设里写了的项；
+    -- trailingWidth = 标签文字后面要留的宽（如小问号），只在有样式时生效。
+    local style = type(options.style) == "table" and options.style or nil
+    row._exSettingsRowStyle = style
+    -- autoWidth：这一行单独按标签实际字宽排文字列（同预设 labelAutoWidth），只在有样式时生效；每次借出重设。
+    row._exSettingsRowAutoWidth = style and options.autoWidth == true or nil
+    row._exSettingsRowSliderLabelWidth = nil -- 同卡滑杆行对齐用的标签列宽，V2 设置行布局每次重给
+    -- stacked：这一行一律标签在上、控件在下（控件与文字左缘对齐、占满文字列宽），只在有样式时生效；每次借出重设。
+    row._exSettingsRowStacked = style and options.stacked == true or nil
+    row._exSettingsRowTrailingWidth = style and tonumber(options.trailingWidth) or nil
+    if style and style.rowMinHeight then row._exSettingsRowMinHeight = style.rowMinHeight end
     row._exSettingsRowIsLast = options.isLast == true
+    -- 标签前的可选位：lead = "checkbox"（勾选框由调用方摆在 UpdateSettingsRowLayout 返回的位置）
+    -- 或 "icon"（行自己画 options.icon：GUIIcons ID 或贴图文件 ID）。两者共用一个位，宽度只在 GM。
+    if options.lead ~= nil and options.lead ~= "checkbox" and options.lead ~= "icon" then
+        error("settings row lead must be checkbox or icon", 2)
+    end
+    row._exSettingsRowLead = options.lead
+    if options.lead == "icon" and not row._exSettingsRowIcon then
+        row._exSettingsRowIcon = row:CreateTexture(nil, "ARTWORK")
+    end
+    if row._exSettingsRowIcon then
+        local icon = row._exSettingsRowIcon
+        if options.lead == "icon" then
+            if type(options.icon) == "string" then icon:SetTexture(EXUI:GetIcon(options.icon)) else icon:SetTexture(options.icon) end
+            icon:SetSize(GM.settings.leadIconSize, GM.settings.leadIconSize)
+            icon:Show()
+        else
+            icon:Hide()
+        end
+    end
     row._exSettingsRowTitle:SetText(tostring(options.label or ""))
     row._exSettingsRowTitle:SetShown(options.label ~= nil and tostring(options.label) ~= "")
+    -- 永不换行的样式（预设 noWrap）：标签只占一行，放不下截断、悬停显示全名（见 UpdateSettingsRowLayout）。
+    -- 每次借出都重设；没有样式时与原来一样换行。
+    row._exSettingsRowTitle:SetWordWrap(not (style and style.noWrap))
+    -- 定宽标签列的样式（预设 labelColumnWidth）：标签在列里靠右；每次借出重设。
+    row._exSettingsRowTitle:SetJustifyH(style and style.labelColumnWidth and "RIGHT" or "LEFT")
+    if row._exSettingsRowLabelHit then row._exSettingsRowLabelHit:Hide() end
     row._exSettingsRowDescription:SetText(tostring(options.description or ""))
     row._exSettingsRowDescription:SetShown(options.description ~= nil and tostring(options.description) ~= "")
-    MODERN.ApplyTextRole(row._exSettingsRowTitle, "title", SETTINGS_LIST_TITLE)
-    MODERN.Font(row._exSettingsRowDescription, GM.font.text, SETTINGS_LIST_DESCRIPTION,
-        "", "GameFontHighlightSmall")
+    MODERN.ApplyTextRole(row._exSettingsRowTitle, "settingsLabel", SETTINGS_LIST_TITLE)
+    MODERN.ApplyTextRole(row._exSettingsRowDescription, "settingsDescription", SETTINGS_LIST_DESCRIPTION)
+    if style and (style.labelFont or style.labelText or style.labelOutline) then
+        MODERN.Font(row._exSettingsRowTitle, style.labelFont or GM.settings.labelFont,
+            style.labelText or SETTINGS_LIST_TITLE, style.labelOutline and "OUTLINE" or "", "GameFontHighlight")
+    end
+    -- 行线颜色：样式写了 dividerColor 才改色，换回无样式借用时恢复原色。
+    local dividerColor = style and style.dividerColor
+    if dividerColor or row._exSettingsRowDividerTinted then
+        SetSettingsDividerColor(row._exSettingsRowDivider, dividerColor or MC.headerDivider)
+        row._exSettingsRowDividerTinted = dividerColor ~= nil or nil
+    end
     row._exSettingsRowDivider:SetShown(not row._exSettingsRowIsLast)
     EXUI:ClearControlSurface(row)
     return row
@@ -755,6 +889,8 @@ function EXUI:UpdateSettingsRowLayout(row, width, controlHeight, descriptionWidg
     local exbossProfile = row._exSettingsRowPresentationProfile == SETTINGS_LIST_EXBOSS_SKILL_PROFILE
     local rowPaddingX = exbossProfile and SETTINGS_LIST_EXBOSS_CONTENT_PADDING_X
         or SETTINGS_LIST_ROW_PADDING_X
+    local style = row._exSettingsRowStyle
+    if style and style.rowPaddingX then rowPaddingX = style.rowPaddingX end
     local innerWidth = math.max(1, width - rowPaddingX * 2)
     local title = row._exSettingsRowTitle
     local description = descriptionWidget
@@ -764,10 +900,20 @@ function EXUI:UpdateSettingsRowLayout(row, width, controlHeight, descriptionWidg
         or (not descriptionWidget and description:IsShown())
     local rowPaddingY = exbossProfile
         and SETTINGS_LIST_EXBOSS_SIMPLE_PADDING_Y or SETTINGS_LIST_ROW_PADDING_Y
-    local textWidth, textHeight, controlX, controlY, controlWidth, height, stacked
+    if style and style.rowPaddingY then rowPaddingY = style.rowPaddingY end
+    -- 标签前的勾选框 / 图标位：文字整体右移，转上下排时控件与文字左缘对齐。
+    local leadSize = row._exSettingsRowLead == "checkbox" and GM.size.checkboxBoxSize
+        or (row._exSettingsRowLead == "icon" and GM.settings.leadIconSize) or 0
+    local leadWidth = leadSize > 0 and (leadSize + GM.settings.leadGap) or 0
+    local leadX = rowPaddingX
+    local textX = leadX + leadWidth
+    innerWidth = math.max(1, innerWidth - leadWidth)
+    local textWidth, textHeight, controlX, controlY, controlWidth, height, stacked, labelColumn
+    -- 标签文字列扣掉文字后面留的宽（只有样式行会有）；说明仍占整列。
+    local trailing = row._exSettingsRowTrailingWidth or 0
     if row._exSettingsRowFullWidth then
         textWidth = innerWidth
-        local titleHeight = SettingsTextHeight(title, textWidth)
+        local titleHeight = SettingsTextHeight(title, math.max(1, textWidth - trailing))
         textHeight = titleHeight
         if descriptionShown then
             if descriptionWidget then descriptionWidget:SetWidth(textWidth) end
@@ -775,16 +921,32 @@ function EXUI:UpdateSettingsRowLayout(row, width, controlHeight, descriptionWidg
                 + SettingsTextHeight(description, textWidth)
         end
         controlX = 0
-        controlY = textHeight > 0 and (rowPaddingY + textHeight + 10) or 0
+        controlY = textHeight > 0 and (rowPaddingY + textHeight + SETTINGS_LIST_STACK_GAP) or 0
         controlWidth = width
         local bottomPadding = textHeight > 0 and rowPaddingY or 0
         height = math.max(textHeight > 0 and row._exSettingsRowMinHeight or 0,
             controlY + controlHeight + bottomPadding)
     else
-        controlWidth, textWidth, stacked = ResolveSettingsRowColumns(innerWidth,
-            row._exSettingsRowControlWidth, row._exSettingsRowControlKind,
-            row._exSettingsRowInputWidthPercent, row._exSettingsRowMinControlWidth)
-        local titleHeight = SettingsTextHeight(title, textWidth)
+        if style and style.labelColumnWidth and title:IsShown() then
+            -- 定宽标签列（预设 labelColumnWidth）：各行标签列同宽、文字靠右，控件从标签列右边加
+            -- labelColumnGap 开始；标签放不下照 noWrap 截断、悬停全名。
+            labelColumn = style.labelColumnWidth + trailing
+            controlWidth = ResolveStyledRowColumns(row, innerWidth - (style.labelColumnGap or 0)
+                + SETTINGS_LIST_COLUMN_GAP, style, labelColumn)
+            textWidth, stacked = labelColumn, false
+        elseif style and (style.labelAutoWidth or row._exSettingsRowAutoWidth) then
+            -- 文字列按标签实际字宽（加文字后面的留位）；没有标签时文字列不占宽。
+            local labelWidth = title:IsShown() and (math.ceil(title:GetUnboundedStringWidth()) + trailing) or 0
+            controlWidth, textWidth, stacked = ResolveStyledRowColumns(row, innerWidth, style, labelWidth)
+        else
+            controlWidth, textWidth, stacked = ResolveSettingsRowColumns(innerWidth,
+                row._exSettingsRowControlWidth, row._exSettingsRowControlKind,
+                row._exSettingsRowInputWidthPercent, row._exSettingsRowMinControlWidth)
+        end
+        if row._exSettingsRowStacked then
+            controlWidth, textWidth, stacked, labelColumn = innerWidth, innerWidth, true, nil
+        end
+        local titleHeight = SettingsTextHeight(title, math.max(1, textWidth - trailing))
         textHeight = titleHeight
         if descriptionShown then
             if descriptionWidget then descriptionWidget:SetWidth(textWidth) end
@@ -796,16 +958,17 @@ function EXUI:UpdateSettingsRowLayout(row, width, controlHeight, descriptionWidg
             local stackGap = textHeight > 0 and SETTINGS_LIST_STACK_GAP or 0
             height = math.max(row._exSettingsRowMinHeight,
                 rowPaddingY * 2 + textHeight + stackGap + controlHeight)
-            controlX = rowPaddingX
+            controlX = textX
             controlY = rowPaddingY + textHeight + stackGap
         else
             height = math.max(row._exSettingsRowMinHeight,
                 rowPaddingY * 2 + math.max(textHeight, controlHeight))
-            controlX = width - rowPaddingX - controlWidth
+            controlX = labelColumn and (textX + labelColumn + (style.labelColumnGap or 0))
+                or (width - rowPaddingX - controlWidth)
             controlY = math.floor((height - controlHeight) * 0.5 + 0.5)
         end
         if descriptionShown then
-            local minimum = SETTINGS_LIST_DESCRIPTION_MIN_HEIGHT
+            local minimum = style and style.rowMinHeight or SETTINGS_LIST_DESCRIPTION_MIN_HEIGHT
             if height < minimum then
                 -- 窄版时把多出来的高度加在控件上方，保持控件贴近行底。
                 if stacked then controlY = controlY + (minimum - height) end
@@ -819,8 +982,16 @@ function EXUI:UpdateSettingsRowLayout(row, width, controlHeight, descriptionWidg
     end
     title:ClearAllPoints()
     if title:IsShown() then
-        title:SetPoint("TOPLEFT", row, "TOPLEFT", rowPaddingX, -textTop)
-        title:SetWidth(textWidth)
+        title:SetPoint("TOPLEFT", row, "TOPLEFT", textX, -textTop)
+        title:SetWidth(math.max(1, textWidth - trailing))
+    end
+    if style and style.noWrap then UpdateSettingsRowLabelHit(row, title) end
+    -- 勾选框 / 图标与标签第一行垂直居中。
+    local lineHeight = select(2, title:GetFont()) or leadSize
+    local leadTop = math.floor(textTop + (lineHeight - leadSize) * 0.5 + 0.5)
+    if row._exSettingsRowLead == "icon" then
+        row._exSettingsRowIcon:ClearAllPoints()
+        row._exSettingsRowIcon:SetPoint("TOPLEFT", row, "TOPLEFT", leadX, -leadTop)
     end
     if descriptionShown then
         local descriptionHeight = SettingsTextHeight(description, textWidth)
@@ -829,7 +1000,7 @@ function EXUI:UpdateSettingsRowLayout(row, width, controlHeight, descriptionWidg
             if title:IsShown() then
                 descriptionWidget:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -SETTINGS_LIST_DESCRIPTION_GAP)
             else
-                descriptionWidget:SetPoint("TOPLEFT", row, "TOPLEFT", rowPaddingX, -textTop)
+                descriptionWidget:SetPoint("TOPLEFT", row, "TOPLEFT", textX, -textTop)
             end
             descriptionWidget:SetSize(textWidth, descriptionHeight)
         else
@@ -837,19 +1008,21 @@ function EXUI:UpdateSettingsRowLayout(row, width, controlHeight, descriptionWidg
             if title:IsShown() then
                 description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -SETTINGS_LIST_DESCRIPTION_GAP)
             else
-                description:SetPoint("TOPLEFT", row, "TOPLEFT", rowPaddingX, -textTop)
+                description:SetPoint("TOPLEFT", row, "TOPLEFT", textX, -textTop)
             end
             description:SetWidth(textWidth)
         end
     end
     row:SetSize(width, height)
     local divider = row._exSettingsRowDivider
+    local dividerInset = style and style.dividerInset or rowPaddingX
     divider:ClearAllPoints()
-    divider:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", rowPaddingX, 0)
-    divider:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -rowPaddingX, 0)
+    divider:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", dividerInset, 0)
+    divider:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -dividerInset, 0)
     divider:SetShown(not row._exSettingsRowIsLast)
     EXUI:ClearControlSurface(row)
-    return height, controlX, controlY, controlWidth, stacked == true
+    -- 第 6、7 个返回值：标签前勾选框 / 图标的左上角（相对行）。
+    return height, controlX, controlY, controlWidth, stacked == true, leadX, leadTop
 end
 
 local function SettingsControlTextWidth(region)
@@ -1599,7 +1772,7 @@ end
 local function CaptureControlSurfaceState(frame)
     local state = {}
     for radius, skin in pairs(frame and frame._exModernSurfaces or {}) do
-        local saved = { pieces = {} }
+        local saved = { active = skin.active, pieces = {} }
         for index, piece in ipairs(skin.pieces or {}) do
             local r, g, b, a = piece.texture:GetVertexColor()
             saved.pieces[index] = {
@@ -1615,6 +1788,7 @@ end
 local function RestoreControlSurfaceState(frame, state)
     for radius, skin in pairs(frame and frame._exModernSurfaces or {}) do
         local saved = state and state[radius]
+        skin.active = saved and saved.active == true or false
         if skin.Layout then skin.Layout() end
         for index, piece in ipairs(skin.pieces or {}) do
             local pieceState = saved and saved.pieces[index]
@@ -1768,7 +1942,8 @@ function EXUI:PrepareSettingsListCard(card, options)
         local header = card._exSettingsCardHeader
         header:SetHeight(card._exSettingsListExternalHeader.height)
         header:Show()
-        header:EnableMouse(false)
+        -- 可折叠时整条表头可点（OnMouseUp 与 −/+ 同一切换）；表头上的 help 等子按钮在上层，点它们不切换。
+        header:EnableMouse(externalCollapsible)
         if exbossProfile then
             card._exSettingsCardIcon:ClearAllPoints()
             card._exSettingsCardIcon:SetPoint("LEFT", header, "LEFT", SETTINGS_LIST_EXBOSS_CONTENT_PADDING_X, 0)
@@ -2022,6 +2197,8 @@ function EXUI:RestoreSettingsListControl(widget)
     if state.sliderLayout then
         local sliderState = state.sliderLayout
         widget._exSettingsValuePosition = sliderState.valuePosition
+        widget._exSettingsInputWidth = sliderState.inputWidthSetting
+        widget._exSettingsInputHeight = nil
         widget._exGridFixedHeight = sliderState.fixedHeight
         widget:SetSize(sliderState.width, sliderState.height)
         local input = widget.numberInput
@@ -2039,17 +2216,40 @@ function EXUI:RestoreSettingsListControl(widget)
     return true
 end
 
+-- 数字框宽 "fit"：按这条滑杆最小、最大值格式化后较长的那个定宽（负号、百分号、小数都算上），刚好不裁字。
+local function FitSliderInputWidth(widget)
+    local input = widget.numberInput
+    local measure = widget._exInputMeasure
+    if not measure then
+        measure = widget:CreateFontString(nil, "BACKGROUND")
+        measure:Hide()
+        widget._exInputMeasure = measure
+    end
+    local fontPath, fontSize, fontFlags = input:GetFont()
+    if fontPath then measure:SetFont(fontPath, fontSize, fontFlags) else measure:SetFontObject(input:GetFontObject()) end
+    local minimum, maximum = (widget.Slider or widget):GetMinMaxValues()
+    local format = widget._formatter or tostring
+    local widest = 0
+    for _, value in ipairs({ minimum, maximum }) do
+        measure:SetText(tostring(format(value)))
+        widest = math.max(widest, measure:GetUnboundedStringWidth())
+    end
+    return math.ceil(widest) + GM.space.sliderInputInset * 2 + 4
+end
+
 -- Reflow only the original GridSlider and its original number EditBox.  The
 -- numeric value, formatter, interaction scripts and lifecycle callbacks remain
 -- owned by CreateSlider.
-function EXUI:UpdateSettingsListControlLayout(widget, width)
+-- height（可选）：普通矩形控件的高，只有可选页面样式传（预设 controlHeight）；不传取原值。
+function EXUI:UpdateSettingsListControlLayout(widget, width, height)
     if not widget then return 0 end
     width = math.max(1, tonumber(width) or widget:GetWidth() or 1)
+    local ordinaryHeight = tonumber(height) or SETTINGS_LIST_ORDINARY_CONTROL_HEIGHT
     local borrowedKind = widget._exSettingsBorrowedKind
     if widget._exSettingsOrdinaryControl == true and borrowedKind ~= nil then
-        widget:SetSize(width, SETTINGS_LIST_ORDINARY_CONTROL_HEIGHT)
-        widget._exGridFixedHeight = SETTINGS_LIST_ORDINARY_CONTROL_HEIGHT
-        return SETTINGS_LIST_ORDINARY_CONTROL_HEIGHT, width
+        widget:SetSize(width, ordinaryHeight)
+        widget._exGridFixedHeight = ordinaryHeight
+        return ordinaryHeight, width
     elseif borrowedKind == "text" or borrowedKind == "multiline" then
         widget:SetWidth(width)
         return math.max(1, widget:GetHeight()), width
@@ -2057,21 +2257,28 @@ function EXUI:UpdateSettingsListControlLayout(widget, width)
     if widget._gridType == "GridSlider" and widget._exSettingsValuePosition == "right"
         and widget.numberInput then
         local height = math.max(SETTINGS_LIST_ORDINARY_CONTROL_HEIGHT, SLIDER_NUMBER_INPUT_HEIGHT)
+        -- 数值框是纯输入框（不带加减）。定宽：各条滑杆的轨道一样长；数值特别长放不下时才按最长数值加宽。
+        -- 高可由预设另给（_exSettingsInputHeight，见 PrepareSettingsListControl 的 inputHeight）。
+        local fixedWidth = widget._exSettingsInputWidth == "fit" and 0
+            or tonumber(widget._exSettingsInputWidth) or SLIDER_NUMBER_INPUT_WIDTH
+        local fullInputWidth = math.max(fixedWidth, FitSliderInputWidth(widget))
+        local inputHeight = widget._exSettingsInputHeight or SLIDER_NUMBER_INPUT_HEIGHT
+        local inputGap = GM.settings.sliderValueGap
         local gap, inputWidth, trackWidth
         if widget._exSettingsOrdinaryControl == true then
-            gap = math.min(10, math.max(0, width - 2))
-            inputWidth = math.min(SLIDER_NUMBER_INPUT_WIDTH, math.max(1, width - gap - 1))
+            gap = math.min(inputGap, math.max(0, width - 2))
+            inputWidth = math.min(fullInputWidth, math.max(1, width - gap - 1))
             trackWidth = math.max(1, width - gap - inputWidth)
         else
-            gap, inputWidth = 10, SLIDER_NUMBER_INPUT_WIDTH
-            trackWidth = math.max(80, width - gap - inputWidth)
+            gap, inputWidth = inputGap, fullInputWidth
+            trackWidth = math.max(GM.size.sliderTrackMinWidth, width - gap - inputWidth)
         end
         widget:SetSize(trackWidth, height)
         widget._exGridFixedHeight = height
         local input = widget.numberInput
         input:ClearAllPoints()
         input:SetPoint("LEFT", widget, "RIGHT", gap, 0)
-        input:SetSize(inputWidth, SLIDER_NUMBER_INPUT_HEIGHT)
+        input:SetSize(inputWidth, inputHeight)
         local interactive = widget.Slider
         if interactive then
             interactive:ClearAllPoints()
@@ -2085,8 +2292,8 @@ function EXUI:UpdateSettingsListControlLayout(widget, width)
         and (widget._gridType == "GridButton" or widget._gridType == "GridInput" or widget._gridType == "GridDropdown"
             or widget._gridType == "GridLSMDropdown" or widget._gridType == "GridMultiselect"
             or widget._gridType == "GridColorButton") then
-        widget:SetSize(width, SETTINGS_LIST_ORDINARY_CONTROL_HEIGHT)
-        widget._exGridFixedHeight = SETTINGS_LIST_ORDINARY_CONTROL_HEIGHT
+        widget:SetSize(width, ordinaryHeight)
+        widget._exGridFixedHeight = ordinaryHeight
         -- Repaint against the final first-pass geometry as well as later
         -- reflows. This synchronizes the surface slices even when a pooled
         -- dropdown happens to be assigned the same root width it held before.
@@ -2099,7 +2306,7 @@ function EXUI:UpdateSettingsListControlLayout(widget, width)
         else
             PaintModernDropdown(widget)
         end
-        return SETTINGS_LIST_ORDINARY_CONTROL_HEIGHT, width
+        return ordinaryHeight, width
     end
     widget:SetWidth(width)
     return math.max(1, widget:GetHeight()), width
@@ -2186,8 +2393,13 @@ function EXUI:PrepareSettingsListControl(widget, options)
             interactivePoints = interactive and CaptureRegionPoints(interactive) or nil,
             interactiveWidth = interactive and interactive:GetWidth() or nil,
             interactiveHeight = interactive and interactive:GetHeight() or nil,
+            inputWidthSetting = widget._exSettingsInputWidth,
         }
         widget._exSettingsValuePosition = "right"
+        -- inputWidth（可选，只有样式预设传）：数值框宽（数字或 "fit" = 按最长数值定宽）；
+        -- inputHeight（可选，只有样式预设传）：数值框高。不传同原样。
+        widget._exSettingsInputWidth = options.inputWidth
+        widget._exSettingsInputHeight = options.inputHeight
         self:UpdateSettingsListControlLayout(widget, widget:GetWidth())
     end
     if options.role == "label" then
@@ -2305,6 +2517,13 @@ function EXUI:PrepareSettingsListControl(widget, options)
         else
             box:SetPoint("RIGHT", widget, "RIGHT", 0, 0)
             box:SetSize(GM.size.switchTrackWidth, GM.size.switchTrackHeight)
+            -- labelLeft：标签留在控件左侧、开关贴右，与设置行同一左右分工（组合设置组里的开关量用它）。
+            if options.labelLeft and widget.label then
+                widget.label:ClearAllPoints()
+                widget.label:SetPoint("LEFT", widget, "LEFT", 0, 0)
+                widget.label:SetPoint("RIGHT", box, "LEFT", -SETTINGS_LIST_COLUMN_GAP, 0)
+                widget.label:SetJustifyH("LEFT")
+            end
         end
         PaintModernCheckbox(widget, nil, true)
     end
@@ -2352,11 +2571,11 @@ local function IsModuleCommonOrdinaryField(field)
         or kind == "lsm_background" or kind == "lsm_border" or kind == "lsm_texture"
 end
 
--- [WEB-REQ 28] 普通行右侧控件最小可用宽：滑条 settingsRowSliderMinWidth，其余普通控件 settingsRowControlMinWidth；
+-- [WEB-REQ 28] 普通行右侧控件最小可用宽：滑条 settingsRowSliderMinWidth，其余普通控件 settings.controlMinWidth；
 -- 非普通字段（开关/胶囊/整行/按钮）返回 nil，沿用旧算法。Grid 与复合控件创建 Row 时用同一函数，保证测量与摆放同源。
 function EXUI:GetModuleCommonControlMinWidth(field)
     if not IsModuleCommonOrdinaryField(field) then return nil end
-    return field.type == "slider" and GM.size.settingsRowSliderMinWidth or GM.size.settingsRowControlMinWidth
+    return field.type == "slider" and GM.size.settingsRowSliderMinWidth or GM.settings.controlMinWidth
 end
 
 local function GetModuleCommonFieldMinWidth(field)

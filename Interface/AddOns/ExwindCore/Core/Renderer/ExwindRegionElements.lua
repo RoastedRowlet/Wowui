@@ -137,6 +137,26 @@ local function AssertNativePayload(value, label, seen, allowDuration)
     end
 end
 
+-- 时长文字的绑定参数（durationOptions）原样交给 DurationTextBinding：其中的
+-- formatter、colorCurve 是原生对象（userdata），只允许这类原生对象，
+-- 函数、协程、Frame/Region 与 Secret 仍然拒绝。
+local function AssertDurationOptions(value, label, seen)
+    local valueType = type(value)
+    if IsSecret(value) then error(label .. " cannot contain a Secret value", 3) end
+    if valueType == "function" or valueType == "thread" then
+        error(label .. " cannot contain " .. valueType, 3)
+    end
+    if valueType ~= "table" then return end
+    if type(value.GetObjectType) == "function" then error(label .. " cannot contain a Frame/Region object", 3) end
+    seen = seen or {}
+    if seen[value] then return end
+    seen[value] = true
+    for key, child in pairs(value) do
+        AssertPure(key, label, nil, false)
+        AssertDurationOptions(child, label, seen)
+    end
+end
+
 local function AssertContent(kind, content, label)
     if content == nil then return end
     if type(content) ~= "table" then error(label .. " must be table", 3) end
@@ -145,6 +165,8 @@ local function AssertContent(kind, content, label)
         if nativeKeys[key] then
             AssertNativePayload(value, label .. "." .. key, nil,
                 key == "durationObject" or key == "secretDuration" or key == "cooldown")
+        elseif key == "durationOptions" and nativeKeys.durationObject then
+            AssertDurationOptions(value, label .. "." .. key)
         else
             AssertPure(value, label .. "." .. tostring(key), nil, false)
         end
@@ -256,6 +278,9 @@ local function ApplyIcon(widget, spec, moduleKey)
         cooldown.durationTextProperty, cooldown.durationTextOptions)
     elseif cooldown.mode == "DURATION" then widget:SetDurationObject(cooldown.duration, cooldown.clearIfZero,
         cooldown.durationTextProperty, cooldown.durationTextOptions)
+        if type(cooldown.frozen) == "table" then
+            widget:FreezeCooldownSwipe(cooldown.frozen.elapsed, cooldown.frozen.total)
+        end
     elseif cooldown.static == true then
         widget:SetStaticCooldown(cooldown.remaining, cooldown.duration, cooldown.format)
         if type(cooldown.text) == "string" then widget:SetCountdownText(cooldown.text) end
@@ -351,6 +376,7 @@ local function ApplyTexture(widget, spec)
         flipV = content.flipV,
         blendMode = content.blendMode or spec.style.blendMode,
         rotation = content.rotation or spec.style.rotation,
+        pulse = content.pulse,
         color = content.color or spec.style,
         shown = content.shown ~= false and spec.shown ~= false,
     })

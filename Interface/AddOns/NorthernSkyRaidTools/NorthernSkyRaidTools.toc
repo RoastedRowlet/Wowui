@@ -1,7 +1,7 @@
 ## Interface: 120105, 16001
 ## AllowLoadGameType: standard, camelot
 ## Title: |cFF00FFFFNorthern Sky Raid Tools|r
-## Version: 12.1.30
+## Version: 12.1.32
 ## IconTexture: Interface\AddOns\NorthernSkyRaidTools\Media\NSLogo.blp
 ## Author: Reloe, Rav
 ## DefaultState: Enable

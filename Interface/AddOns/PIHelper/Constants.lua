@@ -4,7 +4,7 @@
 
 local ADDON_NAME, addon = ...
 
-addon.VERSION = "1.8.0"
+addon.VERSION = "1.9.0"
 addon.PI_SPELL_ID = 10060
 addon.GROUP_KEY = "pihelper"
 

@@ -85,10 +85,12 @@ function EXUI:CreateVisualTexture(parent, profile, templateName)
     return self:ApplyVisualLayer(texture, layer, parent)
 end
 
-function EXUI:CreateVisualFontString(parent, profile, templateName)
+-- overflow：文字放不下时的处理。默认 "wrap" 换行；只有登记过的位置（光环名等）才传 "truncate" 出省略号。
+function EXUI:CreateVisualFontString(parent, profile, templateName, overflow)
     if not parent or not parent.CreateFontString then return nil end
     local layer = self:GetVisualLayer(profile)
     local text = parent:CreateFontString(nil, layer.drawLayer, templateName, layer.subLevel)
+    text:SetWordWrap(overflow ~= "truncate")
     return self:ApplyVisualLayer(text, layer, parent)
 end
 

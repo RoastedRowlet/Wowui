@@ -127,11 +127,8 @@ local function NormalizeUnitToken(unit)
 end
 
 local function NormalizeCastBarID(value)
-    local id = tonumber(value)
-    if not id then
-        return nil
-    end
-    return id
+    -- UnitCastBarID is an opaque, non-secret identifier scoped to a unit token.
+    return value
 end
 
 local function IsNonChineseLocale()
@@ -237,7 +234,7 @@ local function IsBadCheckColor(color)
         and color.b == CAST_CHECK_BAD.b
 end
 
-local function ResolveActiveColor(db)
+local function ResolveActiveColor(colorConfig)
     if activeAnim then
         local hasCheck = false
         local c
@@ -252,16 +249,30 @@ local function ResolveActiveColor(db)
             return CAST_CHECK_GOOD.r, CAST_CHECK_GOOD.g, CAST_CHECK_GOOD.b
         end
     end
-    return GetConfiguredColor(db)
+    return colorConfig.r, colorConfig.g, colorConfig.b
+end
+
+-- 施法检测期间每帧重套颜色，配置色和透明度走运行时缓存；ApplyVisuals 是所有改设置
+-- 路径（设置页、预览、切配置、重置）的共同出口，在那里失效。
+local _colorConfig = nil
+
+local function GetColorConfig()
+    if _colorConfig then
+        return _colorConfig
+    end
+    local db = DB()
+    local r, g, b = GetConfiguredColor(db)
+    _colorConfig = { r = r, g = g, b = b, a = Clamp01(db.alpha, DEFAULTS.alpha) }
+    return _colorConfig
 end
 
 local function ApplyActiveColor()
     if not activeAnim then
         return
     end
-    local db = DB()
-    local r, g, b = ResolveActiveColor(db)
-    local a = Clamp01(db.alpha, DEFAULTS.alpha)
+    local colorConfig = GetColorConfig()
+    local r, g, b = ResolveActiveColor(colorConfig)
+    local a = colorConfig.a
 
     local function ApplyCooldownColor(cd)
         if not cd then return end
@@ -377,6 +388,7 @@ local function DoesOwnerMatch(state, owner)
     if owner.castKind and tostring(state.ownerCastKind or "") ~= tostring(owner.castKind or "") then
         return false
     end
+    if owner.unit and owner.castKind and owner.castBarID == nil then return false end
     local ownerCastBarID = NormalizeCastBarID(owner.castBarID)
     local stateCastBarID = NormalizeCastBarID(state.ownerCastBarID)
     if ownerCastBarID ~= nil and stateCastBarID ~= ownerCastBarID then
@@ -391,25 +403,8 @@ local function DoesOwnerMatch(state, owner)
     if owner.eventID ~= nil and tonumber(state.ownerEventID) ~= tonumber(owner.eventID) then
         return false
     end
-    if (owner.encounterID ~= nil or owner.eventID ~= nil)
-        and tostring(state.ownerSource or "") == "boss"
-        and tostring(owner.source or "") == "boss"
-    then
-        return true
-    end
     local ownerUnit = NormalizeUnitToken(owner.unit)
-    local stateUnit = NormalizeUnitToken(state.ownerUnit)
-    if ownerUnit ~= nil then
-        if stateUnit == ownerUnit then
-            return true
-        end
-        if tostring(state.ownerSource or "") == "boss"
-            and tostring(owner.source or "") == "boss"
-            and ownerCastBarID ~= nil
-            and stateCastBarID == ownerCastBarID
-        then
-            return true
-        end
+    if ownerUnit ~= nil and NormalizeUnitToken(state.ownerUnit) ~= ownerUnit then
         return false
     end
     return true
@@ -612,6 +607,7 @@ local function StartAnimation(phases, opts)
 end
 
 local function ApplyVisuals()
+    _colorConfig = nil
     if not frame then return end
     local db = DB()
     local size = SafeNum(db.size, DEFAULTS.size)
@@ -979,6 +975,12 @@ function Ring:Hide()
     end
 end
 
+function Ring:UpdateOwnerCastBarID(owner, castBarID)
+    if DoesOwnerMatch(activeAnim, owner) then
+        activeAnim.ownerCastBarID = castBarID
+    end
+end
+
 function Ring:StopByOwner(owner)
     if type(owner) ~= "table" then
         return 0
@@ -992,6 +994,7 @@ function Ring:StopByOwner(owner)
 end
 
 function Ring:StopByUnitCastBar(unit, castBarID, castKind)
+    if castBarID == nil then return false end
     return self:StopByOwner({
         source = "boss",
         unit = NormalizeUnitToken(unit),

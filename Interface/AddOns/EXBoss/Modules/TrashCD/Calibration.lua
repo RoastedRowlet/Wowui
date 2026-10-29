@@ -60,7 +60,7 @@ local function EmitTrashCastBarStop(runtime, castKind, castBarID, castSeq)
     if kind ~= "cast" and kind ~= "channel" then
         return
     end
-    local normalizedCastBarID = SafeNumericValue(castBarID)
+    local normalizedCastBarID = castBarID
     if not normalizedCastBarID then
         return
     end
@@ -720,6 +720,34 @@ function Mod.BuildRuntimeScheduleSignature(runtime, candidateNPCID, defaultAncho
     return table.concat(parts, "|")
 end
 
+-- A cast and its channel have unrelated IDs. Only known two-phase spells
+-- with a matching cast duration can carry their identity into the channel.
+function Mod.ResolveCastChannelSpell(runtime, source, now)
+    if type(source) ~= "table" or source.activeCastKind ~= "cast"
+        or source.pendingInterrupted or not source.activeCastStartAt then
+        return nil
+    end
+    if source.pendingSucceededAt and now - source.pendingSucceededAt > CAST_TIME_TOLERANCE then
+        return nil
+    end
+    local mobData = Mod.GetMobCDData(runtime.matchedMapID, runtime.matchedNPCID)
+    if type(mobData) ~= "table" then return nil end
+    local elapsed = now - source.activeCastStartAt
+    local matched
+    for _, spell in pairs(mobData.spells or {}) do
+        if SpellHasChannel(spell)
+            and (not source.activeSpellID or tonumber(spell.spellID) == tonumber(source.activeSpellID)) then
+            local delta, duration = GetBestCastTimeDelta(spell, elapsed)
+            if duration and duration > 0 and delta <= CAST_TIME_TOLERANCE
+                and not DescribeFingerprintMismatch(spell, source) then
+                if matched then return nil end
+                matched = spell
+            end
+        end
+    end
+    return matched
+end
+
 function Mod.InferSucceededSpell(runtime, mobData, defaultAnchorAt, successAtOverride)
     if type(runtime) ~= "table" or type(mobData) ~= "table" or type(mobData.spells) ~= "table" then
         return nil
@@ -1234,6 +1262,7 @@ local function ResetRuntimeSchedule(runtime)
     if type(runtime) ~= "table" then
         return
     end
+    runtime.recentFinishedCast = nil
     if HasRuntimeSchedule(runtime) and Output and type(Output.CancelRuntimeScriptEvents) == "function" then
         Output.CancelRuntimeScriptEvents(runtime)
     end

@@ -277,12 +277,6 @@ function Panel:CreateWelcomeContent()
     card:SetPoint("CENTER", 0, 2)
     self.CoreStatusCard = card
 
-    local accent = EXUI:CreateVisualTexture(card, EXBASEFRAME)
-    accent:SetPoint("TOPLEFT", 0, 0)
-    accent:SetPoint("BOTTOMLEFT", 0, 0)
-    accent:SetWidth(3)
-    accent:SetColorTexture(CopyColor(Color.cyan))
-
     local eyebrow = MakeText(card, "OVERLAY", 10, Color.cyan, "OUTLINE")
     eyebrow:SetPoint("TOPLEFT", 22, -22)
     eyebrow:SetText("EXWINDCORE · UNIFIED PANEL")
@@ -495,8 +489,8 @@ end
 local function SetRailButtonState(button, active)
     if not button then return end
     button._active = active == true
-    SetRailButtonSurface(button, active and GC.shell.railActive or GC.shell.railTransparent)
-    button.accent:Hide() -- 选中不再显示左侧竖线（原 SetShown(active == true)）
+    SetRailButtonSurface(button, GC.shell.railTransparent)
+    EXUI:PaintSelectCell(button, button._active, 4)
     button.label:SetTextColor(CopyColor(active and Color.text or Color.muted))
 end
 
@@ -518,16 +512,12 @@ function Panel:RebuildAppRail()
                 button._providerMeta = self.ProviderMeta[id] or {}
                 button.label = MakeText(button, "OVERLAY", 15, Color.muted, "OUTLINE")
                 button.label:SetPoint("CENTER")
-                button.accent = EXUI:CreateVisualTexture(button, EXBASEFRAME)
-                button.accent:SetPoint("LEFT", -6, 0)
-                button.accent:SetSize(2, 23)
-                button.accent:SetColorTexture(CopyColor(Color.cyan))
                 button:SetScript("OnClick", function(self)
-                    Panel:SelectProvider(self._providerID)
+                    Panel:SelectProvider(self._providerID, nil, "rail")
                 end)
                 button:SetScript("OnEnter", function(self)
                     if not self._active then
-                        SetRailButtonSurface(self, GC.shell.railHover)
+                        SetRailButtonSurface(self, GC.menuHover)
                     end
                     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                     GameTooltip:SetText((self._providerMeta and self._providerMeta.title) or self._providerID, 0.86, 0.92, 1)
@@ -555,10 +545,8 @@ end
 -- Provider 图标列表里，只能从下方固定的齿轮按钮进入。用来承载不属于任何
 -- 单一插件的全局开关，例如统一小地图按钮的隐藏开关。
 --
--- 内容和其它设置页一样，统一走 ExwindGrid + EXUI 标准控件渲染，不手写
--- Frame/CheckButton；不属于任何 moduleKey，因此 config 用一个 __index/
--- __newindex 代理表把 Grid 的标准读写路径实时转发到 Is/SetMinimapButtonHidden，
--- 而不是另建一份镜像 DB。
+-- 页面由 V2 声明和标准控件持有。不属于任何 moduleKey，owner 通过实时
+-- 配置代理读写正式的小地图按钮和面板缩放设置，不建立镜像 DB。
 local SettingsProvider = { id = "settings", accent = "cyan", hasTopTabs = false, layoutMode = "tabs_full" }
 
 local SettingsConfigProxy = setmetatable({}, {
@@ -580,21 +568,41 @@ local SettingsConfigProxy = setmetatable({}, {
 })
 
 local PANEL_SCALE_OPTIONS = {
-    { "60%", 60 }, { "65%", 65 }, { "70%", 70 }, { "75%", 75 }, { "80%", 80 },
-    { "85%", 85 }, { "90%", 90 }, { "95%", 95 }, { "100%", 100 },
-    { "105%", 105 }, { "110%", 110 },
+    { label = "60%", value = 60 }, { label = "65%", value = 65 },
+    { label = "70%", value = 70 }, { label = "75%", value = 75 },
+    { label = "80%", value = 80 }, { label = "85%", value = 85 },
+    { label = "90%", value = 90 }, { label = "95%", value = 95 },
+    { label = "100%", value = 100 }, { label = "105%", value = 105 },
+    { label = "110%", value = 110 },
 }
 
--- 200 列密度和 HomePage.lua 等其它标准设置页保持一致，让 y 坐标差对应
--- 合理的像素间距；默认 50 列会让每格过宽，内容被拉得离标题很远。
-local SETTINGS_GRID_COLS = 200
+local SETTINGS_PAGE_ID = "ExwindCore.UnifiedPanelSettings"
+EXUI:RegisterSettingsPageV2(SETTINGS_PAGE_ID, {
+    version = 2,
+    cards = {
+        { id = "settings", kind = "card", title = L["通用设置"], children = {
+            { id = "minimapHidden", kind = "control", ref = "minimapHidden", controlType = "switch" },
+            { id = "panelScale", kind = "control", ref = "panelScale", controlType = "select" },
+        } },
+    },
+})
 
-local function BuildSettingsLayout()
-    return {
-        { key = "header_settings", type = "header", x = 1, y = 3, w = 190, h = 4, label = L["通用设置"], labelSize = 20 },
-        { key = "minimapHidden", type = "checkbox", x = 3, y = 11, w = 60, h = 4, label = L["隐藏小地图按钮"] },
-        { key = "panelScale", type = "dropdown", x = 3, y = 19, w = 30, h = 4, label = L["面板缩放"], items = PANEL_SCALE_OPTIONS },
-    }
+local function CreateSettingsOwner()
+    local owner = { controls = {} }
+    local function Control(key, spec)
+        local binding = {
+            Read = function() return SettingsConfigProxy[key] end,
+            Write = function(_, value) SettingsConfigProxy[key] = value end,
+        }
+        return EXUI:CreateSettingsV2Control(spec, function() return binding end)
+    end
+    owner.controls.minimapHidden = Control("minimapHidden", {
+        controlType = "switch", label = L["隐藏小地图按钮"],
+    })
+    owner.controls.panelScale = Control("panelScale", {
+        controlType = "select", label = L["面板缩放"], options = PANEL_SCALE_OPTIONS,
+    })
+    return owner
 end
 
 function SettingsProvider:Mount(hosts)
@@ -613,16 +621,20 @@ function SettingsProvider:Mount(hosts)
 end
 
 function SettingsProvider:Render()
-    local Grid = _G.ExwindGrid
-    if not (Grid and self.ScrollFrame and self.ScrollChild) then return end
+    if not (self.ScrollFrame and self.ScrollChild) then return end
     local width = self.ScrollFrame:GetWidth()
     if width < 100 then width = 800 end
     self.ScrollChild:SetWidth(width - 16)
-    self.ScrollChild:SetHeight(1)
-    if Grid.SetContainerCols then
-        Grid:SetContainerCols(self.ScrollChild, SETTINGS_GRID_COLS)
+    if self.Session then
+        self.Session:Refresh()
+    else
+        self.Owner = CreateSettingsOwner()
+        self.Owner.onHeightChanged = function(height)
+            self.ScrollChild:SetHeight(height)
+            self.ScrollFrame:UpdateScrollChildRect()
+        end
+        self.Session = EXUI:MountSettingsPageV2(self.ScrollChild, SETTINGS_PAGE_ID, self.Owner)
     end
-    Grid:Render(self.ScrollChild, BuildSettingsLayout(), SettingsConfigProxy, nil)
 end
 
 function SettingsProvider:ApplyRoute()
@@ -637,6 +649,10 @@ function SettingsProvider:Relayout()
 end
 
 function SettingsProvider:Hide()
+    if self.Session then
+        self.Session:Release()
+        self.Session, self.Owner = nil, nil
+    end
     if self.Root then self.Root:Hide() end
 end
 
@@ -678,7 +694,9 @@ function Panel:UnregisterProvider(id)
     self:RebuildAppRail()
 end
 
-function Panel:SelectProvider(id, route)
+-- source（可选）：怎么选到的。"rail" = 在中央面板左侧点了这个插件的入口；命令、Router 打开不写。
+-- 原样交给 provider:ApplyRoute(route, previous, source)，不用它的 provider 不受影响。
+function Panel:SelectProvider(id, route, source)
     if not id then
         if self.ActiveProvider then
             local oldProvider = self.Providers[self.ActiveProvider]
@@ -724,7 +742,7 @@ function Panel:SelectProvider(id, route)
         navRatio = provider.navRatio,
     })
     if type(provider.ApplyRoute) == "function" then
-        provider:ApplyRoute(route, previous)
+        provider:ApplyRoute(route, previous, source)
     end
     self:RebuildAppRail()
     if self.SettingsRailButton then SetRailButtonState(self.SettingsRailButton, id == "settings") end
@@ -869,11 +887,6 @@ function Panel:CreateFrame()
     settingsBtn:SetPoint("BOTTOM", rail, "BOTTOM", 0, 188)
     SetRailButtonSurface(settingsBtn, GC.shell.railTransparent)
     settingsBtn._providerMeta = { accent = "cyan" }
-    settingsBtn.accent = EXUI:CreateVisualTexture(settingsBtn, EXBASEFRAME)
-    settingsBtn.accent:SetPoint("LEFT", -6, 0)
-    settingsBtn.accent:SetSize(2, 23)
-    settingsBtn.accent:SetColorTexture(CopyColor(Color.cyan))
-    settingsBtn.accent:Hide()
     -- SetRailButtonState 是圆形 Provider 按钮和这几个固定功能按钮共用的高亮
     -- 函数，会无条件访问 button.label；这里不显示文字，只为满足该访问。
     settingsBtn.label = MakeText(settingsBtn, "OVERLAY", 15, Color.muted, "OUTLINE")
@@ -885,7 +898,7 @@ function Panel:CreateFrame()
     settingsBtn:SetScript("OnClick", function() Panel:SelectProvider("settings") end)
     settingsBtn:SetScript("OnEnter", function(self)
         if not self._active then
-            SetRailButtonSurface(self, GC.shell.railHover)
+            SetRailButtonSurface(self, GC.menuHover)
         end
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L["通用设置"], 0.86, 0.92, 1)
@@ -912,7 +925,7 @@ function Panel:CreateFrame()
         end
     end)
     changelog:SetScript("OnEnter", function(self)
-        SetRailButtonSurface(self, GC.shell.railHover)
+        SetRailButtonSurface(self, GC.menuHover)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L["更新日志"], 0.86, 0.92, 1)
         GameTooltip:Show()
@@ -937,7 +950,7 @@ function Panel:CreateFrame()
     editMode.icon:SetTexture("Interface\\AddOns\\ExwindCore\\Textures\\grid.png")
     editMode:SetScript("OnClick", function() Panel:EnterEditMode() end)
     editMode:SetScript("OnEnter", function(self)
-        SetRailButtonSurface(self, GC.shell.railHover)
+        SetRailButtonSurface(self, GC.menuHover)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L["编辑模式"], 0.86, 0.92, 1)
         GameTooltip:Show()
@@ -958,7 +971,7 @@ function Panel:CreateFrame()
     reload.icon:SetTexture("Interface\\AddOns\\ExwindCore\\Textures\\reload.png")
     reload:SetScript("OnClick", function() ReloadUI() end)
     reload:SetScript("OnEnter", function(self)
-        SetRailButtonSurface(self, GC.shell.railHover)
+        SetRailButtonSurface(self, GC.menuHover)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L["重新加载界面"], 0.86, 0.92, 1)
         GameTooltip:Show()

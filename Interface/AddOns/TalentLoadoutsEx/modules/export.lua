@@ -10,13 +10,13 @@ function Addon:GetExportText()
 
 	local exportStream = ExportUtil.MakeExportDataStream();
 	local configID = talentsFrame:GetConfigID();
-	local currentSpecID = PlayerUtil.GetCurrentSpecID();
+	local specID = PlayerUtil.GetCurrentSpecID();
 
 	local treeInfo = talentsFrame:GetTreeInfo();
 	local treeHash = treeInfo and C_Traits.GetTreeHash(treeInfo.ID);
 	if treeHash then
 		local serializationVersion = C_Traits.GetLoadoutSerializationVersion();
-		talentsFrame:WriteLoadoutHeader(exportStream, serializationVersion, currentSpecID, treeHash);
+		talentsFrame:WriteLoadoutHeader(exportStream, serializationVersion, specID, treeHash);
 		talentsFrame:WriteLoadoutContent(exportStream, configID, treeInfo.ID);
 
 		return exportStream:GetExportString();

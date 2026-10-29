@@ -24,9 +24,8 @@ EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, {
     version = 2,
     cards = {
         { id = "common", kind = "card", title = L["通用设置"], children = {
-            { id = "desc", kind = "hint", text = L["自动依附在 PVE 面板侧边的信息架。"] },
             { id = "enabled", kind = "control", controlType = "switch", path = "enabled",
-                label = L["启用模块"] },
+                label = L["启用模块"], description = L["自动依附在 PVE 面板侧边的信息架。"] },
             { id = "side", kind = "control", controlType = "select", path = "side", label = L["依附侧"], options = {
                 { value = "LEFT", label = L["左侧"] },
                 { value = "RIGHT", label = L["右侧"] },

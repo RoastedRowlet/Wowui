@@ -183,87 +183,87 @@ local CHAT_CHANNEL_BAR_ANCHOR_OPTS = {
 -- =========================================================
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
-local function RegisterLayout()
-    -- [声明迁移边界：设置页] 静态控件、频道记录与两个复合控件各只声明一次。
-    -- CHANNELS 业务顺序、key/type/setKey、命令输入与预览/运行回调禁止修改。
-    local layout = {
-        version = 1,
-        sections = {
+local function RegisterSettingsPage()
+    local declaration = {
+        version = 2,
+        cards = {
             {
-                kind = "settings",
+                kind = "card",
                 id = "common",
                 title = L["通用设置"],
-                items = {
-                    { key = "enabled", type = "switch", label = L["启用"] },
-                    { key = "btn_reset_pos", type = "button", label = L["重置位置"] },
-                    { key = "buttonPadding", type = "slider", label = L["按钮间距"], min = 0, max = 20, step = 1 },
-                    { key = "buttonSize", type = "slider", label = L["按钮大小"], min = 20, max = 50, step = 1 },
-                    { key = "x", type = "slider", label = "X", min = -1200, max = 1200, step = 1 },
-                    { key = "y", type = "slider", label = "Y", min = -1000, max = 1000, step = 1 },
+                children = {
+                    { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用"] },
+                    { id = "btn_reset_pos_row", kind = "setting", label = L["重置位置"], children = {
+                        { id = "btn_reset_pos", kind = "button", text = L["重置位置"], clickKey = "btn_reset_pos" },
+                    } },
+                    { id = "buttonPadding", kind = "control", controlType = "slider", path = "buttonPadding", label = L["按钮间距"], min = 0, max = 20, step = 1 },
+                    { id = "buttonSize", kind = "control", controlType = "slider", path = "buttonSize", label = L["按钮大小"], min = 20, max = 50, step = 1 },
+                    { id = "x", kind = "control", controlType = "slider", path = "x", label = "X", min = -1200, max = 1200, step = 1 },
+                    { id = "y", kind = "control", controlType = "slider", path = "y", label = "Y", min = -1000, max = 1000, step = 1 },
                 },
             },
             {
-                kind = "composite",
-                id = "anchor",
+                kind = "card",
+                id = "anchor_card",
                 title = L["锚点设置"],
-                component = "anchorgroup",
-                key = "anchor",
-                opts = CHAT_CHANNEL_BAR_ANCHOR_OPTS,
+                children = {
+                    { id = "anchor", kind = "component", component = "anchorgroup", path = "anchor",
+                        label = L["锚点设置"], optionsRef = "anchor" },
+                },
             },
             {
-                kind = "table",
+                kind = "card",
                 id = "channels",
                 title = L["频道设置"],
-                columns = {
-                    { title = L["启用"] },
-                    { title = L["名称"] },
-                    { title = L["文字"] },
-                    { title = L["频道/命令"] },
-                    { title = L["颜色"] },
+                children = {
+                    { id = "channels_table", kind = "table", columns = {
+                        { title = L["启用"] }, { title = L["名称"] }, { title = L["文字"] },
+                        { title = L["频道/命令"] }, { title = L["颜色"] },
+                    }, children = {} },
                 },
-                supportsAdd = false,
-                records = {},
             },
             {
-                kind = "composite",
+                kind = "card",
                 id = "font",
                 title = L["频道文字"],
-                component = "fontgroup",
-                key = "font_style",
-                opts = {},
+                children = {
+                    { id = "font_style", kind = "component", component = "fontgroup", path = "font_style", label = L["频道文字"] },
+                },
             },
         },
     }
-    local records = layout.sections[3].records
+    local rows = declaration.cards[3].children[1].children
+    local function Cell(id, child)
+        return { id = id .. "_cell", kind = "cell", children = { child } }
+    end
+    -- 固定频道按原业务顺序声明；节点 id 保留预览定位用的 GUI key。
     for _, channel in ipairs(CHANNELS) do
         local id = channel.id
-        records[#records + 1] = {
-            cells = {
-                {
-                    key = "channel_" .. id .. "_enabled",
-                    type = "switch",
-                    label = channel.name,
-                    setKey = "show_" .. id,
-                },
-                { text = channel.name },
-                {
-                    key = "channel_" .. id .. "_name",
-                    type = "input",
-                    label = L["文字"],
-                    setKey = id .. "_name",
-                },
-                {
-                    key = "channel_" .. id .. "_command",
-                    type = "input",
-                    label = L["频道/命令"],
-                    setKey = id .. "_channel",
-                },
-                { key = id, type = "color", label = L["颜色"] },
+        local enabledKey, nameKey, commandKey = "channel_" .. id .. "_enabled", "channel_" .. id .. "_name", "channel_" .. id .. "_command"
+        rows[#rows + 1] = {
+            id = "channel_" .. id,
+            kind = "row",
+            children = {
+                Cell(enabledKey, { id = enabledKey, kind = "control", controlType = "checkbox", ref = enabledKey }),
+                Cell("channel_" .. id .. "_label", { id = "channel_" .. id .. "_label", kind = "text", text = channel.name }),
+                Cell(nameKey, { id = nameKey, kind = "control", controlType = "input", path = id .. "_name" }),
+                Cell(commandKey, { id = commandKey, kind = "control", controlType = "input", path = id .. "_channel" }),
+                Cell(id, { id = id, kind = "control", controlType = "color", path = id }),
             },
         }
     end
 
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
+    EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, declaration, function(context)
+        local owner = { options = { anchor = CHAT_CHANNEL_BAR_ANCHOR_OPTS }, controls = {} }
+        for _, channel in ipairs(CHANNELS) do
+            local id = channel.id
+            local adapter = EXUI:CreateSettingsV2Control({ controlType = "checkbox", label = "" }, function()
+                return EXUI:CreateSettingsV2Binding(EXWIND_MODULE_KEY, context.config, "show_" .. id)
+            end)
+            owner.controls["channel_" .. id .. "_enabled"] = adapter
+        end
+        return owner
+    end)
 end
 local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY)
 local function DB() return EX_DB end
@@ -293,14 +293,9 @@ EnsureAnchorController = function()
         getRelativePoint = function(self) return self:IsAttachEnabled() and "TOPLEFT" or "BOTTOMLEFT" end,
         clampedToScreen = true,
         onPositionSaved = function()
-            -- 世界编辑只保存同一份 ModuleDB；当前设置页随后必须回读它，而不能
-            -- 留下旧的 x/y Slider 数值。
             if EXUI.CurrentModule ~= EXWIND_MODULE_KEY then return end
-            if EXUI.MainFrame and EXUI.MainFrame:IsShown() and type(EXUI.RefreshContent) == "function" then
-                -- x/y 是普通 Grid Slider，不是复合组；按 RangeCheck 的正式页面
-                -- 重绘路径回读，避免只回读一部分组合控件。
-                EXUI:RefreshContent()
-            end
+            local page = EXUI:GetModulePage(EXWIND_MODULE_KEY)
+            if page then page:Refresh() end
         end
     })
     return anchorController
@@ -553,7 +548,8 @@ local function HandlePreviewIntent(intent)
     if intent.type ~= "elementRightClicked" or not CHANNEL_GUI_TARGETS[intent.guiTarget] then
         error("ChatChannelBar preview received invalid GUI target", 2)
     end
-    if not EXUI:FocusModuleGridKey(EXWIND_MODULE_KEY, intent.guiTarget, EXUI.ModuleScrollFrame, EXUI.ActivePageFrame) then
+    local page = EXUI:GetModulePage(EXWIND_MODULE_KEY)
+    if not page or not page:Focus(intent.guiTarget, EXUI.ActivePageScrollFrame or EXUI.ModuleScrollFrame) then
         error("ChatChannelBar preview GUI target is not rendered: " .. tostring(intent.guiTarget), 2)
     end
     return true
@@ -562,7 +558,7 @@ end
 -- =========================================================
 -- 七、初始化与启动 | Initialization and Startup
 -- =========================================================
-RegisterLayout()
+RegisterSettingsPage()
 if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 EXUI:RegisterEditableModule({
     addon = "ExwindTools",
@@ -598,6 +594,8 @@ ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY,
     function(info)
         if info and info.key == "btn_reset_pos" then
             DB().x = DEFAULTS.x; DB().y = DEFAULTS.y; Refresh()
+            local page = EXUI:GetModulePage(EXWIND_MODULE_KEY)
+            if page then page:Refresh() end
         end
     end)
 ExwindTools:RegisterEvent("PLAYER_ENTERING_WORLD", EXWIND_MODULE_KEY, function() Refresh() end)

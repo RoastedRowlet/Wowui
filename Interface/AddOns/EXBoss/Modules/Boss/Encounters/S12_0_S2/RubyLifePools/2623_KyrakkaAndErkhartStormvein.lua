@@ -301,6 +301,11 @@ R:Register({
     encounterID = 2623,
     dungeon = { key = "ruby_life_pools", name = "Ruby Life Pools", zhCN = "红玉新生法池" },
     boss = { key = "kyrakka_and_erkhart_stormvein", name = "Kyrakka and Erkhart Stormvein", zhCN = "基拉卡与厄克哈特·风脉" },
+    healthThresholds = {
+        -- 任何一只降到 40% 即转阶段（另一只来合体），两只各自按真实血量显示。
+        { unit = "boss1", threshold = 40, preset = "phase_transition" },
+        { unit = "boss2", threshold = 40, preset = "phase_transition" },
+    },
     phaseAlerts = {},
     vulnerability = {},
     extras = {},

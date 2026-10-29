@@ -13,13 +13,19 @@
 ## Notes-zhCN: 自动检测微卡顿、帧数骤降和掉帧，精确找出导致性能问题的插件
 ## Notes-zhTW: 自動偵測微卡頓、幀數驟降和掉幀，精確找出導致效能問題的插件
 ## Author: Osiris the Kiwi / Discord: osirisnz
-## Version: 1.0.7
+## Version: 1.0.8
 ## SavedVariables: StutterAlertDB
 ## Category: Development Tools
 ## X-License: All Rights Reserved
 ## IconTexture: Interface\AddOns\StutterAlert\Media\saicon
 
 # --- Load order matters ---
+# Libraries for the minimap button and the addon compartment entry.
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\lib.xml
+
 # Locale scaffolding first so the L table exists before anything reads it.
 Locale.lua
 Locales\Locales.xml
@@ -35,6 +41,7 @@ Advisor.lua
 
 # UI.
 Overlay.lua
+Launcher.lua
 
 # Wiring / events / slash commands (last, once everything is defined).
 Init.lua

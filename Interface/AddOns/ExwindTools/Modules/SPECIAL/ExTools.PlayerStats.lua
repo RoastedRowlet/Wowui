@@ -736,303 +736,155 @@ ExwindTools.GetPlayerStatTree = function()
 end
 
 -- =========================================================
--- 三、GUI 声明 | GUI Declarations — Settings Table Renderer / 设置表格渲染器
+-- 三、GUI 声明 | GUI Declarations
 -- =========================================================
-local PLAYER_STATS_ROWS_TABLE = "playerstats_rows_table"
-local PLAYER_STATS_ROW_ACTIONS = "PlayerStatsRowActions"
-local playerStatsFactory = _G.ExwindFactory
-if not playerStatsFactory then error("PlayerStats requires ExwindFactory", 2) end
-if not playerStatsFactory.Pools[PLAYER_STATS_ROW_ACTIONS] then
-    playerStatsFactory:InitCompositePool(PLAYER_STATS_ROW_ACTIONS)
+local function GetSelectedPlayerStatsRow()
+    local selected = tonumber(EX_DB.selectedRow) or 1
+    return math.max(1, math.min(selected, #EX_DB.rows))
 end
 
-local function ReleasePlayerStatsTableControl(control)
-    if not control then return end
-    if EXUI.RestoreSettingsListControl then EXUI:RestoreSettingsListControl(control) end
-    local factory = _G.ExwindFactory
-    if factory and control._isCompositeHost then
-        factory:ReleaseCompositeHost(control)
-    elseif factory then
-        factory:ReleaseGridWidget(control)
-    else
-        control:Hide()
-        control:SetParent(nil)
-    end
-end
-
-local function ClearPlayerStatsTableRows(controls)
-    for index = #controls.rows, 1, -1 do
-        local record = controls.rows[index]
-        if record.actions then
-            record.actions:SetScript("OnSizeChanged", nil)
-            for _, button in ipairs(record.actionButtons or {}) do
-                ReleasePlayerStatsTableControl(button)
-            end
-            ReleasePlayerStatsTableControl(record.actions)
-        end
-        ReleasePlayerStatsTableControl(record.percent)
-        ReleasePlayerStatsTableControl(record.syncFont)
-        ReleasePlayerStatsTableControl(record.stat)
-        ReleasePlayerStatsTableControl(record.name)
-        ReleasePlayerStatsTableControl(record.enabled)
-        ReleasePlayerStatsTableControl(record.add)
-        controls.rows[index] = nil
-    end
-end
-
-local function CommitPlayerStatsRowValue(rowIndex, field, value)
-    local row = EX_DB.rows[rowIndex]
-    if type(row) ~= "table" or row[field] == value then return false end
-    return EXUI:CommitModuleValue({
-        moduleKey = EXWIND_MODULE_KEY,
-        path = ("rows.%d.%s"):format(rowIndex, field),
-        readValue = function() return row[field] end,
-        writeValue = function(nextValue)
-            if EX_DB.rows[rowIndex] == row then row[field] = nextValue end
-        end,
-    }, value)
+local function RefreshSettingsPanel()
+    local page = EXUI:GetModulePage(EXWIND_MODULE_KEY)
+    if page then page:Refresh() end
 end
 
 local function SelectPlayerStatsRow(rowIndex)
     if EX_DB.rows[rowIndex] == nil or EX_DB.selectedRow == rowIndex then return end
-    EXUI:CommitModuleValue({
-        moduleKey = EXWIND_MODULE_KEY,
-        path = "selectedRow",
-        readValue = function() return EX_DB.selectedRow end,
-        writeValue = function(nextValue) EX_DB.selectedRow = nextValue end,
-    }, rowIndex)
+    EXUI:CreateSettingsV2Binding(EXWIND_MODULE_KEY, EX_DB, "selectedRow"):Write(rowIndex, "commit")
 end
 
 local function ClickPlayerStatsRowAction(rowIndex, key)
     if not EX_DB.rows[rowIndex] then return end
     SelectPlayerStatsRow(rowIndex)
-    ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", {
-        key = key,
-        ts = GetTime(),
-    })
+    ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", { key = key, ts = GetTime() })
 end
 
-local function CreatePlayerStatsRowActions(host, rowIndex, rowCount)
-    local actions = playerStatsFactory:AcquireCompositeHost(PLAYER_STATS_ROW_ACTIONS, host)
-    actions:SetSize(1, GM.size.buttonHeight * 2 + 4)
-    actions:EnableMouse(false)
-    local buttons = {
-        EXUI:CreateButton(actions, GM.size.buttonHeight, GM.size.buttonHeight, L["选择"], function()
-            SelectPlayerStatsRow(rowIndex)
-        end, { variant = "secondary", compact = true }),
-        EXUI:CreateButton(actions, GM.size.buttonHeight, GM.size.buttonHeight, L["↑"], function()
-            ClickPlayerStatsRowAction(rowIndex, "btn_up")
-        end, { variant = "secondary", compact = true }),
-        EXUI:CreateButton(actions, GM.size.buttonHeight, GM.size.buttonHeight, L["↓"], function()
-            ClickPlayerStatsRowAction(rowIndex, "btn_down")
-        end, { variant = "secondary", compact = true }),
-        EXUI:CreateButton(actions, GM.size.buttonHeight, GM.size.buttonHeight, L["删除"], function()
-            ClickPlayerStatsRowAction(rowIndex, "btn_delete")
-        end, { variant = "danger", compact = true }),
-    }
-    if rowIndex == 1 then buttons[2]:Disable() end
-    if rowIndex == rowCount then buttons[3]:Disable() end
-    if rowCount == 1 then buttons[4]:Disable() end
-    local function LayoutActions(_, width)
-        local gap = 4
-        local buttonWidth = math.max(24, (width - gap) / 2)
-        for index, button in ipairs(buttons) do
-            local position = ({ 1, 3, 4, 2 })[index]
-            button:SetWidth(buttonWidth)
-            button:ClearAllPoints()
-            button:SetPoint("TOPLEFT", actions, "TOPLEFT",
-                ((position - 1) % 2) * (buttonWidth + gap), -math.floor((position - 1) / 2) * (GM.size.buttonHeight + gap))
+local function PlayerStatsCell(id, child)
+    return { id = id, kind = "cell", children = { child } }
+end
+
+local PLAYER_STATS_LAYOUT = { version = 2, cards = {
+    { kind = "card", id = "common", title = L["通用设置"], children = {
+        { id = "showBg", kind = "control", controlType = "switch", path = "showBg", label = L["显示背景"] },
+        { id = "showBorder", kind = "control", controlType = "switch", path = "showBorder", label = L["显示边框"] },
+        { id = "texture", kind = "control", controlType = "select", media = "background", path = "bgSettings.texture", label = L["背景材质"] },
+        { id = "bgColor", kind = "control", controlType = "color", path = "bgSettings.bgColor", label = L["背景颜色"] },
+        { id = "borderTexture", kind = "control", controlType = "select", media = "border", path = "bgSettings.borderTexture", label = L["边框材质"] },
+        { id = "borderColor", kind = "control", controlType = "color", path = "bgSettings.borderColor", label = L["边框颜色"] },
+        { id = "edgeSize", kind = "control", controlType = "slider", path = "bgSettings.edgeSize", label = L["边框粗细"], min = 1, max = 32 },
+        { id = "inset", kind = "control", controlType = "slider", path = "bgSettings.inset", label = L["边框内距"], min = 0, max = 16 },
+        { id = "labelAlign", kind = "control", controlType = "select", path = "bgSettings.labelAlign", label = L["标签对齐"], options = {
+            { value = "LEFT", label = L["左对齐"] }, { value = "CENTER", label = L["居中"] }, { value = "RIGHT", label = L["右对齐"] },
+        } },
+        { id = "valueAlign", kind = "control", controlType = "select", path = "bgSettings.valueAlign", label = L["数值对齐"], options = {
+            { value = "LEFT", label = L["左对齐"] }, { value = "CENTER", label = L["居中"] }, { value = "RIGHT", label = L["右对齐"] },
+        } },
+        { id = "rowSpacing", kind = "control", controlType = "slider", path = "bgSettings.rowSpacing", label = L["行间距"], min = -10, max = 30 },
+        { id = "labelX", kind = "control", controlType = "slider", path = "bgSettings.labelX", label = L["标签全局X"], min = -100, max = 100 },
+        { id = "valueX", kind = "control", controlType = "slider", path = "bgSettings.valueX", label = L["数值全局X"], min = -100, max = 100 },
+    } },
+    { kind = "card", id = "rows_table", title = L["属性行管理"], children = {
+        { kind = "table", id = "rows_table.columns", columns = {
+            { title = L["启用"] }, { title = L["名称"] }, { title = L["属性"] },
+            { title = L["字体跟随"] }, { title = L["百分比"] },
+        }, selected = "isSelectedRow",
+        addAction = { id = "btn_add", text = L["新增"], clickKey = "btn_add" },
+        rowActions = {
+            { id = "rows_table.select", text = L["选择"], action = "selectRow" },
+            { id = "rows_table.up", text = L["↑"], action = "moveUp", enabled = "canMoveUp" },
+            { id = "rows_table.down", text = L["↓"], action = "moveDown", enabled = "canMoveDown" },
+            { id = "rows_table.delete", text = L["删除"], action = "deleteRow", presentation = "danger", enabled = "canDelete" },
+        }, children = {
+            { kind = "repeat", id = "rows_table.records", source = "rows", template = {
+                kind = "row", id = "rows_table.row", children = {
+                    PlayerStatsCell("rows_table.enabled", { id = "rows_table.enabled.control", kind = "control", controlType = "checkbox", ref = "rowEnabled" }),
+                    PlayerStatsCell("rows_table.label", { id = "rows_table.label.control", kind = "control", controlType = "input", ref = "rowLabel" }),
+                    PlayerStatsCell("rows_table.key", { id = "rows_table.key.control", kind = "control", controlType = "select", ref = "rowKey" }),
+                    PlayerStatsCell("rows_table.syncFont", { id = "rows_table.syncFont.control", kind = "control", controlType = "checkbox", ref = "rowSyncFont" }),
+                    PlayerStatsCell("rows_table.isPercent", { id = "rows_table.isPercent.control", kind = "control", controlType = "checkbox", ref = "rowPercent" }),
+                },
+            } },
+        } },
+    } },
+    { kind = "repeat", id = "rows.selected", source = "selectedRow", template = {
+        kind = "card", id = "rows", titleSource = "selectedRowName", children = {
+            { id = "format", kind = "control", controlType = "slider", ref = "rowFormat" },
+            { id = "roles", kind = "control", controlType = "select", ref = "rowRoles" },
+            { id = "scenes", kind = "control", controlType = "select", ref = "rowScenes" },
+        },
+    } },
+    { kind = "repeat", id = "fontLabel.selected", source = "selectedRow", template = {
+        kind = "card", id = "card.fontLabel", title = L["标签样式"], children = {
+            { id = "fontLabel", kind = "component", ref = "fontLabel" },
+        },
+    } },
+    { kind = "repeat", id = "fontValue.selected", source = "selectedRow", template = {
+        kind = "card", id = "card.fontValue", title = L["数值样式"], children = {
+            { id = "fontValue", kind = "component", ref = "fontValue" },
+        },
+    } },
+    { kind = "card", id = "card.anchor", title = L["锚点设置"], children = {
+        { id = "pos", kind = "component", component = "anchorgroup", path = "pos", optionsRef = "anchor" },
+    } },
+} }
+
+local function CreatePlayerStatsSettingsOwner()
+    local records = {}
+    local owner = { controls = {}, components = {}, sources = {}, actions = {}, predicates = {}, texts = {},
+        options = { anchor = PLAYER_STATS_ANCHOR_OPTS } }
+    owner.sources.rows = function()
+        local rows = {}
+        for index, row in ipairs(EX_DB.rows) do
+            local record = records[index]
+            if not record or record.row ~= row then
+                record = { index = index, row = row }
+                records[index] = record
+            end
+            rows[index] = record
+        end
+        return rows
+    end
+    owner.sources.selectedRow = function()
+        return { owner.sources.rows()[GetSelectedPlayerStatsRow()] }
+    end
+    owner.texts.selectedRowName = function(scope)
+        local row, index = scope.item.row, scope.item.index
+        local name = type(row.label) == "string" and row.label ~= "" and (L[row.label] or row.label)
+            or (L["属性行 "] .. index)
+        return L["选择要编辑的行"] .. "：" .. index .. " " .. name
+    end
+    local function RowBinding(field)
+        return function(context)
+            return EXUI:CreateSettingsV2Binding(EXWIND_MODULE_KEY, EX_DB,
+                "rows." .. context.scope.item.index .. "." .. field)
         end
     end
-    actions:SetScript("OnSizeChanged", LayoutActions)
-    LayoutActions(actions, actions:GetWidth())
-    return actions, buttons
+    owner.controls.rowEnabled = EXUI:CreateSettingsV2Control({ controlType = "checkbox", label = "" }, RowBinding("enabled"))
+    owner.controls.rowLabel = EXUI:CreateSettingsV2Control({ controlType = "input" }, RowBinding("label"))
+    owner.controls.rowKey = EXUI:CreateSettingsV2Control({ controlType = "select", optionsSource = "ExwindTools.GetPlayerStatTree" }, RowBinding("key"))
+    owner.controls.rowSyncFont = EXUI:CreateSettingsV2Control({ controlType = "checkbox", label = "" }, RowBinding("syncFont"))
+    owner.controls.rowPercent = EXUI:CreateSettingsV2Control({ controlType = "checkbox", label = "" }, RowBinding("isPercent"))
+    owner.controls.rowFormat = EXUI:CreateSettingsV2Control({ controlType = "slider", label = L["小数"], min = 0, max = 3 }, RowBinding("format"))
+    owner.controls.rowRoles = EXUI:CreateSettingsV2Control({ controlType = "select", multiple = true, label = L["显示职责"], options = {
+        { value = "TANK", label = "TANK" }, { value = "HEALER", label = "HEALER" }, { value = "DAMAGER", label = "DAMAGER" },
+    } }, RowBinding("roles"))
+    owner.controls.rowScenes = EXUI:CreateSettingsV2Control({ controlType = "select", multiple = true, label = L["显示场景"], options = {
+        { value = "副本内", label = L["副本内"] }, { value = "副本外", label = L["副本外"] },
+    } }, RowBinding("scenes"))
+    owner.components.fontLabel = EXUI:CreateSettingsV2Component({ component = "fontgroup", opts = { bodyOnly = true } }, RowBinding("fontLabel"))
+    owner.components.fontValue = EXUI:CreateSettingsV2Component({ component = "fontgroup", opts = { bodyOnly = true } }, RowBinding("fontValue"))
+    owner.predicates.canMoveUp = function(scope) return scope.item.index > 1 end
+    owner.predicates.canMoveDown = function(scope) return scope.item.index < #EX_DB.rows end
+    owner.predicates.canDelete = function() return #EX_DB.rows > 1 end
+    owner.predicates.isSelectedRow = function(scope) return scope.item.index == GetSelectedPlayerStatsRow() end
+    owner.actions.selectRow = function(context) SelectPlayerStatsRow(context.scope.item.index) end
+    owner.actions.moveUp = function(context) ClickPlayerStatsRowAction(context.scope.item.index, "btn_up") end
+    owner.actions.moveDown = function(context) ClickPlayerStatsRowAction(context.scope.item.index, "btn_down") end
+    owner.actions.deleteRow = function(context) ClickPlayerStatsRowAction(context.scope.item.index, "btn_delete") end
+    return owner
 end
 
-local RebuildPlayerStatsRowsTable
-
-RebuildPlayerStatsRowsTable = function(host, context)
-    local controls = host and host._exPlayerStatsRowsTable
-    if not controls then return end
-    context:ReleaseTablePresentation()
-    ClearPlayerStatsTableRows(controls)
-
-    local presentedRecords = {}
-    for index, row in ipairs(EX_DB.rows) do
-        local rowIndex = index
-        local record = {
-            enabled = EXUI:CreateCheckbox(host, "", row.enabled == true, function(checked)
-                CommitPlayerStatsRowValue(rowIndex, "enabled", checked == true)
-            end),
-            name = EXUI:CreateEditBox(host, tostring(row.label or ""), 1, GM.size.inputHeight, nil, {
-                onEditFocusLost = function(text)
-                    CommitPlayerStatsRowValue(rowIndex, "label", text or "")
-                end,
-            }),
-            stat = EXUI:CreateDropdown(host, 1, nil, ExwindTools.GetPlayerStatTree(), row.key, function(value)
-                CommitPlayerStatsRowValue(rowIndex, "key", value)
-            end),
-            syncFont = EXUI:CreateCheckbox(host, L["数值字体跟随名称"], row.syncFont == true, function(checked)
-                CommitPlayerStatsRowValue(rowIndex, "syncFont", checked == true)
-            end),
-            percent = EXUI:CreateCheckbox(host, L["百分比"], row.isPercent == true, function(checked)
-                CommitPlayerStatsRowValue(rowIndex, "isPercent", checked == true)
-            end),
-        }
-        record.actions, record.actionButtons = CreatePlayerStatsRowActions(host, rowIndex, #EX_DB.rows)
-        controls.rows[#controls.rows + 1] = record
-        presentedRecords[#presentedRecords + 1] = {
-            cells = {
-                { widget = record.enabled, type = "switch" },
-                { widget = record.name, type = "input" },
-                { widget = record.stat, type = "select" },
-                { widget = record.syncFont, type = "switch" },
-                { widget = record.percent, type = "switch" },
-                { widget = record.actions, type = "actions" },
-            },
-        }
-    end
-
-    local add = EXUI:CreateButton(host, 1, GM.size.buttonHeight, L["新增"], function()
-        ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ButtonClicked", {
-            key = "btn_add",
-            ts = GetTime(),
-        })
-    end, { variant = "primary", compact = true })
-    controls.rows[#controls.rows + 1] = { add = add }
-    context:SetTableControls({
-        add = {
-            cells = {
-                { text = "" },
-                { text = "" },
-                { text = "" },
-                { text = "" },
-                { text = "" },
-                { widget = add, type = "button" },
-            },
-        },
-        records = presentedRecords,
-    })
-end
-
-local playerStatsGrid = ExwindTools.Grid
-if not playerStatsGrid then error("PlayerStats requires ExwindGrid", 2) end
-playerStatsGrid:RegisterTableControls(PLAYER_STATS_ROWS_TABLE, {
-    mount = function(host, context)
-        host._exPlayerStatsRowsTable = { rows = {} }
-        RebuildPlayerStatsRowsTable(host, context)
-    end,
-    update = function(host, context)
-        RebuildPlayerStatsRowsTable(host, context)
-    end,
-    release = function(host)
-        local controls = host._exPlayerStatsRowsTable
-        if controls then ClearPlayerStatsTableRows(controls) end
-        host._exPlayerStatsRowsTable = nil
-    end,
-})
-
--- =========================================================
--- 三、GUI 声明 | GUI Declarations
--- =========================================================
-local function EX_RegisterLayout()
-    local sel = tonumber(EX_DB.selectedRow) or 1
-    if sel < 1 then sel = 1 end
-    if sel > #EX_DB.rows then sel = #EX_DB.rows end
-
-    local currentRowPath = "rows." .. sel
-    local currentRow = EX_DB.rows[sel]
-    local currentRowName = currentRow and currentRow.label
-    if type(currentRowName) ~= "string" or currentRowName == "" then
-        currentRowName = L["属性行 "] .. sel
-    else
-        currentRowName = L[currentRowName] or currentRowName
-    end
-    local function ApplyLivePreview(value, context)
-        if ApplyPlayerStatsLiveVisual then
-            ApplyPlayerStatsLiveVisual(value, context)
-        end
-    end
-    local fontLivePreview = {
-        size = ApplyLivePreview,
-        x = ApplyLivePreview,
-        y = ApplyLivePreview,
-    }
-    -- [普通 sections 迁移边界：设置页] 只迁移纯呈现分区；动态行路径与字体组继续引用同一原数据。
-    -- rows.N 动态 path、行增删/排序、属性/职责/场景顺序与 TextList 刷新回调禁止修改；header/subheader 不等于卡片容器。
-    local layout = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings", id = "common", title = L["通用设置"],
-                items = {
-                    { key = "showBg", type = "switch", label = L["显示背景"] },
-                    { key = "showBorder", type = "switch", label = L["显示边框"] },
-                    { key = "texture", type = "select", media = "background", parentKey = "bgSettings", label = L["背景材质"] },
-                    { key = "bgColor", type = "color", parentKey = "bgSettings", label = L["背景颜色"] },
-                    { key = "borderTexture", type = "select", media = "border", parentKey = "bgSettings", label = L["边框材质"] },
-                    { key = "borderColor", type = "color", parentKey = "bgSettings", label = L["边框颜色"] },
-                    { key = "edgeSize", type = "slider", parentKey = "bgSettings", label = L["边框粗细"], min = 1, max = 32 },
-                    { key = "inset", type = "slider", parentKey = "bgSettings", label = L["边框内距"], min = 0, max = 16 },
-                    { key = "labelAlign", type = "select", parentKey = "bgSettings", label = L["标签对齐"], options = {
-                        { value = "LEFT", label = L["左对齐"] }, { value = "CENTER", label = L["居中"] }, { value = "RIGHT", label = L["右对齐"] },
-                    } },
-                    { key = "valueAlign", type = "select", parentKey = "bgSettings", label = L["数值对齐"], options = {
-                        { value = "LEFT", label = L["左对齐"] }, { value = "CENTER", label = L["居中"] }, { value = "RIGHT", label = L["右对齐"] },
-                    } },
-                    { key = "rowSpacing", type = "slider", parentKey = "bgSettings", label = L["行间距"], min = -10, max = 30 },
-                    { key = "labelX", type = "slider", parentKey = "bgSettings", label = L["标签全局X"], min = -100, max = 100 },
-                    { key = "valueX", type = "slider", parentKey = "bgSettings", label = L["数值全局X"], min = -100, max = 100 },
-                },
-            },
-            {
-                kind = "table", id = "rows_table", title = L["属性行管理"],
-                key = "rows", controlFactory = PLAYER_STATS_ROWS_TABLE,
-                columns = {
-                    { title = L["启用此行"] },
-                    { title = L["名称"] },
-                    { title = L["属性"] },
-                    { title = L["数值字体跟随名称"] },
-                    { title = L["百分比"] },
-                    { title = L["选择"] .. " / " .. L["删除"] },
-                },
-                supportsAdd = true,
-            },
-            {
-                kind = "settings", id = "rows", title = L["选择要编辑的行"] .. ": " .. sel .. ": " .. currentRowName,
-                items = {
-                    { key = "format", type = "slider", parentKey = currentRowPath, label = L["小数"], min = 0, max = 3 },
-                    { key = "roles", type = "select", multiple = true, parentKey = currentRowPath, label = L["显示职责"], options = {
-                        { value = "TANK", label = "TANK" }, { value = "HEALER", label = "HEALER" }, { value = "DAMAGER", label = "DAMAGER" },
-                    } },
-                    { key = "scenes", type = "select", multiple = true, parentKey = currentRowPath, label = L["显示场景"], options = {
-                        { value = "副本内", label = L["副本内"] }, { value = "副本外", label = L["副本外"] },
-                    } },
-                },
-            },
-            {
-                kind = "composite", id = "fontLabel", title = L["标签样式"],
-                component = "fontgroup", key = "fontLabel", parentKey = currentRowPath, opts = { bodyOnly = true },
-            },
-            {
-                kind = "composite", id = "fontValue", title = L["数值样式"],
-                component = "fontgroup", key = "fontValue", parentKey = currentRowPath, opts = { bodyOnly = true },
-            },
-            {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "pos", opts = PLAYER_STATS_ANCHOR_OPTS,
-            },
-        },
-    }
-
-
-
-    if ExwindGrid then
-        ExwindGrid.ExportReplacements = { [currentRowPath] = '"rows." .. sel' }
-    end
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
-end
-EX_RegisterLayout()
+EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, PLAYER_STATS_LAYOUT, CreatePlayerStatsSettingsOwner)
 
 -- =============================================================
 -- 唯一 Renderer：动态双列 TextList。Runtime / World / Panel 只切换 host，
@@ -1141,12 +993,6 @@ local function ApplyPresentation(list, presentation, point, host)
     return bounds
 end
 
-local function RefreshSettingsPanel()
-    if EXUI.MainFrame and EXUI.MainFrame:IsShown() and EXUI.RefreshContent then
-        EXUI:RefreshContent()
-    end
-end
-
 EnsureAnchor = function()
     if anchorController then
         anchorFrame = anchorController:Ensure(); return anchorFrame
@@ -1210,9 +1056,7 @@ local function HandlePanelPreviewIntent(intent)
     local rowID = type(intent.elementID) == "string" and intent.elementID:match("^playerstats:row:(%d+)$")
     local rowIndex = tonumber(rowID)
     if not rowIndex or not EX_DB.rows[rowIndex] or intent.guiTarget ~= "fontLabel" then return false end
-    EX_DB.selectedRow = rowIndex
-    EX_RegisterLayout()
-    EXUI:RefreshContent()
+    SelectPlayerStatsRow(rowIndex)
     return EXUI:FocusCurrentModuleGridKey(EXWIND_MODULE_KEY, "fontLabel")
 end
 
@@ -1274,20 +1118,31 @@ local function ReapplyExistingList(list, sample)
     list:ReapplyExistingItems(function(id) return rows[tostring(id)] end)
 end
 
+local function ChangesPlayerStatsRows(changedPath)
+    if type(changedPath) ~= "string" then return false end
+    local field = changedPath:match("^rows%.%d+%.([^%.]+)$")
+    return field == "enabled" or field == "roles" or field == "scenes" or field == "key"
+end
+
 local function RequiresFullSurfaceRefresh(changedPath)
     if type(changedPath) ~= "string" or changedPath == "" then return true end
     if changedPath == "showBg" or changedPath == "showBorder" then return true end
     if changedPath:match("^bgSettings%.") or changedPath == "pos" or changedPath:match("^pos%.") then return true end
     -- 这些字段会改变实际行集合或订阅的属性来源，不能只重套已有文字。
-    return changedPath:match("^rows%.%d+%.(enabled|roles|scenes|key)$") ~= nil
+    return ChangesPlayerStatsRows(changedPath)
 end
 
 local function RefreshActiveSurfaces(_, changedPath, phase)
-    -- selectedRow 只是设置页当前编辑上下文；写入后必须重新登记动态 rows.N 路径，
-    -- 否则名称、属性和字体控件仍会写到先前选中的行。
+    -- selectedRow 只改变编辑上下文；会话更新选中行 repeat 的数字路径绑定。
+    if changedPath == "rows" then
+        RefreshSettingsPanel()
+        SyncStateWatches()
+        RefreshAll(true)
+        return
+    end
+
     if changedPath == "selectedRow" then
         if phase == "committed" then
-            EX_RegisterLayout()
             RefreshSettingsPanel()
         end
         return
@@ -1298,12 +1153,12 @@ local function RefreshActiveSurfaces(_, changedPath, phase)
     end
 
     if RequiresFullSurfaceRefresh(changedPath) then
-        if type(changedPath) == "string" and changedPath:match("^rows%.%d+%.(enabled|roles|scenes|key)$") then
+        if ChangesPlayerStatsRows(changedPath) then
             SyncStateWatches()
         end
         local changesWorldGeometry = type(changedPath) == "string"
             and (changedPath == "bgSettings.rowSpacing"
-                or changedPath:match("^rows%.%d+%.(enabled|roles|scenes|key)$") ~= nil)
+                or ChangesPlayerStatsRows(changedPath))
         RefreshAll(changesWorldGeometry)
         return
     end
@@ -1375,17 +1230,13 @@ end)
 
 ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY, function(info)
     if not info or not info.key then return end
-    local selected = tonumber(EX_DB.selectedRow) or 1
-    if selected < 1 then selected = 1 end
-    if selected > #EX_DB.rows then selected = #EX_DB.rows end
+    local selected = GetSelectedPlayerStatsRow()
     if info.key == "btn_up" and selected > 1 then
         EX_DB.rows[selected], EX_DB.rows[selected - 1] = EX_DB.rows[selected - 1], EX_DB.rows[selected]
         EX_DB.selectedRow = selected - 1
-        EX_RegisterLayout(); EXUI:RefreshContent()
     elseif info.key == "btn_down" and selected < #EX_DB.rows then
         EX_DB.rows[selected], EX_DB.rows[selected + 1] = EX_DB.rows[selected + 1], EX_DB.rows[selected]
         EX_DB.selectedRow = selected + 1
-        EX_RegisterLayout(); EXUI:RefreshContent()
     elseif info.key == "btn_add" then
         table.insert(EX_DB.rows, {
             enabled = true,
@@ -1400,14 +1251,11 @@ ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY,
             fontValue = GetDefaultFont()
         })
         EX_DB.selectedRow = #EX_DB.rows
-        EX_RegisterLayout(); EXUI:RefreshContent()
     elseif info.key == "btn_delete" and #EX_DB.rows > 1 then
         table.remove(EX_DB.rows, selected)
         EX_DB.selectedRow = math.max(1, selected - 1)
-        EX_RegisterLayout(); EXUI:RefreshContent()
     end
-    SyncStateWatches()
-    RefreshAll(true)
+    EXUI:NotifyModuleValueChanged(EXWIND_MODULE_KEY, "rows", "committed")
 end)
 
 ExwindTools:ReportReady(EXWIND_MODULE_KEY)

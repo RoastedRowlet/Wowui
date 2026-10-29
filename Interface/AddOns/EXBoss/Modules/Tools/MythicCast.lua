@@ -83,11 +83,11 @@ local pendingCastUpdates        = {}
 local castUpdateGeneration      = 0
 
 -- ------------------------------------------------------------
--- 1. Grid 布局定义
+-- 1. V2 页面声明
 -- ------------------------------------------------------------
 -- 所有设置控件均由下方封装组布局生成。
 
--- 唯一可编辑默认值真源。Grid 导出的 EX_DEFAULTS 可直接覆盖本表；
+-- 唯一可编辑默认值真源；
 -- 禁止把页面视觉分组误写成 ModuleDB 的嵌套路径。
 local EX_DEFAULTS               = {
     anchor = {
@@ -348,7 +348,7 @@ local PLAYER_TARGET_INDICATOR_EXTRA_OPTS = ExwindTools:BuildStandardTimerBarAler
     },
 })
 PLAYER_TARGET_INDICATOR_EXTRA_OPTS.presentation = "settings-list"
--- 整体位置只有这个标准 Anchor 声明：运行时 AnchorController 和 Grid 的
+-- 整体位置只有这个标准 Anchor 声明：运行时 AnchorController 和 V2 的
 -- anchorgroup 必须使用同一次 CreateStandardModuleAnchor 的返回合同，不能各自
 -- 复制 posX/posY 或 frame picker。
 local ANCHOR_SCHEMA = {
@@ -375,8 +375,9 @@ local ANCHOR_SCHEMA = {
     anchorPoint = "CENTER",
     relativePoint = "CENTER",
 }
--- CreateStandardModuleAnchor 只创建 controller 声明，不创建 Frame；因此可在 Grid
--- export/layout 前建立同一份 AnchorGroup opts，仍由 CreateAnchor 延迟 Ensure 实体。
+-- CreateStandardModuleAnchor 只创建 controller 声明，不创建 Frame；页面复用
+-- 同一份 AnchorGroup opts，仍由 CreateAnchor 延迟 Ensure 实体。
+local ANCHOR_OPTS
 anchorController, ANCHOR_OPTS = EXUI:CreateStandardModuleAnchor(ANCHOR_SCHEMA)
 local LAYOUT_OPTS = {
     allowedDirections = { "UP", "DOWN" },
@@ -388,57 +389,43 @@ local LAYOUT_OPTS = {
 }
 local FONT_OPTS = { offsetMin = -1000, offsetMax = 1000, shadowOffsetMin = -1000, shadowOffsetMax = 1000 }
 local TIMER_BAR_OPTS = { iconOffsetMin = -1000, iconOffsetMax = 1000 }
-local GridExporter = ExwindTools.Grid
-if GridExporter and GridExporter.RegisterExportReference then
-    GridExporter:RegisterExportReference(COMMON_OPTS, "COMMON_OPTS")
-    GridExporter:RegisterExportReference(RAID_MARKER_EXTRA_OPTS, "RAID_MARKER_EXTRA_OPTS")
-    GridExporter:RegisterExportReference(PLAYER_TARGET_INDICATOR_EXTRA_OPTS, "PLAYER_TARGET_INDICATOR_EXTRA_OPTS")
-    GridExporter:RegisterExportReference(ANCHOR_OPTS, "ANCHOR_OPTS")
-    GridExporter:RegisterExportReference(LAYOUT_OPTS, "LAYOUT_OPTS")
-    GridExporter:RegisterExportReference(FONT_OPTS, "FONT_OPTS")
-    GridExporter:RegisterExportReference(TIMER_BAR_OPTS, "TIMER_BAR_OPTS")
-end
-
--- [普通 sections 迁移边界：MythicCast 设置页]
--- 允许：只按共享规范调整纯呈现分区；普通设置分区始终展开。
--- 禁止：修改业务事件/排序、key/path/opts、StandardConfigBinding、世界/运行时 collection、预览或释放链。
--- modulecommonsettings/anchorgroup/widgetlayout/timerBarGroup/fontgroup 必须整体引用，不能拆成原子控件重拼。
+-- 保留设置块顺序与组合控件身份；带回调的锚点选项由页面 owner 提供。
 local EX_LAYOUT = {
-    version = 1,
-    title = L["大米怪物施法"],
-    sections = {
-        { kind = "composite", id = "module-common", title = L["通用设置"],
-            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
-        { kind = "composite", id = "layout", title = L["排列设置"],
-            component = "widgetlayout", key = "layout", opts = LAYOUT_OPTS },
-        { kind = "composite", id = "anchor", title = L["锚点设置"],
-            component = "anchorgroup", key = "anchor", opts = ANCHOR_OPTS },
-        { kind = "composite", id = "timer-bar", title = L["计时条外观"],
-            component = "timerbargroup", key = "timerGroup", opts = TIMER_BAR_OPTS },
-        { kind = "composite", id = "raid-marker", title = L["额外子元素－团队标记"],
-            component = "modulecommonsettings", key = "raidMarkerExtra", opts = RAID_MARKER_EXTRA_OPTS },
-        { kind = "composite", id = "player-target", title = L["额外子元素－玩家目标提示"],
-            component = "modulecommonsettings", key = "playerTargetIndicatorExtra", opts = PLAYER_TARGET_INDICATOR_EXTRA_OPTS },
-        { kind = "composite", id = "spell-font", title = L["法术名称"],
-            component = "fontgroup", key = "font_spell", opts = {
-                offsetMin = FONT_OPTS.offsetMin, offsetMax = FONT_OPTS.offsetMax,
-                shadowOffsetMin = FONT_OPTS.shadowOffsetMin, shadowOffsetMax = FONT_OPTS.shadowOffsetMax,
-            } },
-        { kind = "composite", id = "target-font", title = L["施法目标"],
-            component = "fontgroup", key = "font_target", opts = {
-                offsetMin = FONT_OPTS.offsetMin, offsetMax = FONT_OPTS.offsetMax,
-                shadowOffsetMin = FONT_OPTS.shadowOffsetMin, shadowOffsetMax = FONT_OPTS.shadowOffsetMax,
-            } },
-        { kind = "composite", id = "timer-font", title = L["时间文字"],
-            component = "fontgroup", key = "font_timer", opts = {
-                offsetMin = FONT_OPTS.offsetMin, offsetMax = FONT_OPTS.offsetMax,
-                shadowOffsetMin = FONT_OPTS.shadowOffsetMin, shadowOffsetMax = FONT_OPTS.shadowOffsetMax,
-            } },
+    version = 2,
+    cards = {
+        { kind = "card", id = "module-common", title = L["通用设置"], children = {
+            { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", opts = COMMON_OPTS },
+        } },
+        { kind = "card", id = "layout-card", title = L["排列设置"], children = {
+            { kind = "component", id = "layout", component = "widgetlayout", path = "layout", opts = LAYOUT_OPTS },
+        } },
+        { kind = "card", id = "anchor-card", title = L["锚点设置"], children = {
+            { kind = "component", id = "anchor", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+        } },
+        { kind = "card", id = "timer-bar", title = L["计时条外观"], children = {
+            { kind = "component", id = "timerGroup", component = "timerbargroup", path = "timerGroup", opts = TIMER_BAR_OPTS },
+        } },
+        { kind = "card", id = "raid-marker", title = L["额外子元素－团队标记"], children = {
+            { kind = "component", id = "raidMarkerExtra", component = "modulecommonsettings", path = "raidMarkerExtra", opts = RAID_MARKER_EXTRA_OPTS },
+        } },
+        { kind = "card", id = "player-target", title = L["额外子元素－玩家目标提示"], children = {
+            { kind = "component", id = "playerTargetIndicatorExtra", component = "modulecommonsettings", path = "playerTargetIndicatorExtra", opts = PLAYER_TARGET_INDICATOR_EXTRA_OPTS },
+        } },
+        { kind = "card", id = "spell-font", title = L["法术名称"], children = {
+            { kind = "component", id = "font_spell", component = "fontgroup", path = "font_spell", opts = FONT_OPTS },
+        } },
+        { kind = "card", id = "target-font", title = L["施法目标"], children = {
+            { kind = "component", id = "font_target", component = "fontgroup", path = "font_target", opts = FONT_OPTS },
+        } },
+        { kind = "card", id = "timer-font", title = L["时间文字"], children = {
+            { kind = "component", id = "font_timer", component = "fontgroup", path = "font_timer", opts = FONT_OPTS },
+        } },
     },
 }
 
-
-ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, EX_LAYOUT)
+local function CreateMythicCastPageOwner()
+    return { options = { anchor = ANCHOR_OPTS } }
+end
 
 local function GetLayoutDB()
     return EX_DB.layout or EX_DEFAULTS.layout
@@ -1262,9 +1249,10 @@ end
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = EXWIND_MODULE_KEY,
     page = GUIPage,
+    title = L["大米怪物施法"],
     binding = STANDARD_CONFIG_BINDING,
     layout = EX_LAYOUT,
-    getColumns = 200,
+    ownerFactory = CreateMythicCastPageOwner,
     preview = {
         height = 172,
         render = RenderMythicCastPanelPreview,

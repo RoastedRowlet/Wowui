@@ -20,6 +20,7 @@ local modtex2 = _G["CharacterModelFramebgtex2"] or modbg:CreateTexture("Characte
 local modelbtn = _G["CCS_clk_Btn"] or CreateFrame("Button", "CCS_clk_Btn", PaperDollFrame, "UIPanelButtonTemplate")
 local modelbtnfont1 = _G["CCS_clk_Btnfs1"] or modelbtn:CreateFontString("CCS_clk_Btnfs1")
 local ccs_cshow
+local ReputationFrame_Update
 local function hookfix() 
 
     if C_AddOns.IsAddOnLoaded("ClassCodex") == true and option("showm_sp_onopen") == true then
@@ -60,7 +61,7 @@ local function hookfix()
         if QUI_CharacterFrameBg_Skin ~= nil then
             QUI_CharacterFrameBg_Skin:SetAlpha(0)
         end
-        CharacterFrameCloseButton:SetPoint("TOPRIGHT", CharacterFrameBg, "TOPRIGHT", -5, 0)
+        CharacterFrameCloseButton:SetPoint("TOPRIGHT", CharacterFrameBg, "TOPRIGHT", -18, -10)
         CharacterFrameCloseButton:SetSize(32, 32)
         CharacterFrameCloseButton:SetScale(.5)
         --CharacterFrame.NineSlice:Hide()
@@ -105,7 +106,7 @@ local function hookfix()
 
 end
 
-local function MoveModelLeft() 
+function CCS.MoveModelLeft() 
     local Height = 359+(7*option("vpad"))  -- Hard code it for now
     
     if CharacterModelScene:GetHeight() == Height then
@@ -130,9 +131,9 @@ local function MoveModelLeft()
     CharacterModelFrameBackgroundOverlay:Hide()
     
     modbg:ClearAllPoints()
-    modbg:SetPoint("TOPLEFT", CharacterHeadSlot, "TOPLEFT", 0, 0)
-    modbg:SetPoint("RIGHT", CharacterHandsSlot, "RIGHT", 0, 0)    
-    modbg:SetPoint("BOTTOM", CharacterMainHandSlot, "BOTTOM", 0, 0)            
+    modbg:SetPoint("TOPLEFT", CharacterHeadSlot, "TOPLEFT", 0, 4)
+    modbg:SetPoint("RIGHT", CharacterHandsSlot, "RIGHT", 2, 0)    
+    modbg:SetPoint("BOTTOM", CharacterMainHandSlot, "BOTTOM", 0, -7)        
 
 end
 
@@ -145,6 +146,10 @@ local function MoveModelRight()
     CharacterModelScene:SetFrameLevel(9000)
     CharacterModelScene:Show();
     
+    if _G["ccsm_sf"] and _G["ccsm_sf"]:IsShown() then _G["ccsm_sf"]:Hide() end
+    if _G["ccsrf_sf"] and _G["ccsrf_sf"]:IsShown() then _G["ccsrf_sf"]:Hide() end    
+    if _G["ccsgf_sf"] and _G["ccsgf_sf"]:IsShown() then _G["ccsgf_sf"]:Hide() end
+
     _G["CharacterModelFramebg"]:ClearAllPoints()
     _G["CharacterModelFramebg"]:SetAllPoints(CharacterModelScene)    
 end
@@ -158,7 +163,7 @@ function CCS.Clicky(endstate)
     if _G["ccsgf_sf"] then _G["ccsgf_sf"]:Hide() end    
     
     if endstate == "LEFT" or CharacterModelScene:GetHeight() >= (CharacterFrameBg:GetHeight()-5) then -- This is to move model under the character equipment
-        MoveModelLeft()
+        CCS.MoveModelLeft()
         if _G["ccsm_sf"] and (option("showm_sp_onopen") == true) and UnitLevel("player") >= CCS.MaxLevel and (C_MythicPlus.GetCurrentAffixes() and C_MythicPlus.GetCurrentAffixes()[1]) then
             _G["ccsm_sf"]:Show()
         elseif _G["ccsm_sf"] then 
@@ -173,7 +178,7 @@ function CCS.Clicky(endstate)
 end
 
 ccs_cshow = function()
-    MoveModelLeft()
+    CCS.MoveModelLeft()
     if C_AddOns.IsAddOnLoaded("Narcissus") and NarciMiniTalentTree and NarciMiniTalentTree:IsVisible() then -- Just relocate the mini talent tree so it isn't hidden behind the character frame.
     C_Timer.NewTicker(.1, function() 
             NarciMiniTalentTree:ClearAllPoints(); 
@@ -197,6 +202,10 @@ ccs_cshow = function()
 
     CCS.ChangeModelBg(false)
     CharacterModelScene.ControlFrame:Hide()
+    -- Seriously, Bliz?  Why do you re-show these elements every time the character frame opens?
+    for _, r in ipairs({ CharacterModelScene:GetRegions() }) do if r.Hide then r:Hide() end end
+    CharacterModelFrameBackgroundOverlay:Hide()
+    ReputationFrame_Update()
     if option("skinchartabs") then
         CCS.SkinCharacterButtons()
     elseif CharacterFrameTab1 and CharacterFrameTab1.CCS_BG and CharacterFrameTab1.CCS_BG:IsShown() then
@@ -327,7 +336,7 @@ local function SpecChangeInit()
             local link = nil 
             local spellid = nil
             local description = "" 
-            local xOffset = 5 + (26 * (count-1)) 
+            local xOffset = 50 + (26 * (count-1)) 
             local btn = _G["CCS_PSpecBtn"..count]
             
             if ( id and id ~= 0) then
@@ -445,7 +454,7 @@ local function TryLoopItems()
     end
 end
 
-local function ReputationFrame_Update()
+ReputationFrame_Update = function()
     local ks={ReputationFrame.ScrollBox.ScrollTarget:GetChildren()}; 
     local gender = UnitSex("player");
     local xtext, factiontext= "", ""
@@ -1320,8 +1329,11 @@ function CCS.HookSetup()
                 NarciMiniTalentTree:ClearAllPoints(); 
                 NarciMiniTalentTree:SetPoint("TOPLEFT", CharacterFrameBg, "TOPRIGHT", 0, 0)
             end                        
+            for _, r in ipairs({ CharacterModelScene:GetRegions() }) do if r.Hide then r:Hide() end end
+            CharacterModelFrameBackgroundOverlay:Hide()            
         end)
         PaperDollSidebarTab1._ccsHooked = true
+
     end
 
     if not PaperDollSidebarTab2._ccsHooked then
@@ -1376,6 +1388,9 @@ function CCS.HookSetup()
                 NarciMiniTalentTree:ClearAllPoints()
                 NarciMiniTalentTree:SetPoint("TOPLEFT", CharacterFrameBg, "TOPRIGHT", 0, 0)
             end
+            for _, r in ipairs({ CharacterModelScene:GetRegions() }) do if r.Hide then r:Hide() end end
+            CharacterModelFrameBackgroundOverlay:Hide()
+            
         end)
 
         PaperDollSidebarTab2._ccsHooked = true
@@ -1408,7 +1423,9 @@ function CCS.HookSetup()
             if C_AddOns.IsAddOnLoaded("Narcissus") then -- Just relocate the mini talent tree so it isn't hidden behind the character frame.
                 NarciMiniTalentTree:ClearAllPoints(); 
                 NarciMiniTalentTree:SetPoint("TOPLEFT", CharacterFrameBg, "TOPRIGHT", 0, 0)
-            end            
+            end   
+            for _, r in ipairs({ CharacterModelScene:GetRegions() }) do if r.Hide then r:Hide() end end
+            CharacterModelFrameBackgroundOverlay:Hide()
         end)
         PaperDollSidebarTab3._ccsHooked = true
     end
@@ -1452,18 +1469,9 @@ function module:SetupBlizzardFrameOverrides()
     ReputationFrame.ReputationDetailFrame.Border.Bg:SetColorTexture(0,0,0,1)
     ReputationFrame.ReputationDetailFrame:SetPoint("TOPLEFT", ReputationFrame, "TOPRIGHT", 27, 0)
 
-    if _G["CharacterFrameBgbg"] == nil then CCS.CreateChonkyCharacterBG() end
     local charbg = _G["CharacterFrameBgbg"] 
-    --local charbg _G["CharacterFrameBgbg"] or CreateFrame("Frame", "CharacterFrameBgbg", CharacterFrame, BackdropTemplateMixin and "BackdropTemplate")
-    
     local charbgtex = _G["CharacterFrameBgbgtex"] or charbg:CreateTexture("CharacterFrameBgbgtex", "BACKGROUND", nil, 1)    
     
-    --[[charbg:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background", -- optional background texture
-        edgeFile = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\UI-Tooltip-SquareBorder.blp",        -- thin edge texture
-        edgeSize = 16,                                              -- thickness of the border
-        insets = { left = 3, right = 3, top = 3, bottom = 3 },      -- inset so content doesn't overlap border
-    })--]]
     GearManagerPopupFrame:SetFrameStrata("DIALOG")
     GearManagerPopupFrame.IconSelector:SetFrameStrata("FULLSCREEN")
     
@@ -1503,10 +1511,10 @@ function module:SetupBlizzardFrameOverrides()
     CharacterFrameTitleText:ClearAllPoints();
     CharacterFrameTitleText:SetPoint("LEFT", CharacterFrame, "LEFT", 50, 0)
     CharacterFrameTitleText:SetPoint("RIGHT", CharacterFrameInset.Bg, "RIGHT", -40, 0)
-
     CharacterLevelText:ClearAllPoints()
     CharacterLevelText:SetPoint("TOP", CharacterFrameTitleText, "BOTTOM", 0, 0)
-
+    CharacterFrameTitleText:SetShown(option("showcharname"))
+    CharacterLevelText:SetShown(option("showclasslevel"))
     CharacterFrame.NineSlice:Hide()
     CharacterFramePortrait:Hide()
 
@@ -1570,7 +1578,7 @@ function module:SetupBlizzardFrameOverrides()
     CharacterFrameTab2.Text:SetTextColor(1,1,1,1)
     CharacterFrameTab3.Text:SetTextColor(1,1,1,1)
 
-    CharacterFrameTab1:SetPoint("TOPLEFT", CharacterFrame, "BOTTOMLEFT", 11, 2)
+    CharacterFrameTab1:SetPoint("TOPLEFT", CharacterFrame, "BOTTOMLEFT", 35, 2)
     CharacterFrameTab1.Left:ClearAllPoints()
     CharacterFrameTab1.LeftActive:ClearAllPoints()
     CharacterFrameTab1.LeftHighlight:ClearAllPoints()
@@ -1706,6 +1714,17 @@ function module:SetupBlizzardFrameOverrides()
     CharacterModelFrameBackgroundOverlay:SetPoint("TOPLEFT", CharacterModelFrameBackgroundTopLeft, "TOPLEFT", 0, 0)
     CharacterModelFrameBackgroundOverlay:SetPoint("BOTTOMRIGHT", CharacterModelFrameBackgroundBotRight, "BOTTOMRIGHT", 0, 70)
     CharacterModelFrameBackgroundOverlay:Hide()
+    CharacterModelFrameBackgroundOverlay:SetTexture("")
+    for _, r in ipairs({ CharacterModelScene:GetRegions() }) do if r.Hide then r:Hide() end end
+    
+    if PaperDollInnerBorderBottom then PaperDollInnerBorderBottom:Hide() end
+    if PaperDollInnerBorderBottom2 then PaperDollInnerBorderBottom2:Hide() end
+    if PaperDollInnerBorderBottomLeft then PaperDollInnerBorderBottomLeft:Hide() end
+    if PaperDollInnerBorderBottomRight then PaperDollInnerBorderBottomRight:Hide() end
+    if PaperDollInnerBorderTop then PaperDollInnerBorderTop:Hide() end
+    if PaperDollInnerBorderTopLeft then PaperDollInnerBorderTopLeft:Hide() end
+    if PaperDollInnerBorderTopRight then PaperDollInnerBorderTopRight:Hide() end
+    
     if CCS.Themes ~= nil and CCS.Themes.enabled == true and option("theme") ~= "None" then
         CCS.CreateChonkyNineSlice(modbg)
     end
@@ -1785,34 +1804,34 @@ function module:SetupBlizzardFrameOverrides()
     end)
     
     modbg:ClearAllPoints()
-    modbg:SetPoint("TOPLEFT", CharacterHeadSlot, "TOPLEFT", 0, 0)
-    modbg:SetPoint("RIGHT", CharacterHandsSlot, "RIGHT", 0, 0)    
-    modbg:SetPoint("BOTTOM", CharacterMainHandSlot, "BOTTOM", 0, 0)        
+    modbg:SetPoint("TOPLEFT", CharacterHeadSlot, "TOPLEFT", 0, 4)
+    modbg:SetPoint("RIGHT", CharacterHandsSlot, "RIGHT", 2, 0)    
+    modbg:SetPoint("BOTTOM", CharacterMainHandSlot, "BOTTOM", 0, -7)        
     modbg:SetFrameStrata("LOW")
-    modbg:SetFrameLevel(5000)
+    modbg:SetFrameLevel(1)
 end
 
 function module:UpdateStyle()
-    if _G["CharacterFrameBgbg"] == nil then CCS.CreateChonkyCharacterBG() end
     local charbg = _G["CharacterFrameBgbg"] 
-    --local charbg = _G["CharacterFrameBgbg"] or CreateFrame("Frame", "CharacterFrameBgbg", CharacterFrame, BackdropTemplateMixin and "BackdropTemplate")
     local charbgtex = _G["CharacterFrameBgbgtex"] or charbg:CreateTexture("CharacterFrameBgbgtex", "BACKGROUND", nil, 1)    
     local bgr, bgg, bgb, bgalpha = option("bgcolor")[1], option("bgcolor")[2], option("bgcolor")[3], option("bgcolor")[4];
-
-    local borderColor = CCS.StyleColor.border
-    if charbg.SetBackdrop and charbg.SetBackdropColor and charbg.SetBackdropBorderColor then
-        charbg:SetBackdropBorderColor(unpack(borderColor))   -- purple border    
-        charbg:SetBackdropColor(bgr,bgg,bgb,bgalpha)   -- purple border    
+    if option("theme") ~= "None" and CCS.Themes.enabled then
+        bgr, bgg, bgb, bgalpha = unpack({0,0,0,1})
     end
+
     charbgtex:SetVertexColor(bgr,bgg,bgb,bgalpha);
-    CharacterFrameInsetRight.Bg:SetShown(option("showsidebarbg"))
+    if option("theme") ~= "None" and CCS.Themes.enabled then
+        CharacterFrameInsetRight.Bg:Show()
+    else
+        CharacterFrameInsetRight.Bg:SetShown(option("showsidebarbg"))
+    end
     CCS:SkinBlizzardButton(CharacterFrameCloseButton, "x", 26)
 
     local CCSsetbtn = _G["CCSsetbtn"] or CreateFrame("Button", "CCSsetbtn", CharacterFrame)
    CCS:ApplyIconStyle(CCSsetbtn, "gear", 32)
 
     local ttfontsize = option("fontsize_nametitle") or 12
-    CharacterFrameTitleText:SetPoint("TOP", CharacterFrame, "TOP", 0, -5*ttfontsize/12)
+    CharacterFrameTitleText:SetPoint("TOP", CharacterFrame, "TOP", 0, -(10+5*ttfontsize/12))
     CharacterFrameTitleText:SetFont( option("fontname_nametitle") or CCS.fontname, ttfontsize , CCS.textoutline)
     if option("showfontshadow") == true then
         CharacterFrameTitleText:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
@@ -1863,14 +1882,14 @@ function module:ApplyDynamicLayout()
         CharacterFrame.Background:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+65, 0); --275  .449
 
 		CharacterFrameCloseButton:ClearAllPoints();
-		CharacterFrameCloseButton:SetPoint("TOPRIGHT", CharacterFrameBg, "TOPRIGHT", -10, -10)
+		CharacterFrameCloseButton:SetPoint("TOPRIGHT", CharacterFrameBg, "TOPRIGHT", -18, -10)
 		CharacterFrameCloseButton:SetSize(32, 32)
 		CharacterFrameCloseButton:SetScale(.5)
 		---------------
 		-- All slots on the left (under head) are tied back to this slot
 		---------------
 		CharacterHeadSlot:ClearAllPoints()
-		CharacterHeadSlot:SetPoint("TOPLEFT", CharacterFrameBg, "TOPLEFT", 30, -60)
+		CharacterHeadSlot:SetPoint("TOPLEFT", CharacterFrameBg, "TOPLEFT", 36, -69)
 		CharacterNeckSlot:ClearAllPoints()
 		CharacterNeckSlot:SetPoint("TOPLEFT", CharacterHeadSlot, "BOTTOMLEFT", 0, -option("vpad"))
 		CharacterShoulderSlot:ClearAllPoints()
@@ -1887,7 +1906,7 @@ function module:ApplyDynamicLayout()
 		CharacterWristSlot:SetPoint("TOPLEFT", CharacterTabardSlot, "BOTTOMLEFT", 0, -option("vpad"))
 		-- All slots on the right (under hands) are tied back to this slot
 		CharacterHandsSlot:ClearAllPoints()
-		CharacterHandsSlot:SetPoint("TOPLEFT", CharacterFrameBg, "TOPLEFT", 283 + option("hpad"), -60)
+		CharacterHandsSlot:SetPoint("TOPLEFT", CharacterFrameBg, "TOPLEFT", 272 + option("hpad"), -69)
 		CharacterWaistSlot:ClearAllPoints()
 		CharacterWaistSlot:SetPoint("TOPLEFT", CharacterHandsSlot, "BOTTOMLEFT", 0, -option("vpad"))
 		CharacterLegsSlot:ClearAllPoints()
@@ -2038,10 +2057,30 @@ function module:ApplyDynamicLayout()
             CharacterTrinket1SlotNormalTexture:Show()
             CharacterWaistSlotNormalTexture:Show()
             CharacterWristSlotNormalTexture:Show()
-              
         end
+        CharacterBackSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterChestSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterFeetSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterFinger0SlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterFinger1SlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterHandsSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterHeadSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterLegsSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterMainHandSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterNeckSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterSecondaryHandSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterShirtSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterShoulderSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterTabardSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterTrinket0SlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterTrinket1SlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterWaistSlotNormalTexture:SetPoint("CENTER",0,0)
+        CharacterWristSlotNormalTexture:SetPoint("CENTER",0,0)
+        if CharacterRangedSlotNormalTexture then CharacterRangedSlotNormalTexture:SetPoint("CENTER",0,0) end            
+
     end
 end
+
 -- Module Initialization
 function module:Initialize(onlyStyle)
     -- Set up the character sheet for the current player
@@ -2058,6 +2097,7 @@ function module:Initialize(onlyStyle)
     if onlyStyle and self.BlizzardCleanup then
         self:ApplyDynamicLayout()
         self:UpdateStyle()
+        CCS.SkinItems()
         return
     end
 
@@ -2077,6 +2117,7 @@ function module:Initialize(onlyStyle)
 
     if not self.StyleSetup then
         self:UpdateStyle()
+        CCS.SkinItems()
         self.StyleSetup = true
     end
 
@@ -2117,7 +2158,6 @@ function CCS.RefreshTitleRows()
         end)
     end)
 end
-
 
 -- Define the event handler function for this module
 function CCS.CharacterSheetEventHandler(event, ...)
@@ -2177,12 +2217,14 @@ function CCS.CharacterSheetEventHandler(event, ...)
             CCS.CharacterButtonsRevert()
         end
         LootSpecInit()
-        SpecChangeInit()        
+        SpecChangeInit()
+        CCS.SkinItems()
         --print(date("%H:%M:%S") .. format(".%03d", (GetTime() * 1000) % 1000), "message")
         if CCS_TitleSearchBox then
             CCS_TitleSearchBox:SetShown(option("showtitlesearch"))
         end
-
+        CharacterFrameTitleText:SetShown(option("showcharname"))
+        CharacterLevelText:SetShown(option("showclasslevel"))
         return true
     elseif event == "CCS_EVENT_CSHOW" then
 

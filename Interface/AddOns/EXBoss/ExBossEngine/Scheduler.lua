@@ -217,11 +217,8 @@ local function NormalizeUnitToken(unit)
 end
 
 local function NormalizeCastBarID(value)
-    local id = tonumber(value)
-    if not id then
-        return nil
-    end
-    return id
+    -- UnitCastBarID is an opaque, non-secret identifier scoped to a unit token.
+    return value
 end
 
 local function IsBossUnitToken(unit)
@@ -617,7 +614,7 @@ local function BuildTrashRingPlanForCurrentStart(timer, runtime)
     for i = 1, #rawPlan do
         local phase = rawPlan[i]
         local duration = tonumber(phase and phase.duration) or 0
-        if duration > 0 then
+        if duration > 0 and phase.castKind == runtime.activeCastKind then
             if elapsed >= duration then
                 elapsed = elapsed - duration
             else
@@ -889,7 +886,8 @@ function Scheduler:_PruneBossObservedRuntimes(now)
             self._bossObservedRuntimes[runtimeID] = nil
         else
             local expiresAt = tonumber(runtime.expiresAt) or 0
-            if runtime.active ~= true or (expiresAt > 0 and now > expiresAt) then
+            if (runtime.active ~= true and now > (runtime.transitionUntil or 0))
+                or (expiresAt > 0 and now > expiresAt) then
                 self._bossObservedRuntimes[runtimeID] = nil
             end
         end
@@ -1054,90 +1052,40 @@ function Scheduler:_FindBossObservedTransitionSource(timer, unit, nextCastBarID)
     local encounterID = tonumber(timer and timer.encounterID) or tonumber(self._encounterID)
     local eventID = tonumber(timer and timer.eventID)
     local unitToken = NormalizeUnitToken(unit)
-    local normalizedNextCastBarID = NormalizeCastBarID(nextCastBarID)
-    if not encounterID or not normalizedNextCastBarID then
-        return nil
-    end
-
+    if not encounterID or not unitToken or nextCastBarID == nil then return nil end
     self:_PruneBossObservedRuntimes()
-
-    local wantedPreviousCastBarID = normalizedNextCastBarID - 1
-    local bestRuntime, bestScore = nil, nil
+    local now, matched = GetTime(), nil
     for _, runtime in pairs(self._bossObservedRuntimes or {}) do
-        if type(runtime) == "table"
-            and runtime.active == true
-            and tonumber(runtime.encounterID) == encounterID
-            and tostring(runtime.castKind or "") == "cast"
-            and NormalizeCastBarID(runtime.castBarID) == wantedPreviousCastBarID then
-            local score = 0
-            if eventID and tonumber(runtime.eventID) == eventID then
-                score = score + 1000
-            end
-            if unitToken and type(runtime.units) == "table" and runtime.units[unitToken] == true then
-                score = score + 100
-            end
-            if not bestScore or score > bestScore then
-                bestScore = score
-                bestRuntime = runtime
-            end
+        local snapshot = runtime.timerSnapshot
+        local castDuration = tonumber(snapshot and snapshot.ringCastDuration) or 0
+        local channelDuration = tonumber(snapshot and snapshot.ringChannelDuration) or 0
+        if runtime.encounterID == encounterID and runtime.primaryUnit == unitToken
+            and runtime.castKind == "cast" and (runtime.active or runtime.transitionUntil)
+            and (not eventID or runtime.eventID == eventID)
+            and castDuration > 0 and channelDuration > 0
+            and math.abs(now - runtime.startedAt - castDuration) <= BOSS_CAST_OBSERVE_MIN_WINDOW_AFTER then
+            if matched then return nil end
+            matched = runtime
         end
     end
-
-    return bestRuntime
+    return matched
 end
 
 function Scheduler:_FindBossObservedRuntimeForStop(unit, castKind, castBarID, specialEventID)
     local encounterID = tonumber(self._encounterID)
-    if not encounterID then
-        return nil
-    end
-
-    self:_PruneBossObservedRuntimes()
-
     local unitToken = NormalizeUnitToken(unit)
-    local normalizedCastBarID = NormalizeCastBarID(castBarID)
-    local wantedKind = tostring(castKind or "")
-    local wantedEventID = tonumber(specialEventID)
-
-    local bestRuntime, bestScore = nil, nil
+    if not encounterID or not unitToken or castBarID == nil then return nil end
+    self:_PruneBossObservedRuntimes()
     for _, runtime in pairs(self._bossObservedRuntimes or {}) do
-        if type(runtime) == "table"
-            and runtime.active == true
-            and tonumber(runtime.encounterID) == encounterID
-            and tostring(runtime.castKind or "") == wantedKind then
-            local matches = true
-            local score = 0
-            if wantedEventID then
-                if tonumber(runtime.eventID) ~= wantedEventID then
-                    matches = false
-                else
-                    score = score + 1000
-                end
-            end
-
-            if matches and normalizedCastBarID ~= nil then
-                if NormalizeCastBarID(runtime.castBarID) == normalizedCastBarID then
-                    score = score + 100
-                elseif not wantedEventID then
-                    matches = false
-                end
-            end
-
-            if matches and unitToken and type(runtime.units) == "table" and runtime.units[unitToken] == true then
-                score = score + 10
-            end
-
-            if matches and score > 0 and (not bestScore or score > bestScore) then
-                bestScore = score
-                bestRuntime = runtime
-            end
+        if runtime.encounterID == encounterID and runtime.primaryUnit == unitToken
+            and runtime.castKind == castKind and runtime.castBarID == castBarID
+            and (not specialEventID or runtime.eventID == tonumber(specialEventID)) then
+            return runtime
         end
     end
-
-    return bestRuntime
 end
 
-function Scheduler:_StopBossObservedRuntime(runtime)
+function Scheduler:_StopBossObservedRuntime(runtime, allowTransition)
     if type(runtime) ~= "table" or runtime.active ~= true then
         return false
     end
@@ -1157,7 +1105,12 @@ function Scheduler:_StopBossObservedRuntime(runtime)
     if ring and type(ring.StopByOwner) == "function" then
         ring:StopByOwner(owner)
     end
-    self._bossObservedRuntimes[runtime.id] = nil
+    local snapshot = runtime.timerSnapshot
+    if allowTransition and (tonumber(snapshot and snapshot.ringChannelDuration) or 0) > 0 then
+        runtime.transitionUntil = runtime.stoppedAt + BOSS_CAST_OBSERVE_MIN_WINDOW_AFTER
+    else
+        self._bossObservedRuntimes[runtime.id] = nil
+    end
     return true
 end
 
@@ -1174,7 +1127,7 @@ function Scheduler:_AttachBossObservedRuntimeUnitAlias(unit, castKind, castBarID
     runtime.units[unitToken] = true
 end
 
-function Scheduler:_ResolveAndStopBossObservedRuntime(unit, castKind, castBarID, specialEventID)
+function Scheduler:_ResolveAndStopBossObservedRuntime(unit, castKind, castBarID, specialEventID, interrupted)
     local runtime = self:_FindBossObservedRuntimeForStop(unit, castKind, castBarID, specialEventID)
     if not runtime then
         BossProgressDebugPrint(string.format(
@@ -1189,7 +1142,14 @@ function Scheduler:_ResolveAndStopBossObservedRuntime(unit, castKind, castBarID,
         tostring(runtime.id), tostring(runtime.eventID), tostring(NormalizeUnitToken(unit) or unit), tostring(castKind),
         tostring(NormalizeCastBarID(castBarID))
     ))
-    return self:_StopBossObservedRuntime(runtime)
+    if interrupted then
+        runtime.transitionUntil = nil
+        if not runtime.active then
+            self._bossObservedRuntimes[runtime.id] = nil
+            return false
+        end
+    end
+    return self:_StopBossObservedRuntime(runtime, not interrupted and castKind == "cast")
 end
 
 function Scheduler:_HandleBossObservedChannelTransition(timer, unit, castBarID)
@@ -1197,7 +1157,10 @@ function Scheduler:_HandleBossObservedChannelTransition(timer, unit, castBarID)
     if not runtime then
         return false
     end
-    return self:_StopBossObservedRuntime(runtime)
+    runtime.transitionUntil = nil
+    self:_StopBossObservedRuntime(runtime)
+    self._bossObservedRuntimes[runtime.id] = nil
+    return true
 end
 
 function Scheduler:_TryShowBossObservedChannelFromStart(unit, castBarID)
@@ -1473,6 +1436,13 @@ function Scheduler:_RecordBossCastObserveStart(unit, kind, castBarID)
         return
     end
     local unitToken = NormalizeUnitToken(unit)
+    if kind == "cast" then
+        for id, runtime in pairs(self._bossObservedRuntimes or {}) do
+            if runtime.primaryUnit == unitToken and not runtime.active then
+                self._bossObservedRuntimes[id] = nil
+            end
+        end
+    end
     local now = GetTime()
     BossProgressDebugPrint(string.format(
         "observe start unit=%s kind=%s castBarID=%s",
@@ -1495,6 +1465,7 @@ function Scheduler:_RecordBossCastObserveStart(unit, kind, castBarID)
         local old = self._bossCastObserveRecentStarts[i]
         if type(old) == "table"
             and old.kind == entry.kind
+            and old.unit == entry.unit
             and old.castBarID ~= nil
             and entry.castBarID ~= nil
             and old.castBarID == entry.castBarID
@@ -1599,11 +1570,9 @@ local function ShouldShowTimerBarNow(timer, now)
 end
 
 local function ResolveBunBarLeadTime()
-    local tools = rawget(_G, "ExwindTools")
-    local display = tools and tools.GetModuleDB and tools:GetModuleDB("ExBoss.BunBar") or nil
-    local seconds = type(display) == "table" and display.hideLongTimersSeconds or nil
-    if type(seconds) == "number" then
-        return math.max(0, seconds)
+    local seconds = ExBoss.UI.BunBar:GetLeadTimeSeconds()
+    if seconds then
+        return seconds
     end
     return BUNBAR_LEAD_TIME
 end
@@ -3457,6 +3426,28 @@ local function IsTrashObservedSpellAllowedForCurrentRole(runtime, spellID)
         return true
     end
     return TrashRuntimeConfig.IsRuntimeSpellAllowedForCurrentRole(runtime, spellID) ~= false
+end
+
+function Scheduler:ShowTrashObservedChannelTransition(runtime)
+    local spellID = tonumber(runtime and runtime.activeSpellID)
+    if not spellID or runtime.activeCastKind ~= "channel"
+        or runtime.transitionCastKind ~= "cast"
+        or not IsTrashObservedSpellAllowedForCurrentRole(runtime, spellID) then
+        return false
+    end
+    local timer = self:GetTrashLocalTimer(runtime, spellID)
+    if type(timer) ~= "table" then return false end
+    if runtime._channelDisplaySeq == runtime.activeCastSeq then return true end
+    runtime._channelDisplaySeq = runtime.activeCastSeq
+    DispatchTrashObservedCastStartEvent(runtime, spellID, timer)
+    return PlayTrashObservedCastStartRing(runtime, timer, spellID)
+end
+
+function Scheduler:UpdateTrashObservedCastBarID(runtime, previousID)
+    local owner = {source = "trash", runtime = runtime,
+        castKind = runtime.activeCastKind, castBarID = previousID}
+    ExBoss.UI.CastProgressBar:UpdateOwnerCastBarID(owner, runtime.activeCastBarID)
+    ExBoss.UI.RingProgress:UpdateOwnerCastBarID(owner, runtime.activeCastBarID)
 end
 
 -- 预判语音的诊断沿用 TrashCD Runtime Debug；不开 Debug 时完全无输出。
@@ -5428,6 +5419,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
                 castBar:StopByOwner({
                     source = "boss",
                     unit = NormalizeUnitToken(unit),
+                    castBarID = castBarID,
                     castKind = "cast",
                     encounterID = tonumber(Scheduler._encounterID),
                     eventID = specialEventID,
@@ -5440,6 +5432,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
                 ring:StopByOwner({
                     source = "boss",
                     unit = NormalizeUnitToken(unit),
+                    castBarID = castBarID,
                     castKind = "cast",
                     encounterID = tonumber(Scheduler._encounterID),
                     eventID = specialEventID,
@@ -5461,6 +5454,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
                 castBar:StopByOwner({
                     source = "boss",
                     unit = NormalizeUnitToken(unit),
+                    castBarID = castBarID,
                     castKind = "channel",
                     encounterID = tonumber(Scheduler._encounterID),
                     eventID = specialEventID,
@@ -5473,6 +5467,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
                 ring:StopByOwner({
                     source = "boss",
                     unit = NormalizeUnitToken(unit),
+                    castBarID = castBarID,
                     castKind = "channel",
                     encounterID = tonumber(Scheduler._encounterID),
                     eventID = specialEventID,
@@ -5488,14 +5483,15 @@ frame:SetScript("OnEvent", function(_, event, ...)
         local specialCastEventID = GetSpecialBossStopEventID(Scheduler._encounterID, unit, "cast")
         local specialChannelEventID = GetSpecialBossStopEventID(Scheduler._encounterID, unit, "channel")
         if IsBossCastObserveUnit(unit) then
-            Scheduler:_ResolveAndStopBossObservedRuntime(unit, "cast", castBarID, specialCastEventID)
-            Scheduler:_ResolveAndStopBossObservedRuntime(unit, "channel", castBarID, specialChannelEventID)
+            Scheduler:_ResolveAndStopBossObservedRuntime(unit, "cast", castBarID, specialCastEventID, true)
+            Scheduler:_ResolveAndStopBossObservedRuntime(unit, "channel", castBarID, specialChannelEventID, true)
         end
         if castBar and type(castBar.StopByUnitCastBar) == "function" and IsBossCastObserveUnit(unit) then
             if specialCastEventID and type(castBar.StopByOwner) == "function" then
                 castBar:StopByOwner({
                     source = "boss",
                     unit = NormalizeUnitToken(unit),
+                    castBarID = castBarID,
                     castKind = "cast",
                     encounterID = tonumber(Scheduler._encounterID),
                     eventID = specialCastEventID,
@@ -5505,6 +5501,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
                 castBar:StopByOwner({
                     source = "boss",
                     unit = NormalizeUnitToken(unit),
+                    castBarID = castBarID,
                     castKind = "channel",
                     encounterID = tonumber(Scheduler._encounterID),
                     eventID = specialChannelEventID,
@@ -5518,6 +5515,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
                 ring:StopByOwner({
                     source = "boss",
                     unit = NormalizeUnitToken(unit),
+                    castBarID = castBarID,
                     castKind = "cast",
                     encounterID = tonumber(Scheduler._encounterID),
                     eventID = specialCastEventID,
@@ -5527,6 +5525,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
                 ring:StopByOwner({
                     source = "boss",
                     unit = NormalizeUnitToken(unit),
+                    castBarID = castBarID,
                     castKind = "channel",
                     encounterID = tonumber(Scheduler._encounterID),
                     eventID = specialChannelEventID,

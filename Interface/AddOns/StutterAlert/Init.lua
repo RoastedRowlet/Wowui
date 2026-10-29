@@ -4,6 +4,7 @@ local format = string.format
 
 local Detector = ns.Detector
 local Overlay  = ns.Overlay
+local Launcher = ns.Launcher
 local DB       = ns.DB
 
 local combatStart = 0
@@ -38,6 +39,7 @@ events:SetScript("OnEvent", function(_, event, arg1)
 
     elseif event == "PLAYER_LOGIN" then
         Overlay:Create()
+        Launcher:Update()
         Detector:RebuildAddonList()
         applyEnabledState()
 

@@ -17,32 +17,48 @@ local COMMON_OPTS = {
         { path = "healthColor", type = "checkbox", label = L["血量条随剩余血量染色"] },
     },
 }
--- [卡片/Grid 迁移边界：DungeonExtras 设置页]
--- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
--- 禁止：修改业务开关 path/key、增长方向、StandardConfigBinding、预览或释放合同。
--- modulecommonsettings/anchorgroup/widgetlayout/timerBarGroup/fontgroup 必须整体引用；风火图业务样式不并入血量条卡片。
+local ANCHOR_OPTS = Mod:GetStandardAnchorGroupOptions()
+
+-- 保留原设置组次序与组合控件身份；运行期锚点选项由 owner 提供。
 local LAYOUT = {
-    version = 1,
-    title = L["副本额外设置"],
-    sections = {
-        { kind = "composite", id = "module-common", title = L["通用"],
-            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
-        { kind = "composite", id = "layout", title = L["血量条排列"],
-            component = "widgetlayout", key = "layout", opts = { allowedDirections = { "UP", "DOWN" }, includeMaxPerRow = false, maxVisibleMin = 1, maxVisibleMax = 6, defaultMaxVisible = 6 } },
-        { kind = "composite", id = "anchor", title = L["锚点"],
-            component = "anchorgroup", key = "anchor", opts = Mod:GetStandardAnchorGroupOptions() },
-        { kind = "composite", id = "timer-bar", title = L["外观"],
-            component = "timerbargroup", key = "timerGroup" },
-        { kind = "composite", id = "spell-font", title = L["单位名称"],
-            component = "fontgroup", key = "font_spell" },
-        { kind = "composite", id = "timer-font", title = L["血量百分比"],
-            component = "fontgroup", key = "font_timer" },
+    version = 2,
+    cards = {
+        { kind = "card", id = "module-common", title = L["通用"],
+            children = {
+                { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", opts = COMMON_OPTS },
+            } },
+        { kind = "card", id = "layout-card", title = L["血量条排列"],
+            children = {
+                { kind = "component", id = "layout", component = "widgetlayout", path = "layout",
+                    opts = { allowedDirections = { "UP", "DOWN" }, includeMaxPerRow = false, maxVisibleMin = 1, maxVisibleMax = 6, defaultMaxVisible = 6 } },
+            } },
+        { kind = "card", id = "anchor-card", title = L["锚点"],
+            children = {
+                { kind = "component", id = "anchor", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+        { kind = "card", id = "timer-bar", title = L["外观"],
+            children = {
+                { kind = "component", id = "timerGroup", component = "timerbargroup", path = "timerGroup", opts = {} },
+            } },
+        { kind = "card", id = "spell-font", title = L["单位名称"],
+            children = {
+                { kind = "component", id = "font_spell", component = "fontgroup", path = "font_spell", opts = {} },
+            } },
+        { kind = "card", id = "timer-font", title = L["血量百分比"],
+            children = {
+                { kind = "component", id = "font_timer", component = "fontgroup", path = "font_timer", opts = {} },
+            } },
     },
 }
-Tools:RegisterModuleLayout(KEY, LAYOUT)
+
+local function CreatePageOwner()
+    return { options = { anchor = ANCHOR_OPTS } }
+end
+
 -- [生命周期边界] StandardModulePage 继续拥有 Scroll、preview 与 release；布局迁移不得另建页面生命周期。
 local standardPage = EXUI:CreateStandardModulePage({
-    moduleKey = KEY, page = Page, binding = Mod.StandardConfigBinding, layout = LAYOUT, getColumns = 200,
+    moduleKey = KEY, page = Page, title = L["副本额外设置"], layout = LAYOUT,
+    ownerFactory = CreatePageOwner,
     preview = { height = 202,
         render = function(dock) Mod:ShowPanelPreview(dock) end,
         refresh = function() Mod:RefreshPanelPreview() end,
@@ -50,6 +66,10 @@ local standardPage = EXUI:CreateStandardModulePage({
     applyScrollSkin = function(scrollFrame) ExBoss.UI.ApplyModernScrollBarSkin(scrollFrame) end,
     sliderContract = function()
         return { groupPaths = { moduleCommon = "", layout = "layout", timerGroup = "timerGroup", font_spell = "font_spell", font_timer = "font_timer" } }
+    end,
+    afterLayout = function(context)
+        local common = context.modulePage and context.modulePage:Find("moduleCommon")
+        if common and type(common.RebindDB) == "function" then common:RebindDB(context.config) end
     end,
 })
 function Page:Render(contentFrame) return standardPage:Render(contentFrame) end

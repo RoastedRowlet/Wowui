@@ -16,6 +16,7 @@ local L = (ExwindTools and ExwindTools.L) or setmetatable({}, { __index = functi
 local MODULE_KEY = "ExClass.NoMoveSkillAlert"
 local DEFAULT_ALERT_OFFSET_X, DEFAULT_ALERT_OFFSET_Y = 15, -5
 local RefreshActiveSurfaces
+local RefreshActiveSkillData
 
 -- =============================================================
 -- 声明式配置：只维护职业 / 专精 / 法术ID / 显示文本Key
@@ -159,19 +160,33 @@ local NO_MOVE_SKILL_CONFIGS = {
 local CLASS_CONFIG_ORDER = { "MAGE", "DEATHKNIGHT", "ROGUE", "PALADIN", "DEMONHUNTER", "EVOKER" }
 local CONFIG_REFRESH_KEYS = {
     enabled = true,
+    displayFormat = true,
     mage_enable = true,
     dk_enable_steed = true,
+    dk_fmt_steed = true,
     rogue_enable_shadow = true,
     rogue_enable_phantom = true,
+    rogue_fmt_shadow = true,
+    rogue_fmt_phantom = true,
     paladin_enable_holy = true,
     paladin_enable_protection = true,
     paladin_enable_retribution = true,
+    paladin_fmt_steed = true,
+    paladin_fmt_holy = true,
+    paladin_fmt_protection = true,
+    paladin_fmt_retribution = true,
     dh_enable_havoc = true,
     dh_enable_vengeance = true,
     dh_enable_devourer = true,
+    dh_fmt_havoc = true,
+    dh_fmt_vengeance = true,
+    dh_fmt_devourer = true,
     evoker_enable_devastation = true,
     evoker_enable_preservation = true,
     evoker_enable_augmentation = true,
+    evoker_fmt_devastation = true,
+    evoker_fmt_preservation = true,
+    evoker_fmt_augmentation = true,
 }
 
 local function GetSpecInfoForConfig(specID)
@@ -352,7 +367,9 @@ local EX_DEFAULTS = {
 -- 一、模块标识与依赖引用 | Module Identity and Dependencies
 -- =========================================================
 local MODULE_SPEC = {
-    RefreshActiveSurfaces = function(controller) return RefreshActiveSurfaces(controller) end,
+    RefreshActiveSurfaces = function(controller, changedPath, phase)
+        if RefreshActiveSurfaces then return RefreshActiveSurfaces(controller, changedPath, phase) end
+    end,
     moduleKey = MODULE_KEY,
     kind = "text",
     -- =========================================================
@@ -391,129 +408,118 @@ local MODULE_SPEC = {
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings", id = "common", title = L["通用设置"],
-                items = {
-                    { key = "enabled", type = "switch", label = L["启用"] },
-                },
-            },
-            {
-                kind = "table", id = "mage", title = L["|cff3fc7eb法师设置|r"],
-                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
-                supportsAdd = false,
-                records = {
-                    { cells = {
-                        { key = "mage_enable", type = "switch" },
-                        { key = "desc_displayFormat", type = "description", label = L["|T135932:18:18:0:0:64:64:5:59:5:59|t 奥术  |T135810:18:18:0:0:64:64:5:59:5:59|t 火焰  |T135846:18:18:0:0:64:64:5:59:5:59|t 冰霜"] },
-                        { key = "displayFormat", type = "input" },
+        version = 2,
+        cards = {
+            { id = "card.common", kind = "card", title = L["通用设置"], children = {
+                { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用"] }
+            } },
+            { id = "card.mage", kind = "card", title = L["|cff3fc7eb法师设置|r"], children = {
+                { id = "mage.table", kind = "table", columns = {
+                    { title = L["启用"] }, { title = L["专精"], weight = 1.6 }, { title = L["显示CD时的内容 (用 %t 代表时间)"] },
+                }, children = {
+                    { id = "mage.row.1", kind = "row", children = {
+                        { id = "mage.row.1.1", kind = "cell", children = { { id = "mage_enable", kind = "control", controlType = "checkbox", path = "mage_enable", label = "" } } },
+                        { id = "mage.row.1.2", kind = "cell", children = { { id = "desc_displayFormat", kind = "text", text = L["|T135932:18:18:0:0:64:64:5:59:5:59|t 奥术  |T135810:18:18:0:0:64:64:5:59:5:59|t 火焰  |T135846:18:18:0:0:64:64:5:59:5:59|t 冰霜"] } } },
+                        { id = "mage.row.1.3", kind = "cell", children = { { id = "displayFormat", kind = "control", controlType = "input", path = "displayFormat" } } },
                     } },
-                },
-            },
-            {
-                kind = "table", id = "deathknight", title = L["|cffc41e3a死亡骑士设置|r"],
-                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
-                supportsAdd = false,
-                records = {
-                    { cells = {
-                        { key = "dk_enable_steed", type = "switch" },
-                        { key = "desc_dk_fmt_steed", type = "description", label = L["|T135770:18:18:0:0:64:64:5:59:5:59|t 鲜血  |T135773:18:18:0:0:64:64:5:59:5:59|t 冰霜  |T135775:18:18:0:0:64:64:5:59:5:59|t 邪恶"] },
-                        { key = "dk_fmt_steed", type = "input" },
+                } },
+            } },
+            { id = "card.deathknight", kind = "card", title = L["|cffc41e3a死亡骑士设置|r"], children = {
+                { id = "deathknight.table", kind = "table", columns = {
+                    { title = L["启用"] }, { title = L["专精"], weight = 1.6 }, { title = L["显示CD时的内容 (用 %t 代表时间)"] },
+                }, children = {
+                    { id = "deathknight.row.1", kind = "row", children = {
+                        { id = "deathknight.row.1.1", kind = "cell", children = { { id = "dk_enable_steed", kind = "control", controlType = "checkbox", path = "dk_enable_steed", label = "" } } },
+                        { id = "deathknight.row.1.2", kind = "cell", children = { { id = "desc_dk_fmt_steed", kind = "text", text = L["|T135770:18:18:0:0:64:64:5:59:5:59|t 鲜血  |T135773:18:18:0:0:64:64:5:59:5:59|t 冰霜  |T135775:18:18:0:0:64:64:5:59:5:59|t 邪恶"] } } },
+                        { id = "deathknight.row.1.3", kind = "cell", children = { { id = "dk_fmt_steed", kind = "control", controlType = "input", path = "dk_fmt_steed" } } },
                     } },
-                },
-            },
-            {
-                kind = "table", id = "rogue", title = L["|cfffff468盗贼设置|r"],
-                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
-                supportsAdd = false,
-                records = {
-                    { cells = {
-                        { key = "rogue_enable_shadow", type = "switch" },
-                        { key = "desc_rogue_fmt_shadow", type = "description", label = L["|T236270:18:18:0:0:64:64:5:59:5:59|t 奇袭  |T132320:18:18:0:0:64:64:5:59:5:59|t 敏锐"] },
-                        { key = "rogue_fmt_shadow", type = "input" },
+                } },
+            } },
+            { id = "card.rogue", kind = "card", title = L["|cfffff468盗贼设置|r"], children = {
+                { id = "rogue.table", kind = "table", columns = {
+                    { title = L["启用"] }, { title = L["专精"], weight = 1.6 }, { title = L["显示CD时的内容 (用 %t 代表时间)"] },
+                }, children = {
+                    { id = "rogue.row.1", kind = "row", children = {
+                        { id = "rogue.row.1.1", kind = "cell", children = { { id = "rogue_enable_shadow", kind = "control", controlType = "checkbox", path = "rogue_enable_shadow", label = "" } } },
+                        { id = "rogue.row.1.2", kind = "cell", children = { { id = "desc_rogue_fmt_shadow", kind = "text", text = L["|T236270:18:18:0:0:64:64:5:59:5:59|t 奇袭  |T132320:18:18:0:0:64:64:5:59:5:59|t 敏锐"] } } },
+                        { id = "rogue.row.1.3", kind = "cell", children = { { id = "rogue_fmt_shadow", kind = "control", controlType = "input", path = "rogue_fmt_shadow" } } },
                     } },
-                    { cells = {
-                        { key = "rogue_enable_phantom", type = "switch" },
-                        { key = "desc_rogue_fmt_phantom", type = "description", label = L["|T236286:18:18:0:0:64:64:5:59:5:59|t 狂徒"] },
-                        { key = "rogue_fmt_phantom", type = "input" },
+                    { id = "rogue.row.2", kind = "row", children = {
+                        { id = "rogue.row.2.1", kind = "cell", children = { { id = "rogue_enable_phantom", kind = "control", controlType = "checkbox", path = "rogue_enable_phantom", label = "" } } },
+                        { id = "rogue.row.2.2", kind = "cell", children = { { id = "desc_rogue_fmt_phantom", kind = "text", text = L["|T236286:18:18:0:0:64:64:5:59:5:59|t 狂徒"] } } },
+                        { id = "rogue.row.2.3", kind = "cell", children = { { id = "rogue_fmt_phantom", kind = "control", controlType = "input", path = "rogue_fmt_phantom" } } },
                     } },
-                },
-            },
-            {
-                kind = "table", id = "paladin", title = L["|cfff48cba圣骑士设置|r"],
-                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
-                supportsAdd = false,
-                records = {
-                    { cells = {
-                        { key = "paladin_enable_holy", type = "switch" },
-                        { key = "desc_paladin_fmt_holy", type = "description", label = L["|T135920:18:18:0:0:64:64:5:59:5:59|t 神圣"] },
-                        { key = "paladin_fmt_holy", type = "input" },
+                } },
+            } },
+            { id = "card.paladin", kind = "card", title = L["|cfff48cba圣骑士设置|r"], children = {
+                { id = "paladin.table", kind = "table", columns = {
+                    { title = L["启用"] }, { title = L["专精"], weight = 1.6 }, { title = L["显示CD时的内容 (用 %t 代表时间)"] },
+                }, children = {
+                    { id = "paladin.row.1", kind = "row", children = {
+                        { id = "paladin.row.1.1", kind = "cell", children = { { id = "paladin_enable_holy", kind = "control", controlType = "checkbox", path = "paladin_enable_holy", label = "" } } },
+                        { id = "paladin.row.1.2", kind = "cell", children = { { id = "desc_paladin_fmt_holy", kind = "text", text = L["|T135920:18:18:0:0:64:64:5:59:5:59|t 神圣"] } } },
+                        { id = "paladin.row.1.3", kind = "cell", children = { { id = "paladin_fmt_holy", kind = "control", controlType = "input", path = "paladin_fmt_holy" } } },
                     } },
-                    { cells = {
-                        { key = "paladin_enable_protection", type = "switch" },
-                        { key = "desc_paladin_fmt_protection", type = "description", label = L["|T236264:18:18:0:0:64:64:5:59:5:59|t 防护"] },
-                        { key = "paladin_fmt_protection", type = "input" },
+                    { id = "paladin.row.2", kind = "row", children = {
+                        { id = "paladin.row.2.1", kind = "cell", children = { { id = "paladin_enable_protection", kind = "control", controlType = "checkbox", path = "paladin_enable_protection", label = "" } } },
+                        { id = "paladin.row.2.2", kind = "cell", children = { { id = "desc_paladin_fmt_protection", kind = "text", text = L["|T236264:18:18:0:0:64:64:5:59:5:59|t 防护"] } } },
+                        { id = "paladin.row.2.3", kind = "cell", children = { { id = "paladin_fmt_protection", kind = "control", controlType = "input", path = "paladin_fmt_protection" } } },
                     } },
-                    { cells = {
-                        { key = "paladin_enable_retribution", type = "switch" },
-                        { key = "desc_paladin_fmt_retribution", type = "description", label = L["|T135873:18:18:0:0:64:64:5:59:5:59|t 惩戒"] },
-                        { key = "paladin_fmt_retribution", type = "input" },
+                    { id = "paladin.row.3", kind = "row", children = {
+                        { id = "paladin.row.3.1", kind = "cell", children = { { id = "paladin_enable_retribution", kind = "control", controlType = "checkbox", path = "paladin_enable_retribution", label = "" } } },
+                        { id = "paladin.row.3.2", kind = "cell", children = { { id = "desc_paladin_fmt_retribution", kind = "text", text = L["|T135873:18:18:0:0:64:64:5:59:5:59|t 惩戒"] } } },
+                        { id = "paladin.row.3.3", kind = "cell", children = { { id = "paladin_fmt_retribution", kind = "control", controlType = "input", path = "paladin_fmt_retribution" } } },
                     } },
-                },
-            },
-            {
-                kind = "table", id = "demonhunter", title = L["|cffa330c9恶魔猎手设置|r"],
-                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
-                supportsAdd = false,
-                records = {
-                    { cells = {
-                        { key = "dh_enable_havoc", type = "switch" },
-                        { key = "desc_dh_fmt_havoc", type = "description", label = L["|T1247264:18:18:0:0:64:64:5:59:5:59|t 浩劫"] },
-                        { key = "dh_fmt_havoc", type = "input" },
+                } },
+            } },
+            { id = "card.demonhunter", kind = "card", title = L["|cffa330c9恶魔猎手设置|r"], children = {
+                { id = "demonhunter.table", kind = "table", columns = {
+                    { title = L["启用"] }, { title = L["专精"], weight = 1.6 }, { title = L["显示CD时的内容 (用 %t 代表时间)"] },
+                }, children = {
+                    { id = "demonhunter.row.1", kind = "row", children = {
+                        { id = "demonhunter.row.1.1", kind = "cell", children = { { id = "dh_enable_havoc", kind = "control", controlType = "checkbox", path = "dh_enable_havoc", label = "" } } },
+                        { id = "demonhunter.row.1.2", kind = "cell", children = { { id = "desc_dh_fmt_havoc", kind = "text", text = L["|T1247264:18:18:0:0:64:64:5:59:5:59|t 浩劫"] } } },
+                        { id = "demonhunter.row.1.3", kind = "cell", children = { { id = "dh_fmt_havoc", kind = "control", controlType = "input", path = "dh_fmt_havoc" } } },
                     } },
-                    { cells = {
-                        { key = "dh_enable_vengeance", type = "switch" },
-                        { key = "desc_dh_fmt_vengeance", type = "description", label = L["|T1247265:18:18:0:0:64:64:5:59:5:59|t 复仇"] },
-                        { key = "dh_fmt_vengeance", type = "input" },
+                    { id = "demonhunter.row.2", kind = "row", children = {
+                        { id = "demonhunter.row.2.1", kind = "cell", children = { { id = "dh_enable_vengeance", kind = "control", controlType = "checkbox", path = "dh_enable_vengeance", label = "" } } },
+                        { id = "demonhunter.row.2.2", kind = "cell", children = { { id = "desc_dh_fmt_vengeance", kind = "text", text = L["|T1247265:18:18:0:0:64:64:5:59:5:59|t 复仇"] } } },
+                        { id = "demonhunter.row.2.3", kind = "cell", children = { { id = "dh_fmt_vengeance", kind = "control", controlType = "input", path = "dh_fmt_vengeance" } } },
                     } },
-                    { cells = {
-                        { key = "dh_enable_devourer", type = "switch" },
-                        { key = "desc_dh_fmt_devourer", type = "description", label = L["|T7455385:18:18:0:0:64:64:5:59:5:59|t 噬灭"] },
-                        { key = "dh_fmt_devourer", type = "input" },
+                    { id = "demonhunter.row.3", kind = "row", children = {
+                        { id = "demonhunter.row.3.1", kind = "cell", children = { { id = "dh_enable_devourer", kind = "control", controlType = "checkbox", path = "dh_enable_devourer", label = "" } } },
+                        { id = "demonhunter.row.3.2", kind = "cell", children = { { id = "desc_dh_fmt_devourer", kind = "text", text = L["|T7455385:18:18:0:0:64:64:5:59:5:59|t 噬灭"] } } },
+                        { id = "demonhunter.row.3.3", kind = "cell", children = { { id = "dh_fmt_devourer", kind = "control", controlType = "input", path = "dh_fmt_devourer" } } },
                     } },
-                },
-            },
-            {
-                kind = "table", id = "evoker", title = L["|cff33937f唤魔师设置|r"],
-                columns = { { title = L["启用"] }, { title = L["专精"] }, { title = L["显示CD时的内容 (用 %t 代表时间)"] } },
-                supportsAdd = false,
-                records = {
-                    { cells = {
-                        { key = "evoker_enable_devastation", type = "switch" },
-                        { key = "desc_evoker_fmt_devastation", type = "description", label = L["|T4511811:18:18:0:0:64:64:5:59:5:59|t 湮灭"] },
-                        { key = "evoker_fmt_devastation", type = "input" },
+                } },
+            } },
+            { id = "card.evoker", kind = "card", title = L["|cff33937f唤魔师设置|r"], children = {
+                { id = "evoker.table", kind = "table", columns = {
+                    { title = L["启用"] }, { title = L["专精"], weight = 1.6 }, { title = L["显示CD时的内容 (用 %t 代表时间)"] },
+                }, children = {
+                    { id = "evoker.row.1", kind = "row", children = {
+                        { id = "evoker.row.1.1", kind = "cell", children = { { id = "evoker_enable_devastation", kind = "control", controlType = "checkbox", path = "evoker_enable_devastation", label = "" } } },
+                        { id = "evoker.row.1.2", kind = "cell", children = { { id = "desc_evoker_fmt_devastation", kind = "text", text = L["|T4511811:18:18:0:0:64:64:5:59:5:59|t 湮灭"] } } },
+                        { id = "evoker.row.1.3", kind = "cell", children = { { id = "evoker_fmt_devastation", kind = "control", controlType = "input", path = "evoker_fmt_devastation" } } },
                     } },
-                    { cells = {
-                        { key = "evoker_enable_preservation", type = "switch" },
-                        { key = "desc_evoker_fmt_preservation", type = "description", label = L["|T4511812:18:18:0:0:64:64:5:59:5:59|t 恩护"] },
-                        { key = "evoker_fmt_preservation", type = "input" },
+                    { id = "evoker.row.2", kind = "row", children = {
+                        { id = "evoker.row.2.1", kind = "cell", children = { { id = "evoker_enable_preservation", kind = "control", controlType = "checkbox", path = "evoker_enable_preservation", label = "" } } },
+                        { id = "evoker.row.2.2", kind = "cell", children = { { id = "desc_evoker_fmt_preservation", kind = "text", text = L["|T4511812:18:18:0:0:64:64:5:59:5:59|t 恩护"] } } },
+                        { id = "evoker.row.2.3", kind = "cell", children = { { id = "evoker_fmt_preservation", kind = "control", controlType = "input", path = "evoker_fmt_preservation" } } },
                     } },
-                    { cells = {
-                        { key = "evoker_enable_augmentation", type = "switch" },
-                        { key = "desc_evoker_fmt_augmentation", type = "description", label = L["|T5198700:18:18:0:0:64:64:5:59:5:59|t 增辉"] },
-                        { key = "evoker_fmt_augmentation", type = "input" },
+                    { id = "evoker.row.3", kind = "row", children = {
+                        { id = "evoker.row.3.1", kind = "cell", children = { { id = "evoker_enable_augmentation", kind = "control", controlType = "checkbox", path = "evoker_enable_augmentation", label = "" } } },
+                        { id = "evoker.row.3.2", kind = "cell", children = { { id = "desc_evoker_fmt_augmentation", kind = "text", text = L["|T5198700:18:18:0:0:64:64:5:59:5:59|t 增辉"] } } },
+                        { id = "evoker.row.3.3", kind = "cell", children = { { id = "evoker_fmt_augmentation", kind = "control", controlType = "input", path = "evoker_fmt_augmentation" } } },
                     } },
-                },
-            },
-            {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchorGroup", parentKey = "font_alert",
-            },
-            {
-                kind = "composite", id = "font_alert", title = L["提示文字"],
-                component = "fontgroup", key = "font_alert",
-            },
+                } },
+            } },
+            { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
+                { id = "anchorGroup", kind = "component", component = "anchorgroup", path = "font_alert.anchorGroup", optionsRef = "anchor" }
+            } },
+            { id = "card.font_alert", kind = "card", title = L["提示文字"], children = {
+                { id = "font_alert", kind = "component", component = "fontgroup", path = "font_alert" }
+            } }
         },
     },
 }
@@ -607,12 +613,14 @@ end
 local function SetAlertDuration(durationObject, formatString)
     runtimeText = ""
     runtimeDuration = durationObject
-    runtimeDurationFormat = formatString or "{}"
+    -- Translate saved templates before replacing %t so existing profiles use L[].
+    -- Unknown templates pass through the locale proxy, preserving custom text.
+    runtimeDurationFormat = formatString and (L[formatString]:gsub("%%t", "{}")) or "{}"
     RefreshRuntimeVisual()
 end
 
 BuildSamplePresentation = function()
-    local format = DB.displayFormat or "我没有闪 (%t)"
+    local format = L[DB.displayFormat or "我没有闪 (%t)"]
     -- gsub 会额外返回替换次数；括号强制只把替换后的文本交给中央 presentation，
     -- 绝不能把次数误传为 nativeRemainingDuration。
     return BuildPresentation((format:gsub("%%t", "12")))
@@ -625,7 +633,10 @@ local function RefreshPreview()
     } }, LAYOUT)
 end
 
-RefreshActiveSurfaces = function(controller)
+RefreshActiveSurfaces = function(controller, changedPath, phase)
+    if phase == "committed" and IsConfigRefreshKey(changedPath) then
+        RefreshActiveSkillData()
+    end
     if controller.previewEntries and controller.previewEntries[1] then
         controller.previewEntries[1].presentation = BuildSamplePresentation()
     end
@@ -692,7 +703,7 @@ local function UpdateRogueDirectAlert()
         SetRuntimeVisible(false)
         return
     end
-    SetAlertDuration(duration, (fmt:gsub("%%t", "{}")))
+    SetAlertDuration(duration, fmt)
     SetRuntimeVisible(true)
 end
 
@@ -753,7 +764,7 @@ local function UpdateMageDirectAlert()
         HideMageDirectAlert()
         return
     end
-    SetAlertDuration(duration, (fmt:gsub("%%t", "{}")))
+    SetAlertDuration(duration, fmt)
     SetRuntimeVisible(true)
 end
 
@@ -783,14 +794,14 @@ local function UpdatePaladinDirectAlert()
         HidePaladinDirectAlert()
         return
     end
-    SetAlertDuration(duration, (fmt:gsub("%%t", "{}")))
+    SetAlertDuration(duration, fmt)
     SetRuntimeVisible(true)
 end
 
 -- =============================================================
 -- 天赋扫描
 -- =============================================================
-local function RefreshActiveSkillData()
+RefreshActiveSkillData = function()
     local _, className = UnitClass("player")
 
     -- 盗贼只在冷却状态事件时重绑原生 Duration，不创建模块计时循环。

@@ -92,53 +92,27 @@ local MODULE_SPEC = {
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        sections = {
-            {
-                kind = "composite",
-                id = "common",
-                title = L["模块通用设置"],
-                component = "modulecommonsettings",
-                key = "moduleCommon",
-                opts = {
+        version = 2,
+        cards = {
+            { id = "card.common", kind = "card", title = L["模块通用设置"], children = {
+                { id = "moduleCommon", kind = "component", component = "modulecommonsettings", path = "moduleCommon", opts = {
                     bindRoot = true,
                     presentation = "settings-list",
                     fields = { { label = L["启用"], path = "enabled", presentation = "switch", type = "checkbox" } },
-                    fixedLayout = {
-                        controlH = 6,
-                        controlW = 46,
-                        firstY = 0,
-                        logicalWidth = 200,
-                        rowStep = 14,
-                        slotX = { 3, 53, 103, 153 },
-                    },
-                },
-            },
-            {
-                kind = "settings",
-                id = "messages",
-                title = L["提示内容"],
-                items = {
-                    { key = "enterMessage", label = L["进入战斗文本"], type = "input" },
-                    { key = "leaveMessage", label = L["离开战斗文本"], type = "input" },
-                    { key = "enterColor", label = L["进入战斗颜色"], type = "color" },
-                    { key = "leaveColor", label = L["离开战斗颜色"], type = "color" },
-                },
-            },
-            {
-                kind = "composite",
-                id = "anchor",
-                title = L["锚点设置"],
-                component = "anchorgroup",
-                key = "anchor",
-            },
-            {
-                kind = "composite",
-                id = "font_text",
-                title = L["文字样式"],
-                component = "fontgroup",
-                key = "font_text",
-            },
+                } }
+            } },
+            { id = "card.messages", kind = "card", title = L["提示内容"], children = {
+                { id = "enterMessage", kind = "control", controlType = "input", path = "enterMessage", label = L["进入战斗文本"] },
+                { id = "leaveMessage", kind = "control", controlType = "input", path = "leaveMessage", label = L["离开战斗文本"] },
+                { id = "enterColor", kind = "control", controlType = "color", path = "enterColor", label = L["进入战斗颜色"] },
+                { id = "leaveColor", kind = "control", controlType = "color", path = "leaveColor", label = L["离开战斗颜色"] }
+            } },
+            { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
+                { id = "anchor", kind = "component", component = "anchorgroup", path = "anchor", optionsRef = "anchor" }
+            } },
+            { id = "card.font_text", kind = "card", title = L["文字样式"], children = {
+                { id = "font_text", kind = "component", component = "fontgroup", path = "font_text" }
+            } }
         },
     },
 }

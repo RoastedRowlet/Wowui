@@ -1,4 +1,4 @@
-## Interface: 11508, 11509, 20505, 20506, 30405, 38002, 40402, 50503, 50504, 120007, 120100, 120105
+## Interface: 11508, 11509, 20505, 20506, 30405, 38002, 40402, 50503, 50504, 120107, 120100, 120105
 
 ## Title: LittleWigs
 ## Notes: Boss warnings for 5-man dungeons & scenarios.
@@ -23,7 +23,7 @@
 
 ## Dependencies: BigWigs
 ## LoadOnDemand: 1
-## Version: v12.1.21
+## Version: v12.1.22
 
 ## X-BigWigs-Minimum: 427
 ## X-BigWigs-LoadOn-InstanceId: 2805,2811,2813,2825,2859,2874,2915,2923,2993, 2933,2952,2953,2961,2962,2963,2964,2965,2966,2979,3003,3038,3043,3077,3079 [AllowLoadGameType standard]
@@ -37,6 +37,9 @@ Midnight\Delves\AtalAman\SpiritflayerJinma.lua [AllowLoadGameType standard]
 Midnight\Delves\CollegiateCalamity\Hydrangea.lua [AllowLoadGameType standard]
 Midnight\Delves\CollegiateCalamity\InfiltratorGarand.lua [AllowLoadGameType standard]
 Midnight\Delves\CollegiateCalamity\VoidscornedVagrant.lua [AllowLoadGameType standard]
+Midnight\Delves\GnarldorIsle\GralkaSnakeEater.lua [AllowLoadGameType standard]
+Midnight\Delves\GnarldorIsle\OsseousAmalgamation.lua [AllowLoadGameType standard]
+Midnight\Delves\LabyrinthOfKindojan\DenZara.lua [AllowLoadGameType standard]
 Midnight\Delves\LabyrinthOfKindojan\Kindojan.lua [AllowLoadGameType standard]
 Midnight\Delves\ParhelionPlaza\GladiusSlaurna.lua [AllowLoadGameType standard]
 Midnight\Delves\ShadowguardPoint\ChiefArcanistPatram.lua [AllowLoadGameType standard]
@@ -47,6 +50,9 @@ Midnight\Delves\TheGrudgePit\Gyrospore.lua [AllowLoadGameType standard]
 Midnight\Delves\TheGrudgePit\Mycomight.lua [AllowLoadGameType standard]
 Midnight\Delves\TheGulfOfMemory\Lumenia.lua [AllowLoadGameType standard]
 Midnight\Delves\TheGulfOfMemory\Multhaul.lua [AllowLoadGameType standard]
+Midnight\Delves\TheRingOfGlory\Gnok.lua [AllowLoadGameType standard]
+Midnight\Delves\TheRingOfGlory\Gnok2.lua [AllowLoadGameType standard]
+Midnight\Delves\TheRingOfGlory\Drakta.lua [AllowLoadGameType standard]
 Midnight\Delves\TheShadowEnclave\Antenorian.lua [AllowLoadGameType standard]
 Midnight\Delves\TormentsRise\Nullaeus.lua [AllowLoadGameType standard]
 Midnight\Delves\TwilightCrypts\BlademasterDarza.lua [AllowLoadGameType standard]

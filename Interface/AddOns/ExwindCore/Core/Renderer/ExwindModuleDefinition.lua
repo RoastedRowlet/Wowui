@@ -2,8 +2,7 @@
 -- ExwindModuleDefinition
 --
 -- 新模块唯一入口。一个 ModuleDefinition 同时声明设置页、Panel Preview、
--- 输入事务与正式显示同步；它绝不经过 RegisterModuleLayout / RegisterModulePreview。
--- 旧注册表仍仅供未迁移模块使用，不能与本入口混用。
+-- 输入事务与正式显示同步；设置页直接挂载 V2，预览由同一 controller 持有。
 -- =========================================================
 
 local ExwindTools = _G.ExwindTools
@@ -44,11 +43,9 @@ local function ShallowCopy(value)
 end
 
 local function RequireOrdinarySettingsLayout(layout, moduleKey)
-    if type(layout) ~= "table" or layout.version ~= 1
-        or type(layout.sections) ~= "table" or layout.cards ~= nil then
-        error("ModuleDefinition settings.layout requires version=1 sections; special cards use their owning page: "
-            .. tostring(moduleKey), 3)
-    end
+    local ok, issue = EXUI:ValidateSettingsDeclarationV2(layout)
+    if not ok then error("ModuleDefinition " .. tostring(moduleKey) .. " settings.layout "
+        .. issue.path .. ": " .. issue.message, 3) end
     return layout
 end
 
@@ -125,9 +122,6 @@ function ExwindTools:RegisterModule(definition)
     if type(definition) ~= "table" then error("RegisterModule requires definition table", 2) end
     local moduleKey = RequireModuleKey(definition.moduleKey, "RegisterModule")
     if self.ModuleDefinitions[moduleKey] then error("RegisterModule duplicate moduleKey: " .. moduleKey, 2) end
-    if self.RegisteredLayouts and self.RegisteredLayouts[moduleKey] then
-        error("RegisterModule cannot coexist with RegisterModuleLayout: " .. moduleKey, 2)
-    end
     if self.ModulePreviewRenderers and self.ModulePreviewRenderers[moduleKey] then
         error("RegisterModule cannot coexist with RegisterModulePreview: " .. moduleKey, 2)
     end
@@ -137,6 +131,9 @@ function ExwindTools:RegisterModule(definition)
     end
     if type(definition.settings.layout) == "table" then
         RequireOrdinarySettingsLayout(definition.settings.layout, moduleKey)
+    end
+    if definition.settings.ownerFactory ~= nil and type(definition.settings.ownerFactory) ~= "function" then
+        error("RegisterModule settings.ownerFactory must be function", 2)
     end
     if type(definition.display) ~= "table" then error("RegisterModule requires display table", 2) end
     RequireFunction(definition.display.buildPanel, "display.buildPanel")
@@ -307,18 +304,24 @@ function EXUI:RegisterBasicTimerBar(declaration)
         _basicState = { active = false },
         settings = {
             layout = {
-                { key = "header", type = "header", x = 1, y = 1, w = 197, h = 8,
-                    label = "EXUI Standard TimerBar Test", labelSize = 25 },
-                { key = "description", type = "description", x = 1, y = 14, w = 197, h = 10,
-                    label = "/run extoolstest(\"timerbar\", 5, \"text\", 8, \"atlas\")" },
-                { key = schema.timerBarKey, type = "timerbargroup", x = 1, y = 27, w = 197, h = 56,
-                    measure = true, label = "TimerBar", opts = {} },
-                { key = schema.textA.key, type = "fontgroup", x = 1, y = 87, w = 197, h = 50,
-                    measure = true, label = L["法术名称"], opts = {} },
-                { key = schema.textB.key, type = "fontgroup", x = 1, y = 141, w = 197, h = 50,
-                    measure = true, label = L["目标名称"], opts = {} },
-                { key = schema.textC.key, type = "fontgroup", x = 1, y = 195, w = 197, h = 50,
-                    measure = true, label = L["时间"], opts = {} },
+                version = 2,
+                cards = {
+                    { id="header", kind="card", title="EXUI Standard TimerBar Test", children={
+                        { id="description", kind="hint", text="/run extoolstest(\"timerbar\", 5, \"text\", 8, \"atlas\")" },
+                    } },
+                    { id="timerbar-card", kind="card", title="TimerBar", children={
+                        { id=schema.timerBarKey, kind="component", component="timerbargroup", path=schema.timerBarKey },
+                    } },
+                    { id="text-a-card", kind="card", title=L["法术名称"], children={
+                        { id=schema.textA.key, kind="component", component="fontgroup", path=schema.textA.key },
+                    } },
+                    { id="text-b-card", kind="card", title=L["目标名称"], children={
+                        { id=schema.textB.key, kind="component", component="fontgroup", path=schema.textB.key },
+                    } },
+                    { id="text-c-card", kind="card", title=L["时间"], children={
+                        { id=schema.textC.key, kind="component", component="fontgroup", path=schema.textC.key },
+                    } },
+                },
             },
         },
         display = {

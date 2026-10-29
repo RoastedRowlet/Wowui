@@ -46,44 +46,33 @@ local DEFAULTS = {
 ExwindTools:DeclareModuleSpecDefaults(MODULE_KEY, { root = DEFAULTS })
 local DB = ExwindTools:GetModuleDB(MODULE_KEY)
 local controller
+local settingsSession
 local function PickRaidMarkerPanelAnchor()
     if controller and type(controller.StartFramePicker) == "function" then return controller:StartFramePicker() end
     return false
 end
-local RAID_MARKER_PANEL_ANCHOR_OPTS = {
-    bindRoot = true,
-    offsetXKey = "posX",
-    offsetYKey = "posY",
-    defaultOffsetX =
-        DEFAULTS.posX,
-    defaultOffsetY = DEFAULTS.posY,
-    attachEnabledKey = "attachToCustom",
-    attachTargetKey =
-    "customAttachTarget",
-    onPickFrame = PickRaidMarkerPanelAnchor
-}
--- [声明迁移边界：设置页] 仅把原设置控件改为 settings 声明；anchorgroup 仍整体引用。
--- key/value、绑定冲突规则、secure slot 顺序和 Panel/World/Runtime 回调禁止修改。
 -- =========================================================
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
 local layout = {
-    version = 1,
-    sections = {
+    version = 2,
+    cards = {
         {
-            kind = "settings",
-            id = "common",
+            kind = "card",
+            id = "card.common",
             title = L["通用设置"],
-            items = {
-                { key = "showPanel", type = "switch", label = L["显示面板"] },
-                { key = "scale", type = "slider", label = L["面板缩放"], min = .1, max = 3, step = .1 },
-                { key = "buttonSpacing", type = "slider", label = L["按钮间距"], min = 0, max = 20, step = 1 },
-                { key = "btn_reset_pos", type = "button", label = L["重置位置"] },
-                { key = "enableCountdownButton", type = "switch", label = L["启用倒数"] },
-                { key = "countdownSeconds", type = "input", label = L["倒数秒数"] },
-                { key = "enableReadyCheckButton", type = "switch", label = L["启用就位确认"] },
-                { key = "swapCountdownAndReadyCheck", type = "switch", label = L["交换确认与倒数"] },
-                { key = "raidMarkerBinding", type = "select", label = L["标记按键"], options = {
+            children = {
+                { kind = "control", id = "showPanel", path = "showPanel", controlType = "switch", label = L["显示面板"] },
+                { kind = "control", id = "scale", path = "scale", controlType = "slider", label = L["面板缩放"], min = .1, max = 3, step = .1 },
+                { kind = "control", id = "buttonSpacing", path = "buttonSpacing", controlType = "slider", label = L["按钮间距"], min = 0, max = 20, step = 1 },
+                { kind = "setting", id = "btn_reset_pos_row", label = L["重置位置"], children = {
+                    { kind = "button", id = "btn_reset_pos", clickKey = "btn_reset_pos", text = L["重置位置"] },
+                } },
+                { kind = "control", id = "enableCountdownButton", path = "enableCountdownButton", controlType = "switch", label = L["启用倒数"] },
+                { kind = "control", id = "countdownSeconds", path = "countdownSeconds", controlType = "input", label = L["倒数秒数"] },
+                { kind = "control", id = "enableReadyCheckButton", path = "enableReadyCheckButton", controlType = "switch", label = L["启用就位确认"] },
+                { kind = "control", id = "swapCountdownAndReadyCheck", path = "swapCountdownAndReadyCheck", controlType = "switch", label = L["交换确认与倒数"] },
+                { kind = "control", id = "raidMarkerBinding", path = "raidMarkerBinding", controlType = "select", label = L["标记按键"], options = {
                     { value = "left", label = L["左键"] },
                     { value = "right", label = L["右键"] },
                     { value = "shift-left", label = L["SHIFT+左键"] },
@@ -91,7 +80,7 @@ local layout = {
                     { value = "ctrl-left", label = L["CTRL+左键"] },
                     { value = "ctrl-right", label = L["CTRL+右键"] },
                 } },
-                { key = "worldMarkerBinding", type = "select", label = L["光柱按键"], options = {
+                { kind = "control", id = "worldMarkerBinding", path = "worldMarkerBinding", controlType = "select", label = L["光柱按键"], options = {
                     { value = "left", label = L["左键"] },
                     { value = "right", label = L["右键"] },
                     { value = "shift-left", label = L["SHIFT+左键"] },
@@ -99,22 +88,36 @@ local layout = {
                     { value = "ctrl-left", label = L["CTRL+左键"] },
                     { value = "ctrl-right", label = L["CTRL+右键"] },
                 } },
-                { key = "bundleLayout", type = "switch", label = L["束状排列"] },
-                { key = "hoverShow", type = "switch", label = L["悬停显示"] },
-                { key = "idleAlpha", type = "slider", label = L["离开透明度"], min = 0, max = 1, step = .05 },
+                { kind = "control", id = "bundleLayout", path = "bundleLayout", controlType = "switch", label = L["束状排列"] },
+                { kind = "control", id = "hoverShow", path = "hoverShow", controlType = "switch", label = L["悬停显示"] },
+                { kind = "control", id = "idleAlpha", path = "idleAlpha", controlType = "slider", label = L["离开透明度"], min = 0, max = 1, step = .05 },
             },
         },
         {
-            kind = "composite",
-            id = "anchor",
-            title = L["锚点设置"],
-            component = "anchorgroup",
-            key = "anchorGroup",
-            opts = RAID_MARKER_PANEL_ANCHOR_OPTS,
+            kind = "card", id = "card.anchor", title = L["锚点设置"],
+            children = {
+                { kind = "component", component = "anchorgroup", id = "anchorGroup", path = "anchorGroup", optionsRef = "anchor" },
+            },
         },
     },
 }
-ExwindTools:RegisterModuleLayout(MODULE_KEY, layout)
+EXUI:RegisterModuleSettingsPageV2(MODULE_KEY, layout, function()
+    return {
+        AttachSession = function(self, session) settingsSession = session end,
+        options = {
+            anchor = {
+                bindRoot = true,
+                offsetXKey = "posX",
+                offsetYKey = "posY",
+                defaultOffsetX = DEFAULTS.posX,
+                defaultOffsetY = DEFAULTS.posY,
+                attachEnabledKey = "attachToCustom",
+                attachTargetKey = "customAttachTarget",
+                onPickFrame = PickRaidMarkerPanelAnchor,
+            },
+        },
+    }
+end)
 if not ExwindTools:IsModuleEnabled(MODULE_KEY) then return end
 -- =========================================================
 -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
@@ -381,9 +384,7 @@ local function EnsureAnchor()
         initialHeight = 44,
         clampedToScreen = true,
         onPositionSaved = function()
-            if EXUI.CurrentModule == MODULE_KEY and EXUI.MainFrame and EXUI.MainFrame:IsShown() and type(EXUI.RefreshContent) == "function" then
-                EXUI:RefreshContent()
-            end
+            if settingsSession then settingsSession:Refresh() end
         end
     }); anchor = controller:Ensure(); return anchor
 end

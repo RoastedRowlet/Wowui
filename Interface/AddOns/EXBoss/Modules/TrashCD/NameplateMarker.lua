@@ -293,6 +293,9 @@ local function ResolvePlateAnchorTarget(plate, unit)
                 end
             end
         end
+        -- Platynator hides Blizzard's UnitFrame right after it installs its
+        -- own display.  Falling back to that bar would follow a hidden frame.
+        return nil
 
     elseif addonType == "plater" then
         -- Plater maintains this frame itself after every nameplate layout pass:
@@ -344,13 +347,20 @@ local function AnchorUnitFrameToPlate(frame, plate, unit)
     if not (frame and plate) then
         return
     end
-    local anchorTarget
-    if frame._anchorPlate == plate then
-        anchorTarget = frame._anchorTarget
-    else
-        anchorTarget = ResolvePlateAnchorTarget(plate, unit) or plate
-        frame._anchorPlate = plate
+    local anchorTarget = frame._anchorPlate == plate and frame._anchorTarget or nil
+    -- Platynator keeps one display per style under each plate and hides /
+    -- unanchors the inactive ones, so a cached health widget can go stale
+    -- when the unit returns with another style.
+    if anchorTarget and GetNameplateAddonType() == "platynator" and not IsUsableAnchorCandidate(anchorTarget, plate) then
+        anchorTarget = nil
+    end
+    if not anchorTarget then
+        anchorTarget = ResolvePlateAnchorTarget(plate, unit)
+        -- Nil only while Platynator has not installed its display yet: follow
+        -- the plate for now and resolve again on the next refresh.
+        frame._anchorPlate = anchorTarget and plate or nil
         frame._anchorTarget = anchorTarget
+        anchorTarget = anchorTarget or plate
     end
     frame:ClearAllPoints()
     if type(frame.SetAllPoints) == "function" then

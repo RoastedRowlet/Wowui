@@ -51,6 +51,7 @@ local peaversTalentsDataIcons = {
 		["The Twin Fangs"] = 7966623,
 		["The Coiled Altar"] = 7966625,
 		["Ula'tek"] = 7966624,
+		["Kith'ix"] = 8214194,
 	},
 };
 
@@ -95,6 +96,13 @@ local function GetDataCache(srcAddon, isCombineGroupsText, specID, category)
 	return dataCache[srcAddon][isCombineGroupsText][specID][category];
 end
 
+local function GetPlayerSpecIcon()
+	local specIndex = C_SpecializationInfo.GetSpecialization();
+	local specInfo = specIndex and {C_SpecializationInfo.GetSpecializationInfo(specIndex)};
+	local specIcon = specInfo and specInfo[4];
+	return specIcon or Addon.DEFAULT_ICON;
+end
+
 local function GetPeaversTalentsDataByCategory(category)
 	local srcAddon = "PeaversTalentsData";
 	local PeaversTalentsData = _G[srcAddon];
@@ -103,12 +111,12 @@ local function GetPeaversTalentsDataByCategory(category)
 		return nil;
 	end
 
-	local classID = select(2, UnitClassBase("player"));
-	local specID, _, _, specIcon = PlayerUtil.GetCurrentSpecID();
-	if not classID or not specID or not specIcon then
+	local specID = PlayerUtil.GetCurrentSpecID();
+	if not specID then
 		return nil;
 	end
 
+	local specIcon = specID and GetPlayerSpecIcon();
 	local option = TalentLoadoutEx.Option.Preset;
 	if option.PeaversTalentsData[category] then
 		local icons = peaversTalentsDataIcons[category == "mythic" and category or "raid"];
@@ -118,7 +126,7 @@ local function GetPeaversTalentsDataByCategory(category)
 			presetData = {};
 
 			local prefix = option.isCombineGroups and peaversTalentsDataPrefixes[category] or "";
-			local builds, errorMsg = API.GetBuilds(classID, specID, "parses");
+			local builds, errorMsg = API.GetBuilds(Addon.playerClassId, specID, "parses");
 			if errorMsg then
 				Addon:Print("PeaversTalentsData.API.GetBuilds() -> ", errorMsg);
 			end
@@ -143,7 +151,7 @@ local function GetPeaversTalentsDataByCategory(category)
 				if not group then
 					group = {
 						isPreset = true,
-						name = peaversTalentsDataGroupNames[category].."\nWoWCompare",
+						name = peaversTalentsDataGroupNames[category].."\nparses.gg",
 						icon = icons[0];
 						isExpanded = false,
 					};
@@ -170,9 +178,8 @@ local function GetMurlokExportDataByCategory(category)
 		return nil;
 	end
 
-	local classID = select(2, UnitClassBase("player"));
-	local specID, _, _, specIcon = PlayerUtil.GetCurrentSpecID();
-	if not classID or not specID or not specIcon then
+	local specID = PlayerUtil.GetCurrentSpecID();
+	if not specID then
 		return nil;
 	end
 
@@ -185,7 +192,7 @@ local function GetMurlokExportDataByCategory(category)
 
 			for className, classContent in pairs(categoryContent) do
 				local classInfo = ClassConfig[className];
-				if classInfo.class.id == classID then
+				if classInfo.class.id == Addon.playerClassId then
 					for specName, specContent in pairs(classContent) do
 						local specInfo = classInfo.specs[specName];
 						if specInfo.id == specID then
@@ -274,7 +281,7 @@ end
 local combinedGroups = {
 	PeaversTalentsData = {
 		isPreset = true,
-		name = "WoWCompare",
+		name = "parses.gg",
 		isExpanded = false,
 	},
 	MurlokExport = {
@@ -294,8 +301,7 @@ local function GetPeaversTalentsData()
 
 	if #presetData > 0 and TalentLoadoutEx.Option.Preset.isCombineGroups then
 		local combinedGroup = combinedGroups.PeaversTalentsData;
-		local specIcon = select(4, PlayerUtil.GetCurrentSpecID());
-		combinedGroup.icon = specIcon or Addon.DEFAULT_ICON;
+		combinedGroup.icon = GetPlayerSpecIcon();
 		table.insert(presetData, 1, combinedGroup);
 	end
 
@@ -309,8 +315,7 @@ local function GetMurlokExportData()
 
 	if #presetData > 0 and TalentLoadoutEx.Option.Preset.isCombineGroups then
 		local combinedGroup = combinedGroups.MurlokExport;
-		local specIcon = select(4, PlayerUtil.GetCurrentSpecID());
-		combinedGroup.icon = specIcon or Addon.DEFAULT_ICON;
+		combinedGroup.icon = GetPlayerSpecIcon();
 		table.insert(presetData, 1, combinedGroup);
 	end
 

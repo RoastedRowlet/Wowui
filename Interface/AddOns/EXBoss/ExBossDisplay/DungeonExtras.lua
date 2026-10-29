@@ -160,7 +160,12 @@ local function BuildPresentation(record, sample)
     end
     local interaction = EXUI:BuildStandardPreviewInteraction("TimerBar", db, INTERACTION_SCHEMA)
     return {
-        style = { timerBar = db.timerGroup, text = { label = db.font_spell, time = db.font_timer } },
+        style = { timerBar = db.timerGroup, text = { label = db.font_spell, time = db.font_timer },
+            -- 静态样本沿用交互声明的左右文字槽；固定宽度不再一起居中叠写。
+            textAnchors = sample and {
+                label = INTERACTION_SCHEMA["core.spellName"].anchor,
+                time = INTERACTION_SCHEMA["core.time"].anchor,
+            } or nil },
         label = record.name, icon = { value = 136016 },
         -- 预览使用普通文字；运行时按护盾条路径直写现成 timeText，避开普通时间参数判断。
         time = { text = sample and record.text or "", shown = db.font_timer.enabled == true },

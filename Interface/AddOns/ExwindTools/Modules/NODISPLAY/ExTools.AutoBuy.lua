@@ -5,9 +5,8 @@
 -- 一、模块标识与依赖引用 | Module Identity and Dependencies
 -- =========================================================
 local ExwindTools = _G.ExwindTools
-local EXDB = _G.EXDB
 if not ExwindTools then return end
-local EXState = ExwindTools.State
+local EXUI = ExwindTools.UI
 local L = (ExwindTools and ExwindTools.L) or setmetatable({}, { __index = function(_, key) return key end })
 
 -- 1. 识别 Key
@@ -62,13 +61,6 @@ local PRESET_ITEMS = {
 }
 
 -- =========================================================
--- [v4.2] 注册与配置
--- =========================================================
-
-
-
--- 2. Grid 布局 (核心)
--- =========================================================
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
 local pendingItemInfo = {}
@@ -89,108 +81,135 @@ local function ItemTextCell(itemID)
     }
 end
 
-local function EX_RegisterLayout()
-    -- 物品身份由正式表格的只读 text/icon 单元格显示；启用、数量、增删
-    -- 继续使用原记录、配置路径和业务回调。
-    local layout = {
-        version = 1,
-        title = L["自动购买 (Auto Buy)"],
-        description = L["当打开商人界面时，自动购买背包中缺少的物品 (自动补齐到设置数量)"],
-        sections = {
-            {
-                kind = "table",
-                id = "general",
-                title = L["通用设置"],
-                columns = {
-                    { title = L["启用"] },
-                    { title = L["物品"] },
-                    { title = L["数量"] },
-                    { title = L["操作"] },
-                },
-                supportsAdd = true,
-                add = {
-                    cells = {
-                        { text = "" },
-                        { key = "addID", type = "input", label = L["输入 ID"] },
-                        { text = "" },
-                        { key = "addItem", type = "button", label = L["添加"] },
-                    },
-                },
-                records = {},
-            },
-        },
-    }
-
-    local records = layout.sections[1].records
-
-    -- 渲染自定义列表
-    local customList = {}
-    for id, _ in pairs(EX_DB.CustomItems) do table.insert(customList, tonumber(id)) end
-    table.sort(customList)
-
-    for _, id in ipairs(customList) do
-        records[#records + 1] = { cells = {
-            {
-                key = "custom_enabled_" .. id,
-                parentKey = "CustomItems", subKey = id, type = "itemenabled", itemID = id,
-            },
-            ItemTextCell(id),
-            {
-                key = "custom_quantity_" .. id,
-                parentKey = "CustomItems", subKey = id, type = "itemquantity", itemID = id,
-            },
-            {
-                key = "custom_delete_" .. id,
-                parentKey = "CustomItems", subKey = id, type = "itemdelete", itemID = id,
-                canDelete = true,
-            },
-        } }
-    end
-
-    local cats = { { k = "food", n = L["消耗品"] }, { k = "key", n = L["钥石设置"] }, { k = "map", n = L["副本地图"] } }
-    for _, cat in ipairs(cats) do
-        -- [Core] 如果是 Key 或 Map 分类且当前不是 Beta 环境，则隐藏
-        local isBetaOnly = (cat.k == "key" or cat.k == "map")
-        local shouldShow = (not isBetaOnly) or ExwindTools.IsBeta
-
-        if shouldShow then
-            for _, it in ipairs(PRESET_ITEMS) do
-                if it.cat == cat.k then
-                    if not EX_DB.Items[it.id] then EX_DB.Items[it.id] = { enabled = true, quantity = it.buy } end
-                    records[#records + 1] = { cells = {
-                        {
-                            key = "preset_enabled_" .. it.id,
-                            parentKey = "Items", subKey = it.id, type = "itemenabled", itemID = it.id,
-                        },
-                        ItemTextCell(it.id),
-                        {
-                            key = "preset_quantity_" .. it.id,
-                            parentKey = "Items", subKey = it.id, type = "itemquantity", itemID = it.id,
-                        },
-                        { text = "" },
-                    } }
+local presetRecords = {}
+for _, category in ipairs({ "food", "key", "map" }) do
+    if category == "food" or ExwindTools.IsBeta then
+        for _, item in ipairs(PRESET_ITEMS) do
+            if item.cat == category then
+                if not EX_DB.Items[item.id] then
+                    EX_DB.Items[item.id] = { enabled = true, quantity = item.buy }
                 end
+                presetRecords[#presetRecords + 1] = { key = item.id, id = item.id, parentKey = "Items", data = EX_DB.Items[item.id] }
+                ItemTextCell(item.id)
             end
         end
     end
-
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, layout)
-    return layout
 end
 
--- 3. 立即注册
-EX_RegisterLayout()
+local settingsSession
+local function RefreshSettings()
+    if settingsSession and settingsSession.alive then settingsSession:Refresh() end
+end
+
+local function Cell(id, child)
+    return { id = id, kind = "cell", children = { child } }
+end
+
+local function BuildV2Declaration()
+    local rows = {}
+    for _, prefix in ipairs({ "custom", "preset" }) do
+        rows[#rows + 1] = { id = prefix .. ".rows", kind = "repeat", source = prefix, template = {
+            id = prefix .. ".row", kind = "row", children = {
+                Cell(prefix .. ".enabled", { id = prefix .. "_enabled", kind = "control", controlType = "checkbox", ref = "itemEnabled" }),
+                Cell(prefix .. ".item", { id = prefix .. ".item.identity", kind = "text", textSource = "itemIdentity" }),
+                Cell(prefix .. ".quantity", { id = prefix .. "_quantity", kind = "control", controlType = "input", ref = "itemQuantity" }),
+            },
+        } }
+    end
+    return { version = 2, cards = {
+        { id = "general", kind = "card", title = L["通用设置"], children = {
+            { id = "general.add", kind = "setting", label = L["物品 ID"],
+                description = L["当打开商人界面时，自动购买背包中缺少的物品 (自动补齐到设置数量)"], children = {
+                { id = "addID", kind = "control", controlType = "input", path = "addID" },
+            } },
+            { id = "general.table", kind = "table", columns = {
+                { title = L["启用"] }, { title = L["物品"] }, { title = L["数量"] },
+            }, addAction = { id = "addItem", text = L["添加"], clickKey = "addItem" },
+            rowActions = { { id = "custom_delete", text = L["删除"], action = "deleteItem",
+                enabled = "customItem", presentation = "danger" } }, children = rows },
+        } },
+    } }
+end
+
+local function CreateV2Owner()
+    local owner = { binding = { moduleKey = EXWIND_MODULE_KEY, config = EX_DB },
+        controls = {}, texts = {}, sources = {}, actions = {}, predicates = {} }
+    function owner:AttachSession(session) settingsSession = session end
+    local customRecords = {}
+    owner.sources.custom = function()
+        local records = {}
+        for key, data in pairs(EX_DB.CustomItems) do
+            local record = customRecords[key]
+            if not record or record.data ~= data then
+                record = { key = key, id = tonumber(key), parentKey = "CustomItems", data = data }
+                customRecords[key] = record
+            end
+            records[#records + 1] = record
+        end
+        table.sort(records, function(a, b)
+            if a.id == b.id then return type(a.key) < type(b.key) end
+            return a.id < b.id
+        end)
+        return records
+    end
+    owner.sources.preset = function()
+        for index, record in ipairs(presetRecords) do
+            local data = EX_DB.Items[record.key]
+            if record.data ~= data then
+                presetRecords[index] = { key = record.key, id = record.id, parentKey = "Items", data = data }
+            end
+        end
+        return presetRecords
+    end
+    local function ItemBinding(context, field)
+        local record = context.scope.item
+        -- 绑定原记录本体，保留物品 ID 的原始数字／字符串键；完整路径只用于通知。
+        local binding = EXUI:CreateSettingsV2Binding(EXWIND_MODULE_KEY, EX_DB[record.parentKey][record.key], field)
+        binding.path = record.parentKey .. "." .. record.key .. "." .. field
+        local write = binding.Write
+        function binding:Write(value, phase)
+            if not context:IsCurrent() then return false end
+            return write(self, value, phase)
+        end
+        return binding
+    end
+    owner.controls.itemEnabled = EXUI:CreateSettingsV2Control({ controlType = "checkbox", label = "" },
+        function(context) return ItemBinding(context, "enabled") end)
+    owner.controls.itemQuantity = EXUI:CreateSettingsV2Control({ controlType = "input" }, function(context)
+        local binding = ItemBinding(context, "quantity")
+        local read, write = binding.Read, binding.Write
+        function binding:Read() return read(self) or 1 end
+        function binding:Write(value, phase)
+            return write(self, tonumber(value) or 1, phase)
+        end
+        return binding
+    end)
+    local mountQuantity = owner.controls.itemQuantity.mount
+    owner.controls.itemQuantity.mount = function(host, context)
+        local widget = mountQuantity(host, context)
+        widget:SetJustifyH("CENTER")
+        widget:SetNumeric(true)
+        return widget
+    end
+    owner.texts.itemIdentity = function(scope)
+        local cell = ItemTextCell(scope.item.id)
+        return "|T" .. cell.icon .. ":0|t " .. cell.text
+    end
+    owner.predicates.customItem = function(scope) return scope.item.parentKey == "CustomItems" end
+    owner.actions.deleteItem = function(context)
+        local key = context.scope.item.key
+        ExwindTools:UpdateState(EXWIND_MODULE_KEY .. ".ItemConfigDelete", { key = key })
+    end
+    return owner
+end
+
+EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, BuildV2Declaration(), CreateV2Owner)
 
 ExwindTools:RegisterEvent("GET_ITEM_INFO_RECEIVED", EXWIND_MODULE_KEY, function(_, itemID, success)
     if not pendingItemInfo[itemID] then return end
     pendingItemInfo[itemID] = nil
     if not success then return end
-    local layout = EX_RegisterLayout()
-    local ui = ExwindTools.UI
-    if ui.CurrentPage == "ModuleSettings" and ui.CurrentModule == EXWIND_MODULE_KEY then
-        local session = ui.ActivePageFrame and ui.ActivePageFrame._exCardSession
-        if session then session:ReplaceSettingsSection("general", layout.sections[1]) end
-    end
+    RefreshSettings()
 end)
 
 -- =========================================================
@@ -205,19 +224,17 @@ ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY,
         if id and id > 0 then
             EX_DB.CustomItems[id] = { enabled = true, quantity = 5 }
             EX_DB.addID = "" -- 清空
-            EX_RegisterLayout()
-            ExwindTools.UI:RefreshContent()
+            RefreshSettings()
         end
     end
 end)
 
 -- 2. 处理 ItemConfig 组件上报的删除事件
 ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ItemConfigDelete", EXWIND_MODULE_KEY, function(data)
-    local id = tonumber(data.key)
+    local id = data.key
     if id and EX_DB.CustomItems[id] then
         EX_DB.CustomItems[id] = nil
-        EX_RegisterLayout()
-        ExwindTools.UI:RefreshContent()
+        RefreshSettings()
     end
 end)
 

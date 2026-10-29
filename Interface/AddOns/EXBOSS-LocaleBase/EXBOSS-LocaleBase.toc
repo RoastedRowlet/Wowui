@@ -1,4 +1,4 @@
-﻿## Interface: 120100
+﻿## Interface: 120105, 120100
 ## Title: |cffff4400Ex|r|cff00ccffBoss|r Locale Base
 ## Notes: EXBoss locale system bootstrap — must load before EXBOSS-Locale fills the stores
 ## Author: Exwind

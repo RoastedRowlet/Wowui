@@ -687,10 +687,14 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
         standardSchema = standardSchema,
     }
     collection.layout = EXUI:CreateWidgetLayout(parent, {})
+    EXUI:InitializeCollectionVisualAnimations(collection)
 
     function collection:AcquireItem(itemID)
         local item = self.itemsByID[itemID]
-        if item then return item end
+        if item then
+            if self:IsItemVisualRetiring(itemID) then self:StopItemVisualAnimation(itemID) end
+            return item
+        end
         item = NewItem(self, itemID)
         self.itemsByID[itemID] = item
         self.geometryRevision = (self.geometryRevision or 0) + 1
@@ -699,6 +703,7 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
 
     function collection:ApplyItem(item, presentation)
         if not item or not item.widget then return item end
+        if self:IsItemVisualRetiring(item.id) then self:StopItemVisualAnimation(item.id) end
         self.geometryRevision = (self.geometryRevision or 0) + 1
         presentation = type(presentation) == "table" and presentation or {}
         item.presentation = presentation
@@ -817,7 +822,7 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
         -- 样本数量减少时，旧 Item 不能残留在屏幕上；这里只隐藏未参与本轮
         -- collection 的 Item，不回写任何 Body/ExtraChild 的坐标。
         for itemID, item in pairs(self.itemsByID) do
-            if not wanted[itemID] and item.root then item.root:Hide() end
+            if not wanted[itemID] and item.root and not self:IsItemVisualRetiring(itemID) then item.root:Hide() end
         end
         local layoutStyle = {}
         for key, value in pairs(type(layout) == "table" and layout or {}) do layoutStyle[key] = value end
@@ -906,6 +911,7 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
     function collection:ReleaseItem(itemID)
         local item = self.itemsByID[itemID]
         if not item then return end
+        self:StopItemVisualAnimation(itemID)
         self.itemsByID[itemID] = nil
         self.geometryRevision = (self.geometryRevision or 0) + 1
         EXUI:ReleaseCollectionItemClick(item)
@@ -943,6 +949,7 @@ local function CreateCollection(parent, interactionMode, moduleKey, callbacks, s
     function collection:SetItemClickAction(itemID, spec)
         local item = self.itemsByID[itemID]
         if not item or not item.root then return false end
+        if self:IsItemVisualRetiring(itemID) then return false end
         return EXUI:ApplyCollectionItemClick(item, spec)
     end
 

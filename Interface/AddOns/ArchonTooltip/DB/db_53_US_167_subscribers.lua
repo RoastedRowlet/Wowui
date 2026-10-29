@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Priest-Holy','Priest-Discipline',}
-local provider = {region='US',realm="Ner'zhul",name='US',type='subscribers',zone=53,date='2026-10-20',data={Ca='Calystalyn:BAECNQAFFH8QAAIBAAYKSBJMDwCeAQaODQAABQBbAHUNAAACAAwAfw0AAAEAHACpDQAABABGAFwNAAABABMAMw0AAAMAOgABAAYKSBJMDwCeAQaODQAABQBbAHUNAAACAAwAfw0AAAEAHACpDQAABABGAFwNAAABABMAMw0AAAMAOgA1AAQKfyQAAwEACgrtHRYqAMECAAEACgqEHRYqAMECAAIABwoWGHoKAKABAAAA.',De='Derpindot:BAEANQAECgUIBAAAAA==.',},}
+local lookup = {'Unknown-Unknown','Priest-Holy','Priest-Discipline',}
+local provider = {region='US',realm="Ner'zhul",name='US',type='subscribers',zone=53,date='2026-10-27',data={Be='Behr:BAEANQAECgMIAgABNQAECgUIBAABAAAAAA==.',Ca='Calystalyn:BAECNQAFFH8QAAICAAYKSBJMDwCeAQaODQAABQBbAHUNAAACAAwAfw0AAAEAHACpDQAABABGAFwNAAABABMAMw0AAAMAOgACAAYKSBJMDwCeAQaODQAABQBbAHUNAAACAAwAfw0AAAEAHACpDQAABABGAFwNAAABABMAMw0AAAMAOgA1AAQKfyQAAwIACgrtHRYqAMECAAIACgqEHRYqAMECAAMABwoWGHoKAKABAAAA.',De='Derpindot:BAEANQAECgUIBAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

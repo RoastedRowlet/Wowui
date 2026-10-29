@@ -23,10 +23,6 @@ local RefreshActiveSurfaces
 -- 一、模块标识与依赖引用 | Module Identity and Dependencies
 -- =========================================================
 local MODULE_SPEC = {
-    RefreshActiveSurfaces = function(controller, changedPath, phase)
-        return RefreshActiveSurfaces(controller, changedPath,
-            phase)
-    end,
     moduleKey = MODULE_KEY,
     kind = "text",
     version = 1,
@@ -95,37 +91,36 @@ local MODULE_SPEC = {
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings", id = "common", title = L["通用设置"],
-                items = {
-                    { key = "enabled", label = L["启用计时器"], type = "switch" },
-                    { key = "resetOnBoss", label = L["首领重置"], type = "switch" },
-                    { key = "hideOutOfCombat", label = L["脱战隐藏"], type = "switch" },
-                    { key = "keepTimeOnLeaveCombat", label = L["脱战停表"], type = "switch" },
-                    { key = "leftText", label = L["前缀文字 (左)"], type = "input" },
-                    { key = "rightText", label = L["后缀文字 (右)"], type = "input" },
-                },
-            },
-            {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchorGroup", parentKey = "font_text",
-            },
-            {
-                kind = "composite", id = "font_text", title = L["字体与整体位置"],
-                component = "fontgroup", key = "font_text",
-            },
+        version = 2,
+        cards = {
+            { id = "card.common", kind = "card", title = L["通用设置"], children = {
+                { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用计时器"] },
+                { id = "resetOnBoss", kind = "control", controlType = "switch", path = "resetOnBoss", label = L["首领重置"] },
+                { id = "hideOutOfCombat", kind = "control", controlType = "switch", path = "hideOutOfCombat", label = L["脱战隐藏"] },
+                { id = "keepTimeOnLeaveCombat", kind = "control", controlType = "switch", path = "keepTimeOnLeaveCombat", label = L["脱战停表"] },
+                { id = "leftText", kind = "control", controlType = "input", path = "leftText", label = L["前缀文字 (左)"] },
+                { id = "rightText", kind = "control", controlType = "input", path = "rightText", label = L["后缀文字 (右)"] }
+            } },
+            { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
+                { id = "anchorGroup", kind = "component", component = "anchorgroup", path = "font_text.anchorGroup", optionsRef = "anchor" }
+            } },
+            { id = "card.font_text", kind = "card", title = L["字体与整体位置"], children = {
+                { id = "font_text", kind = "component", component = "fontgroup", path = "font_text" }
+            } }
         },
     },
 }
+-- EXUI_STANDARD_DECLARATION_END
+
+MODULE_SPEC.RefreshActiveSurfaces = function(controller, changedPath, phase)
+    return RefreshActiveSurfaces(controller, changedPath, phase)
+end
 
 ExwindTools:DeclareModuleSpecDefaults(MODULE_KEY, MODULE_SPEC.defaults)
 local DB = ExwindTools:GetModuleDB(MODULE_KEY)
 local central = EXUI:RegisterTextModule(MODULE_SPEC)
 local LAYOUT = DB.layout
 if not ExwindTools:IsModuleEnabled(MODULE_KEY) then return end
--- EXUI_STANDARD_DECLARATION_END
 
 -- =========================================================
 -- 五、业务状态与功能逻辑 | Business State and Logic
@@ -220,9 +215,8 @@ local function RefreshVisuals()
 end
 
 RefreshActiveSurfaces = function(controller, changedPath, phase)
-    -- enabled changes the existence of the runtime text itself: when disabled
-    -- it has been released, so a reapply-only pass cannot make it visible.
-    if changedPath == "enabled" and phase == "committed" then
+    -- Visibility switches can create or release the runtime text itself.
+    if (changedPath == "enabled" or changedPath == "hideOutOfCombat") and phase == "committed" then
         RefreshVisuals()
         return false
     end

@@ -24,23 +24,42 @@ local encounterTtsExecutionGuards = {
 	[2067] = function(unit) -- Viceroy Nezhar, Seat of the Triumvirate
 		return UnitLevel(unit) == 90
 	end,
-	[3457] = function(unit) -- The Writhing Coil, Altar of Fangs
+	[3457] = function(unit)      -- The Writhing Coil, Altar of Fangs
 		return not UnitIsBossMob(unit) -- ignores casts by the intermission adds
-	end
-	,
-	[2127] = function(unit) -- Avatar of Sethraliss, Temple of Sethraliss
+	end,
+
+	[2127] = function(unit)      -- Avatar of Sethraliss, Temple of Sethraliss
 		return not UnitIsBossMob(unit) -- ignores casts by the intermission adds
 	end
 }
 
----@param unit string
----@param activeEncounterId number
----@return boolean
-local function EncounterPreventsTTSExecution(unit, activeEncounterId)
-	local fn = encounterTtsExecutionGuards[activeEncounterId]
+---@type table<number, fun(info: SpellCastInfo, seenEncounterIds: table<number, true>): boolean>
+local challengeModeTtsExecutionGuards = {
+	[2813] = function(info, seenEncounterIds)             -- Murder Row
+		return info.isChannel and next(seenEncounterIds) == nil -- ignores channels before the first boss
+	end,
+}
 
-	if fn then
-		return fn(unit)
+---@param info SpellCastInfo
+---@param encounterState TargetedSpellsEncounterState
+---@return boolean
+local function SituationPreventsTTSExecution(info, encounterState)
+	if encounterState.activeEncounterId ~= nil then
+		local encounterGuard = encounterTtsExecutionGuards[encounterState.activeEncounterId]
+
+		if encounterGuard then
+			return encounterGuard(info.unit)
+		end
+	end
+
+	if encounterState.challengeModeMapId ~= nil then
+		local challengeModeGuard = challengeModeTtsExecutionGuards[encounterState.challengeModeMapId]
+
+		if challengeModeGuard then
+			local result = challengeModeGuard(info, encounterState.seenEncounterIds)
+
+			return result
+		end
 	end
 
 	return false
@@ -68,23 +87,21 @@ local function UnitMatchesTTSCriteria(unit)
 	return settings[Private.Enum.NpcType.Other]
 end
 
-function Private.TextToSpeechUtil.MaybeAnnounceSpell(info, contentType, activeEncounterId)
+function Private.TextToSpeechUtil.MaybeAnnounceSpell(info, contentType, encounterState)
 	if
 	-- Suppress open-world announcements outside combat.
 		(contentType == Private.Enum.ContentType.OpenWorld and (not InCombatLockdown() or not UnitAffectingCombat(
 			info.unit
 		)))
-		or EncounterPreventsTTSExecution(info.unit, activeEncounterId)
+		or SituationPreventsTTSExecution(info, encounterState)
+		or not UnitMatchesTTSCriteria(info.unit)
 	then
 		return
 	end
 
 	local now = GetTime()
 
-	if
-		announcementCache[info.unit] ~= nil and now - announcementCache[info.unit] < 3
-		or not UnitMatchesTTSCriteria(info.unit)
-	then
+	if announcementCache[info.unit] ~= nil and now - announcementCache[info.unit] < 3 then
 		return
 	end
 
@@ -99,6 +116,7 @@ function Private.TextToSpeechUtil.MaybeAnnounceSpell(info, contentType, activeEn
 	local configuredVoice = TargetedSpellsSaved.TextToSpeech.TextToSpeechVoice
 	local voiceId = configuredVoice ~= nil and configuredVoice > -1 and configuredVoice
 		or C_TTSSettings.GetVoiceOptionID(Enum.TtsVoiceType.Standard)
+
 
 	C_VoiceChat.SpeakText(voiceId, spellName, 2, C_TTSSettings.GetSpeechVolume(), true)
 end

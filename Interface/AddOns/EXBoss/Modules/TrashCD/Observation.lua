@@ -99,11 +99,8 @@ local function NormalizeNameplateUnit(unit)
 end
 
 local function NormalizeCastBarID(castBarID)
-    local id = tonumber(castBarID)
-    if id and id >= 0 then
-        return id
-    end
-    return nil
+    -- UnitCastBarID is an opaque, non-secret identifier scoped to a unit token.
+    return castBarID
 end
 
 local function SafeUnitHasVisibleChannelCastBarID(unit)
@@ -160,7 +157,7 @@ local function ActiveCastMatches(runtime, castBarID)
     if activeID ~= nil and eventID ~= nil then
         return activeID == eventID
     end
-    return activeID == nil and eventID == nil
+    return false
 end
 
 local function SafeUnitTargetTokenExists(unit)
@@ -242,6 +239,7 @@ local function ResetRuntimeObservedCastOrder(runtime)
     if type(runtime) ~= "table" then
         return
     end
+    runtime.recentFinishedCast = nil
     runtime.observedOpeningCastCount = nil
     runtime.activeCastObservedOrder = nil
 end
@@ -821,7 +819,6 @@ function Mod.BeginRuntimeCast(state, unit, kind, castBarID, combatConfirmed)
     local nextKind = tostring(kind or "cast")
 
     local nextCastBarID = NormalizeCastBarID(castBarID)
-    local activeCastBarID = NormalizeCastBarID(runtime.activeCastBarID)
     local activeKind = tostring(runtime.activeCastKind or "")
     if runtime.activeCastStartAt
         and activeKind == nextKind
@@ -842,35 +839,41 @@ function Mod.BeginRuntimeCast(state, unit, kind, castBarID, combatConfirmed)
         and nextCastBarID ~= nil
         and not ActiveCastMatches(runtime, nextCastBarID)
     if isInterruptibleChannelRefresh then
+        local previousID = runtime.activeCastBarID
         runtime.activeCastBarID = nextCastBarID
+        ExBoss.Timeline.Scheduler:UpdateTrashObservedCastBarID(runtime, previousID)
         runtime.channelRefreshOnInterruptibleAt = nil
         runtime.channelRefreshOnInterruptibleCastBarID = nil
         runtime.channelRefreshOnInterruptibleSeq = nil
         return false
     end
 
-    local isCastIntoChannel = nextKind == "channel"
-        and activeCastBarID ~= nil
-        and nextCastBarID ~= nil
-        and nextCastBarID == (activeCastBarID + 1)
+    local calibration = ExBoss.TrashCD.Calibration
+    local previous = runtime.activeCastStartAt and runtime or runtime.recentFinishedCast
+    local transitionSpell = nextKind == "channel" and nextCastBarID ~= nil
+        and calibration.ResolveCastChannelSpell(runtime, previous, now) or nil
+    local isCastIntoChannel = transitionSpell ~= nil
+    runtime.recentFinishedCast = nil
     if not isCastIntoChannel
         and runtime.activeCastStartAt ~= nil
         and (runtime.pendingSucceeded == true or runtime.pendingInterrupted == true) then
         QueuePendingCastSnapshot(runtime, "begin-overwrite")
     end
-    local carriedSpellID = isCastIntoChannel and runtime.activeSpellID or nil
-    local carriedSpellAmbiguous = isCastIntoChannel and runtime.activeSpellAmbiguous or nil
-    local carriedSpellPredictedAt = isCastIntoChannel and runtime.activeSpellPredictedAt or nil
-    local carriedSpellAnchorAt = isCastIntoChannel and runtime.activeSpellAnchorAt or nil
-    local carriedSpellNextSeqIndex = isCastIntoChannel and runtime.activeSpellNextSeqIndex or nil
-    local carriedObservedOrder = isCastIntoChannel and tonumber(runtime.activeCastObservedOrder) or nil
+    local carriedSpellID = isCastIntoChannel and transitionSpell.spellID or nil
+    local carriedSpellAmbiguous = isCastIntoChannel and previous.activeSpellAmbiguous or nil
+    local carriedSpellPredictedAt = isCastIntoChannel and previous.activeSpellPredictedAt or nil
+    local carriedSpellAnchorAt = isCastIntoChannel and previous.activeSpellAnchorAt or nil
+    local carriedSpellNextSeqIndex = isCastIntoChannel and previous.activeSpellNextSeqIndex or nil
+    local carriedObservedOrder = isCastIntoChannel and tonumber(previous.activeCastObservedOrder) or nil
 
-    if isCastIntoChannel
-        and runtime.activeCastStartAt
-        and tostring(runtime.activeCastKind or "") == "cast"
-        and not runtime.pendingInterrupted then
-        runtime.transitionCastStartAt = tonumber(runtime.activeCastStartAt)
-        runtime.transitionCastBarID = activeCastBarID
+    runtime.transitionCastStartAt = nil
+    runtime.transitionCastBarID = nil
+    runtime.transitionCastKind = nil
+    runtime.transitionIntoKind = nil
+    if isCastIntoChannel then
+        EmitTrashCastBarStop(runtime, "cast", previous.activeCastBarID, previous.activeCastSeq)
+        runtime.transitionCastStartAt = tonumber(previous.activeCastStartAt)
+        runtime.transitionCastBarID = previous.activeCastBarID
         runtime.transitionCastKind = "cast"
         runtime.transitionIntoKind = nextKind
         MarkBehavior(runtime, "cast_into_channel", now)
@@ -1008,6 +1011,7 @@ function Mod.MarkRuntimeCastStop(state, unit, castBarID)
         runtime.pendingSucceeded = true
         runtime.pendingSucceededAt = GetTime()
         runtime.pendingBehavior = "cast_success"
+        runtime.recentFinishedCast = CapturePendingCastSnapshot(runtime)
         runtime.scheduleDirty = true
         EmitTrashCastBarStop(runtime, "cast", castBarID, runtime.activeCastSeq)
     end
@@ -1018,14 +1022,16 @@ function Mod.MarkRuntimeInterrupted(state, unit, castBarID)
     if not runtime then
         return
     end
+    if runtime.recentFinishedCast and castBarID ~= nil
+        and runtime.recentFinishedCast.activeCastBarID == castBarID then
+        runtime.recentFinishedCast = nil
+    end
     if ActiveCastMatches(runtime, castBarID) then
         local activeKind = tostring(runtime.activeCastKind or "")
         runtime.pendingInterrupted = true
         runtime.pendingInterruptedAt = GetTime()
         runtime.pendingBehavior = ResolveResultKind(activeKind, false)
-        if activeKind == "cast" then
-            EmitTrashCastBarStop(runtime, activeKind, castBarID, runtime.activeCastSeq)
-        end
+        EmitTrashCastBarStop(runtime, activeKind, castBarID, runtime.activeCastSeq)
     else
         MarkBehavior(runtime, "cast_interrupted", GetTime())
     end
@@ -1056,7 +1062,8 @@ function Mod.MarkRuntimeChannelStop(state, unit, castBarID, interruptedBy)
     if not runtime then
         return
     end
-    if ActiveCastMatches(runtime, castBarID) then
+    if runtime.activeCastKind == "channel" and ActiveCastMatches(runtime, castBarID) then
+        EmitTrashCastBarStop(runtime, "channel", castBarID, runtime.activeCastSeq)
         if interruptedBy ~= nil then
             runtime.pendingInterrupted = true
             runtime.pendingInterruptedAt = GetTime()
@@ -1079,6 +1086,7 @@ function Mod.ClearRuntimeActiveCast(state, unit, castBarID)
     if castBarID ~= nil and not ActiveCastMatches(runtime, castBarID) then
         return
     end
+    runtime.recentFinishedCast = nil
     runtime.activeCastKind = nil
     runtime.activeCastBarID = nil
     runtime.activeCastStartAt = nil

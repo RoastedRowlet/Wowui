@@ -1,4 +1,4 @@
-## Interface: 120007, 120100, 16001
+## Interface: 120105, 120107, 120200, 120205, 120207, 16001
 ## Title: Targeted Spells
 ## DefaultState: Enabled
 ## SavedVariables: TargetedSpellsSaved
@@ -6,7 +6,7 @@
 ## OptionalDeps: !!AddonLocale
 ## Category: Archon
 ## Notes: Highlights spells targeting the player and/or the party
-## Version: 4.0.4
+## Version: 4.1.0
 ## Author: Xephyris-Blackrock-EU
 
 ## X-Curse-Project-ID: 1418323
@@ -20,6 +20,7 @@ Libs\LibSharedMedia-3.0\lib.xml
 Templates\TargetedSpellsFrameTemplate.xml
 Templates\TargetedSpellsBarFrameTemplate.xml
 Templates\TargetedSpellsIconDurationFrameTemplate.xml
+Templates\TargetedSpellsPixelGlowTemplate.xml
 
 Enum.lua
 Init.lua

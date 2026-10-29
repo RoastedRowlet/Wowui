@@ -1,7 +1,7 @@
-## Interface: 120100
+## Interface: 120105
 ## Title: Silvermoon Lap Counter
 ## Notes: Counts laps around Silvermoon City (Midnight) using 4 checkpoints
-## Author: Silvermoon Runner
+## Author: Comag-Malfurion (Have Fun)
 ## Version: 1.0.0
 ## SavedVariables: SilvermoonLapCounterDB
 

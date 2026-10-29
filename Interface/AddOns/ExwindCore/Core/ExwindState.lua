@@ -35,6 +35,7 @@
     - ClassName (string)
     - SpecID (number)
     - SpecName (string)
+    - HeroSpecID (number, 当前英雄天赋 SubTreeID，未激活为 0)
     - RoleKey (string: tank/heal/dps/unknown)
     - RoleName (string)
     - DevMode (boolean)
@@ -58,6 +59,10 @@
     - ShadowmeldAvailable (boolean)
     - ShadowmeldCD (boolean)
     - ShadowmeldExpiration (number)
+    - GameVersion, GameBuild (string), GameInterface (number)
+    - ClientLocale (string), RegionID (number), RegionName (string)
+    - AddonVersions (table: ExwindCore/ExwindTools/EXBoss/EXAura → 版本号，未加载不出现)
+    - LoadedAddOns (table: 已加载插件名 → TOC Version，没写为空串)
 --]]
 
 local ExwindTools = _G.ExwindTools
@@ -129,6 +134,7 @@ ExwindTools.State = {
     ClassName = L["未知"],
     SpecID = 0,
     SpecName = L["未知"],
+    HeroSpecID = 0,
     RoleKey = "unknown",
     RoleName = L["未知职责"],
     Level = 0,
@@ -170,6 +176,16 @@ ExwindTools.State = {
     ShadowmeldAvailable = false,
     ShadowmeldCD = false,
     ShadowmeldExpiration = 0,
+
+    -- 客户端与插件环境（/exbug 整张导出 State，客服据此判断版本和第三方插件）
+    GameVersion = "",
+    GameBuild = "",
+    GameInterface = 0,
+    ClientLocale = "",
+    RegionID = 0,
+    RegionName = "",
+    AddonVersions = {},
+    LoadedAddOns = {},
 }
 
 
@@ -1081,10 +1097,52 @@ end
 --========================== 状态采集初始化 =============================
 --=======================================================================
 
+--=======================================================================
+--======================== 客户端与插件环境 =============================
+--=======================================================================
+-- 版本号来源与打包流程一致：Core 与 Tools 共用打包脚本写入的 ExwindTools_MetaData，
+-- EXBoss 用 ExBoss_MetaData，EXAura 还没有打包生成的版本号，只能读 TOC。
+local ADDON_VERSION_SOURCES = {
+    ExwindCore = function() return ExwindTools_MetaData and ExwindTools_MetaData.version end,
+    ExwindTools = function() return ExwindTools_MetaData and ExwindTools_MetaData.version end,
+    EXBoss = function() return ExBoss_MetaData and ExBoss_MetaData.version end,
+    EXAura = function() return C_AddOns.GetAddOnMetadata("EXAura", "Version") end,
+}
+
+local function RefreshClientState()
+    local version, build, _, interface = GetBuildInfo()
+    ExwindTools:UpdateState("GameVersion", version or "")
+    ExwindTools:UpdateState("GameBuild", build or "")
+    ExwindTools:UpdateState("GameInterface", interface or 0)
+    ExwindTools:UpdateState("ClientLocale", GetLocale() or "")
+    ExwindTools:UpdateState("RegionID", GetCurrentRegion() or 0)
+    ExwindTools:UpdateState("RegionName", GetCurrentRegionName() or "")
+end
+
+local function RefreshAddOnState()
+    local loaded = {}
+    for index = 1, C_AddOns.GetNumAddOns() do
+        if C_AddOns.IsAddOnLoaded(index) then
+            local name = C_AddOns.GetAddOnInfo(index)
+            loaded[name] = C_AddOns.GetAddOnMetadata(index, "Version") or ""
+        end
+    end
+    local versions = {}
+    for addonName, source in pairs(ADDON_VERSION_SOURCES) do
+        if loaded[addonName] then versions[addonName] = source() or "" end
+    end
+    ExwindTools:UpdateState("LoadedAddOns", loaded)
+    ExwindTools:UpdateState("AddonVersions", versions)
+end
+
 local function InitializeStateMonitors()
     local OWNER = "ExwindState"
 
     RefreshUIReplacementState()
+    RefreshClientState()
+    RefreshAddOnState()
+    -- 登录后按需加载的插件（编辑器、语言包等）也补进清单
+    ExwindTools:RegisterEvent("ADDON_LOADED", OWNER .. "_AddOns", RefreshAddOnState)
     ExwindTools:RegisterEvent("ADDON_LOADED", OWNER .. "_UIReplacement", function(_, addonName)
         if addonName == "ElvUI" or addonName == "NDui" or addonName == "EllesmereUI" then
             RefreshUIReplacementState()
@@ -1370,6 +1428,7 @@ local function InitializeStateMonitors()
         ExwindTools:UpdateState("ClassName", className)
         ExwindTools:UpdateState("SpecID", specID or 0)
         ExwindTools:UpdateState("SpecName", specName)
+        ExwindTools:UpdateState("HeroSpecID", C_ClassTalents.GetActiveHeroTalentSpec() or 0)
         ExwindTools:UpdateState("RoleKey", roleKey)
         ExwindTools:UpdateState("RoleName", roleName)
         ExwindTools:UpdateState("Level", UnitLevel("player") or 0)
@@ -1381,8 +1440,8 @@ local function InitializeStateMonitors()
         end
     end
 
-    local function ScheduleSpecInfoUpdate(_, unit)
-        if unit and unit ~= "player" then
+    local function ScheduleSpecInfoUpdate(event, unit)
+        if event == "PLAYER_SPECIALIZATION_CHANGED" and unit and unit ~= "player" then
             return
         end
 

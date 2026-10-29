@@ -262,9 +262,8 @@ Addon.icons = {
 	};
 	--]]
 	{
-		-- Raid: Midnight Season 2
-		{8039569, "Midnight Season 2"},
-		{3012069, "Nymrissa Wavecaller"},
+		-- Raid: Midnight Season 2-1
+		{8039569, "The Venomous Abyss", ""},
 		{7966621, "Nek'zali the Soulcoiler" },
 		{7966620, "Entombed Sentinels" },
 		{7966622, "The Lost Explorers" },
@@ -273,6 +272,11 @@ Addon.icons = {
 		{7966623, "The Twin Fangs" },
 		{7966625, "The Coiled Altar" },
 		{7966624, "Ula'tek" },
+	},
+	{
+		-- Raid: Midnight Season 2-2
+		{3012069, "Nymrissa Wavecaller", ""},
+		{8214194, "Kith'ix", ""},
 	},
 	-- #endregion
 };

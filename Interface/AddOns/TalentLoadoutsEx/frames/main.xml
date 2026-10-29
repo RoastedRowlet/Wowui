@@ -425,7 +425,7 @@
 							<Frame parentArray="PresetAddons" inherits="TalentLoadoutExPresetAddonFrameTemplate">
 								<Size x="100" y="180"/>
 								<KeyValues>
-									<KeyValue key="title" value="WoWCompare(PeaversTalentsData)"/>
+									<KeyValue key="title" value="parses.gg(PeaversTalentsData)"/>
 									<KeyValue key="addonName" value="PeaversTalentsData"/>
 								</KeyValues>
 								<Frames>

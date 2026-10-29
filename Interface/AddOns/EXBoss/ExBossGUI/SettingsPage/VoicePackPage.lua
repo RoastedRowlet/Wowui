@@ -7,7 +7,6 @@
 ExBoss.UI.Panel.VoicePackPage             = ExBoss.UI.Panel.VoicePackPage or {}
 local Page                                = ExBoss.UI.Panel.VoicePackPage
 local EXUI                                = _G.ExwindTools and _G.ExwindTools.UI
-local GC                                  = _G.ExwindTools and _G.ExwindTools.GUIColors
 local L                                   = (ExBoss and ExBoss.L) or
     setmetatable({}, { __index = function(_, k) return k end })
 
@@ -18,53 +17,7 @@ local RefreshPage                         = nil
 local UpdateConfigurationManagerButtonState = nil
 local DEFAULT_VOICE_PACK                  = "EXWIND(默认)"
 local ENGLISH_VOICE_PACK                  = "英文(ENG)"
-
--- ─── 帮助函数 ─────────────────────────────────────────────────
-
-local function Bg(parent, r, g, b, a)
-    local f = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-    f:SetBackdrop({
-        bgFile   = "Interface\\Buttons\\WHITE8X8",
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        edgeSize = 10,
-        insets   = { left = 2, right = 2, top = 2, bottom = 2 },
-    })
-    if r ~= nil and g ~= nil and b ~= nil then
-        f:SetBackdropColor(r, g, b, a or 0.92)
-    else
-        f:SetBackdropColor(unpack(GC.card))
-    end
-    f:SetBackdropBorderColor(unpack(GC.panelBorder))
-    return f
-end
-
-local function TopBar(parent, r, g, b)
-    local t = EXUI:CreateVisualTexture(parent, EXBORDERFRAME)
-    t:SetColorTexture(r, g, b, 0.95)
-    t:SetHeight(2)
-    t:SetPoint("TOPLEFT", parent, "TOPLEFT", 6, -6)
-    t:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -6, -6)
-    return t
-end
-
-local function Divider(parent, anchor, offY)
-    local t = EXUI:CreateVisualTexture(parent, EXBORDERFRAME)
-    t:SetHeight(1)
-    t:SetColorTexture(unpack(GC.popupDivider))
-    t:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, offY or -10)
-    t:SetPoint("TOPRIGHT", parent, "RIGHT", -16, 0)
-    return t
-end
-
-local function Chip(parent, r, g, b)
-    local chip = Bg(parent, r * 0.18, g * 0.18, b * 0.18, 0.88)
-    chip:SetBackdropBorderColor(r * 0.6, g * 0.6, b * 0.6, 0.90)
-    local fs = EXUI:CreateVisualFontString(chip, EXFONTFRAME, "GameFontNormalSmall")
-    fs:SetPoint("CENTER")
-    fs:SetTextColor(r, g, b)
-    chip.label = fs
-    return chip
-end
+local pageDraft                           = nil
 
 -- ─── DB / 语音包工具 ──────────────────────────────────────────
 
@@ -146,10 +99,8 @@ local function RefreshPackDropdownText()
         return
     end
     local g = EnsureDB()
-    packDropdown._currentValue = g.selectedVoicePack
-    if packDropdown.SetText then
-        packDropdown:SetText(g.selectedVoicePack or L["请选择..."])
-    end
+    if pageDraft then pageDraft.selectedVoicePack = g.selectedVoicePack end
+    EXUI:SetDropdownValue(packDropdown, g.selectedVoicePack)
 end
 
 local function FinalizePackSelection(g, packName)
@@ -309,7 +260,7 @@ local function BuildSpecItems()
     for specID, row in pairs(specs) do
         local id = tonumber(specID)
         if id and type(row) == "table" then
-            out[#out + 1] = { BuildSpecDisplayName(id), tostring(id) }
+            out[#out + 1] = { BuildSpecDisplayName(id), id }
         end
     end
     table.sort(out, function(a, b)
@@ -335,17 +286,14 @@ local function FindConfigurationRow(configurationRef)
 end
 
 local MODULE_KEY = "ExBoss.VoicePackPage"
-local GRID_COLS = 200
 local scrollFrame = nil
 local scrollChild = nil
 local missingDepsText = nil
 local pageSyncLock = false
-local pageLayoutData = nil
 local lastSyncedConfigurationRef = nil
 -- 这里的表只承载当前页面控件值/实体管理器的临时选中项。它绝不能使用
 -- ModuleDB：语音包、职责 Author 选择和 User 实体本身各有自己的 authority，
 -- 持久 ModuleDB 会在重新打开页面时拿旧镜像覆盖这些真实状态。
-local pageDraft = nil
 
 local function GetPageDBDefaults()
     return {
@@ -370,11 +318,6 @@ local function GetPageDB()
     return pageDraft
 end
 
-local function IsGridEditActive()
-    local Grid = _G.ExwindGrid
-    return Grid and Grid.IsLiveEditing == true and Grid.LiveContainer == scrollChild
-end
-
 local function ApplyStatusColor(text, ok, isError)
     local value = tostring(text or "")
     if value == "" then
@@ -389,7 +332,7 @@ local function ApplyStatusColor(text, ok, isError)
     return "|cffbfc8d6" .. value .. "|r"
 end
 
-local function BuildPackItemsForGrid()
+local function BuildPackItems()
     local items = {}
     local packs = GetVoicePacks()
     for i = 1, #packs do
@@ -446,7 +389,7 @@ local SLOT_ROWS = {
     { slot = "raid_heal", label = L["团本治疗"] },
 }
 
--- Grid controller notifications are module-wide. Keep a per-control snapshot
+-- Controller notifications are module-wide. Keep a per-control snapshot
 -- so changing one Author dropdown never replays the other five selections.
 local lastAuthorPresetValues = {}
 local lastAppearanceProfileID = ""
@@ -690,365 +633,291 @@ local function DeleteManagedConfiguration()
     })
 end
 
-local function FindLayoutEntry(items, key)
-    if type(items) == "table" and type(items.cards) == "table" then
-        for _, card in ipairs(items.cards) do
-            local found = FindLayoutEntry(card.content and card.content.items, key)
-            if found then return found end
-        end
-    end
-    if type(items) == "table" and type(items.sections) == "table" then
-        for i = 1, #items.sections do
-            local section = items.sections[i]
-            if section.id == key then return section end
-            if type(section.description) == "table" and section.description.key == key then return section.description end
-            if section.footerDescription and section.footerDescription.key == key then return section.footerDescription end
-            local found = FindLayoutEntry(section.items, key)
-            if found then return found end
-        end
-    end
-    for i = 1, #(items or {}) do
-        local item = items[i]
-        if type(item) == "table" then
-            if item.key == key then
-                return item
-            end
-            if type(item.description) == "table" and item.description.key == key then return item.description end
-            if type(item.children) == "table" then
-                local found = FindLayoutEntry(item.children, key)
-                if found then
-                    return found
-                end
-            end
-        end
-    end
-    return nil
-end
-
--- Choice and management cards share the existing draft; documentation is display-only.
+-- V2 owns the cards and rule table; the owner retains the transient selections.
 local DOCUMENTATION_URL = "https://exwind.net/exboss/config"
-local DOCUMENTATION_RENDERER = "ExBoss.VoicePackDocumentation"
+local cardSession
+local ruleRecords = {}
 
-local function RegisterDocumentationRenderer(Grid)
-    if Grid:GetCustomRenderer(DOCUMENTATION_RENDERER) then return end
-    Grid:RegisterCustomRenderer(DOCUMENTATION_RENDERER, {
-        mount = function(host)
-            local input = EXUI:CreateEditBox(host, DOCUMENTATION_URL, 280, 28, nil, {})
-            input:SetPoint("TOPLEFT", 0, 0)
-            input:SetPoint("TOPRIGHT", 0, 0)
-            local edit = input.editBox or input
-            edit:SetScript("OnTextChanged", function(self)
-                if self:GetText() ~= DOCUMENTATION_URL then
-                    self:SetText(DOCUMENTATION_URL)
-                    self:HighlightText()
-                end
-            end)
-            -- OnEditFocusGained 槽位上有 Core 的输入框画器（HookScript 挂的，与业务
-            -- 脚本同在一个 extrinsic 槽位），SetScript 会把它一起清掉。先走
-            -- ClearControlScript 丢掉该槽位的安装记录，写完业务脚本后再调一次
-            -- ApplyControlAppearance 把画器补回来；顺序不能颠倒。
-            EXUI:ClearControlScript(edit, "OnEditFocusGained")
-            edit:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
-            edit:SetScript("OnMouseUp", function(self) self:HighlightText() end)
-            EXUI:ApplyControlAppearance(input)
-            host.documentationInput = input
-        end,
-        layout = function() return 28 end,
-        release = function(host)
-            local input = host.documentationInput
-            if input then
-                local edit = input.editBox or input
-                -- 置 nil 的一支同样不能裸 SetScript：走 ClearControlScript 清槽位并
-                -- 丢掉画器安装记录，下一次借用时 CreateEditBox 会把画器重新装上。
-                EXUI:ClearControlScript(edit, "OnMouseUp")
-                EXUI:ClearControlScript(edit, "OnEditFocusGained")
-                edit:ClearFocus()
-                if input._fromPool and _G.ExwindFactory then
-                    _G.ExwindFactory:Release(input._fromPool, input)
-                else
-                    input:Hide()
-                    input:SetParent(nil)
-                end
-            end
-            host.documentationInput = nil
-        end,
-    })
+local function Options(items)
+    local options = {}
+    for _, item in ipairs(items) do
+        options[#options + 1] = { label = tostring(item[1] or ""), value = item[2] }
+    end
+    return options
 end
 
-local RULES_RENDERER = "ExBoss.SpecializationRules"
-local function RegisterRulesRenderer(Grid)
-    if Grid:GetCustomRenderer(RULES_RENDERER) then return end
-    local function Release(host)
-        if host.rulesForm then host.rulesForm:Release(); host.rulesForm = nil end
-        for _, control in ipairs(host.ruleControls or {}) do
-            if control._specRulePicker then control:Release()
-            elseif control._fromPool and _G.ExwindFactory then _G.ExwindFactory:Release(control._fromPool, control)
-            else control:Hide(); control:SetParent(nil) end
-        end
-        host.ruleControls = nil
+local function RefreshOptions(widget, items)
+    -- Keep the original list captured by the dropdown's text resolver.
+    local target = widget._items
+    for index = #target, 1, -1 do target[index] = nil end
+    for index, item in ipairs(items) do target[index] = item end
+end
+
+local function SelectionControl(key, label, itemsFor, bindingFor)
+    local adapter = EXUI:CreateSettingsV2Control({
+        controlType = "select", label = label, options = Options(itemsFor()), search = true,
+    }, bindingFor or function()
+        return EXUI:CreateSettingsV2Binding(MODULE_KEY, GetPageDB(), key)
+    end)
+    local update = adapter.update
+    adapter.update = function(widget, context)
+        RefreshOptions(widget, itemsFor())
+        update(widget, context)
     end
-    local function Mount(host)
+    return adapter
+end
+
+local function SyncRuleRecords()
+    local bossCfg = GetBossConfig()
+    local rows = bossCfg and bossCfg:GetSpecRules() or {}
+    if #rows ~= #ruleRecords then ruleRecords = {} end
+    for index, row in ipairs(rows) do
+        local record = ruleRecords[index] or {}
+        record.enabled, record.specID = row.enabled, row.specID
+        record.appearance, record.mplus, record.raid = row.appearance, row.mplus, row.raid
+        ruleRecords[index] = record
+    end
+end
+
+local function CompleteRuleChange(ok, reason, path)
+    if ok then
+        SyncRuleRecords()
+        EXUI:NotifyModuleValueChanged(MODULE_KEY, path, "committed")
+    end
+    C_Timer.After(0, function()
+        if Page._visible then SetStatus(ok and "" or tostring(reason), ok) end
+    end)
+    return ok
+end
+
+local function RuleBinding(context, field)
+    local scope = context.scope
+    local binding = EXUI:CreateSettingsV2Binding(MODULE_KEY, scope.item, field)
+    binding.path = "specRules." .. scope.index .. "." .. field
+    function binding:Write(value)
+        if not context:IsCurrent() or self:Read() == value then return false end
         local bossCfg = GetBossConfig()
-        host.ruleControls = {}
-        local function Keep(control, kind)
-            host.ruleControls[#host.ruleControls + 1] = control
-            return { widget = control, type = kind }
-        end
-        local function Complete(ok, reason)
-            -- SetStatus rebuilds the page; wait until the menu/click callback returns.
-            C_Timer.After(0, function()
-                if Page._visible then SetStatus(ok and "" or tostring(reason), ok) end
-            end)
-        end
-        local function Items(kind)
-            local options = { { kind == "appearance" and L["默认（依一般设置）"] or L["默认（依职责设置）"], "" } }
-            if kind == "appearance" then
-                for _, row in ipairs(BuildAppearanceProfileItems()) do options[#options + 1] = row end
-            else
-                for _, row in ipairs(bossCfg:GetAuthorConfigurationItems(kind)) do
-                    options[#options + 1] = { row.name or row.id, row.id }
-                end
-            end
-            return options
-        end
-        local records = {}
-        for i, rule in ipairs(bossCfg:GetSpecRules()) do
-            local index = i
-            local function Update(field, value) Complete(bossCfg:UpdateSpecRule(index, field, value)) end
-            local enabled = EXUI:CreateCheckbox(host, "", rule.enabled == true, function(v) Update("enabled", v) end)
-            local picker = EXUI:CreateSpecPicker(host, 190, rule.specID, function(v) Update("specID", v) end)
-            picker._specRulePicker = true
-            local cells = { Keep(enabled, "switch"), Keep(picker, "select") }
-            for _, kind in ipairs({ "appearance", "mplus", "raid" }) do
-                local field = kind
-                cells[#cells + 1] = Keep(EXUI:CreateDropdown(host, 170, nil, Items(field), rule[field] or "",
-                    function(value) Update(field, value) end), "select")
-            end
-            cells[#cells + 1] = Keep(EXUI:CreateButton(host, 80, 28, L["删除"], function()
-                Complete(bossCfg:DeleteSpecRule(index))
-            end, { variant = "danger", compact = true }), "button")
-            records[#records + 1] = { cells = cells }
-        end
-        local add = Keep(EXUI:CreateButton(host, 96, 28, L["新增规则"], function()
-            Complete(bossCfg:AddSpecRule())
-        end, { variant = "primary", compact = true }), "button")
-        host.rulesForm = Grid:MountSettingsForm(host, {
-            kind = "table", id = "specialization-rules", title = "", supportsAdd = true,
-            columns = { {title=L["启用"]}, {title=L["职业 / 专精"]}, {title=L["外观配置"]},
-                {title=L["大秘境"]}, {title=L["团本"]}, {title=L["操作"]} },
-            add = { cells = { {text=""}, {text=""}, {text=""}, {text=""}, {text=""}, add } },
-            records = records,
-        })
+        local ok, reason = bossCfg:UpdateSpecRule(scope.index, field, value)
+        CompleteRuleChange(ok, reason, self.path)
+        return ok
     end
-    Grid:RegisterCustomRenderer(RULES_RENDERER, {
-        mount = Mount,
-        update = function(host) Release(host); Mount(host) end,
-        layout = function(host, _, width) return host.rulesForm:Relayout(width) end,
-        release = Release,
-    })
+    return binding
 end
 
-local function BuildConfigurationLayout()
-    local function Card(id, title, placement, items)
-        local rows = {}
-        local actions
-        for index, item in ipairs(items) do
-            item.x, item.y, item.w, item.h = 1, index, 200, 1
-            item.measure = { preferredHeight = 28, minHeight = 28 }
-            if item.type == "select" then
-                item.items, item.originalOptions = item.originalOptions, nil
-            end
-            if item.type == "select" or item.type == "input" then
-                rows[#rows + 1] = { key = item.key, label = item.label }
-            elseif item.type == "button" then
-                if not actions then
-                    actions = { controls = {} }
-                    rows[#rows + 1] = actions
-                end
-                local width = item.key == "btn_copy_configuration" and 140
-                    or item.key == "btn_rename_configuration" and 100 or 80
-                actions.controls[#actions.controls + 1] = { key = item.key, width = width }
-            else
-                rows[#rows + 1] = { controls = { { key = item.key } } }
-            end
+local function RuleItems(kind)
+    local items = { { _G.ExwindTools.L["默认"], "" } }
+    if kind == "appearance" then
+        for _, item in ipairs(BuildAppearanceProfileItems()) do items[#items + 1] = item end
+    else
+        local bossCfg = GetBossConfig()
+        for _, row in ipairs(bossCfg and bossCfg:GetAuthorConfigurationItems(kind) or {}) do
+            items[#items + 1] = { row.name or row.id, row.id }
         end
-        return { id = id, title = title, placement = placement,
-            content = { kind = "grid", items = items },
-            settingsList = { title = title, preserveHeader = false, rows = rows } }
     end
-    local halfWidth = { ratio = 0.5, offset = -8 }
-    local choices = {
-        { key = "appearanceProfileID", type = "select", label = L["外观配置"], originalOptions = BuildAppearanceProfileItems(), search = true },
-        { key = "author_mplus_tank", type = "select", label = L["大秘境 · 坦克"], originalOptions = BuildAuthorPresetItems("mplus_tank"), search = true },
-        { key = "author_mplus_dps", type = "select", label = L["大秘境 · 输出"], originalOptions = BuildAuthorPresetItems("mplus_dps"), search = true },
-        { key = "author_mplus_heal", type = "select", label = L["大秘境 · 治疗"], originalOptions = BuildAuthorPresetItems("mplus_heal"), search = true },
-        { key = "author_raid_tank", type = "select", label = L["团本 · 坦克"], originalOptions = BuildAuthorPresetItems("raid_tank"), search = true },
-        { key = "author_raid_dps", type = "select", label = L["团本 · 输出"], originalOptions = BuildAuthorPresetItems("raid_dps"), search = true },
-        { key = "author_raid_heal", type = "select", label = L["团本 · 治疗"], originalOptions = BuildAuthorPresetItems("raid_heal"), search = true },
-        { key = "selectedVoicePack", type = "select", label = L["当前语音包"], originalOptions = BuildPackItemsForGrid(), search = true },
+    return items
+end
+
+local function BuildOwner()
+    local owner = {
+        binding = { moduleKey = MODULE_KEY, config = GetPageDB() },
+        controls = {},
+        actions = {
+            copy = CopyManagedConfiguration, rename = RenameManagedConfiguration, delete = DeleteManagedConfiguration,
+            addRule = function()
+                local ok, reason = GetBossConfig():AddSpecRule()
+                CompleteRuleChange(ok, reason, "specRules")
+            end,
+            deleteRule = function(context)
+                local ok, reason = GetBossConfig():DeleteSpecRule(context.scope.index)
+                CompleteRuleChange(ok, reason, "specRules")
+            end,
+        },
+        predicates = { canCopy = function()
+            return select(1, ParseConfigurationRef(GetPageDB().selectedConfiguration)) ~= "appearance"
+        end },
+        sources = { rules = function() return ruleRecords end },
+        onHeightChanged = function(height) scrollChild:SetHeight(height) end,
     }
-    local manager = {
-        { key = "selectedConfiguration", type = "select", label = L["选择配置"], originalOptions = BuildAllConfigurationItems(), search = true },
-        { key = "configurationName", type = "input", label = L["名称"] },
-        { key = "btn_copy_configuration", type = "button", label = L["复制为新配置"], variant = "primary", func = CopyManagedConfiguration },
-        { key = "btn_rename_configuration", type = "button", label = L["确认改名"], func = RenameManagedConfiguration },
-        { key = "btn_delete_configuration", type = "button", label = L["删除"], variant = "danger", func = DeleteManagedConfiguration },
-    }
-    return { version = 1, title = L["语音 / 配置"], settingsListWidthPercent = 100, cards = {
-        Card("active-configurations", L["配置与语音选择"], { target = "$container", point = "TOPLEFT", relativePoint = "TOPLEFT", width = halfWidth }, choices),
-        Card("configuration-manager", L["配置管理"], { target = "active-configurations", side = "right", align = "start", gap = 16, width = halfWidth }, manager),
-        Card("specialization-rules", L["专精自动选用"], { target = "active-configurations", side = "below", align = "start", gap = 16, width = {ratio=1} }, {
-            { key = "specialization_rules", type = "custom", renderer = RULES_RENDERER },
+    owner.controls.appearanceProfileID = SelectionControl("appearanceProfileID", L["外观配置"], BuildAppearanceProfileItems)
+    local labels = { L["大秘境 · 坦克"], L["大秘境 · 输出"], L["大秘境 · 治疗"],
+        L["团本 · 坦克"], L["团本 · 输出"], L["团本 · 治疗"] }
+    for index, row in ipairs(SLOT_ROWS) do
+        local slot = row.slot
+        local key = "author_" .. slot
+        owner.controls[key] = SelectionControl(key, labels[index], function() return BuildAuthorPresetItems(slot) end)
+    end
+    owner.controls.selectedVoicePack = SelectionControl("selectedVoicePack", L["当前语音包"], BuildPackItems)
+    owner.controls.selectedConfiguration = SelectionControl("selectedConfiguration", L["选择配置"], BuildAllConfigurationItems)
+    owner.controls.ruleEnabled = EXUI:CreateSettingsV2Control({ controlType = "checkbox", label = "" },
+        function(context) return RuleBinding(context, "enabled") end)
+    owner.controls.ruleSpec = SelectionControl("specID", nil, BuildSpecItems,
+        function(context) return RuleBinding(context, "specID") end)
+    owner.controls.documentation = EXUI:CreateSettingsV2Control({
+        controlType = "input", label = L["配置说明"], size = "wide",
+    }, function()
+        return {
+            Read = function() return DOCUMENTATION_URL end,
+            Write = function() return false end,
+        }
+    end)
+    local documentation = owner.controls.documentation
+    local mountDocumentation, releaseDocumentation = documentation.mount, documentation.release
+    documentation.mount = function(host, context)
+        local input = mountDocumentation(host, context)
+        local edit = input.editBox or input
+        edit:SetScript("OnTextChanged", function(self)
+            if self:GetText() ~= DOCUMENTATION_URL then
+                self:SetText(DOCUMENTATION_URL)
+                self:HighlightText()
+            end
+        end)
+        EXUI:ClearControlScript(edit, "OnEditFocusGained")
+        edit:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
+        edit:SetScript("OnMouseUp", function(self) self:HighlightText() end)
+        return input
+    end
+    documentation.release = function(input, context)
+        local edit = input.editBox or input
+        EXUI:ClearControlScript(edit, "OnMouseUp")
+        EXUI:ClearControlScript(edit, "OnEditFocusGained")
+        EXUI:ClearControlScript(edit, "OnTextChanged")
+        releaseDocumentation(input, context)
+    end
+    for _, kind in ipairs({ "appearance", "mplus", "raid" }) do
+        local field = kind
+        owner.controls["rule_" .. field] = SelectionControl(field, nil,
+            function() return RuleItems(field) end, function(context) return RuleBinding(context, field) end)
+    end
+    return owner
+end
+
+local function Control(id)
+    return { id = id, kind = "control", controlType = "select", ref = id }
+end
+
+local function BuildDeclaration()
+    local choices = { Control("appearanceProfileID") }
+    for _, row in ipairs(SLOT_ROWS) do choices[#choices + 1] = Control("author_" .. row.slot) end
+    choices[#choices + 1] = Control("selectedVoicePack")
+    local columns, cells = {}, {}
+    local titles = { L["启用"], L["职业 / 专精"], L["外观配置"], L["大秘境"], L["团本"] }
+    local refs = { "ruleEnabled", "ruleSpec", "rule_appearance", "rule_mplus", "rule_raid" }
+    for index, title in ipairs(titles) do
+        columns[index] = { title = title }
+        cells[index] = { id = "rules_cell_" .. index, kind = "cell", children = {
+            { id = "rule_value_" .. index, kind = "control", ref = refs[index],
+                controlType = index == 1 and "checkbox" or "select" },
+        } }
+    end
+    local function Card(id, title, row, column, span, children)
+        return { id = id, kind = "card", title = title, row = row, column = column, span = span, children = children }
+    end
+    return { version = 2, layout = "grid", columns = { { weight = 1 }, { weight = 1 } }, cards = {
+        Card("active-configurations", L["配置与语音选择"], 1, 1, 1, choices),
+        Card("configuration-manager", L["配置管理"], 1, 2, 1, {
+            Control("selectedConfiguration"),
+            { id = "configurationName", kind = "control", controlType = "input", path = "configurationName", label = L["名称"] },
+            { id = "configuration_actions", kind = "setting", label = L["操作"], children = {
+                { id = "btn_copy_configuration", kind = "button", text = L["复制为新配置"], action = "copy", presentation = "primary", enabled = "canCopy" },
+                { id = "btn_rename_configuration", kind = "button", text = L["确认改名"], action = "rename" },
+                { id = "btn_delete_configuration", kind = "button", text = L["删除"], action = "delete", presentation = "danger" },
+            } },
         }),
-        Card("configuration-documentation", L["配置说明"], { target = "configuration-manager", side = "below", align = "end", gap = 16, width = halfWidth }, {
-            { key = "config_documentation", type = "custom", renderer = DOCUMENTATION_RENDERER },
+        Card("specialization-rules", L["专精自动选用"], 3, 1, 2, {
+            { id = "rules_table", kind = "table", columns = columns,
+                addAction = { id = "rule_add", text = L["新增规则"], action = "addRule" },
+                rowActions = {
+                    { id = "rule_delete", text = L["删除"], action = "deleteRule", presentation = "danger" },
+                }, children = {
+                    { id = "specialization_rules", kind = "repeat", source = "rules", template = {
+                        id = "rule_row", kind = "row", children = cells,
+                    } },
+                },
+            },
+        }),
+        Card("configuration-documentation", L["配置说明"], 2, 2, 1, {
+            { id = "config_documentation", kind = "control", controlType = "input", ref = "documentation" },
         }),
     } }
 end
 
-local function BuildLayout()
-    return BuildConfigurationLayout()
+local function FindControl(key)
+    local page = EXUI:GetModulePage(MODULE_KEY, scrollChild)
+    return page and page:Find(key)
 end
 
-local function UpdateLayoutData(layout)
-    if type(layout) ~= "table" then
-        return
+local function ReleaseCards()
+    packDropdown = nil
+    if cardSession then
+        cardSession:Release()
+        cardSession = nil
+        scrollChild._exV2Session, scrollChild._exV2Owner = nil, nil
     end
-
-    local updates = {
-        selectedVoicePack = { items = BuildPackItemsForGrid() },
-        appearanceProfileID = { items = BuildAppearanceProfileItems() },
-        author_mplus_tank = { items = BuildAuthorPresetItems("mplus_tank") },
-        author_mplus_dps = { items = BuildAuthorPresetItems("mplus_dps") },
-        author_mplus_heal = { items = BuildAuthorPresetItems("mplus_heal") },
-        author_raid_tank = { items = BuildAuthorPresetItems("raid_tank") },
-        author_raid_dps = { items = BuildAuthorPresetItems("raid_dps") },
-        author_raid_heal = { items = BuildAuthorPresetItems("raid_heal") },
-    }
-
-    for key, fields in pairs(updates) do
-        local item = FindLayoutEntry(layout, key)
-        if item then
-            for field, value in pairs(fields) do
-                item[field] = value
-            end
-        end
+    ruleRecords = {}
+    if EXUI.ActivePageFrame == scrollChild then
+        EXUI.ActivePageFrame = nil
+        if EXUI.CurrentModule == MODULE_KEY then EXUI.CurrentModule = nil end
     end
+    if EXUI.ActivePageScrollFrame == scrollFrame then EXUI.ActivePageScrollFrame = nil end
 end
 
-local function GetOrBuildLayout()
-    -- 专精规则与配置卡片数量会动态变化，每次刷新重新生成布局。
-    pageLayoutData = BuildLayout()
-    UpdateLayoutData(pageLayoutData)
-    return pageLayoutData
-end
-
--- [混合函数边界] RenderGrid 内只可调整 Scroll/Grid 几何；动态重建布局、RegisterModuleLayout、编辑状态和延迟 guard 禁止修改。
-local function RenderGrid(contentFrame, resetScroll)
-    local Grid = _G.ExwindGrid
-    if not Grid then
-        return
-    end
-
-    RegisterDocumentationRenderer(Grid)
-    RegisterRulesRenderer(Grid)
-    local layout = GetOrBuildLayout()
-    ExwindTools:RegisterModuleLayout(MODULE_KEY, layout)
-
+local function RenderV2(contentFrame, resetScroll)
     if not scrollFrame then
         scrollFrame = CreateFrame("ScrollFrame", nil, contentFrame, "ScrollFrameTemplate")
-        if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then
-            ExBoss.UI.ApplyModernScrollBarSkin(scrollFrame)
-        end
+        if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then ExBoss.UI.ApplyModernScrollBarSkin(scrollFrame) end
         scrollChild = CreateFrame("Frame", nil, scrollFrame)
         scrollChild:SetHeight(1)
         scrollFrame:SetScrollChild(scrollChild)
         root = scrollFrame
     end
-
-    missingDepsText = nil
     scrollFrame:SetParent(contentFrame)
     scrollFrame:ClearAllPoints()
     scrollFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -4)
     scrollFrame:SetPoint("BOTTOMRIGHT", contentFrame, "BOTTOMRIGHT", -18, 4)
-    if resetScroll == true then
-        scrollFrame:SetVerticalScroll(0)
-    end
+    if resetScroll then scrollFrame:SetVerticalScroll(0) end
     scrollFrame:Show()
-
+    Page._mountGeneration = (Page._mountGeneration or 0) + 1
+    local generation = Page._mountGeneration
     C_Timer.After(0, function()
-        if Page._visible ~= true or not (scrollFrame and scrollFrame:IsShown() and scrollChild) then
-            return
-        end
+        if Page._visible ~= true or generation ~= Page._mountGeneration then return end
         local width = contentFrame:GetWidth()
-        if width < 100 then
-            width = 1160
-        end
+        if width < 100 then width = 1160 end
         scrollChild:SetWidth(width - 16)
-        scrollChild:SetHeight(1)
-        scrollChild:SetParent(scrollFrame)
         scrollChild:ClearAllPoints()
-        scrollChild:SetPoint("TOPLEFT", 0, 0)
+        scrollChild:SetPoint("TOPLEFT")
         scrollChild:Show()
-        if ExwindTools.UI then
-            ExwindTools.UI.ActivePageFrame = scrollChild
-            ExwindTools.UI.CurrentModule = MODULE_KEY
+        EXUI.ActivePageFrame, EXUI.CurrentModule = scrollChild, MODULE_KEY
+        EXUI.ActivePageScrollFrame = scrollFrame
+        if not cardSession then
+            local owner = BuildOwner()
+            local session, issue = EXUI:MountSettingsDeclarationV2(scrollChild, BuildDeclaration(), owner)
+            if not session then error(issue.path .. ": " .. issue.message) end
+            cardSession = session
+            scrollChild._exV2Session, scrollChild._exV2Owner = session, owner
+            packDropdown = FindControl("selectedVoicePack")
+        else
+            cardSession:Refresh()
         end
-        if Page._cardSession and type(Page._cardSession.Release) == "function" then
-            Page._cardSession:Release()
-            Page._cardSession = nil
-        end
-        Page._cardSession = Grid:MountCards(scrollChild, layout, {
-            pageId = MODULE_KEY,
-            regionId = "voice-pack",
-            config = GetPageDB(),
-            moduleKey = MODULE_KEY,
-            scrollFrame = scrollFrame,
-        })
-        UpdateConfigurationManagerButtonState(Grid)
+        cardSession:Layout()
+        UpdateConfigurationManagerButtonState()
     end)
 end
 
-UpdateConfigurationManagerButtonState = function(Grid)
-    if not (Grid and Grid.FindMountedWidget and scrollChild) then
-        return
-    end
-    -- Keep these controls clickable.  The action itself validates whether the
-    -- selected Author was imported and shows the precise reason for built-ins.
-    -- Grid's disabled-state handling was leaving the rename button inert even
-    -- after an imported Author had been selected.
-    local copyButton = Grid:FindMountedWidget(scrollChild, "btn_copy_configuration")
+UpdateConfigurationManagerButtonState = function()
+    local copyButton = FindControl("btn_copy_configuration")
     if copyButton and copyButton.SetEnabled then
         copyButton:SetEnabled(select(1, ParseConfigurationRef(GetPageDB().selectedConfiguration)) ~= "appearance")
-    elseif copyButton and copyButton.Enable then
-        copyButton:Enable()
-    end
-    local renameButton = Grid:FindMountedWidget(scrollChild, "btn_rename_configuration")
-    if renameButton and renameButton.SetEnabled then
-        renameButton:SetEnabled(true)
-    elseif renameButton and renameButton.Enable then
-        renameButton:Enable()
-    end
-    local deleteButton = Grid:FindMountedWidget(scrollChild, "btn_delete_configuration")
-    if deleteButton and deleteButton.SetEnabled then
-        deleteButton:SetEnabled(true)
-    elseif deleteButton and deleteButton.Enable then
-        deleteButton:Enable()
     end
 end
 
 RefreshPage = function(resetScroll)
     SyncRuntimeToPageDB()
+    SyncRuleRecords()
     local contentFrame = Page._contentFrame
-    if not contentFrame then
-        return
-    end
-    local EXUI = _G.ExwindTools and _G.ExwindTools.UI
-    local Grid = _G.ExwindGrid
-    if not (ExwindTools and EXUI and EXUI.CreateDropdown and Grid) then
-        if scrollFrame then
-            scrollFrame:Hide()
-        end
+    if not contentFrame then return end
+    if not (EXUI and EXUI.MountSettingsDeclarationV2 and EXUI.CreateSettingsV2Control) then
+        if scrollFrame then scrollFrame:Hide() end
+        if not (EXUI and EXUI.CreateVisualFontString) then return end
         if not missingDepsText then
             missingDepsText = EXUI:CreateVisualFontString(contentFrame, EXFONTFRAME, "GameFontHighlight")
             missingDepsText:SetPoint("TOPLEFT", 24, -24)
@@ -1056,37 +925,41 @@ RefreshPage = function(resetScroll)
             missingDepsText:SetJustifyH("LEFT")
             missingDepsText:SetTextColor(1, 0.4, 0.4)
         end
-        missingDepsText:SetText(L["语音/配置页面依赖 ExwindTools.UI 与 ExwindGrid，当前未就绪。请确认 ExwindCore 已正确加载后重开面板。"])
+        missingDepsText:SetText(L["语音/配置页面依赖 ExwindTools.UI，当前未就绪。请确认 ExwindCore 已正确加载后重开面板。"])
         missingDepsText:Show()
         return
     end
-    if missingDepsText then
-        missingDepsText:Hide()
-    end
-    RenderGrid(contentFrame, resetScroll == true)
+    if missingDepsText then missingDepsText:Hide() end
+    RenderV2(contentFrame, resetScroll == true)
 end
 
-local function RefreshActiveSurfaces()
+local function RefreshActiveSurfaces(changedPath)
     if pageSyncLock then
         return
     end
     local db = GetPageDB()
+    if changedPath and changedPath:match("^specRules") then return end
+    if changedPath == "configurationName" then return end
     local selectedRef = tostring(db.selectedConfiguration or "")
-    if selectedRef ~= tostring(lastSyncedConfigurationRef or "") then
+    if (not changedPath or changedPath == "selectedConfiguration")
+        and selectedRef ~= tostring(lastSyncedConfigurationRef or "") then
         SelectConfiguration(selectedRef)
         return
     end
-    local changed = SetPack(db.selectedVoicePack)
-    if changed == false then
-        SyncRuntimeToPageDB()
+    if not changedPath or changedPath == "selectedVoicePack" then
+        local changed = SetPack(db.selectedVoicePack)
+        if changed == false then
+            SyncRuntimeToPageDB()
+            if cardSession then cardSession:Refresh() end
+        end
     end
     local appearanceID = tostring(db.appearanceProfileID or "")
-    if lastAppearanceProfileID ~= appearanceID then
+    if (not changedPath or changedPath == "appearanceProfileID") and lastAppearanceProfileID ~= appearanceID then
         lastAppearanceProfileID = appearanceID
         ApplyAppearanceProfileSelection(appearanceID)
     end
     for key, value in pairs(db) do
-        if type(key) == "string" and key:sub(1, 7) == "author_" then
+        if (not changedPath or changedPath == key) and type(key) == "string" and key:sub(1, 7) == "author_" then
             local selected = tostring(value or "")
             if lastAuthorPresetValues[key] ~= selected then
                 lastAuthorPresetValues[key] = selected
@@ -1105,6 +978,8 @@ end
 
 function Page:Hide()
     Page._visible = false
+    Page._mountGeneration = (Page._mountGeneration or 0) + 1
+    ReleaseCards()
     if scrollFrame then
         scrollFrame:Hide()
     end
@@ -1115,9 +990,9 @@ end
 
 if EXUI then
     EXUI:RegisterModuleValueController(MODULE_KEY, {
-        RefreshActiveSurfaces = function()
+        RefreshActiveSurfaces = function(_, changedPath)
             if Page._visible == true then
-                RefreshActiveSurfaces()
+                RefreshActiveSurfaces(changedPath)
             end
         end,
     })

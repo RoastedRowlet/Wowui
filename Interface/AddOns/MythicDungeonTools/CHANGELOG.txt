@@ -1,3 +1,4 @@
-## 6.3.6 (2026-10-12)
+## 6.3.26 (2026-10-28)
 
-- Added Patch 12.1.5 support
+- Updated Russian and German translations.
+- Long checkbox labels in Settings now wrap instead of being cut off.

@@ -282,14 +282,13 @@ local function BuildAuraGlowsUI(screen)
         local key, settings = entry.key, entry.settings
         local items = {
             { type = "button", label = NSI:Loc("Export"), fnc = function() ShowAuraGlowExportPopup(NSI:ExportAuraGlowEntry(key)) end },
-        }
-        if entry.builtin then
-            items[#items + 1] = { type = "button", label = NSI:Loc("Reset"), fnc = function()
-                NSI:ResetBuiltinAuraGlow(key)
+            { type = "button", label = NSI:Loc("Reset"), fnc = function()
+                NSI:ResetAuraGlow(key)
                 RebuildList()
                 RebuildTab()
-            end }
-        else
+            end },
+        }
+        if not entry.builtin then
             items[#items + 1] = { type = "button", label = NSI:Loc("Duplicate"), fnc = function()
                 local newKey = NSI:DuplicateCustomAuraGlow(key)
                 RebuildList()
@@ -435,7 +434,7 @@ local function BuildAuraGlowsUI(screen)
             row:SetPoint("TOPLEFT", listChild, "TOPLEFT", indent, -offset)
             row:SetWidth(listChild:GetWidth() - indent)
             row.entry = entry
-            row.label:SetText(entry.settings.Name)
+            row.label:SetText(NSI:Loc(entry.settings.Name))
             local spellIDs = not entry.defaultSettings and entry.settings.AuraType == "Buffs" and entry.settings.BuffFiltering == "SpellIDs"
                 and NSI:GetAuraGlowSpellIDList(entry.key) or nil
             local icon = entry.settings.menuIcon and C_Spell.GetSpellTexture(entry.settings.menuIcon)
@@ -1118,7 +1117,7 @@ local function BuildAuraGlowsUI(screen)
         if not settings then return end
         local builtin = NSI.AuraGlowBuiltins[selectedKey] ~= nil
         local defaultSettings = selectedKey == NSI.AuraGlowDefaultSettingsKey
-        nameEntry:SetValue(settings.Name)
+        nameEntry:SetValue(NSI:Loc(settings.Name))
         nameEntry.editBox:SetEnabled(not builtin and not defaultSettings)
         previewButton.frame:SetShown(not defaultSettings)
         deleteButton.frame:SetShown(not builtin and not defaultSettings)

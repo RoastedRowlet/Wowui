@@ -682,7 +682,7 @@ local ADDON_ROSTER = {
     { folder = "EllesmereUIActionBars",        display = "Action Bars",          search_name = "EllesmereUI Action Bars"             },
     { folder = "EllesmereUINameplates",        display = "Nameplates",           search_name = "EllesmereUI Nameplates"              },
     { folder = "EllesmereUIUnitFrames",        display = "Unit Frames",          search_name = "EllesmereUI Unit Frames"             },
-    { folder = "EllesmereUIRaidFrames",        display = "Raid Frames",          search_name = "EllesmereUI Raid Frames"             },
+    { folder = "EllesmereUIRaidFrames",        display = "Raid & Party Frames",  search_name = "EllesmereUI Raid & Party Frames"     },
     { folder = "EllesmereUICooldownManager",   display = "Cooldown Manager",     search_name = "EllesmereUI Cooldown Manager"        },
     { folder = "EllesmereUIResourceBars",      display = "Resource & Cast Bars", search_name = "EllesmereUI Resource Bars Cast Bars" },
     { folder = "EllesmereUIAuraBuffReminders", display = "AuraBuff Reminders",   search_name = "EllesmereUI AuraBuff Reminders"      },
@@ -699,7 +699,9 @@ local ADDON_ROSTER = {
     { folder = "EllesmereUIDataBars",          display = "DataBars",             search_name = "EllesmereUI DataBars"                },
     { folder = "EllesmereUIQuickdraw",         display = "Quickdraw",            search_name = "EllesmereUI Quickdraw"               },
     { folder = "EllesmereUILoadoutManager",    display = "Loadout Manager",      search_name = "EllesmereUI Loadout Manager"         },
+    { folder = "EllesmereUIGroupFinder",       display = "Group Finder",         search_name = "EllesmereUI Group Finder Premade Groups" },
     { folder = "EllesmereUIPartyMode",         display = "Party Mode",           search_name = "EllesmereUI Party Mode",             alwaysLoaded = true },
+    { folder = "EllesmereUISimpleLootCouncil", display = "Simple Loot Council",  search_name = "EllesmereUI Simple Loot Council Loot Council" },
 }
 
 -------------------------------------------------------------------------------
@@ -726,6 +728,7 @@ EllesmereUI.ADDON_GROUPS = {
         members = {
             "EllesmereUIQoL",
             "EllesmereUIForeverEssentials",
+            "EllesmereUISimpleLootCouncil",
             "EllesmereUIAuraBuffReminders",
             "EllesmereUIDataBars",
             "EllesmereUIQuickdraw",
@@ -738,8 +741,9 @@ EllesmereUI.ADDON_GROUPS = {
         label   = "UI Reskin Addons",
         members = {
             "EllesmereUIBlizzardSkin",
-            "EllesmereUIDamageMeters",
             "EllesmereUIMythicTimer",
+            "EllesmereUIDamageMeters",
+            "EllesmereUIGroupFinder",
             "EllesmereUIQuestTracker",
             "EllesmereUIFriends",
             "EllesmereUIMinimap",
@@ -785,6 +789,7 @@ end
 EllesmereUI.FOREVER_HIDDEN_ADDONS = {
     EllesmereUIMythicTimer = true, EllesmereUIFriends = true,
     EllesmereUILoadoutManager = true,
+    EllesmereUIGroupFinder = true,
     -- Not an addon: the Dragon Riding profile pseudo-folder (its file returns at
     -- load on Forever), listed so the profile import/export checklists drop it.
     EllesmereUIDragonRiding = true,
@@ -795,12 +800,18 @@ EllesmereUI.FOREVER_ONLY_ADDONS = {
     EllesmereUIForeverEssentials = true,
 }
 -- Modules held back from the current release on every client: they leave the
--- same lists, their runtime stops at its top, and neither the packager nor
--- the tester zip ships their folder (.pkgmeta ignore, package-for-testers.ps1).
--- To ship one, drop it here and restore its .pkgmeta move-folders line and
--- the tester zip.
+-- same lists and the packager does not ship their folder (.pkgmeta ignore);
+-- the tester zip ships every folder as the tree stands, held back or not
+-- (owner 2026-10-20). The Loadout Manager never loads (its TOC is LoadOnDemand
+-- and nothing loads it); a Group Finder listed here would stop at the top of
+-- each runtime file. To ship one, drop it here, drop its TOC's LoadOnDemand
+-- hold line and restore its .pkgmeta move-folders line. Simple Loot Council
+-- is held back too (listed here, with the hold line in both its TOCs, and
+-- .pkgmeta ignoring it); to switch it on locally for the guild's raid tests,
+-- drop it here and drop the hold line from both TOCs.
 EllesmereUI.HELD_BACK_ADDONS = {
     EllesmereUILoadoutManager = true,
+    EllesmereUISimpleLootCouncil = true,
 }
 -- The set the running client leaves out.
 do
@@ -1119,9 +1130,10 @@ local function MakeDropdownArrow(parent, xPad, ppOverride)
 end
 
 -- Page reuse (EllesmereUIOptions/EllesmereUI_FramePool.lua): ONE switch for the
--- whole suite, off until every module has passed its parity gates. While it is
--- off every page takes the build-and-drop path it always took.
-EllesmereUI._reusePages = false
+-- whole suite. On: a page built again gets its earlier frames back reset to
+-- fresh instead of building new ones. Off: every page takes the old
+-- build-and-drop path (the one-line rollback).
+EllesmereUI._reusePages = true
 -- The frame pool's table (EllesmereUI_PixelPerfect.lua makes it): for the
 -- resident helpers that build options frames (MakeBorder, AttachSmoothScrollbar)
 -- a plain CreateFrame until the options addon loads the pool, which fills this
@@ -1197,6 +1209,34 @@ end
 
 local function lerp(a, b, t) return a + (b - a) * t end
 
+-- Realm a character roster groups by. Forever is realmless: the ruleset name.
+function EllesmereUI.RealmGroupName()
+    if not EllesmereUI.IS_FOREVER then return GetRealmName() end
+    local R = Enum.GameRule
+    local function On(rule) return rule and C_GameRules.IsGameRuleActive(rule) end
+    if On(R.HardcoreRuleset) then return GUILD_PLAYSTYLE_HARDCORE end
+    local pvp, rp = On(R.PvPRuleset), On(R.RPRuleset)
+    if pvp and rp then return GDAPI_REALMTYPE_PVP_RP end
+    if pvp then return GDAPI_REALMTYPE_PVP end
+    if rp then return GDAPI_REALMTYPE_RP end
+    return GDAPI_REALMTYPE_NORMAL
+end
+
+-- Per-character key "Name<sep>RealmGroupName". Moves a store's entry from the
+-- old realm-name key (Forever only; retail keys match).
+function EllesmereUI.CharKey(sep, store)
+    local name, group = UnitName("player"), EllesmereUI.RealmGroupName()
+    if not name or not group then return nil end
+    local key = name .. sep .. group
+    if not EllesmereUI.IS_FOREVER then return key end
+    local old = name .. sep .. (GetRealmName() or "")
+    if type(store) == "table" and old ~= key and store[old] ~= nil then
+        if store[key] == nil then store[key] = store[old] end
+        store[old] = nil
+    end
+    return key
+end
+
 -- "Name-Realm" whisper/invite target. With realmName it builds (realm wins,
 -- spaces stripped); with a finished name alone it only collapses a stacked realm.
 function EllesmereUI.BuildFullName(charName, realmName)
@@ -1264,6 +1304,7 @@ EllesmereUI.DIRECTIONS_ICON = MEDIA_PATH .. "icons\\eui-directions.png"
 EllesmereUI.SYNC_ICON       = MEDIA_PATH .. "icons\\sync.png"
 EllesmereUI.EYE_VISIBLE_ICON   = MEDIA_PATH .. "icons\\eui-visible.png"
 EllesmereUI.EYE_INVISIBLE_ICON = MEDIA_PATH .. "icons\\eui-invisible.png"
+EllesmereUI.UNLOCK_ICON     = MEDIA_PATH .. "icons\\unlockmode.png"
 
 -- Shared chat/tooltip colour escapes. Leave codes inside L()/Lf() literals alone:
 -- that text is the translation key.
@@ -1358,6 +1399,20 @@ function EllesmereUI.BuildAlertSoundTables()
         if f then paths[k] = dir .. f end
     end
     return paths, names, order
+end
+
+-- Plays one catalogue path: a file path, a SoundKit id (1 = silent), or a
+-- FileDataID when isFile is set (a number the catalogue cannot tell apart).
+function EllesmereUI.PlaySoundPath(path, isFile)
+    if type(path) == "number" then
+        if isFile then
+            PlaySoundFile(path, "Master")
+        elseif path ~= 1 then
+            PlaySound(path, "Master")
+        end
+    elseif path then
+        PlaySoundFile(path, "Master")
+    end
 end
 
 -- Statusbar texture catalogue: same contract as the sound catalogue above.
@@ -3166,7 +3221,7 @@ function EllesmereUI:EnsureLoaded()
     if Pool.Kept then
         EUI_NS.PoolKept, EUI_NS.PoolCreateFrame = Pool.Kept, Pool.CreateFrame
         EUI_NS.PoolIsIdle, EUI_NS.PoolGen, EUI_NS.PoolDevEndPass = Pool.IsIdle, Pool.Gen, Pool._DevEndPass
-        EUI_NS.PoolManaged = Pool.Managed
+        EUI_NS.PoolManaged, EUI_NS.PoolPin = Pool.Managed, Pool.Pin
     end
     -- Deferred inits run inside the suite registration window: some options
     -- files register their module page from here (e.g. Party Mode).
@@ -3179,7 +3234,7 @@ end
 -------------------------------------------------------------------------------
 --  Slash commands
 -------------------------------------------------------------------------------
-EllesmereUI.VERSION = "9.5.4"
+EllesmereUI.VERSION = "9.6.9"
 
 -- Register this addon's version into a shared global table (taint-free at load time)
 if not _G._EUI_AddonVersions then _G._EUI_AddonVersions = {} end
@@ -3268,6 +3323,15 @@ EllesmereUI._RunConflictCheck = function()
             if not EllesmereUIDB then return true end
             return EllesmereUIDB[key] ~= false
         end
+        -- Another Mythic+ timer addon only clashes with the Mythic+ Timer window,
+        -- so it is named only while that window is on, and the message points at
+        -- its switch (the rest of Mythic+ Tools keeps running beside it).
+        local function MPlusTimerOn()
+            return _G._EMT_IsTimerEnabled and _G._EMT_IsTimerEnabled()
+        end
+        local function MPlusTimerMsg(label)
+            return EllesmereUI.Lf("%1$s conflicts with EllesmereUI's Mythic+ Timer. Turn off Enable Mythic+ Timer on the Mythic+ Timer tab of Mythic+ Tools, or disable %1$s.", label)
+        end
         local conflicts = {
             { addon = "ElvUI",                    label = "ElvUI",                      targets = "all",                              message = "Many of ElvUI's modules are incompatible with EllesmereUI. Make sure to disable any conflicting modules." },
             { addon = "DandersFrames",            label = "Danders Frames",             targets = { "EllesmereUIRaidFrames" } },
@@ -3279,7 +3343,7 @@ EllesmereUI._RunConflictCheck = function()
             -- check; moduleCheck adds the HoverCast-enabled check.
             { addon = "Clique",                   label = "Clique",                     targets = { "EllesmereUIRaidFrames" },
               moduleCheck = function() return _G._ERF_IsHoverCastEnabled and _G._ERF_IsHoverCastEnabled() end,
-              message = "Clique controls click-casting on the same Raid Frames as EllesmereUI's HoverCast, so they conflict. Disable the Clique addon to use HoverCast." },
+              message = "Clique controls click-casting on the same Raid & Party Frames as EllesmereUI's HoverCast, so they conflict. Disable the Clique addon to use HoverCast." },
             { addon = "TellMeWhen",               label = "TellMeWhen",                 targets = "all",                              message = "TellMeWhen overlaps with EllesmereUI's core positional architecture. If you ONLY use for sound alerts it should be okay but may still cause issues." },
             { addon = "Bartender4",               label = "Bartender4",                 targets = { "EllesmereUIActionBars" } },
             { addon = "Dominos",                  label = "Dominos",                    targets = { "EllesmereUIActionBars" } },
@@ -3314,9 +3378,12 @@ EllesmereUI._RunConflictCheck = function()
             { addon = "SkironCooldownManager",    label = "Skiron Cooldown Manager",    targets = { "EllesmereUICooldownManager" } },
             { addon = "ArcUI",                    label = "ArcUI",                      targets = { "EllesmereUICooldownManager", } },
             { addon = "Ayije_CDM",                label = "Ayije CDM",                  targets = { "EllesmereUICooldownManager", "EllesmereUIResourceBars" } },
-            { addon = "MythicPlusTimer",          label = "Mythic Plus Timer",          targets = { "EllesmereUIMythicTimer" } },
-            { addon = "WarpDeplete",              label = "WarpDeplete",                targets = { "EllesmereUIMythicTimer" } },
-            { addon = "MPlusTimer",               label = "MPlusTimer",                 targets = { "EllesmereUIMythicTimer" } },
+            { addon = "MythicPlusTimer",          label = "Mythic Plus Timer",          targets = { "EllesmereUIMythicTimer" },
+              moduleCheck = MPlusTimerOn, message = MPlusTimerMsg("Mythic Plus Timer") },
+            { addon = "WarpDeplete",              label = "WarpDeplete",                targets = { "EllesmereUIMythicTimer" },
+              moduleCheck = MPlusTimerOn, message = MPlusTimerMsg("WarpDeplete") },
+            { addon = "MPlusTimer",               label = "MPlusTimer",                 targets = { "EllesmereUIMythicTimer" },
+              moduleCheck = MPlusTimerOn, message = MPlusTimerMsg("MPlusTimer") },
             { addon = "ChonkyCharacterSheet",     label = "Chonky Character Sheet",     targets = { "EllesmereUIBlizzardSkin" },
               moduleCheck = function() return BlizzardSkinSubEnabled("themedCharacterSheet") end,
               message = "Chonky Character Sheet conflicts with the EllesmereUI's Character Sheet. Disable either Chonky or the Character Sheet skin in Blizzard UI Enhanced settings." },
@@ -3431,12 +3498,15 @@ end
 C_Timer.After(2, function()
     if EllesmereUIDB and EllesmereUIDB.firstInstallPopupShown then
         -- Defer while any intro popup is still pending/open; each runs the conflict check itself
-        -- when dismissed (RaidFrames / PatchNotes / WindowSkins / SpecOverrides / PTRManagers
-        -- popup files, plus the 12.1 launch video announcement in EllesmereUI_VideoGuides.lua).
+        -- when dismissed (RaidFrames / PatchNotes / WindowSkins / SpecOverrides / PTRManagers /
+        -- StyleLaunch / GroupFinder / KickTracker popup files, plus the 12.1 launch video
+        -- announcement in EllesmereUI_VideoGuides.lua).
         if EllesmereUI._raidFramesIntroPending or EllesmereUI._patchNotesIntroPending
            or EllesmereUI._windowSkinsIntroPending or EllesmereUI._specOvIntroPending
            or EllesmereUI._ptrManagersIntroPending or EllesmereUI._launchVideoIntroPending
-           or EllesmereUI._styleLaunchIntroPending or EllesmereUI._styleChoicePending then return end
+           or EllesmereUI._styleLaunchIntroPending or EllesmereUI._groupFinderIntroPending
+           or EllesmereUI._kickTrackerIntroPending
+           or EllesmereUI._styleChoicePending then return end
         EllesmereUI._RunConflictCheck()
     end
 end)
@@ -3562,6 +3632,87 @@ SlashCmdList.EUIDEV = function()
 end
 
 -------------------------------------------------------------------------------
+--  Status badge: a small dark tag with a faint accent wash, a 1px accent border, a
+--  pulsing accent dot and an accent label (the /euidev DEV MODE ACTIVE badge, Simple
+--  Loot Council's SLC ACTIVE). Made hidden through the page pool's CreateFrame, so a
+--  kept options page hands it back; the caller places it and shows it while its
+--  state holds. The dot pulses only while the badge shows. The accent is read when
+--  the badge is made.
+--  opts (optional): dot = false leaves the dot out (a plain text tag, nothing
+--  animated). onClick makes the badge a button: the wash brightens on hover and
+--  tooltip (a string, or a function returning one or nil) shows beside it; the
+--  caller turns the mouse off (EnableMouse) while a click would do nothing.
+-------------------------------------------------------------------------------
+function EllesmereUI.BuildStatusBadge(parent, text, name, opts)
+    local accent = ELLESMERE_GREEN
+    local dotted = not (opts and opts.dot == false)
+    local onClick = opts and opts.onClick
+    local f = POOL.CreateFrame(onClick and "Button" or "Frame", name, parent)
+    f:SetHeight(26)
+    f:EnableMouse(onClick and true or false)
+    f:Hide()
+
+    -- Dark base + faint accent wash for an on-brand tint
+    local bg = f:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints()
+    bg:SetColorTexture(0.02, 0.02, 0.03, 0.62)
+    local wash = f:CreateTexture(nil, "BORDER")
+    wash:SetAllPoints()
+    wash:SetColorTexture(accent.r, accent.g, accent.b, 0.06)
+
+    PP.CreateBorder(f, accent.r, accent.g, accent.b, 0.9, 1, "OVERLAY", 7)
+
+    local label = f:CreateFontString(nil, "OVERLAY")
+    label:SetFont(EllesmereUI.EXPRESSWAY, 11,
+        (EllesmereUI.SlugFlag("OUTLINE, SLUG")) or "OUTLINE")
+    label:SetText(text)
+    label:SetTextColor(accent.r, accent.g, accent.b, 1)
+
+    if dotted then
+        -- Pulsing accent "LED" dot (recording-indicator vibe)
+        local dot = f:CreateTexture(nil, "ARTWORK")
+        dot:SetTexture("Interface\\Buttons\\WHITE8x8")
+        dot:SetVertexColor(accent.r, accent.g, accent.b, 1)
+        dot:SetSize(7, 7)
+        dot:SetPoint("LEFT", f, "LEFT", 9, 0)
+        DisablePixelSnap(dot)
+        local ag = dot:CreateAnimationGroup()
+        ag:SetLooping("BOUNCE")
+        local pulse = ag:CreateAnimation("Alpha")
+        pulse:SetFromAlpha(1); pulse:SetToAlpha(0.1)
+        pulse:SetDuration(0.7); pulse:SetSmoothing("IN_OUT")
+        f:SetScript("OnShow", function() ag:Play() end)
+        f:SetScript("OnHide", function() ag:Stop() end)
+        label:SetPoint("LEFT", dot, "RIGHT", 8, 0)
+        -- Size to content: dotPad(9) + dot(7) + gap(8) + text + rightPad(12)
+        f:SetWidth(9 + 7 + 8 + label:GetStringWidth() + 12)
+    else
+        label:SetPoint("CENTER", f, "CENTER", 0, 0)
+        f:SetWidth(12 + label:GetStringWidth() + 12)
+    end
+
+    if onClick then
+        local tooltip = opts.tooltip
+        f:SetScript("OnEnter", function(self)
+            wash:SetColorTexture(accent.r, accent.g, accent.b, 0.16)
+            local tip = tooltip
+            if type(tip) == "function" then tip = tip() end
+            if tip then EllesmereUI.ShowWidgetTooltip(self, tip) end
+        end)
+        f:SetScript("OnLeave", function()
+            wash:SetColorTexture(accent.r, accent.g, accent.b, 0.06)
+            EllesmereUI.HideWidgetTooltip()
+        end)
+        f:SetScript("OnClick", function(self)
+            wash:SetColorTexture(accent.r, accent.g, accent.b, 0.06)
+            EllesmereUI.HideWidgetTooltip()
+            onClick(self)
+        end)
+    end
+    return f
+end
+
+-------------------------------------------------------------------------------
 --  Dev Mode badge: a small top-left indicator shown while /euidev is active (the addon-
 --  restriction-forced CVars are on, forcing the restricted / secret-value environment for
 --  testing). Toggled by /euidev and re-checked on login, since the CVars persist across sessions.
@@ -3575,71 +3726,17 @@ do
 
     local badge
 
-    local function CreateDevBadge()
-        if badge then return badge end
-        local PP = EllesmereUI.PP
-        local accent = EllesmereUI.ELLESMERE_GREEN or { r = 0.05, g = 0.82, b = 0.62 }
-
-        local f = CreateFrame("Frame", "EllesmereUIDevModeBadge", UIParent)
-        f:SetFrameStrata("HIGH")
-        f:SetHeight(26)
-        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 16, -41)
-        f:EnableMouse(false)
-        f:Hide()
-
-        -- Dark base + faint accent wash for an on-brand tint
-        local bg = f:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints()
-        bg:SetColorTexture(0.02, 0.02, 0.03, 0.62)
-        local wash = f:CreateTexture(nil, "BORDER")
-        wash:SetAllPoints()
-        wash:SetColorTexture(accent.r, accent.g, accent.b, 0.06)
-
-        -- Accent 1px border (our own frame, safe)
-        if PP and PP.CreateBorder then
-            PP.CreateBorder(f, accent.r, accent.g, accent.b, 0.9, 1, "OVERLAY", 7)
-        end
-
-        -- Pulsing accent "LED" dot (recording-indicator vibe)
-        local dot = f:CreateTexture(nil, "ARTWORK")
-        dot:SetTexture("Interface\\Buttons\\WHITE8x8")
-        dot:SetVertexColor(accent.r, accent.g, accent.b, 1)
-        dot:SetSize(7, 7)
-        dot:SetPoint("LEFT", f, "LEFT", 9, 0)
-        if dot.SetSnapToPixelGrid then dot:SetSnapToPixelGrid(false); dot:SetTexelSnappingBias(0) end
-        local ag = dot:CreateAnimationGroup()
-        ag:SetLooping("BOUNCE")
-        local pulse = ag:CreateAnimation("Alpha")
-        pulse:SetFromAlpha(1); pulse:SetToAlpha(0.1)
-        pulse:SetDuration(0.7); pulse:SetSmoothing("IN_OUT")
-        f._pulse = ag
-
-        -- Label
-        local label = f:CreateFontString(nil, "OVERLAY")
-        label:SetFont(EllesmereUI.EXPRESSWAY, 11,
-            (EllesmereUI.SlugFlag("OUTLINE, SLUG")) or "OUTLINE")
-        label:SetText("DEV MODE ACTIVE")
-        label:SetTextColor(accent.r, accent.g, accent.b, 1)
-        label:SetPoint("LEFT", dot, "RIGHT", 8, 0)
-
-        -- Size to content: dotPad(9) + dot(7) + gap(8) + text + rightPad(12)
-        f:SetWidth(9 + 7 + 8 + label:GetStringWidth() + 12)
-
-        badge = f
-        return f
-    end
-
     function EllesmereUI.UpdateDevModeIndicator()
         if not EllesmereUI.IsDevModeActive() then
-            if badge then
-                if badge._pulse then badge._pulse:Stop() end
-                badge:Hide()
-            end
+            if badge then badge:Hide() end
             return
         end
-        local f = CreateDevBadge()
-        f:Show()
-        if f._pulse then f._pulse:Play() end
+        if not badge then
+            badge = EllesmereUI.BuildStatusBadge(UIParent, "DEV MODE ACTIVE", "EllesmereUIDevModeBadge")
+            badge:SetFrameStrata("HIGH")
+            badge:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 16, -41)
+        end
+        badge:Show()
     end
 
     -- CVars persist across sessions: check on login (deferred so the theme accent is fully resolved). PLAYER_LOGIN re-fires on /reload, so this covers both.
@@ -3742,8 +3839,9 @@ do
                 if not EllesmereUIDB then EllesmereUIDB = {} end
                 EllesmereUIDB.showMinimapButton = false
                 btn:Hide()
+                -- an open page re-reads its rows (a closed panel catches up when it next shows)
                 local rl = EllesmereUI and EllesmereUI._widgetRefreshList
-                if rl then for i = 1, #rl do rl[i]() end end
+                if rl and #rl > 0 then EllesmereUI:RefreshPage() end
             end
         end)
 
@@ -4039,7 +4137,7 @@ initFrame:SetScript("OnEvent", function(self, event)
 
     -- Add EllesmereUI + Unlock Mode buttons to the Game Menu (pause menu); both share a single Layout hook to avoid double-push conflicts.
     if GameMenuFrame and not EllesmereUI._GetFFD(GameMenuFrame).euiBtn then
-        -- Game menu frame+button skinning lives in EllesmereUIBlizzardSkin.lua so it only
+        -- Game menu frame+button skinning lives in EllesmereUIBlizzardSkin (EUI_BlizzardSkin_Dialogs.lua) so it only
         -- applies when that addon is enabled; detect whether the skin is active so EUI's own buttons match the skinned menu style.
         local _blizzSkinLoaded = C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded("EllesmereUIBlizzardSkin")
         -- "Reskin Pause Menu" is an independent toggle (default on); the migration blizzskin_reskin_master_split_v1 seeds reskinGameMenu for existing users.

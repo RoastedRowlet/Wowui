@@ -1,7 +1,7 @@
 ---@diagnostic disable: undefined-global, undefined-field, need-check-nil
 -- =============================================================
 -- ExBossGUI/SettingsPage/TimerBarPage.lua
--- 计时条设置页（ExwindGrid 渲染）
+-- 计时条设置页（V2 声明）
 --
 -- 标准接入：页面外壳由 EXUI:CreateStandardModulePage 统一拥有；本文件只声明
 -- 既有布局、标准 Slider 生命周期和 TimerBar 的 Preview Surface 调用。
@@ -12,17 +12,14 @@
 -- =============================================================
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
+local EXUI = ExwindTools.UI or _G.ExwindToolsUI
+if not EXUI then return end
 local L = (ExBoss and ExBoss.L) or setmetatable({}, { __index = function(_, k) return k end })
 
 ExBoss.UI.Panel.TimerBarPage = ExBoss.UI.Panel.TimerBarPage or {}
 local Page = ExBoss.UI.Panel.TimerBarPage
 
 local MODULE_KEY = "ExBoss.TimerBar"
-local BASE_GRID_COLS = 200
-local MIN_GRID_COLS = 200
-local MAX_GRID_COLS = 200
-local TARGET_CELL_PX = 18
-local LAYOUT_CACHE = {}
 
 -- =============================================================
 -- 模块控件规格
@@ -84,98 +81,61 @@ local SLIDER_GROUP_PATHS = {
 }
 
 -- =============================================================
--- Grid 纯布局声明
+-- V2 纯布局声明
 -- =============================================================
 
--- [普通 sections 声明边界：TimerBar 设置页]
--- 允许：只按共享规范调整纯呈现分区；尺寸与排列由 Core 统一测量。
--- 禁止：修改 key/type/path/opts、字段业务次序、ScaleLayout 语义、预览或 Slider/释放合同。
--- modulecommonsettings/anchorgroup/widgetlayout/timerBarGroup/fontgroup 必须整体引用；旧背景/标题项不等于内容容器。
+-- 保留原设置块次序与组合控件身份；带回调的选项由 owner 提供。
 local LAYOUT = {
-    version = 1,
-    title = L["计时条设置"],
-    sections = {
-        { kind = "settings", id = "timeline-enabled", title = L["时间轴样式选择"],
-            binding = { moduleKey = "ExBoss.GeneralOverview", getConfig = function() return _G.EXBOSS12S2 end },
-            items = { { key = "timer", type = "switch", label = L["启用"], parentKey = "ui.general.timelineBars" } } },
-        { kind = "composite", id = "module-common", title = L["通用设置"],
-            component = "modulecommonsettings", key = "moduleCommon", opts = TIMER_BAR_COMMON_OPTS },
-        { kind = "composite", id = "layout", title = L["排列设置"],
-            component = "widgetlayout", key = "layout", opts = TIMER_BAR_LAYOUT_OPTS },
-        { kind = "composite", id = "anchor", title = L["锚点设置"],
-            component = "anchorgroup", key = "anchorGroup", opts = TIMER_BAR_ANCHOR_OPTS },
-        { kind = "composite", id = "timer-bar", title = L["计时条外观"],
-            component = "timerbargroup", key = "timerGroup" },
-        { kind = "composite", id = "extra-texture", title = L["额外子元素－材质"],
-            component = "modulecommonsettings", key = "extraTexture", opts = TIMER_BAR_EXTRA_TEXTURE_OPTS },
-        { kind = "composite", id = "spell-font", title = L["法术名称"],
-            component = "fontgroup", key = "font_spell" },
-        { kind = "composite", id = "timer-font", title = L["时间文本"],
-            component = "fontgroup", key = "font_timer" },
+    version = 2,
+    cards = {
+        { kind = "card", id = "timeline-enabled", title = L["时间轴样式选择"],
+            children = {
+                { kind = "control", id = "timer", controlType = "switch", ref = "timelineEnabled" },
+            } },
+        { kind = "card", id = "module-common", title = L["通用设置"],
+            children = {
+                { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", opts = TIMER_BAR_COMMON_OPTS },
+            } },
+        { kind = "card", id = "layout-card", title = L["排列设置"],
+            children = {
+                { kind = "component", id = "layout", component = "widgetlayout", path = "layout", opts = TIMER_BAR_LAYOUT_OPTS },
+            } },
+        { kind = "card", id = "anchor", title = L["锚点设置"],
+            children = {
+                { kind = "component", id = "anchorGroup", component = "anchorgroup", path = "anchorGroup", optionsRef = "anchor" },
+            } },
+        { kind = "card", id = "timer-bar", title = L["计时条外观"],
+            children = {
+                { kind = "component", id = "timerGroup", component = "timerbargroup", path = "timerGroup", opts = {} },
+            } },
+        { kind = "card", id = "extra-texture", title = L["额外子元素－材质"],
+            children = {
+                { kind = "component", id = "extraTexture", component = "modulecommonsettings", path = "extraTexture", optionsRef = "extraTexture" },
+            } },
+        { kind = "card", id = "spell-font", title = L["法术名称"],
+            children = {
+                { kind = "component", id = "font_spell", component = "fontgroup", path = "font_spell", opts = {} },
+            } },
+        { kind = "card", id = "timer-font", title = L["时间文本"],
+            children = {
+                { kind = "component", id = "font_timer", component = "fontgroup", path = "font_timer", opts = {} },
+            } },
     },
 }
 
-
-
--- =============================================================
--- Grid 布局缩放与注册
--- =============================================================
-local function ResolveGridCols(contentWidth)
-    local w = tonumber(contentWidth) or 0
-    if w < 100 then
-        return BASE_GRID_COLS
-    end
-    local cols = math.floor(((w - 20) / TARGET_CELL_PX) + 0.5)
-    if cols < MIN_GRID_COLS then cols = MIN_GRID_COLS end
-    if cols > MAX_GRID_COLS then cols = MAX_GRID_COLS end
-    return cols
+local function CreatePageOwner()
+    return {
+        options = {
+            anchor = TIMER_BAR_ANCHOR_OPTS,
+            extraTexture = TIMER_BAR_EXTRA_TEXTURE_OPTS,
+        },
+        controls = {
+            timelineEnabled = EXUI:CreateSettingsV2Control({ controlType = "switch", label = L["启用"] }, function()
+                return EXUI:CreateSettingsV2Binding("ExBoss.GeneralOverview", _G.EXBOSS12S2, "ui.general.timelineBars.timer")
+            end),
+        },
+    }
 end
-
-local function ScaleLayout(items, toCols)
-    if toCols == BASE_GRID_COLS then
-        return LAYOUT
-    end
-    local cached = LAYOUT_CACHE[toCols]
-    if cached then
-        return cached
-    end
-
-    local scale = toCols / BASE_GRID_COLS
-    local function ScaleItems(src)
-        local out = {}
-        for _, item in ipairs(src) do
-            local row = {}
-            for k, v in pairs(item) do
-                if k ~= "children" then
-                    row[k] = v
-                end
-            end
-            if type(item.x) == "number" and type(item.w) == "number" then
-                local nx = math.floor(((item.x - 1) * scale) + 1 + 0.5)
-                local nw = math.max(1, math.floor(item.w * scale + 0.5))
-                if nx < 1 then nx = 1 end
-                if nx > toCols then nx = toCols end
-                if nx + nw - 1 > toCols then
-                    nw = math.max(1, toCols - nx + 1)
-                end
-                row.x = nx
-                row.w = nw
-            end
-            if type(item.children) == "table" then
-                row.children = ScaleItems(item.children)
-            end
-            out[#out + 1] = row
-        end
-        return out
-    end
-
-    cached = ScaleItems(items)
-    LAYOUT_CACHE[toCols] = cached
-    return cached
-end
-
--- 注册布局（加载时执行一次）
-ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
 
 -- =============================================================
 -- 标准页面合同
@@ -184,12 +144,11 @@ local function GetTimerBar()
     return ExBoss.UI and ExBoss.UI.TimerBar
 end
 
-local function RebindTimerBarModuleCommon(grid, container, db)
-    -- state.widgets 的既有 key 是组合控件身份；迁移后不得改名或改为按位置查找。
+local function RebindTimerBarModuleCommon(context)
     for _, key in ipairs({ "moduleCommon", "extraTexture" }) do
-        local group = grid and grid.FindMountedWidget and grid:FindMountedWidget(container, key)
+        local group = context.modulePage and context.modulePage:Find(key)
         if group and type(group.RebindDB) == "function" then
-            group:RebindDB(db)
+            group:RebindDB(context.config)
         end
     end
 end
@@ -209,11 +168,12 @@ local function ReleaseTimerBarPanelPreview()
 end
 
 -- [生命周期边界] StandardModulePage 继续拥有 Scroll、延迟 Render、preview 与 release；布局迁移不得重建这些生命周期。
-local StandardPage = ExwindTools.UI:CreateStandardModulePage({
+local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,
+    title = L["计时条设置"],
     layout = LAYOUT,
-    getColumns = 200,
+    ownerFactory = CreatePageOwner,
     preview = {
         -- 模块合同下限：TimerBar 预览至少显示两条，不能从 1px Dock 开始。
         height = 120,
@@ -230,8 +190,8 @@ local StandardPage = ExwindTools.UI:CreateStandardModulePage({
             groupPaths = SLIDER_GROUP_PATHS,
         }
     end,
-    afterGridLayout = function(context)
-        RebindTimerBarModuleCommon(context.grid, context.scrollChild, context.config)
+    afterLayout = function(context)
+        RebindTimerBarModuleCommon(context)
     end,
 })
 
@@ -244,6 +204,5 @@ function Page:Hide()
 end
 
 function Page:RefreshTimelineBarControls()
-    local control = StandardPage.cardSession and StandardPage.cardSession:GetWidget("timeline-enabled", "timer")
-    if control then control:SetChecked(ExBoss.DisplayPolicy.IsTimelineBarEnabled("timer")) end
+    return StandardPage:RefreshControls()
 end

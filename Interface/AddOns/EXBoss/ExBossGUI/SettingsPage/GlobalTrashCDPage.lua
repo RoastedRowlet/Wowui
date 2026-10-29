@@ -1,7 +1,7 @@
 ---@diagnostic disable: undefined-global, undefined-field, need-check-nil
 -- =============================================================
 -- ExBossGUI/SettingsPage/GlobalTrashCDPage.lua
--- 小怪CD 全局设置页（ExwindGrid 渲染）
+-- 小怪CD 全局设置页（V2 声明）
 -- =============================================================
 
 local ExwindTools = _G.ExwindTools
@@ -13,12 +13,9 @@ local L                           = (ExBoss and ExBoss.L) or setmetatable({}, { 
 ExBoss.UI.Panel.GlobalTrashCDPage = ExBoss.UI.Panel.GlobalTrashCDPage or {}
 local Page                        = ExBoss.UI.Panel.GlobalTrashCDPage
 
--- 仅用于 Grid 的页面事件；TrashCD 设置的唯一持久 owner 是 Store 的
+-- 仅用于页面事件；TrashCD 设置的唯一持久 owner 是 Store 的
 -- Factory -> Author -> User 链路，不能再把页面草稿放进 ModuleDB。
 local EDITOR_KEY                  = "ExBoss.TrashCD.Settings.Editor"
-local BASE_GRID_COLS              = 200
-local TARGET_CELL_PX              = 18
-local LAYOUT_CACHE                = {}
 local standardPreview             = nil
 local ToggleScreenNameplatePreview
 local StopScreenNameplatePreview
@@ -76,47 +73,30 @@ local DEFAULTS                    = {
     },
 }
 
--- 与 TrashCD.Store.GetNameplateIconStrata 完全同一份合法 strata 集合。
--- 这是姓名版图标相对其他姓名版元素的显示层级，不是世界锚点层级。
-local NAMEPLATE_GROWTH_SIDE_ITEMS = {
-    { L["左侧"], "left" },
-    { L["右侧"], "right" },
-}
-
-local NAMEPLATE_ICON_STRATA_ITEMS = {
-    { "BACKGROUND",        "BACKGROUND" },
-    { "LOW",               "LOW" },
-    { "MEDIUM",            "MEDIUM" },
-    { "HIGH",              "HIGH" },
-    { "DIALOG",            "DIALOG" },
-    { "FULLSCREEN",        "FULLSCREEN" },
-    { "FULLSCREEN_DIALOG", "FULLSCREEN_DIALOG" },
-    { "TOOLTIP",           "TOOLTIP" },
-}
-
 -- =============================================================
 -- 布局
 -- =============================================================
--- [卡片/Grid 迁移边界：小怪全局设置]
--- 允许：只按共享规范调整下列声明的 x/y/w/h、三组自然卡片与实际可见高度。
--- 禁止：修改 key/type/path、页面 draft→Store 提交、live slider、姓名版预览或字段业务次序。
--- icongroup/fontgroup 必须整体引用；顶部 panel preview 与屏幕姓名版 preview 是两套独立生命周期。
+-- 图标组/字体组整体复用；面板预览和屏幕姓名版预览独立管理。
 local LAYOUT = {
-    version = 1,
-    title = L["小怪内置CD姓名版图标"],
-    sections = {
-        { kind = "settings", id = "placement", title = L["通用"],
-            items = {
-                { key = "nameplateIconSpacing", subKey = "spacing", parentKey = "nameplateIcon", type = "slider", min = 0, max = 50, step = 1, label = L["图标间距"] },
-                { key = "nameplateGrowthSide", type = "select", label = L["图标增长方向"], options = { { value = "left", label = L["左侧"] }, { value = "right", label = L["右侧"] } } },
-                { key = "nameplateIconStrata", type = "select", label = L["图标层级"], options = { { value = "BACKGROUND", label = "BACKGROUND" }, { value = "LOW", label = "LOW" }, { value = "MEDIUM", label = "MEDIUM" }, { value = "HIGH", label = "HIGH" }, { value = "DIALOG", label = "DIALOG" }, { value = "FULLSCREEN", label = "FULLSCREEN" }, { value = "FULLSCREEN_DIALOG", label = "FULLSCREEN_DIALOG" }, { value = "TOOLTIP", label = "TOOLTIP" } } },
-                { key = "hideNameplateIconAboveSeconds", type = "input", label = L["隐藏剩余超过 X 秒的图标（0=关闭）"] },
-                { key = "screenNameplatePreview", type = "button", label = L["屏幕敌方姓名版预览 开/关"], func = function() ToggleScreenNameplatePreview() end },
+    version = 2,
+    layout = "stack",
+    cards = {
+        { kind = "card", id = "placement", title = L["通用"],
+            children = {
+                { kind = "control", id = "nameplateIconSpacing", path = "nameplateIcon.spacing", controlType = "slider", min = 0, max = 50, step = 1, label = L["图标间距"] },
+                { kind = "control", id = "nameplateGrowthSide", path = "nameplateGrowthSide", controlType = "select", label = L["图标增长方向"], options = { { value = "left", label = L["左侧"] }, { value = "right", label = L["右侧"] } } },
+                { kind = "control", id = "nameplateIconStrata", path = "nameplateIconStrata", controlType = "select", label = L["图标层级"], options = { { value = "BACKGROUND", label = "BACKGROUND" }, { value = "LOW", label = "LOW" }, { value = "MEDIUM", label = "MEDIUM" }, { value = "HIGH", label = "HIGH" }, { value = "DIALOG", label = "DIALOG" }, { value = "FULLSCREEN", label = "FULLSCREEN" }, { value = "FULLSCREEN_DIALOG", label = "FULLSCREEN_DIALOG" }, { value = "TOOLTIP", label = "TOOLTIP" } } },
+                { kind = "control", id = "hideNameplateIconAboveSeconds", path = "hideNameplateIconAboveSeconds", controlType = "input", label = L["隐藏剩余超过 X 秒的图标（0=关闭）"] },
+                { kind = "setting", id = "previewRow", label = L["屏幕敌方姓名版预览 开/关"], children = {
+                    { kind = "button", id = "screenNameplatePreview", text = L["预览"], action = "screenNameplatePreview" },
+                } },
             } },
-        { kind = "composite", id = "icon", title = L["外观"],
-            component = "icongroup", key = "nameplateIcon", opts = { enableOffset = true, hideIconID = true } },
-        { kind = "composite", id = "text", title = L["倒数时间文本"],
-            component = "fontgroup", key = "nameplateIconText" },
+        { kind = "card", id = "icon", title = L["外观"], children = {
+            { kind = "component", id = "nameplateIcon", component = "icongroup", path = "nameplateIcon", opts = { enableOffset = true, hideIconID = true } },
+        } },
+        { kind = "card", id = "text", title = L["倒数时间文本"], children = {
+            { kind = "component", id = "nameplateIconText", component = "fontgroup", path = "nameplateIconText" },
+        } },
     },
 }
 
@@ -146,10 +126,14 @@ end
 
 local function ReplaceTable(dst, src)
     for key in pairs(dst) do
-        dst[key] = nil
+        if src[key] == nil then dst[key] = nil end
     end
     for key, value in pairs(src) do
-        dst[key] = DeepCopy(value)
+        if type(value) == "table" and type(dst[key]) == "table" then
+            ReplaceTable(dst[key], value)
+        else
+            dst[key] = DeepCopy(value)
+        end
     end
     return dst
 end
@@ -165,7 +149,7 @@ local function GetRuntimeTrashSettings()
     return nil
 end
 
--- Grid 必须始终持有同一个页面草稿表，故重载 resolved 时原地替换内容。
+-- 页面和复合控件始终持有同一份草稿及子表，重载 resolved 时原地替换内容。
 -- 这样不会出现旧 ModuleDB 的跨页面残留，也不会让复合控件持有过期表。
 local function LoadRuntimeSettingsToDraft()
     local runtime = GetRuntimeTrashSettings()
@@ -212,10 +196,8 @@ StopScreenNameplatePreview = function()
 end
 
 local function RefreshVisibleControls()
-    local Grid = _G.ExwindGrid
-    if Grid and Page._scrollChild and type(Grid.RefreshContainerControlsFromDB) == "function" then
-        Grid:RefreshContainerControlsFromDB(Page._scrollChild)
-    end
+    local page = EXUI:GetModulePage(EDITOR_KEY, Page._scrollChild)
+    if page then page:Refresh() end
 end
 
 local function FocusPreviewGUI(guiTarget)
@@ -223,7 +205,8 @@ local function FocusPreviewGUI(guiTarget)
     if target ~= "nameplateIcon" and target ~= "nameplateIconText" then
         error("TrashCD nameplate preview has no GUI target for " .. target, 2)
     end
-    if not EXUI:FocusModuleGridKey(EDITOR_KEY, target, Page._scrollFrame, Page._scrollChild) then
+    local page = EXUI:GetModulePage(EDITOR_KEY, Page._scrollChild)
+    if not page or not page:Focus(target, Page._scrollFrame) then
         error("TrashCD nameplate preview GUI target is not rendered: " .. target, 2)
     end
 end
@@ -257,10 +240,7 @@ local function RefreshPanelPreview()
     standardPreview:Materialize(preview.definition, preview.model)
 end
 
--- IconGroup / FontGroup 目前是历史复合控件：它们的旧 onValueChanged 会在
--- Slider 每一格调用 CompositeEmitUpdate。只在本页把经过审计的纯视觉 Slider
--- 改接生命周期；其余字段继续走原有 commit 路径，不能把会影响真实姓名版
--- 业务/结构的字段误当作 panel 的轻量视觉更新。
+-- 只将这些纯视觉 Slider 接到姓名版的轻量预览；其余字段保留标准提交。
 local LIVE_SLIDER_FIELDS = {
     nameplateIcon = {
         width = true,
@@ -280,7 +260,10 @@ local LIVE_SLIDER_FIELDS = {
     },
 }
 
-local CommitCurrentField
+local function IsDraftCurrent(draft)
+    return Page._editorActive == true and Page._editorDraft == draft
+        and Page._v2Session ~= nil and Page._v2Session.alive == true
+end
 
 local function InstallLiveSliders(group, section, draft)
     if not (group and type(group._exCompositeControls) == "table") then return end
@@ -291,19 +274,18 @@ local function InstallLiveSliders(group, section, draft)
     for _, entry in ipairs(group._exCompositeControls) do
         local field, slider = tostring(entry.path or ""), entry.control
         if entry.kind == "slider" and supported[field] and slider and type(slider.SetLifecycleCallbacks) == "function" then
-            -- 禁用复合控件旧的每格 EmitUpdate；它会走已废弃状态总线，随后
-            -- 写 User Delta 并 Materialize。live 只写当前页面草稿。
+            -- live 只写当前页面草稿并更新面板视觉，提交才刷新正式表面。
             slider._onValueChanged = nil
             slider:SetLifecycleCallbacks({
                 onLive = function(value)
+                    if not IsDraftCurrent(draft) then return end
                     group._exCompositeDb[field] = value
                     marker:ApplyLiveVisual(standardPreview, section .. "." .. field, value, draft)
                 end,
                 onCommit = function(value)
+                    if not IsDraftCurrent(draft) then return end
                     group._exCompositeDb[field] = value
-                    -- 唯一正式出口：Store patch 的验证/持久化与 preview rebuild
-                    -- 都只在 release、回车或输入框失焦发生一次。
-                    CommitCurrentField({ fullPath = section .. "." .. field })
+                    -- 正式出口由唯一 ValueController 提交 Store 并刷新预览。
                     EXUI:NotifyModuleValueChanged(EDITOR_KEY, section .. "." .. field, "committed")
                 end,
             })
@@ -312,41 +294,28 @@ local function InstallLiveSliders(group, section, draft)
 end
 
 local function InstallPageLiveSliders(draft)
-    local Grid = _G.ExwindGrid
-    if not (Grid and Grid.FindMountedWidget and Page._scrollChild) then return end
-    InstallLiveSliders(Grid:FindMountedWidget(Page._scrollChild, "nameplateIcon"), "nameplateIcon", draft)
-    InstallLiveSliders(Grid:FindMountedWidget(Page._scrollChild, "nameplateIconText"), "nameplateIconText", draft)
-    local spacing = Grid:FindMountedWidget(Page._scrollChild, "nameplateIconSpacing")
+    local page = EXUI:GetModulePage(EDITOR_KEY, Page._scrollChild)
+    if not page then return end
+    InstallLiveSliders(page:Find("nameplateIcon"), "nameplateIcon", draft)
+    InstallLiveSliders(page:Find("nameplateIconText"), "nameplateIconText", draft)
+    local spacing = page:Find("nameplateIconSpacing")
     if spacing and type(spacing.SetLifecycleCallbacks) == "function" then
         spacing._onValueChanged = nil
         spacing:SetLifecycleCallbacks({
             onLive = function(value)
+                if not IsDraftCurrent(draft) then return end
                 draft.nameplateIcon = type(draft.nameplateIcon) == "table" and draft.nameplateIcon or {}
                 draft.nameplateIcon.spacing = value
                 GetNameplateMarker():ApplyLiveVisual(standardPreview, "nameplateIcon.spacing", value, draft)
             end,
             onCommit = function(value)
+                if not IsDraftCurrent(draft) then return end
                 draft.nameplateIcon = type(draft.nameplateIcon) == "table" and draft.nameplateIcon or {}
                 draft.nameplateIcon.spacing = value
-                CommitCurrentField({ fullPath = "nameplateIcon.spacing" })
                 EXUI:NotifyModuleValueChanged(EDITOR_KEY, "nameplateIcon.spacing", "committed")
             end,
         })
     end
-end
-
-CommitCurrentField = function(info)
-    local gridDB = Page._editorDraft
-    local Store = ExBoss and ExBoss.TrashCD and ExBoss.TrashCD.Store
-    if not (gridDB and Store and type(Store.SetConfigValue) == "function") then return end
-    local fullPath = tostring(info.fullPath or info.key or "")
-    local path, value = { "settings" }, gridDB
-    for key in fullPath:gmatch("[^%.]+") do
-        path[#path + 1] = key
-        value = type(value) == "table" and value[key] or nil
-    end
-    if #path <= 1 or value == nil then return end
-    Store.SetConfigValue(path, value)
 end
 
 local function CommitActiveDraft()
@@ -369,54 +338,12 @@ local function CommitActiveDraft()
     CommitLeaves(gridDB, {})
 end
 
-local function ResolveGridCols(contentWidth)
-    local w = tonumber(contentWidth) or 0
-    if w < 100 then return BASE_GRID_COLS end
-    local cols = math.floor(((w - 20) / TARGET_CELL_PX) + 0.5)
-    if cols < BASE_GRID_COLS then cols = BASE_GRID_COLS end
-    if cols > BASE_GRID_COLS then cols = BASE_GRID_COLS end
-    return cols
-end
-
-local function ScaleLayout(items, toCols)
-    if toCols == BASE_GRID_COLS then return LAYOUT end
-    local cached = LAYOUT_CACHE[toCols]
-    if cached then return cached end
-    local scale = toCols / BASE_GRID_COLS
-    local function ScaleItems(src)
-        local out = {}
-        for _, item in ipairs(src) do
-            local row = {}
-            for k, v in pairs(item) do
-                if k ~= "children" then row[k] = v end
-            end
-            if type(item.x) == "number" and type(item.w) == "number" then
-                local nx = math.floor(((item.x - 1) * scale) + 1 + 0.5)
-                local nw = math.max(1, math.floor(item.w * scale + 0.5))
-                if nx < 1 then nx = 1 end
-                if nx > toCols then nx = toCols end
-                if nx + nw - 1 > toCols then nw = math.max(1, toCols - nx + 1) end
-                row.x = nx
-                row.w = nw
-            end
-            if type(item.children) == "table" then
-                row.children = ScaleItems(item.children)
-            end
-            out[#out + 1] = row
-        end
-        return out
-    end
-    cached = ScaleItems(items)
-    LAYOUT_CACHE[toCols] = cached
-    return cached
-end
-
 -- =============================================================
--- Grid commit → 写入当前 User DIFF + 刷新显示
+-- V2 commit → 写入当前 User DIFF + 刷新显示
 -- =============================================================
-ExwindTools:RegisterModuleLayout(EDITOR_KEY, LAYOUT)
+EXUI:RegisterSettingsPageV2(EDITOR_KEY, LAYOUT)
 
-local function RefreshActiveSurfaces(_, phase)
+local function RefreshActiveSurfaces(_, changedPath, phase)
     if Page._editorActive ~= true or type(Page._editorDraft) ~= "table" then return end
     -- The generic composite controls write their page draft during a Slider
     -- drag.  Persisting and Materializing here would rebuild this entire page
@@ -424,6 +351,7 @@ local function RefreshActiveSurfaces(_, phase)
     -- everything else commits once when the mouse is released.
     if phase == "changing" then return false end
     CommitActiveDraft()
+    RefreshVisibleControls()
     RefreshPanelPreview()
     local marker = ExBoss and ExBoss.TrashCD and ExBoss.TrashCD.NameplateMarker
     if marker and type(marker.IsScreenNameplatePreviewEnabled) == "function"
@@ -440,11 +368,17 @@ EXUI:RegisterModuleValueController(EDITOR_KEY, {
 -- =============================================================
 -- Render
 -- =============================================================
--- [混合函数边界] Page:Render 内只可调整 Dock/Scroll/Grid 的锚点与尺寸；revision guard、draft、预览、ActivePage 与既有 OnHide 行为禁止修改。
--- 设置目录切换只隐藏 ScrollFrame：其 OnHide 会清 draft/revision、preview 与 ActivePage，但不会释放 Grid；不得把下方 Page:Hide 的完整释放写成当前目录调用链。
+-- 目录切换隐藏 ScrollFrame、再次 Render 或显式 Hide 都释放设置会话。
+local function ReleaseSettingsSession()
+    Page._v2Session = nil
+    if Page._scrollChild then
+        EXUI:ReleaseModuleSettingsPage(Page._scrollChild)
+    end
+end
+
 function Page:Render(contentFrame)
-    local Grid = _G.ExwindGrid
-    if not Grid then return end
+    Page._editorActive = false
+    ReleaseSettingsSession()
     Page._renderGeneration = (Page._renderGeneration or 0) + 1
     local renderGeneration = Page._renderGeneration
     Page._editorRevision = (Page._editorRevision or 0) + 1
@@ -483,6 +417,7 @@ function Page:Render(contentFrame)
             end
             if standardPreview then standardPreview:Release() end
             StopScreenNameplatePreview()
+            ReleaseSettingsSession()
             if Page._previewDock then Page._previewDock:Hide() end
         end)
     end
@@ -524,22 +459,21 @@ function Page:Render(contentFrame)
             ExwindTools.UI.CurrentModule   = EDITOR_KEY
         end
         RefreshPanelPreview()
-        if Page._cardSession and type(Page._cardSession.Release) == "function" then
-            Page._cardSession:Release()
-            Page._cardSession = nil
-        end
-        Page._cardSession = Grid:MountCards(sc, LAYOUT, {
-            pageId = EDITOR_KEY,
-            regionId = "global-trash-cd",
-            config = gridDB,
-            moduleKey = EDITOR_KEY,
-            scrollFrame = sf,
-        })
+        local owner = {
+            binding = { moduleKey = EDITOR_KEY, config = gridDB },
+            actions = {
+                screenNameplatePreview = function(context)
+                    if context:IsCurrent() and IsDraftCurrent(gridDB) then ToggleScreenNameplatePreview() end
+                end,
+            },
+        }
+        Page._v2Session = EXUI:MountModuleSettingsDeclarationV2(
+            sc, EDITOR_KEY, owner, L["小怪内置CD姓名版图标"], nil, sf)
         InstallPageLiveSliders(gridDB)
     end)
 end
 
--- [释放边界] 显式 Page:Hide 才会额外 ReleaseContainerWidgets；当前 GlobalSettings 目录不会调用它，未来迁移不得偷偷改变调用链或重复释放。
+-- 显式 Hide 与目录隐藏同样释放设置会话。
 function Page:Hide()
     Page._renderGeneration = (Page._renderGeneration or 0) + 1
     Page._editorRevision = (Page._editorRevision or 0) + 1
@@ -550,9 +484,6 @@ function Page:Hide()
         ExwindTools.UI.ActivePageFrame = nil
         ExwindTools.UI.CurrentModule = nil
     end
-    local Grid = _G.ExwindGrid
-    if Grid and Grid.ReleaseContainerWidgets and Page._scrollChild then
-        Grid:ReleaseContainerWidgets(Page._scrollChild)
-    end
+    ReleaseSettingsSession()
     if Page._scrollFrame then Page._scrollFrame:Hide() end
 end

@@ -42,14 +42,14 @@ function Provider:CreateHeaderActions(header)
     holder:SetPoint("RIGHT", header, "RIGHT", -46, 0)
     self.HeaderActions = holder
 
-    local reload = EXUI:CreateButton(holder, 120, ExwindTools.GUIMetrics.size.buttonHeight, L["立即重载界面"], function()
+    local reload = EXUI:CreateButton(holder, 118, 24, L["立即重载界面"], function()
         C_UI.Reload()
     end)
-    reload:SetSize(118, 24)
+    reload:SetHeight(24)
     reload:SetPoint("RIGHT", 0, 0)
     self.ReloadButton = reload
 
-    local edit = EXUI:CreateButton(holder, 120, ExwindTools.GUIMetrics.size.buttonHeight, "", function()
+    local edit = EXUI:CreateButton(holder, 118, 24, "", function()
         EXUI:ToggleEditMode()
         UpdateEditModeButton()
         -- 保留旧行为：开启全局编辑时收起总面板，给世界中的锚点操作让出空间。
@@ -57,17 +57,17 @@ function Provider:CreateHeaderActions(header)
             Panel:Hide()
         end
     end)
-    edit:SetSize(118, 24)
+    edit:SetHeight(24)
     edit:SetPoint("RIGHT", reload, "LEFT", -7, 0)
     self.EditModeButton = edit
     EXUI.EditModeToggleButton = edit
 
-    local changelog = EXUI:CreateButton(holder, 120, ExwindTools.GUIMetrics.size.buttonHeight, L["更新日志"], function()
+    local changelog = EXUI:CreateButton(holder, 84, 24, L["更新日志"], function()
         if ExwindTools.ShowChangelog then
             ExwindTools:ShowChangelog({ markShown = true })
         end
     end)
-    changelog:SetSize(84, 24)
+    changelog:SetHeight(24)
     changelog:SetPoint("RIGHT", edit, "LEFT", -7, 0)
     self.ChangelogButton = changelog
     EXUI.ChangelogButton = changelog

@@ -89,6 +89,22 @@ function EllesmereUI._RestoreWidgetRefreshList(snap)
     for i = 1, #snap do _widgetRefreshList[i] = snap[i] end
 end
 
+-- The refresh RefreshPage put off while the panel was closed or folded to the
+-- mini window (a forced pass, or the fast path's widget re-read): run once, for
+-- the page then shown, when the panel shows again (the on-show callback ahead
+-- of the module OnShow handlers, and the unfold).
+local function RunDeferredRefresh()
+    if EllesmereUI._pendingForceRefresh then
+        EllesmereUI._pendingForceRefresh = nil
+        -- the pass dresses every widget at its current value
+        EllesmereUI._pendingFastRefresh = nil
+        EllesmereUI:RefreshPage(true)
+    elseif EllesmereUI._pendingFastRefresh then
+        EllesmereUI._pendingFastRefresh = nil
+        for i = 1, #_widgetRefreshList do _widgetRefreshList[i]() end
+    end
+end
+
 -- Hide all children/regions of a frame without orphaning them
 local HideAllChildren
 do
@@ -174,9 +190,7 @@ local UpdateSidebarHighlight, ClearContent
 -------------------------------------------------------------------------------
 --  Build Main Frame
 -------------------------------------------------------------------------------
-local function CreateMainFrame()
-    if mainFrame then return mainFrame end
-
+local function BuildFrame()
     -----------------------------------------------------------------------
     --  Root frame + scaling
     -----------------------------------------------------------------------
@@ -845,11 +859,8 @@ local function CreateMainFrame()
             if not mainFrame:IsShown() then return end
             -- Dropped somewhere else: keep the unfolded panel on screen.
             if EllesmereUI._panelNudge then EllesmereUI._KeepPanelOnScreen() end
-            -- Pages are only ever built on screen (RefreshPage defers while folded).
-            if EllesmereUI._pendingForceRefresh then
-                EllesmereUI._pendingForceRefresh = nil
-                EllesmereUI:RefreshPage(true)
-            end
+            -- Pages are only ever built or re-read on screen (RefreshPage defers while folded).
+            RunDeferredRefresh()
             for i = 1, #hooks do hooks[i](false) end
         end
     end
@@ -876,7 +887,9 @@ local function CreateMainFrame()
             mainFrame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", ml + dx, mb + dy)
         end
     end
+end
 
+local function BuildSidebar()
     -----------------------------------------------------------------------
     --  Sidebar
     -----------------------------------------------------------------------
@@ -1993,7 +2006,7 @@ local function CreateMainFrame()
 
     -- Build the sidebar in group order; positions are assigned once and re-stacked by
     -- RefreshSidebarStates. Group/roster references go through
-    -- the private EUI_NS model (one upvalue, CreateMainFrame is at the 60-upvalue cap);
+    -- the private EUI_NS model (one upvalue instead of one per name, keeps BuildSidebar well under the 60-upvalue cap);
     -- cumulative `_y` walks each row so group and child heights can differ.
     -- Outside addons' own groups and pages join the model first (see the Plugin API).
     EUI_NS.SyncExternal()
@@ -2026,7 +2039,7 @@ local function CreateMainFrame()
     -- cannot swap in one that is handed the private button table.
     local pairs = pairs
     -- Lock/unlock excluded modules during an override editing session: their settings cannot be
-    -- captured, so the row grays out and blocks clicks. Called from the session enter/exit paths in EllesmereUI_SpecOverrides.
+    -- captured, so the row grays out and blocks clicks. Called from the session enter/exit paths in EUI_SpecOverrides_Session.lua.
     EllesmereUI.RefreshSidebarOverrideLocks = function()
         local active = EllesmereUI.SpecOverrides_EditSessionActive
             and EllesmereUI.SpecOverrides_EditSessionActive() or false
@@ -2314,7 +2327,12 @@ local function CreateMainFrame()
     resUpdateFrame:SetScript("OnHide", function()
         if resTicker then resTicker:Cancel(); resTicker = nil end
     end)
+end
 
+-- The public header API below iterates private tables; a local pairs means setfenv on it
+-- cannot swap in one that is handed those tables.
+local function BuildContent()
+    local pairs = pairs
     -----------------------------------------------------------------------
     --  Right-side content region
     -----------------------------------------------------------------------
@@ -2678,9 +2696,12 @@ local function CreateMainFrame()
             if r ~= contentHeaderBg and r ~= contentHeaderDiv then r:Hide(); r:SetParent(nil) end
         end
         -- The root that showed is cleared like the header frame's own parts
-        -- (stale until built again); a saved root keeps its parts.
+        -- (stale until built again); a saved root keeps its parts. What still
+        -- shows over it (an open popup) is pinned first, before the header
+        -- collapses under it (Pool.Pin, EllesmereUI_FramePool.lua).
         local act = H.active
         if act then
+            if EUI_NS.PoolPin then EUI_NS.PoolPin(act) end
             H.stale[isRoot[act]] = true
             EUI_NS.DropRootForeign(act)
             H.active = nil
@@ -2700,6 +2721,8 @@ local function CreateMainFrame()
         local root = H.roots[cacheKey]
         if root and H.active == root then
             root:Hide()
+            -- what still shows over it stays put while the header collapses
+            if EUI_NS.PoolPin then EUI_NS.PoolPin(root) end
             H.active = nil
             H.height[cacheKey] = contentHeaderH
             contentHeaderFrame:Hide()
@@ -2830,6 +2853,8 @@ local function CreateMainFrame()
             local H = EUI_NS.hdr
             H.height[key] = h
             H.stale[key] = nil
+            -- dev mode: an idle pooled object left showing on the kept root
+            if EUI_NS.PoolDevEndPass then EUI_NS.PoolDevEndPass(target, key) end
         end
         ApplyContentLayout()
     end
@@ -2893,6 +2918,8 @@ local function CreateMainFrame()
         for _, r in ipairs(rg) do
             if r ~= contentHeaderBg and r ~= contentHeaderDiv then r:Hide() end
         end
+        -- what still shows over the root stays put while the header collapses
+        if act and EUI_NS.PoolPin then EUI_NS.PoolPin(act) end
         contentHeaderFrame:Hide()
         contentHeaderFrame:SetHeight(1)
         contentHeaderH = 0
@@ -2910,6 +2937,10 @@ local function CreateMainFrame()
         InvalidateContentHeaderCache()
     end
 
+    return rightW, rightX
+end
+
+local function BuildFooter(rightW, rightX)
     -----------------------------------------------------------------------
     --  Footer  (Reset to Defaults + Reload UI | Done)
     -----------------------------------------------------------------------
@@ -3002,8 +3033,6 @@ local function CreateMainFrame()
         RS_BRD_R, RS_BRD_G, RS_BRD_B, RS_BRD_A, RS_BRD_HR, RS_BRD_HG, RS_BRD_HB, RS_BRD_HA,
         "Reload UI", function() EllesmereUI.RequestReload(EllesmereUI.L("Reload UI"), EllesmereUI.L("Reload the UI now?")) end)
     footerFrame._reloadBtn = reloadBtn
-    -- WoW Forever: the click itself is the reload, no popup.
-    EllesmereUI.AttachReloadClick(reloadBtn)
 
     -- Per-module Reset visibility: suite pages and pages with no onReset hide Reset and
     -- slide Reload UI left into its slot. Called from SelectModule.
@@ -3196,6 +3225,15 @@ local function CreateMainFrame()
             brd:SetColor(r, g, b, lerp(0.7, 1, progress))
         end })
     end
+end
+
+local function CreateMainFrame()
+    if mainFrame then return mainFrame end
+
+    BuildFrame()
+    BuildSidebar()
+    local rightW, rightX = BuildContent()
+    BuildFooter(rightW, rightX)
 
     return mainFrame
 end
@@ -3206,6 +3244,17 @@ end
 -- Display-only tab label overrides ([page identity] = shown label), registered by module options
 -- files. Page IDENTITY stays the original string everywhere else (SelectPage, nav targets, unlock elements, spec overrides, saved state); only the tab text changes.
 EllesmereUI.TAB_LABEL_OVERRIDES = EllesmereUI.TAB_LABEL_OVERRIDES or {}
+
+-- A page's tab label (not localized): a suite module's own config.tabLabels[page] first,
+-- so a label never lands on another module's page of the same name, then the shared
+-- TAB_LABEL_OVERRIDES, else the page identity itself. tabLabels is suite-only (plugin
+-- configs are ignored), and on EUI_NS, not EllesmereUI: a public slot would let any
+-- addon relabel the suite's tabs.
+function EUI_NS.GetTabLabel(folderName, page)
+    local m = folderName and EUI_NS.IsSuiteKey(folderName) and modules[folderName]
+    local own = m and type(m.tabLabels) == "table" and m.tabLabels[page]
+    return own or EllesmereUI.TAB_LABEL_OVERRIDES[page] or page
+end
 
 -- Tab buttons are pooled by position (tabBar._tabPool) and re-labelled for each
 -- module; tabBar._tabButtons lists the ones in use, in order.
@@ -3259,7 +3308,7 @@ CreateTabButton = function(index, name)
     btn._disabled = nil
     btn._tip      = nil
     local label = btn._label
-    label:SetText(EllesmereUI.L(EllesmereUI.TAB_LABEL_OVERRIDES[name] or name))
+    label:SetText(EllesmereUI.L(EUI_NS.GetTabLabel(activeModule, name)))
     label:SetTextColor(TEXT_DIM.r, TEXT_DIM.g, TEXT_DIM.b, TEXT_DIM.a)
     label:SetAlpha(1)
 
@@ -3339,6 +3388,23 @@ BuildTabs = function(pageNames, disabledPages, disabledTooltips)
             editBox:ClearFocus()
         end)
 
+        -- Disabled (a page the inline search cannot filter, SelectPage): greyed
+        -- like a disabled option, under a blocker that takes the mouse and says why.
+        local searchBlock = CreateFrame("Frame", nil, searchFrame)
+        searchBlock:SetAllPoints()
+        searchBlock:SetFrameLevel(clearBtn:GetFrameLevel() + 1)
+        searchBlock:EnableMouse(true)
+        searchBlock:Hide()
+        searchBlock:SetScript("OnEnter", function()
+            EllesmereUI.ShowWidgetTooltip(searchFrame, EllesmereUI.L("Search is not available on this page."))
+        end)
+        searchBlock:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+        tabBar._setSearchDisabled = function(off)
+            if off then editBox:ClearFocus() end
+            searchFrame:SetAlpha(off and 0.3 or 1)
+            searchBlock:SetShown(off)
+        end
+
         -- Border hover effect
         searchFrame:SetScript("OnEnter", function() searchBrd:SetColor(STYLE.BORDER_R, STYLE.BORDER_G, STYLE.BORDER_B, 0.15) end)
         searchFrame:SetScript("OnLeave", function() searchBrd:SetColor(STYLE.BORDER_R, STYLE.BORDER_G, STYLE.BORDER_B, 0.10) end)
@@ -3378,7 +3444,7 @@ BuildTabs = function(pageNames, disabledPages, disabledTooltips)
         tabBar._searchFrame = searchFrame
 
         -- Spec Override capture toggle (left of the search box). All look
-        -- and behavior live in EllesmereUI_SpecOverrides.lua.
+        -- and behavior live in EUI_SpecOverrides_Popups.lua (SpecOverrides_SetupButton).
         if EllesmereUI.SpecOverrides_SetupButton then
             local soBtn = CreateFrame("Button", nil, tabBar)
             soBtn:SetSize(26, 26)
@@ -3472,6 +3538,15 @@ local function RecycleAllSearchHighlights(detach)
         if detach then hl:SetParent(nil) end
         _searchHighlightPool[#_searchHighlightPool + 1] = hl
         _searchHighlightsActive[i] = nil
+    end
+    -- An inline search run recycles without detaching, so a highlight it put
+    -- back can still sit hidden on the row it pulsed on: a page pass takes
+    -- those off too.
+    if detach then
+        for i = 1, #_searchHighlightPool do
+            local hl = _searchHighlightPool[i]
+            if hl:GetParent() then hl:SetParent(nil) end
+        end
     end
 end
 
@@ -3604,6 +3679,13 @@ function EllesmereUI:NavigateToElementSettings(moduleName, pageName, sectionName
             end
         end
         return nil
+    end
+
+    -- Refused in combat like Show (see there), before the page selection below
+    -- runs, which has no combat check of its own.
+    if InCombatLockdown() then
+        EllesmereUI.PrintError("Cannot open options during combat.")
+        return
     end
 
     -- First-open split (see _SplitFirstOpen): Show() below returns without
@@ -4218,7 +4300,9 @@ do
         EllesmereUIDataBars = true,
         EllesmereUIQuickdraw = true,
         EllesmereUILoadoutManager = true,
+        EllesmereUIGroupFinder = true,
         EllesmereUIForeverEssentials = true,
+        EllesmereUISimpleLootCouncil = true,
     }
 
     -- Shared tail of every accepted registration. Only reachable from the
@@ -4303,8 +4387,9 @@ end
 -------------------------------------------------------------------------------
 -- From here on the public functions iterate private tables (page cache, a
 -- module's page list): local iterators mean setfenv cannot swap in one that
--- is handed those tables. (Declared after CreateMainFrame, which is at the
--- upvalue cap.)
+-- is handed those tables. (Declared after CreateMainFrame and its Build*
+-- functions; BuildSidebar and BuildContent declare their own pairs, the others
+-- use none.)
 local pairs, ipairs = pairs, ipairs
 -- Page cache: maps "moduleName::pageName" -> { wrapper, totalH, headerBuilder }
 -- On revisit, we show the cached wrapper and refresh widget values instead of rebuilding.
@@ -4695,6 +4780,13 @@ function EllesmereUI:SelectPage(pageName)
     activePage = pageName
     _lastPagePerModule[activeModule] = pageName
     UpdateTabHighlight(pageName)
+    -- A page that draws its own layout over the scroll frame (a manager page,
+    -- config.noSearchPages) has nothing the inline search can filter: the box
+    -- shows disabled there.
+    if tabBar and tabBar._setSearchDisabled then
+        local noSearch = modules[activeModule].noSearchPages
+        tabBar._setSearchDisabled(noSearch ~= nil and noSearch[pageName] == true)
+    end
 
     local cacheKey = activeModule .. "::" .. pageName
     local cached = _pageCache[cacheKey]
@@ -4794,12 +4886,6 @@ end
 -- Pass force=true to bypass the fast refresh path (e.g. when widget layout changes).
 function EllesmereUI:RefreshPage(force)
     if not activeModule or not activePage then return end
-    -- Fast path: if widgets registered refresh callbacks, just re-read
-    -- DB values in-place.  No frame teardown, no allocations.
-    if not force and #_widgetRefreshList > 0 then
-        for i = 1, #_widgetRefreshList do _widgetRefreshList[i]() end
-        return
-    end
     -- Panel hidden: a rebuild here would run buildPage with nothing on screen, firing page-open
     -- side effects (preview flags, placeholder shows) AFTER the OnHide cleanup already cleared
     -- them -- they then stick until the next open (e.g. CDM buff previews staying visible when
@@ -4807,7 +4893,20 @@ function EllesmereUI:RefreshPage(force)
     -- Folded to the mini window counts as hidden: a page built under the hidden body
     -- never shows, so its OnHide teardown (page-scoped event listeners) never runs.
     -- The unfold consumes the flag (EllesmereUI._SetPanelCollapsed).
-    if not (mainFrame and mainFrame:IsShown()) or EllesmereUI._panelCollapsed then
+    local hidden = not (mainFrame and mainFrame:IsShown()) or EllesmereUI._panelCollapsed
+    -- Fast path: if widgets registered refresh callbacks, just re-read
+    -- DB values in-place.  No frame teardown, no allocations.
+    if not force and #_widgetRefreshList > 0 then
+        -- Nothing on the page can be seen: the re-read waits for the next show
+        -- (RunDeferredRefresh), so a closed panel repaints nothing.
+        if hidden then
+            EllesmereUI._pendingFastRefresh = true
+            return
+        end
+        for i = 1, #_widgetRefreshList do _widgetRefreshList[i]() end
+        return
+    end
+    if hidden then
         EllesmereUI._pendingForceRefresh = true
         return
     end
@@ -4856,15 +4955,10 @@ function EllesmereUI:RefreshPage(force)
     end
 end
 
--- Consume a rebuild that was requested while the panel was hidden (see the deferral
--- inside RefreshPage). Registered here, before any module files load, so it runs ahead
--- of module OnShow callbacks -- they then observe the freshly rebuilt page.
-EllesmereUI:RegisterOnShow(function()
-    if EllesmereUI._pendingForceRefresh then
-        EllesmereUI._pendingForceRefresh = nil
-        EllesmereUI:RefreshPage(true)
-    end
-end)
+-- Consume a rebuild or re-read that was requested while the panel was hidden (see the
+-- deferral inside RefreshPage). Registered here, before any module files load, so it runs
+-- ahead of module OnShow callbacks -- they then observe the current page.
+EllesmereUI:RegisterOnShow(RunDeferredRefresh)
 
 -- Public: snap the settings scroll back to the top (e.g. in resource bars clicking on a
 -- simple section to the Advanced page)
@@ -4893,8 +4987,7 @@ end
 --  resetScope ("account": settings every profile shares, "character": this
 --  character's own; default: the current profile) and resetMessage (a
 --  string, or a function returning one, in place of the standard question).
---  A typed confirm cannot drive WoW Forever's /reload click, so the reset
---  runs as RequestReload's pre-reload work, as Reset ALL's wipe does.
+--  The reset runs as RequestReload's pre-reload work, as Reset ALL's wipe does.
 -------------------------------------------------------------------------------
 local RESET_SCOPE_TEXT = {
     profile   = "Only your current profile is reset; your other profiles keep their settings.",
@@ -5216,8 +5309,17 @@ function EllesmereUI:_SplitFirstOpen(afterFn)
     return true
 end
 
+-- The panel never opens in combat (it closes as combat starts). Callers check
+-- before they ask, but an open can still land after combat began: the
+-- first-open split and the Settings button run it a frame later, and a deep
+-- link (NavigateToElementSettings) can come from a click on a game frame.
+-- Pages built then would call widget methods that are blocked in combat.
 function EllesmereUI:Show()
     if self._openPending then return end
+    if InCombatLockdown() then
+        EllesmereUI.PrintError("Cannot open options during combat.")
+        return
+    end
     if self:_SplitFirstOpen(function() EllesmereUI:Show() end) then return end
     CreateMainFrame()
     RefreshSidebarStates()
@@ -5229,6 +5331,12 @@ end
 function EllesmereUI:Hide()   if mainFrame then mainFrame:Hide() end end
 function EllesmereUI:Toggle()
     if self._openPending then return end
+    -- Closing still works in combat; opening or unfolding the mini window does
+    -- not (see Show).
+    if InCombatLockdown() and not (mainFrame and mainFrame:IsShown() and not self._panelCollapsed) then
+        EllesmereUI.PrintError("Cannot open options during combat.")
+        return
+    end
     if self:_SplitFirstOpen(function() EllesmereUI:Toggle() end) then return end
     CreateMainFrame()
     if self._panelCollapsed then
@@ -5442,7 +5550,7 @@ end
 --  (a module can opt out of the latter with searchPrebuild = false).
 --  Developer guide: PLUGINS_API.md.
 -------------------------------------------------------------------------------
-EllesmereUI.PLUGIN_API_VERSION = 1
+EllesmereUI.PLUGIN_API_VERSION = 3
 
 do
     local PREFIX          = EUI_NS.PLUGIN_PREFIX

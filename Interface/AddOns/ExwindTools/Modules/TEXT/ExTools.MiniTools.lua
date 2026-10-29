@@ -1643,19 +1643,16 @@ local function EX_RegisterLayout()
     local function Switch(key, label)
         return { id = key, kind = "control", controlType = "switch", path = key, label = label }
     end
-    local function Card(key, label)
-        return { id = key, kind = "control", controlType = "card", path = key, label = label }
+    local function Toggle(key, label)
+        return { path = key, label = label }
     end
     local function Select(key, label, values)
         local options = {}
         for index, value in ipairs(values) do options[index] = { value = value[1], label = value[2] } end
         return { id = key, kind = "control", controlType = "select", path = key, label = label, options = options }
     end
-    local function CardRow(id, label, cards)
-        return { id = id, kind = "row", children = {
-            { id = id .. ".label", kind = "text", text = label },
-            { id = id .. ".cards", kind = "actions", position = "end", align = "end", children = cards },
-        } }
+    local function ToggleRow(id, label, items)
+        return { id = id, kind = "control", controlType = "toggles", label = label, items = items }
     end
     EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, { version = 2, cards = {
         { id = "map", kind = "card", title = L["地图"], children = {
@@ -1682,14 +1679,14 @@ local function EX_RegisterLayout()
         } },
         { id = "combat_log", kind = "card", title = L["自动战斗记录"], children = {
             Switch("AutoCombatLog", L["启用模块 (总开关)"]),
-            CardRow("combat_log.dungeon", L["|cffffd1005人地下城|r"], {
-                Card("ACL_DungeonFollower", L["追随者"]), Card("ACL_DungeonNormal", L["普通"]),
-                Card("ACL_DungeonHeroic", L["英雄"]), Card("ACL_DungeonMythic", L["史诗"]),
-                Card("ACL_DungeonChallenge", L["大秘境"]),
+            ToggleRow("combat_log.dungeon", L["|cffffd1005人地下城|r"], {
+                Toggle("ACL_DungeonFollower", L["追随者"]), Toggle("ACL_DungeonNormal", L["普通"]),
+                Toggle("ACL_DungeonHeroic", L["英雄"]), Toggle("ACL_DungeonMythic", L["史诗"]),
+                Toggle("ACL_DungeonChallenge", L["大秘境"]),
             }),
-            CardRow("combat_log.raid", L["|cffffd100团队副本|r"], {
-                Card("ACL_RaidLFR", L["随机"]), Card("ACL_RaidNormal", L["普通"]),
-                Card("ACL_RaidHeroic", L["英雄"]), Card("ACL_RaidMythic", L["史诗"]),
+            ToggleRow("combat_log.raid", L["|cffffd100团队副本|r"], {
+                Toggle("ACL_RaidLFR", L["随机"]), Toggle("ACL_RaidNormal", L["普通"]),
+                Toggle("ACL_RaidHeroic", L["英雄"]), Toggle("ACL_RaidMythic", L["史诗"]),
             }),
         } },
         { id = "battle_tag", kind = "card", title = L["修改战网名称"], children = {

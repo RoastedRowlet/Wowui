@@ -14,16 +14,6 @@ local EX_DB
 local GetActionLabel
 local NormalizeThemeId
 local EnsureAnchorController
-local ApplyMicroMenuLivePresentation
--- Layout 在 renderer 建立前已注册；因此 Grid 保存的必须是稳定的转发函数，
--- 而不能保存稍后才赋值的 nil callback。
-local function ApplyMicroMenuLivePreview(value, context)
-    if type(ApplyMicroMenuLivePresentation) == "function" then
-        return ApplyMicroMenuLivePresentation(value, context)
-    end
-    return false
-end
-
 local function IsCombatRestricted()
     local state = ExwindTools and ExwindTools.State
     if state and state.InCombat == true then
@@ -137,20 +127,6 @@ for _, actionDef in ipairs(ACTION_LIST) do
     ACTION_LABEL_TO_ID[actionDef.id] = actionDef.id
 end
 
-local function BuildActionDropdownItems()
-    local items = {}
-    for _, actionDef in ipairs(ACTION_LIST) do
-        local text = actionDef.label
-        if actionDef.atlas then
-            text = CreateAtlasMarkup(actionDef.atlas, 16, 16) .. " " .. actionDef.label
-        end
-        items[#items + 1] = { text, actionDef.id }
-    end
-    return items
-end
-
-ExwindTools.GetMicroMenuActionItems = BuildActionDropdownItems
-
 -- =============================================================
 -- 图标主题
 -- =============================================================
@@ -245,7 +221,7 @@ local function BuildIconPickerChoices()
                 themeId = "blizzard",
                 iconId = iconId,
                 label = GetActionLabel(iconId),
-                themeName = THEME_BY_ID.blizzard.name,
+                themeName = L[THEME_BY_ID.blizzard.name],
             }
         end
     end
@@ -259,8 +235,8 @@ local function BuildIconPickerChoices()
                     choices[#choices + 1] = {
                         themeId = theme.id,
                         iconId = iconId,
-                        label = "图标 " .. iconId,
-                        themeName = theme.name,
+                        label = string.format(L["图标 %s"], iconId),
+                        themeName = L[theme.name],
                     }
                 end
             end
@@ -269,16 +245,6 @@ local function BuildIconPickerChoices()
 
     return choices
 end
-
-local function BuildThemeDropdownItems()
-    local items = {}
-    for _, theme in ipairs(ICON_THEMES) do
-        items[#items + 1] = { theme.name, theme.id }
-    end
-    return items
-end
-
-ExwindTools.GetMicroMenuThemeItems = BuildThemeDropdownItems
 
 local DEFAULT_LEFT_ACTIONS = {
     "character", "questlog", "achievement", "lfg", "guild",
@@ -344,199 +310,9 @@ local EX_DEFAULTS = {
     },
 }
 
-local function PickMicroMenuAnchor()
-    return EnsureAnchorController():StartFramePicker()
-end
-
-local MICRO_MENU_ANCHOR_OPTS = {
-    bindRoot = true,
-    offsetXKey = "anchorX",
-    offsetYKey = "anchorY",
-    defaultOffsetX = EX_DEFAULTS.anchorX,
-    defaultOffsetY = EX_DEFAULTS.anchorY,
-    attachEnabledKey = "attachToCustom",
-    attachTargetKey = "customAttachTarget",
-    onPickFrame = PickMicroMenuAnchor,
-}
-
--- Grid/EXUI 的 Slider live 阶段已经先写入唯一 ModuleDB；这里仅公开模块的
--- 三宿主窄投影入口。数量类 Slider 会改变 item 集合，故只在松手 commit 后
--- 完整重排，不能滥用 live 回调 Acquire/Release 项目。
-local MICRO_MENU_FONT_LIVE = {
-    size = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    x = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    y = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    shadowX = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    shadowY = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-}
-
-local MICRO_MENU_ICON_LIVE = {
-    width = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    height = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    alpha = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    rotation = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    cropLeft = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    cropRight = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    cropTop = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    cropBottom = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    borderSize = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    borderPadding = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    ["cooldown.swipeAlpha"] = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-    ["cooldown.edgeAlpha"] = function(value, context) return ApplyMicroMenuLivePreview(value, context) end,
-}
-
-local function BuildSlotPath(side, index)
-    return "slots." .. side .. "." .. index
-end
-
 local function BuildSelectedSlotTitle(side, index)
     return (side == "right" and L["右"] or L["左"]) .. index
 end
-
-local function BuildSlotEditorItems(selectedSide, selectedIndex)
-    local slotPath = BuildSlotPath(selectedSide or "left", selectedIndex or 1)
-    local slot
-    if EX_DB and type(EX_DB.slots) == "table" and type(EX_DB.slots[selectedSide or "left"]) == "table" then
-        slot = EX_DB.slots[selectedSide or "left"][selectedIndex or 1]
-    end
-
-    local leftAction = type(slot) == "table" and type(slot.leftClick) == "table" and slot.leftClick.action or "none"
-    local rightAction = type(slot) == "table" and type(slot.rightClick) == "table" and slot.rightClick.action or "none"
-    local leftIsCustom = leftAction == "custom"
-    local rightIsCustom = rightAction == "custom"
-
-    local children = {
-        {
-            key = "left_action",
-            parentKey = slotPath,
-            subKey = "leftClick.action",
-            type = "select",
-            label = "左键点击",
-            optionsSource = "ExwindTools.GetMicroMenuActionItems",
-        },
-        {
-            key = "right_action",
-            parentKey = slotPath,
-            subKey = "rightClick.action",
-            type = "select",
-            label = "右键点击",
-            optionsSource = "ExwindTools.GetMicroMenuActionItems",
-        },
-    }
-
-    if leftIsCustom then
-        children[#children + 1] = {
-            key = "left_cmd",
-            parentKey = slotPath,
-            subKey = "leftClick.cmd",
-            type = "input",
-            label = "左键命令",
-        }
-    end
-
-    if rightIsCustom then
-        children[#children + 1] = {
-            key = "right_cmd",
-            parentKey = slotPath,
-            subKey = "rightClick.cmd",
-            type = "input",
-            label = "右键命令",
-        }
-    end
-
-    return children
-end
-
-local function BuildLayout(selectedSide, selectedIndex)
-    local currentSide = EX_DB and EX_DB.selectedSlotSide or selectedSide or "left"
-    local currentIndex = EX_DB and EX_DB.selectedSlotIndex or selectedIndex or 1
-    local selectedTitle = BuildSelectedSlotTitle(currentSide, currentIndex)
-    -- [声明迁移边界：设置页] 仅把原动态设置与复合控件改为 typed sections。
-    -- 左/右槽位选择与动作顺序、selectedSlot 绑定、图标选择器、预览/运行回调禁止修改。
-    local layout = {
-        version = 1,
-        title = "微型选单",
-        sections = {
-            {
-                kind = "settings", id = "basic", title = "基础设置",
-                description = {
-                    key = "desc", type = "description",
-                    label = "中间时间是唯一根点；左右动作固定相对它排列，三宿主都只展示这一套选单。",
-                },
-                items = {
-                    { key = "enabled", type = "switch", label = "启用" },
-                    { key = "showBackground", type = "switch", label = "显示背景" },
-                    { key = "barScale", type = "slider", label = "整体缩放", min = 0.5, max = 2.0, step = 0.05 },
-                    { key = "bgAlpha", type = "slider", label = "背景透明度", min = 0, max = 1, step = 0.05 },
-                },
-            },
-            {
-                kind = "settings", id = "theme", title = "图标风格",
-                items = {
-                    { key = "iconTheme", type = "select", label = "整体风格", optionsSource = "ExwindTools.GetMicroMenuThemeItems" },
-                    { key = "leftCount", type = "slider", label = "左侧数量", min = 0, max = MAX_SLOTS, step = 1 },
-                    { key = "rightCount", type = "slider", label = "右侧数量", min = 0, max = MAX_SLOTS, step = 1 },
-                },
-            },
-            {
-                kind = "settings", id = "time", title = "时间文字",
-                items = {
-                    {
-                        key = "timeFormat", type = "select", label = "时间格式",
-                        options = {
-                            { value = "24小时制", label = "24小时制" },
-                            { value = "12小时制", label = "12小时制" },
-                        },
-                    },
-                    { key = "showSeconds", type = "switch", label = "显示秒数" },
-                },
-            },
-            {
-                kind = "composite", id = "position", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchorGroup", opts = MICRO_MENU_ANCHOR_OPTS,
-            },
-            {
-                kind = "settings", id = "slot", title = "当前槽位：" .. selectedTitle,
-                description = {
-                    key = "slot_desc", type = "description",
-                    label = "先选择左右分组与槽位编号，再编辑图标和左右键动作；上方预览只展示同一套选单。",
-                },
-                items = {
-                    {
-                        key = "selectedSlotSide", type = "select", label = "分组",
-                        options = {
-                            { value = "左侧", label = "left" },
-                            { value = "右侧", label = "right" },
-                        },
-                    },
-                    { key = "selectedSlotIndex", type = "slider", label = "槽位编号", min = 1, max = MAX_SLOTS, step = 1 },
-                    { key = "btn_select_icon", type = "button", label = "选择图案" },
-                },
-            },
-            {
-                kind = "composite", id = "time_font", title = "时间文字",
-                component = "fontgroup", key = "timeFont", opts = {},
-            },
-            {
-                kind = "composite", id = "icon_style", title = "整体图标",
-                component = "icongroup", key = "iconStyle", opts = { enableOffset = false },
-            },
-        },
-    }
-
-    local slotItems = layout.sections[5].items
-    for _, item in ipairs(BuildSlotEditorItems(currentSide, currentIndex)) do
-        slotItems[#slotItems + 1] = item
-    end
-
-    return layout
-end
-
-local function EX_RegisterLayout(selectedSide, selectedIndex)
-    ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, BuildLayout(selectedSide, selectedIndex))
-end
-
-EX_RegisterLayout("left", 1)
 
 -- =============================================================
 -- 载入检查
@@ -711,7 +487,6 @@ local function NormalizeDatabase()
 end
 
 NormalizeDatabase()
-EX_RegisterLayout(EX_DB.selectedSlotSide, EX_DB.selectedSlotIndex)
 
 local function GetSelectedSlotInfo()
     EnsureSelectedSlotVisible()
@@ -899,7 +674,7 @@ end
 
 GetActionLabel = function(actionId)
     local actionDef = ACTION_BY_ID[actionId]
-    return actionDef and actionDef.label or ACTION_BY_ID.none.label
+    return L[actionDef and actionDef.label or ACTION_BY_ID.none.label]
 end
 
 local function GetTimeString()
@@ -948,15 +723,6 @@ local function RunSlotAction(side, index, mouseButton)
         if not ok then
             EXDebug("MicroMenu 按钮执行失败: %s", tostring(err))
         end
-    end
-end
-
-local function RefreshLayoutPanel()
-    EX_RegisterLayout(EX_DB.selectedSlotSide, EX_DB.selectedSlotIndex)
-    if ExwindTools.UI and ExwindTools.UI.RefreshContentKeepModuleScroll then
-        ExwindTools.UI:RefreshContentKeepModuleScroll()
-    elseif ExwindTools.UI and ExwindTools.UI.RefreshContent then
-        ExwindTools.UI:RefreshContent()
     end
 end
 
@@ -1599,17 +1365,6 @@ local function ReapplyMicroMenuLiveSurface(surface, presentation)
     PositionSurfaceHosts(surface, presentation)
 end
 
-ApplyMicroMenuLivePresentation = function(_, context)
-    local path = type(context) == "table" and context.fullPath or nil
-    local visualPath = path == "barScale" or path == "bgAlpha" or
-        (type(path) == "string" and (path:match("^timeFont%.") or path:match("^iconStyle%.")))
-    if not visualPath then return false end
-    ReapplyMicroMenuLiveSurface(runtimeSurface, BuildPresentation(false))
-    ReapplyMicroMenuLiveSurface(worldSurface, BuildPresentation(true))
-    ReapplyMicroMenuLiveSurface(panelSurface, BuildPresentation(true))
-    return true
-end
-
 local function UnionSurfaceBounds(result, bounds, x, y)
     if type(bounds) ~= "table" then return result end
     local left = (bounds.left or -bounds.width * 0.5) + x
@@ -1664,17 +1419,13 @@ end
 
 local function HandlePanelIntent(intent)
     if type(intent) ~= "table" then return false end
-    -- 左键仅验证 panel 命中层；右键才进入对应槽位的设置 GUI。IconCollection
+    -- 左键仅验证 panel 命中层；右键选中对应槽位。IconCollection
     -- 的正式 intent 名称是 elementRightClicked，不是不存在的 openGUI。
     if intent.type == "elementClicked" then return true end
     if intent.type ~= "elementRightClicked" then return false end
     local side, index = type(intent.elementID) == "string" and intent.elementID:match("^(left|right)%.slot%.(%d+)")
     if side and index then
         EX_DB.selectedSlotSide, EX_DB.selectedSlotIndex = side, tonumber(index)
-        RefreshLayoutPanel()
-    end
-    if ExwindTools.UI and type(ExwindTools.UI.FocusModuleGridKey) == "function" then
-        ExwindTools.UI:FocusModuleGridKey(EXWIND_MODULE_KEY, intent.guiTarget or "selectedSlotSide")
         return true
     end
     return false

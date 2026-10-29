@@ -8,10 +8,12 @@ local GC = _G.ExwindTools.GUIColors
 local GS = _G.ExwindTools.GUIStates
 local GM = _G.ExwindTools.GUIMetrics
 local Paint, Layout
+-- 页签文字左右内距；fit=true 的页签组放不下时逐步压到 TAB_FIT_MIN_PAD。
+local TAB_PAD, TAB_FIT_MIN_PAD, TAB_ICON_WIDTH = 14, 4, 22
 local RADIO_TEXTURE = "Interface\\AddOns\\ExwindCore\\Textures\\Materials\\ExwindTools\\PlayerPosition\\Circle.png"
 
 local function IsOptionCard(host)
-    return host.variant == "options" and host.mode == "single" and not host.choiceStyle and not host.triStateMode
+    return host.variant == "options" and host.mode == "single" and not host.choiceStyle
 end
 
 local function IsSegmented(host)
@@ -37,6 +39,9 @@ local function SetMovingTexture(host, texture, x, width, animate)
             motion.texture:ClearAllPoints()
             motion.texture:SetPoint(motion.anchor, self, motion.anchor, motion.x, motion.y)
             motion.texture:SetWidth(motion.width)
+            -- 选中块的圆角片按自己在屏幕上的位置取整；只挪位置不触发尺寸变化，每帧按新位置重排（位置没变时直接跳过），
+            -- 否则停下后片落在半个像素上、片间露缝。
+            UI:RefreshCompositeSurfaces(motion.texture)
             if t >= 1 then self:SetScript("OnUpdate", nil) end
         end)
         return
@@ -46,7 +51,8 @@ local function SetMovingTexture(host, texture, x, width, animate)
     state.texture, state.x, state.width = texture, x, width
     state.toX, state.toWidth = nil, nil
     state.anchor = host.variant == "tabs" and "BOTTOMLEFT" or "TOPLEFT"
-    state.y = host.variant == "tabs" and 1 or -3
+    -- 分段选中块的上沿 = 轨道内距（黑色轨道 2，其余 3）。
+    state.y = host.variant == "tabs" and 1 or (host.darkTrack and -GM.space.segmentedDarkTrackPad or -3)
     host._choiceMotion = state
     texture:ClearAllPoints()
     texture:SetPoint(state.anchor, host, state.anchor, x, state.y)
@@ -132,11 +138,6 @@ local function Composite(base, overlay)
 end
 
 local function Normalize(host, value)
-    if host.triStateMode then
-        assert(value == "neutral" or value == "include" or (value == "exclude" and host.allowExclude),
-            "TriStateChip expects neutral/include or an allowed exclude state")
-        return value
-    end
     if host.mode == "multiple" then
         local selected = {}
         for _, item in ipairs(host.items) do
@@ -154,7 +155,6 @@ local function Normalize(host, value)
 end
 
 local function Selected(host, id)
-    if host.triStateMode then return host.selection ~= "neutral" end
     if host.mode == "multiple" then return host.selection[id] == true end
     return host.selection == id
 end
@@ -174,9 +174,6 @@ Paint = function(button)
         or selected and "selected" or hover and "hover" or "normal"
     button:SetEnabled(not disabled)
     local fill, edge, textColor
-    if host.triStateMode and not button._choiceArrow then
-        button.label:SetText(item.label)
-    end
     if host._specPickerTextColor and not button._choiceArrow then
         UI:ClearControlSurface(button)
         textColor = host._specPickerMultiple and
@@ -195,6 +192,8 @@ Paint = function(button)
         local tabState = GS and GS.tab and GS.tab[state]
         textColor = tabState and tabState.text or disabled and Appearance.colors.disabledText or
             (selected and GC.tabSelectedText or (hover and GC.tabHoverText or GC.tabText))
+        -- 页签组 options.selectedText：选中项（可用、未按下时）的文字色；不写时照旧。
+        if state == "selected" and host.tabSelectedText then textColor = host.tabSelectedText end
     elseif IsOptionCard(host) and not button._choiceArrow then
         local optionState = GS and GS.option and GS.option[state]
         fill = optionState and optionState.fill or disabled and Appearance.colors.disabledFill or
@@ -212,17 +211,20 @@ Paint = function(button)
         button.radioInner:SetShown(not selected)
         button.radioDot:SetShown(selected)
         button.description:SetTextColor(unpack(disabled and Appearance.colors.disabledText or GC.optionDesc))
-    elseif host.triStateMode and selected and not disabled and not button._choiceArrow then
-        local tone = host.selection == "include" and GC.triInclude or GC.triExclude
-        fill = Composite(Appearance.colors.subcard,
-            {tone[1], tone[2], tone[3], pressed and .34 or (hover and .26 or .18)})
-        edge, textColor = tone, Appearance.colors.white
-        UI:SetControlSurface(button, GM.radius.control, fill, edge)
     elseif IsSegmented(host) and not button._choiceArrow then
         UI:ClearControlSurface(button)
         local optionState = GS and GS.option and GS.option[state]
         textColor = optionState and optionState.text or disabled and Appearance.colors.disabledText or
             (selected and GC.segmentSelectedText or (hover and GC.segmentHoverText or GC.segmentText))
+        -- 分段每项可写选中文字色（只有选中且可用时生效）。
+        if selected and not disabled and item.selectedText then textColor = item.selectedText end
+        -- 黑色轨道：未选中、可用的段悬停 / 按下时画淡白底（选中段由滑动选中块画）。
+        if host.darkTrack and not selected and not disabled and (hover or pressed) then
+            local tint = pressed and GC.segmentDarkPressed or GC.segmentDarkHover
+            UI:SetControlSurface(button, GM.radius.thumb, tint, GC.transparent)
+        end
+        -- 浮层外观（EXUI:SetControlOverlayAppearance）：分段文字加描边。
+        Appearance.SyncOverlayFont(host, button.label)
     elseif (host.choiceStyle == "connected" or host.choiceStyle == "segmented") and not button._choiceArrow then
         local radius = host.choiceStyle == "connected" and 0 or GM.radius.control
         local optionState = GS and GS.option and GS.option[state]
@@ -254,7 +256,7 @@ Paint = function(button)
         end
     else
         local base = Appearance.colors.subcard
-        local pillState = not host.triStateMode and GS and GS.pill and GS.pill[state]
+        local pillState = GS and GS.pill and GS.pill[state]
         if pillState then
             fill, edge, textColor = pillState.fill, pillState.border, pillState.text
         elseif disabled then
@@ -305,13 +307,35 @@ function Methods:SetValue(value)
     Layout(self, true, old ~= self.selection)
 end
 
+-- 分段轨道：平常 segmentTrack 底；浮层外观（host._exOverlay）换浮层底与边；
+-- 黑色轨道（host.darkTrack）只画黑底不画边，优先于浮层外观。
+local function PaintSegmentTrack(host)
+    if host.darkTrack then
+        UI:SetControlSurface(host, GM.radius.control, GC.segmentDarkTrack, GC.transparent)
+        return
+    end
+    local overlay = host._exOverlay == true
+    UI:SetControlSurface(host, GM.radius.control, overlay and GC.floatControlFill or GC.segmentTrack,
+        overlay and GC.floatControlBorder or GC.segmentTrackBorder)
+end
+
+-- 分段选中块的颜色：整组禁用时灰；选中项写了 selectedFill 用它；否则主色（黑色轨道为白 0.22）。
+local function SegmentSliderColor(host)
+    if host.disabled then return Appearance.colors.disabledFill end
+    for _, item in ipairs(host.items or {}) do
+        if item.selectedFill and Selected(host, item.id) then return item.selectedFill end
+    end
+    return host.darkTrack and GC.segmentDarkSelected or GC.segmentSelected
+end
+
 function Methods:SetDisabled(disabled)
     if not self._choiceLease then return end
     self.disabled = disabled == true
     for _, button in ipairs(self.buttons) do Paint(button) end
     if IsSegmented(self) and self.segmentSlider then
-        local color = self.disabled and Appearance.colors.disabledFill or GC.segmentSelected
+        local color = SegmentSliderColor(self)
         UI:SetControlSurface(self.segmentSlider, GM.radius.thumb, color, color)
+        self._choiceSliderTinted = color ~= GC.segmentSelected and not self.disabled or nil
     end
 end
 
@@ -319,14 +343,12 @@ local function Choose(button)
     local host, item = button._choiceHost, button._choiceItem
     if not host or not host._choiceLease or not host:IsVisible() or host.disabled or item.disabled then return end
     local old, value = host:GetValue(), host:GetValue()
-    if host.triStateMode then
-        value = value == "neutral" and "include"
-            or (value == "include" and host.allowExclude and "exclude" or "neutral")
-    elseif host.mode == "multiple" then
+    if host.mode == "multiple" then
         value[item.id] = not value[item.id] or nil
         if not host.allowEmpty and not next(value) then return end
     elseif value == item.id then
-        if not host.allowEmpty then return end
+        -- 分段控件的 allowEmpty 只表示“值为 nil 时不高亮”：再点已选项不取消。
+        if not host.allowEmpty or IsSegmented(host) then return end
         value = nil
     else value = item.id end
     local lease, callback = host._choiceLease, host.onChange
@@ -370,10 +392,16 @@ local function LayoutLabel(button)
         return
     end
     local padding = button:GetWidth() < 32 and 2 or 6
-    if host.variant == "tabs" and not button._choiceArrow then padding = 14 end
+    if host.variant == "tabs" and not button._choiceArrow then padding = host._choiceTabPad or TAB_PAD end
     local label = button.label
     label:ClearAllPoints()
-    if button._choiceItem.icon and button.icon then
+    if button._choiceItem.iconOnly and button.icon then
+        -- 只有图标：图标居中，名称只在悬停提示里（OnEnter 显示 item.label）。
+        button.icon:ClearAllPoints()
+        button.icon:SetPoint("CENTER", button, "CENTER", 0, 0)
+        label:SetWidth(0)
+        label:SetPoint("CENTER", button, "CENTER", 0, 0)
+    elseif button._choiceItem.icon and button.icon then
         -- 图标与文字作为一组整体居中：间距固定 6px，且起点取整，避免半像素错位。
         local groupWidth = 20 + 6 + math.ceil(label:GetUnboundedStringWidth())
         local startX = math.max(2, math.floor((button:GetWidth() - groupWidth) / 2))
@@ -384,8 +412,10 @@ local function LayoutLabel(button)
         label:SetPoint("LEFT", button.icon, "RIGHT", 6, 0)
         label:SetJustifyH("LEFT")
     else
-        label:SetPoint("TOPLEFT", button, "TOPLEFT", padding, 0)
-        label:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -padding, 0)
+        -- 分段 options.textOffsetY：文字整体下移（只有分段会写）。
+        local offsetY = host and host.textOffsetY or 0
+        label:SetPoint("TOPLEFT", button, "TOPLEFT", padding, -offsetY)
+        label:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -padding, -offsetY)
         label:SetJustifyH("CENTER")
     end
     label:SetJustifyV("MIDDLE")
@@ -398,18 +428,22 @@ local function AcquireButton(host, parent, item, onClick)
     local button = Factory:Acquire(ITEM, parent)
     button._choiceHost, button._choiceItem, button._choiceHover, button._choicePressed, button._choiceArrow = host, item, false, false, false
     local textRole = (host.variant == "tabs" or IsOptionCard(host) or host.choiceStyle == "segmented" or
-        host.choiceStyle == "connected" or host.triStateMode) and "fieldValue" or "control"
+        host.choiceStyle == "connected") and "fieldValue" or "control"
+    if host.darkTrack then textRole = "control" end -- 黑色轨道（迷你分段）用 13 号字
     Appearance.ApplyTextRole(button.label, textRole, nil, textRole == "control" and "GameFontNormalSmall" or nil)
+    if host.tabFontSize then Appearance.Font(button.label, host.tabFontSize, nil, "", "GameFontHighlight") end
     Appearance.ApplyTextRole(button.description, "hint", GC.optionDesc)
     button:SetPushedTextOffset(0, 0)
-    button.label:SetText(item.label)
+    button.label:SetText(item.iconOnly and "" or item.label)
     button.description:SetText(item.description or "")
     button.radioOuter:Hide(); button.radioInner:Hide(); button.radioDot:Hide()
     LayoutLabel(button)
     button.icon:ClearAllPoints()
     if IsOptionCard(host) and not onClick then button.icon:SetPoint("RIGHT", -14, 0)
+    elseif item.iconOnly then button.icon:SetPoint("CENTER", button, "CENTER", 0, 0)
     else button.icon:SetPoint("LEFT", 6, 0) end
-    button.icon:SetSize(20, 20)
+    local iconSize = item.iconOnly and GM.size.iconGlyphSize or 20
+    button.icon:SetSize(iconSize, iconSize)
     local icon = item.icon
     button._choiceIconTint = icon ~= nil and _G.ExwindTools.GUIIcons.ids[icon] ~= nil
     button.icon:SetTexture(icon and (_G.ExwindTools.GUIIcons.ids[icon] and UI:GetIcon(icon) or icon))
@@ -417,14 +451,12 @@ local function AcquireButton(host, parent, item, onClick)
     button:SetScript("OnClick", onClick or Choose)
     button:SetScript("OnEnter", function(self)
         self._choiceHover = true; Paint(self)
-        if _G.GameTooltip and self._choiceItem then
+        -- 文字完整可见、又没有额外 tooltip 时不出提示（否则只是把按钮名再写一遍，还会盖住旁边的页签）。
+        local item = self._choiceItem
+        local labelHidden = item and (item.iconOnly or not self.label:IsShown() or self.label:IsTruncated())
+        if _G.GameTooltip and item and (item.tooltip or labelHidden) then
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:SetText(self._choiceItem.label)
-            if host.triStateMode then
-                local L = _G.ExwindTools.L
-                local state = host.selection == "include" and "包含" or (host.selection == "exclude" and "不包含" or "不限")
-                GameTooltip:AddLine(L and L[state] or state)
-            end
             if self._choiceItem.tooltip then GameTooltip:AddLine(self._choiceItem.tooltip, .8, .85, .9, true) end
             GameTooltip:Show()
         end
@@ -459,7 +491,7 @@ local function AcquireButton(host, parent, item, onClick)
         self.radioOuter:Hide(); self.radioInner:Hide(); self.radioDot:Hide()
         self.label:SetText("")
         self.label:ClearAllPoints()
-        -- 专精格会把名称隐藏；归还时恢复显示，下一个租约（页签/Chip/选项卡片）才有文字。
+        -- 专精格会把名称隐藏；归还时恢复显示，下一个租约（页签/选项卡片）才有文字。
         self.label:Show()
         self:SetPushedTextOffset(0, 0)
     end)
@@ -490,6 +522,23 @@ function Methods:SetPageScroll()
     end
 end
 
+-- fit=true 的页签组：总宽超过可用宽时把每项左右内距逐步压到 TAB_FIT_MIN_PAD；仍放不下才走滚动箭头。
+local function FitTabPadding(host, width)
+    local count = #host.buttons
+    if count == 0 then return TAB_PAD end
+    local function Total(pad)
+        local total = host.gap * (count - 1)
+        for _, button in ipairs(host.buttons) do
+            total = total + math.max(host.minItemWidth, button.label:GetUnboundedStringWidth()
+                + (button._choiceItem.icon and TAB_ICON_WIDTH or 0) + pad * 2)
+        end
+        return total
+    end
+    local pad = TAB_PAD
+    while pad > TAB_FIT_MIN_PAD and Total(pad) > width + .5 do pad = pad - 1 end
+    return pad
+end
+
 Layout = function(host, reveal, animate)
     if not host._choiceLease or host._choiceLayout then return end
     host._choiceLayout = true
@@ -500,8 +549,9 @@ Layout = function(host, reveal, animate)
     host.viewport:SetFrameLevel(baseLevel + 2)
     if host.tabOverlay then host.tabOverlay:SetFrameLevel(baseLevel + 30) end -- 高于壳层分隔线（+20），选中线压在分隔线上
     for _, button in ipairs(host.buttons) do button:SetFrameLevel(baseLevel + 3) end
-    local padding = IsSegmented(host) and 3 or ((host.choiceStyle == "segmented" or host.choiceStyle == "connected") and 2 or 0)
+    local padding = IsSegmented(host) and (host.darkTrack and GM.space.segmentedDarkTrackPad or GM.space.segmentedTrackPad) or ((host.choiceStyle == "segmented" or host.choiceStyle == "connected") and GM.space.connectedTrackPad or 0)
     local width, gap, height = math.max(1, host:GetWidth() - padding * 2), host.gap, host.itemHeight - padding * 2
+    host._choiceTabPad = host.variant == "tabs" and (host.fit and FitTabPadding(host, width) or TAB_PAD) or nil
     if host.segmentSlider then host.segmentSlider:SetHeight(height) end
     local count = #host.buttons
     local columns = host.columns or (host.wrap and math.min(count, math.max(1, math.floor((width + gap) / (host.minItemWidth + gap)))) or count)
@@ -509,8 +559,9 @@ Layout = function(host, reveal, animate)
     local equalWidth = math.max(1, (width - (columns - 1) * gap) / columns)
     local x, y, lastRight = 0, 0, 0
     for index, button in ipairs(host.buttons) do
-        local contentPadding = host.variant == "tabs" and (button._choiceItem.icon and 50 or 28) or
-            (button._choiceItem.icon and 42 or 20)
+        local contentPadding = host.variant == "tabs"
+            and ((button._choiceItem.icon and TAB_ICON_WIDTH or 0) + host._choiceTabPad * 2) or
+            (button._choiceItem.icon and GM.space.choiceIconItemPadX or GM.space.choiceItemPadX)
         local size = host.sizing == "content" and math.max(host.minItemWidth, button.label:GetUnboundedStringWidth() + contentPadding) or equalWidth
         if host.variant == "tabs" then size = math.max(host.minItemWidth, size) else size = math.min(width, size) end
         if host.wrap and x > 0 and (x + size > width + .5 or (host.columns and (index - 1) % columns == 0)) then x, y = 0, y + height + gap end
@@ -564,7 +615,8 @@ Layout = function(host, reveal, animate)
         end
         if target then
             if host.variant == "tabs" then
-                local tabInset = GM.size.tabIndicatorInset
+                -- 下划线比文字内距少 2；内距被 fit 压窄时随之少缩。
+                local tabInset = math.min(GM.size.tabIndicatorInset, math.max(0, host._choiceTabPad - 2))
                 local indicatorX = inset + target._choiceX - host.offset + tabInset
                 local indicatorWidth = math.max(1, target._choiceWidth - tabInset * 2)
                 host.tabIndicator:SetShown(indicatorX + indicatorWidth > inset and indicatorX < inset + visibleWidth)
@@ -572,6 +624,12 @@ Layout = function(host, reveal, animate)
                 local clippedRight = math.min(inset + visibleWidth, indicatorX + indicatorWidth)
                 SetMovingTexture(host, host.tabIndicator, clippedX, math.max(1, clippedRight - clippedX), animate)
             else
+                -- 选中项写了 selectedFill 才改选中块颜色；换回没写的项时恢复（借出时已重画默认色）。
+                if target._choiceItem.selectedFill or host._choiceSliderTinted then
+                    local color = SegmentSliderColor(host)
+                    UI:SetControlSurface(host.segmentSlider, GM.radius.thumb, color, color)
+                    host._choiceSliderTinted = target._choiceItem.selectedFill ~= nil and not host.disabled or nil
+                end
                 SetMovingTexture(host, host.segmentSlider, padding + target._choiceX, target._choiceWidth, animate)
             end
         elseif host.variant == "tabs" then host.tabIndicator:Hide()
@@ -593,9 +651,12 @@ local function CopyItems(items)
         assert(not seen[item.id], "Duplicate choice id: " .. tostring(item.id))
         seen[item.id] = true
         assert(item.tone == nil or item.tone == "neutral" or item.tone == "include" or item.tone == "exclude", "Unknown choice tone")
+        assert(not item.iconOnly or item.icon ~= nil, "Icon-only choice item requires an icon")
         copied[#copied + 1] = { id = item.id, label = tostring(item.label or item.id), icon = item.icon,
+            iconOnly = item.iconOnly == true or nil,
             tooltip = item.tooltip, description = item.description or item.desc,
-            disabled = item.disabled == true, tone = item.tone }
+            disabled = item.disabled == true, tone = item.tone,
+            selectedFill = item.selectedFill, selectedText = item.selectedText }
     end
     return copied
 end
@@ -623,20 +684,36 @@ local function Create(parent, options, tabs)
     local host = Factory:AcquireCompositeHost(HOST, parent)
     for key, method in pairs(Methods) do host[key] = method end
     host._choiceLease, host._choiceRevision = {}, 0
-    host.triStateMode, host.allowExclude, host._choicePageScroll = nil, nil, not tabs
+    host._choicePageScroll = not tabs
     host._gridType = "ChoiceGroup"
     host.variant = tabs and "tabs" or "options"
     host.choiceStyle = not tabs and (options.appearance == "compact" or options.appearance == "form" or options.appearance == "dungeon-aura" or options.appearance == "load-card" or options.appearance == "segmented" or options.appearance == "connected") and options.appearance or nil
     host.mode = not tabs and options.mode == "multiple" and "multiple" or "single"
+    -- 黑色轨道外观只给分段；每次借出重设，没写就是 nil。
+    host.darkTrack = IsSegmented(host) and options.track == "dark" or nil
+    host.textOffsetY = IsSegmented(host) and options.textOffsetY or nil
     if IsSegmented(host) then
-        UI:SetControlSurface(host, GM.radius.control, GC.segmentTrack, GC.segmentTrackBorder)
+        PaintSegmentTrack(host)
     elseif host.choiceStyle == "segmented" or host.choiceStyle == "connected" or host.choiceStyle == "compact" or host.choiceStyle == "load-card" then
         UI:SetControlSurface(host, GM.radius.control, Appearance.colors.input, Appearance.colors.inputBorder)
     else
         UI:ClearControlSurface(host)
     end
     host._specPickerTextColor = nil
+    -- 浮层外观开关的重画：只有分段画轨道与文字描边，其它选择产品不受影响。
+    host._exOverlayRefresh = function(self)
+        if not IsSegmented(self) then return end
+        PaintSegmentTrack(self)
+        for _, button in ipairs(self.buttons or {}) do Paint(button) end
+    end
     host.allowEmpty = not tabs and options.allowEmpty == true
+    -- 页签选中字色每次借出重设，没写就是 nil。
+    assert(not tabs or options.selectedText == nil or type(options.selectedText) == "table", "selectedText must be a color table")
+    host.tabSelectedText = tabs and options.selectedText or nil
+    -- 页签字号 options.fontSize（可选，正数）：不传时照旧（fieldValue 字号）。
+    assert(not tabs or options.fontSize == nil or (type(options.fontSize) == "number" and options.fontSize > 0), "fontSize must be a positive number")
+    host.tabFontSize = tabs and options.fontSize or nil
+    host.fit = tabs and options.fit == true or nil
     host.sizing = options.sizing == "content" and "content" or "equal"
     if tabs then host.sizing = "content" end
     if host.choiceStyle == "connected" then host.sizing = "content" end
@@ -645,7 +722,8 @@ local function Create(parent, options, tabs)
     host.minItemWidth = math.max(16, options.minItemWidth or 44)
     host.gap = math.max(0, options.gap or (tabs and 4 or 3))
     if host.choiceStyle == "connected" then host.gap = 0 end
-    if IsSegmented(host) then host.gap, host.sizing, host.wrap = 0, "equal", false end
+    -- 分段默认各段等宽；调用方写了 sizing = "content" 才按文字宽。
+    if IsSegmented(host) then host.gap, host.wrap = 0, false; if options.sizing ~= "content" then host.sizing = "equal" end end
     if IsOptionCard(host) then host.gap, host.columns, host.sizing, host.wrap = 8, 1, "equal", true end
     host.itemHeight = math.max(18, options.itemHeight or (tabs and GM.size.tabHeight or GM.size.chipHeight))
     if tabs then host.itemHeight = math.max(GM.size.tabHeight, host.itemHeight) end
@@ -681,14 +759,17 @@ local function Create(parent, options, tabs)
         host.segmentSlider:SetHeight(host.itemHeight - 6) -- 与 Layout 的 padding*2 一致，随后由 Layout 重算
     end
     if host.segmentSlider then
-        local sliderColor = host.disabled and Appearance.colors.disabledFill or GC.segmentSelected
+        local sliderColor = host.disabled and Appearance.colors.disabledFill
+            or (host.darkTrack and GC.segmentDarkSelected or GC.segmentSelected)
         UI:SetControlSurface(host.segmentSlider, GM.radius.thumb, sliderColor, sliderColor)
         host.segmentSlider:SetShown(IsSegmented(host))
     end
+    -- 借出时选中块已画回默认色：每项选中色的标记随之清掉。
+    host._choiceSliderTinted = nil
     host.viewport = Factory:Acquire(VIEW, host)
     -- 只有页签需要裁剪（溢出横向滚动）。其它选择产品的按钮高度正好等于 viewport
     -- 高度、左边也与 viewport 左边重合，裁剪会削掉 surface 按物理像素取整后溢出的
-    -- 那 1 像素描边与圆角——饱和色（Chip 的 include/exclude、选项卡片）一眼就能看出缺边。
+    -- 那 1 像素描边与圆角——饱和色（选项卡片）一眼就能看出缺边。
     -- 非页签不会横向溢出：按钮宽已被 min(width, size) 夹住，wrap 会换行，connected 还会收宽。
     host.viewport:SetClipsChildren(host.variant == "tabs")
     host.viewport:EnableMouse(false)
@@ -732,6 +813,9 @@ local function Create(parent, options, tabs)
 end
 
 -- appearance = "segmented": a single-selection track with a sliding solid fill.
+-- 页签组 options.fit = true：总宽超过可用宽时先把每项左右内距逐步压到最小值，仍放不下才出滚动箭头；不传时不变。
+-- 页签组 options.selectedText = 色表颜色：选中页签的文字色（如 GC.accent）；按下、停用时照旧；不传时不变。
+-- 页签组 options.itemHeight = 页签高（不低于 GM.size.tabHeight），options.fontSize = 页签字号；不传时不变。
 -- items = { { id, label, icon?, tooltip?, description?, disabled?, tone? }, ... }
 -- single value = id; multiple value = { [id] = true }. onChange may return false.
 function UI:CreateTabGroup(parent, options) return Create(parent, options, true) end
@@ -745,24 +829,89 @@ function UI:_CreateSegmentedChoice(parent, options)
     return Create(parent, segmented, false)
 end
 
--- One named chip, with explicit states; this is not boolean/multiple selection.
-function UI:CreateTriStateChip(parent, options)
-    options = options or {}
-    assert(type(options.label) == "string", "TriStateChip requires a label")
-    local host = Create(parent, {
-        items={{id="chip", label=options.label, tooltip=options.tooltip}},
-        width=options.width or 160, itemHeight=options.itemHeight or GM.size.chipHeight,
-        allowEmpty=true, sizing="content", wrap=false, disabled=options.disabled,
-        onChange=options.onChange,
-    }, false)
-    host.triStateMode, host.allowExclude = true, options.allowExclude ~= false
-    Appearance.ApplyTextRole(host.buttons[1].label, "fieldValue")
-    host.buttons[1].label:SetJustifyH("CENTER")
-    host.buttons[1].label:SetJustifyV("MIDDLE")
-    UI:ApplyVisualLayer(host.buttons[1].label, _G.EXFONTFRAME)
-    host:SetValue(options.value or "neutral")
-    host:SetWidth(options.width or math.max(64, host.buttons[1].label:GetUnboundedStringWidth() + 20))
-    host:SetPageScroll()
+-- 单选卡片列表：竖排，每项一个单选圆点 + 标题 + 可选一行说明。value = 选中项 id。
+-- V2 的 optionlist 控件用它（例如 EXAura 二级面板左栏的“当”）。
+function UI:CreateOptionList(parent, options)
+    local list = {}
+    for key, value in pairs(options or {}) do list[key] = value end
+    list.appearance, list.mode = nil, "single"
+    return Create(parent, list, false)
+end
+
+-- 多选：一排独立的勾选小块（选中时右上角主色斜角 + 白勾，与勾选卡片同一画法），
+-- 不套外框，可同时选多个，也可全不选。value = { [id] = true }。
+-- V2 的 toggles 控件用它，每项各写一个 boolean 字段。
+local TOGGLE_GROUP = "EXUI.ToggleGroup"
+Factory:InitCompositePool(TOGGLE_GROUP)
+
+local function LayoutToggleGroup(host)
+    local x = 0
+    for _, card in ipairs(host.cards) do
+        local width = card._exToggleWidth
+        card:ClearAllPoints()
+        PixelUtil.SetPoint(card, "TOPLEFT", host, "TOPLEFT", x, 0, 0, 0)
+        card:SetSize(width, GM.size.controlHeight)
+        x = x + width + GM.settings.toggleItemGap
+    end
+end
+
+function UI:CreateToggleGroup(parent, options)
+    local host = Factory:AcquireCompositeHost(TOGGLE_GROUP, parent)
+    host:SetHeight(GM.size.controlHeight)
+    host.cards, host._toggleValue = {}, {}
+    for id, selected in pairs(options.value or {}) do host._toggleValue[id] = selected end
+    for index, item in ipairs(options.items) do
+        local card = UI:CreateCheckbox(host, item.label, host._toggleValue[item.id] == true, function(checked)
+            local next = {}
+            for id, selected in pairs(host._toggleValue) do next[id] = selected end
+            next[item.id] = checked == true or nil
+            host._toggleValue = next
+            options.onChange(next)
+        end)
+        UI:PrepareSettingsListControl(card, { presentation = "card" })
+        UI:ApplyControlAppearance(card)
+        -- 按卡片标题（与显示同一字体）量文字宽。
+        card._exToggleWidth = math.ceil(card.checkbox._exSettingsCardSurface.Title:GetUnboundedStringWidth())
+            + GM.settings.toggleItemPadX
+        host.cards[index] = card
+        card._exToggleId = item.id
+    end
+    function host:NaturalWidth()
+        local width = 0
+        for index, card in ipairs(self.cards) do
+            width = width + card._exToggleWidth + (index > 1 and GM.settings.toggleItemGap or 0)
+        end
+        return width
+    end
+    function host:SetValue(selection)
+        self._toggleValue = {}
+        for id, selected in pairs(selection or {}) do self._toggleValue[id] = selected end
+        for _, card in ipairs(self.cards) do
+            card:SetChecked(self._toggleValue[card._exToggleId] == true)
+            UI:ApplyControlAppearance(card)
+        end
+    end
+    function host:SetDisabled(disabled)
+        for _, card in ipairs(self.cards) do
+            card.checkbox:SetEnabled(not disabled)
+            UI:ApplyControlAppearance(card)
+        end
+    end
+    host:SetScript("OnSizeChanged", LayoutToggleGroup)
+    Factory:AttachPoolRelease(host, function(frame)
+        frame:SetScript("OnSizeChanged", nil)
+        for index = #frame.cards, 1, -1 do
+            local card = frame.cards[index]
+            UI:RestoreSettingsListControl(card)
+            Factory:ReleaseGridWidget(card)
+            frame.cards[index] = nil
+        end
+        frame.cards, frame._toggleValue = nil, nil
+        frame.NaturalWidth, frame.SetValue, frame.SetDisabled = nil, nil, nil
+    end)
+    host:SetWidth(host:NaturalWidth())
+    LayoutToggleGroup(host)
+    host:Show()
     return host
 end
 

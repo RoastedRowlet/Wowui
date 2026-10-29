@@ -102,9 +102,16 @@ local C = {
     -- 狀態色：成功（綠）。資訊用既有的藍，錯誤用既有的紅
     okFg       = "4cc38a",  -- 成功文字 / 圖示，壓在卡片上對比 7.46
     okBorder   = "235c43",  -- 成功提示外框
-    okSolid    = "218358",  -- 成功實心（白字對比 4.72），預留，本批未使用
+    okSolid    = "218358",  -- 成功實心（白字對比 4.72）；EXAura 過濾「只看」用（GC.filterInclude）
     infoBorder = "24476b",  -- 資訊提示外框
-    errBorder  = "6b2f33", -- 錯誤提示外框；與 infoBorder / okBorder 同檔亮度
+    errBorder  = "6b2f33",
+    warnFg     = "f7b861",  -- 警告文字 / 圖示（貼行提示 warn）
+    warnBorder = "6b4a24",  -- 警告提示外框；與 errBorder 同檔亮度
+ -- 錯誤提示外框；與 infoBorder / okBorder 同檔亮度
+    -- 過濾卡片淺字 / 只看懸停（EXAura 編輯器新版）
+    filterIncText  = "bfeed5", -- 只看：卡片名稱淺綠字
+    filterExcText  = "f4c7c7", -- 排除：卡片名稱淺紅字
+    filterIncHover = "26935f", -- 只看：懸停
 
 }
 
@@ -176,8 +183,12 @@ ExwindTools.GUIColors = {
     popupDivider      = H(C.bSubtle),
     menuHover         = NeutralA(0.10), -- [改] 原 AccentA(0.08)
     listSelected      = AccentA(0.13), -- 列表与技能卡使用主色半透明选中底色
-    menuSelected      = H(SOLID), -- [改] 原 AccentA(0.13)
-    menuSelectedHover = H(SOLID_HOVER), -- [改] 原 AccentA(0.20)
+    -- 下拉展开面板与下拉框本身同一套：底色、边框同输入框（原来用比卡片还亮的 popup 灰，
+    -- 和深色的下拉框、框里更深的搜索框三层明暗打架）；选中项淡主色底 + 浅蓝字和勾，不再整条实心蓝（用户 10-26）。
+    menuPanel         = H(C.ctrl),
+    menuPanelBorder   = H(C.iBorder),
+    menuSelected      = AccentA(0.13), -- 选中项淡主色底（同 listSelected）
+    menuSelectedHover = AccentA(0.20), -- 选中项悬停（同 tagSelectedHover）
 
     -- ---------- 滑桿 ----------
     -- 轨道是空的（不画已走过那一段的填充），所以悬停反馈全靠轨道自己换色：
@@ -238,152 +249,299 @@ ExwindTools.GUIColors = {
     dangerPressedFill = H(C.dgPressed), -- [改] 原 DangerA(0.22)
 
     -- 勾選卡片（C1 角標）
-    checkCard               = H(C.head), -- [新]
-    checkCardBorder         = H(C.bSubtle), -- [新]
-    checkCardHoverBorder    = H(C.bHover), -- [新]
-    checkCardSelected       = H(C.ccSelected), -- [新]
-    checkCardSelectedBorder = H(SOLID), -- [新]
-    checkCardCorner         = H(SOLID), -- [新]
-    checkCardCornerCheck    = Hex(0xff, 0xff, 0xff), -- [新]
-    checkCardText           = H(C.dim), -- [新]
-    checkCardSelectedText   = Hex(0xff, 0xff, 0xff), -- [新]
-    checkCardDesc           = H(C.dim), -- [新]
+    checkCard               = H(C.head),
+ -- [新]
+    checkCardBorder         = H(C.bSubtle),
+ -- [新]
+    checkCardHoverBorder    = H(C.bHover),
+ -- [新]
+    checkCardSelected       = H(C.ccSelected),
+ -- [新]
+    checkCardSelectedBorder = H(SOLID),
+ -- [新]
+    checkCardCorner         = H(SOLID),
+ -- [新]
+    checkCardCornerCheck    = Hex(0xff, 0xff, 0xff),
+ -- [新]
+    checkCardText           = H(C.dim),
+ -- [新]
+    checkCardSelectedText   = Hex(0xff, 0xff, 0xff),
+ -- [新]
+    checkCardDesc           = H(C.dim),
+ -- [新]
+    -- 图标选取（iconpick）格子：没选中去色后乘这个暗色，悬停乘浅一点的。
+    pickDimShade            = Hex(0x6b, 0x6b, 0x6b),
+    pickHoverShade          = Hex(0xbf, 0xbf, 0xbf),
+    -- 公共选中外观（UI:PaintSelectRow / PaintSelectCell）的整块底：比悬停底 menuHover 还淡的中性灰叠层。
+    selectFill              = NeutralA(0.05),
+ -- [新]
 
     -- 彈出層 / 下拉選單
-    popupShadow       = BlackA(0.55), -- [新]
-    menuSelectedText  = Hex(0xff, 0xff, 0xff), -- [新]
-    menuCheck         = Hex(0xff, 0xff, 0xff), -- [新]
+    popupShadow       = BlackA(0.55),
+ -- [新]
+    menuSelectedText  = H(C.aText), -- 选中项文字：浅蓝（同 accentHover），压在淡主色底上
+ -- [新]
+    menuCheck         = H(C.aFg),   -- 选中勾（行左侧）：浅蓝前景色
+ -- [新]
 
     -- 下拉選單試聽圖示（音波）
-    menuPreviewIcon          = H(C.text), -- [新]
-    menuPreviewIconRow       = H(C.dim), -- [新]
-    menuPreviewIconHover     = Hex(0xff, 0xff, 0xff), -- [新]
-    menuPreviewPlaying       = H(SOLID), -- [新]
-    menuPreviewSelected      = WhiteA(0.75), -- [新]
-    menuPreviewSelectedHover = Hex(0xff, 0xff, 0xff), -- [新]
+    menuPreviewIcon          = H(C.text),
+ -- [新]
+    menuPreviewIconRow       = H(C.dim),
+ -- [新]
+    menuPreviewIconHover     = Hex(0xff, 0xff, 0xff),
+ -- [新]
+    menuPreviewPlaying       = H(SOLID),
+ -- [新]
+    menuPreviewSelected      = WhiteA(0.75),
+ -- [新]
+    menuPreviewSelectedHover = Hex(0xff, 0xff, 0xff),
+ -- [新]
 
     -- 滑桿
-    sliderThumbShadow = BlackA(0.60), -- [新]
+    sliderThumbShadow = BlackA(0.60),
+ -- [新]
     -- 现行滑条拖块：深蓝；按下不再变暗，只比常态略亮；轨道保持灰色 sliderTrack。
     sliderKnob        = H(SOLID),
     sliderKnobHover   = H("3582d4"),
     sliderKnobPressed = H("428ad7"),
-    sliderThumbRing   = AccentA(0.20), -- [新]
+    sliderThumbRing   = AccentA(0.20),
+ -- [新]
 
     -- 分段選擇器
-    segmentTrack        = H(C.ctrl), -- [新]
-    segmentTrackBorder  = H(C.iBorder), -- [新]
-    segmentSelectedText = Hex(0xff, 0xff, 0xff), -- [新]
-    segmentHoverText    = H(C.text), -- [新]
+    segmentTrack        = H(C.ctrl),
+ -- [新]
+    segmentTrackBorder  = H(C.iBorder),
+ -- [新]
+    segmentSelectedText = Hex(0xff, 0xff, 0xff),
+ -- [新]
+    segmentHoverText    = H(C.text),
+ -- [新]
 
     -- 按鈕共用
-    buttonInset = BlackA(0.45), -- [新]
+    buttonInset = BlackA(0.45),
+ -- [新]
 
     -- 主要按鈕
-    primaryTop            = H(C.priTop), -- [新]
-    primaryBottom         = H(SOLID), -- [新]
-    primaryHoverTop       = H(SOLID_HOVER), -- [新]
-    primaryHoverBottom    = H(SOLID_HOVER), -- [新]
+    primaryTop            = H(C.priTop),
+ -- [新]
+    primaryBottom         = H(SOLID),
+ -- [新]
+    primaryHoverTop       = H(SOLID_HOVER),
+ -- [新]
+    primaryHoverBottom    = H(SOLID_HOVER),
+ -- [新]
     primaryButtonHoverFill = H("3582d4"), -- 方案 E：悬停亮一档
     primaryPressedFill    = H("428ad7"),
-    primaryPressedBorder  = H("2a7ed5"), -- [新]
-    primaryBorder         = H(SOLID_ACTIVE), -- [新]
-    primaryHoverBorder    = H("256fbc"), -- [新]
-    primaryHighlight      = WhiteA(0.14), -- [新]
-    primaryHoverHighlight = WhiteA(0.18), -- [新]
+    primaryPressedBorder  = H("2a7ed5"),
+ -- [新]
+    primaryBorder         = H(SOLID_ACTIVE),
+ -- [新]
+    primaryHoverBorder    = H("256fbc"),
+ -- [新]
+    primaryHighlight      = WhiteA(0.14),
+ -- [新]
+    primaryHoverHighlight = WhiteA(0.18),
+ -- [新]
 
     -- 次要按鈕
-    secondaryTop            = H(C.btnTop), -- [新]
-    secondaryBottom         = H(C.btnBottom), -- [新]
-    secondaryHoverTop       = H(C.btnHoverTop), -- [新]
-    secondaryHoverBottom    = H(C.btnHoverBottom), -- [新]
-    secondaryHoverText      = H(C.text), -- [新]
-    secondaryHighlight      = WhiteA(0.06), -- [新]
-    secondaryHoverHighlight = WhiteA(0.09), -- [新]
+    secondaryTop            = H(C.btnTop),
+ -- [新]
+    secondaryBottom         = H(C.btnBottom),
+ -- [新]
+    secondaryHoverTop       = H(C.btnHoverTop),
+ -- [新]
+    secondaryHoverBottom    = H(C.btnHoverBottom),
+ -- [新]
+    secondaryHoverText      = H(C.text),
+ -- [新]
+    secondaryHighlight      = WhiteA(0.06),
+ -- [新]
+    secondaryHoverHighlight = WhiteA(0.09),
+ -- [新]
 
     -- 危險按鈕・灰底紅字
-    dangerTop            = H(C.btnTop), -- [新]
-    dangerBottom         = H(C.btnBottom), -- [新]
-    dangerHoverTop       = H(C.dgHoverTop), -- [新]
-    dangerHoverBottom    = H(C.dgHoverBottom), -- [新]
+    dangerTop            = H(C.btnTop),
+ -- [新]
+    dangerBottom         = H(C.btnBottom),
+ -- [新]
+    dangerHoverTop       = H(C.dgHoverTop),
+ -- [新]
+    dangerHoverBottom    = H(C.dgHoverBottom),
+ -- [新]
     dangerHoverBorder    = H("934147"),
     dangerPressedBorder  = H("a84a51"), -- [新]
-    dangerHoverText      = H(C.danger), -- [新]
-    dangerHighlight      = WhiteA(0.06), -- [新]
-    dangerHoverHighlight = WhiteA(0.08), -- [新]
+    dangerHoverText      = H(C.danger),
+ -- [新]
+    dangerHighlight      = WhiteA(0.06),
+ -- [新]
+    dangerHoverHighlight = WhiteA(0.08),
+ -- [新]
 
     -- 危險按鈕・紅色實心
-    dangerSolidTop            = H(C.dsTop), -- [新]
-    dangerSolidBottom         = H(C.dsBottom), -- [新]
-    dangerSolidHoverTop       = H(C.dsHoverTop), -- [新]
-    dangerSolidHoverBottom    = H(C.dsHoverBottom), -- [新]
-    dangerSolidPressedFill    = H(C.dsPressed), -- [新]
-    dangerSolidBorder         = H(C.dsPressed), -- [新]
-    dangerSolidHoverBorder    = H(C.dsBottom), -- [新]
-    dangerSolidText           = Hex(0xff, 0xff, 0xff), -- [新]
-    dangerSolidHighlight      = WhiteA(0.14), -- [新]
-    dangerSolidHoverHighlight = WhiteA(0.18), -- [新]
+    dangerSolidTop            = H(C.dsTop),
+ -- [新]
+    dangerSolidBottom         = H(C.dsBottom),
+ -- [新]
+    dangerSolidHoverTop       = H(C.dsHoverTop),
+ -- [新]
+    dangerSolidHoverBottom    = H(C.dsHoverBottom),
+ -- [新]
+    dangerSolidPressedFill    = H(C.dsPressed),
+ -- [新]
+    dangerSolidBorder         = H(C.dsPressed),
+ -- [新]
+    dangerSolidHoverBorder    = H(C.dsBottom),
+ -- [新]
+    dangerSolidText           = Hex(0xff, 0xff, 0xff),
+ -- [新]
+    dangerSolidHighlight      = WhiteA(0.14),
+ -- [新]
+    dangerSolidHoverHighlight = WhiteA(0.18),
+ -- [新]
     -- 頁籤（T1）
-    tabText          = H(C.dim), -- [新]
-    tabHoverText     = H(C.text), -- [新]
-    tabSelectedText  = Hex(0xff, 0xff, 0xff), -- [新]
-    tabIndicator     = H(SOLID), -- 主色深藍（原 H(C.aFg)）      -- 主色指示條，高度見 GM.size.tabIndicatorHeight -- [新]
-    tabDivider       = H(C.bSubtle), -- [新]
-
-    -- 三态筛选 Chip（CreateTriStateChip）的语义主色；真源在此，控件不再写死 RGBA。
-    triInclude       = { 0.30, 0.78, 0.48, 1 }, -- 只看（include）
-    triExclude       = { 0.933, 0.443, 0.502, 1 }, -- 排除（exclude）
+    tabText          = H(C.dim),
+ -- [新]
+    tabHoverText     = H(C.text),
+ -- [新]
+    tabSelectedText  = Hex(0xff, 0xff, 0xff),
+ -- [新]
+    tabIndicator     = H(SOLID), -- 主色深藍（原 H(C.aFg)）      -- 主色指示條，高度見 GM.size.tabIndicatorHeight
+ -- [新]
+    tabDivider       = H(C.bSubtle),
+ -- [新]
 
     -- 選項組（G1）
-    optionRow             = H(C.head), -- [新]
-    optionRowBorder       = H(C.bSubtle), -- [新]
-    optionRowHoverBorder  = H(C.bHover), -- [新]
-    optionRowSelected     = H(C.ccSelected), -- [新]
-    optionRowSelectedBorder = H(SOLID), -- [新]
-    optionTitle           = H(C.text), -- [新]
-    optionTitleSelected   = Hex(0xff, 0xff, 0xff), -- [新]
-    optionDesc            = H(C.dim), -- [新]
-    radioBorder           = H(C.iHover), -- [新]
-    radioHoverBorder      = H(C.bStrong), -- [新]
-    radioSelected         = H(SOLID), -- [新]
-    radioDot              = Hex(0xff, 0xff, 0xff), -- [新]
+    optionRow             = H(C.head),
+ -- [新]
+    optionRowBorder       = H(C.bSubtle),
+ -- [新]
+    optionRowHoverBorder  = H(C.bHover),
+ -- [新]
+    optionRowSelected     = H(C.ccSelected),
+ -- [新]
+    optionRowSelectedBorder = H(SOLID),
+ -- [新]
+    optionTitle           = H(C.text),
+ -- [新]
+    optionTitleSelected   = Hex(0xff, 0xff, 0xff),
+ -- [新]
+    optionDesc            = H(C.dim),
+ -- [新]
+    radioBorder           = H(C.iHover),
+ -- [新]
+    radioHoverBorder      = H(C.bStrong),
+ -- [新]
+    radioSelected         = H(SOLID),
+ -- [新]
+    radioDot              = Hex(0xff, 0xff, 0xff),
+ -- [新]
 
     -- 確認彈窗（D1）
-    dialog         = H(C.pop), -- [新]
-    dialogBorder   = H(C.bDef), -- [新]
-    dialogShadow   = BlackA(0.55), -- [新]
-    dialogOverlay  = { 8 / 255, 10 / 255, 12 / 255, 0.60 }, -- [新]
-    dialogTitle    = Hex(0xff, 0xff, 0xff), -- [新]
-    dialogText     = H(C.dim), -- [新]
+    dialog         = H(C.pop),
+ -- [新]
+    dialogBorder   = H(C.bDef),
+ -- [新]
+    dialogShadow   = BlackA(0.55),
+ -- [新]
+    dialogOverlay  = { 8 / 255, 10 / 255, 12 / 255, 0.60 },
+ -- [新]
+    dialogTitle    = Hex(0xff, 0xff, 0xff),
+ -- [新]
+    dialogText     = H(C.dim),
+ -- [新]
 
     -- 狀態提示（S1）
-    statusInfoFg     = H(C.aFg), -- [新]
-    statusInfoBorder = H(C.infoBorder), -- [新]
-    statusInfoTint   = { H(C.aFg)[1], H(C.aFg)[2], H(C.aFg)[3], 0.10 }, -- [新]
-    statusOkFg       = H(C.okFg), -- [新]
-    statusOkBorder   = H(C.okBorder), -- [新]
-    statusOkTint     = { H(C.okFg)[1], H(C.okFg)[2], H(C.okFg)[3], 0.10 }, -- [新]
-    statusErrFg      = H(C.danger), -- [新]
-    statusErrBorder  = H(C.errBorder), -- [新]
-    statusErrTint    = DangerA(0.10), -- [新]
-    statusDesc       = H(C.dim), -- [新]
-    statusNoticeBase = H(C.card), -- 頁內狀態提示的合成基底
-    toast            = H(C.pop),       -- Toast 底色，上面再疊對應的 Tint -- [新]
-    toastShadow      = BlackA(0.55), -- [新]
+    statusInfoFg     = H(C.aFg),
+ -- [新]
+    statusInfoBorder = H(C.infoBorder),
+ -- [新]
+    statusInfoTint   = { H(C.aFg)[1], H(C.aFg)[2], H(C.aFg)[3], 0.10 },
+ -- [新]
+    statusOkFg       = H(C.okFg),
+ -- [新]
+    statusOkBorder   = H(C.okBorder),
+ -- [新]
+    statusOkTint     = { H(C.okFg)[1], H(C.okFg)[2], H(C.okFg)[3], 0.10 },
+ -- [新]
+    statusErrFg      = H(C.danger),
+ -- [新]
+    statusErrBorder  = H(C.errBorder),
+ -- [新]
+    statusErrTint    = DangerA(0.10),
+    statusWarnFg     = H(C.warnFg),     -- 貼行提示 warn
+    statusWarnBorder = H(C.warnBorder),
+    statusWarnTint   = { H(C.warnFg)[1], H(C.warnFg)[2], H(C.warnFg)[3], 0.10 },
+ -- [新]
+    statusDesc       = H(C.dim),
+ -- [新]
+    statusNoticeBase = H(C.card),
+ -- 頁內狀態提示的合成基底
+    toast            = H(C.pop),       -- Toast 底色，上面再疊對應的 Tint
+ -- [新]
+    toastShadow      = BlackA(0.55),
+ -- [新]
 
     -- 右鍵選單（R3）
-    contextMenu          = H(C.pop), -- [新]
-    contextMenuBorder    = H(C.bDef), -- [新]
-    contextMenuShadow    = BlackA(0.55), -- [新]
-    contextMenuTitle     = H(C.ph), -- [新]
-    contextMenuText      = H(C.text), -- [新]
-    contextMenuIcon      = H(C.dim), -- [新]
-    contextMenuHover     = NeutralA(0.10), -- [新]
-    contextMenuDivider   = H(C.bSubtle), -- [新]
-    contextMenuDanger    = H(C.danger), -- [新]
-    contextMenuDangerHover = DangerA(0.10), -- [新]
-    contextMenuDisabled  = H(C.dis), -- [新]
-    contextMenuCheck     = WhiteA(1), -- [新]
+    contextMenu          = H(C.pop),
+ -- [新]
+    contextMenuBorder    = H(C.bDef),
+ -- [新]
+    contextMenuShadow    = BlackA(0.55),
+ -- [新]
+    contextMenuTitle     = H(C.ph),
+ -- [新]
+    contextMenuText      = H(C.text),
+ -- [新]
+    contextMenuIcon      = H(C.dim),
+ -- [新]
+    contextMenuHover     = NeutralA(0.10),
+ -- [新]
+    contextMenuDivider   = H(C.bSubtle),
+ -- [新]
+    contextMenuDanger    = H(C.danger),
+ -- [新]
+    contextMenuDangerHover = DangerA(0.10),
+ -- [新]
+    contextMenuDisabled  = H(C.dis),
+ -- [新]
+    contextMenuCheck     = WhiteA(1),
+ -- [新]
+
+    -- EXAura 編輯器新版（只新增，舊色不動）
+    filterIncludeText    = H(C.filterIncText), -- 過濾卡片：只看名稱
+    filterExcludeText    = H(C.filterExcText), -- 過濾卡片：排除名稱
+    filterInclude        = H(C.okSolid), -- 過濾「只看」主綠：卡片邊、淡底、迷你分段選中段、面板整行
+    filterIncludeHover   = H(C.filterIncHover), -- 過濾卡片：只看懸停
+    filterExclude        = H(C.dangerB), -- 過濾三態小標籤「排除」實心底（白字）
+    settingsBarFill      = BlackA(0.30), -- 設置條淡底
+    settingsBarDivider   = WhiteA(0.18), -- 設置條行線
+    floatControlFill     = H(C.ctrl, 0.62), -- 浮層控件底
+    floatControlBorder   = WhiteA(0.22), -- 浮層控件邊
+    capsuleHoverFill     = WhiteA(0.07), -- 膠囊按鈕組：懸停底
+    capsulePressedFill   = WhiteA(0.14), -- 膠囊按鈕組：按下底
+    capsulePressedBorder = WhiteA(0.55), -- 膠囊按鈕組：按下內描邊
+    capsuleAddText       = H(C.okFg), -- 膠囊按鈕組：「新增」段圖示與文字
+    capsuleDangerText    = H(C.dangerB), -- 膠囊按鈕組：「退出」段圖示與文字
+    -- 分段控件「黑色軌道」外觀（CreateSegmentedControl options.track = "dark"）
+    segmentDarkTrack     = BlackA(0.28), -- 軌道底，不畫邊
+    segmentDarkHover     = WhiteA(0.08), -- 未選中段懸停底
+    segmentDarkPressed   = WhiteA(0.14), -- 未選中段按下底
+    segmentDarkSelected  = WhiteA(0.22), -- 選中塊（該段沒寫 selectedFill 時）
+    -- 圖示按鈕「黑色軌道」外觀（CreateIconButton appearance = "dark"，疊在彩色底上用）
+    iconDarkFill         = BlackA(0.20), -- 平常底，不畫邊
+    iconDarkIcon         = WhiteA(0.55), -- 平常圖示
+    iconDarkHoverBorder  = WhiteA(0.35), -- 懸停、按下的邊
+    iconDarkChecked      = WhiteA(0.24), -- 開啟（checked）的底
+    iconDarkDisabledFill = BlackA(0.07), -- 停用底（平常底的 35%）
+    iconDarkDisabledIcon = WhiteA(0.19), -- 停用圖示（平常圖示的 35%）
+    -- 發光設置組顏色行的色板（金、白、藍、綠、紅、紫；不含透明度，透明度另有滑桿）
+    glowPalette = { { 1, 0.82, 0.2 }, { 1, 1, 1 }, { 0.35, 0.8, 1 }, { 0.4, 1, 0.45 }, { 1, 0.35, 0.3 }, { 0.8, 0.45, 1 } },
+    -- 取色面板底下一排常用色（白、红、橙、黄、绿、青、蓝、紫），点一下直接设成该色。
+    colorPresets = {
+        Hex(0xff, 0xff, 0xff), Hex(0xff, 0x30, 0x30), Hex(0xff, 0x80, 0x00), Hex(0xff, 0xd1, 0x00),
+        Hex(0x1e, 0xff, 0x00), Hex(0x00, 0xcc, 0xff), Hex(0x00, 0x70, 0xdd), Hex(0xa3, 0x35, 0xee),
+    },
 
     -- ---------- FontString 內嵌色 ----------
     markup = {
@@ -431,9 +589,7 @@ ExwindTools.GUIColors = {
         sidebarIdleText     = H(C.dim),
         sidebarIdleRail     = H(C.bDef),
 
-        railActive      = AccentA(0.13),
         railTransparent = { 0, 0, 0, 0 },
-        railHover       = NeutralA(0.08),
     },
 }
 
@@ -461,9 +617,8 @@ local sidebar = {
     -- 与基准不一致，也容易被看成选中，故一并取消。
     hover={fill=G.menuHover, border=G.transparent, text=G.shell.sidebarHoverText},
     pressed={fill=G.menuHover, border=G.transparent, text=G.shell.sidebarHoverText},
-    -- 侧栏选中＝只描边（用户 2026-10-05 推翻同月 4 日的“主色淡底 + 左侧 3px 指示条 + 纯白字”）：
-    -- 底色不动，只加一圈主色描边，文字用常规正文色。这是唯一呈现，没有第二套。
-    selected={fill=G.transparent, border=G.primaryFill, text=G.text},
+    -- 侧栏选中：底色不动、文字用正文色，外框由公共选中外观（UI:PaintSelectRow）画。
+    selected={fill=G.transparent, border=G.transparent, text=G.text},
     disabled={fill=G.transparent, border=G.transparent, text=G.shell.sidebarDisabledText},
 }
 ExwindTools.GUIStates = {

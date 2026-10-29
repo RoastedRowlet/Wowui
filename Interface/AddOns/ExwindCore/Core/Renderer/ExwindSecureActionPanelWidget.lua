@@ -93,14 +93,20 @@ end
 
 -- Runtime Collection item clicks.  Secure buttons stay outside the Collection
 -- ItemRoot parent chain so B's visual layout may continue to move in combat.
+-- spec.mode：code（普通回调 spec.onClick，战斗中可用）；macro / spell / item 走安全按钮，
+-- 动作文字分别在 spec.macro / spec.spell / spec.item，战斗中隐藏且不可用，脱战后按当前 spec 重新绑定。
+local SECURE_ATTRIBUTES = { macro = "macrotext1", spell = "spell1", item = "item1" }
 local pendingItems, retiredMacros, activeMacros = {}, {}, {}
 local function Locked() return InCombatLockdown and InCombatLockdown() end
+local function ClearSecureAction(button)
+    button:SetAttribute("type1", nil)
+    for _, attribute in pairs(SECURE_ATTRIBUTES) do button:SetAttribute(attribute, nil) end
+end
 local function DestroyMacro(macro)
     if not macro then return end
     if Locked() then retiredMacros[macro] = true; return end
     if UnregisterStateDriver then UnregisterStateDriver(macro.handler, "exauracombat") end
-    macro.button:SetAttribute("type1", nil)
-    macro.button:SetAttribute("macrotext1", nil)
+    ClearSecureAction(macro.button)
     macro.button:Hide()
     macro.button:ClearAllPoints()
     macro.button:SetParent(nil)
@@ -109,10 +115,53 @@ local function DestroyMacro(macro)
     retiredMacros[macro] = nil
     activeMacros[macro] = nil
 end
+-- spec.tooltip：悬停提示 { spell = 法术ID } / { item = 物品ID } / { text = "文字" }，只显示 GameTooltip，不改点击。
+local function ShowTooltip(owner, tooltip)
+    if not GameTooltip or type(tooltip) ~= "table" then return end
+    GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+    if tooltip.spell then GameTooltip:SetSpellByID(tooltip.spell)
+    elseif tooltip.item then GameTooltip:SetItemByID(tooltip.item)
+    else GameTooltip:SetText(tooltip.text, nil, nil, nil, nil, true) end
+    GameTooltip:Show()
+end
+local function HideTooltip(owner)
+    if GameTooltip and GameTooltip:GetOwner() == owner then GameTooltip:Hide() end
+end
+-- 提示层只收鼠标移动、不收点击：点击穿过它落到下面的普通点击按钮；安全按钮在它上面，另挂同样的提示。
+local function ApplyTooltip(item, tooltip)
+    local hover = item._collectionTooltipFrame
+    if not tooltip then
+        if hover then HideTooltip(hover); hover:Hide() end
+        return
+    end
+    if not hover then
+        hover = CreateFrame("Frame", nil, item.root)
+        hover:SetMouseClickEnabled(false)
+        hover:SetMouseMotionEnabled(true)
+        hover:SetScript("OnEnter", function(self) ShowTooltip(self, self._tooltip) end)
+        hover:SetScript("OnLeave", HideTooltip)
+        hover:SetScript("OnHide", HideTooltip)
+        item._collectionTooltipFrame = hover
+    end
+    hover._tooltip = tooltip
+    hover:ClearAllPoints()
+    hover:SetAllPoints(item.root)
+    hover:SetFrameLevel((item.root:GetFrameLevel() or 0) + 10)
+    hover:Show()
+end
 local function CreateMacro(item)
     local button = CreateFrame("Button", nil, UIParent, "SecureActionButtonTemplate")
     button:EnableMouse(true)
     button:RegisterForClicks("LeftButtonUp")
+    button:HookScript("OnEnter", function(self)
+        local owner = activeMacros[item._collectionMacro] and item._collectionClickSpec
+        if owner and item._collectionMacro.button == self then ShowTooltip(self, owner.tooltip) end
+    end)
+    button:HookScript("OnLeave", HideTooltip)
+    button:HookScript("OnHide", HideTooltip)
+    -- 插件建的安全按钮默认跟随 ActionButtonUseKeyDown（默认开）只在按下时执行；
+    -- 这里只登记了松开，必须明确改成松开执行，否则点击不会执行任何动作。
+    button:SetAttribute("useOnKeyDown", false)
     local handler = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
     handler:SetFrameRef("action", button)
     handler:SetAttribute("_onstate-exauracombat", [[
@@ -120,6 +169,8 @@ local function CreateMacro(item)
             local action = self:GetFrameRef("action")
             action:SetAttribute("type1", nil)
             action:SetAttribute("macrotext1", nil)
+            action:SetAttribute("spell1", nil)
+            action:SetAttribute("item1", nil)
             action:Hide()
         end
     ]])
@@ -155,6 +206,7 @@ end
 local function ApplyClick(item)
     if not item.root then return false end
     local spec = item._collectionClickSpec or {}
+    ApplyTooltip(item, spec.tooltip)
     if spec.mode ~= "code" and item._collectionCodeButton then
         item._collectionCodeButton:Hide()
         item._collectionCodeButton:SetScript("OnClick", nil)
@@ -174,7 +226,9 @@ local function ApplyClick(item)
     end
     if Locked() then pendingItems[item] = true; return false end
     pendingItems[item] = nil
-    if spec.mode ~= "macro" or type(spec.macro) ~= "string" or spec.macro == "" then
+    local attribute = SECURE_ATTRIBUTES[spec.mode]
+    local action = attribute and spec[spec.mode]
+    if type(action) ~= "string" or action == "" then
         DestroyMacro(item._collectionMacro)
         item._collectionMacro = nil
         return true
@@ -182,8 +236,7 @@ local function ApplyClick(item)
     if not ItemVisible(item) then
         local macro = item._collectionMacro
         if macro then
-            macro.button:SetAttribute("type1", nil)
-            macro.button:SetAttribute("macrotext1", nil)
+            ClearSecureAction(macro.button)
             macro.button:Hide()
         end
         return false
@@ -202,8 +255,9 @@ local function ApplyClick(item)
     button:SetSize(width, height)
     button:SetFrameStrata(item.root:GetFrameStrata())
     button:SetFrameLevel((item.root:GetFrameLevel() or 0) + 20)
-    button:SetAttribute("type1", "macro")
-    button:SetAttribute("macrotext1", spec.macro)
+    ClearSecureAction(button)
+    button:SetAttribute("type1", spec.mode)
+    button:SetAttribute(attribute, action)
     button:Show()
     return true
 end
@@ -235,6 +289,12 @@ function EXUI:ReleaseCollectionItemClick(item)
         code:SetParent(nil)
     end
     item._collectionCodeButton = nil
+    local hover = item._collectionTooltipFrame
+    if hover then
+        hover:Hide()
+        hover:SetParent(nil)
+    end
+    item._collectionTooltipFrame = nil
     DestroyMacro(item._collectionMacro)
     item._collectionMacro, item._collectionClickSpec = nil, nil
 end

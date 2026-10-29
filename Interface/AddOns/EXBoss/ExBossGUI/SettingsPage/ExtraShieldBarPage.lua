@@ -1,6 +1,6 @@
 ---@diagnostic disable: undefined-global, undefined-field, need-check-nil
--- ExtraShieldBar 设置页：只声明既有 Grid 布局与标准合同入口。Dock、Scroll、
--- Watch、OnHide/release、Grid 回读均由 EXUI:CreateStandardModulePage 统一拥有。
+-- ExtraShieldBar 设置页：声明 V2 布局与标准合同入口。Dock、Scroll、
+-- Watch、OnHide/release、组合控件回读均由 EXUI:CreateStandardModulePage 统一拥有。
 
 local ExwindTools = _G.ExwindTools
 if not ExwindTools then return end
@@ -38,28 +38,36 @@ if type(SHIELD_ANCHOR_OPTS) ~= "table" then
     error("ExtraShieldBarPage requires standard AnchorGroup options", 2)
 end
 
--- [卡片/Grid 迁移边界：ExtraShieldBar 设置页]
--- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
--- 禁止：修改 key/type/path/opts、虚构无业务意义的 layout、预览、Slider 或释放合同。
--- modulecommonsettings/anchorgroup/timerBarGroup/fontgroup 必须整体引用，不能拆成原子控件重拼。
+-- 保留原设置块次序与组合控件身份；运行期锚点选项由 owner 提供。
 local LAYOUT = {
-    version = 1,
-    title = L["额外护盾条设置"],
-    sections = {
-        { kind = "composite", id = "module-common", title = L["通用设置"],
-            component = "modulecommonsettings", key = "moduleCommon", opts = SHIELD_COMMON_OPTS },
-        { kind = "composite", id = "anchor", title = L["锚点设置"],
-            component = "anchorgroup", key = "anchor", opts = SHIELD_ANCHOR_OPTS },
-        { kind = "composite", id = "timer-bar", title = L["外观"],
-            component = "timerbargroup", key = "timerGroup" },
-        { kind = "composite", id = "spell-font", title = L["法术名称"],
-            component = "fontgroup", key = "font_spell" },
-        { kind = "composite", id = "timer-font", title = L["数值文本"],
-            component = "fontgroup", key = "font_timer" },
+    version = 2,
+    cards = {
+        { kind = "card", id = "module-common", title = L["通用设置"],
+            children = {
+                { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", opts = SHIELD_COMMON_OPTS },
+            } },
+        { kind = "card", id = "anchor-card", title = L["锚点设置"],
+            children = {
+                { kind = "component", id = "anchor", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+        { kind = "card", id = "timer-bar", title = L["外观"],
+            children = {
+                { kind = "component", id = "timerGroup", component = "timerbargroup", path = "timerGroup", opts = {} },
+            } },
+        { kind = "card", id = "spell-font", title = L["法术名称"],
+            children = {
+                { kind = "component", id = "font_spell", component = "fontgroup", path = "font_spell", opts = {} },
+            } },
+        { kind = "card", id = "timer-font", title = L["数值文本"],
+            children = {
+                { kind = "component", id = "font_timer", component = "fontgroup", path = "font_timer", opts = {} },
+            } },
     },
 }
 
-ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
+local function CreatePageOwner()
+    return { options = { anchor = SHIELD_ANCHOR_OPTS } }
+end
 
 local function RenderStandardPreview(dock)
     GetExtraShieldBar():ShowPanelPreview(dock)
@@ -81,17 +89,18 @@ local function ReleaseStandardPreview()
     end
 end
 
-local function RebindModuleCommon(grid, container, db)
-    -- state.widgets.moduleCommon 是稳定组合控件入口，迁移后必须保留 key 查找语义。
-    local group = grid and grid.FindMountedWidget and grid:FindMountedWidget(container, "moduleCommon")
-    if group and type(group.RebindDB) == "function" then group:RebindDB(db) end
+local function RebindModuleCommon(context)
+    local group = context.modulePage and context.modulePage:Find("moduleCommon")
+    if group and type(group.RebindDB) == "function" then group:RebindDB(context.config) end
 end
 
 -- [生命周期边界] StandardModulePage 继续拥有 Scroll、preview 与 release；布局迁移不得改这些回调。
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,
+    title = L["额外护盾条设置"],
     layout = LAYOUT,
+    ownerFactory = CreatePageOwner,
     preview = {
         height = 160,
         render = RenderStandardPreview,
@@ -111,8 +120,8 @@ local StandardPage = EXUI:CreateStandardModulePage({
             groupPaths = contract.groupPaths,
         }
     end,
-    afterGridLayout = function(context)
-        RebindModuleCommon(context.grid, context.scrollChild, context.config)
+    afterLayout = function(context)
+        RebindModuleCommon(context)
     end,
 })
 

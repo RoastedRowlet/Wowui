@@ -66,7 +66,7 @@ PremadeGroupsFilterState = {
 ["raid"] = {
 ["difficulty"] = {
 ["act"] = true,
-["val"] = 2,
+["val"] = 3,
 },
 ["heals"] = {
 ["max"] = "",

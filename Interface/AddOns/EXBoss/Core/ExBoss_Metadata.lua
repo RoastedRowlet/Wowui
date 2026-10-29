@@ -3,13 +3,39 @@
 -- 请勿手动通过 Git 提交修改此文件中的版本号，除非你是为了测试。
 
 ExBoss_MetaData = {
-    version = "v26.10.9.1239",
+    version = "v26.10.28.2259",
     changelog = {
-        version = "v26.10.5.2034",
-        title = "v26.10.5.2034 更新日志",
-        publishedAt = "2026-10-05 20:34",
+        version = "v26.10.18.1915",
+        title = "v26.10.18.1915 更新日志",
+        publishedAt = "2026-10-18 19:15",
         fontSize = 14,
         content = [[
+@H1@ v26.10.18.1915
+
+@CN@ @H2@ 渲染引擎
+@CN@ - 所有插件升级并统一使用V2渲染
+@CN@ - 删除所有V1和初代GRID代码
+@CN@ - 删除网格布局概念和在线编辑器
+@CN@ - 如果您是开发者并使用了我们EXCORE旧版的渲染方案需要同时升级 并没有保留任何兼容或是桥接
+
+@CN@ @H2@ EXBOSS
+@CN@ - 重做首领/小怪页面 解决了大量性能问题 同时维持6ms预算的异步让出
+@CN@ - 升级所有施法相关推理到12.1.5
+@CN@ - 更新所有小怪/BOSS施法时间
+@CN@ - 更新所有小怪内置CD (如有问题请持续反馈)
+
+@EN@ @H2@ Rendering Engine
+@EN@ - Upgraded all addons to use V2 rendering
+@EN@ - Removed all V1 and original GRID code
+@EN@ - Removed the grid layout system and online editor
+@EN@ - Developers using the old EXCORE rendering system must upgrade as well. No compatibility or bridging support has been retained
+
+@EN@ @H2@ EXBOSS
+@EN@ - Rebuilt the boss/trash pages, fixing numerous performance issues while retaining asynchronous yielding with a 6ms budget
+@EN@ - Updated all cast-related inference logic for 12.1.5
+@EN@ - Updated cast times for all trash mobs and bosses
+@EN@ - Updated all trash mobs' internal cooldowns (please keep reporting any issues)
+
 @H1@ v26.10.5.2034
 
 @CN@ @H2@ 界面全面改版

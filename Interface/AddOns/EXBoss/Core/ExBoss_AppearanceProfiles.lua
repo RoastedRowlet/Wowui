@@ -507,6 +507,7 @@ local function ApplyAppearance(appearance)
             for childKey, childValue in pairs(source) do
                 target[childKey] = childValue
             end
+            ExwindTools:InvalidateModuleDBDefaults(key)
         elseif source ~= nil then
             root.ModuleDB[key] = source
         end

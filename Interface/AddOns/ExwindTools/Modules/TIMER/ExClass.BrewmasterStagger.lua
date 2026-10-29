@@ -33,7 +33,7 @@ local TIMER_SCHEMA = ExwindTools.StandardTimerBar.NormalizeSchema({
     textC = { key = "font_timer", gridKey = "font_timer", role = "time", label = L["时间"], optional = true },
 })
 -- =============================================================
--- 模块声明：唯一默认 DB、中央锚点、预览元素与设置页几何
+-- 模块声明：唯一默认 DB、中央锚点、预览元素与 V2 设置页
 -- =============================================================
 -- =========================================================
 -- 一、模块标识与依赖引用 | Module Identity and Dependencies
@@ -167,76 +167,64 @@ local MODULE_SPEC = {
     -- 四、显示、预览与编辑接入 | Display, Preview and Edit Integration
     -- =========================================================
     preview = { positionGuiKeys = { "font_spell" }, elements = { ["core.spellName"] = { guiKey = "font_spell", movable = true, textRole = "spellName", tooltip = L["酒池文字样式"], position = { x = "font_spell.x", y = "font_spell.y" } } } },
-    -- 设置页：所有控件均声明绝对 x/y/w/h，不使用流式布局。
-    -- [卡片迁移边界：设置页] 仅可按统一规范调整下列 gui.static/gui.fields 的 x/y/w/h 与卡片分组。
-    -- key/type/opts、DB path、anchor/preview/defaults、按钮语义及计时条刷新合同禁止修改；复合控件必须整体引用，header 不等于容器。
+    -- V2 设置页：节点 id 保留原 guiKey，path 绑定既有模块存档。
     -- =========================================================
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings", id = "general", title = L["酒池基础设置"],
-                items = {
-                    { key = "enabled", label = L["启用酒池条"], type = "switch" },
-                    { key = "showText", label = L["显示文字"], type = "switch" },
-                    { key = "hideBar", label = L["隐藏条体"], type = "switch" },
-                    { key = "hideOnMounted", label = L["骑乘时隐藏"], type = "switch" },
-                    { key = "textColorFollowsBar", label = L["文字跟随条体颜色"], type = "switch" },
-                    { key = "textValueOnly", label = L["仅显示数值"], type = "switch" },
-                    { key = "fullBarPercent", label = L["满条映射上限 (%)"], min = 50, max = 500, step = 1, type = "slider" },
-                    { key = "btn_reset_pos", label = L["重置酒池位置"], type = "button" },
-                },
-            },
-            {
-                kind = "table", id = "thresholds", title = L["酒池数值与阈值"],
-                columns = {
-                    { title = L["启用"] },
-                    { title = L["阶段"] },
-                    { title = L["阈值 (%)"] },
-                    { title = L["颜色"] },
-                },
-                supportsAdd = false,
-                records = {
-                    { cells = {
-                        { key = "warningEnabled", type = "switch" },
-                        { text = L["阶段一"] },
-                        { key = "warningThresholdValue", type = "input" },
-                        { key = "warningColor", type = "color" },
+        version = 2,
+        cards = {
+            { id = "card.general", kind = "card", title = L["酒池基础设置"], children = {
+                { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用酒池条"] },
+                { id = "showText", kind = "control", controlType = "switch", path = "showText", label = L["显示文字"] },
+                { id = "hideBar", kind = "control", controlType = "switch", path = "hideBar", label = L["隐藏条体"] },
+                { id = "hideOnMounted", kind = "control", controlType = "switch", path = "hideOnMounted", label = L["骑乘时隐藏"] },
+                { id = "textColorFollowsBar", kind = "control", controlType = "switch", path = "textColorFollowsBar", label = L["文字跟随条体颜色"] },
+                { id = "textValueOnly", kind = "control", controlType = "switch", path = "textValueOnly", label = L["仅显示数值"] },
+                { id = "fullBarPercent", kind = "control", controlType = "slider", path = "fullBarPercent", label = L["满条映射上限 (%)"], min = 50, max = 500, step = 1 },
+                { id = "btn_reset_pos_row", kind = "setting", label = L["重置酒池位置"], children = {
+                    { id = "btn_reset_pos", kind = "button", text = L["重置位置"], clickKey = "btn_reset_pos" },
+                } },
+            } },
+            { id = "card.thresholds", kind = "card", title = L["酒池数值与阈值"], children = {
+                { id = "thresholds.table", kind = "table", columns = {
+                    { title = L["启用"] }, { title = L["阶段"] }, { title = L["阈值 (%)"] }, { title = L["颜色"] },
+                }, children = {
+                    { id = "thresholds.row.1", kind = "row", children = {
+                        { id = "thresholds.row.1.1", kind = "cell", children = { { id = "warningEnabled", kind = "control", controlType = "checkbox", path = "warningEnabled", label = "" } } },
+                        { id = "thresholds.row.1.2", kind = "cell", children = { { id = "thresholds.row.1.2.text", kind = "text", text = L["阶段一"] } } },
+                        { id = "thresholds.row.1.3", kind = "cell", children = { { id = "warningThresholdValue", kind = "control", controlType = "input", path = "warningThresholdValue" } } },
+                        { id = "thresholds.row.1.4", kind = "cell", children = { { id = "warningColor", kind = "control", controlType = "color", path = "warningColor" } } },
                     } },
-                    { cells = {
-                        { key = "dangerEnabled", type = "switch" },
-                        { text = L["阶段二"] },
-                        { key = "dangerThresholdValue", type = "input" },
-                        { key = "dangerColor", type = "color" },
+                    { id = "thresholds.row.2", kind = "row", children = {
+                        { id = "thresholds.row.2.1", kind = "cell", children = { { id = "dangerEnabled", kind = "control", controlType = "checkbox", path = "dangerEnabled", label = "" } } },
+                        { id = "thresholds.row.2.2", kind = "cell", children = { { id = "thresholds.row.2.2.text", kind = "text", text = L["阶段二"] } } },
+                        { id = "thresholds.row.2.3", kind = "cell", children = { { id = "dangerThresholdValue", kind = "control", controlType = "input", path = "dangerThresholdValue" } } },
+                        { id = "thresholds.row.2.4", kind = "cell", children = { { id = "dangerColor", kind = "control", controlType = "color", path = "dangerColor" } } },
                     } },
-                    { cells = {
-                        { key = "extraColor1Enabled", type = "switch" },
-                        { text = L["阶段三"] },
-                        { key = "extraColor1ThresholdValue", type = "input" },
-                        { key = "extraColor1", type = "color" },
+                    { id = "thresholds.row.3", kind = "row", children = {
+                        { id = "thresholds.row.3.1", kind = "cell", children = { { id = "extraColor1Enabled", kind = "control", controlType = "checkbox", path = "extraColor1Enabled", label = "" } } },
+                        { id = "thresholds.row.3.2", kind = "cell", children = { { id = "thresholds.row.3.2.text", kind = "text", text = L["阶段三"] } } },
+                        { id = "thresholds.row.3.3", kind = "cell", children = { { id = "extraColor1ThresholdValue", kind = "control", controlType = "input", path = "extraColor1ThresholdValue" } } },
+                        { id = "thresholds.row.3.4", kind = "cell", children = { { id = "extraColor1", kind = "control", controlType = "color", path = "extraColor1" } } },
                     } },
-                    { cells = {
-                        { key = "extraColor2Enabled", type = "switch" },
-                        { text = L["阶段四"] },
-                        { key = "extraColor2ThresholdValue", type = "input" },
-                        { key = "extraColor2", type = "color" },
+                    { id = "thresholds.row.4", kind = "row", children = {
+                        { id = "thresholds.row.4.1", kind = "cell", children = { { id = "extraColor2Enabled", kind = "control", controlType = "checkbox", path = "extraColor2Enabled", label = "" } } },
+                        { id = "thresholds.row.4.2", kind = "cell", children = { { id = "thresholds.row.4.2.text", kind = "text", text = L["阶段四"] } } },
+                        { id = "thresholds.row.4.3", kind = "cell", children = { { id = "extraColor2ThresholdValue", kind = "control", controlType = "input", path = "extraColor2ThresholdValue" } } },
+                        { id = "thresholds.row.4.4", kind = "cell", children = { { id = "extraColor2", kind = "control", controlType = "color", path = "extraColor2" } } },
                     } },
-                },
-            },
-            {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchor",
-            },
-            {
-                kind = "composite", id = "timer", title = L["酒池条样式"],
-                component = "timerbargroup", key = "timerGroup",
-            },
-            {
-                kind = "composite", id = "font", title = L["酒池文字样式"],
-                component = "fontgroup", key = "font_spell",
-            },
+                } },
+            } },
+            { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
+                { id = "anchor", kind = "component", component = "anchorgroup", path = "anchor", optionsRef = "anchor" }
+            } },
+            { id = "card.timer", kind = "card", title = L["酒池条样式"], children = {
+                { id = "timerGroup", kind = "component", component = "timerbargroup", path = "timerGroup" }
+            } },
+            { id = "card.font", kind = "card", title = L["酒池文字样式"], children = {
+                { id = "font_spell", kind = "component", component = "fontgroup", path = "font_spell" }
+            } }
         },
     },
 }
@@ -339,11 +327,6 @@ local function RefreshRuntime()
     else
         central:Clear()
     end
-end
-
-local function Refresh()
-    RefreshPreview()
-    RefreshRuntime()
 end
 
 RefreshActiveSurfaces = function(controller)
@@ -453,7 +436,11 @@ SyncRuntimeEventWatches()
 ExwindTools:WatchState(MODULE_KEY .. ".ButtonClicked", MODULE_KEY,
     function(info)
         if info and info.key == "btn_reset_pos" then
-            DB.posX, DB.posY = -16, -130; Refresh()
+            DB.posX, DB.posY = -16, -130
+            EXUI:NotifyModuleValueChanged(MODULE_KEY, "posX", "committed")
+            EXUI:NotifyModuleValueChanged(MODULE_KEY, "posY", "committed")
+            local page = EXUI:GetModulePage(MODULE_KEY)
+            if page then page:Refresh() end
         end
     end)
 -- 职业、专精、骑乘状态改变会重新绑定或取消酒池高频监听。

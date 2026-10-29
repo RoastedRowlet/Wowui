@@ -763,6 +763,7 @@ function Mod.PlayRuntimeCastStartVoice(runtime, kind)
     if castKind == "channel"
         and runtime.transitionCastKind == "cast"
         and runtime.transitionIntoKind == castKind then
+        GetScheduler():ShowTrashObservedChannelTransition(runtime)
         return false
     end
 

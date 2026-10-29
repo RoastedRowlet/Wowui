@@ -112,8 +112,8 @@ function TargetedSpellsBarMixin:PositionElements()
 
 	local core = layout[Element.ProgressBar]
 	self.ProgressBar:ClearAllPoints()
-	PixelUtil.SetPoint(self.ProgressBar, "CENTER", self, "CENTER", core.centerX, core.centerY)
-	PixelUtil.SetSize(self.ProgressBar, core.width, core.height)
+	self.ProgressBar:SetPoint("CENTER", self, "CENTER", core.centerX, core.centerY)
+	self.ProgressBar:SetSize(core.width, core.height)
 
 	local background = elements[Element.Background]
 	self.ProgressBar.Background:SetShown(background == nil or background.active ~= false)
@@ -124,8 +124,8 @@ function TargetedSpellsBarMixin:PositionElements()
 		local geom = layout[entry.tag]
 
 		if geom ~= nil then
-			PixelUtil.SetPoint(region, "CENTER", self, "CENTER", geom.centerX, geom.centerY)
-			PixelUtil.SetSize(region, geom.width, geom.height)
+			region:SetPoint("CENTER", self, "CENTER", geom.centerX, geom.centerY)
+			region:SetSize(geom.width, geom.height)
 
 			if entry.applyShown then
 				region:SetShown(elements[entry.tag].active ~= false)
@@ -149,7 +149,7 @@ function TargetedSpellsBarMixin:PositionElements()
 				ApplyTextWidth(region, geom.maxWidth)
 			end
 
-			PixelUtil.SetPoint(region, geom.justifyH, self, "CENTER", geom.edgeX, geom.centerY)
+			region:SetPoint(geom.justifyH, self, "CENTER", geom.edgeX, geom.centerY)
 
 			local element = elements[entry.tag]
 			if not element.useClassColor then
@@ -169,7 +169,7 @@ function TargetedSpellsBarMixin:ApplyLayout()
 		return
 	end
 
-	PixelUtil.SetSize(self, core.width, core.height)
+	self:SetSize(core.width, core.height)
 	self:PositionElements()
 
 	self:SetForegroundBarTexture()
@@ -180,6 +180,7 @@ function TargetedSpellsBarMixin:ApplyLayout()
 
 	local border = self:GetElement(Element.Border)
 	self:ApplyBorderStyle(border ~= nil and border.active ~= false and border.borderTexture or "None")
+	self:ApplyIconBorderStyle()
 
 	local duration = self:GetElement(Element.DurationCooldown)
 	if duration ~= nil then
@@ -290,6 +291,22 @@ function TargetedSpellsBarMixin:ApplyBorderStyle(styleName)
 		self.ProgressBar --[[@as TargetedSpellsBorderFrame]],
 		styleName,
 		{ width = layout.barWidth, height = (core and core.height) or 0, offsetX = 0, offsetY = 0 },
+		border and border.borderSize,
+		border and border.borderColor
+	)
+end
+
+function TargetedSpellsBarMixin:ApplyIconBorderStyle()
+	local border = self:GetElement(Element.IconBorder)
+	local icon = self:GetElement(Element.Icon)
+	if icon == nil then
+		return
+	end
+
+	Private.Utils.ApplyBorderStyle(
+		self.IconBorder --[[@as TargetedSpellsBorderFrame]],
+		border ~= nil and border.active ~= false and icon.active ~= false and border.borderTexture or "None",
+		{ width = icon.width, height = icon.height, offsetX = 0, offsetY = 0 },
 		border and border.borderSize,
 		border and border.borderColor
 	)

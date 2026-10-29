@@ -35,33 +35,50 @@ MDT.mapPOIs[dungeonIndex] = {
       ["sizeMult"] = 1.5,
     },
     [2] = {
-      ["type"] = "genericItem",
+      ["type"] = "genericAssignablePOI",
       ["x"] = 82.873761510963,
       ["y"] = -326.03647700266,
+      ["index"] = 1,
+      ["textAnchor"] = "RIGHT",
+      ["textAnchorTo"] = "LEFT",
       ["info"] = {
         ["texture"] = 135265,
         ["spellId"] = 1271545,
         ["size"] = 15,
+        ["fontSize"] = 6,
+        ["textOffsetX"] = -1,
+        ["textOffsetY"] = 0,
       },
     },
     [3] = {
-      ["type"] = "genericItem",
+      ["type"] = "genericAssignablePOI",
       ["x"] = 199.9,
       ["y"] = -431,
+      ["index"] = 2,
+      ["textAnchor"] = "LEFT",
+      ["textAnchorTo"] = "RIGHT",
       ["info"] = {
         ["texture"] = 135265,
         ["spellId"] = 1271545,
         ["size"] = 15,
+        ["fontSize"] = 6,
+        ["textOffsetX"] = 1,
+        ["textOffsetY"] = 0,
       },
     },
     [4] = {
-      ["type"] = "genericItem",
+      ["type"] = "genericAssignablePOI",
       ["x"] = 497.97968554859,
       ["y"] = -231.42173301341,
+      ["textAnchor"] = "LEFT",
+      ["textAnchorTo"] = "RIGHT",
       ["info"] = {
         ["texture"] = 237528,
         ["spellId"] = 1271737,
         ["size"] = 15,
+        ["fontSize"] = 6,
+        ["textOffsetX"] = 1,
+        ["textOffsetY"] = 0,
       },
     },
     [5] = {
@@ -206,15 +223,9 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Undead",
     ["level"] = 91,
     ["spells"] = {
-      [1221063] = {
-      },
       [1238687] = {
       },
-      [1238725] = {
-      },
       [1238760] = {
-      },
-      [1249737] = {
       },
     },
     ["clones"] = {
@@ -272,8 +283,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Humanoid",
     ["level"] = 90,
     ["spells"] = {
-      [1221063] = {
-      },
       [1241214] = {
         ["interruptible"] = true,
       },
@@ -367,8 +376,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Humanoid",
     ["level"] = 90,
     ["spells"] = {
-      [1221063] = {
-      },
       [1241217] = {
       },
       [1297699] = {
@@ -516,8 +523,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Beast",
     ["level"] = 90,
     ["spells"] = {
-      [1221063] = {
-      },
       [1238053] = {
         ["enrage"] = true,
       },
@@ -633,11 +638,7 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Elemental",
     ["level"] = 91,
     ["spells"] = {
-      [1221063] = {
-      },
       [1309947] = {
-      },
-      [1309964] = {
       },
     },
     ["clones"] = {
@@ -659,13 +660,9 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Beast",
     ["level"] = 90,
     ["spells"] = {
-      [1221063] = {
-      },
       [1241226] = {
       },
       [1265400] = {
-      },
-      [1265402] = {
       },
     },
     ["clones"] = {
@@ -789,11 +786,7 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Elemental",
     ["level"] = 90,
     ["spells"] = {
-      [1221063] = {
-      },
       [1296518] = {
-      },
-      [1296519] = {
       },
     },
     ["clones"] = {
@@ -875,8 +868,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Beast",
     ["level"] = 90,
     ["spells"] = {
-      [1221063] = {
-      },
       [1309919] = {
         ["interruptible"] = true,
       },
@@ -942,12 +933,8 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Elemental",
     ["level"] = 90,
     ["spells"] = {
-      [1221063] = {
-      },
       [1239860] = {
         ["magic"] = true,
-      },
-      [1239871] = {
       },
       [1266178] = {
       },
@@ -1013,13 +1000,9 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Undead",
     ["level"] = 91,
     ["spells"] = {
-      [1221063] = {
-      },
       [1240280] = {
       },
       [1241463] = {
-      },
-      [1241464] = {
       },
     },
     ["clones"] = {
@@ -1093,8 +1076,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Humanoid",
     ["level"] = 90,
     ["spells"] = {
-      [1221063] = {
-      },
       [1246687] = {
         ["interruptible"] = true,
       },
@@ -1145,8 +1126,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Beast",
     ["level"] = 91,
     ["spells"] = {
-      [1221063] = {
-      },
       [1246957] = {
       },
       [1246986] = {
@@ -1185,8 +1164,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["spells"] = {
       [1246847] = {
         ["interruptible"] = true,
-      },
-      [1246860] = {
       },
       [1246865] = {
         ["enrage"] = true,
@@ -1451,8 +1428,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["encounterID"] = 2777,
     ["instanceID"] = 1311,
     ["spells"] = {
-      [1221063] = {
-      },
       [1232012] = {
       },
       [1234021] = {
@@ -1461,16 +1436,10 @@ MDT.dungeonEnemies[dungeonIndex] = {
       },
       [1234681] = {
       },
-      [1234734] = {
-      },
       [1234846] = {
         ["poison"] = true,
       },
       [1235072] = {
-      },
-      [1235075] = {
-      },
-      [1235076] = {
       },
       [1235079] = {
       },
@@ -1503,12 +1472,8 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Beast",
     ["level"] = 90,
     ["spells"] = {
-      [1221063] = {
-      },
       [1238439] = {
         ["bleed"] = true,
-      },
-      [1238440] = {
       },
     },
     ["clones"] = {
@@ -1629,25 +1594,15 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["instanceID"] = 1311,
     ["spells"] = {
       [1235548] = {
-      },
-      [1235549] = {
         ["magic"] = true,
       },
       [1235623] = {
       },
-      [1235635] = {
-      },
       [1235656] = {
-      },
-      [1235658] = {
       },
       [1235783] = {
       },
-      [1235795] = {
-      },
       [1236289] = {
-      },
-      [1297749] = {
       },
     },
     ["clones"] = {
@@ -1668,8 +1623,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Not specified",
     ["level"] = 90,
     ["spells"] = {
-      [1235638] = {
-      },
       [1235641] = {
       },
     },
@@ -1721,10 +1674,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Humanoid",
     ["level"] = 91,
     ["spells"] = {
-      [1247366] = {
-      },
-      [1247367] = {
-      },
       [1251027] = {
       },
       [1264753] = {
@@ -1733,8 +1682,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
         ["interruptible"] = true,
       },
       [1296722] = {
-      },
-      [1309924] = {
       },
       [1309925] = {
       },
@@ -1837,8 +1784,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Not specified",
     ["level"] = 90,
     ["spells"] = {
-      [1221063] = {
-      },
       [1238801] = {
         ["curse"] = true,
       },
@@ -1901,31 +1846,15 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["encounterID"] = 2777,
     ["instanceID"] = 1311,
     ["spells"] = {
-      [1221063] = {
-      },
       [1242860] = {
-      },
-      [1242869] = {
-      },
-      [1242887] = {
       },
       [1243002] = {
       },
-      [1243011] = {
-      },
-      [1243273] = {
-      },
       [1243408] = {
-      },
-      [1243569] = {
       },
       [1254622] = {
       },
-      [1261976] = {
-      },
       [1297792] = {
-      },
-      [1297793] = {
       },
       [1297796] = {
       },
@@ -1955,15 +1884,11 @@ MDT.dungeonEnemies[dungeonIndex] = {
       },
       [1243078] = {
       },
-      [1243856] = {
-      },
       [1249186] = {
       },
       [1261776] = {
       },
       [1262253] = {
-      },
-      [1270826] = {
       },
     },
     ["clones"] = {
@@ -1990,11 +1915,7 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["spells"] = {
       [1242976] = {
       },
-      [1255570] = {
-      },
       [1255577] = {
-      },
-      [1262577] = {
       },
     },
     ["clones"] = {
@@ -2087,8 +2008,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
       [1238439] = {
         ["bleed"] = true,
       },
-      [1238440] = {
-      },
       [1239394] = {
         ["interruptible"] = true,
       },
@@ -2117,8 +2036,6 @@ MDT.dungeonEnemies[dungeonIndex] = {
     ["creatureType"] = "Not specified",
     ["level"] = 90,
     ["spells"] = {
-      [1246821] = {
-      },
       [1246825] = {
       },
     },

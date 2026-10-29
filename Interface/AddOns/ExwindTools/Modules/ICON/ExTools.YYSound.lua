@@ -20,7 +20,7 @@ local CUSTOM_SOUND_PATH_GUIDE = L["有效路径示例：Interface\\AddOns\\MySou
 local LSM = LibStub("LibSharedMedia-3.0", true)
 
 -- 预设、DB 字段、锚点、预览交互和所有设置页坐标均由模块声明。
--- 此表只含数据，绝不把模块函数或渲染实现传给中央。
+-- 页面声明只含数据，运行期设置选项由 SettingsOwner 提供。
 -- =========================================================
 -- 一、模块标识与依赖引用 | Module Identity and Dependencies
 -- =========================================================
@@ -128,60 +128,79 @@ local MODULE_SPEC = {
             },
         },
     },
-    -- [卡片迁移边界：设置页] 仅可按统一规范调整下列 gui.static/gui.fields 的 x/y/w/h 与卡片分组。
-    -- key/type/opts、DB path、anchor/preview/defaults 及刷新回调均属绑定或业务合同，禁止修改；复合控件必须整体引用，header 本身不等于卡片容器。
     -- =========================================================
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        sections = {
+        version = 2,
+        cards = {
             {
-                kind = "settings", id = "common", title = L["通用设置"],
-                items = {
-                    { key = "enabled", label = L["启用"], type = "switch" },
-                    { key = "spellID", label = L["法术 ID（优先）"], type = "input" },
-                    { key = "iconTexture", label = L["图标路径/ID"], type = "input" },
+                kind = "card", id = "card.common", title = L["通用设置"],
+                children = {
+                    { kind = "control", id = "enabled", path = "enabled", label = L["启用"], controlType = "switch" },
+                    { kind = "control", id = "spellID", path = "spellID", label = L["法术 ID（优先）"], controlType = "input" },
+                    { kind = "control", id = "iconTexture", path = "iconTexture", label = L["图标路径/ID"], controlType = "input" },
                 },
             },
             {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchor",
-            },
-            {
-                kind = "composite", id = "icon", title = L["图标本体"],
-                component = "icongroup", key = "icon",
-            },
-            {
-                kind = "composite", id = "font_time", title = L["倒数文本"],
-                component = "fontgroup", key = "font_time",
-            },
-            {
-                kind = "settings", id = "sound", title = L["音效设置"],
-                items = {
-                    { key = "sound", label = L["内置音效"], type = "select", media = "sound" },
-                    { key = "soundChannel", label = L["输出频道"], type = "select", originalOptions = { { L["主音量"], "Master" }, { L["效果"], "SFX" }, { L["环境"], "Ambience" }, { L["音乐"], "Music" }, { L["对话"], "Dialog" } } },
-                    { key = "useCustomSound", label = L["使用自定义路径"], type = "switch" },
-                    { key = "randomSound", label = L["随机播放多条"], type = "switch" },
+                kind = "card", id = "card.anchor", title = L["锚点设置"],
+                children = {
+                    { kind = "component", id = "anchor", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
                 },
             },
             {
-                kind = "settings", id = "custom_sounds", title = L["自定义音效路径"],
-                description = { key = "custom_sound_path_guide", type = "description", label = CUSTOM_SOUND_PATH_GUIDE, fontSize = 16 },
-                items = {
-                    { key = "customSound1", label = L["音效 1"], parentKey = "customSounds", subKey = "1", type = "input", inputWidthPercent = 130 },
-                    { key = "customSound2", label = L["音效 2"], parentKey = "customSounds", subKey = "2", type = "input", inputWidthPercent = 130 },
-                    { key = "customSound3", label = L["音效 3"], parentKey = "customSounds", subKey = "3", type = "input", inputWidthPercent = 130 },
-                    { key = "customSound4", label = L["音效 4"], parentKey = "customSounds", subKey = "4", type = "input", inputWidthPercent = 130 },
-                    { key = "customSound5", label = L["音效 5"], parentKey = "customSounds", subKey = "5", type = "input", inputWidthPercent = 130 },
-                    { key = "customSound6", label = L["音效 6"], parentKey = "customSounds", subKey = "6", type = "input", inputWidthPercent = 130 },
+                kind = "card", id = "card.icon", title = L["图标本体"],
+                children = {
+                    { kind = "component", id = "icon", component = "icongroup", path = "icon", optionsRef = "icon" },
                 },
             },
             {
-                kind = "settings", id = "test", title = L["测试操作"],
-                items = {
-                    { key = "btn_test", label = L["测试效果"], type = "button" },
-                    { key = "btn_stop", label = L["停止测试"], type = "button" },
+                kind = "card", id = "card.font_time", title = L["倒数文本"],
+                children = {
+                    { kind = "component", id = "font_time", component = "fontgroup", path = "font_time" },
+                },
+            },
+            {
+                kind = "card", id = "card.sound", title = L["音效设置"],
+                children = {
+                    { kind = "control", id = "sound", path = "sound", label = L["内置音效"], controlType = "select", media = "sound" },
+                    { kind = "control", id = "soundChannel", path = "soundChannel", label = L["输出频道"], controlType = "select", options = {
+                        { value = "Master", label = L["主音量"] }, { value = "SFX", label = L["效果"] },
+                        { value = "Ambience", label = L["环境"] }, { value = "Music", label = L["音乐"] }, { value = "Dialog", label = L["对话"] },
+                    } },
+                    { kind = "control", id = "useCustomSound", path = "useCustomSound", label = L["使用自定义路径"], controlType = "switch" },
+                    { kind = "control", id = "randomSound", path = "randomSound", label = L["随机播放多条"], controlType = "switch" },
+                },
+            },
+            {
+                kind = "card", id = "card.custom_sounds", title = L["自定义音效路径"],
+                children = {
+                    { kind = "table", id = "custom_sounds.table", columns = {
+                        { title = L["音效"] }, { title = L["自定义音效路径"] },
+                    }, children = {
+                        { kind = "repeat", id = "custom_sounds.rows", source = "customSounds", template = {
+                            kind = "row", id = "custom_sounds.row", children = {
+                                { kind = "cell", id = "custom_sounds.name", children = {
+                                    { kind = "text", id = "custom_sounds.name.text", textSource = "customSoundTitle" },
+                                } },
+                                { kind = "cell", id = "custom_sounds.path", children = {
+                                    { kind = "control", id = "custom_sounds.input", controlType = "input", ref = "customSound" },
+                                } },
+                            },
+                        } },
+                    } },
+                    { kind = "setting", id = "btn_add_custom_sound_row", label = L["添加音效"], description = CUSTOM_SOUND_PATH_GUIDE, children = {
+                        { kind = "button", id = "btn_add_custom_sound", clickKey = "btn_add_custom_sound", text = L["添加音效"] },
+                    } },
+                },
+            },
+            {
+                kind = "card", id = "card.test", title = L["测试操作"],
+                children = {
+                    { kind = "setting", id = "btn_test_row", label = L["测试效果"], children = {
+                        { kind = "button", id = "btn_test", clickKey = "btn_test", text = L["测试效果"] },
+                        { kind = "button", id = "btn_stop", clickKey = "btn_stop", text = L["停止测试"] },
+                    } },
                 },
             },
         },
@@ -189,8 +208,6 @@ local MODULE_SPEC = {
 }
 ExwindTools:DeclareModuleSpecDefaults(MODULE_KEY, MODULE_SPEC.defaults)
 local DB = ExwindTools:GetModuleDB(MODULE_KEY)
-local CUSTOM_SOUNDS_SECTION_INDEX = 6
-local customSoundsDescription = MODULE_SPEC.gui.sections[CUSTOM_SOUNDS_SECTION_INDEX].description
 
 local function GetCustomSoundCount(sounds)
     local count = 6
@@ -204,27 +221,26 @@ local function GetCustomSoundCount(sounds)
     return count
 end
 
-local function BuildCustomSoundsSection(count)
-    local items = {}
-    for index = 1, count do
-        items[#items + 1] = {
-            key = "customSound" .. index,
-            label = string.format(L["音效 %d"], index),
-            parentKey = "customSounds",
-            subKey = tostring(index),
-            type = "input",
-            inputWidthPercent = 130,
-        }
+MODULE_SPEC.SettingsOwner = function(controller)
+    local records = {}
+    local owner = { sources = {}, controls = {}, texts = {} }
+    owner.sources.customSounds = function()
+        local rows = {}
+        for index = 1, GetCustomSoundCount(controller:GetConfig().customSounds) do
+            records[index] = records[index] or { index = index }
+            rows[index] = records[index]
+        end
+        return rows
     end
-    items[#items + 1] = { key = "btn_add_custom_sound", label = L["添加音效"], type = "button" }
-    return {
-        kind = "settings", id = "custom_sounds", title = L["自定义音效路径"],
-        description = customSoundsDescription,
-        items = items,
-    }
+    owner.texts.customSoundTitle = function(scope)
+        return string.format(L["音效 %d"], scope.item.index)
+    end
+    owner.controls.customSound = EXUI:CreateSettingsV2Control({ controlType = "input", size = "wide" },
+        function(context)
+            return EXUI:CreateSettingsV2Binding(MODULE_KEY, controller:GetConfig(), "customSounds." .. context.scope.item.index)
+        end)
+    return owner
 end
-
-MODULE_SPEC.gui.sections[CUSTOM_SOUNDS_SECTION_INDEX] = BuildCustomSoundsSection(GetCustomSoundCount(DB.customSounds))
 local central = EXUI:RegisterIconModule(MODULE_SPEC)
 local LAYOUT = DB.layout
 if not ExwindTools:IsModuleEnabled(MODULE_KEY) then return end
@@ -388,13 +404,8 @@ ExwindTools:WatchState(MODULE_KEY .. ".ButtonClicked", MODULE_KEY, function(clic
         if type(DB.customSounds) ~= "table" then return end
         local nextIndex = GetCustomSoundCount(DB.customSounds) + 1
         DB.customSounds[nextIndex] = ""
-        local section = BuildCustomSoundsSection(nextIndex)
-        central.spec.gui.sections[CUSTOM_SOUNDS_SECTION_INDEX] = section
-        local page = EXUI.ActivePageFrame
-        local session = page and _G.ExwindGrid and _G.ExwindGrid:GetMountedCardSession(page)
-        if session and session.context.moduleKey == MODULE_KEY then
-            session:ReplaceSettingsSection("custom_sounds", section)
-        end
+        local page = EXUI:GetModulePage(MODULE_KEY)
+        if page then page:Refresh() end
     end
 end)
 

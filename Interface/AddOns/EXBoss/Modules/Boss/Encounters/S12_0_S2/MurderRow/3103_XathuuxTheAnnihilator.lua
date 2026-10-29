@@ -56,9 +56,7 @@ do
         boss = { key = "xathuux_the_annihilator", name = "Xathuux the Annihilator", zhCN = "歼灭者萨祖克斯" },
         phaseAlerts = {},
         vulnerability = {},
-        -- [卡片/Grid 迁移边界：3103 encounter extra]
-        -- 仅 layout 的 x/y/w/h 与外层卡片呈现可按共享规范迁移；key/defaults/onChanged 及上方事件业务禁止修改。
-        -- enabled 控件由统一 SettingsCard body 挂载并回收。
+        -- enabled 的 V2 path 只写 extra 草稿，正式提交仍由 ExtrasEditor 路由到 BossConfig。
         extras = {
             {
                 key = EXTRA_KEY,
@@ -67,15 +65,13 @@ do
                 description = L["提前 4 秒提示易伤，随后显示持续 15 秒的 30% 易伤阶段倒数。"],
                 defaults = { enabled = true },
                 layout = {
-                    version = 1,
-                    title = L["易伤提示"],
+                    version = 2,
                     cards = {
-                        { id = "vulnerability", title = L["易伤提示"], collapsible = true,
-                            placement = { target = "$container", point = "TOPLEFT", relativePoint = "TOPLEFT" },
-                            content = { kind = "grid", items = {
-                                { key = "enabled", type = "checkbox", x = 1, y = 1, w = 70, h = 6,
+                        { id = "vulnerability", kind = "card", title = L["易伤提示"], collapsible = true,
+                            children = {
+                                { id = "enabled", kind = "control", controlType = "switch", path = "enabled",
                                     label = L["启用易伤提示"] },
-                            } } },
+                            } },
                     },
                 },
                 onChanged = function(config)

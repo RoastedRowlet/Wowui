@@ -1115,6 +1115,9 @@ local function HookCompact()
 			if addon.ShadowedReplacesCompactFrame and addon.ShadowedReplacesCompactFrame(frame) then
 				return
 			end
+			if addon.NucleusReplacesCompactFrame and addon.NucleusReplacesCompactFrame(frame) then
+				return
+			end
 			if addon.IsActive and addon.IsActive() then
 				addon.AttachUnitFrame(frame)
 			end
@@ -1272,6 +1275,39 @@ local function HookEnhanceQoLAssign()
 	end
 end
 
+local nucleusHooked
+
+local function HookNucleusAssign()
+	if nucleusHooked then
+		return
+	end
+	local N = _G.Nucleus
+	local UF = N and N.UnitFrame
+	if type(N) ~= "table" or type(N.On) ~= "function" or type(UF) ~= "table" or type(UF.BindChild) ~= "function" then
+		return
+	end
+	nucleusHooked = true
+	-- BindChild runs after the secure header assigns the unit. Pets, bosses,
+	-- and target/focus spotlight slots are not group buttons.
+	hooksecurefunc(UF, "BindChild", function(child)
+		if not child or not addon.IsActive or not addon.IsActive() then
+			return
+		end
+		if addon.IsNucleusGroupButton and not addon.IsNucleusGroupButton(child) then
+			return
+		end
+		addon.AttachUnitFrame(child)
+	end)
+	N:On("NUCLEUS_SETTING_CHANGED", function(_, section)
+		if section ~= "party" and section ~= "raid" and section ~= "spotlight" and section ~= "npc" then
+			return
+		end
+		if addon.IsActive and addon.IsActive() and addon.QueueAttach then
+			addon.QueueAttach()
+		end
+	end)
+end
+
 local sufHooked
 
 local function HookShadowedAssign()
@@ -1312,6 +1348,7 @@ function addon.HookRaidFrameProviders()
 	HookCellAssign()
 	HookEnhanceQoLAssign()
 	HookShadowedAssign()
+	HookNucleusAssign()
 end
 
 addon.On("LOADED", addon.HookRaidFrameProviders)

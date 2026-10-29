@@ -352,11 +352,15 @@ function EXUI:CreateTextCollection(parent, interactionMode, moduleKey, callbacks
         contentCenter = type(callbacks) == "table" and callbacks.contentCenter == true,
         itemsByID = {}, currentItems = {}, itemWidth = 1, itemHeight = 1 }
     collection.layout = EXUI:CreateWidgetLayout(parent, {})
+    EXUI:InitializeCollectionVisualAnimations(collection)
 
     function collection:AcquireItem(itemID)
         if type(itemID) ~= "string" or itemID == "" then error("TextCollection itemID must be non-empty string", 2) end
         local item = self.itemsByID[itemID]
-        if item then return item end
+        if item then
+            if self:IsItemVisualRetiring(itemID) then self:StopItemVisualAnimation(itemID) end
+            return item
+        end
         item = NewItem(self, itemID)
         self.itemsByID[itemID] = item
         return item
@@ -364,6 +368,7 @@ function EXUI:CreateTextCollection(parent, interactionMode, moduleKey, callbacks
 
     function collection:ApplyItem(item, presentation)
         if not item or not item.widget then error("TextCollection ApplyItem requires an acquired item", 2) end
+        if self:IsItemVisualRetiring(item.id) then self:StopItemVisualAnimation(item.id) end
         if type(presentation) ~= "table" then error("TextCollection presentation must be table", 2) end
         item.presentation, item.declaredBounds, item.semanticSlot = presentation, RequireDeclaredBounds(presentation), ResolveSlot(presentation)
         item.presentationScale = RequirePresentationScale(presentation)
@@ -395,7 +400,9 @@ function EXUI:CreateTextCollection(parent, interactionMode, moduleKey, callbacks
         if width then self.itemWidth, self.itemHeight = width, height end
         local wanted = {}
         for _, item in ipairs(items or {}) do wanted[item.id] = true end
-        for id, item in pairs(self.itemsByID) do if not wanted[id] then item.root:Hide() end end
+        for id, item in pairs(self.itemsByID) do
+            if not wanted[id] and not self:IsItemVisualRetiring(id) then item.root:Hide() end
+        end
         self.layout:ApplyStyle(CopyLayout(layout, self.contentCenter))
         self.layout:SetSemanticItems(items or {}, self.itemWidth, self.itemHeight)
         self.currentItems = items or {}
@@ -451,6 +458,7 @@ function EXUI:CreateTextCollection(parent, interactionMode, moduleKey, callbacks
     function collection:SetItemClickAction(itemID, spec)
         local item = self.itemsByID[itemID]
         if not item or not item.root then return false end
+        if self:IsItemVisualRetiring(itemID) then return false end
         return EXUI:ApplyCollectionItemClick(item, spec)
     end
     -- Runtime animations (for example a fading announcement) may adjust the
@@ -468,6 +476,7 @@ function EXUI:CreateTextCollection(parent, interactionMode, moduleKey, callbacks
     function collection:PlayItemAlphaSequence(itemID, phases, onFinished)
         local item = self.itemsByID[itemID]
         if not item or not item.root or type(phases) ~= "table" or #phases == 0 then return false end
+        self:StopItemVisualAnimation(itemID)
         if item.alphaAnimation then
             item.alphaAnimation:SetScript("OnFinished", nil)
             item.alphaAnimation:Stop()
@@ -498,6 +507,7 @@ function EXUI:CreateTextCollection(parent, interactionMode, moduleKey, callbacks
     function collection:ReleaseItem(itemID)
         local item = self.itemsByID[itemID]
         if not item then return end
+        self:StopItemVisualAnimation(itemID)
         if item.alphaAnimation then
             item.alphaAnimation:SetScript("OnFinished", nil)
             item.alphaAnimation:Stop()

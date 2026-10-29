@@ -112,6 +112,10 @@ ns.DEFAULTS = {
         soundOnCritical    = false,
         muted              = {},   -- [addonName] = true
 
+        -- The launcher (Launcher.lua). Off by default: the anchor button already sits on the HUD.
+        minimapButton      = false,
+        compartment        = true,
+
         -- Storage caps.
         maxLogEntries      = 100,
     },
@@ -133,6 +137,9 @@ ns.DEFAULTS = {
 
     -- Capped hitch log (newest at the end).
     log = {},
+
+    -- LibDBIcon's own: button position plus hide and compartment flags, driven by settings.
+    minimap = {},
 }
 
 local function deepCopy(src)

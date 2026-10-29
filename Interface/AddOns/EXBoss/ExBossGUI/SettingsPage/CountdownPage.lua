@@ -1,7 +1,7 @@
 ---@diagnostic disable: undefined-global, undefined-field, need-check-nil
 -- =============================================================
 -- ExBossGUI/SettingsPage/CountdownPage.lua
--- Countdown 只声明既有 Grid 布局；Dock、Scroll、Watch、延迟 Render、释放和
+-- Countdown 只声明 V2 卡片布局；Dock、Scroll、Watch、延迟 Render、释放和
 -- Slider 生命周期均由 EXUI 标准合同拥有。Secret runtime 值绝不进入此页面。
 -- =============================================================
 
@@ -64,33 +64,42 @@ local COMMON_OPTS = {
     },
 }
 
--- [卡片/Grid 迁移边界：Countdown 设置页]
--- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
--- 禁止：修改 key/type/path/opts、测试回调、Secret-safe 固定样本、预览或释放合同。
--- modulecommonsettings/anchorgroup/icongroup/fontgroup 必须整体引用；旧背景/标题项不自动拥有相邻控件。
+-- 保留原设置块次序与组合控件身份；带回调的选项由 owner 提供。
 local LAYOUT = {
-    version = 1,
-    title = L["屏幕倒计时"],
-    sections = {
-        { kind = "composite", id = "module-common", title = L["通用设置"],
-            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
-        { kind = "composite", id = "anchor", title = L["锚点设置"],
-            component = "anchorgroup", key = "anchor", opts = ANCHOR_OPTS },
-        { kind = "composite", id = "icon", title = L["外观"],
-            component = "icongroup", key = "icon" },
-        { kind = "composite", id = "text-font", title = L["提示文字"],
-            component = "fontgroup", key = "font_text" },
-        { kind = "composite", id = "time-font", title = L["倒计时数字"],
-            component = "fontgroup", key = "font_time" },
+    version = 2,
+    cards = {
+        { kind = "card", id = "module-common", title = L["通用设置"],
+            children = {
+                { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", optionsRef = "moduleCommon" },
+            } },
+        { kind = "card", id = "anchor-card", title = L["锚点设置"],
+            children = {
+                { kind = "component", id = "anchor", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+        { kind = "card", id = "icon-card", title = L["外观"],
+            children = {
+                { kind = "component", id = "icon", component = "icongroup", path = "icon", opts = {} },
+            } },
+        { kind = "card", id = "text-font", title = L["提示文字"],
+            children = {
+                { kind = "component", id = "font_text", component = "fontgroup", path = "font_text", opts = {} },
+            } },
+        { kind = "card", id = "time-font", title = L["倒计时数字"],
+            children = {
+                { kind = "component", id = "font_time", component = "fontgroup", path = "font_time", opts = {} },
+            } },
     },
 }
 
-ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
+local function CreatePageOwner()
+    return {
+        options = { moduleCommon = COMMON_OPTS, anchor = ANCHOR_OPTS },
+    }
+end
 
-local function RebindCountdownModuleCommon(grid, container, db)
-    -- state.widgets.moduleCommon 是稳定组合控件入口，迁移后必须保留 key 查找语义。
-    local common = grid and grid.FindMountedWidget and grid:FindMountedWidget(container, "moduleCommon")
-    if common and type(common.RebindDB) == "function" then common:RebindDB(db) end
+local function RebindCountdownModuleCommon(context)
+    local common = context.modulePage and context.modulePage:Find("moduleCommon")
+    if common and type(common.RebindDB) == "function" then common:RebindDB(context.config) end
 end
 
 local function RenderStandardPreview(dock)
@@ -109,7 +118,9 @@ end
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,
+    title = L["屏幕倒计时"],
     layout = LAYOUT,
+    ownerFactory = CreatePageOwner,
     preview = {
         height = 160,
         render = RenderStandardPreview,
@@ -128,8 +139,8 @@ local StandardPage = EXUI:CreateStandardModulePage({
             groupPaths = contract.groupPaths,
         }
     end,
-    afterGridLayout = function(context)
-        RebindCountdownModuleCommon(context.grid, context.scrollChild, context.config)
+    afterLayout = function(context)
+        RebindCountdownModuleCommon(context)
     end,
 })
 

@@ -1,6 +1,7 @@
 # Grid2
 
-## [4.1.6-beta](https://github.com/michaelnpsp/Grid2/tree/4.1.6-beta) (2026-10-12)
-[Full Changelog](https://github.com/michaelnpsp/Grid2/compare/4.1.4-beta...4.1.6-beta) [Previous Releases](https://github.com/michaelnpsp/Grid2/releases)
+## [4.1.9](https://github.com/michaelnpsp/Grid2/tree/4.1.9) (2026-10-16)
+[Full Changelog](https://github.com/michaelnpsp/Grid2/compare/4.1.7...4.1.9) [Previous Releases](https://github.com/michaelnpsp/Grid2/releases)
 
-- Added a new "buff-missing" status, that can be used to display missing buffs, but only out of combat and in non-competitivy content.  
+- Missing buffs: Added a setting to ignore buffs the character does not know (GH issue #476)  
+    Icons indicators: Removed cap for "icons per row" setting (GH issue #475)  

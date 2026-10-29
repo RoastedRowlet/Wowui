@@ -208,8 +208,7 @@ end
 
 local function SetShown()
 	local talentsFrame = Addon.TalentsFrame;
-	local isShown = talentsFrame:IsShown() and talentsFrame.ApplyButton:IsShown();
-	Addon.ApplyButton.isShown = isShown;
+	local isShown = talentsFrame:IsShown() and not talentsFrame:IsInspecting();
 
 	if isShown then
 		Addon:UpdateScrollBox();
@@ -219,9 +218,6 @@ local function SetShown()
 	Addon.InspectImportButton:SetShown(not isShown);
 end
 
-Addon.ApplyButton = {};
-Addon.ApplyButton.isShown = false;
-Addon.ApplyButton.isEnabled = false;
 function Addon:InitFrame()
 	Addon.ParentFrame = PlayerSpellsFrame;
 	Addon.frame = CreateFrame("Frame", "TalentLoadoutExMainFrame", Addon.ParentFrame, "TalentLoadoutExMainFrameTemplate");
@@ -230,16 +226,8 @@ function Addon:InitFrame()
 	InitPvpFrame();
 
 	Addon.TalentsFrame = Addon.ParentFrame.TalentsFrame;
-	hooksecurefunc(Addon.TalentsFrame, "SetShown", SetShown);
-	hooksecurefunc(Addon.TalentsFrame.ApplyButton, "SetShown", SetShown);
-
-	hooksecurefunc(
-		Addon.TalentsFrame.ApplyButton,
-		"SetEnabled",
-		function(_, enabled)
-			Addon.ApplyButton.isEnabled = enabled;
-		end
-	);
+	Addon.TalentsFrame:HookScript("OnShow", SetShown);
+	Addon.TalentsFrame:HookScript("OnHide", SetShown);
 
 	Addon:InitPanelButtons();
 	Addon:InitTextPopupFrame();

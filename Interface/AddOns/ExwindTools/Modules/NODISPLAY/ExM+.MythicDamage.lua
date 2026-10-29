@@ -144,10 +144,10 @@ local function EX_RegisterLayout()
                 id = "common",
                 title = L["通用设置"],
                 children = {
-                    { id = "commonDescription", kind = "hint", text = L["法术描述的数值会随着层数改变"] },
                     { id = "useColoredNumbers", kind = "control", controlType = "switch", path = "useColoredNumbers", label = L["数值染色"] },
                     { id = "abbreviateNumbers", kind = "control", controlType = "switch", path = "abbreviateNumbers", label = L["简写数字 (万/亿)"] },
-                    { id = "mythicLevel", kind = "control", controlType = "slider", path = "mythicLevel", label = L["模拟层数 (0-30)"], min = 0, max = 30, step = 1 },
+                    { id = "mythicLevel", kind = "control", controlType = "slider", path = "mythicLevel", label = L["模拟层数 (0-30)"],
+                        description = L["法术描述的数值会随着层数改变"], min = 0, max = 30, step = 1 },
                     { id = "damageColor", kind = "control", controlType = "color", path = "damageColor", label = L["伤害数值颜色"] },
                 },
             },
@@ -156,7 +156,9 @@ local function EX_RegisterLayout()
                 id = "tools",
                 title = L["工具"],
                 children = {
-                    { id = "openSpellInfo", kind = "button", text = L["大米怪物法术"], clickKey = "openSpellInfo" },
+                    { id = "openSpellInfo_row", kind = "setting", label = L["大米怪物法术"], children = {
+                        { id = "openSpellInfo", kind = "button", text = L["大米怪物法术"], clickKey = "openSpellInfo" },
+                    } },
                 },
             },
         },

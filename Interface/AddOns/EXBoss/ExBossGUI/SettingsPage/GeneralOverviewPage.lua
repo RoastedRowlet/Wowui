@@ -10,18 +10,7 @@ ExBoss.UI.Panel.GeneralOverviewPage = ExBoss.UI.Panel.GeneralOverviewPage or {}
 local Page = ExBoss.UI.Panel.GeneralOverviewPage
 
 local MODULE_KEY = "ExBoss.GeneralOverview"
-local BASE_GRID_COLS = 200
-local MIN_GRID_COLS = 200
-local MAX_GRID_COLS = 200
-local TARGET_CELL_PX = 18
-local LAYOUT_CACHE = {}
-local ACTIVE_CONTENT_FRAME
 local refreshingTimelineBars = false
-
-local BAR_SOURCE_OPTIONS = {
-    { L["Boss 技能"], "boss" },
-    { L["小怪技能"], "trash" },
-}
 
 local function ReadCVarValue(name)
     local key = tostring(name or "")
@@ -95,37 +84,33 @@ local function IsEncounterWarningSoundsEnabled()
     return value ~= "2"
 end
 
--- [卡片/Grid 迁移边界：通用设置]
--- 允许：只按共享规范调整下列声明的 x/y/w/h 与自然卡片分组。
--- 禁止：修改 key/type/parentKey/subKey、字段业务次序、CVar/Store 写回与即时刷新回调。
--- header/背景类声明不自动拥有相邻控件；迁移后仍须让原 DB 路径与回调负责保存。
+-- 全局设置绑定 EXBOSS12S2 根，所有提交仍交给唯一 GeneralOverview owner。
 local LAYOUT = {
-    version = 1,
-    title = L["通用设置"],
-    sections = {
-        { kind = "settings", id = "general", title = L["通用设置"],
-            items = {
-                { key = "timelineBars", type = "select", multiple = true, label = L["时间轴样式选择"], options = { { value = "bun", label = L["束状条"] }, { value = "timer", label = L["计时条"] } }, parentKey = "ui.general" },
-                { key = "bunBarSources", type = "select", multiple = true, label = L["束状条显示"], options = { { value = "boss", label = L["Boss 技能"] }, { value = "trash", label = L["小怪技能"] } }, parentKey = "ui.general" },
-                { key = "timerBarSources", type = "select", multiple = true, label = L["计时条显示"], options = { { value = "boss", label = L["Boss 技能"] }, { value = "trash", label = L["小怪技能"] } }, parentKey = "ui.general" },
-                { key = "disableBlizzardEncounterTimeline", type = "switch", label = L["关闭暴雪原生计时条"], parentKey = "ui.general" },
-                { key = "disableEXBossInRaid", type = "switch", label = L["团本中禁用 EXBoss"], parentKey = "ui.general" },
-                { key = "disableAuraSoundRegistration", type = "switch", label = L["关闭光环语音注册（重载后生效）"], parentKey = "voice.global" },
-                { key = "hideTankBossAlertsForDps", type = "switch", label = L["DPS职责下不提示坦克技能"], parentKey = "ui.general" },
-                { key = "hideTankBossAlertsForHeal", type = "switch", label = L["治疗职责下不提示坦克技能"], parentKey = "ui.general" },
-                { key = "showSpellOccurrenceCount", type = "switch", label = L["法术名称显示次数"], parentKey = "ui.general" },
-                { key = "encounterWarningsEnabled", type = "switch", label = L["开启暴雪中央文字预警（注意：如果关闭会导致语音不工作）"], parentKey = "ui.general" },
-                { key = "encounterWarningSoundsEnabled", type = "switch", label = L["开启中央文字预警提示音（预设叮一声）"], parentKey = "ui.general" },
-                { key = "enableBlizzardHintCountdown", type = "switch", label = L["暴雪时间轴模式启用5秒倒数"], parentKey = "ui.general" },
-                { key = "enableBlizzardTimelineInRaid", type = "switch", label = L["团本中仍开启暴雪原生计时条"], parentKey = "ui.general" },
+    version = 2,
+    cards = {
+        { kind = "card", id = "general", title = L["通用设置"],
+            children = {
+                { id = "timelineBars", kind = "control", controlType = "select", multiple = true, label = L["时间轴样式选择"], options = { { value = "bun", label = L["束状条"] }, { value = "timer", label = L["计时条"] } }, path = "ui.general.timelineBars" },
+                { id = "bunBarSources", kind = "control", controlType = "select", multiple = true, label = L["束状条显示"], options = { { value = "boss", label = L["Boss 技能"] }, { value = "trash", label = L["小怪技能"] } }, path = "ui.general.bunBarSources" },
+                { id = "timerBarSources", kind = "control", controlType = "select", multiple = true, label = L["计时条显示"], options = { { value = "boss", label = L["Boss 技能"] }, { value = "trash", label = L["小怪技能"] } }, path = "ui.general.timerBarSources" },
+                { id = "disableBlizzardEncounterTimeline", kind = "control", controlType = "switch", label = L["关闭暴雪原生计时条"], path = "ui.general.disableBlizzardEncounterTimeline" },
+                { id = "disableEXBossInRaid", kind = "control", controlType = "switch", label = L["团本中禁用 EXBoss"], path = "ui.general.disableEXBossInRaid" },
+                { id = "disableAuraSoundRegistration", kind = "control", controlType = "switch", label = L["关闭光环语音注册（重载后生效）"], path = "voice.global.disableAuraSoundRegistration" },
+                { id = "hideTankBossAlertsForDps", kind = "control", controlType = "switch", label = L["DPS职责下不提示坦克技能"], path = "ui.general.hideTankBossAlertsForDps" },
+                { id = "hideTankBossAlertsForHeal", kind = "control", controlType = "switch", label = L["治疗职责下不提示坦克技能"], path = "ui.general.hideTankBossAlertsForHeal" },
+                { id = "showSpellOccurrenceCount", kind = "control", controlType = "switch", label = L["法术名称显示次数"], path = "ui.general.showSpellOccurrenceCount" },
+                { id = "encounterWarningsEnabled", kind = "control", controlType = "switch", label = L["开启暴雪中央文字预警（注意：如果关闭会导致语音不工作）"], path = "ui.general.encounterWarningsEnabled" },
+                { id = "encounterWarningSoundsEnabled", kind = "control", controlType = "switch", label = L["开启中央文字预警提示音（预设叮一声）"], path = "ui.general.encounterWarningSoundsEnabled" },
+                { id = "enableBlizzardHintCountdown", kind = "control", controlType = "switch", label = L["暴雪时间轴模式启用5秒倒数"], path = "ui.general.enableBlizzardHintCountdown" },
+                { id = "enableBlizzardTimelineInRaid", kind = "control", controlType = "switch", label = L["团本中仍开启暴雪原生计时条"], path = "ui.general.enableBlizzardTimelineInRaid" },
             } },
-        { kind = "settings", id = "auto-gossip", title = L["自动对话"],
-            items = {
-                { key = "autoGossipEnabled", type = "switch", label = L["启用自动对话"], parentKey = "autoGossip", subKey = "enabled" },
-                { key = "autoGossipAcademyBuff", type = "switch", label = L["[大秘境] 自动对话学院(AA)BUFF"], parentKey = "autoGossip", subKey = "academyBuff" },
-                { key = "autoGossipCaveCauldron", type = "switch", label = L["[大秘境] 自动对话洞窟(MC)大锅BUFF"], parentKey = "autoGossip", subKey = "caveCauldron" },
-                { key = "autoGossipPosRescue", type = "switch", label = L["[大秘境] 自动对话萨隆矿坑救人(POS)"], parentKey = "autoGossip", subKey = "posRescue" },
-                { key = "autoGossipNpxBuff", type = "switch", label = L["[大秘境] 自动对话节点(NPX)BUFF"], parentKey = "autoGossip", subKey = "npxBuff" },
+        { kind = "card", id = "auto-gossip", title = L["自动对话"],
+            children = {
+                { id = "autoGossipEnabled", kind = "control", controlType = "switch", label = L["启用自动对话"], path = "autoGossip.enabled" },
+                { id = "autoGossipAcademyBuff", kind = "control", controlType = "switch", label = L["[大秘境] 自动对话学院(AA)BUFF"], path = "autoGossip.academyBuff" },
+                { id = "autoGossipCaveCauldron", kind = "control", controlType = "switch", label = L["[大秘境] 自动对话洞窟(MC)大锅BUFF"], path = "autoGossip.caveCauldron" },
+                { id = "autoGossipPosRescue", kind = "control", controlType = "switch", label = L["[大秘境] 自动对话萨隆矿坑救人(POS)"], path = "autoGossip.posRescue" },
+                { id = "autoGossipNpxBuff", kind = "control", controlType = "switch", label = L["[大秘境] 自动对话节点(NPX)BUFF"], path = "autoGossip.npxBuff" },
             } },
     },
 }
@@ -251,12 +236,17 @@ local function ApplyBarModeChange()
     sched:RefreshTimelineBars()
 end
 
-local function RefreshTimelineBarControls()
-    local dropdown = Page._cardSession and Page._cardSession:GetWidget("general", "timelineBars")
+function Page:RefreshTimelineBarControls()
+    local mountedPage = EXUI:GetModulePage(MODULE_KEY, self._scrollChild)
+    local dropdown = mountedPage and mountedPage:Find("timelineBars")
     if dropdown then
         dropdown._selections = ExBoss.DisplayPolicy.GetTimelineBars()
         dropdown:RefreshSelectionDisplay()
     end
+end
+
+local function RefreshTimelineBarControls()
+    Page:RefreshTimelineBarControls()
     for _, key in ipairs({ "TimerBarPage", "BunBarPage", "GlobalSettingsPage" }) do
         local page = ExBoss.UI.Panel[key]
         if page and page.RefreshTimelineBarControls then page:RefreshTimelineBarControls() end
@@ -310,61 +300,12 @@ local function ApplyBossSceneToggleChange()
     end
 end
 
-local function ResolveGridCols(contentWidth)
-    local w = tonumber(contentWidth) or 0
-    if w < 100 then
-        return BASE_GRID_COLS
-    end
-    local cols = math.floor(((w - 20) / TARGET_CELL_PX) + 0.5)
-    if cols < MIN_GRID_COLS then cols = MIN_GRID_COLS end
-    if cols > MAX_GRID_COLS then cols = MAX_GRID_COLS end
-    return cols
+EXUI:RegisterSettingsPageV2(MODULE_KEY, LAYOUT)
+
+local function RefreshPageControls()
+    local mountedPage = EXUI:GetModulePage(MODULE_KEY, Page._scrollChild)
+    if mountedPage then mountedPage:Refresh() end
 end
-
-local function ScaleLayout(items, toCols)
-    if toCols == BASE_GRID_COLS then
-        return LAYOUT
-    end
-    local cached = LAYOUT_CACHE[toCols]
-    if cached then
-        return cached
-    end
-
-    local scale = toCols / BASE_GRID_COLS
-    local function ScaleItems(src)
-        local out = {}
-        for _, item in ipairs(src) do
-            local row = {}
-            for k, v in pairs(item) do
-                if k ~= "children" then
-                    row[k] = v
-                end
-            end
-            if type(item.x) == "number" and type(item.w) == "number" then
-                local nx = math.floor(((item.x - 1) * scale) + 1 + 0.5)
-                local nw = math.max(1, math.floor(item.w * scale + 0.5))
-                if nx < 1 then nx = 1 end
-                if nx > toCols then nx = toCols end
-                if nx + nw - 1 > toCols then
-                    nw = math.max(1, toCols - nx + 1)
-                end
-                row.x = nx
-                row.w = nw
-            end
-            if type(item.children) == "table" then
-                row.children = ScaleItems(item.children)
-            end
-            out[#out + 1] = row
-        end
-        return out
-    end
-
-    cached = ScaleItems(items)
-    LAYOUT_CACHE[toCols] = cached
-    return cached
-end
-
-ExwindTools:RegisterModuleLayout(MODULE_KEY, LAYOUT)
 
 local function RefreshActiveSurfaces(_, changedPath, phase)
     if changedPath == "ui.general.timelineBars"
@@ -385,10 +326,12 @@ local function RefreshActiveSurfaces(_, changedPath, phase)
     local rootDB = EnsureRootDB()
     if changedPath == "voice.global.disableAuraSoundRegistration" then
         -- 这个开关只保存下次加载要采用的值；当前会话不刷新或移除注册。
+        RefreshPageControls()
         return
     end
     if changedPath == "ui.general.bunBarSources" or changedPath == "ui.general.timerBarSources" then
         -- Scheduler 在每个既有分发点读取该选择；不需要也不能重启当前 Boss 时间轴。
+        RefreshPageControls()
         return
     end
     local general = rootDB.ui and rootDB.ui.general or {}
@@ -403,23 +346,46 @@ local function RefreshActiveSurfaces(_, changedPath, phase)
     local mod = ExBoss and ExBoss.AutoGossip
     if mod and type(mod.NotifySettingsChanged) == "function" then mod.NotifySettingsChanged() end
     ApplyVoiceOverrides()
+    RefreshPageControls()
 end
 
 EXUI:RegisterModuleValueController(MODULE_KEY, {
     RefreshActiveSurfaces = RefreshActiveSurfaces,
 })
 
--- [混合函数边界] Page:Render 内只可调整 sf/sc 的锚点、宽高与布局挂载；rootDB、ActivePage、延迟 guard 和 Grid:Render 绑定禁止修改。
-function Page:Render(contentFrame)
-    local Grid = _G.ExwindGrid
-    if not Grid or not contentFrame then
-        return
+local function ReleaseSession()
+    Page._renderGeneration = (Page._renderGeneration or 0) + 1
+    Page._v2Session = nil
+    local sc = Page._scrollChild
+    if sc then
+        EXUI:ReleaseModuleSettingsPage(sc)
     end
+    if sc and EXUI.ActivePageFrame == sc then
+        EXUI.ActivePageFrame = nil
+    end
+    if Page._scrollFrame and EXUI.ActivePageScrollFrame == Page._scrollFrame then
+        EXUI.ActivePageScrollFrame = nil
+    end
+    if EXUI.CurrentModule == MODULE_KEY then
+        EXUI.CurrentModule = nil
+    end
+end
 
-    ACTIVE_CONTENT_FRAME = contentFrame
+local function SyncScrollChildWidth()
+    local sf, sc = Page._scrollFrame, Page._scrollChild
+    if not sf or not sc then return end
+    local width = sf:GetWidth()
+    if width < 100 then
+        local contentWidth = Page._contentFrame and Page._contentFrame:GetWidth() or 0
+        width = contentWidth >= 100 and (contentWidth - 24) or 804
+    end
+    sc:SetWidth(math.max(1, width))
+    if Page._v2Session then Page._v2Session:Invalidate() end
+end
 
+function Page:Render(contentFrame)
+    if not contentFrame then return end
     local rootDB = EnsureRootDB()
-
     if not Page._scrollFrame then
         local sf = CreateFrame("ScrollFrame", "ExBoss_GeneralOverviewScroll", contentFrame, "ScrollFrameTemplate")
         if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then
@@ -432,10 +398,15 @@ function Page:Render(contentFrame)
 
         Page._scrollFrame = sf
         Page._scrollChild = sc
+        sf:HookScript("OnHide", ReleaseSession)
+        sf:HookScript("OnSizeChanged", SyncScrollChildWidth)
     end
 
     local sf = Page._scrollFrame
     local sc = Page._scrollChild
+    Page._contentFrame = contentFrame
+    ReleaseSession()
+    local generation = Page._renderGeneration
 
     sf:SetParent(contentFrame)
     sf:ClearAllPoints()
@@ -445,28 +416,29 @@ function Page:Render(contentFrame)
     sf:Show()
 
     C_Timer.After(0, function()
-        if not sf:IsShown() then return end
-        local w = contentFrame:GetWidth()
-        if w < 100 then w = 820 end
-        sc:SetWidth(w - 16)
+        if Page._renderGeneration ~= generation or not sf:IsShown()
+            or sf:GetParent() ~= contentFrame then return end
+        SyncScrollChildWidth()
         sc:SetParent(sf)
         sc:ClearAllPoints()
         sc:SetPoint("TOPLEFT", 0, 0)
         sc:Show()
-        if ExwindTools.UI then
-            ExwindTools.UI.ActivePageFrame = sc
-            ExwindTools.UI.CurrentModule = MODULE_KEY
-        end
-        if Page._cardSession and type(Page._cardSession.Release) == "function" then
-            Page._cardSession:Release()
-            Page._cardSession = nil
-        end
-        Page._cardSession = Grid:MountCards(sc, LAYOUT, {
-            pageId = MODULE_KEY,
-            regionId = "general-overview",
-            config = rootDB,
-            moduleKey = MODULE_KEY,
-            scrollFrame = sf,
-        })
+        EXUI.ActivePageFrame = sc
+        EXUI.ActivePageScrollFrame = sf
+        EXUI.CurrentModule = MODULE_KEY
+        local owner = {
+            binding = { moduleKey = MODULE_KEY, config = rootDB },
+        }
+        Page._v2Session = EXUI:MountModuleSettingsDeclarationV2(sc, MODULE_KEY, owner,
+            L["通用设置"], L["全局显示模式与语音输出。"], sf)
     end)
+end
+
+function Page:Hide()
+    ReleaseSession()
+    if self._scrollFrame then self._scrollFrame:Hide() end
+end
+
+function Page:Refresh()
+    RefreshPageControls()
 end

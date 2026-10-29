@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Warrior-Arms',}
-local provider = {region='US',realm="Drak'Tharon",name='US',type='subscribers',zone=53,date='2026-10-20',data={Tr='Trater:BAEANQADCgMIAwAAAA==.',Va='Vaskie:BAECNQAFFH8RAAIBAAUKeREZBgAdAQWODQAABQAtAHUNAAADACIAfw0AAAMAMgCpDQAABQBPAFwNAAABABMAAQAFCnkRGQYAHQEFjg0AAAUALQB1DQAAAwAiAH8NAAADADIAqQ0AAAUATwBcDQAAAQATADUABAp/QAACAQAKCpEhOAkAJwIAAQAKCpEhOAkAJwIAAAA=.',},}
+local provider = {region='US',realm="Drak'Tharon",name='US',type='subscribers',zone=53,date='2026-10-27',data={Tr='Trater:BAEANQADCgMIAwAAAA==.',Va='Vaskie:BAECNQAFFH8SAAIBAAYKexRBBgB2AQaODQAABQAtAHUNAAADACIAfw0AAAMAMgCpDQAABQBPAFwNAAABABMAXQ0AAAEAUwABAAYKexRBBgB2AQaODQAABQAtAHUNAAADACIAfw0AAAMAMgCpDQAABQBPAFwNAAABABMAXQ0AAAEAUwA1AAQKf0kAAgEACgqRIXcTAG4DAAEACgqRIXcTAG4DAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

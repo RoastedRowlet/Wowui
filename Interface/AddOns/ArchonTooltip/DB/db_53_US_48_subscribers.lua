@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Evoker-Devastation',}
-local provider = {region='US',realm='Caelestrasz',name='US',type='subscribers',zone=53,date='2026-10-20',data={Dr='Dracarsynimz:BAEBNQAECn8UAAIBAAgKDAbGHgBnAQiODQAAAgARAHUNAAADAAcAfw0AAAMAFACpDQAAAwASAFwNAAACACIAXQ0AAAIABwBlDQAAAQAHADMNAAAEABUAAQAICgwGxh4AZwEIjg0AAAIAEQB1DQAAAwAHAH8NAAADABQAqQ0AAAMAEgBcDQAAAgAiAF0NAAACAAcAZQ0AAAEABwAzDQAABAAVAAAA.',},}
+local provider = {region='US',realm='Caelestrasz',name='US',type='subscribers',zone=53,date='2026-10-27',data={Dr='Dracarsynimz:BAEBNQAECn8UAAIBAAgKDAbGHgBnAQiODQAAAgARAHUNAAADAAcAfw0AAAMAFACpDQAAAwASAFwNAAACACIAXQ0AAAIABwBlDQAAAQAHADMNAAAEABUAAQAICgwGxh4AZwEIjg0AAAIAEQB1DQAAAwAHAH8NAAADABQAqQ0AAAMAEgBcDQAAAgAiAF0NAAACAAcAZQ0AAAEABwAzDQAABAAVAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

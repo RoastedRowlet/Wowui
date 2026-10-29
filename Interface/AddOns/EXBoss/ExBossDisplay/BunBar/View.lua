@@ -436,8 +436,16 @@ local function GetRuntimeConfig()
         trackHeight = math.max(5, SafeNum(db.trackHeight, 49)),
         showName = not (type(db.font_spell) == "table" and db.font_spell.enabled == false),
         showTimer = not (type(db.font_timer) == "table" and db.font_timer.enabled == false),
+        timerFontSize = SafeNum(((type(db.font_timer) == "table") and db.font_timer or DEFAULT_FONT_TIME).size,
+            DEFAULT_FONT_TIME.size),
+        hideLongTimersSeconds = type(db.hideLongTimersSeconds) == "number" and math.max(0, db.hideLongTimersSeconds) or nil,
     }
     return _runtimeConfig
+end
+
+-- 调度器每帧对每个计时器取提前量，走运行时配置，设置改变时随它一起失效。
+function BunBar:GetLeadTimeSeconds()
+    return GetRuntimeConfig().hideLongTimersSeconds
 end
 
 
@@ -1299,6 +1307,7 @@ local function BuildBunBarTimelinePresentation(mode)
         or timelineLen * (1 - (FIVE_SEC_MARK_REMAIN / ACTIVE_WINDOW_SECS))
     local timeline = {
         anchor = "CENTER", lockAnchor = true,
+        fit = mode == "panel" and "contain" or nil,
         x = mode == "panel" and PANEL_TIMELINE_OFFSET_X or 0,
         y = mode == "panel" and PANEL_TIMELINE_OFFSET_Y or 0,
         width = timelineX, height = timelineLen,
@@ -1613,10 +1622,8 @@ local function ApplyPlacement(node, targetX, targetY, remaining, introKind, isQu
     end
     if updateText and showTimeText and node.TimeText then
         local txt = FormatTime(remaining)
-        local db = DB()
-        local timeFont = (type(db.font_timer) == "table") and db.font_timer or DEFAULT_FONT_TIME
         node.TimeText:SetText(txt)
-        UpdateTimeTextBounds(node, txt, iconSize, SafeNum(timeFont.size, DEFAULT_FONT_TIME.size))
+        UpdateTimeTextBounds(node, txt, iconSize, GetRuntimeConfig().timerFontSize)
     end
 end
 

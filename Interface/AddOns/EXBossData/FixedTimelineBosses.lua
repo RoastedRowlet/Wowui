@@ -406,10 +406,7 @@ local encounterTriggers = {
     [2127] = {
         trigger = TRIGGER_AI, -- [塞塔里斯的化身]
         durationRules = {
-            { time = 13, eventID = 92,  sync = true },
-            { time = 15, eventID = 828, sync = true },
-
-
+            { time = 15, eventID = 828 },
         },
     },
 
@@ -692,21 +689,14 @@ local encounterTriggers = {
     [3458] = {
         trigger = TRIGGER_AI, -- [尾王]
         durationRules = {
-            { time = 32, eventID = 821, sync = true },
-            { time = 14, eventID = 823, sync = true },
-            { time = 26, eventID = 824, sync = true },
-            { time = 26, eventID = 824, sync = true },
+            { time = 36, eventID = 821, sync = true },
+            { time = 30, eventID = 824, sync = true },
+            { time = 18, eventID = 823, sync = true },
+            { time = 3,  eventID = 822, sync = true },
 
-            { time = 64, eventID = 822, },
+            { time = 16, eventID = 821, },
             { time = 30, eventID = 824, },
-            { time = 14, eventID = 821, },
-
-        },
-        eventActions = {
-            [822] = {
-                finishMode = "timer",
-                timerFinishIgnoreStateWindow = 1.0,
-            },
+            { time = 65, eventID = 822, },
         },
     },
 }

@@ -23,28 +23,18 @@ if not ExwindTools:IsModuleEnabled(EXWIND_MODULE_KEY) then return end
 -- =========================================================
 -- 三、GUI 声明 | GUI Declarations
 -- =========================================================
--- 4. Grid 布局
-local function EX_RegisterLayout()
-    -- [声明迁移边界：设置页] 仅把原入口按钮改为唯一 settings 声明。
-    -- key/type、按钮回调及下方全屏统计面板的业务排序和渲染禁止修改。
-    local layout = {
-        version = 1,
-        sections = {
-            {
-                kind = "settings",
-                id = "common",
-                title = L["通用设置"],
-                description = L["全屏沉浸式的战绩分析面板。显示实时评分、称号线差距、国服排名、低保进度等。"],
-                items = {
-                    { key = "open", type = "button", label = L["立即打开面板"] },
-                },
-            },
-        },
-    }
-
-    ExwindTools.UI:RegisterSettingsPage(EXWIND_MODULE_KEY, layout)
-end
-EX_RegisterLayout()
+-- 4. 设置页（V2）
+EXUI:RegisterModuleSettingsPageV2(EXWIND_MODULE_KEY, {
+    version = 2,
+    cards = {
+        { id = "common", kind = "card", title = L["通用设置"], children = {
+            { id = "open_row", kind = "setting", label = L["立即打开面板"],
+                description = L["全屏沉浸式的战绩分析面板。显示实时评分、称号线差距、国服排名、低保进度等。"], children = {
+                { id = "open", kind = "button", text = L["立即打开面板"], clickKey = "open" },
+            } },
+        } },
+    },
+})
 
 -- 按钮监听
 ExwindTools:WatchState(EXWIND_MODULE_KEY .. ".ButtonClicked", EXWIND_MODULE_KEY, function(data)
@@ -70,28 +60,29 @@ local EX_DB = ExwindTools:GetModuleDB(EXWIND_MODULE_KEY, {})
 -- [[ PYTHON_DATA_START ]]
 local EXMRH_PYTHON_DATA = {
     RankTable = {
-        { label = "0.1%", score = 3936.28, count = 1141 },
-        { label = "1%", score = 3737.93, count = 11407 },
-        { label = "10%", score = 3357.43, count = 114060 },
-        { label = "25%", score = 3052.64, count = 285152 },
-        { label = "40%", score = 2841.93, count = 456237 },
-        { label = "48.90%", score = 2679.88, count = 557746 },
-        { label = "50%", score = 2654.31, count = 570289 },
-        { label = "54.20%", score = 2556.68, count = 618194 },
-        { label = "59.20%", score = 2316.32, count = 675225 },
-        { label = "60%", score = 2271.02, count = 684347 },
-        { label = "61.30%", score = 2197.36, count = 699179 },
-        { label = "63.10%", score = 2074.25, count = 719706 },
-        { label = "66.30%", score = 1833.45, count = 756204 },
-        { label = "67.60%", score = 1715.48, count = 771032 },
-        { label = "70%", score = 1531.19, count = 798405 },
-        { label = "70.70%", score = 1477.42, count = 806392 },
-        { label = "72.20%", score = 1354.37, count = 823501 },
-        { label = "74.40%", score = 1233.29, count = 848591 },
+        { label = "0.1%", score = 4124.42, count = 1249 },
+        { label = "1%", score = 3892.03, count = 12493 },
+        { label = "10%", score = 3472.61, count = 124876 },
+        { label = "25%", score = 3125.14, count = 312187 },
+        { label = "40%", score = 2937.05, count = 499496 },
+        { label = "40.90%", score = 2919.08, count = 510731 },
+        { label = "50%", score = 2727.62, count = 624362 },
+        { label = "52.30%", score = 2679.22, count = 653089 },
+        { label = "56.80%", score = 2557.88, count = 709276 },
+        { label = "60%", score = 2386.08, count = 749235 },
+        { label = "61.30%", score = 2316.29, count = 765469 },
+        { label = "63.30%", score = 2193.03, count = 790443 },
+        { label = "64.90%", score = 2076.80, count = 810425 },
+        { label = "68.00%", score = 1831.57, count = 849133 },
+        { label = "69.30%", score = 1713.25, count = 865368 },
+        { label = "70%", score = 1655.74, count = 874107 },
+        { label = "72.20%", score = 1474.95, count = 901581 },
+        { label = "73.70%", score = 1353.74, count = 920312 },
+        { label = "75.70%", score = 1230.55, count = 945286 },
     },
-    TotalPopulation = 1140579,
-    DataTime = "2026.10.09 08:04",
-    ExwindVersion = "v26.10.9.1239",
+    TotalPopulation = 1248725,
+    DataTime = "2026.10.28 21:02",
+    ExwindVersion = "v26.10.28.2300",
 }
 -- [[ PYTHON_DATA_END ]]
 
@@ -501,8 +492,8 @@ function EXMRH.InitHeader()
         return ic, tx
     end
     --tooltip和FRAME的X轴参数
-    EXMRH.C1I, EXMRH.C1T = CreateCrestFrame(3345, 0);
-    EXMRH.C2I, EXMRH.C2T = CreateCrestFrame(3347, 140)
+    EXMRH.C1I, EXMRH.C1T = CreateCrestFrame(3445, 0);
+    EXMRH.C2I, EXMRH.C2T = CreateCrestFrame(3446, 140)
     --=======================================================================================
     ----------------------------------------最右侧卡片元素模块--------------------------------
     --=======================================================================================
@@ -754,10 +745,10 @@ function EXMRH.UpdateAllData()
     local function UpdateItem(slotID, ic, tx, btn)
         local link = GetInventoryItemLink("player", slotID)
         if link then
-            local itemName, _, quality, _, _, _, _, _, _, itemTexture = GetItemInfo(link)
+            local itemName, _, quality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(link)
             if itemName then
                 tx:SetText(itemName)
-                local r, g, b = GetItemQualityColor(quality or 4)
+                local r, g, b = C_Item.GetItemQualityColor(quality or 4)
                 tx:SetTextColor(r, g, b)
                 ic:SetTexture(itemTexture)
             else
@@ -890,7 +881,7 @@ function EXMRH.UpdateAllData()
                 :SetText(maxW > 0 and string.format("%d/%d", cur, maxW) or tostring(cur))
         end
     end
-    UpdateCrest(3345, EXMRH.C1I, EXMRH.C1T); UpdateCrest(3347, EXMRH.C2I, EXMRH.C2T)
+    UpdateCrest(3445, EXMRH.C1I, EXMRH.C1T); UpdateCrest(3446, EXMRH.C2I, EXMRH.C2T)
     --=======================================================================================
     ----------------------------------------八个低保副本记录----------------------------------
     --=======================================================================================

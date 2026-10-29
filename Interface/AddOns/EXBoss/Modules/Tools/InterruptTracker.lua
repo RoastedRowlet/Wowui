@@ -138,31 +138,40 @@ local RAID_MARKER_EXTRA_OPTS = ExwindTools:BuildStandardTimerBarAlertIconsGroupO
 })
 RAID_MARKER_EXTRA_OPTS.presentation = "settings-list"
 local LAYOUT_OPTS = { allowedDirections = { "UP", "DOWN" }, includeMaxPerRow = false, maxVisibleMin = 1, maxVisibleMax = 5, defaultMaxVisible = 5 }
--- [普通 sections 迁移边界：InterruptTracker 设置页]
--- 允许：只按共享规范调整纯呈现分区；普通设置分区始终展开。
--- 禁止：修改队伍/施法业务事件与排序、key/path/opts、StandardConfigBinding、collection、预览或释放链。
--- modulecommonsettings/anchorgroup/widgetlayout/timerBarGroup/fontgroup 必须整体引用，不能拆成原子控件重拼。
+-- 设置页只声明 V2 卡片与整体组合控件；运行期锚点选项由 owner 提供。
 local EX_LAYOUT = {
-    version = 1,
-    title = L["打断监控"],
-    sections = {
-        { kind = "composite", id = "module-common", title = L["通用设置"],
-            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
-        { kind = "composite", id = "layout", title = L["排列设置"],
-            component = "widgetlayout", key = "layout", opts = LAYOUT_OPTS },
-        { kind = "composite", id = "anchor", title = L["锚点设置"],
-            component = "anchorgroup", key = "anchor", opts = ANCHOR_OPTS },
-        { kind = "composite", id = "timer-bar", title = L["计时条外观"],
-            component = "timerbargroup", key = "timerGroup" },
-        { kind = "composite", id = "raid-marker", title = L["额外子元素－团队标记"],
-            component = "modulecommonsettings", key = "raidMarkerExtra", opts = RAID_MARKER_EXTRA_OPTS },
-        { kind = "composite", id = "spell-font", title = L["玩家名字"],
-            component = "fontgroup", key = "font_spell" },
-        { kind = "composite", id = "timer-font", title = L["冷却时间"],
-            component = "fontgroup", key = "font_timer" },
+    version = 2,
+    cards = {
+        { kind = "card", id = "module-common", title = L["通用设置"],
+            children = {
+                { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", opts = COMMON_OPTS },
+            } },
+        { kind = "card", id = "layout-card", title = L["排列设置"],
+            children = {
+                { kind = "component", id = "layout", component = "widgetlayout", path = "layout", opts = LAYOUT_OPTS },
+            } },
+        { kind = "card", id = "anchor-card", title = L["锚点设置"],
+            children = {
+                { kind = "component", id = "anchor", component = "anchorgroup", path = "anchor", optionsRef = "anchor" },
+            } },
+        { kind = "card", id = "timer-bar", title = L["计时条外观"],
+            children = {
+                { kind = "component", id = "timerGroup", component = "timerbargroup", path = "timerGroup", opts = {} },
+            } },
+        { kind = "card", id = "raid-marker", title = L["额外子元素－团队标记"],
+            children = {
+                { kind = "component", id = "raidMarkerExtra", component = "modulecommonsettings", path = "raidMarkerExtra", opts = RAID_MARKER_EXTRA_OPTS },
+            } },
+        { kind = "card", id = "spell-font", title = L["玩家名字"],
+            children = {
+                { kind = "component", id = "font_spell", component = "fontgroup", path = "font_spell", opts = {} },
+            } },
+        { kind = "card", id = "timer-font", title = L["冷却时间"],
+            children = {
+                { kind = "component", id = "font_timer", component = "fontgroup", path = "font_timer", opts = {} },
+            } },
     },
 }
-ExwindTools:RegisterModuleLayout(EXWIND_MODULE_KEY, EX_LAYOUT)
 
 local TIMER_SCHEMA = {
     timerBarKey = "timerGroup", layoutKey = "layout", offsetXKey = "posX", offsetYKey = "posY",
@@ -574,7 +583,8 @@ ExBoss.UI.Panel = ExBoss.UI.Panel or {}; ExBoss.UI.Panel.InterruptTrackerPage = 
 local GUIPage = ExBoss.UI.Panel.InterruptTrackerPage
 -- [生命周期边界] STANDARD_PAGE 只承接设置页；上方 runtime/world/panel collection 与 WatchState/事件链均禁止改动。
 STANDARD_PAGE = EXUI:CreateStandardModulePage({
-    moduleKey = EXWIND_MODULE_KEY, page = GUIPage, binding = STANDARD_CONFIG_BINDING, layout = EX_LAYOUT, getColumns = 200,
+    moduleKey = EXWIND_MODULE_KEY, page = GUIPage, title = L["打断监控"], binding = STANDARD_CONFIG_BINDING, layout = EX_LAYOUT,
+    ownerFactory = function() return { options = { anchor = ANCHOR_OPTS } } end,
     preview = { height = 172, render = function(dock) Module:ShowPanelPreview(dock) end,
         refresh = function() Module:RefreshPanelPreview() end, release = function() Module:ReleasePanelPreview() end },
     applyScrollSkin = function(scrollFrame) if ExBoss.UI and ExBoss.UI.ApplyModernScrollBarSkin then ExBoss.UI.ApplyModernScrollBarSkin(scrollFrame) end end,

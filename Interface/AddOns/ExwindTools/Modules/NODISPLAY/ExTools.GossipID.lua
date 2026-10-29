@@ -393,16 +393,6 @@ local function CustomRecords()
     return list
 end
 
-local function TableHead(id, titles)
-    local row = { id = id, kind = "row", children = {} }
-    for index, title in ipairs(titles) do
-        row.children[index] = { id = id .. "." .. index, kind = "cell", children = {
-            { id = id .. "." .. index .. ".text", kind = "hint", text = title },
-        } }
-    end
-    return row
-end
-
 local function Cell(id, child)
     return { id = id, kind = "cell", children = { child } }
 end
@@ -413,15 +403,17 @@ local function BuildV2Declaration()
             { id = "enabled", kind = "control", controlType = "switch", path = "enabled", label = L["启用功能"] },
             { id = "showQuestID", kind = "control", controlType = "switch", path = "showQuestID", label = L["显示任务 ID"] },
             { id = "showOptionID", kind = "control", controlType = "switch", path = "showOptionID", label = L["显示对话选项 ID"] },
-            { id = "autoSelectEnabled", kind = "control", controlType = "switch", path = "autoSelectEnabled", label = L["启用自动对话"] },
-            { id = "showActionButton", kind = "control", controlType = "switch", path = "showActionButton", label = L["显示加入按钮"] },
+            { id = "autoSelectEnabled", kind = "control", controlType = "switch", path = "autoSelectEnabled", label = L["启用自动对话"],
+                description = L["若某个自定义 ID 后续进入预设，将自动移除自定义项并以预设为准。"] },
+            { id = "showActionButton", kind = "control", controlType = "switch", path = "showActionButton", label = L["显示加入按钮"],
+                description = L["点击后会把当前选项加入自定义自动对话列表。"] },
             { id = "buttonPosition", kind = "control", controlType = "select", path = "buttonPosition", label = L["按钮位置"],
                 options = { { value = "LEFT", label = L["前面"] }, { value = "RIGHT", label = L["后面"] } } },
         } },
         { id = "presets", kind = "card", title = L["预设自动对话"], children = {
-            { id = "presets.desc", kind = "hint", text = L["若某个自定义 ID 后续进入预设，将自动移除自定义项并以预设为准。"] },
-            { id = "presets.table", kind = "columns", columns = { { width = 64 }, { weight = 1 }, { weight = 1 } }, children = {
-                TableHead("presets.head", { L["启用"], L["名称"], "ID" }),
+            { id = "presets.table", kind = "table", columns = {
+                { title = L["启用"] }, { title = L["名称"] }, { title = "ID" },
+            }, children = {
                 { id = "presets.rows", kind = "repeat", source = "presets", template = { id = "presets.row", kind = "row", children = {
                     Cell("presets.row.enabled", { id = "presets.row.enabled.control", kind = "control", controlType = "checkbox", ref = "presetEnabled" }),
                     Cell("presets.row.name", { id = "presets.row.name.text", kind = "text", textSource = "presetTitle" }),
@@ -430,10 +422,9 @@ local function BuildV2Declaration()
             } },
         } },
         { id = "custom", kind = "card", title = L["自定义自动对话"], children = {
-            { id = "custom.empty", kind = "hint", visible = "noCustom",
-                text = L["当前没有自定义自动对话项。点击对话行图标，或在上方手动添加。"] },
-            { id = "custom.table", kind = "columns", columns = { { width = 64 }, { weight = 1 }, { weight = 1 }, { width = 96 } }, children = {
-                TableHead("custom.head", { L["启用"], L["名称"], "ID", L["操作"] }),
+            { id = "custom.table", kind = "table", columns = {
+                { title = L["启用"] }, { title = L["名称"] }, { title = "ID" }, { title = L["操作"] },
+            }, children = {
                 { id = "custom.add", kind = "row", children = {
                     Cell("custom.add.blank", { id = "custom.add.blank.text", kind = "text", text = "" }),
                     Cell("custom.add.name", { id = "manualAddName", kind = "control", controlType = "input", path = "manualAddName" }),
@@ -468,7 +459,6 @@ local function CreateV2Owner()
         return instanceName and string.format("(%d) [%s]", scope.item.id, instanceName)
             or string.format("(%d)", scope.item.id)
     end
-    owner.predicates.noCustom = function() return #GetSortedCustomOptionIDs() == 0 end
     owner.controls.presetEnabled = EXUI:CreateSettingsV2Control({ controlType = "checkbox", label = "" },
         function(context) return Bind("presetStates." .. context.scope.item.key .. ".enabled") end)
     owner.controls.customEnabled = EXUI:CreateSettingsV2Control({ controlType = "checkbox", label = "" },

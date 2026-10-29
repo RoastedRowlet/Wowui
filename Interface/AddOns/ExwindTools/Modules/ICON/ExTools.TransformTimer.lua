@@ -201,60 +201,51 @@ local MODULE_SPEC = {
     -- 三、GUI 声明 | GUI Declarations
     -- =========================================================
     gui = {
-        version = 1,
-        sections = {
-            {
-                kind = "table", id = "sound_alerts", title = L["声音提示"],
-                columns = {
-                    { title = L["启用"] },
-                    { title = L["秒数"] },
-                    { title = L["音效"] },
-                },
-                supportsAdd = false,
-                records = {
-                    { cells = {
-                        { key = "soundAlert1Enabled", type = "switch" },
-                        { key = "soundAlert1Second", type = "input" },
-                        { key = "soundAlert1Sound", type = "select", media = "sound" },
+        version = 2,
+        cards = {
+            { id = "card.sound_alerts", kind = "card", title = L["声音提示"], children = {
+                { id = "sound_alerts.table", kind = "table", columns = {
+                    { title = L["启用"] }, { title = L["秒数"] }, { title = L["音效"] },
+                }, children = {
+                    { id = "sound_alerts.row1", kind = "row", children = {
+                        { id = "sound_alerts.row1.enabled", kind = "cell", children = { { id = "soundAlert1Enabled", kind = "control", controlType = "checkbox", path = "soundAlert1Enabled", label = "" } } },
+                        { id = "sound_alerts.row1.second", kind = "cell", children = { { id = "soundAlert1Second", kind = "control", controlType = "input", path = "soundAlert1Second" } } },
+                        { id = "sound_alerts.row1.sound", kind = "cell", children = { { id = "soundAlert1Sound", kind = "control", controlType = "select", path = "soundAlert1Sound", media = "sound" } } },
                     } },
-                    { cells = {
-                        { key = "soundAlert2Enabled", type = "switch" },
-                        { key = "soundAlert2Second", type = "input" },
-                        { key = "soundAlert2Sound", type = "select", media = "sound" },
+                    { id = "sound_alerts.row2", kind = "row", children = {
+                        { id = "sound_alerts.row2.enabled", kind = "cell", children = { { id = "soundAlert2Enabled", kind = "control", controlType = "checkbox", path = "soundAlert2Enabled", label = "" } } },
+                        { id = "sound_alerts.row2.second", kind = "cell", children = { { id = "soundAlert2Second", kind = "control", controlType = "input", path = "soundAlert2Second" } } },
+                        { id = "sound_alerts.row2.sound", kind = "cell", children = { { id = "soundAlert2Sound", kind = "control", controlType = "select", path = "soundAlert2Sound", media = "sound" } } },
                     } },
-                    { cells = {
-                        { key = "soundAlert3Enabled", type = "switch" },
-                        { key = "soundAlert3Second", type = "input" },
-                        { key = "soundAlert3Sound", type = "select", media = "sound" },
+                    { id = "sound_alerts.row3", kind = "row", children = {
+                        { id = "sound_alerts.row3.enabled", kind = "cell", children = { { id = "soundAlert3Enabled", kind = "control", controlType = "checkbox", path = "soundAlert3Enabled", label = "" } } },
+                        { id = "sound_alerts.row3.second", kind = "cell", children = { { id = "soundAlert3Second", kind = "control", controlType = "input", path = "soundAlert3Second" } } },
+                        { id = "sound_alerts.row3.sound", kind = "cell", children = { { id = "soundAlert3Sound", kind = "control", controlType = "select", path = "soundAlert3Sound", media = "sound" } } },
                     } },
-                    { cells = {
-                        { key = "soundAlert4Enabled", type = "switch" },
-                        { key = "soundAlert4Second", type = "input" },
-                        { key = "soundAlert4Sound", type = "select", media = "sound" },
+                    { id = "sound_alerts.row4", kind = "row", children = {
+                        { id = "sound_alerts.row4.enabled", kind = "cell", children = { { id = "soundAlert4Enabled", kind = "control", controlType = "checkbox", path = "soundAlert4Enabled", label = "" } } },
+                        { id = "sound_alerts.row4.second", kind = "cell", children = { { id = "soundAlert4Second", kind = "control", controlType = "input", path = "soundAlert4Second" } } },
+                        { id = "sound_alerts.row4.sound", kind = "cell", children = { { id = "soundAlert4Sound", kind = "control", controlType = "select", path = "soundAlert4Sound", media = "sound" } } },
                     } },
-                    { cells = {
-                        { key = "soundAlert5Enabled", type = "switch" },
-                        { key = "soundAlert5Second", type = "input" },
-                        { key = "soundAlert5Sound", type = "select", media = "sound" },
+                    { id = "sound_alerts.row5", kind = "row", children = {
+                        { id = "sound_alerts.row5.enabled", kind = "cell", children = { { id = "soundAlert5Enabled", kind = "control", controlType = "checkbox", path = "soundAlert5Enabled", label = "" } } },
+                        { id = "sound_alerts.row5.second", kind = "cell", children = { { id = "soundAlert5Second", kind = "control", controlType = "input", path = "soundAlert5Second" } } },
+                        { id = "sound_alerts.row5.sound", kind = "cell", children = { { id = "soundAlert5Sound", kind = "control", controlType = "select", path = "soundAlert5Sound", media = "sound" } } },
                     } },
-                },
-            },
-            {
-                kind = "composite", id = "anchor", title = L["锚点设置"],
-                component = "anchorgroup", key = "anchor", parentKey = "icon",
-            },
-            {
-                kind = "composite", id = "icon", title = L["变身图标"],
-                component = "icongroup", key = "icon",
-            },
-            {
-                kind = "composite", id = "font_time", title = L["倒数文本"],
-                component = "fontgroup", key = "font_time",
-            },
-            {
-                kind = "composite", id = "font_stacks", title = L["层数文本（次数）"],
-                component = "fontgroup", key = "font_stacks",
-            },
+                } },
+            } },
+            { id = "card.anchor", kind = "card", title = L["锚点设置"], children = {
+                { id = "anchor", kind = "component", component = "anchorgroup", path = "icon.anchor", optionsRef = "anchor" },
+            } },
+            { id = "card.icon", kind = "card", title = L["变身图标"], children = {
+                { id = "icon", kind = "component", component = "icongroup", path = "icon", optionsRef = "icon" },
+            } },
+            { id = "card.font_time", kind = "card", title = L["倒数文本"], children = {
+                { id = "font_time", kind = "component", component = "fontgroup", path = "font_time" },
+            } },
+            { id = "card.font_stacks", kind = "card", title = L["层数文本（次数）"], children = {
+                { id = "font_stacks", kind = "component", component = "fontgroup", path = "font_stacks" },
+            } },
         },
     },
     samples = { icon = 7135881, stacks = "3", cooldownSeconds = 12.3, cooldownDuration = 30 },

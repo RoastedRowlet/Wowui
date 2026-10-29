@@ -36,7 +36,7 @@ driver:Hide()
 -- ---------------------------------------------------------------------------
 local function createToastFrame()
     local f = CreateFrame("Frame", nil, UIParent)
-    f:SetFrameStrata("HIGH")
+    f:SetFrameStrata("MEDIUM")
     f:SetFrameLevel(90) -- sit just under the anchor button
     f:Hide()
 
@@ -346,40 +346,33 @@ local function buildContextLine(r)
     return format(L.TT_CTX_PREFIX, table.concat(parts, L.LIST_SEP))
 end
 
-local function showTooltip()
-    -- Anchor the tooltip on whichever side the stack is NOT growing into.
-    local _, alignRight = getGrowthDir()
-    if alignRight then
-        GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
-    else
-        GameTooltip:SetOwner(frame, "ANCHOR_LEFT")
-    end
-
-    GameTooltip:AddLine(versionedTitle())
+-- The live readout. The launcher passes its own tooltip and gets no drag or clear hints.
+function Overlay:FillTooltip(tt, fromLauncher)
+    tt:AddLine(versionedTitle())
 
     -- Severity label (color = severity, matching the button).
     local st = ns.Overlay.currentState or STATE.CALM
     local sc = COLOR[st]
-    GameTooltip:AddLine(format(L.TT_SEVERITY, ns.Detector:GetSeverityLabel()), sc[1], sc[2], sc[3])
+    tt:AddLine(format(L.TT_SEVERITY, ns.Detector:GetSeverityLabel()), sc[1], sc[2], sc[3])
 
     -- Say plainly that nothing is being measured. A quiet button that stays
     -- quiet for a reason the player cannot see is worse than a noisy one.
     local isThrottled, throttleCVar = ns.Detector:IsThrottled()
     if isThrottled then
         local tc = COLOR.THROTTLED
-        GameTooltip:AddLine(L.TT_THROTTLED, tc[1], tc[2], tc[3])
+        tt:AddLine(L.TT_THROTTLED, tc[1], tc[2], tc[3])
         local capLabel = ns.CapCVarLabel(throttleCVar)
-        GameTooltip:AddLine(capLabel and format(L.TT_THROTTLED_CVAR, capLabel) or L.TT_THROTTLED_WHY,
+        tt:AddLine(capLabel and format(L.TT_THROTTLED_CVAR, capLabel) or L.TT_THROTTLED_WHY,
             0.6, 0.6, 0.6, true)
     end
 
-    GameTooltip:AddLine(" ")
+    tt:AddLine(" ")
 
     -- Last 5 pulls this session (in-memory only; gone on reload/logout).
-    GameTooltip:AddLine(L.TT_PULLS_HEADER)
+    tt:AddLine(L.TT_PULLS_HEADER)
     local pulls = DB:GetRecentPulls()
     if #pulls == 0 then
-        GameTooltip:AddLine(L.TT_PULLS_NONE, 0.6, 0.6, 0.6)
+        tt:AddLine(L.TT_PULLS_NONE, 0.6, 0.6, 0.6)
     else
         for i = 1, #pulls do
             local p = pulls[i]
@@ -391,18 +384,18 @@ local function showTooltip()
                 right = format(L.TT_PULL_LINE, p.total, p.gameCount, p.addonCount, p.worstAnyMs)
             end
             local rCol, gCol, bCol = getMsColor(p.worstAnyMs or 0)
-            GameTooltip:AddDoubleLine(timeAgo, right, 0.9, 0.9, 0.9, rCol, gCol, bCol)
+            tt:AddDoubleLine(timeAgo, right, 0.9, 0.9, 0.9, rCol, gCol, bCol)
         end
     end
-    GameTooltip:AddLine(" ")
+    tt:AddLine(" ")
 
-    GameTooltip:AddLine(L.TT_RECENT_HEADER)
+    tt:AddLine(L.TT_RECENT_HEADER)
     local recent = DB:GetRecentHitches(5)
     local seenCauses = {} -- non-addon causes, drives the actionable tips section
     local shownDefs  = {} -- so each distinct label is explained once, not per line
 
     if #recent == 0 then
-        GameTooltip:AddLine(L.TT_RECENT_NONE, 0.6, 0.6, 0.6)
+        tt:AddLine(L.TT_RECENT_NONE, 0.6, 0.6, 0.6)
     else
         for i = 1, #recent do
             local r = recent[i]
@@ -425,13 +418,13 @@ local function showTooltip()
             end
 
             local rCol, gCol, bCol = getMsColor(r.ms)
-            GameTooltip:AddDoubleLine(who, rightText, 0.9, 0.9, 0.9, rCol, gCol, bCol)
+            tt:AddDoubleLine(who, rightText, 0.9, 0.9, 0.9, rCol, gCol, bCol)
 
             -- Newest hitch: show what was happening at the time.
             if i == 1 then
                 local ctxLine = buildContextLine(r)
                 if ctxLine then
-                    GameTooltip:AddLine(ctxLine, 0.6, 0.6, 0.6, true)
+                    tt:AddLine(ctxLine, 0.6, 0.6, 0.6, true)
                 end
             end
 
@@ -439,15 +432,15 @@ local function showTooltip()
             local dk = defKeyFor(r)
             if not shownDefs[dk] then
                 shownDefs[dk] = true
-                GameTooltip:AddLine(L[dk], 0.6, 0.6, 0.6, true)
+                tt:AddLine(L[dk], 0.6, 0.6, 0.6, true)
             end
         end
     end
 
     local top = DB:GetTopSources(5)
     if #top > 0 then
-        GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(L.TT_TOP_HEADER)
+        tt:AddLine(" ")
+        tt:AddLine(L.TT_TOP_HEADER)
         for i = 1, #top do
             local e = top[i]
             local title = ns.AddonGlyph(e.name) .. " " .. ns.StripColor(ns.addonTitle[e.name] or e.name)
@@ -455,39 +448,53 @@ local function showTooltip()
             local rightText = format(L.TT_TOP_RIGHT, e.hitches, e.peakMs, timeAgo)
             local rCol, gCol, bCol = getMsColor(e.peakMs)
 
-            GameTooltip:AddDoubleLine(title, rightText, 0.9, 0.9, 0.9, rCol, gCol, bCol)
+            tt:AddDoubleLine(title, rightText, 0.9, 0.9, 0.9, rCol, gCol, bCol)
         end
     end
 
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddLine(L.TT_HITCH_EXPLAIN, 1, 0.82, 0, true)
-    GameTooltip:AddLine(L.TT_ACTION_HEADER, 0.9, 0.9, 0.9)
-    GameTooltip:AddLine(L.TT_ACTION_ADDON, 0.8, 0.8, 0.8, true)
+    tt:AddLine(" ")
+    tt:AddLine(L.TT_HITCH_EXPLAIN, 1, 0.82, 0, true)
+    tt:AddLine(L.TT_ACTION_HEADER, 0.9, 0.9, 0.9)
+    tt:AddLine(L.TT_ACTION_ADDON, 0.8, 0.8, 0.8, true)
 
     local addedTips = false
     for causeKey in pairs(seenCauses) do
         local tipKey = causeKey .. "_TIP"
         local tipText = L[tipKey]
         if tipText and tipText ~= tipKey then
-            GameTooltip:AddLine("- " .. tipText, 0.8, 0.8, 0.8, true)
+            tt:AddLine("- " .. tipText, 0.8, 0.8, 0.8, true)
             addedTips = true
         end
     end
 
     if not addedTips then
-        GameTooltip:AddLine(L.TT_ACTION_ENGINE, 0.8, 0.8, 0.8, true)
+        tt:AddLine(L.TT_ACTION_ENGINE, 0.8, 0.8, 0.8, true)
     end
 
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddLine(L.TT_HINT_EXPORT, 0.5, 0.5, 0.5)
-    GameTooltip:AddLine(L.TT_HINT_CLEAR, 0.5, 0.5, 0.5)
-    GameTooltip:AddLine(L.TT_HINT_MENU, 0.5, 0.5, 0.5)
-    GameTooltip:AddLine(DB.settings.locked and L.TT_HINT_LOCKED or L.TT_HINT_UNLOCKED, 0.5, 0.5, 0.5)
+    tt:AddLine(" ")
+    tt:AddLine(L.TT_HINT_EXPORT, 0.5, 0.5, 0.5)
+    if not fromLauncher then tt:AddLine(L.TT_HINT_CLEAR, 0.5, 0.5, 0.5) end
+    tt:AddLine(L.TT_HINT_MENU, 0.5, 0.5, 0.5)
+    if not fromLauncher then
+        tt:AddLine(DB.settings.locked and L.TT_HINT_LOCKED or L.TT_HINT_UNLOCKED, 0.5, 0.5, 0.5)
+    end
     -- Only when banners are suppressed. Otherwise a player who turned them off
     -- weeks ago has no way to tell that from the addon having gone silent.
     if DB.settings.bannerMode ~= "ALL" then
-        GameTooltip:AddLine(L.TT_HINT_BANNERS_OFF, 0.5, 0.5, 0.5, true)
+        tt:AddLine(L.TT_HINT_BANNERS_OFF, 0.5, 0.5, 0.5, true)
     end
+end
+
+local function showTooltip()
+    -- Anchor the tooltip on whichever side the stack is NOT growing into.
+    local _, alignRight = getGrowthDir()
+    if alignRight then
+        GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+    else
+        GameTooltip:SetOwner(frame, "ANCHOR_LEFT")
+    end
+
+    Overlay:FillTooltip(GameTooltip)
     GameTooltip:Show()
 end
 
@@ -1201,6 +1208,70 @@ function Overlay:ShowPreview()
     self:PushSummaryToast(L.PREVIEW_MODE, COLOR[STATE.ELEVATED], 4)
 end
 
+-- The right-click menu, shared by the anchor button and the launcher.
+function Overlay:OpenMenu(owner)
+    MenuUtil.CreateContextMenu(owner, function(_, rootDescription)
+        rootDescription:CreateTitle(L.MENU_TITLE)
+
+        -- Banner Visibility Submenu
+        local bannerMenu = rootDescription:CreateButton(L.MENU_BANNERS)
+        local function setBannerMode(mode)
+            DB.settings.bannerMode = mode
+            if mode ~= "ALL" then ns.Overlay:ClearToasts() end
+            -- Preview regardless of the mode just chosen: this is an
+            -- explicit action, so it should always show the player what
+            -- they picked rather than silently doing nothing.
+            ns.Overlay:ShowPreview()
+        end
+        bannerMenu:CreateRadio(L.MENU_BANNERS_ALL, function() return DB.settings.bannerMode == "ALL" end, function() setBannerMode("ALL") end)
+        bannerMenu:CreateRadio(L.MENU_BANNERS_SUMMARY, function() return DB.settings.bannerMode == "SUMMARY" end, function() setBannerMode("SUMMARY") end)
+        bannerMenu:CreateRadio(L.MENU_BANNERS_OFF, function() return DB.settings.bannerMode == "OFF" end, function() setBannerMode("OFF") end)
+
+        -- Growth Direction Submenu
+        local growthMenu = rootDescription:CreateButton(L.MENU_GROWTH_DIR)
+        local function setGrowth(dir)
+            DB.settings.bannerGrowthOverride = dir
+            if #toasts > 0 then ns.Overlay:LayoutToasts() end
+            ns.Overlay:ShowPreview()
+        end
+
+        growthMenu:CreateRadio(L.MENU_GROWTH_AUTO, function() return DB.settings.bannerGrowthOverride == "AUTO" end, function() setGrowth("AUTO") end)
+        growthMenu:CreateRadio(L.MENU_GROWTH_LU, function() return DB.settings.bannerGrowthOverride == "LEFT_UP" end, function() setGrowth("LEFT_UP") end)
+        growthMenu:CreateRadio(L.MENU_GROWTH_LD, function() return DB.settings.bannerGrowthOverride == "LEFT_DOWN" end, function() setGrowth("LEFT_DOWN") end)
+        growthMenu:CreateRadio(L.MENU_GROWTH_RU, function() return DB.settings.bannerGrowthOverride == "RIGHT_UP" end, function() setGrowth("RIGHT_UP") end)
+        growthMenu:CreateRadio(L.MENU_GROWTH_RD, function() return DB.settings.bannerGrowthOverride == "RIGHT_DOWN" end, function() setGrowth("RIGHT_DOWN") end)
+
+        -- Size Submenu
+        local sizeMenu = rootDescription:CreateButton(L.MENU_SIZE)
+        sizeMenu:CreateRadio(L.MENU_SIZE_DEFAULT, function() return DB.settings.buttonSize == "DEFAULT" or DB.settings.buttonSize == nil end, function() DB.settings.buttonSize = "DEFAULT" ns.Overlay:RestorePosition() end)
+        sizeMenu:CreateRadio(L.MENU_SIZE_S, function() return DB.settings.buttonSize == 32 end, function() DB.settings.buttonSize = 32 ns.Overlay:RestorePosition() end)
+        sizeMenu:CreateRadio(L.MENU_SIZE_M, function() return DB.settings.buttonSize == 64 end, function() DB.settings.buttonSize = 64 ns.Overlay:RestorePosition() end)
+
+        rootDescription:CreateDivider()
+
+        -- Actions
+        rootDescription:CreateCheckbox(L.MENU_LOCK, function() return DB.settings.locked end, function() ns.Overlay:SetLocked(not DB.settings.locked) end)
+        rootDescription:CreateCheckbox(L.MENU_MINIMAP, function() return DB.settings.minimapButton end, function()
+            DB.settings.minimapButton = not DB.settings.minimapButton
+            ns.Launcher:Update()
+        end)
+        if ns.Launcher:HasCompartment() then
+            rootDescription:CreateCheckbox(L.MENU_COMPARTMENT, function() return DB.settings.compartment end, function()
+                DB.settings.compartment = not DB.settings.compartment
+                ns.Launcher:Update()
+            end)
+        end
+        rootDescription:CreateButton(L.MENU_RESET, function() ns.Overlay:ResetPosition() end)
+        rootDescription:CreateButton(L.MENU_CLEAR_HIST, function()
+            DB:ClearHistory()
+            if GameTooltip:IsOwned(frame) then
+                GameTooltip:Hide()
+                showTooltip()
+            end
+        end)
+    end)
+end
+
 function Overlay:Create()
     local s = DB.settings
     local initialSize = s.buttonSize
@@ -1209,7 +1280,9 @@ function Overlay:Create()
     -- 1. The Anchor Button (Back to Frame to dodge skinning addons and native button borders)
     frame = CreateFrame("Frame", "StutterAlertOverlay", UIParent)
     frame:SetSize(initialSize, initialSize)
-    frame:SetFrameStrata("HIGH")
+    -- MEDIUM, not HIGH: full-screen HIGH frames (Warband Stables, the world map) must
+    -- cover it; level 100 still puts it over the rest of the MEDIUM HUD.
+    frame:SetFrameStrata("MEDIUM")
     frame:SetFrameLevel(100)
     frame:SetMovable(true)
     frame:SetClampedToScreen(true)
@@ -1266,56 +1339,7 @@ function Overlay:Create()
         end
 
         if button == "RightButton" then
-            MenuUtil.CreateContextMenu(self, function(owner, rootDescription)
-                rootDescription:CreateTitle(L.MENU_TITLE)
-
-                -- Banner Visibility Submenu
-                local bannerMenu = rootDescription:CreateButton(L.MENU_BANNERS)
-                local function setBannerMode(mode)
-                    DB.settings.bannerMode = mode
-                    if mode ~= "ALL" then ns.Overlay:ClearToasts() end
-                    -- Preview regardless of the mode just chosen: this is an
-                    -- explicit action, so it should always show the player what
-                    -- they picked rather than silently doing nothing.
-                    ns.Overlay:ShowPreview()
-                end
-                bannerMenu:CreateRadio(L.MENU_BANNERS_ALL, function() return DB.settings.bannerMode == "ALL" end, function() setBannerMode("ALL") end)
-                bannerMenu:CreateRadio(L.MENU_BANNERS_SUMMARY, function() return DB.settings.bannerMode == "SUMMARY" end, function() setBannerMode("SUMMARY") end)
-                bannerMenu:CreateRadio(L.MENU_BANNERS_OFF, function() return DB.settings.bannerMode == "OFF" end, function() setBannerMode("OFF") end)
-
-                -- Growth Direction Submenu
-                local growthMenu = rootDescription:CreateButton(L.MENU_GROWTH_DIR)
-                local function setGrowth(dir)
-                    DB.settings.bannerGrowthOverride = dir
-                    if #toasts > 0 then ns.Overlay:LayoutToasts() end
-                    ns.Overlay:ShowPreview()
-                end
-
-                growthMenu:CreateRadio(L.MENU_GROWTH_AUTO, function() return DB.settings.bannerGrowthOverride == "AUTO" end, function() setGrowth("AUTO") end)
-                growthMenu:CreateRadio(L.MENU_GROWTH_LU, function() return DB.settings.bannerGrowthOverride == "LEFT_UP" end, function() setGrowth("LEFT_UP") end)
-                growthMenu:CreateRadio(L.MENU_GROWTH_LD, function() return DB.settings.bannerGrowthOverride == "LEFT_DOWN" end, function() setGrowth("LEFT_DOWN") end)
-                growthMenu:CreateRadio(L.MENU_GROWTH_RU, function() return DB.settings.bannerGrowthOverride == "RIGHT_UP" end, function() setGrowth("RIGHT_UP") end)
-                growthMenu:CreateRadio(L.MENU_GROWTH_RD, function() return DB.settings.bannerGrowthOverride == "RIGHT_DOWN" end, function() setGrowth("RIGHT_DOWN") end)
-
-                -- Size Submenu
-                local sizeMenu = rootDescription:CreateButton(L.MENU_SIZE)
-                sizeMenu:CreateRadio(L.MENU_SIZE_DEFAULT, function() return DB.settings.buttonSize == "DEFAULT" or DB.settings.buttonSize == nil end, function() DB.settings.buttonSize = "DEFAULT" ns.Overlay:RestorePosition() end)
-                sizeMenu:CreateRadio(L.MENU_SIZE_S, function() return DB.settings.buttonSize == 32 end, function() DB.settings.buttonSize = 32 ns.Overlay:RestorePosition() end)
-                sizeMenu:CreateRadio(L.MENU_SIZE_M, function() return DB.settings.buttonSize == 64 end, function() DB.settings.buttonSize = 64 ns.Overlay:RestorePosition() end)
-
-                rootDescription:CreateDivider()
-
-                -- Actions
-                rootDescription:CreateCheckbox(L.MENU_LOCK, function() return DB.settings.locked end, function() ns.Overlay:SetLocked(not DB.settings.locked) end)
-                rootDescription:CreateButton(L.MENU_RESET, function() ns.Overlay:ResetPosition() end)
-                rootDescription:CreateButton(L.MENU_CLEAR_HIST, function()
-                    DB:ClearHistory()
-                    if GameTooltip:IsOwned(self) then
-                        GameTooltip:Hide()
-                        showTooltip()
-                    end
-                end)
-            end)
+            ns.Overlay:OpenMenu(self)
         elseif button == "LeftButton" and IsShiftKeyDown() then
             DB:ClearHistory()
             if GameTooltip:IsOwned(self) then

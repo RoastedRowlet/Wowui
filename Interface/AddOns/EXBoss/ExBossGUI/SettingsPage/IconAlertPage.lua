@@ -1,7 +1,7 @@
 ---@diagnostic disable: undefined-global, undefined-field, need-check-nil
 -- =============================================================
 -- ExBossGUI/SettingsPage/IconAlertPage.lua
--- IconAlert 设置页只承载 Grid 与 EXUI 标准预览面板。
+-- IconAlert 设置页只承载 V2 声明与 EXUI 标准预览面板。
 -- =============================================================
 
 local ExwindTools = _G.ExwindTools
@@ -47,36 +47,50 @@ local LAYOUT_OPTS = {
     defaultMaxVisible = 5,
 }
 
--- [卡片/Grid 迁移边界：IconAlert 设置页]
--- 允许：普通 sections 单声明及纯展示排列；Core 统一测量，原语义选项保留。
--- 禁止：修改 key/type/path/opts、允许增长方向、预览、Slider 或释放合同。
--- modulecommonsettings/anchorgroup/widgetlayout/icongroup/fontgroup/glow_settings 必须整体引用，不能拆开重拼。
-local GRID_LAYOUT = {
-    version = 1,
-    title = L["图标设置"],
-    sections = {
-        { kind = "composite", id = "module-common", title = L["通用"],
-            component = "modulecommonsettings", key = "moduleCommon", opts = COMMON_OPTS },
-        { kind = "composite", id = "layout", title = L["排列设置"],
-            component = "widgetlayout", key = "layout", opts = LAYOUT_OPTS },
-        { kind = "composite", id = "anchor", title = L["锚点"],
-            component = "anchorgroup", key = "anchorGroup", opts = ANCHOR_OPTS },
-        { kind = "composite", id = "icon", title = L["外观"],
-            component = "icongroup", key = "icon" },
-        { kind = "composite", id = "glow", title = L["发光子元素"],
-            component = "glow_settings", key = "glow" },
-        { kind = "composite", id = "name-font", title = L["名称子元素"],
-            component = "fontgroup", key = "font_text" },
-        { kind = "composite", id = "time-font", title = L["倒数文本"],
-            component = "fontgroup", key = "font_time" },
-        { kind = "composite", id = "stacks-font", title = L["层数文本"],
-            component = "fontgroup", key = "font_stacks" },
+-- 保留组合控件身份、绑定与排列次序；运行期锚点选项由 owner 提供。
+local LAYOUT = {
+    version = 2,
+    cards = {
+        { kind = "card", id = "module-common", title = L["通用"],
+            children = {
+                { kind = "component", id = "moduleCommon", component = "modulecommonsettings", path = "moduleCommon", opts = COMMON_OPTS },
+            } },
+        { kind = "card", id = "layout-card", title = L["排列设置"],
+            children = {
+                { kind = "component", id = "layout", component = "widgetlayout", path = "layout", opts = LAYOUT_OPTS },
+            } },
+        { kind = "card", id = "anchor", title = L["锚点"],
+            children = {
+                { kind = "component", id = "anchorGroup", component = "anchorgroup", path = "anchorGroup", optionsRef = "anchor" },
+            } },
+        { kind = "card", id = "icon-card", title = L["外观"],
+            children = {
+                { kind = "component", id = "icon", component = "icongroup", path = "icon", opts = {} },
+            } },
+        { kind = "card", id = "glow-card", title = L["发光子元素"],
+            children = {
+                { kind = "component", id = "glow", component = "glow_settings", path = "glow", opts = {} },
+            } },
+        { kind = "card", id = "name-font", title = L["名称子元素"],
+            children = {
+                { kind = "component", id = "font_text", component = "fontgroup", path = "font_text", opts = {} },
+            } },
+        { kind = "card", id = "time-font", title = L["倒数文本"],
+            children = {
+                { kind = "component", id = "font_time", component = "fontgroup", path = "font_time", opts = {} },
+            } },
+        { kind = "card", id = "stacks-font", title = L["层数文本"],
+            children = {
+                { kind = "component", id = "font_stacks", component = "fontgroup", path = "font_stacks", opts = {} },
+            } },
     },
 }
 
-ExwindTools:RegisterModuleLayout(MODULE_KEY, GRID_LAYOUT)
+local function CreatePageOwner()
+    return { options = { anchor = ANCHOR_OPTS } }
+end
 
--- Page 只提供本模块既有布局和标准声明；Dock、Scroll、Watch、延迟 Render 与
+-- Page 只提供本模块既有布局和 V2 声明；Dock、Scroll、Watch、延迟 Render 与
 -- OnHide/release 全由 StandardModulePage 统一拥有。
 local function RenderStandardPreview(dock)
     local iconAlert = GetIconAlert()
@@ -97,7 +111,9 @@ end
 local StandardPage = EXUI:CreateStandardModulePage({
     moduleKey = MODULE_KEY,
     page = Page,
-    layout = GRID_LAYOUT,
+    title = L["图标设置"],
+    layout = LAYOUT,
+    ownerFactory = CreatePageOwner,
     preview = {
         height = 160,
         render = RenderStandardPreview,

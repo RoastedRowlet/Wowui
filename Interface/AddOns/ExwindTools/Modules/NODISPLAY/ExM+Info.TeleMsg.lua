@@ -38,7 +38,7 @@ local DEFAULT_MSG = EXWIND_DEFAULTS.teleportShoutText
 
 -- 设置页（V2）
 local function BuildPreviewText()
-    local fmt = EX_DB.teleportShoutText or DEFAULT_MSG
+    local fmt = L[EX_DB.teleportShoutText or DEFAULT_MSG]
     local name = (EXDB.GetLocalizedInstanceNoteName and EXDB:GetLocalizedInstanceNoteName(658)) or L["萨隆矿坑"]
     local link = "|cff71d5ff|Hspell:444222|h[" .. name .. "]|h|r"
     local out = fmt:gsub("%%link", link):gsub("%%name", name)
@@ -48,8 +48,7 @@ local function BuildPreviewText()
     local playerColored = "|c" ..
         ((color and color.GenerateHexColor) and color:GenerateHexColor() or "ffffff") .. UnitName("player") .. "|r"
 
-    return "\n|cffffd100" ..
-        L["预览:"] .. "|r\n|cffaaaaff[" .. L["队伍"] .. "] [" .. playerColored .. "]: " .. out .. "|r"
+    return "|cffaaaaff[" .. L["队伍"] .. "] [" .. playerColored .. "]: " .. out .. "|r"
 end
 
 local settingsSession
@@ -69,33 +68,25 @@ local function EX_RegisterLayout()
                 title = L["喊话设置"],
                 children = {
                     {
-                        id = "shoutTiming", kind = "control", controlType = "select", path = "shoutTiming", label = L["喊话时机"],
+                        id = "shoutTiming", kind = "control", controlType = "select", path = "shoutTiming", label = L["喊话时机"], size = "wide",
                         options = {
                             { value = "施法开始", label = L["施法开始"] },
                             { value = "施法成功", label = L["施法成功"] },
                         },
                     },
-                    { id = "reset", kind = "button", text = L["恢复默认喊话"], clickKey = "reset" },
+                    { id = "reset.row", kind = "setting", label = L["恢复默认喊话"], children = {
+                        { id = "reset", kind = "button", text = L["恢复默认喊话"], clickKey = "reset" },
+                    } },
                     { id = "teleportShoutText", kind = "control", controlType = "input", path = "teleportShoutText", label = L["自定义喊话内容"],
-                        inputWidthPercent = 200 },
+                        size = "wide", description = L["|cffffd100变量说明:|r\
+  |cff00ff00%link|r  = 法术链接\
+  |cff00ff00%name|r = 副本名称"] },
                 },
             },
             { id = "preview", kind = "card", title = L["变量与预览"], children = {
-                { id = "preview.table", kind = "columns", columns = { { weight = 1 } }, children = {
-                    { id = "preview.head", kind = "row", children = {
-                        { id = "preview.head.cell", kind = "cell", children = {
-                            { id = "preview.head.text", kind = "hint", text = "" },
-                        } },
-                    } },
-                    { id = "preview.variables", kind = "row", children = {
-                        { id = "preview.variables.cell", kind = "cell", children = {
-                            { id = "preview.variables.text", kind = "text", text = L["|cffffd100变量说明:|r\
-  |cff00ff00%link|r  = 法术链接\
-  |cff00ff00%name|r = 副本名称"] },
-                        } },
-                    } },
-                    { id = "preview.message", kind = "row", children = {
-                        { id = "preview.message.cell", kind = "cell", children = {
+                { id = "preview.table", kind = "table", columns = { { title = L["预览:"] } }, children = {
+                    { id = "preview.row", kind = "row", children = {
+                        { id = "preview.message", kind = "cell", children = {
                             { id = "preview.message.text", kind = "text", textSource = "preview" },
                         } },
                     } },
@@ -138,7 +129,7 @@ local function HandleSpellCast(unit, spellID)
     local spellLink = C_Spell.GetSpellLink(spellID)
     if not spellLink then return end
 
-    local msgFormat = EX_DB.teleportShoutText or DEFAULT_MSG
+    local msgFormat = L[EX_DB.teleportShoutText or DEFAULT_MSG]
     local message = msgFormat:gsub("%%link", spellLink):gsub("%%name", dungeonName)
     SendChatMessage(message, "PARTY")
 end

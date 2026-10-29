@@ -44,20 +44,57 @@ local function NonTextBase(opts)
 	local records = {}
 
 	if not opts.omitActive then
-		records[#records + 1] = { setting = "active", name = "ELEMENT_ACTIVE", type = SettingType.Boolean, default = opts
-		.active }
+		records[#records + 1] = {
+			setting = "active",
+			name = "ELEMENT_ACTIVE",
+			type = SettingType.Boolean,
+			default = opts
+				.active
+		}
 	end
 
-	records[#records + 1] = { setting = "width", name = "ELEMENT_WIDTH", type = SettingType.Number, min = 1, max = 512, step = 1, default =
-	opts.width }
-	records[#records + 1] = { setting = "height", name = "ELEMENT_HEIGHT", type = SettingType.Number, min = 1, max = 512, step = 1, default =
-	opts.height }
+	records[#records + 1] = {
+		setting = "width",
+		name = "ELEMENT_WIDTH",
+		type = SettingType.Number,
+		min = 1,
+		max = 512,
+		step = 1,
+		default =
+			opts.width
+	}
+	records[#records + 1] = {
+		setting = "height",
+		name = "ELEMENT_HEIGHT",
+		type = SettingType.Number,
+		min = 1,
+		max = 512,
+		step = 1,
+		default =
+			opts.height
+	}
 
 	if not opts.omitOffset then
-		records[#records + 1] = { setting = "x", name = "ELEMENT_X", type = SettingType.Number, min = -512, max = 512, step = 1, default =
-		opts.x or 0 }
-		records[#records + 1] = { setting = "y", name = "ELEMENT_Y", type = SettingType.Number, min = -512, max = 512, step = 1, default =
-		opts.y or 0 }
+		records[#records + 1] = {
+			setting = "x",
+			name = "ELEMENT_X",
+			type = SettingType.Number,
+			min = -512,
+			max = 512,
+			step = 1,
+			default =
+				opts.x or 0
+		}
+		records[#records + 1] = {
+			setting = "y",
+			name = "ELEMENT_Y",
+			type = SettingType.Number,
+			min = -512,
+			max = 512,
+			step = 1,
+			default =
+				opts.y or 0
+		}
 	end
 
 	return records
@@ -80,8 +117,13 @@ local function TextBase(opts)
 
 	if opts.useClassColor ~= nil then
 		table.insert(records,
-			{ setting = "useClassColor", name = "ELEMENT_USE_CLASS_COLOR", type = SettingType.Boolean, default = opts
-			.useClassColor })
+			{
+				setting = "useClassColor",
+				name = "ELEMENT_USE_CLASS_COLOR",
+				type = SettingType.Boolean,
+				default = opts
+					.useClassColor
+			})
 	end
 
 	return records
@@ -95,6 +137,17 @@ local function CountdownTextRecords(fontSize)
 		{ setting = "countdownFont",      name = "ELEMENT_FONT",               type = SettingType.Font,      default = FRIZQT },
 		{ setting = "countdownFontFlags", name = "ELEMENT_FONT_FLAGS",         type = SettingType.FontFlags, default = DefaultFontFlags() },
 		{ setting = "fractionThreshold",  name = "ELEMENT_FRACTION_THRESHOLD", type = SettingType.Number,    min = 0,                     max = 30, step = 1, default = 3 },
+	}
+end
+
+---@param active boolean
+---@return table[]
+local function BorderRecords(active)
+	return {
+		{ setting = "active",        name = "ELEMENT_ACTIVE",         type = SettingType.Boolean, default = active },
+		{ setting = "borderTexture", name = "ELEMENT_BORDER_TEXTURE", type = SettingType.Texture, mediaType = "border", default = "Blizzard Tooltip Border" },
+		{ setting = "borderColor",   name = "ELEMENT_BORDER_COLOR",   type = SettingType.Color,   default = "FFFFFFFF" },
+		{ setting = "borderSize",    name = "ELEMENT_BORDER_SIZE",    type = SettingType.Number,  min = 1,              max = 32,                           step = 1, default = 8 },
 	}
 end
 
@@ -141,12 +194,7 @@ local function BuildIconSchema()
 		useClassColor = true,
 	})
 
-	schema[Enum.Element.Border] = {
-		{ setting = "active",        name = "ELEMENT_ACTIVE",         type = SettingType.Boolean, default = true },
-		{ setting = "borderTexture", name = "ELEMENT_BORDER_TEXTURE", type = SettingType.Texture, mediaType = "border", default = "Blizzard Tooltip Border" },
-		{ setting = "borderColor",   name = "ELEMENT_BORDER_COLOR",   type = SettingType.Color,   default = "FFFFFFFF" },
-		{ setting = "borderSize",    name = "ELEMENT_BORDER_SIZE",    type = SettingType.Number,  min = 1,              max = 32,                           step = 1, default = 8 },
-	}
+	schema[Enum.Element.Border] = BorderRecords(true)
 
 	return schema
 end
@@ -214,12 +262,9 @@ local function BuildBarSchema()
 
 	schema[Enum.Element.InterruptShield] = NonTextBase({ active = false, width = 24, height = 24, x = -35, y = 0 })
 
-	schema[Enum.Element.Border] = {
-		{ setting = "active",        name = "ELEMENT_ACTIVE",         type = SettingType.Boolean, default = false },
-		{ setting = "borderTexture", name = "ELEMENT_BORDER_TEXTURE", type = SettingType.Texture, mediaType = "border", default = "Blizzard Tooltip Border" },
-		{ setting = "borderColor",   name = "ELEMENT_BORDER_COLOR",   type = SettingType.Color,   default = "FFFFFFFF" },
-		{ setting = "borderSize",    name = "ELEMENT_BORDER_SIZE",    type = SettingType.Number,  min = 1,              max = 32,                           step = 1, default = 8 },
-	}
+	schema[Enum.Element.Border] = BorderRecords(false)
+
+	schema[Enum.Element.IconBorder] = BorderRecords(false)
 
 	return schema
 end
@@ -230,7 +275,8 @@ local function BuildIconDurationSchema()
 
 	do
 		local records = NonTextBase({ omitActive = true, omitOffset = true, width = 32, height = 32 })
-		table.insert(records, { setting = "iconZoom", name = "ELEMENT_ICON_ZOOM", type = SettingType.Number, min = 1, max = 2, step = 0.05, default = 1.35 })
+		table.insert(records,
+			{ setting = "iconZoom", name = "ELEMENT_ICON_ZOOM", type = SettingType.Number, min = 1, max = 2, step = 0.05, default = 1.35 })
 		schema[Enum.Element.Icon] = records
 	end
 
@@ -256,12 +302,7 @@ local function BuildIconDurationSchema()
 		schema[Enum.Element.Duration] = records
 	end
 
-	schema[Enum.Element.Border] = {
-		{ setting = "active",        name = "ELEMENT_ACTIVE",         type = SettingType.Boolean, default = true },
-		{ setting = "borderTexture", name = "ELEMENT_BORDER_TEXTURE", type = SettingType.Texture, mediaType = "border", default = "Blizzard Tooltip Border" },
-		{ setting = "borderColor",   name = "ELEMENT_BORDER_COLOR",   type = SettingType.Color,   default = "FFFFFFFF" },
-		{ setting = "borderSize",    name = "ELEMENT_BORDER_SIZE",    type = SettingType.Number,  min = 1,              max = 32,                           step = 1, default = 8 },
-	}
+	schema[Enum.Element.Border] = BorderRecords(true)
 
 	return schema
 end

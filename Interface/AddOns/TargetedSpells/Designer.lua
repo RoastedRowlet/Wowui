@@ -100,6 +100,7 @@ local ELEMENT_ORDER = {
 		Element.InterruptSource,
 		Element.InterruptShield,
 		Element.Border,
+		Element.IconBorder,
 	},
 	[Private.Enum.Template.IconDuration] = {
 		Element.Icon,
@@ -412,6 +413,7 @@ function DesignerMixin:EnsureMarkerVisuals(marker)
 		return
 	end
 
+	marker:SetRoundLayoutToNearestPixel(true)
 	marker:RegisterForClicks("LeftButtonUp")
 
 	local highlight = marker:CreateTexture(nil, "HIGHLIGHT")
@@ -467,8 +469,8 @@ function DesignerMixin:BuildMarkers()
 
 			marker.element = elementTag
 			marker:ClearAllPoints()
-			PixelUtil.SetSize(marker, width, height)
-			PixelUtil.SetPoint(marker, "CENTER", self.Preview, "CENTER", x, y)
+			marker:SetSize(width, height)
+			marker:SetPoint("CENTER", self.Preview, "CENTER", x, y)
 			local areaLevel = math.min(200, math.floor(50000 / math.max(1, width * height)))
 			marker:SetFrameLevel(self.Preview:GetFrameLevel() + 20 + areaLevel)
 			marker:SetScript("OnClick", function(clicked)
@@ -510,9 +512,11 @@ function DesignerMixin:SetupElementDropdown()
 			return
 		end
 
+		local templateNames = Private.L.Designer.TemplateElementNames[self.scratchTemplate]
+
 		for _, elementTag in ipairs(order) do
 			rootDescription:CreateRadio(
-				Private.L.Designer.ElementNames[elementTag] or elementTag,
+				templateNames and templateNames[elementTag] or Private.L.Designer.ElementNames[elementTag] or elementTag,
 				function()
 					return self.selectedElement == elementTag
 				end,
@@ -1058,9 +1062,9 @@ function DesignerMixin:UpdateMarkerRects()
 
 			if width ~= nil then
 				marker:Show()
-				PixelUtil.SetSize(marker, width, height)
+				marker:SetSize(width, height)
 				marker:ClearAllPoints()
-				PixelUtil.SetPoint(marker, "CENTER", self.Preview, "CENTER", x, y)
+				marker:SetPoint("CENTER", self.Preview, "CENTER", x, y)
 			else
 				marker:Hide()
 			end
@@ -1150,18 +1154,22 @@ function DesignerMixin:Initialize()
 	self.Canvas:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -12, 42)
 	self.Canvas:SetFrameLevel(self:GetFrameLevel() + 10)
 
-	self.ApplyButton = CreateFrame("Button", nil, self, "UIPanelButtonTemplate")
+	self.ApplyButton = CreateFrame("Button", nil, self, "UIPanelDynamicResizeButtonTemplate")
+	self.ApplyButton:SetRoundLayoutToNearestPixel(true)
 	self.ApplyButton:SetSize(130, 22)
 	self.ApplyButton:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -12, 12)
 	self.ApplyButton:SetText(Private.L.Designer.Apply)
+	DynamicResizeButton_Resize(self.ApplyButton)
 	self.ApplyButton:SetScript("OnClick", function()
 		self:ApplyScratch()
 	end)
 
-	self.RevertButton = CreateFrame("Button", nil, self, "UIPanelButtonTemplate")
+	self.RevertButton = CreateFrame("Button", nil, self, "UIPanelDynamicResizeButtonTemplate")
+	self.RevertButton:SetRoundLayoutToNearestPixel(true)
 	self.RevertButton:SetSize(100, 22)
 	self.RevertButton:SetPoint("RIGHT", self.ApplyButton, "LEFT", -6, 0)
 	self.RevertButton:SetText(Private.L.Designer.Revert)
+	DynamicResizeButton_Resize(self.RevertButton)
 	self.RevertButton:SetScript("OnClick", function()
 		self:RevertScratch()
 	end)
@@ -1184,10 +1192,12 @@ function DesignerMixin:Initialize()
 	self.Panel.ElementDropdown:SetWidth(self.Panel:GetWidth() - 24)
 	self:SetupElementDropdown()
 
-	self.Panel.ResetButton = CreateFrame("Button", nil, self.Panel, "UIPanelButtonTemplate")
+	self.Panel.ResetButton = CreateFrame("Button", nil, self.Panel, "UIPanelDynamicResizeButtonTemplate")
+	self.Panel.ResetButton:SetRoundLayoutToNearestPixel(true)
 	self.Panel.ResetButton:SetSize(140, 22)
 	self.Panel.ResetButton:SetPoint("BOTTOM", self.Panel, "BOTTOM", 0, 8)
 	self.Panel.ResetButton:SetText(Private.L.Designer.ResetElement)
+	DynamicResizeButton_Resize(self.Panel.ResetButton)
 	self.Panel.ResetButton:SetScript("OnClick", function()
 		self:ResetSelectedElement()
 	end)
