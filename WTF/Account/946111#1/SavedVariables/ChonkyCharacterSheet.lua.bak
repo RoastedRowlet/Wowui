@@ -428,12 +428,7 @@ ChonkyCharacterSheetDB = {
 ["default_font"] = "Fonts\\FRIZQT__.TTF",
 ["fontname_wc_prog"] = "Fonts\\FRIZQT__.TTF",
 ["fontname_gf_itemname"] = "Fonts\\FRIZQT__.TTF",
-["fontcolor_gf_dungeon"] = {
-0.6,
-0.85,
-1,
-1,
-},
+["fontsize_stats"] = 10,
 ["fontname_gf_header"] = "Fonts\\FRIZQT__.TTF",
 ["showdurabilitybar"] = true,
 ["show_general"] = true,
@@ -472,12 +467,7 @@ ChonkyCharacterSheetDB = {
 0,
 1,
 },
-["custom_color_explorer"] = {
-0.62,
-0.62,
-0.62,
-1,
-},
+["fontsize_gf_header"] = 14,
 ["show_right_texture"] = true,
 ["spec_1_priority_mode"] = "none",
 ["bgcolor_inspect"] = {
@@ -495,7 +485,12 @@ ChonkyCharacterSheetDB = {
 1,
 },
 ["showitemupgrade_inspect"] = true,
-["maxupgradehide"] = false,
+["secondary_stats_color"] = {
+0.4,
+0.8,
+0.4,
+1,
+},
 ["secondary_mastery"] = true,
 ["bgtype"] = "Default",
 ["fontname_raid"] = "Fonts\\FRIZQT__.TTF",
@@ -565,7 +560,12 @@ ChonkyCharacterSheetDB = {
 0.45,
 0.4,
 },
-["fontname_gf_dungeon"] = "Fonts\\FRIZQT__.TTF",
+["itemupgradecolor"] = {
+0.98,
+0.6,
+0.35,
+1,
+},
 ["border_color"] = {
 0.3,
 0.1,
@@ -612,12 +612,7 @@ ChonkyCharacterSheetDB = {
 ["spec_2_priority_slots"] = {
 },
 ["fontsize_currency"] = 12,
-["itemupgradecolor"] = {
-0.98,
-0.6,
-0.35,
-1,
-},
+["fontname_gf_dungeon"] = "Fonts\\FRIZQT__.TTF",
 ["showm_sp"] = false,
 ["show_inbag_ilvl"] = true,
 ["custom_color_veteran"] = {
@@ -649,14 +644,14 @@ ChonkyCharacterSheetDB = {
 ["collapse_pvp"] = false,
 ["fontsize_hppower"] = 12,
 ["attribute_power"] = true,
-["secondary_stats_color"] = {
-0.4,
-0.8,
-0.4,
+["maxupgradehide"] = false,
+["secondary_crit"] = true,
+["custom_color_explorer"] = {
+0.62,
+0.62,
+0.62,
 1,
 },
-["secondary_crit"] = true,
-["fontsize_gf_header"] = 14,
 ["fontcolor_gf_header"] = {
 0.1647,
 0.9804,
@@ -681,7 +676,12 @@ ChonkyCharacterSheetDB = {
 1,
 1,
 },
-["fontsize_stats"] = 10,
+["fontcolor_gf_dungeon"] = {
+0.6,
+0.85,
+1,
+1,
+},
 ["show_mplusi_frame_border"] = true,
 ["showcharname"] = true,
 ["repheadercolor"] = {

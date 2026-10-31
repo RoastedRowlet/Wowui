@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 363
+FrameLevel: 365
 Anchor: LEFT
 X: 44
 Y: -235
@@ -41,13 +41,6 @@ X: 0
 Y: 0
 W: 840
 H: 713
-Frame: NSIRaidBuffFrame
-FrameLevel: 1
-Anchor: TOP
-X: -207
-Y: -85
-W: 300
-H: 300
 Frame: MRTCombatTimer
 FrameLevel: 1
 Anchor: CENTER
@@ -55,3 +48,10 @@ X: -235
 Y: -122
 W: 77
 H: 27
+Frame: NSIRaidBuffFrame
+FrameLevel: 1
+Anchor: TOP
+X: -207
+Y: -85
+W: 300
+H: 300
