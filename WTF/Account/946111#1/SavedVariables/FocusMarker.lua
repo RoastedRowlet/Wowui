@@ -1,8 +1,5 @@
 
 FocusMarkerDB = {
-["preferredIcon"] = 5,
-["isLocked"] = true,
-["iconSize"] = 32,
 ["position"] = {
 "BOTTOMLEFT",
 "UIParent",
@@ -10,10 +7,15 @@ FocusMarkerDB = {
 6.333371162414551,
 39.00061798095703,
 },
+["isLocked"] = true,
 ["orientation"] = "HORIZONTAL",
-["barVisible"] = true,
-["noMouseover"] = true,
 ["debugLog"] = {
+"[22:50:28] [INFO]: FocusMarker v2.0.14 (API 12.0) initialized.",
+"[22:50:28] [ERROR]: Macro 'FocusMark' not found.",
+"[22:39:05] [INFO]: FocusMarker v2.0.14 (API 12.0) initialized.",
+"[22:39:05] [ERROR]: Macro 'FocusMark' not found.",
+"[21:50:19] [INFO]: FocusMarker v2.0.14 (API 12.0) initialized.",
+"[21:50:19] [ERROR]: Macro 'FocusMark' not found.",
 "[21:15:38] [INFO]: FocusMarker v2.0.14 (API 12.0) initialized.",
 "[21:15:38] [ERROR]: Macro 'FocusMark' not found.",
 "[23:07:02] [INFO]: FocusMarker v2.0.14 (API 12.0) initialized.",
@@ -58,11 +60,9 @@ FocusMarkerDB = {
 "[15:20:18] [ERROR]: Macro 'FocusMark' not found.",
 "[01:43:54] [INFO]: FocusMarker v2.0.14 (API 12.0) initialized.",
 "[01:43:54] [ERROR]: Macro 'FocusMark' not found.",
-"[18:12:47] [INFO]: FocusMarker v2.0.14 (API 12.0) initialized.",
-"[18:12:47] [ERROR]: Macro 'FocusMark' not found.",
-"[17:57:50] [INFO]: FocusMarker v2.0.14 (API 12.0) initialized.",
-"[17:57:50] [ERROR]: Macro 'FocusMark' not found.",
-"[16:30:00] [INFO]: FocusMarker v2.0.14 (API 12.0) initialized.",
-"[16:30:00] [ERROR]: Macro 'FocusMark' not found.",
 },
+["iconSize"] = 32,
+["barVisible"] = true,
+["noMouseover"] = true,
+["preferredIcon"] = 5,
 }

@@ -1,24 +1,35 @@
 
 RaiderIO_Config = {
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["hide"] = false,
-["lock"] = false,
-},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["lock"] = false,
+["hide"] = false,
+},
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Shieldmebaby-area-52"] = true,
-["us-Cyphergrip-area-52"] = true,
-["us-party5-stormrage"] = true,
-["us-Blindingsols-area-52"] = true,
-["us-Bigmufflez-area-52"] = true,
+["us-Linathi-quelthalas"] = true,
+["us-Namara-stormrage"] = true,
+["us-Tumn-stormrage"] = true,
+["us-Gosugg-stormrage"] = true,
+["us-Zaartan-stormrage"] = true,
+["us-Axtul-stormrage"] = true,
+["us-Vexxith-moon-guard"] = true,
+["us-Radranna-stormrage"] = true,
+["us-Magoshi-stormrage"] = true,
+["us-Uoy-stormrage"] = true,
+["us-Usuallyalive-stormrage"] = true,
+["us-Acerarak-stormrage"] = true,
+["us-Vinceoffer-stormrage"] = true,
+["us-Dravenholt-stormrage"] = true,
+["us-Lovealock-stormrage"] = true,
+["us-Luthríc-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }
