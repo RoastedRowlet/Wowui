@@ -125,6 +125,12 @@ local TEXT_ALIGNMENTS = {
     { label = "Left", value = "LEFT" }, { label = "Center", value = "CENTER" }, { label = "Right", value = "RIGHT" },
 }
 
+local DifficultyData = {
+    { id = 14, label = "Normal", color = {0.2, 0.8, 1} },
+    { id = 15, label = "Heroic", color = {0.7, 0.3, 1} },
+    { id = 16, label = "Mythic", color = {1, 0.2, 0.2} },
+}
+
 local ROLE_DATA = {
     { key = "TANK", label = "Tank" }, { key = "HEALER", label = "Healer" },
     { key = "DAMAGER", label = "DPS" }, { key = "MELEE", label = "Melee" }, { key = "RANGED", label = "Ranged" },
@@ -282,6 +288,7 @@ local function BuildAuraTrackingUI(screen)
     local rightW      = content_width - rightX - pad
     local tabContentH = tab_content_height - 20 - 68 - 6
     local DISPLAY_TOP = 46   -- fixed anchor row height at top of Display tab
+    local displayTypeHeight = 30
     -- Scroll frames inside each inner tab are narrower than the panel so the
     -- native UIPanelScrollFrameTemplate scrollbar (anchored just outside the
     -- frame's right edge) stays inside the NSUI window instead of spilling past it.
@@ -290,6 +297,9 @@ local function BuildAuraTrackingUI(screen)
     NSRT.AuraTrackingSettings.UI = NSRT.AuraTrackingSettings.UI or {}
     local selectedKey = NSRT.AuraTrackingSettings.UI.Selected
     local autoPreviewKey
+    NSI.RegisterCallback("NSRT_AuraTrackingPreviews", "NSRT_STOP_PREVIEWS", function()
+        autoPreviewKey = nil
+    end)
     local function SetSelectedKey(key)
         selectedKey = key
         NSRT.AuraTrackingSettings.UI = NSRT.AuraTrackingSettings.UI or {}
@@ -345,7 +355,7 @@ local function BuildAuraTrackingUI(screen)
     local rightPanel, RebuildList, SelectEntry, RebuildCurrentTab
     local displaySearchEntry
     local displaySearchText = ""
-    local nameEntry, groupDD, anchorEntry
+    local nameEntry, groupDD, anchorEntry, attachEntry
     local resetTriggerScroll = false
 
     -- Player Stats Display: a standalone, non-aura built-in entry that lives
@@ -376,6 +386,14 @@ local function BuildAuraTrackingUI(screen)
     searchEntry.editBox:HookScript("OnEditFocusGained", function(self) UpdateSearchHint(self) end)
     searchEntry.editBox:HookScript("OnEditFocusLost",   function(self) UpdateSearchHint(self) end)
 
+    local useBuiltinsCheckbox = CreateCheckButton(screen, NSI:Loc("Enable All Built-in Boss Trackings"), function()
+        return NSRT.AuraTrackingSettings.UseBuiltinAuraTrackings
+    end, function(_, enabled)
+        NSI:SetUseBuiltinAuraTrackings(enabled)
+    end, leftWidth - pad * 2, 22, "NSUIAuraTrackUseBuiltins", NSI:Loc("Automatically enables all current and future built-in boss Aura Trackings. Manual enabled-state changes are kept."))
+    useBuiltinsCheckbox:SetPoint("TOPLEFT", screen, "TOPLEFT", pad, topY - 50)
+    NSI:SetUIFont(useBuiltinsCheckbox.label, 11, "")
+
     -- ── Left: bottom buttons ────────────────────────────────────────────────
     local createBtn = CreateLocalizedButton(screen, "Create Aura", function()
         local key = NSI:AddCustomAuraTracking()
@@ -404,7 +422,7 @@ local function BuildAuraTrackingUI(screen)
     stopBtn:SetPoint("BOTTOMLEFT", screen, "BOTTOMLEFT", pad, pad)
 
     -- ── Left: scroll list ───────────────────────────────────────────────────
-    local scrollTop    = topY - 24 - 22 - 6
+    local scrollTop    = topY - 24 - 22 - 6 - 26
     local scrollHeight = tab_content_height + scrollTop - pad - 72 - 6
     local listW        = leftWidth - pad * 2
 
@@ -633,6 +651,13 @@ local function BuildAuraTrackingUI(screen)
 
     local function GroupContextMenu(groupName)
         local previewKeys = GetGroupPreviewKeys(groupName)
+        local canDuplicateGroup = false
+        for index, entry in ipairs(NSI:IterateAuraTrackingEntries()) do
+            if entry.group == groupName and not NSI.AuraTrackingBossBuiltins[entry.builtin] then
+                canDuplicateGroup = true
+                break
+            end
+        end
         local groupPreviewLocked = #previewKeys > 0
         for _, key in ipairs(previewKeys) do
             if NSI[PreviewFlag(key)] ~= true then
@@ -648,7 +673,7 @@ local function BuildAuraTrackingUI(screen)
                 ShowAuraTrackingExportPopup(NSI:ExportAuraTrackingGroup(groupName), string.format(NSI:Loc("Exporting Aura Tracking group: |cFF00FFFF%s|r"), groupName))
             end },
         }
-        if groupName ~= NSI.AuraTrackingMatrixGroup then
+        if groupName ~= NSI.AuraTrackingMatrixGroup and canDuplicateGroup then
             table.insert(items, 3, { type = "button", label = NSI:Loc("Duplicate Group"), fnc = function() NSI:DuplicateAuraTrackingGroup(groupName); RebuildList() end })
         end
         if groupName ~= NSI.AuraTrackingBuiltinGroup and groupName ~= NSI.AuraTrackingMatrixGroup then
@@ -688,6 +713,7 @@ local function BuildAuraTrackingUI(screen)
     local function EntryContextMenu(item)
         local sk = item.settingsKey
         local s  = item.settings
+        local bossBuiltin = NSI.AuraTrackingBossBuiltins[item.builtin]
         local items = {}
 
         items[#items + 1] = { type = "button", label = s.pinned and NSI:Loc("Unpin") or NSI:Loc("Pin to Top"),
@@ -700,7 +726,7 @@ local function BuildAuraTrackingUI(screen)
             items[#items + 1] = { type = "button", label = NSI:Loc("Reset"), fnc = function()
                 StopPreview(sk)
                 NSI:ResetBuiltinAuraTracking(sk)
-                RebuildList()
+                SelectEntry(sk, false)
             end }
         end
 
@@ -709,6 +735,8 @@ local function BuildAuraTrackingUI(screen)
                 local newKey = NSI:DuplicateCustomAuraTracking(sk)
                 RebuildList(); if newKey then SelectEntry(newKey) end
             end }
+        end
+        if not item.builtin or bossBuiltin then
             local groupSub = {
                 { type = "button", label = NSI:Loc("— No Group —"), fnc = function() NSI:SetAuraTrackingEntryGroup(sk, "") end },
             }
@@ -731,17 +759,19 @@ local function BuildAuraTrackingUI(screen)
 
         local copySub = {}
         for _, section in ipairs(SECTIONS) do
-            local sec = section
-            copySub[#copySub + 1] = { type = "button", label = NSI:Loc(sec), fnc = function()
-                NSI:CopyAuraTrackingSection(sk, sec)
-                print("|cFF00FFFFNSRT:|r " .. string.format(NSI:Loc("Copied %s settings from '%s'."), NSI:Loc(sec), s.Name or NSI:Loc("Unnamed")))
-            end }
+            if section ~= "Trigger" or not bossBuiltin then
+                local sec = section
+                copySub[#copySub + 1] = { type = "button", label = NSI:Loc(sec), fnc = function()
+                    NSI:CopyAuraTrackingSection(sk, sec)
+                    print("|cFF00FFFFNSRT:|r " .. string.format(NSI:Loc("Copied %s settings from '%s'."), NSI:Loc(sec), s.Name or NSI:Loc("Unnamed")))
+                end }
+            end
         end
         items[#items + 1] = { type = "submenu", label = NSI:Loc("Copy") .. "...", items = copySub }
 
         local pasteSub = {}
         for _, section in ipairs(SECTIONS) do
-            if NSI:CanPasteAuraTrackingSection(section) then
+            if NSI:CanPasteAuraTrackingSection(section, sk) then
                 local sec = section
                 pasteSub[#pasteSub + 1] = { type = "button", label = NSI:Loc(sec), fnc = function()
                     NSI:PasteAuraTrackingSection(sk, sec)
@@ -834,7 +864,7 @@ local function BuildAuraTrackingUI(screen)
                 row:Show()
 
                 local settings = item.settings
-                local willLoad = NSI:EvaluateLoad(settings, true)
+                local willLoad = NSI:EvaluateAuraTrackingLoad(settings, true)
                 if selectedKey == item.settingsKey then
                     row.__background:SetVertexColor(0, 1, 1); row.__background:SetAlpha(1)
                 else
@@ -853,6 +883,9 @@ local function BuildAuraTrackingUI(screen)
                 row.enabledCB:SetOnChange(function(_, v)
                     local es = NSI:GetAuraTrackingSettings(sk)
                     if es then
+                        if NSI.AuraTrackingBossBuiltins[es.builtin] then
+                            es.enabledEdited = true
+                        end
                         es.enabled = v; NSI:InitAuraTracking(false, sk ~= "AuraMatrix")
                         RebuildList()
                     end
@@ -905,7 +938,7 @@ local function BuildAuraTrackingUI(screen)
 
     local function BuildGroupItems()
         local s = selectedKey and NSI:GetAuraTrackingSettings(selectedKey)
-        if not s or s.builtin then return {} end
+        if not s or (s.builtin and not NSI.AuraTrackingBossBuiltins[s.builtin]) then return {} end
         local items = { { label = NSI:Loc("— No Group —"), value = "", onclick = function()
             NSI:SetAuraTrackingEntryGroup(selectedKey, ""); groupDD:Refresh(); RebuildList()
         end } }
@@ -923,7 +956,7 @@ local function BuildAuraTrackingUI(screen)
     local function GetGroupSelected()
         local s = selectedKey and NSI:GetAuraTrackingSettings(selectedKey)
         if not s then return "" end
-        if s.builtin then return NSI:Loc(s.builtin == "AuraMatrix" and NSI.AuraTrackingMatrixGroup or NSI.AuraTrackingBuiltinGroup) end
+        if s.builtin and not NSI.AuraTrackingBossBuiltins[s.builtin] then return NSI:Loc(s.builtin == "AuraMatrix" and NSI.AuraTrackingMatrixGroup or NSI.AuraTrackingBuiltinGroup) end
         return (s.group and s.group ~= "") and s.group or NSI:Loc("— No Group —")
     end
     groupDD = CreateDropdown(rightPanel, nil, BuildGroupItems, GetGroupSelected, 130, 22, "NSUIAuraTrackGroupDD")
@@ -969,13 +1002,46 @@ local function BuildAuraTrackingUI(screen)
         end
     end
 
-    -- ── Fixed anchor row at the top of the Display tab ───────────────────────
     local displayF = tabFrames["Display"]
+    local displayTypeButtons = {}
+    for index, displayType in ipairs({"Icon", "Bar", "Text", "Circle"}) do
+        local button = CreateLocalizedSubButton(displayF, displayType, function()
+            local settings = selectedKey and NSI:GetAuraTrackingSettings(selectedKey)
+            if not settings or (settings.DisplayType or "Icon") == displayType then return end
+            local previousType = settings.DisplayType or "Icon"
+            settings.DisplayLayouts = settings.DisplayLayouts or {}
+            local layoutFields = {
+                "Width", "Height", "GrowDirection", "InverseCooldownSwipe", "Limit", "AuraNameEnabled", "CustomTexts",
+                "DurationAnchorPoint", "DurationXOffset", "DurationYOffset", "HideDurationText", "DurationFontSize", "DurationColor",
+                "ShowDecimalSeconds", "DecimalThreshold", "ColorDurationUnderThreshold", "ColorDurationThreshold", "DurationThresholdColor",
+                "StackAnchorPoint", "StackXOffset", "StackYOffset", "HideStackText", "StackFontSize", "StackColor",
+            }
+            local previousLayout = {}
+            for fieldIndex, field in ipairs(layoutFields) do
+                local value = settings[field]
+                previousLayout[field] = type(value) == "table" and CopyTable(value) or value
+            end
+            settings.DisplayLayouts[previousType] = previousLayout
+            settings.DisplayType = displayType
+            local layout = settings.DisplayLayouts[displayType] or NSI:CreateAuraTrackingSettingsDefaults({DisplayType = displayType})
+            for fieldIndex, field in ipairs(layoutFields) do
+                local value = layout[field]
+                settings[field] = type(value) == "table" and CopyTable(value) or value
+            end
+            if displayType == "Circle" or displayType == "Text" then settings.Limit = 1 end
+            apply(selectedKey)
+            RebuildCurrentTab()
+        end, 84, "NSUIAuraTrackType" .. displayType)
+        button:SetPoint("TOPLEFT", displayF, "TOPLEFT", (index - 1) * 87, 0)
+        displayTypeButtons[displayType] = button
+    end
+
+    -- ── Fixed anchor row below the display type selector ────────────────────
     local anchorLbl = displayF:CreateFontString(nil, "OVERLAY")
     NSI:SetUIFont(anchorLbl, 11, "")
     anchorLbl:SetTextColor(1, 0.82, 0, 1)
     anchorLbl:SetText(NSI:Loc("Anchor Frame"))
-    anchorLbl:SetPoint("TOPLEFT", displayF, "TOPLEFT", 0, 0)
+    anchorLbl:SetPoint("TOPLEFT", displayF, "TOPLEFT", 0, -displayTypeHeight)
 
     anchorEntry = CreateTextEntry(displayF, nil,
         function() local s = selectedKey and NSI:GetAuraTrackingSettings(selectedKey); return s and s.CustomAnchorFrame or "UIParent" end,
@@ -993,16 +1059,88 @@ local function BuildAuraTrackingUI(screen)
         end,
         rightW, 22, nil, nil, nil, "NSUIAuraTrackAnchorEntry",
         { title = NSI:Loc("Anchor Frame"), desc = NSI:Loc("Aura Tracking Anchor Frame Tooltip") })
-    anchorEntry:SetPoint("TOPLEFT", displayF, "TOPLEFT", 0, -18)
+    anchorEntry:SetPoint("TOPLEFT", displayF, "TOPLEFT", 0, -displayTypeHeight - 18)
+
+    local attachLbl = displayF:CreateFontString(nil, "OVERLAY")
+    NSI:SetUIFont(attachLbl, 11, "")
+    attachLbl:SetTextColor(1, 0.82, 0, 1)
+    attachLbl:SetText(NSI:Loc("Attach to"))
+    attachEntry = CreateTextEntry(displayF, nil,
+        function() local s = selectedKey and NSI:GetAuraTrackingSettings(selectedKey); return s and s.AttachTo or "" end,
+        function(widget, value)
+            if not selectedKey then return end
+            if not NSI:SetAuraTrackingAttachment(selectedKey, value) then
+                print("|cFF00FFFFNSRT:|r " .. NSI:Loc("Invalid Aura Tracking attachment."))
+                attachEntry:SetValue(NSI:GetAuraTrackingSettings(selectedKey).AttachTo or "")
+                return
+            end
+            apply(selectedKey)
+            RebuildCurrentTab()
+        end,
+        rightW, 22, nil, nil, nil, "NSUIAuraTrackAttachEntry",
+        {title = NSI:Loc("Attach to"), desc = NSI:Loc("Aura Tracking Attach To Tooltip")})
 
     -- ── Definition builders (Display / Trigger via BuildWidgets) ─────
     local function BuildDisplayDefs(s, key)
         local defs = {}
+        local attachmentGroups = select(2, NSI:GetAuraTrackingAttachmentGroups())
+        local attachmentGroup = attachmentGroups[s]
+        local isAttached = attachmentGroup and attachmentGroup.settings ~= s
+        local displayType = s.DisplayType or "Icon"
+        local isSingle = displayType == "Circle" or displayType == "Text"
         s.DurationColor = s.DurationColor or {1, 1, 0.25, 1}
         s.DurationThresholdColor = s.DurationThresholdColor or {1, 0.25, 0.25, 1}
         local function add(d) defs[#defs + 1] = d end
         local function tip(title, desc)
             return { title = title, desc = desc }
+        end
+        if displayType == "Circle" then
+            add({ Type = "Label", text = "Circle", highlight = true })
+            add({ Type = "Slider", label = "Size", min = 10, max = 500, step = 1,
+                get = function() return s.Width end,
+                set = function(widget, v) s.Width = v; s.Height = v; apply(key) end })
+            local textures = {}
+            for textureIndex, size in ipairs({2, 5, 8, 10, 15}) do
+                textures[#textures + 1] = {label = size .. " px", value = "Interface\\AddOns\\NorthernSkyRaidTools\\Media\\Textures\\circle_" .. size .. "px.png"}
+            end
+            add({ Type = "Dropdown", label = "Texture", values = textures,
+                get = function() return s.CircleTexture or textures[3].value end,
+                set = function(widget, v) s.CircleTexture = v; apply(key) end })
+            add({ Type = "Color", label = "Ring Color",
+                get = function() return unpack(s.RingColor or {1, 1, 1, 1}) end,
+                set = function(widget, r, g, b, a) s.RingColor = {r, g, b, a}; apply(key) end })
+            add({ Type = "Checkbox", label = "Show Background Ring",
+                get = function() return s.ShowBackgroundRing end,
+                set = function(widget, v) s.ShowBackgroundRing = v; apply(key) end })
+        elseif displayType == "Bar" then
+            add({ Type = "Label", text = "Bar", highlight = true })
+            add({ Type = "Dropdown", label = "Texture", values = function()
+                local textures = {}
+                for mediaIndex, name in ipairs(NSI.LSM:List("statusbar")) do textures[#textures + 1] = {label = name, value = name} end
+                return textures
+            end,
+                get = function() return s.BarTexture or "Atrocity" end,
+                set = function(widget, v) s.BarTexture = v; apply(key) end })
+            add({ Type = "Color", label = "Bar Fill Color",
+                get = function() return unpack(s.BarColor or {1, 0, 0, 1}) end,
+                set = function(widget, r, g, b, a) s.BarColor = {r, g, b, a}; apply(key) end })
+            add({ Type = "Color", label = "Background Color",
+                get = function() return unpack(s.BarBackgroundColor or {0, 0, 0, 0.8}) end,
+                set = function(widget, r, g, b, a) s.BarBackgroundColor = {r, g, b, a}; apply(key) end })
+            add({ Type = "Checkbox", label = "Invert Bar Fill",
+                get = function() return s.BarInvertFill end,
+                set = function(widget, v) s.BarInvertFill = v; apply(key) end })
+            add({ Type = "Checkbox", label = "Show Icon",
+                get = function() return s.BarShowIcon ~= false end,
+                set = function(widget, v) s.BarShowIcon = v; apply(key); RebuildCurrentTab() end })
+            if s.BarShowIcon ~= false then
+                add({ Type = "Dropdown", label = "Icon Position", values = {{label = "LEFT", value = "LEFT"}, {label = "RIGHT", value = "RIGHT"}},
+                    get = function() return s.BarIconPosition or "LEFT" end,
+                    set = function(widget, v) s.BarIconPosition = v; apply(key) end })
+            end
+        end
+        if isSingle then
+            add({ Type = "Label", text = "Maximum auras: 1", height = 24 })
         end
         add({ Type = "Label", text = "Position Settings", highlight = true })
         add({ Type = "Dropdown", label = "Anchor Point", values = ANCHOR_POINTS,
@@ -1040,6 +1178,9 @@ local function BuildAuraTrackingUI(screen)
             get = function() return s.FrameStrata or "MEDIUM" end, set = function(_, v) s.FrameStrata = v; apply(key) end })
 
         add({ Type = "Label", text = "Layout", highlight = true })
+        if isAttached then
+            add({ Type = "Label", text = string.format(NSI:Loc("Position and layout controlled by: %s"), attachmentGroup.settings.Name), height = 40 })
+        end
         if key == "AuraMatrix" then
             add({ Type = "Checkbox", label = "Disable Target Tracking",
                 tooltip = tip("Disable Target Tracking", "Hide all target rows and keep only player tracking. Target rows only track friendly units."),
@@ -1052,30 +1193,36 @@ local function BuildAuraTrackingUI(screen)
         add({ Type = "Slider", label = "Spacing", min = -5, max = 20, step = 1,
             tooltip = tip("Spacing", "Spacing between Aura Tracking icons"),
             get = function() return s.Spacing end, set = function(_, v) s.Spacing = v; apply(key) end })
-        add({ Type = "Slider", label = "Width", min = 10, max = 500, step = 1,
-            tooltip = tip("Width", "Width of the Aura Tracking icons"),
-            get = function() return s.Width end, set = function(_, v) s.Width = v; apply(key) end })
-        add({ Type = "Slider", label = "Height", min = 10, max = 500, step = 1,
-            tooltip = tip("Height", "Height of the Aura Tracking icons"),
-            get = function() return s.Height end, set = function(_, v) s.Height = v; apply(key) end })
-        add({ Type = "Slider", label = "Zoom", min = 0, max = 100, step = 1,
-            tooltip = tip("Zoom", "Zooms the icon texture inwards"),
-            get = function() return s.Zoom end, set = function(_, v) s.Zoom = v; apply(key) end })
-        add({ Type = "Slider", label = "Max Icons", min = 1, max = 20, step = 1,
-            tooltip = tip("Max Icons", "Maximum number of auras to display"),
-            get = function() return s.Limit end, set = function(_, v) s.Limit = v; apply(key) end })
-        add({ Type = "Slider", label = "Auras per Row/Column", min = 1, max = 20, step = 1,
-            tooltip = tip("Auras per Row/Column", "Maximum number of aura icons placed in each row or column before the grid grows in its Grid-Grow Direction."),
-            get = function() return s.AurasPerRowColumn or 20 end,
-            set = function(_, v) s.AurasPerRowColumn = v; apply(key) end })
-        add({ Type = "Dropdown", label = "Grid-Grow Direction", values = GridGrowDirections,
-            tooltip = tip("Grid-Grow Direction", "Direction in which the next grid row or column is placed."),
-            get = function() return s.GridGrowDirection or "UP" end,
-            set = function(_, v) s.GridGrowDirection = v; apply(key) end })
-        add({ Type = "Slider", label = "Grid-Spacing", min = -5, max = 50, step = 1,
-            tooltip = tip("Grid-Spacing", "Spacing between rows or columns in the Aura Tracking grid."),
-            get = function() return s.GridSpacing ~= nil and s.GridSpacing or s.Spacing end,
-            set = function(_, v) s.GridSpacing = v; apply(key) end })
+        if displayType ~= "Circle" then
+            add({ Type = "Slider", label = "Width", min = 10, max = 500, step = 1,
+                tooltip = tip("Width", "Width of the Aura Tracking icons"),
+                get = function() return s.Width end, set = function(widget, v) s.Width = v; apply(key) end })
+            add({ Type = "Slider", label = "Height", min = 10, max = 500, step = 1,
+                tooltip = tip("Height", "Height of the Aura Tracking icons"),
+                get = function() return s.Height end, set = function(widget, v) s.Height = v; apply(key) end })
+        end
+        if displayType == "Icon" or displayType == "Bar" and s.BarShowIcon ~= false then
+            add({ Type = "Slider", label = "Zoom", min = 0, max = 100, step = 1,
+                tooltip = tip("Zoom", "Zooms the icon texture inwards"),
+                get = function() return s.Zoom end, set = function(widget, v) s.Zoom = v; apply(key) end })
+        end
+        if not isSingle then
+            add({ Type = "Slider", label = "Max Auras", min = 1, max = 20, step = 1,
+                tooltip = tip("Max Auras", "Maximum number of auras to display"),
+                get = function() return s.Limit end, set = function(widget, v) s.Limit = v; apply(key) end })
+            add({ Type = "Slider", label = "Auras per Row/Column", min = 1, max = 20, step = 1,
+                tooltip = tip("Auras per Row/Column", "Maximum number of aura icons placed in each row or column before the grid grows in its Grid-Grow Direction."),
+                get = function() return s.AurasPerRowColumn or 20 end,
+                set = function(widget, v) s.AurasPerRowColumn = v; apply(key) end })
+            add({ Type = "Dropdown", label = "Grid-Grow Direction", values = GridGrowDirections,
+                tooltip = tip("Grid-Grow Direction", "Direction in which the next grid row or column is placed."),
+                get = function() return s.GridGrowDirection or "UP" end,
+                set = function(widget, v) s.GridGrowDirection = v; apply(key) end })
+            add({ Type = "Slider", label = "Grid-Spacing", min = -5, max = 50, step = 1,
+                tooltip = tip("Grid-Spacing", "Spacing between rows or columns in the Aura Tracking grid."),
+                get = function() return s.GridSpacing ~= nil and s.GridSpacing or s.Spacing end,
+                set = function(widget, v) s.GridSpacing = v; apply(key) end })
+        end
         local isCotankTracking = key == "Tank" or (s.Unit and string.lower(strtrim(s.Unit)) == "cotank")
         if isCotankTracking then
             add({ Type = "Checkbox", label = "Only show first tank",
@@ -1097,33 +1244,39 @@ local function BuildAuraTrackingUI(screen)
             tooltip = tip("Sort Order", "Default uses Blizzard's aura order, which usually follows application order and uses the aura instance ID as a final tie-breaker. Long Duration first shows the longest remaining aura first. Short Duration first shows the shortest remaining aura first. Aura Instance ID sorts only by aura instance ID."),
             get = function() return s.SortMode or "AuraInstanceID" end, set = function(_, v) s.SortMode = v or "AuraInstanceID"; apply(key) end })
 
-        add({ Type = "Label", text = "Icon", highlight = true })
-        add({ Type = "Slider", label = "Border Size", min = 0, max = 10, step = 1,
-            tooltip = tip("Border Size", "Size of the black border around tracked aura icons. Set to 0 to disable it."),
-            get = function() return s.BorderSize end, set = function(_, v) s.BorderSize = v; apply(key) end })
-        add({ Type = "Color", label = "Border Color",
-            tooltip = tip("Border Color", "Color of the border around tracked aura icons."),
-            get = function() return unpack(s.BorderColor) end, set = function(_, r, g, b, a) s.BorderColor = {r, g, b, a}; apply(key) end })
-        add({ Type = "Dropdown", label = "Border Behavior", values = BORDER_SWIPE_MODES,
-            tooltip = tip("Border Behavior", "Choose whether the regular and dispel borders remain fully visible or follow the cooldown swipe."),
-            get = function() return s.BorderSwipeMode or "Static" end,
-            set = function(_, v) s.BorderSwipeMode = v or "Static"; apply(key) end })
-        if key ~= "External" then
-            add({ Type = "Dropdown", label = "Dispel Border", values = DISPEL_BORDER_MODES,
-                tooltip = tip("Dispel Border", "Select a colored border, a colored border with a dispel icon, an icon without a border, or no dispel indicator."),
-                get = function() return s.DispelBorderMode end,
-                set = function(_, v) s.DispelBorderMode = v; apply(key) end })
-            add({ Type = "Slider", label = "Dispel Border Size", min = 0, max = 10, step = 1,
-                tooltip = tip("Dispel Border Size", "Size of the colored dispel border. Set to 0 to disable it."),
-                get = function() return s.DispelBorderSize ~= nil and s.DispelBorderSize or 3 end,
-                set = function(_, v) s.DispelBorderSize = v; apply(key) end })
+        if displayType == "Icon" or displayType == "Bar" then
+            add({ Type = "Label", text = "Border", highlight = true })
+            add({ Type = "Slider", label = "Border Size", min = 0, max = 10, step = 1,
+                tooltip = tip("Border Size", "Size of the black border around tracked aura icons. Set to 0 to disable it."),
+                get = function() return s.BorderSize end, set = function(widget, v) s.BorderSize = v; apply(key) end })
+            add({ Type = "Color", label = "Border Color",
+                tooltip = tip("Border Color", "Color of the border around tracked aura icons."),
+                get = function() return unpack(s.BorderColor) end, set = function(widget, r, g, b, a) s.BorderColor = {r, g, b, a}; apply(key) end })
         end
-        add({ Type = "Checkbox", label = "Enable Cooldown Swipe",
-            tooltip = tip("Enable Cooldown Swipe", "Shows a cooldown swipe on tracked aura icons."),
-            get = function() return s.EnableCooldownSwipe end, set = function(_, v) s.EnableCooldownSwipe = v; apply(key) end })
-        add({ Type = "Checkbox", label = "Inverse Cooldown Swipe",
-            tooltip = tip("Inverse Cooldown Swipe", "Reverses the cooldown swipe direction on tracked aura icons."),
-            get = function() return s.InverseCooldownSwipe end, set = function(_, v) s.InverseCooldownSwipe = v; apply(key) end })
+        if displayType == "Icon" then
+            add({ Type = "Dropdown", label = "Border Behavior", values = BORDER_SWIPE_MODES,
+                tooltip = tip("Border Behavior", "Choose whether the regular and dispel borders remain fully visible or follow the cooldown swipe."),
+                get = function() return s.BorderSwipeMode or "Static" end,
+                set = function(widget, v) s.BorderSwipeMode = v or "Static"; apply(key) end })
+            if key ~= "External" then
+                add({ Type = "Dropdown", label = "Dispel Border", values = DISPEL_BORDER_MODES,
+                    tooltip = tip("Dispel Border", "Select a colored border, a colored border with a dispel icon, an icon without a border, or no dispel indicator."),
+                    get = function() return s.DispelBorderMode end,
+                    set = function(widget, v) s.DispelBorderMode = v; apply(key) end })
+                add({ Type = "Slider", label = "Dispel Border Size", min = 0, max = 10, step = 1,
+                    tooltip = tip("Dispel Border Size", "Size of the colored dispel border. Set to 0 to disable it."),
+                    get = function() return s.DispelBorderSize ~= nil and s.DispelBorderSize or 3 end,
+                    set = function(widget, v) s.DispelBorderSize = v; apply(key) end })
+            end
+        end
+        if displayType == "Icon" or displayType == "Circle" then
+            add({ Type = "Checkbox", label = "Enable Cooldown Swipe",
+                tooltip = tip("Enable Cooldown Swipe", "Shows a cooldown swipe on tracked aura icons."),
+                get = function() return s.EnableCooldownSwipe end, set = function(widget, v) s.EnableCooldownSwipe = v; apply(key) end })
+            add({ Type = "Checkbox", label = "Inverse Cooldown Swipe",
+                tooltip = tip("Inverse Cooldown Swipe", "Reverses the cooldown swipe direction on tracked aura icons."),
+                get = function() return s.InverseCooldownSwipe end, set = function(widget, v) s.InverseCooldownSwipe = v; apply(key) end })
+        end
         add({ Type = "Checkbox", label = "Disable Tooltip",
             tooltip = tip("Disable Tooltip", "Hide tooltips on mouseover. The frame will be clickthrough regardless."),
             get = function() return s.HideTooltip end, set = function(_, v) s.HideTooltip = v; apply(key) end })
@@ -1150,6 +1303,71 @@ local function BuildAuraTrackingUI(screen)
         add({ Type = "Dropdown", label = "Text Outline", values = FontFlags,
             tooltip = tip("Text Outline", "Outline style used for duration and stack text"),
             get = function() return s.TextFontFlags end, set = function(_, v) s.TextFontFlags = v; apply(key) end })
+
+        if displayType == "Text" or displayType == "Bar" then
+            add({ Type = "Label", text = "Aura Name Text", highlight = true })
+            add({ Type = "Checkbox", label = "Show Aura Name",
+                get = function() return s.AuraNameEnabled end,
+                set = function(widget, v) s.AuraNameEnabled = v; apply(key); RebuildCurrentTab() end })
+            if s.AuraNameEnabled then
+                add({ Type = "Slider", label = "Font Size", min = 6, max = 80, step = 1,
+                    get = function() return s.AuraNameFontSize or 24 end,
+                    set = function(widget, v) s.AuraNameFontSize = v; apply(key) end })
+                add({ Type = "Color", label = "Text Color",
+                    get = function() return unpack(s.AuraNameColor or {1, 1, 1, 1}) end,
+                    set = function(widget, r, g, b, a) s.AuraNameColor = {r, g, b, a}; apply(key) end })
+                add({ Type = "Dropdown", label = "Text Anchor Point", values = TextAnchorPoints,
+                    get = function() return s.AuraNameAnchorPoint or (displayType == "Bar" and "LEFT" or "CENTER") end,
+                    set = function(widget, v) s.AuraNameAnchorPoint = v; apply(key) end })
+                add({ Type = "Slider", label = "Text X-Offset", min = -500, max = 500, step = 1,
+                    get = function() return s.AuraNameXOffset or 0 end,
+                    set = function(widget, v) s.AuraNameXOffset = v; apply(key) end })
+                add({ Type = "Slider", label = "Text Y-Offset", min = -500, max = 500, step = 1,
+                    get = function() return s.AuraNameYOffset or 0 end,
+                    set = function(widget, v) s.AuraNameYOffset = v; apply(key) end })
+            end
+        end
+
+        s.CustomTexts = s.CustomTexts or {}
+        for index = 1, 2 do
+            s.CustomTexts[index] = s.CustomTexts[index] or NSI:CreateAuraTrackingSettingsDefaults({DisplayType = displayType}).CustomTexts[index]
+            local textSettings = s.CustomTexts[index]
+            local label = "Custom Text " .. index
+            add({ Type = "Label", text = label, highlight = true })
+            add({ Type = "Checkbox", label = "Enable Custom Text",
+                get = function() return textSettings.Enabled end,
+                set = function(widget, v) textSettings.Enabled = v; apply(key); RebuildCurrentTab() end })
+            if textSettings.Enabled then
+                add({ Type = "Label", text = "Text" })
+                add({ Type = "TextEntry",
+                    get = function() return textSettings.Text or "" end,
+                    set = function(widget, v) textSettings.Text = v; apply(key) end })
+                add({ Type = "Dropdown", label = "Text Font", values = BuildFontValues,
+                    get = function() return textSettings.Font or s.TextFont end,
+                    set = function(widget, v) textSettings.Font = v; apply(key) end })
+                add({ Type = "Dropdown", label = "Text Outline", values = FontFlags,
+                    get = function() return textSettings.FontFlags or s.TextFontFlags end,
+                    set = function(widget, v) textSettings.FontFlags = v; apply(key) end })
+                add({ Type = "Slider", label = "Font Size", min = 6, max = 100, step = 1,
+                    get = function() return textSettings.FontSize or 24 end,
+                    set = function(widget, v) textSettings.FontSize = v; apply(key) end })
+                add({ Type = "Color", label = "Text Color",
+                    get = function() return unpack(textSettings.Color or {1, 1, 1, 1}) end,
+                    set = function(widget, r, g, b, a) textSettings.Color = {r, g, b, a}; apply(key) end })
+                add({ Type = "Dropdown", label = "Text Anchor Point", values = TextAnchorPoints,
+                    get = function() return textSettings.Anchor or "CENTER" end,
+                    set = function(widget, v) textSettings.Anchor = v; apply(key) end })
+                add({ Type = "Dropdown", label = "Relative Point", values = TextAnchorPoints,
+                    get = function() return textSettings.relativeTo or "CENTER" end,
+                    set = function(widget, v) textSettings.relativeTo = v; apply(key) end })
+                add({ Type = "Slider", label = "Text X-Offset", min = -500, max = 500, step = 1,
+                    get = function() return textSettings.XOffset or 0 end,
+                    set = function(widget, v) textSettings.XOffset = v; apply(key) end })
+                add({ Type = "Slider", label = "Text Y-Offset", min = -500, max = 500, step = 1,
+                    get = function() return textSettings.YOffset or 0 end,
+                    set = function(widget, v) textSettings.YOffset = v; apply(key) end })
+            end
+        end
 
         add({ Type = "Label", text = "Duration Text", highlight = true })
         add({ Type = "Checkbox", label = "Hide Duration Text",
@@ -1260,6 +1478,27 @@ local function BuildAuraTrackingUI(screen)
             add({ Type = "Label", text = "Aura Matrix Label Settings", highlight = true })
             add({ Type = "Slider", label = "Name Font Size", min = 6, max = 80, step = 1,
                 get = function() return s.NameFontSize end, set = function(_, v) s.NameFontSize = v; apply(key) end })
+        end
+        if attachmentGroup then
+            local inheritedControls = {
+                ["Multi-Tank Grow"] = true, ["Multi-Tank X-Offset"] = true, ["Multi-Tank Y-Offset"] = true,
+            }
+            if isAttached then
+                inheritedControls["Position Settings"] = true
+                inheritedControls["Anchor Point"] = true
+                inheritedControls["Relative Point"] = true
+                inheritedControls["X-Offset"] = true
+                inheritedControls["Y-Offset"] = true
+                inheritedControls["Grow Direction"] = true
+                inheritedControls["Spacing"] = true
+                inheritedControls["Auras per Row/Column"] = true
+                inheritedControls["Grid-Grow Direction"] = true
+                inheritedControls["Grid-Spacing"] = true
+            end
+            for index = #defs, 1, -1 do
+                local def = defs[index]
+                if inheritedControls[def.label or def.text] then table.remove(defs, index) end
+            end
         end
         return defs
     end
@@ -1382,6 +1621,10 @@ local function BuildAuraTrackingUI(screen)
     end
 
     local function BuildTriggerDefs(s, key)
+        if NSI.AuraTrackingBossBuiltins[s.builtin] then
+            return { { Type = "Label", text = "This built-in display uses encounter-specific aura tracking. Its trigger is controlled by the addon and cannot be edited or copied.",
+                height = 58, textColor = {0.9, 0.9, 0.9, 1} } }
+        end
         if key == "AuraMatrix" then
             return { { Type = "Label", text = "Aura Matrix tracks ten HARMFUL filters for both player and target. Display settings and the position apply to all twenty rows. Each row always shows its filter label. Use Lock Preview to move the entire matrix.",
                 height = 72, textColor = {0.9, 0.9, 0.9, 1} } }
@@ -1575,9 +1818,17 @@ local function BuildAuraTrackingUI(screen)
         local search = string.lower(displaySearchText)
         if activeTab == "Display" then
             local showAnchor = search == "" or string.find(string.lower(NSI:Loc("Anchor Frame")), search, 1, true) ~= nil
+            local showAttach = selectedKey ~= "AuraMatrix" and (search == "" or string.find(string.lower(NSI:Loc("Attach to")), search, 1, true) ~= nil)
             anchorLbl:SetShown(showAnchor)
             anchorEntry.frame:SetShown(showAnchor)
-            topPad = showAnchor and DISPLAY_TOP or 0
+            topPad = displayTypeHeight + (showAnchor and DISPLAY_TOP or 0)
+            attachLbl:SetShown(showAttach)
+            attachEntry.frame:SetShown(showAttach)
+            attachLbl:ClearAllPoints()
+            attachLbl:SetPoint("TOPLEFT", displayF, "TOPLEFT", 0, -topPad)
+            attachEntry.frame:ClearAllPoints()
+            attachEntry:SetPoint("TOPLEFT", displayF, "TOPLEFT", 0, -topPad - 18)
+            if showAttach then topPad = topPad + DISPLAY_TOP end
         end
         local defs = DEF_BUILDERS[activeTab](settings, selectedKey)
         if activeTab == "Display" and search ~= "" then
@@ -1645,7 +1896,13 @@ local function BuildAuraTrackingUI(screen)
     loadChild:SetBackdropColor(0.04, 0.04, 0.04, 0.85)
     loadScroll:SetScrollChild(loadChild)
 
-    local loadCollapsed = { Roles = true, Classes = true, Specs = true, Encounters = true }
+    local lockedEncounterLabel = loadChild:CreateFontString(nil, "OVERLAY")
+    NSI:SetUIFont(lockedEncounterLabel, 12, "")
+    lockedEncounterLabel:SetPoint("TOPLEFT", loadChild, "TOPLEFT", 4, -2)
+    lockedEncounterLabel:SetTextColor(1, 0.82, 0, 1)
+    lockedEncounterLabel:Hide()
+
+    local loadCollapsed = { Roles = true, Classes = true, Specs = true, Encounters = true, Difficulties = true }
     local loadRowW = tabScrollW - 22
     local hdrPool, chkPool = {}, {}
 
@@ -1876,6 +2133,7 @@ local function BuildAuraTrackingUI(screen)
     end)
 
     RebuildLoadTab = function()
+        lockedEncounterLabel:Hide()
         for _, h in ipairs(hdrPool) do h:Hide() end
         for _, r in ipairs(chkPool) do r:Hide() end
         if not selectedKey then
@@ -1889,7 +2147,7 @@ local function BuildAuraTrackingUI(screen)
         end
         s.loadConditions = s.loadConditions or {}
         local cond = s.loadConditions
-        cond.Roles = cond.Roles or {}; cond.Classes = cond.Classes or {}; cond.SpecIDs = cond.SpecIDs or {}; cond.Names = cond.Names or {}; cond.EncounterIDs = cond.EncounterIDs or {}
+        cond.Roles = cond.Roles or {}; cond.Classes = cond.Classes or {}; cond.SpecIDs = cond.SpecIDs or {}; cond.Names = cond.Names or {}; cond.EncounterIDs = cond.EncounterIDs or {}; cond.Difficulties = cond.Difficulties or {}
 
         local chkIdx = 0
         local function CountSel(tbl) local n = 0; for _ in pairs(tbl) do n = n + 1 end; return n end
@@ -1929,7 +2187,13 @@ local function BuildAuraTrackingUI(screen)
         end
 
         local y = 0
-        if not s.builtin then
+        local bossBuiltin = NSI.AuraTrackingBossBuiltins[s.builtin]
+        if bossBuiltin then
+            local encounterName = NSI:Loc(NSI.BossNames[bossBuiltin.encounterID] or tostring(bossBuiltin.encounterID))
+            lockedEncounterLabel:SetText(string.format(NSI:Loc("Encounter: %s (locked)"), encounterName))
+            lockedEncounterLabel:Show()
+            y = y + 24
+        elseif not s.builtin then
             local encounterData = BossData.BuildBossDropdownOptions(nil, false)
             y = LoadSection(y, "Encounters", NSI:Loc("Encounters (leave all unchecked for any encounter)"), CountSel(cond.EncounterIDs))
             if not loadCollapsed.Encounters then
@@ -1938,6 +2202,19 @@ local function BuildAuraTrackingUI(screen)
                     y = AddCheck(y, encounter.label, cond.EncounterIDs[encounterID],
                         function() cond.EncounterIDs[encounterID] = (not cond.EncounterIDs[encounterID]) or nil end,
                         0.2, 0.8, 1, encounter.icon, encounter.texcoord)
+                end
+            end
+            y = y + 4
+        end
+        if next(cond.EncounterIDs) then
+            y = LoadSection(y, "Difficulties", NSI:Loc("Difficulties (leave all unchecked for any difficulty)"), CountSel(cond.Difficulties))
+            if not loadCollapsed.Difficulties then
+                for difficultyIndex = 1, #DifficultyData do
+                    local difficulty = DifficultyData[difficultyIndex]
+                    local difficultyID = difficulty.id
+                    y = AddCheck(y, NSI:Loc(difficulty.label), cond.Difficulties[difficultyID],
+                        function() cond.Difficulties[difficultyID] = (not cond.Difficulties[difficultyID]) or nil end,
+                        difficulty.color[1], difficulty.color[2], difficulty.color[3])
                 end
             end
             y = y + 4
@@ -1978,6 +2255,10 @@ local function BuildAuraTrackingUI(screen)
 
     -- ── Tab dispatch ─────────────────────────────────────────────────────────
     RebuildCurrentTab = function()
+        local settings = selectedKey and NSI:GetAuraTrackingSettings(selectedKey)
+        for displayType, button in pairs(displayTypeButtons) do
+            if settings and (settings.DisplayType or "Icon") == displayType then button:Select() else button:Deselect() end
+        end
         if activeTab == "Load" then RebuildLoadTab() else RebuildWidgetTab() end
     end
 
@@ -2217,9 +2498,11 @@ local function BuildAuraTrackingUI(screen)
         if not settings then StopAutoPreview(key); SetSelectedKey(nil); rightPanel:Hide(); RebuildList(); return end
         rightPanel:Show()
         nameEntry:SetValue(settings.builtin and NSI:Loc(settings.Name or "") or (settings.Name or ""))
-        nameEntry.editBox:SetEnabled(not settings.builtin)
-        nameEntry.editBox:SetAlpha(settings.builtin and 0.5 or 1)
+        local nameEditable = not settings.builtin or NSI.AuraTrackingBossBuiltins[settings.builtin] ~= nil
+        nameEntry.editBox:SetEnabled(nameEditable)
+        nameEntry.editBox:SetAlpha(nameEditable and 1 or 0.5)
         anchorEntry:SetValue(settings.CustomAnchorFrame or "UIParent")
+        attachEntry:SetValue(settings.AttachTo or "")
         groupDD:Refresh()
         SelectInnerTab(activeTab)
         RebuildList()
@@ -2232,6 +2515,7 @@ local function BuildAuraTrackingUI(screen)
         RebuildList()
         if selectedKey and NSI:GetAuraTrackingSettings(selectedKey) then
             if anchorEntry then anchorEntry:SetValue(NSI:GetAuraTrackingSettings(selectedKey).CustomAnchorFrame or "UIParent") end
+            if attachEntry then attachEntry:SetValue(NSI:GetAuraTrackingSettings(selectedKey).AttachTo or "") end
             RebuildCurrentTab()
         elseif rightPanel then
             StopAutoPreview(selectedKey)

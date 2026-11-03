@@ -345,8 +345,28 @@ local function BuildEncounterAlertsUI(parentFrame)
     searchEntry.editBox:HookScript("OnEditFocusGained", function(self) UpdateSearchHint(self) end)
     searchEntry.editBox:HookScript("OnEditFocusLost",   function(self) UpdateSearchHint(self) end)
 
+    local reloeImportCB = CreateCheckButton(screen, NSI:Loc("Automatically Enable New Alerts"),
+        function() return NSRT.Alerts.ReloeReminders end,
+        function(_, v)
+            local wasEnabled = NSRT.Alerts.ReloeReminders == true
+            NSRT.Alerts.ReloeReminders = v
+            if v and not wasEnabled then
+                NSI:PromptReloeReminderImport(function()
+                    RebuildList()
+                    if selectedEncID and selectedKey then
+                        SelectAlert(selectedKey, selectedDiffID or filterDiffID, selectedEncID)
+                    end
+                end)
+            end
+            RebuildList()
+        end,
+        leftWidth - pad * 2, 22, "NSUIEncAlertReloeImportCB")
+    reloeImportCB:SetLocaleKey("Automatically Enable New Alerts")
+    reloeImportCB:SetPoint("TOPLEFT", screen, "TOPLEFT", pad, topY - 20 - 22 - 4 - 22 - 6)
+    NSI:SetUIFont(reloeImportCB.label, 11, "")
+
     -- ── Native ScrollFrame list ─────────────────────────────────────────────
-    local scrollTop    = topY - 20 - 22 - 4 - 22 - 6   -- below title + filter row + search + gaps = -84
+    local scrollTop    = topY - 20 - 22 - 4 - 22 - 6 - 26
     local scrollHeight = tab_content_height + scrollTop - 18 - pad * 2 - 20 - 20 - 2  -- extra rows: import/export(18+2), additional-options(18+2)
     local listW        = leftWidth - pad * 2   -- 220
 
@@ -1081,14 +1101,19 @@ local function BuildEncounterAlertsUI(parentFrame)
                                   items = groupSubItems },
                             }
 
+                            if UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") then
+                                table.insert(menuItems, { type = "button", label = NSI:Loc("Raid Version Check"), fnc = function()
+                                    if not (UnitIsGroupLeader("player") or UnitIsGroupAssistant("player")) then return end
+                                    NSUI.MenuFrame:SelectTabByName("Versions")
+                                    NSUI.version_scrollbox:CheckEncounterAlert(eid, did, alert.internalID or akey)
+                                end })
+                            end
+
                             if isReloeRow then
                                 table.insert(menuItems, { type = "button", label = NSI:Loc("Reset"), fnc = function()
                                     local diffTable = NSRT.EncounterAlerts and NSRT.EncounterAlerts[eid] and NSRT.EncounterAlerts[eid][did]
                                     if diffTable then diffTable[akey] = nil end
                                     NSI:ImportReloeReminders(eid)
-                                    if NSRT.Alerts.Language ~= "enUS" then
-                                        NSI:TranslateAllEncounterAlerts(NSRT.Alerts.Language)
-                                    end
                                     RebuildList()
                                     local stillExists = NSRT.EncounterAlerts and NSRT.EncounterAlerts[eid]
                                                     and NSRT.EncounterAlerts[eid][did]
@@ -1291,29 +1316,10 @@ local function BuildEncounterAlertsUI(parentFrame)
     local ADDOPT_PAD = 12
     local ADDOPT_W   = listW + ADDOPT_PAD * 2 + 10
     local ADDOPT_INNER_W = ADDOPT_W - ADDOPT_PAD * 2
-    local ADDOPT_H   = 300
+    local ADDOPT_H   = 270
     local addOptFrame = CreateStyledFrame(NSUI, ADDOPT_W, ADDOPT_H, "NSRTEncAlertAddOptFrame")
     addOptFrame:SetPoint("TOPLEFT", NSUI, "TOPRIGHT", 4, 0)
     addOptFrame:Hide()
-
-    local reloeImportCB = CreateCheckButton(addOptFrame, NSI:Loc("Automatically Enable New Alerts"),
-        function() return NSRT.Alerts.ReloeReminders end,
-        function(_, v)
-            local wasEnabled = NSRT.Alerts.ReloeReminders == true
-            NSRT.Alerts.ReloeReminders = v
-            if v and not wasEnabled then
-                NSI:PromptReloeReminderImport(function()
-                    RebuildList()
-                    if selectedEncID and selectedKey then
-                        SelectAlert(selectedKey, selectedDiffID or filterDiffID, selectedEncID)
-                    end
-                end)
-            end
-            RebuildList()
-        end,
-        ADDOPT_INNER_W, 22, "NSUIEncAlertReloeImportCB")
-    reloeImportCB:SetLocaleKey("Automatically Enable New Alerts")
-    reloeImportCB:SetPoint("TOPLEFT", addOptFrame, "TOPLEFT", ADDOPT_PAD, -30)
 
     local importSelectedBossBtn = CreateLocalizedButton(addOptFrame, "Import Selected Boss Alerts", function()
         if not filterEncID or filterEncID == 0 then
@@ -1326,7 +1332,7 @@ local function BuildEncounterAlertsUI(parentFrame)
             SelectAlert(selectedKey, selectedDiffID or filterDiffID, selectedEncID)
         end
     end, ADDOPT_INNER_W, 22)
-    importSelectedBossBtn:SetPoint("TOPLEFT", reloeImportCB.frame, "BOTTOMLEFT", 0, -8)
+    importSelectedBossBtn:SetPoint("TOPLEFT", addOptFrame, "TOPLEFT", ADDOPT_PAD, -30)
 
     local fullResetBtn = CreateLocalizedButton(addOptFrame, "Full Reset", function()
         local function DoReset()
@@ -1341,9 +1347,6 @@ local function BuildEncounterAlertsUI(parentFrame)
                 end
             end
             NSI:ImportReloeReminders()
-            if NSRT.Alerts.Language ~= "enUS" then
-                NSI:TranslateAllEncounterAlerts(NSRT.Alerts.Language)
-            end
             RebuildList()
             if selectedEncID and selectedKey then
                 SelectAlert(selectedKey, selectedDiffID or filterDiffID, selectedEncID)
@@ -1412,16 +1415,6 @@ local function BuildEncounterAlertsUI(parentFrame)
             zhTW = { text = "繁體中文",       font = "Fonts\\ARHei.ttf" },
         }
 
-        local function ApplyAlertLanguage(locale)
-            NSI:TranslateAllEncounterAlerts(locale)
-            NSRT.Alerts.Language = locale
-        end
-
-        if NSRT.Alerts.Language == "Auto" then
-            local locale = GetLocale()
-            NSRT.Alerts.Language = languagesAvailable[locale] and locale or "enUS"
-        end
-
         local languageLabel = CreateLabel(addOptFrame, NSI:Loc("Alerts Language"), ADDOPT_INNER_W, 16)
         languageLabel:SetPoint("TOPLEFT", disableAllBtn.frame, "BOTTOMLEFT", 0, -8)
 
@@ -1433,7 +1426,8 @@ local function BuildEncounterAlertsUI(parentFrame)
                 local info = languagesAvailable[locale]
                 local loc = locale
                 table.insert(opts, { label = info.text, font = info.font, value = loc, onclick = function()
-                    ApplyAlertLanguage(loc)
+                    NSRT.Alerts.Language = loc
+                    NSI:TranslateAllEncounterAlerts(loc)
                     RebuildList()
                     if selectedEncID and selectedKey then
                         SelectAlert(selectedKey, selectedDiffID or filterDiffID, selectedEncID)
@@ -1443,7 +1437,7 @@ local function BuildEncounterAlertsUI(parentFrame)
             return opts
         end
         local function getLanguageSelected()
-            local lang = NSRT.Alerts.Language
+            local lang = NSI:GetEncounterAlertLanguage()
             return languagesAvailable[lang] and languagesAvailable[lang].text or languagesAvailable.enUS.text
         end
         local languageDD = CreateDropdown(addOptFrame, nil, BuildLanguageOptions, getLanguageSelected,
@@ -2794,18 +2788,18 @@ end]]
     local timeRowH  = 22
     local timeRows  = {}
 
-    RebuildTimeRows = function()
+    RebuildTimeRows = function(alert)
         for _, row in ipairs(timeRows) do row:Hide() end
-        if not trigF._alert then return end
+        if not alert then return end
         local rows = {}
-        if trigF._alert.phaseTimers then
-            for _, phase in ipairs(NSI:GetSortedPhaseKeys(trigF._alert.phaseTimers)) do
-                for timeIndex, time in ipairs(trigF._alert.phaseTimers[phase] or {}) do
+        if alert.phaseTimers then
+            for _, phase in ipairs(NSI:GetSortedPhaseKeys(alert.phaseTimers)) do
+                for timeIndex, time in ipairs(alert.phaseTimers[phase] or {}) do
                     rows[#rows + 1] = {phase = phase, timeIndex = timeIndex, time = time}
                 end
             end
         else
-            for timeIndex, time in ipairs(trigF._alert.timers or {}) do
+            for timeIndex, time in ipairs(alert.timers or {}) do
                 rows[#rows + 1] = {timeIndex = timeIndex, time = time}
             end
         end
@@ -2853,7 +2847,7 @@ end]]
                         table.remove(trigF._alert.timers, rowData.timeIndex)
                         NSI:SaveAlertData(trigF._alert, "timers", trigF._alert.timers)
                     end
-                    RebuildTimeRows()
+                    RebuildTimeRows(trigF._alert)
                 end
             end)
 
@@ -2906,7 +2900,7 @@ end]]
                 NSI:SaveAlertData(trigF._alert, "timers", trigF._alert.timers)
             end
             addTimeEntry:SetValue("")
-            RebuildTimeRows()
+            RebuildTimeRows(trigF._alert)
         end
     end
 
@@ -2935,7 +2929,7 @@ end]]
             NSI:SaveAlertData(trigF._alert, "phaseTimers", nil)
         end
         RefreshPhaseSpecificControls()
-        RebuildTimeRows()
+        RebuildTimeRows(trigF._alert)
     end, 190, 22, "NSUIEncAlertPhaseSpecificTimers",
         { title = "Phase-specific timers", desc = "When enabled, adding new timers will add them for the specified phase on the right." })
     phaseSpecificCB:SetPoint("LEFT", addTimeBtn.frame, "RIGHT", 8, 0)
@@ -4285,7 +4279,7 @@ end]]
         trigF.phaseSpecificCB:SetValue(entry.phaseTimers ~= nil)
         trigF.phaseSpecificEntry:SetValue(tostring(NSI:GetPrimaryPhase(entry.phase) or 1))
         if trigF.RefreshPhaseSpecificControls then trigF.RefreshPhaseSpecificControls() end
-        trigF.RebuildTimeRows()
+        trigF.RebuildTimeRows(entry)
         trigF.conditionBtn:SetText(NSI:Loc(entry.isConditional and "Edit Condition" or "Add Condition"))
         trigF.encounterStartCodeBtn:SetText(NSI:Loc(entry.onEncounterStart and "Edit Encounter Start Code" or "Add Encounter Start Code"))
         trigF.encounterEndCodeBtn:SetText(NSI:Loc(entry.onEncounterEnd and "Edit Encounter End Code" or "Add Encounter End Code"))

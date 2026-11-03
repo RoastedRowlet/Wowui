@@ -178,6 +178,7 @@ local KEY_PREFIX_FOLDER = {
     ["ERB_"]   = "EllesmereUIResourceBars",
     ["ECHAT_"] = "EllesmereUIChat",
     ["EBS_"]   = "EllesmereUIMinimap",
+    ["EQT_"]   = "EllesmereUIQuestTracker",
     ["EDR_"]   = "EllesmereUIBlizzardSkin",
     ["EMT_"]   = "EllesmereUIMythicTimer",
     ["EABR_"]  = "EllesmereUIAuraBuffReminders",
@@ -2068,6 +2069,8 @@ do
         "tooltipItemLevel", "tooltipMythicScore", "tooltipShowMount",
         "tooltipShowGuildRank", "tooltipShowTarget", "tooltipShowMode",
         "tooltipShowModifier", "tooltipGrowthDirection",
+        "tooltipLevelColor", "tooltipClassLineColor", "tooltipFactionColor",
+        "tooltipGuildmateColor", "tooltipCompactLevel", "tooltipAFKTag",
         "uberTooltips", "uberTooltipsManual", "tooltipHideHealthStrip",
         "tooltipHealthStripTexture", "tooltipHealthStripHeight",
         "tooltipAnchorCursor", "tooltipCursorPosition",
@@ -2114,7 +2117,7 @@ do
         "reskinTrainer", "reskinGossip", "reskinQuest", "reskinInspectRecipe",
         "reskinDelves", "reskinSocialUI",
         "reskinQueueStatus", "reskinDelvePicker", "reskinPlayerChoice",
-        "reskinTrade",
+        "reskinTrade", "reskinFlagCarriers",
         -- The per-look window slots ride with the enables they describe.
         "windowSkinStyleSlots",
         "blizzWindowSkinStyles", "blizzWindowModernDefault",
@@ -2144,7 +2147,9 @@ do
         -- LFG / Merchant / Mail cards
         "lfgRememberRoles",
         "merchantShowAsList", "merchantListRowHeight", "merchantShowItemLevel", "merchantBulkBuy",
+        "merchantExpand", "merchantCols", "merchantRows",
         "mailAltList", "mailAltListMax", "mailAltListMinLevel", "mailAltListSort",
+        "mailCloseBags",
         -- Friends List card (WoW Forever: the friend tiles and auto-accept)
         "friendsListCard",
     })

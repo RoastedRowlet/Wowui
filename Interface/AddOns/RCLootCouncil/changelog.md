@@ -1,3 +1,9 @@
+# 3.24.1
+
+## Bugfixes
+
+- *Fixed secret value error related to whispers.*
+
 # 3.24.0
 
 Updated for patch 12.1.5.

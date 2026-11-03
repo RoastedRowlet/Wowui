@@ -17,28 +17,29 @@ local function T(key)
     return NSI:Loc(key)
 end
 
--- Version check state
-local component_type = "Addon"
-local checkable_components = {"Addon", "Note", "Reminder"}
+local checkable_components = {"Addon", "Note", "Reminder", "Encounter Alert"}
 
-local function build_checkable_components_options()
+local function build_checkable_components_options(onSelect, forPresets)
     local t = {}
     for i = 1, #checkable_components do
-        tinsert(t, {
-            label = T(checkable_components[i]),
-            phraseId = checkable_components[i],
-            value = checkable_components[i],
-            onclick = function(_, _, value)
-                component_type = value
-            end
-        })
+        if not forPresets or checkable_components[i] ~= "Encounter Alert" then
+            tinsert(t, {
+                label = T(checkable_components[i]),
+                phraseId = checkable_components[i],
+                value = checkable_components[i],
+                onclick = function(dropdown, fixedValue, value)
+                    if onSelect then onSelect(value) end
+                end
+            })
+        end
     end
     return t
 end
 
-local component_name = ""
-
 local function BuildVersionCheckUI(parent)
+    local UpdateComponentType
+    local selectedEncID, selectedAlertID
+    local selectedDiffID = 16
 
     local hide_version_response_button = DF:CreateSwitch(parent,
         function(self, _, value) NSRT.Settings["VersionCheckRemoveResponse"] = value end,
@@ -55,7 +56,9 @@ local function BuildVersionCheckUI(parent)
     local component_type_label = DF:CreateLabel(parent, T("Component Type"), 9.5, "white")
     component_type_label:SetPoint("TOPLEFT", parent, "TOPLEFT", 10, -40)
 
-    local component_type_dropdown = DF:CreateDropDown(parent, function() return build_checkable_components_options() end, checkable_components[1])
+    local component_type_dropdown = DF:CreateDropDown(parent, function()
+        return build_checkable_components_options(function() UpdateComponentType() end)
+    end, checkable_components[1], 140)
     component_type_dropdown.addonId = addonId
     component_type_dropdown:Select(checkable_components[1])
     component_type_dropdown:SetTemplate(options_dropdown_template)
@@ -64,7 +67,7 @@ local function BuildVersionCheckUI(parent)
     local component_name_label = DF:CreateLabel(parent, T("Addon Name"), 9.5, "white")
     component_name_label:SetPoint("LEFT", component_type_dropdown, "RIGHT", 10, 0)
 
-    local component_name_entry = DF:CreateTextEntry(parent, function(_, _, value) component_name = value end, 250, 18)
+    local component_name_entry = DF:CreateTextEntry(parent, function() end, 250, 18)
     component_name_entry:SetTemplate(options_button_template)
     component_name_entry:SetPoint("LEFT", component_name_label, "RIGHT", 5, 0)
     component_name_entry:SetHook("OnEditFocusGained", function(self)
@@ -86,6 +89,81 @@ local function BuildVersionCheckUI(parent)
             self:Disable()
         end
     end)
+
+    local encounterSelectors = CreateFrame("Frame", nil, parent)
+    encounterSelectors:SetPoint("TOPLEFT", parent, "TOPLEFT", 10, -68)
+    encounterSelectors:SetSize(content_width - 40, 22)
+    encounterSelectors:Hide()
+
+    local encounterLabel = DF:CreateLabel(encounterSelectors, T("Encounter"), 9.5, "white")
+    encounterLabel:SetPoint("LEFT", encounterSelectors, "LEFT", 0, 0)
+    local alertDropdown
+    local function BuildAlertOptions()
+        local options = {}
+        local alerts = NSRT.EncounterAlerts[selectedEncID] and NSRT.EncounterAlerts[selectedEncID][selectedDiffID]
+        for alertKey, alert in pairs(alerts or {}) do
+            local name = alert.name or T("Unnamed")
+            options[#options + 1] = {
+                label = alert.group and (alert.group .. " - " .. name) or name,
+                value = alert.internalID or alertKey,
+                onclick = function(dropdown, fixedValue, value) selectedAlertID = value end,
+            }
+        end
+        table.sort(options, function(a, b)
+            if a.label == b.label then return a.value < b.value end
+            return a.label < b.label
+        end)
+        return options
+    end
+
+    local function RefreshAlertSelection(internalID)
+        local options = BuildAlertOptions()
+        selectedAlertID = internalID or (options[1] and options[1].value)
+        local selectedIndex
+        for index, option in ipairs(options) do
+            if option.value == selectedAlertID then
+                selectedIndex = index
+                break
+            end
+        end
+        alertDropdown:Refresh()
+        alertDropdown:Select(selectedIndex or false, true)
+    end
+
+    local encounterDropdown = DF:CreateDropDown(encounterSelectors, function()
+        return NSI.UI.BossData.BuildBossDropdownOptions(function(value)
+            selectedEncID = value
+            RefreshAlertSelection()
+        end, false)
+    end, nil, 230)
+    encounterDropdown:SetTemplate(options_dropdown_template)
+    encounterDropdown:SetPoint("LEFT", encounterLabel, "RIGHT", 5, 0)
+
+    local difficultyLabel = DF:CreateLabel(encounterSelectors, T("Difficulty"), 9.5, "white")
+    difficultyLabel:SetPoint("LEFT", encounterDropdown, "RIGHT", 10, 0)
+    local difficultyDropdown = DF:CreateDropDown(encounterSelectors, function()
+        local options = {}
+        for index, difficulty in ipairs({{16, "Mythic"}, {15, "Heroic"}, {14, "Normal"}}) do
+            options[index] = {
+                label = T(difficulty[2]), value = difficulty[1],
+                onclick = function(dropdown, fixedValue, value)
+                    selectedDiffID = value
+                    RefreshAlertSelection()
+                end,
+            }
+        end
+        return options
+    end, selectedDiffID, 100)
+    difficultyDropdown:SetTemplate(options_dropdown_template)
+    difficultyDropdown:SetPoint("LEFT", difficultyLabel, "RIGHT", 5, 0)
+
+    local alertLabel = DF:CreateLabel(encounterSelectors, T("Alert"), 9.5, "white")
+    alertLabel:SetPoint("LEFT", difficultyDropdown, "RIGHT", 10, 0)
+    alertDropdown = DF:CreateDropDown(encounterSelectors, BuildAlertOptions, nil, 300)
+    alertDropdown:SetTemplate(options_dropdown_template)
+    alertDropdown:SetNoOptionsText(T("No alerts available"))
+    alertDropdown:SetEmptyTextAndIcon(T("Alert Missing"))
+    alertDropdown:SetPoint("LEFT", alertLabel, "RIGHT", 5, 0)
 
     local character_name_header = DF:CreateLabel(parent, T("Character Name"), 11)
     character_name_header:SetPoint("TOPLEFT", component_type_label, "BOTTOMLEFT", 10, -20)
@@ -122,7 +200,9 @@ local function BuildVersionCheckUI(parent)
 
                 if version and version == "Offline" then
                     line.version:SetTextColor(0.5, 0.5, 0.5, 1)
-                elseif version and data[1] and data[1].version and version == data[1].version then
+                elseif version == "Alert Missing" then
+                    line.version:SetTextColor(1, 0.65, 0, 1)
+                elseif version and NSI.VersionCheckData and version == NSI.VersionCheckData.version then
                     line.version:SetTextColor(0, 1, 0, 1)
                 else
                     line.version:SetTextColor(1, 0, 0, 1)
@@ -156,7 +236,7 @@ local function BuildVersionCheckUI(parent)
                         end
                     end
                     NSI.VersionCheckData.lastclick[name] = GetTime()
-                    SendChatMessage(message, "WHISPER", nil, name)
+                    if message ~= "" then SendChatMessage(message, "WHISPER", nil, name) end
                 end)
             elseif line then
                 line.name:SetText("")
@@ -237,13 +317,14 @@ local function BuildVersionCheckUI(parent)
     version_check_scrollbox.name_map = {}
     local addData = function(self, data, url)
         local currentData = self:GetData()
-        if self.name_map[data.name] then
-            if NSRT.Settings["VersionCheckRemoveResponse"] and currentData[1] and currentData[1].version and data.version and data.version == currentData[1].version and data.version ~= "Addon Missing" and data.version ~= "Note Missing" and data.version ~= "Reminder Missing" and (not data.ignoreCheck) then
-                local removedIndex = self.name_map[data.name]
-                table.remove(currentData, removedIndex)
-            else
-                currentData[self.name_map[data.name]] = data
-            end
+        local index = self.name_map[data.name]
+        local matches = NSI.VersionCheckData and data.version == NSI.VersionCheckData.version
+        if NSRT.Settings["VersionCheckRemoveResponse"] and matches and data.name ~= UnitName("player")
+            and data.version ~= "Addon Missing" and data.version ~= "Note Missing" and data.version ~= "Reminder Missing"
+            and data.version ~= "Alert Missing" and not data.ignoreCheck then
+            if index then table.remove(currentData, index) end
+        elseif index then
+            currentData[index] = data
         else
             tinsert(currentData, data)
         end
@@ -260,11 +341,44 @@ local function BuildVersionCheckUI(parent)
     version_check_scrollbox.AddData = addData
     version_check_scrollbox.WipeData = wipeData
 
-    version_check_button:SetScript("OnClick", function(self)
+    UpdateComponentType = function()
+        local isEncounterAlert = component_type_dropdown:GetValue() == "Encounter Alert"
+        component_name_label:SetShown(not isEncounterAlert)
+        component_name_entry:SetShown(not isEncounterAlert)
+        encounterSelectors:SetShown(isEncounterAlert)
+        version_number_header:SetText(T(isEncounterAlert and "Enabled Status" or "Version Number"))
+        local extraHeight = isEncounterAlert and 30 or 0
+        character_name_header:ClearAllPoints()
+        character_name_header:SetPoint("TOPLEFT", component_type_label, "BOTTOMLEFT", 10, -20 - extraHeight)
+        version_check_scrollbox:ClearAllPoints()
+        version_check_scrollbox:SetPoint("TOPLEFT", parent, "TOPLEFT", 10, -80 - extraHeight)
+        version_check_scrollbox:SetHeight(tab_content_height - 90 - extraHeight)
+        version_check_scrollbox:SetNumFramesShown(isEncounterAlert and 20 or scrollLines)
+        version_check_scrollbox:Refresh()
+        if isEncounterAlert then
+            if not selectedEncID then
+                local encounters = NSI.UI.BossData.BuildBossDropdownOptions(nil, false)
+                selectedEncID = encounters[1] and encounters[1].value
+            end
+            encounterDropdown:Select(selectedEncID or false)
+            difficultyDropdown:Select(selectedDiffID)
+            RefreshAlertSelection(selectedAlertID)
+        end
+    end
 
+    local function SelectEncounterAlert(encID, diffID, internalID)
+        selectedEncID, selectedDiffID, selectedAlertID = encID, diffID, internalID
+        component_type_dropdown:Select("Encounter Alert")
+        UpdateComponentType()
+    end
+
+    local function RunVersionCheck()
         local text = component_name_entry:GetText()
         local component_type = component_type_dropdown:GetValue()
-        if text and text ~= ""  and component_type ~= "Note" and component_type ~= "Reminder" and not tContains(NSRT.NSUI.AutoComplete[component_type], text) then
+        if component_type == "Encounter Alert" then
+            if not selectedEncID or not selectedDiffID or not selectedAlertID then return end
+            text = selectedAlertID
+        elseif text and text ~= "" and component_type == "Addon" and not tContains(NSRT.NSUI.AutoComplete[component_type], text) then
             tinsert(NSRT.NSUI.AutoComplete[component_type], text)
         end
 
@@ -274,12 +388,18 @@ local function BuildVersionCheckUI(parent)
         if NSI.LastVersionCheck and NSI.LastVersionCheck > now-2 then return end
         NSI.LastVersionCheck = now
         version_check_scrollbox:WipeData()
-        local userData, url = NSI:RequestVersionNumber(component_type, text)
+        local userData, url = NSI:RequestVersionNumber(component_type, text, selectedEncID, selectedDiffID)
         if userData then
-            NSI.VersionCheckData = { version = userData.version, type = component_type, name = text, url = url, lastclick = {} }
             version_check_scrollbox:AddData(userData, url)
         end
-    end)
+    end
+
+    version_check_button:SetScript("OnClick", RunVersionCheck)
+    version_check_scrollbox.CheckEncounterAlert = function(self, encID, diffID, internalID)
+        if not (UnitIsGroupLeader("player") or UnitIsGroupAssistant("player")) then return end
+        SelectEncounterAlert(encID, diffID, internalID)
+        RunVersionCheck()
+    end
 
     -- version check presets
     local preset_label = DF:CreateLabel(parent, T("Preset:"), 9.5, "white")
@@ -296,9 +416,14 @@ local function BuildVersionCheckUI(parent)
             tinsert(t, {
                 label = v[1],
                 value = v[2],
-                onclick = function(_, _, value)
-                    component_type_dropdown:Select(value[1])
-                    component_name_entry:SetText(value[2])
+                onclick = function(dropdown, fixedValue, value)
+                    if value[1] == "Encounter Alert" then
+                        SelectEncounterAlert(value[3], value[4], value[2])
+                    else
+                        component_type_dropdown:Select(value[1])
+                        component_name_entry:SetText(value[2])
+                        UpdateComponentType()
+                    end
                 end
             })
         end
@@ -348,7 +473,7 @@ local function BuildVersionCheckUI(parent)
                 line.component_name = component_name
 
                 line.type:SetText(T(component_type))
-                line.name:SetText(component_name)
+                line.name:SetText(component_type == "Encounter Alert" and label or component_name)
             end
         end
     end
@@ -366,7 +491,8 @@ local function BuildVersionCheckUI(parent)
 
         line.name = DF:CreateLabel(line, "", 9.5, "white")
         line.name:SetTemplate(options_text_template)
-        line.name:SetPoint("LEFT", line, "LEFT", 50, 0)
+        line.name:SetPoint("LEFT", line, "LEFT", 110, 0)
+        line.name:SetWidth(225)
 
         line.deleteButton = DF:CreateButton(line, function()
             tremove(NSRT.Settings["VersionCheckPresets"], line.index)
@@ -403,7 +529,7 @@ local function BuildVersionCheckUI(parent)
     new_preset_type_label:SetPoint("TOPLEFT", version_presets_edit_scrollbox, "BOTTOMLEFT", 0, -20)
 
     local new_preset_type_dropdown = DF:CreateDropDown(version_presets_edit_frame,
-        function() return build_checkable_components_options() end, checkable_components[1], 65)
+        function() return build_checkable_components_options(nil, true) end, checkable_components[1], 65)
     new_preset_type_dropdown.addonId = addonId
     new_preset_type_dropdown:Select(checkable_components[1])
     new_preset_type_dropdown:SetPoint("LEFT", new_preset_type_label, "RIGHT", 5, 0)
@@ -419,7 +545,7 @@ local function BuildVersionCheckUI(parent)
     local add_button = DF:CreateButton(version_presets_edit_frame, function()
         local name = new_preset_name_entry:GetText()
         local type = new_preset_type_dropdown:GetValue()
-        tinsert(NSRT.Settings["VersionCheckPresets"], { type .. ": " .. name, { type, name } })
+        tinsert(NSRT.Settings["VersionCheckPresets"], { T(type) .. ": " .. name, {type, name} })
         version_presets_edit_scrollbox:SetData(NSRT.Settings["VersionCheckPresets"])
         version_presets_edit_scrollbox:Refresh()
         version_check_preset_dropdown:Refresh()
@@ -428,6 +554,7 @@ local function BuildVersionCheckUI(parent)
     end, 60, 20, T("New"))
     add_button:SetPoint("LEFT", new_preset_name_entry, "RIGHT", 10, 0)
     add_button:SetTemplate(options_button_template)
+    UpdateComponentType()
     return version_check_scrollbox
 end
 

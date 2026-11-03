@@ -100,7 +100,11 @@ local AuraTrackingBuiltinDefaultOverrides = {
 
 function NSI:GetDefaultAuraTrackingSettings(settingsKey)
     local overrides = AuraTrackingBuiltinDefaultOverrides[settingsKey]
-    return overrides and self:CreateAuraTrackingSettingsDefaults(overrides)
+    if overrides then return self:CreateAuraTrackingSettingsDefaults(overrides) end
+    local settings = self:GetAuraTrackingSettings(settingsKey)
+    if settings and self.AuraTrackingBossBuiltins[settings.builtin] then
+        return self:CreateBuiltinAuraTrackingSettings(settings.builtin)
+    end
 end
 
 function NSI:ResetBuiltinAuraTracking(settingsKey)
@@ -152,6 +156,7 @@ function NSI:AddMissingDefaults()
         NickNames = {},
         Reminders = {},
         PersonalReminders = {},
+        PersonalReminderSpecs = {},
         InviteList = {},
         AssignmentSettings = {},
         CooldownList = {},
@@ -175,6 +180,7 @@ function NSI:AddMissingDefaults()
         -- Active reminder persistence
         ActiveReminder = nil,
         ActivePersonalReminder = {},
+        ActivePersonalReminderSpecs = {},
         StoredSharedReminder = nil,
         StoredPersonalReminder = {},
 
@@ -434,6 +440,7 @@ function NSI:AddMissingDefaults()
         },
 
         AuraTrackingSettings = {
+            UseBuiltinAuraTrackings = false,
             UI = {
                 Selected = "Player",
                 StyleCopySource = "Player",
@@ -511,6 +518,7 @@ function NSI:AddMissingDefaults()
             AutoAcceptGuildInvite = false,
             AddSpellIDToTooltips = false,
             ConsumableNotificationDurationSeconds = 5,
+            ConsumableNotificationTTS = false,
             TextDisplay = {
                 Anchor = "CENTER",
                 relativeTo = "CENTER",
@@ -541,6 +549,7 @@ function NSI:AddMissingDefaults()
         -- Break Timer
         BreakTimer = {
             enabled = true,
+            ListenToBossMods = false,
             Anchor = "CENTER",
             relativeTo = "CENTER",
             xOffset = 0,
@@ -663,6 +672,7 @@ local ignored = {
     ["CurrentProfile"]   = true,
     ["MainProfile"]      = true,
     ["EncounterAlerts"]  = true,
+    ["EncounterAlertTranslationRevision"] = true,
     ["AuraTrackingSettings"] = true,
     ["AuraGlows"] = true,
     ["AuraSounds"]       = true,
@@ -675,6 +685,8 @@ local ProfileNoteKeys = {
     PersonalNotes = true,
     SharedNotes = true,
     ActivePersonalReminder = true,
+    PersonalReminderSpecs = true,
+    ActivePersonalReminderSpecs = true,
     StoredPersonalReminder = true,
     StoredSharedReminder = true,
 }
@@ -740,13 +752,15 @@ function NSI:CreateProfile(name, init)
         NSRT.ProfileKeys[ProfileKey] = name
     end
     NSRT.CurrentProfile = name
-    if not init and ProfileKey then self:SetReminder(NSRT.StoredPersonalReminder[ProfileKey], true) end
+    if not init and ProfileKey then self:RestorePersonalReminder() end
     self:SaveProfile()
 end
 
 function NSI:LoadProfile(name, skipsave, init)
     if not skipsave then self:SaveProfile() end
     if NSRT.Profiles[name] then
+        NSRT.PersonalReminderSpecs = {}
+        NSRT.ActivePersonalReminderSpecs = {}
         for k, v in pairs(NSRT.Profiles[name]) do
             if not ignored[k] then
                 local myNickName = k == "Settings" and NSRT.Settings and NSRT.Settings.MyNickName
@@ -761,8 +775,8 @@ function NSI:LoadProfile(name, skipsave, init)
         NSRT.ProfileKeys[ProfileKey] = name
     end
     NSRT.CurrentProfile = name
-    if not init and ProfileKey then self:SetReminder(NSRT.StoredPersonalReminder[ProfileKey], true) end
     self:AddMissingDefaults()
+    if not init and ProfileKey then self:RestorePersonalReminder() end
     self:SaveProfile()
     end
 end
@@ -962,6 +976,7 @@ function NSAPI:ImportProfileString(importString, name, allowSharedData, ignoreSh
         end
         NSI:AddMissingDefaults()
         if sharedData.EncounterAlerts then
+            NSI:TranslateAllEncounterAlerts()
             NSI:FireCallback("NSRT_ALERT_FULL_UPDATE")
         end
         if sharedData.AuraSounds then
@@ -1048,6 +1063,7 @@ function NSAPI:OverrideProfile(importString, name, options)
         NSI:AddMissingDefaults()
 
         if sharedData.EncounterAlerts ~= nil then
+            NSI:TranslateAllEncounterAlerts()
             NSI:FireCallback("NSRT_ALERT_FULL_UPDATE")
         end
 
@@ -1144,8 +1160,11 @@ function NSAPI:ImportAlertsString(importString)
     local t = NSI:DecodeExportData(importString, "EncounterAlert")
     if type(t) ~= "table" then return nil end
 
-    local function ResolveImportedAlertKey(destDiff, alertKey, alert)
-        if alert.ReloeReminder then return alertKey end
+    local function ResolveImportedAlertKey(destDiff, alertKey, alert, encID)
+        if alert.ReloeReminder then
+            NSI:TranslateEncounterAlert(encID, alertKey, alert)
+            return alertKey
+        end
 
         local importedID = alert.internalID or alertKey
         local existing = alertKey and destDiff[alertKey]
@@ -1179,7 +1198,7 @@ function NSAPI:ImportAlertsString(importString)
                         end
                         for alertKey, alert in pairs(diffData) do
                             if type(alert) == "table" then
-                                local importKey = ResolveImportedAlertKey(destDiff, alertKey, alert)
+                                local importKey = ResolveImportedAlertKey(destDiff, alertKey, alert, t.encID)
                                 destDiff[importKey] = alert
                                 count = count + 1
                             end
@@ -1203,7 +1222,7 @@ function NSAPI:ImportAlertsString(importString)
                         end
                         for alertKey, alert in pairs(diffData) do
                             if type(alert) == "table" then
-                                local importKey = ResolveImportedAlertKey(destDiff, alertKey, alert)
+                                local importKey = ResolveImportedAlertKey(destDiff, alertKey, alert, encID)
                                 destDiff[importKey] = alert
                                 count = count + 1
                             end
@@ -1229,7 +1248,10 @@ function NSAPI:ImportAlertsString(importString)
             else
                 importKey = NSI:UniqueAlertID(diffTable, false)
             end
-            if t.data then t.data.ReloeReminder = t.alertType == "encounter" and t.data.ReloeReminder or nil end
+            if t.data then
+                t.data.ReloeReminder = t.alertType == "encounter" and t.data.ReloeReminder or nil
+                NSI:TranslateEncounterAlert(t.encID, importKey, t.data)
+            end
             diffTable[importKey] = t.data
             NSI:FireCallback("NSRT_ALERT_CHANGED", t.encID, t.diffID, importKey)
             return 1
@@ -1252,7 +1274,7 @@ function NSAPI:ImportAlertsString(importString)
                     local destDiff = NSRT.EncounterAlerts[encID][diffID]
                     for alertKey, alert in pairs(diffData) do
                         if type(alert) == "table" then
-                            local importKey = ResolveImportedAlertKey(destDiff, alertKey, alert)
+                            local importKey = ResolveImportedAlertKey(destDiff, alertKey, alert, encID)
                             destDiff[importKey] = alert
                             count = count + 1
                         end

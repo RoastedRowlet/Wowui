@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Paladin-Holy',}
-local provider = {region='US',realm='Gnomeregan',name='US',type='subscribers',zone=53,date='2026-10-27',data={Ca='Carnar:BAEANQAECgQIBwABNQAECgcIFAABAD8cAA==.',Re='Renarron:BAEANQAECgQIBAABNQAECgcIFAABAD8cAA==.',},}
+local lookup = {'Unknown-Unknown',}
+local provider = {region='US',realm='Gnomeregan',name='US',type='subscribers',zone=53,date='2026-11-03',data={Ca='Carnar:BAEANQAECgQIBQABNQAECgYIEQABAAAAAA==.',Re='Renarron:BAEANQAECgQIBAABNQAECgYIEQABAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

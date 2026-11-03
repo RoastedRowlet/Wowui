@@ -471,9 +471,9 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
             -- The player's name as the live frame shows it (Forever surname).
             local n = (unitKey == "player") and (EllesmereUI.WithSurname(UnitName("player")) or "Player")
                 or (_previewCreatureNames[unitKey] or unitKey)
-            -- Name Format (WoW Forever only; nil on retail).
-            if EllesmereUI.ForeverShortName and prefix and s then
-                n = EllesmereUI.ForeverShortName(n, s[prefix .. "NameFormat"])
+            -- The slot's Name Format.
+            if prefix and s then
+                n = EllesmereUI.ShortName(n, s[prefix .. "NameFormat"])
             end
             return n
         end
@@ -766,7 +766,11 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
         local customPFill = settings.customPowerFillColor
         local customPBg = settings.customPowerBgColor
         local pfR, pfG, pfB
-        if isPowerColored then
+        if isPowerColored and settings.powerClassColored then
+            local _, ct = UnitClass("player")
+            local cc = EllesmereUI.GetClassColor(ct)
+            pfR, pfG, pfB = cc.r, cc.g, cc.b
+        elseif isPowerColored then
             local _, pToken = UnitPowerType("player")
             local info = EllesmereUI.GetPowerColor(pToken or "MANA")
             pfR, pfG, pfB = info.r, info.g, info.b
@@ -839,7 +843,11 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
         if pf._powerFill and powerH > 0 then
             local txR, txG, txB
             local isPwrC = settings.powerPercentPowerColor ~= false
-            if isPwrC then
+            if isPwrC and settings.powerClassColored then
+                local _, ct = UnitClass("player")
+                local cc = EllesmereUI.GetClassColor(ct)
+                txR, txG, txB = cc.r, cc.g, cc.b
+            elseif isPwrC then
                 local _, pToken = UnitPowerType("player")
                 local info = EllesmereUI.GetPowerColor(pToken or "MANA")
                 txR, txG, txB = info.r, info.g, info.b
@@ -1247,7 +1255,7 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
     if bdrSize == 0 and bdrTexKey == "solid" then border:Hide() end
 
     -- Position an absorb StatusBar per edge mode (mirrors UpdateAbsorbBarReverseFill
-    -- in EllesmereUIUnitFrames.lua): overlay = fills missing-health from the
+    -- in EUI_UnitFrames_Absorb.lua): overlay = fills missing-health from the
     -- current-HP edge (backfills over filled health only for overshields);
     -- right/left = pinned to that edge, fills toward center, ignoring reverse fill.
     local function PositionPreviewAbsorb(bar, mode, isRev, isVert)
@@ -1355,7 +1363,7 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
         local PREV_ABS_ALPHA = { striped = 0.8, stripedReversed = 0.8, clean = (settings.absorbCleanAlpha or 30) / 100, blizzard = 0.8 }
         -- SharedMedia keys fall through to the health-bar texture lookup.
         local tex   = ns.ResolveAbsorbStyleTex(absStyle, PREV_ABS_TEX.striped)
-        -- Effective opacity/color: mirrors GetAbsorbOpacity in EllesmereUIUnitFrames.lua
+        -- Effective opacity/color: mirrors GetAbsorbOpacity in EUI_UnitFrames_Absorb.lua
         local alpha = settings.absorbOpacity and (settings.absorbOpacity / 100) or PREV_ABS_ALPHA[absStyle] or 0.8
         local ac = settings.absorbColor or { r = 1, g = 1, b = 1 }
         absorbBar = CreateFrame("StatusBar", nil, absClip)
@@ -2489,7 +2497,11 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
                 if pf._powerFill then
                     local pvFR, pvFG, pvFB
                     local isPwrC2 = s.powerPercentPowerColor ~= false
-                    if isPwrC2 then
+                    if isPwrC2 and s.powerClassColored then
+                        local _, ct = UnitClass("player")
+                        local cc = EllesmereUI.GetClassColor(ct)
+                        pvFR, pvFG, pvFB = cc.r, cc.g, cc.b
+                    elseif isPwrC2 then
                         local _, pToken = UnitPowerType("player")
                         local info = EllesmereUI.GetPowerColor(pToken or "MANA")
                         pvFR, pvFG, pvFB = info.r, info.g, info.b
@@ -2612,7 +2624,11 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
 
             local pvPfR, pvPfG, pvPfB
             local pvUsePowerColor = s.powerPercentPowerColor ~= false
-            if pvUsePowerColor then
+            if pvUsePowerColor and s.powerClassColored then
+                local _, ct = UnitClass("player")
+                local cc = EllesmereUI.GetClassColor(ct)
+                pvPfR, pvPfG, pvPfB = cc.r, cc.g, cc.b
+            elseif pvUsePowerColor then
                 local _, pToken = UnitPowerType("player")
                 local info = EllesmereUI.GetPowerColor(pToken or "MANA")
                 pvPfR, pvPfG, pvPfB = info.r, info.g, info.b
@@ -3147,7 +3163,7 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
                     largeStripesR         = "Interface\\AddOns\\EllesmereUI\\media\\textures\\shields\\large-absorb-right.png",
                 }
                 local _paAlpha = { striped = 0.8, stripedReversed = 0.8, clean = (s.absorbCleanAlpha or 30) / 100, blizzard = 0.8 }
-                -- Effective opacity/color: mirrors GetAbsorbOpacity in EllesmereUIUnitFrames.lua
+                -- Effective opacity/color: mirrors GetAbsorbOpacity in EUI_UnitFrames_Absorb.lua
                 local _paA = s.absorbOpacity and (s.absorbOpacity / 100) or _paAlpha[absS] or 0.8
                 local _paC = s.absorbColor or { r = 1, g = 1, b = 1 }
                 absorbBar:SetStatusBarTexture(ns.ResolveAbsorbStyleTex(absS, _paTex.striped))
@@ -3287,14 +3303,16 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
                 local alpha = (db.profile.dispelOverlayOpacity or 100) / 100
                 dispelOverlayPreview:ClearAllPoints()
                 dispelOverlayPreview:SetVertexColor(1, 1, 1, 1)
+                dispelOverlayPreview:SetTexCoord(0, 1, 0, 1)
                 if mode == "full" then
                     dispelOverlayPreview:SetAllPoints(health)
                     dispelOverlayPreview:SetColorTexture(c.r, c.g, c.b, alpha)
-                elseif mode == "gradient" or mode == "gradient_sharp" then
+                elseif mode == "gradient" or mode == "gradient_sharp" or mode == "gradient_reverse" then
                     dispelOverlayPreview:SetAllPoints(health)
-                    dispelOverlayPreview:SetTexture(mode == "gradient_sharp"
-                        and "Interface\\AddOns\\EllesmereUI\\media\\textures\\gradient-sharp.tga"
-                        or "Interface\\AddOns\\EllesmereUI\\media\\textures\\gradient-tb.tga")
+                    dispelOverlayPreview:SetTexture(mode == "gradient"
+                        and "Interface\\AddOns\\EllesmereUI\\media\\textures\\gradient-tb.tga"
+                        or "Interface\\AddOns\\EllesmereUI\\media\\textures\\gradient-sharp.tga")
+                    if mode == "gradient_reverse" then dispelOverlayPreview:SetTexCoord(0, 1, 1, 0) end
                     dispelOverlayPreview:SetVertexColor(c.r, c.g, c.b, alpha)
                 else
                     dispelOverlayPreview:SetAllPoints(healthFill)
@@ -3347,6 +3365,40 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
                 tiPv:Show()
             elseif tiPv then
                 tiPv:Hide()
+            end
+            -- Growth Direction: Poison and Bleed icons follow Magic along the row, as live.
+            local grow = dp.dispelIconGrowth or "none"
+            local growOn = tiPv and tiPv:IsShown() and grow ~= "none"
+            local extra = pf._pvDispelIconRow
+            if growOn and not extra then
+                extra = {}
+                local atlases = { "RaidFrame-Icon-DebuffPoison", "RaidFrame-Icon-DebuffBleed" }
+                for i = 1, #atlases do
+                    local f = CreateFrame("Frame", nil, pf)
+                    local tex = f:CreateTexture(nil, "ARTWORK")
+                    tex:SetAllPoints(f)
+                    tex:SetAtlas(atlases[i])
+                    extra[i] = f
+                end
+                pf._pvDispelIconRow = extra
+            end
+            if extra then
+                local sz = dp.dispelIconSize or 16
+                local step = sz + EllesmereUI.PP.FromPixels(1)
+                local dx = (grow == "left" and -step) or (grow == "right" and step) or 0
+                local dy = (grow == "down" and -step) or (grow == "up" and step) or 0
+                for i = 1, #extra do
+                    local f = extra[i]
+                    if growOn then
+                        f:SetFrameLevel(tiPv:GetFrameLevel())
+                        f:SetSize(sz, sz)
+                        f:ClearAllPoints()
+                        f:SetPoint("CENTER", tiPv, "CENTER", dx * i, dy * i)
+                        f:Show()
+                    else
+                        f:Hide()
+                    end
+                end
             end
         end
 

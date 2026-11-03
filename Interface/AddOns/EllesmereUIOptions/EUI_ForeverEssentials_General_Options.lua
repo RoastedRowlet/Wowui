@@ -10,16 +10,17 @@ if not EllesmereUI._ModuleNS["EllesmereUIForeverEssentials"] then return end  --
 -------------------------------------------------------------------------------
 --  NAME FORMAT: one place for every Name Format in the suite, as two checkbox
 --  dropdowns over the same module rows: a box shows that part of the name, so
---  First Name alone = first names, Last Name alone = last names, both = First
---  and Last. A name always shows, so a row's last checked box stays checked.
+--  First Name alone = first names, Last Name alone = last names, both = Full
+--  Name. A name always shows, so a row's last checked box stays checked.
 --  Each row is a WRITE-THROUGH MIRROR, as on Global Settings > Textures: it
 --  reads and writes the module's OWN keys and calls the module's own apply, so
 --  nothing is stored here and each module's page shows the same setting. A row
 --  over several keys (every unit frame text; raid and party) reads checked in
---  neither while they differ, and a click sets them all. A module that is off
---  has no row.
+--  neither while they differ, as does a module set to Abbreviated or a
+--  Character Count (its own page sets those), and a click sets them all. A
+--  module that is off has no row.
 -------------------------------------------------------------------------------
--- A saved Name Format as a row value ("full" = First and Last), and back (nil).
+-- A saved Name Format as a row value ("full" = Full Name), and back (nil).
 local function ModeOf(v) return (v == nil or v == "full") and "full" or v end
 local function Stored(v) return (v ~= "full") and v or nil end
 -- One value while every input agrees, "mixed" once two differ (nil: none yet).
@@ -96,8 +97,9 @@ local function NameFormatSources()
             end }
     end
 
-    -- Nameplates: the enemy name and Target of Target slots (a pick sets every
-    -- slot's key, so a text moved later keeps it), then the friendly players.
+    -- Nameplates: the enemy name, Target of Target and Custom slots showing a name
+    -- or a target (a pick sets every slot's key, so a text moved later keeps it),
+    -- then the friendly players.
     local np = MNS("EllesmereUINameplates")
     if np and np.db then
         local slotKeys, formatKey = np.textSlotKeys, {}
@@ -108,6 +110,13 @@ local function NameFormatSources()
                 local nameSlot, totSlot = np.FindNameSlot(), np._npToTSlot
                 if nameSlot then m = ModeOf(p[formatKey[nameSlot]]) end
                 if totSlot then m = Merge(m, ModeOf(p[formatKey[totSlot]])) end
+                for i = 1, #slotKeys do
+                    local slot = slotKeys[i]
+                    local parsed = p[slot] == "custom" and np.NP_CustomParse(slot)
+                    if parsed and (parsed.has.name or parsed.has.target) then
+                        m = Merge(m, ModeOf(p[formatKey[slot]]))
+                    end
+                end
                 if not m then
                     for i = 1, #slotKeys do m = Merge(m, ModeOf(p[formatKey[slotKeys[i]]])) end
                 end
@@ -668,23 +677,29 @@ _G._EUI_BuildForeverGeneralPage = function(pageName, parent, yOffset)
     });  y = y - h
 
     if not junkOff() then
+        -- Rare and better are never junk by quality (and need DELETE typed), so
+        -- both lists stop at Uncommon.
+        local qualityValues, qualityOrder = _G._EUI_ItemQualityValues(Enum.ItemQuality.Uncommon)
+
         _, h = W:DualRow(parent, y,
             { type = "slider", text = "Items Shown",
               min = 1, max = 6, step = 1, isPercent = false,
               tooltip = "How many junk stacks the window lists.",
               getValue = function() return JI.Get("itemCount") end,
               setValue = function(v) JunkSet("itemCount", v) end },
-            { type = "toggle", text = "Include White Items",
-              tooltip = "Lists white stacks as well as gray ones.",
-              getValue = function() return JI.Get("includeWhite") == true end,
-              setValue = function(v) JunkSet("includeWhite", v) end }
+            { type = "dropdown", text = "Maximum Quality",
+              values = qualityValues, order = qualityOrder,
+              tooltip = "Items above this quality are not shown, unless marked as junk in Bags.",
+              getValue = function() return tostring(JI.Get("maxQuality")) end,
+              setValue = function(v) JunkSet("maxQuality", tonumber(v)) end }
         );  y = y - h
 
         _, h = W:DualRow(parent, y,
-            { type = "toggle", text = "Skip Confirmation for White Items",
-              tooltip = "White stacks delete on the first Ctrl + Left Click instead of the second.",
-              getValue = function() return JI.Get("skipWhiteConfirm") == true end,
-              setValue = function(v) JunkSet("skipWhiteConfirm", v) end },
+            { type = "dropdown", text = "Delete Without Confirming",
+              values = qualityValues, order = qualityOrder,
+              tooltip = "Items of this quality and below delete on the first Ctrl + Left Click. Higher-quality items need a second click, and Rare and above also need DELETE typed.",
+              getValue = function() return tostring(JI.Get("oneClickQuality")) end,
+              setValue = function(v) JunkSet("oneClickQuality", tonumber(v)) end },
             { type = "labeledButton", text = "Excluded Items", buttonText = "Clear", width = 90,
               tooltip = "Brings back items you middle-clicked away.",
               onClick = ClearJunkExclusions }
@@ -714,7 +729,7 @@ _G._EUI_BuildForeverGeneralPage = function(pageName, parent, yOffset)
               setValue = function(v) JunkSet("showFreeSlots", v) end }
         );  y = y - h
 
-        -- Only Show When Bag Space Is Low, its threshold in the cog.
+        -- Only Show When Bag Space Is Low (its threshold in the cog) | Use Auctionator Prices
         local lowRow
         lowRow, h = W:DualRow(parent, y,
             { type = "toggle", text = "Only Show When Bag Space Is Low",
@@ -724,7 +739,14 @@ _G._EUI_BuildForeverGeneralPage = function(pageName, parent, yOffset)
                   JunkSet("onlyLowBagSpace", v)
                   EllesmereUI:RefreshPage()  -- the cog's disabled state
               end },
-            BLANK()
+            { type = "toggle", text = "Use Auctionator Prices",
+              tooltip = "Prices items from Auctionator scans.",
+              disabled = function()
+                  return EllesmereUI._ModuleNS["EllesmereUIForeverEssentials"].AuctionAPI() == nil
+              end,
+              disabledTooltip = "This option requires Auctionator to be loaded.",
+              getValue = function() return JI.Get("auctionPrices") == true end,
+              setValue = function(v) JunkSet("auctionPrices", v) end }
         );  y = y - h
         if not EllesmereUI._prebuilding then
             EllesmereUI.BuildInlineCog(lowRow._leftRegion, {

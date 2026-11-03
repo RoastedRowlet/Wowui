@@ -1,5 +1,5 @@
-### Changes in 120100.98-Release:
+### Changes in 120100.99-Release:
 
 - Changed: Update Interface version
-- Fixed: Pause getting stuck after alt-tabbing
+- Removed: Old savedvariables migration
 

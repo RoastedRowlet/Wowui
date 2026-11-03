@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown','Paladin-Holy',}
-local provider = {region='US',realm='Azgalor',name='US',type='subscribers',zone=53,date='2026-10-27',data={Co='Coconut:BAEANQADCggIDgABNQAECggIDgABAAAAAA==.',St='Strawberry:BAEANQADCggICQABNQAECggIDgABAAAAAA==.',Tr='Truthless:BAECNQAFFH8KAAICAAQKrBkeCgBEAQSODQAABQBMAHUNAAABACIAfw0AAAEAWwCpDQAAAwA9AAIABAqsGR4KAEQBBI4NAAAFAEwAdQ0AAAEAIgB/DQAAAQBbAKkNAAADAD0ANQAECn8rAAICAAoKoB9QDwBRAwACAAoKoB9QDwBRAwAAAA==.',},}
+local lookup = {'Rogue-Subtlety','Paladin-Holy',}
+local provider = {region='US',realm='Azgalor',name='US',type='subscribers',zone=53,date='2026-11-03',data={Co='Coconut:BAEANQADCggIDgABNQAECgoKIAABAOwOAA==.',St='Strawberry:BAEANQADCggICQABNQAECgoKIAABAOwOAA==.',Tr='Truthless:BAECNQAFFH8KAAICAAQKrBnxDAA8AQSODQAABQBMAHUNAAABACIAfw0AAAEAWwCpDQAAAwA9AAIABAqsGfEMADwBBI4NAAAFAEwAdQ0AAAEAIgB/DQAAAQBbAKkNAAADAD0ANQAECn8rAAICAAoKoB9QDwBRAwACAAoKoB9QDwBRAwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

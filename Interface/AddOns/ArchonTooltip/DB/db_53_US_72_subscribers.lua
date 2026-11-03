@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DeathKnight-Blood','Evoker-Devastation','Unknown-Unknown',}
-local provider = {region='US',realm='Dragonblight',name='US',type='subscribers',zone=53,date='2026-10-27',data={Di='Divinehunger:BAEANQADCgQIBAABNQAECgkJNAABAOgcAA==.',La='Lapras:BAECNQAFFH8ZAAICAAYK6iZkAAC8AgaODQAABgBjAHUNAAAEAGMAfw0AAAQAYwCpDQAABgBjAFwNAAACAGMAMw0AAAMAYgACAAYK6iZkAAC8AgaODQAABgBjAHUNAAAEAGMAfw0AAAQAYwCpDQAABgBjAFwNAAACAGMAMw0AAAMAYgA1AAQKfyIAAgIACQrnJmgAAPEDAAIACQrnJmgAAPEDAAAA.',Mo='Moonkissed:BAEANQAECgEIAgAAAA==.',Sa='Saintfoxtrot:BAEANQAECggICAAAAA==.Saintfrosty:BAEANQAECgUIBQABNQAECggICAADAAAAAA==.Saintkhal:BAEANQAECgEIAQABNQAECggICAADAAAAAA==.',},}
+local provider = {region='US',realm='Dragonblight',name='US',type='subscribers',zone=53,date='2026-11-03',data={Di='Divinehunger:BAEANQADCgQIBAABNQAECgoKSAABAE4gAA==.',La='Lapras:BAECNQAFFH8ZAAICAAYK6iZkAAC8AgaODQAABgBjAHUNAAAEAGMAfw0AAAQAYwCpDQAABgBjAFwNAAACAGMAMw0AAAMAYgACAAYK6iZkAAC8AgaODQAABgBjAHUNAAAEAGMAfw0AAAQAYwCpDQAABgBjAFwNAAACAGMAMw0AAAMAYgA1AAQKfyIAAgIACQrnJmgAAPEDAAIACQrnJmgAAPEDAAAA.',Mo='Moonkissed:BAEANQAECgUIBwAAAA==.',Sa='Saintfoxtrot:BAEANQAECggIDgAAAA==.Saintfrosty:BAEANQAECgYICwABNQAECggIDgADAAAAAA==.Saintkhal:BAEANQAECgEIAQABNQAECggIDgADAAAAAA==.Saintlux:BAEANQAECggIAQABNQAECggIDgADAAAAAA==.Saintmedicus:BAEANQAECggIBwABNQAECggIDgADAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

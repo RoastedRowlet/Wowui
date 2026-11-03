@@ -311,6 +311,16 @@ local function BuildQoLOptions()
             iconsize = {16, 16},
         },
         {
+            type = "toggle",
+            boxfirst = true,
+            name = "Read Consumable Notifications",
+            desc = "Read Soulwell, Feast, Hearty Feast, and Cauldron notifications aloud using your TTS settings. Each notification type can be read once every 10 seconds. Repair notifications are excluded.",
+            get = function() return NSRT.QoL.ConsumableNotificationTTS end,
+            set = function(self, fixedparam, value)
+                NSRT.QoL.ConsumableNotificationTTS = value
+            end,
+        },
+        {
             type = "range",
             name = "Duration Seconds",
             desc = "Show dropped consumable notifications for the selected number of seconds.",
@@ -575,6 +585,19 @@ local function BuildQoLOptions()
                 NSI:SetBreakTimerPreview(not NSI.IsBreakTimerPreview)
             end,
             spacement = true
+        },
+        {
+            type = "toggle",
+            boxfirst = true,
+            name = "Listen to DBM and BigWigs Break Timers",
+            desc = "Display break timers sent by group leaders or assistants through DBM or BigWigs in NSRT. Neither addon needs to be installed. Disabled by default.",
+            get = function() return NSRT.BreakTimer.ListenToBossMods end,
+            set = function(self, fixedparam, value)
+                NSRT.BreakTimer.ListenToBossMods = value
+                if not value and NSI.ActiveBreak and NSI.ActiveBreak.external then
+                    NSI:StopBreakTimer()
+                end
+            end,
         },
         {
             type = "toggle",

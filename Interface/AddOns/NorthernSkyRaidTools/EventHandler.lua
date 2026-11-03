@@ -79,6 +79,9 @@ function NSI:EventHandler(e, wowevent, internal, ...) -- internal checks whether
         if self.InitQoL then self:InitQoL() end
         self:InitPlayerStatsDisplay()
         self:RestoreBreakTimer()
+        C_ChatInfo.RegisterAddonMessagePrefix("D5")
+        C_ChatInfo.RegisterAddonMessagePrefix("BigWigs")
+        f:RegisterEvent("CHAT_MSG_ADDON")
         self:CacheSounds()
         self.NSRTFrame:SetAllPoints(UIParent)
         self.LGF.RegisterCallback(self, "GETFRAME_REFRESH", "CacheUnitFrames")
@@ -92,8 +95,7 @@ function NSI:EventHandler(e, wowevent, internal, ...) -- internal checks whether
         else
             self:SetReminder(NSRT.ActiveReminder, false, true) -- loading active reminder from last session
         end
-        local charkey = self:GetProfileKey()
-        self:SetReminder(NSRT.StoredPersonalReminder[charkey], true, true) -- loading active personal reminder from last session
+        self:RestorePersonalReminder(true)
         self:ProcessReminder()
         self:UpdateReminderFrame(true)
         if NSRT.Settings["Debug"] then
@@ -132,6 +134,7 @@ function NSI:EventHandler(e, wowevent, internal, ...) -- internal checks whether
         if internal then diff = 16 end
         if not internal then self:LogTimeline(e, ...) end
         if not diff then return end -- everything else is enabled in lfr, normal, heroic, mythic and story mode because people like to test in there.
+        if self.NSUI then self:StopAllPreviews() end
         self.NSRTFrame.generic_display:Hide()
         self.EncounterID = encounterID
         if self.PrePullReminderTimers then
@@ -145,13 +148,10 @@ function NSI:EventHandler(e, wowevent, internal, ...) -- internal checks whether
         end
         self.TestingReminder = false
         self.IsInPreview = false
-        self:UpdateAuraTrackingEncounterVisibility()
+        self:InitAuraTracking(true)
         self.AuraGlowManualState = {}
         self.AuraGlowLoadCache = {}
         self:InitAuraGlows()
-        for _, v in ipairs({"IconMover", "BarMover", "TextMover", "CircleMover", "DebuffOverviewMover"}) do
-            self:MakeDraggable(self[v], nil, false)
-        end
         self.Phase = 1
         self.PhaseSwapTime = GetTime()
         self.ReminderText = self.ReminderText or {}
@@ -206,9 +206,8 @@ function NSI:EventHandler(e, wowevent, internal, ...) -- internal checks whether
         self:RunEncounterAlertHooks("onEncounterEnd", encID, diff, encID, encounterName, eventDifficultyID, groupSize, success)
         self:EncounterRegister(nil, nil, nil, nil, true)
         self:StopPaceComparison()
-        self:InitAuraSystem()
         self:HideAllReminders(true)
-        self:UpdateAuraTrackingEncounterVisibility()
+        self:InitAuraSystem()
         self.AuraGlowManualState = {}
         self.AuraGlowLoadCache = nil
         self:UpdateAuraGlowVisibility()
@@ -301,10 +300,7 @@ function NSI:EventHandler(e, wowevent, internal, ...) -- internal checks whether
         self:RebuildAuraSounds()
         if self:DifficultyCheck({14, 15, 16}) then
             self:CacheUnitFrames()
-            for containerName in pairs(self.DebuffOverviewContainerSetsByName or {}) do
-                local shown = self.DebuffOverviewShownSets and self.DebuffOverviewShownSets[containerName] or false
-                self:SetDebuffOverviewContainersShown(shown, containerName)
-            end
+            self:RefreshDebuffOverviewContainers()
         end
         local text = ""
         if UnitLevel("player") < 90 then return end
@@ -363,14 +359,15 @@ function NSI:EventHandler(e, wowevent, internal, ...) -- internal checks whether
     elseif e == "NSI_VERSION_CHECK" and internal then
         if self:Restricted() then return end
         if not self.VersionCheckData then return end -- ignore stale responses from a previous check
-        local unit, ver, ignoreCheck = ...
+        local unit, ver, ignoreCheck, requestID = ...
+        if requestID ~= self.VersionCheckData.requestID then return end
         self:VersionResponse({name = UnitName(unit), version = ver, ignoreCheck = ignoreCheck})
     elseif e == "NSI_VERSION_REQUEST" and internal then
-        local unit, type, name = ...
+        local unit, type, name, encID, diffID, requestID = ...
         if UnitExists(unit) and UnitIsUnit("player", unit) then return end -- don't send to yourself
         if UnitExists(unit) then
-            local u, ver, _, ignoreCheck = self:GetVersionNumber(type, name, unit)
-            self:Broadcast("NSI_VERSION_CHECK", "WHISPER", unit, ver, ignoreCheck)
+            local u, ver, url, ignoreCheck = self:GetVersionNumber(type, name, unit, encID, diffID)
+            self:Broadcast("NSI_VERSION_CHECK", "WHISPER", unit, ver, ignoreCheck, requestID)
         end
     elseif e == "NSI_NICKNAMES_COMMS" and internal then
         if self:Restricted() then return end
@@ -381,7 +378,7 @@ function NSI:EventHandler(e, wowevent, internal, ...) -- internal checks whether
     elseif e == "GROUP_ROSTER_UPDATE" and wowevent then
         if self.ArrangeGroups then self:ArrangeGroups() end
         if self.GroupUpdateTimer then self.GroupUpdateTimer:Cancel() end
-        self.GroupUpdateTimer = C_Timer.After(2, function()
+        self.GroupUpdateTimer = C_Timer.NewTimer(2, function()
             self.GroupUpdateTimer = nil
             self:InitAuraSystem()
             if self:DifficultyCheck({14, 15, 16}) then
@@ -432,6 +429,9 @@ function NSI:EventHandler(e, wowevent, internal, ...) -- internal checks whether
         end
         self:RefreshDebuffOverviewContainers()
     elseif e == "ACTIVE_PLAYER_SPECIALIZATION_CHANGED" and wowevent then
+        if not self.EncounterID then
+            self:LoadPersReminder(self:GetEncounterIDFromCurrentZone() or self:EncIDFromReminder(self.LoadedPersonalReminder, true))
+        end
         self:InitAuraTracking()
         self.AuraGlowLoadCache = nil
         self:InitAuraGlows()
@@ -465,6 +465,8 @@ function NSI:EventHandler(e, wowevent, internal, ...) -- internal checks whether
         if state == Enum.EncounterTimelineEventState.Canceled then
             self:EventHandler("ENCOUNTER_TIMELINE_EVENT_REMOVED", true, false, eventID)
         end
+    elseif e == "CHAT_MSG_ADDON" and wowevent then
+        self:ReceiveExternalBreakTimer(...)
     elseif e == "NSI_BREAK_TIMER" and internal then
         local unit, seconds, endServerTime, duration = ...
         self:ReceiveBreakTimer(unit, seconds, endServerTime, duration)

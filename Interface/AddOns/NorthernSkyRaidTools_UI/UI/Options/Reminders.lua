@@ -263,7 +263,7 @@ local function BuildReminderOptions()
             desc = "",
             get = function() return NSRT.ReminderSettings.UnitIconSettings.xOffset end,
             set = function(self, fixedparam, value)
-                NSRT.ReminderSettings.UnitIconSettings.xOffset= value
+                NSRT.ReminderSettings.UnitIconSettings.xOffset = value
                 NSI:UpdateExistingFrames()
             end,
             min = 5,
@@ -425,6 +425,7 @@ local function BuildReminderOptions()
                     if charkey then
                         NSRT.StoredPersonalReminder[charkey] = nil
                         NSRT.ActivePersonalReminder[charkey] = {}
+                        NSRT.ActivePersonalReminderSpecs[charkey] = nil
                     end
                 end
             end,
@@ -569,6 +570,32 @@ local function BuildReminderNoteOptions()
             end,
             nocombat = true,
             spacement = true
+        },
+        {
+            type = "range",
+            name = "x-Offset",
+            desc = "",
+            get = function() return NSRT.ReminderSettings.ReminderFrame.xOffset end,
+            set = function(self, fixedparam, value)
+                NSRT.ReminderSettings.ReminderFrame.xOffset = value
+                NSI:UpdateReminderFrame(false, true)
+            end,
+            min = -3000,
+            max = 3000,
+            nocombat = true,
+        },
+        {
+            type = "range",
+            name = "y-Offset",
+            desc = "",
+            get = function() return NSRT.ReminderSettings.ReminderFrame.yOffset end,
+            set = function(self, fixedparam, value)
+                NSRT.ReminderSettings.ReminderFrame.yOffset = value
+                NSI:UpdateReminderFrame(false, true)
+            end,
+            min = -3000,
+            max = 3000,
+            nocombat = true,
         },
         {
             type = "toggle",
@@ -756,6 +783,32 @@ local function BuildReminderNoteOptions()
             spacement = true
         },
         {
+            type = "range",
+            name = "x-Offset",
+            desc = "",
+            get = function() return NSRT.ReminderSettings.PersonalReminderFrame.xOffset end,
+            set = function(self, fixedparam, value)
+                NSRT.ReminderSettings.PersonalReminderFrame.xOffset = value
+                NSI:UpdateReminderFrame(false, false, true)
+            end,
+            min = -3000,
+            max = 3000,
+            nocombat = true,
+        },
+        {
+            type = "range",
+            name = "y-Offset",
+            desc = "",
+            get = function() return NSRT.ReminderSettings.PersonalReminderFrame.yOffset end,
+            set = function(self, fixedparam, value)
+                NSRT.ReminderSettings.PersonalReminderFrame.yOffset = value
+                NSI:UpdateReminderFrame(false, false, true)
+            end,
+            min = -3000,
+            max = 3000,
+            nocombat = true,
+        },
+        {
             type = "toggle",
             boxfirst = true,
             name = "Show Personal Reminder Note",
@@ -891,6 +944,32 @@ local function BuildReminderNoteOptions()
             end,
             nocombat = true,
             spacement = true
+        },
+        {
+            type = "range",
+            name = "x-Offset",
+            desc = "",
+            get = function() return NSRT.ReminderSettings.ExtraReminderFrame.xOffset end,
+            set = function(self, fixedparam, value)
+                NSRT.ReminderSettings.ExtraReminderFrame.xOffset = value
+                NSI:UpdateReminderFrame(false, false, false, true)
+            end,
+            min = -3000,
+            max = 3000,
+            nocombat = true,
+        },
+        {
+            type = "range",
+            name = "y-Offset",
+            desc = "",
+            get = function() return NSRT.ReminderSettings.ExtraReminderFrame.yOffset end,
+            set = function(self, fixedparam, value)
+                NSRT.ReminderSettings.ExtraReminderFrame.yOffset = value
+                NSI:UpdateReminderFrame(false, false, false, true)
+            end,
+            min = -3000,
+            max = 3000,
+            nocombat = true,
         },
         {
             type = "toggle",

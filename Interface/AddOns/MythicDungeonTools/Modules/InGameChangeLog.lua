@@ -2,25 +2,24 @@ local _, MDT = ...
 
 MDT.changeLog = {
   {
-    tag = "6.3.26",
-    date = "2026-10-28",
+    tag = "6.3.29",
+    date = "2026-11-01",
     notes = {
-      "Updated Russian and German translations.",
-      "Long checkbox labels in Settings now wrap instead of being cut off.",
+      "Added the four Curious Yearlings next to the lone Territorial Matriarch in Den of Nalorakk.",
     },
   },
   {
-    tag = "6.3.25",
-    date = "2026-10-27",
+    tag = "6.3.28",
+    date = "2026-10-31",
     notes = {
-      "The enemy info card now hides as soon as the cursor leaves the enemy. Hold Ctrl to keep it open.",
+      "The Sporeblight Belcher and Leafy Grovecrawler in The Blinding Vale can now be selected separately.",
     },
   },
   {
-    tag = "6.3.24",
-    date = "2026-10-26",
+    tag = "6.3.27",
+    date = "2026-10-29",
     notes = {
-      "New Focus Marker option \"Only focus enemy units\", on by default.",
+      "Fixed short pull totals on map pull labels running into the pull number.",
     },
   },
 }

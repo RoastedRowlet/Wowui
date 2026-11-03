@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown','Druid-Restoration',}
-local provider = {region='US',realm='Stormreaver',name='US',type='subscribers',zone=53,date='2026-10-27',data={Da='Daythyme:BAEANQAECgIIAgAAAA==.',El='Elunasolz:BAEANQADCggINgABNQAECggIDQABAAAAAA==.',Jo='Jonnybravo:BAEANQAECgQICQAAAA==.',Lu='Lunasolz:BAEANQAECggIDQAAAA==.',Wi='Wingdaz:BAEANQADCggICQABNQAFFAUICQACAKoNAA==.',Ys='Yshtolà:BAEANQAECgUICgABNQAECggIDQABAAAAAA==.',},}
+local lookup = {'Paladin-Protection','Druid-Restoration',}
+local provider = {region='US',realm='Stormreaver',name='US',type='subscribers',zone=53,date='2026-11-02',data={Da='Daythyme:BAEANQAECgIIAgAAAA==.',El='Elunasolz:BAEANQADCggIOQABNQAECgkJFgABAEYZAA==.',Jo='Jonnybravo:BAEANQAECgQICQAAAA==.',Lu='Lunasolz:BAEBNQAECn8WAAIBAAkKRhmSDwDyAQmODQAAAwBNAHUNAAACAEsAfw0AAAIAQACpDQAABAA7AFwNAAACAE4AXQ0AAAIAMwBlDQAAAgA2ADMNAAADAEoAuQ0AAAIAOAABAAkKRhmSDwDyAQmODQAAAwBNAHUNAAACAEsAfw0AAAIAQACpDQAABAA7AFwNAAACAE4AXQ0AAAIAMwBlDQAAAgA2ADMNAAADAEoAuQ0AAAIAOAAAAA==.',Wi='Wingdaz:BAEANQADCggICQABNQAFFAUICQACAKoNAA==.',Ys='Yshtolà:BAEANQAECgYIDgABNQAECgkJFgABAEYZAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DeathKnight-Unholy',}
-local provider = {region='US',realm='Dreadmaul',name='US',type='subscribers',zone=53,date='2026-10-27',data={Aw='Awry:BAECNQAFFH8FAAIBAAIK0A5UCACYAAKODQAABAAoAKkNAAABACIAAQACCtAOVAgAmAACjg0AAAQAKACpDQAAAQAiADUABAp/YwACAQAKCuQiMgMAJQMAAQAKCuQiMgMAJQMAAAA=.',},}
+local provider = {region='US',realm='Dreadmaul',name='US',type='subscribers',zone=53,date='2026-11-03',data={Aw='Awry:BAECNQAFFH8JAAIBAAIKZhKkCQCaAAKODQAABgAuAKkNAAADAC8AAQACCmYSpAkAmgACjg0AAAYALgCpDQAAAwAvADUABAp/aQACAQAKCjMkXQMAPQMAAQAKCjMkXQMAPQMAAAA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

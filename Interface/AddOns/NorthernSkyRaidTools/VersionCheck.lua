@@ -1,10 +1,12 @@
 local _, NSI = ... -- Internal namespace
 
-function NSI:RequestVersionNumber(type, name) -- type == "Addon" or "WA" or "Note"
+function NSI:RequestVersionNumber(type, name, encID, diffID)
     if (UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or NSRT.Settings["Debug"]) then
-        local unit, ver, url, ignore = self:GetVersionNumber(type, name, "player")
+        local unit, ver, url, ignore = self:GetVersionNumber(type, name, "player", encID, diffID)
+        local requestID = type == "Encounter Alert" and GetTime() or nil
+        self.VersionCheckData = {version = ver, type = type, name = name, url = url, lastclick = {}, requestID = requestID}
         self:VersionResponse({name = UnitName("player"), version = "No Response", ignoreCheck = ignore})
-        self:Broadcast("NSI_VERSION_REQUEST", "RAID", type, name)
+        self:Broadcast("NSI_VERSION_REQUEST", "RAID", type, name, encID, diffID, requestID)
         for unit in self:IterateGroupMembers() do
             if UnitInRaid(unit) and not UnitIsUnit("player", unit) then
                 local index = UnitInRaid(unit)
@@ -22,7 +24,7 @@ function NSI:VersionResponse(data)
 end
 
 
-function NSI:GetVersionNumber(type, name, unit)
+function NSI:GetVersionNumber(type, name, unit, encID, diffID)
     local ignoreCheck = false
     for u in self:IterateGroupMembers() do
        if C_FriendList.IsIgnored(u) then
@@ -49,5 +51,15 @@ function NSI:GetVersionNumber(type, name, unit)
     elseif type == "Reminder" then
         local reminder = self.Reminder and self.Reminder ~= "" and self:GetHash(self.Reminder) or "Reminder Missing"
         return unit, reminder, "", ignoreCheck
+    elseif type == "Encounter Alert" then
+        local alerts = NSRT.EncounterAlerts[encID] and NSRT.EncounterAlerts[encID][diffID]
+        if alerts then
+            for alertKey, alert in pairs(alerts) do
+                if (alert.internalID or alertKey) == name then
+                    return unit, alert.enabled and "Enabled" or "Disabled", "", ignoreCheck
+                end
+            end
+        end
+        return unit, "Alert Missing", "", ignoreCheck
     end
 end
