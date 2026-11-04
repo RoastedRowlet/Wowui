@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Paladin-Retribution','Warrior-Fury',}
-local provider = {region='US',realm='Smolderthorn',name='US',type='subscribers',zone=53,date='2026-11-02',data={Ka='Kassanndra:BAEANQAECggICAABNQAFFAMIBgABACUKAA==.',Lu='Lumistress:BAECNQAFFH8GAAIBAAMKJQrPFAC8AAOODQAAAwAxAHUNAAABAAUAqQ0AAAIAFgABAAMKJQrPFAC8AAOODQAAAwAxAHUNAAABAAUAqQ0AAAIAFgA1AAQKfy0AAgEACgqjGWVpAGACAAEACgqjGWVpAGACAAAA.',Ny='Nyquil:BAEANQAECggICAABNQAFFAMIBgABACUKAA==.',Te='Terrible:BAEANQAECgEIAQABNQAFFAYICQACABAOAA==.',Vi='Vindictress:BAEANQAECggIBQABNQAFFAMIBgABACUKAA==.',},}
+local provider = {region='US',realm='Smolderthorn',name='US',type='subscribers',zone=53,date='2026-11-03',data={Ka='Kassanndra:BAEANQAECggICQABNQAFFAMIBgABACUKAA==.',Lu='Lumistress:BAECNQAFFH8GAAIBAAMKJQpVFQC7AAOODQAAAwAxAHUNAAABAAUAqQ0AAAIAFgABAAMKJQpVFQC7AAOODQAAAwAxAHUNAAABAAUAqQ0AAAIAFgA1AAQKfy0AAgEACgqjGWVpAGACAAEACgqjGWVpAGACAAAA.',Ny='Nyquil:BAEANQAECggICAABNQAFFAMIBgABACUKAA==.',Te='Terrible:BAEANQAECgEIAQABNQAFFAYICQACABAOAA==.',Vi='Vindictress:BAEANQAECggIBQABNQAFFAMIBgABACUKAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data
