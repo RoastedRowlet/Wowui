@@ -586,11 +586,12 @@ function EAB:FinishSetup()
     end)
 
     -- When a spell flyout closes, fade out any bars that were kept visible by it.
-    -- Not under WoW Forever's Gamepad interface style, which shows and hides
-    -- the flyout from secure code (the flyout skin stands down there too).
+    -- Not under WoW Forever's Gamepad interface style where its navigation can
+    -- still be tainted (EllesmereUI.PadTaintStandDown): it shows and hides the
+    -- flyout from secure code (the flyout skin stands down there too).
     do
         local flyFrame = GetEABFlyout():GetFrame()
-        if flyFrame and not EllesmereUI.PadGamepadUI() then
+        if flyFrame and not EllesmereUI.PadTaintStandDown() then
             flyFrame:HookScript("OnHide", function()
                 if _quickKeybindState.open then return end
                 for key, state in pairs(hoverStates) do
@@ -1168,6 +1169,12 @@ function EAB:FinishSetup()
             if nForms ~= _gridState.spellsForms then
                 _gridState.spellsForms = nForms
                 LayoutBar("StanceBar")
+                -- A newly learned form's button was parked while its slot had no
+                -- form, statehidden set: LayoutBar shows it again but leaves that
+                -- mark, and Blizzard's stance bar update on the next form change
+                -- (its UpdateShownButtons, run on the reused StanceButtons) hides
+                -- every button still carrying it. The AlwaysShow pass owns it.
+                self:ApplyAlwaysShowButtons("StanceBar")
                 self:RefreshRuntimeVisibility() -- re-eval stance bar show/hide
             end
             -- Content-signature gate: SPELLS_CHANGED also fires mid-combat on
@@ -1564,14 +1571,28 @@ function EAB:FinishSetup()
         -- form classes, so nothing can stay stale while visible.
         local sf = barFrames["StanceBar"]
         if sf and not sf:IsVisible() then return end
+        -- WoW Forever's Gamepad interface style: Blizzard's login and loading
+        -- screen pass (ActionBarController_UpdateAll) returns before its
+        -- StanceBar:Update() unless the mouse and keyboard bars are on, so the
+        -- reused StanceButtons get no icon until a form changes. Paint the
+        -- icons here as its UpdateState does, never on the cooldown event.
+        local paintIcons = event ~= "UPDATE_SHAPESHIFT_COOLDOWN" and EllesmereUI.PadGamepadUI()
         local numForms = GetNumShapeshiftForms()
         for i = 1, numForms do
             local btn = _G["StanceButton" .. i]
             if btn then
                 -- Clicks toggle the checked state optimistically; reconcile it
                 -- from the actual form even when the cooldown has not changed.
-                local _, isActive = GetShapeshiftFormInfo(i)
+                local texture, isActive, isCastable = GetShapeshiftFormInfo(i)
                 btn:SetChecked(isActive)
+                local icon = paintIcons and btn.icon
+                if icon then
+                    icon:SetTexture(texture)
+                    if not (issecretvalue and issecretvalue(isCastable)) then
+                        local c = isCastable and 1 or 0.4
+                        icon:SetVertexColor(c, c, c)
+                    end
+                end
             end
             if btn and btn.cooldown then
                 local start, duration, enable = GetShapeshiftFormCooldown(i)

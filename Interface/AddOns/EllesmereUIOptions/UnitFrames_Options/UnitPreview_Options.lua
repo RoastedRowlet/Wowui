@@ -455,11 +455,14 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
     -- Resolve preview text for a content key
     local function PreviewTextForContent(content, s, prefix)
         -- Mirror "Show Decimal on Text": one decimal on abbrevs/percents when the
-        -- global flag is on, integer otherwise.
-        local function _pvAbbrev(v)
+        -- global flag is on, else the Number Format for valueType like the live
+        -- tags (boss frames read "bossHealth" for health).
+        local function _pvAbbrev(v, valueType)
             local cfg = _G._EUI_AbbrevDecimalCfg
             -- The live tags' function (WoW Forever: none under 10,000 abbreviates).
-            return cfg and ns.AbbreviateNumbers(v, cfg) or ns.AbbreviateNumbers(v)
+            if cfg then return ns.AbbreviateNumbers(v, cfg) end
+            if valueType ~= "absorb" and unitKey:match("^boss") then valueType = "bossHealth" end
+            return ns.AbbreviateValue(v, valueType)
         end
         local function _pvPct(p01)
             if not _G._EUI_TextDecimals then return tostring(math.floor(p01 * 100)) end
@@ -536,14 +539,14 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
             local pct = optState._previewHealthPct or 0.70
             local curHP = math.floor(maxHP * pct)
             if content == "healthshort" then return ns.AbbreviateShortHealth(curHP)
-            elseif content == "curhpshort" then return _pvAbbrev(curHP)
-            elseif content == "curmaxhp" then return _pvAbbrev(curHP) .. " / " .. _pvAbbrev(maxHP)
+            elseif content == "curhpshort" then return _pvAbbrev(curHP, "health")
+            elseif content == "curmaxhp" then return _pvAbbrev(curHP, "health") .. " / " .. _pvAbbrev(maxHP, "maxHealth")
             elseif content == "perhp" then return _pvPct(pct) .. "%"
             elseif content == "perhpnosign" then return _pvPct(pct)
-            elseif content == "perhpnum" then return _pvPct(pct) .. "% | " .. _pvAbbrev(curHP)
-            elseif content == "perhpnumdash" then return _pvPct(pct) .. "% - " .. _pvAbbrev(curHP)
-            elseif content == "bothdash" then return _pvAbbrev(curHP) .. " - " .. _pvPct(pct) .. "%"
-            else return _pvAbbrev(curHP) .. " | " .. _pvPct(pct) .. "%" end
+            elseif content == "perhpnum" then return _pvPct(pct) .. "% | " .. _pvAbbrev(curHP, "health")
+            elseif content == "perhpnumdash" then return _pvPct(pct) .. "% - " .. _pvAbbrev(curHP, "health")
+            elseif content == "bothdash" then return _pvAbbrev(curHP, "health") .. " - " .. _pvPct(pct) .. "%"
+            else return _pvAbbrev(curHP, "health") .. " | " .. _pvPct(pct) .. "%" end
         elseif content == "perpp" then
             local ppPct = optState._previewPowerPct or 0.85
             return math.floor(ppPct * 100) .. "%"
@@ -561,7 +564,7 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
             local curHP = math.floor(maxHP * pct)
             local maxPP = UnitPowerMax("player") or 100
             local ppPct2 = optState._previewPowerPct or 0.85
-            return _pvAbbrev(curHP) .. " | " .. ns.AbbreviateNumbers(math.floor(maxPP * ppPct2))
+            return _pvAbbrev(curHP, "health") .. " | " .. ns.AbbreviateNumbers(math.floor(maxPP * ppPct2))
         elseif content == "perhp_perpp" then
             local pct = optState._previewHealthPct or 0.70
             local ppPct3 = optState._previewPowerPct or 0.85
@@ -571,13 +574,13 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
             return string.format("%d", math.floor(maxHP * 0.14))
         elseif content == "absorbshort" then
             local maxHP = UnitHealthMax("player") or 1
-            return _pvAbbrev(math.floor(maxHP * 0.14))
+            return _pvAbbrev(math.floor(maxHP * 0.14), "absorb")
         elseif content == "healabsorb" then
             local maxHP = UnitHealthMax("player") or 1
             return string.format("%d", math.floor(maxHP * 0.08))
         elseif content == "healabsorbshort" then
             local maxHP = UnitHealthMax("player") or 1
-            return _pvAbbrev(math.floor(maxHP * 0.08))
+            return _pvAbbrev(math.floor(maxHP * 0.08), "absorb")
         elseif content == "group" then
             return "3"
         elseif content == "custom" then
@@ -599,9 +602,9 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
                 elseif key == "group" then v = "3"
                 elseif key == "level" then v = PreviewTextForContent("level", s, prefix)
                 elseif key == "hp" then v = tostring(curHP)
-                elseif key == "hp:abr" then v = _pvAbbrev(curHP)
+                elseif key == "hp:abr" then v = _pvAbbrev(curHP, "health")
                 elseif key == "hp:max" then v = tostring(maxHP)
-                elseif key == "hp:max:abr" then v = _pvAbbrev(maxHP)
+                elseif key == "hp:max:abr" then v = _pvAbbrev(maxHP, "maxHealth")
                 elseif key == "hp:pct" then v = _pvPct(optState._previewHealthPct or 0.70)
                 elseif key == "pp" then v = tostring(curPP)
                 elseif key == "pp:abr" then v = ns.AbbreviateNumbers(curPP)
@@ -1413,6 +1416,16 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
         haBgPv:SetColorTexture(0, 0, 0, ((settings.healAbsorbBgOpacity) or 15) / 100)
         haBgPv:SetAllPoints(healAbsorbBar:GetStatusBarTexture())
         healAbsorbBar._bg = haBgPv
+
+        -- Max Health Style preview (its eyeball): a fixed reduced maximum on the
+        -- bar's far end, styled by the live frames' function. Driven in pf:Update.
+        pf._pvMaxHp = CreateFrame("StatusBar", nil, health)
+        pf._pvMaxHp:SetAllPoints(health)
+        pf._pvMaxHp:SetFrameLevel(health:GetFrameLevel() + 2)
+        pf._pvMaxHp:SetMinMaxValues(0, 1)
+        pf._pvMaxHp:SetValue(0.2)
+        pf._pvMaxHp._bg = pf._pvMaxHp:CreateTexture(nil, "ARTWORK", nil, 2)
+        pf._pvMaxHp:Hide()
 
         -- Heal prediction preview (Heal Prediction eyeball): others' heals at the
         -- full incoming total underneath, yours on top, from the HP edge. The
@@ -3230,6 +3243,17 @@ function ns.UFO_BuildUnitPreview(parent, unitKey, side)
                 end
             else
                 healAbsorbBar:Hide()
+            end
+        end
+        local mhPv = pf._pvMaxHp
+        if mhPv then
+            local mhS = s.maxHealthStyle or "none"
+            if optState.showMaxHealthPreview and mhS ~= "none" and ns.UF_ApplyMaxHealthStyle then
+                ns.UF_ApplyMaxHealthStyle(mhPv, mhS, s)
+                ns.UF_OrientMaxHealth(mhPv, s.healthReverseFill, s.healthVerticalFill)
+                mhPv:Show()
+            else
+                mhPv:Hide()
             end
         end
 

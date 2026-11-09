@@ -120,15 +120,18 @@ local GROW_DIR_ORDER = { "LEFT", "RIGHT", "CENTER_HORIZONTAL", "CENTER_VERTICAL"
 local ICON_WRAP_VALUES = { LEFT = "Left", RIGHT = "Right", UP = "Up", DOWN = "Down" }
 local ICON_WRAP_ORDER = { "LEFT", "RIGHT", "UP", "DOWN" }
 
--- Same shape vocabulary and media set as Action Bars' Custom Button Shape
--- (EUI_ActionBars_Options.lua), minus "cropped" -- PAB has no equivalent
--- "cropped square" concept.
+-- Cropped uses a rectangular icon without the masked shapes' overhang.
 local SHAPE_VALUES = {
-    none = "None", square = "Square", circle = "Circle",
+    none = "None", cropped = "Cropped", square = "Square", circle = "Circle",
     csquare = "Curved Square", diamond = "Diamond", hexagon = "Hexagon",
     portrait = "Portrait", shield = "Shield",
 }
-local SHAPE_ORDER = { "none", "square", "circle", "csquare", "diamond", "hexagon", "portrait", "shield" }
+local SHAPE_ORDER = { "none", "cropped", "---", "square", "circle", "csquare", "diamond", "hexagon", "portrait", "shield" }
+-- A masked shape, ringed by its own border; None and Cropped keep the square
+-- border and its pixel size.
+local function IsMaskShape(shape)
+    return shape ~= nil and shape ~= "none" and shape ~= "cropped"
+end
 
 -- Levels map 1:1 to Action Bars' ns.BORDER_THICKNESS regular values (thin=1, normal=2,
 -- heavy=3, strong=4), so cfg.borderSize stays the same plain 0-4 number used elsewhere
@@ -1047,15 +1050,7 @@ local function BuildCoreFields(frame, fontPath, sy, cfg, apply, isBuff)
     ); sy = sy - hh
     do
         local rgn = dsRow._leftRegion
-        local swatch, updateSwatch = EllesmereUI.BuildColorSwatch(
-            rgn, dsRow:GetFrameLevel() + 3,
-            function() return (cfg.durationColorR or 1), (cfg.durationColorG or 1), (cfg.durationColorB or 1), 1 end,
-            function(r, g, b) cfg.durationColorR, cfg.durationColorG, cfg.durationColorB = r, g, b; apply() end,
-            false, 20)
-        swatch:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
-        rgn._lastInline = swatch
-        EllesmereUI.RegisterWidgetRefresh(updateSwatch)
-        EllesmereUI.BuildInlineCog(rgn, { icon = EllesmereUI.RESIZE_ICON, title = "Duration Text", rows = {
+        EllesmereUI.BuildInlineCog(rgn, { title = "Duration Text", rows = {
             { type = "slider", label = "Text Size", min = 6, max = 60, step = 1,
               get = function() return cfg.durationTextSize or 11 end,
               set = function(v) cfg.durationTextSize = v; apply() end },
@@ -1076,18 +1071,18 @@ local function BuildCoreFields(frame, fontPath, sy, cfg, apply, isBuff)
               get = function() return cfg.durationPrecisionThreshold and cfg.durationPrecisionThreshold / 60 or 0 end,
               set = function(v) cfg.durationPrecisionThreshold = v > 0 and math.floor(v * 60 + 0.5) or nil; apply() end },
         } })
-    end
-    do
-        local rgn = dsRow._rightRegion
         local swatch, updateSwatch = EllesmereUI.BuildColorSwatch(
             rgn, dsRow:GetFrameLevel() + 3,
-            function() return (cfg.stackColorR or 1), (cfg.stackColorG or 1), (cfg.stackColorB or 1), 1 end,
-            function(r, g, b) cfg.stackColorR, cfg.stackColorG, cfg.stackColorB = r, g, b; apply() end,
+            function() return (cfg.durationColorR or 1), (cfg.durationColorG or 1), (cfg.durationColorB or 1), 1 end,
+            function(r, g, b) cfg.durationColorR, cfg.durationColorG, cfg.durationColorB = r, g, b; apply() end,
             false, 20)
         swatch:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
         rgn._lastInline = swatch
         EllesmereUI.RegisterWidgetRefresh(updateSwatch)
-        EllesmereUI.BuildInlineCog(rgn, { icon = EllesmereUI.RESIZE_ICON, title = "Stacks Text", rows = {
+    end
+    do
+        local rgn = dsRow._rightRegion
+        EllesmereUI.BuildInlineCog(rgn, { title = "Stacks Text", rows = {
             { type = "slider", label = "Text Size", min = 6, max = 60, step = 1,
               get = function() return cfg.stackTextSize or 11 end,
               set = function(v) cfg.stackTextSize = v; apply() end },
@@ -1102,6 +1097,14 @@ local function BuildCoreFields(frame, fontPath, sy, cfg, apply, isBuff)
               get = function() return cfg.stackPosition or "BOTTOMRIGHT" end,
               set = function(v) cfg.stackPosition = v; apply() end },
         } })
+        local swatch, updateSwatch = EllesmereUI.BuildColorSwatch(
+            rgn, dsRow:GetFrameLevel() + 3,
+            function() return (cfg.stackColorR or 1), (cfg.stackColorG or 1), (cfg.stackColorB or 1), 1 end,
+            function(r, g, b) cfg.stackColorR, cfg.stackColorG, cfg.stackColorB = r, g, b; apply() end,
+            false, 20)
+        swatch:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+        rgn._lastInline = swatch
+        EllesmereUI.RegisterWidgetRefresh(updateSwatch)
     end
 
     return sy
@@ -1135,13 +1138,12 @@ local function BuildDisplayFields(frame, fontPath, sy, cfg, apply, isBuff)
     -- pixel count means nothing there. The Icon Shape setter rebuilds the page when
     -- the shape crosses none/custom, which swaps the control in this slot.
     local sizeCfg
-    if cfg.iconShape and cfg.iconShape ~= "none" then
+    if IsMaskShape(cfg.iconShape) then
         sizeCfg = {
             type = "dropdown", text = "Border Size",
             values = BORDER_SIZE_VALUES, order = BORDER_SIZE_LEVELS,
             itemDisabled = function(v)
-                local shape = cfg.iconShape
-                return shape and shape ~= "none" and BORDER_SIZE_SHAPE_DISABLED[v] or false
+                return IsMaskShape(cfg.iconShape) and BORDER_SIZE_SHAPE_DISABLED[v] or false
             end,
             itemDisabledTooltip = function()
                 return "This option requires a non-custom shape to be selected"
@@ -1166,7 +1168,7 @@ local function BuildDisplayFields(frame, fontPath, sy, cfg, apply, isBuff)
         EllesmereUI.BlizzStyle.Gate("playerauras", {
             type = "dropdown", text = "Border Style",
             disabled = function()
-                return cfg.iconShape and cfg.iconShape ~= "none"
+                return IsMaskShape(cfg.iconShape)
             end,
             disabledTooltip = "This option requires a non-custom shape to be selected",
             rawTooltip = true,
@@ -1234,7 +1236,7 @@ local function BuildDisplayFields(frame, fontPath, sy, cfg, apply, isBuff)
         })
         local function UpdateBorderCogVisibility()
             if cogBtn then cogBtn:SetShown((cfg.borderTexture or "solid") ~= "solid"
-                and not (cfg.iconShape and cfg.iconShape ~= "none")
+                and not IsMaskShape(cfg.iconShape)
                 and not EllesmereUI.BlizzStyle.Get("playerauras")) end
         end
         EllesmereUI.RegisterWidgetRefresh(UpdateBorderCogVisibility)
@@ -1388,8 +1390,7 @@ local function BuildDisplayFields(frame, fontPath, sy, cfg, apply, isBuff)
             -- Snap to Strong so a sync can't strand a shaped bar on a level it
             -- could never pick, silently losing its border and dispel ring.
             local sz = entry.cfg.borderSize or 1
-            if entry.cfg.iconShape and entry.cfg.iconShape ~= "none"
-                and sz >= 1 and sz <= 3 then
+            if IsMaskShape(entry.cfg.iconShape) and sz >= 1 and sz <= 3 then
                 entry.cfg.borderSize = BORDER_SIZE_NUM[BORDER_SIZE_DEFAULT_SHAPE]
             end
             entry.cfg.borderR, entry.cfg.borderG, entry.cfg.borderB, entry.cfg.borderA =
@@ -1478,29 +1479,29 @@ local function BuildDisplayFields(frame, fontPath, sy, cfg, apply, isBuff)
             type = "dropdown", text = "Icon Shape",
             values = SHAPE_VALUES, order = SHAPE_ORDER,
             itemDisabled = function(v)
-                return v ~= "none" and (cfg.borderTexture or "solid") ~= "solid"
+                return IsMaskShape(v) and (cfg.borderTexture or "solid") ~= "solid"
             end,
             itemDisabledTooltip = function(v)
-                if v ~= "none" and (cfg.borderTexture or "solid") ~= "solid" then
+                if IsMaskShape(v) and (cfg.borderTexture or "solid") ~= "solid" then
                     return "This option requires the Border Style to be set to Solid"
                 end
             end,
             getValue = function() return cfg.iconShape or "none" end,
             setValue = function(v)
-                local wasShaped = cfg.iconShape ~= nil and cfg.iconShape ~= "none"
+                local wasShaped = IsMaskShape(cfg.iconShape)
                 cfg.iconShape = v
                 -- Entering shape mode with a now-disabled Border Size level selected:
                 -- snap to the shape default, same as Action Bars' own shape dropdown
                 -- resetting border thickness on every shape change.
                 local curKey = BORDER_SIZE_KEY[cfg.borderSize or 1] or "thin"
-                if v ~= "none" and BORDER_SIZE_SHAPE_DISABLED[curKey] then
+                if IsMaskShape(v) and BORDER_SIZE_SHAPE_DISABLED[curKey] then
                     cfg.borderSize = BORDER_SIZE_NUM[BORDER_SIZE_DEFAULT_SHAPE]
                 end
                 apply()
                 -- The Border Size slots (here and in Icon Effects) hold a pixel
                 -- slider without a shape and the None..Strong dropdown with one, so
                 -- a none/custom crossing rebuilds the page to swap the control.
-                if wasShaped ~= (v ~= nil and v ~= "none") then
+                if wasShaped ~= IsMaskShape(v) then
                     EllesmereUI:RefreshPage(true)
                 end
             end
@@ -1516,6 +1517,17 @@ local function BuildDisplayFields(frame, fontPath, sy, cfg, apply, isBuff)
     ); sy = sy - hh
     do
         local rgn = shapeRow._leftRegion
+        EllesmereUI.BuildInlineCog(rgn, {
+            title = "Icon Shape",
+            disabled = function() return cfg.iconShape ~= "cropped" end,
+            disabledTooltip = "This option requires Icon Shape to be set to Cropped",
+            rows = {
+                { type = "slider", label = "Adjust Crop", min = 5, max = 25, step = 1,
+                  tooltip = "How much is trimmed from the icon's top and bottom, as a percentage per side. 10% is the classic cropped look.",
+                  get = function() return ns.PAB_CropPercent(cfg) end,
+                  set = function(v) cfg.iconCropPercent = v; apply() end },
+            },
+        })
         local keys, labels = {}, {}
         for _, entry in ipairs(PabAllBarEntries()) do
             keys[#keys + 1] = entry.key
@@ -1528,7 +1540,8 @@ local function BuildDisplayFields(frame, fontPath, sy, cfg, apply, isBuff)
         local function CopyShapeTo(entry)
             local shape = cfg.iconShape
             entry.cfg.iconShape = shape
-            if shape and shape ~= "none" then
+            if shape == "cropped" then entry.cfg.iconCropPercent = ns.PAB_CropPercent(cfg) end
+            if IsMaskShape(shape) then
                 entry.cfg.borderTexture = "solid"
                 entry.cfg.borderTextureOffset = nil
                 entry.cfg.borderTextureOffsetY = nil
@@ -1537,7 +1550,7 @@ local function BuildDisplayFields(frame, fontPath, sy, cfg, apply, isBuff)
                 entry.cfg.borderBehind = false
             end
             local sz = entry.cfg.borderSize or 1
-            if shape and shape ~= "none" and sz >= 1 and sz <= 3 then
+            if IsMaskShape(shape) and sz >= 1 and sz <= 3 then
                 entry.cfg.borderSize = BORDER_SIZE_NUM[BORDER_SIZE_DEFAULT_SHAPE]
             end
             PabApplyBarEntry(entry)
@@ -1555,6 +1568,7 @@ local function BuildDisplayFields(frame, fontPath, sy, cfg, apply, isBuff)
                 local shape = cfg.iconShape or "none"
                 for _, entry in ipairs(PabAllBarEntries()) do
                     if (entry.cfg.iconShape or "none") ~= shape then return false end
+                    if shape == "cropped" and ns.PAB_CropPercent(entry.cfg) ~= ns.PAB_CropPercent(cfg) then return false end
                 end
                 return true
             end,
@@ -1814,12 +1828,11 @@ local function BuildFxEffects(frame, sy, cfg, apply)
         -- Shape keeps the None..Strong dropdown (the shape ring is on/off); the
         -- Icon Shape setter rebuilds the page on a none/custom crossing.
         local fxBorderCfg
-        if cfg.iconShape and cfg.iconShape ~= "none" then
+        if IsMaskShape(cfg.iconShape) then
             fxBorderCfg = { type = "dropdown", text = "Border",
               values = BORDER_SIZE_VALUES, order = BORDER_SIZE_LEVELS,
               itemDisabled = function(v)
-                  local shape = cfg.iconShape
-                  return shape and shape ~= "none" and BORDER_SIZE_SHAPE_DISABLED[v] or false
+                  return IsMaskShape(cfg.iconShape) and BORDER_SIZE_SHAPE_DISABLED[v] or false
               end,
               itemDisabledTooltip = function()
                   return "This option requires a non-custom shape to be selected"
@@ -2745,7 +2758,7 @@ local function ShowAddBarPopup(anchorBtn, kind, fontPath)
         local nbBg = nameBox:CreateTexture(nil, "BACKGROUND")
         nbBg:SetAllPoints()
         nbBg:SetColorTexture(0, 0, 0, 0.5)
-        EllesmereUI.MakeBorder(nameBox, 1, 1, 1, 0.2)
+        EllesmereUI.MakeRoundedBorder(nameBox, 1, 1, 1, 0.2, nbBg)
         popup._nameBox = nameBox
         py = py - ROW_H - GAP
 
@@ -2970,6 +2983,23 @@ function ns.PABMP_BuildPage(pageName, parent, yOffset)
     -------------------------------------------------------------------
     local fixedY = -6
 
+    -- The rows' pill and knob, drawn texel to pixel as the settings toggle's
+    -- are (EllesmereUI.MakePixelLayer): a stadium and a circle sized for the
+    -- layer's scale, the knob one pad in from the side its state sits on.
+    local function OptionPillFit(L, k)
+        local w, h = L.parent:GetSize()
+        local hp, wp = math.floor(h * k + 0.5), math.floor(w * k + 0.5)
+        if hp == L.hp and wp == L.wp then return end
+        L.hp, L.wp = hp, wp
+        local pad = math.max(1, math.floor(2 * k + 0.5))
+        local d = math.max(2, hp - 2 * pad)
+        EllesmereUI.SetPillArt(L.track, hp)
+        EllesmereUI.SetCircleArt(L.knob, d)
+        L.knob:SetSize(d, d)
+        L.knob:ClearAllPoints()
+        L.knob:SetPoint("TOPLEFT", L._frame, "TOPLEFT", L.on and (wp - pad - d) or pad, -pad)
+    end
+
     -- Toggle row helper (label left, tile-style pill right).
     local function OptionRow(y, label, state, tooltip, onToggle)
         local row = CreateFrame("Frame", nil, sidebarOuter)
@@ -2989,22 +3019,22 @@ function ns.PABMP_BuildPage(pageName, parent, yOffset)
         btn:SetSize(32, 16)
         btn:SetPoint("RIGHT", row, "RIGHT", -8, 0)
         btn:SetFrameLevel(row:GetFrameLevel() + 2)
-        local pillBg = btn:CreateTexture(nil, "BACKGROUND")
-        pillBg:SetAllPoints()
-        local knob = btn:CreateTexture(nil, "ARTWORK")
-        knob:SetSize(12, 12)
+        local L = EllesmereUI.MakePixelLayer(btn, OptionPillFit)
+        local pillBg = L._frame:CreateTexture(nil, "BACKGROUND")
+        pillBg:SetAllPoints(L._frame)
+        local knob = L._frame:CreateTexture(nil, "ARTWORK")
+        L.track, L.knob, L.on = pillBg, knob, state and true or false
+        L:Fit()
         if state then
             local acr, acg, acb = 0.05, 0.82, 0.62
             if EllesmereUI.ResolveActiveAccent then
                 acr, acg, acb = EllesmereUI.ResolveActiveAccent()
             end
-            pillBg:SetColorTexture(acr, acg, acb, 1)
-            knob:SetPoint("RIGHT", btn, "RIGHT", -2, 0)
-            knob:SetColorTexture(1, 1, 1, 1)
+            pillBg:SetVertexColor(acr, acg, acb, 1)
+            knob:SetVertexColor(1, 1, 1, 1)
         else
-            pillBg:SetColorTexture(0.25, 0.25, 0.25, 1)
-            knob:SetPoint("LEFT", btn, "LEFT", 2, 0)
-            knob:SetColorTexture(0.5, 0.5, 0.5, 1)
+            pillBg:SetVertexColor(0.25, 0.25, 0.25, 1)
+            knob:SetVertexColor(0.5, 0.5, 0.5, 1)
         end
         btn:SetScript("OnClick", function() onToggle(not state) end)
         if tooltip then

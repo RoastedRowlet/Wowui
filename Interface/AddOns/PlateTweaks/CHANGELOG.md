@@ -3,6 +3,21 @@
 All notable changes to PlateTweaks are recorded here. No file like this
 existed before 1.8.4, so history prior to that release is not reconstructed.
 
+## 1.12.1
+
+### Fixed
+
+- **Colouring rules were unreliable inside dungeons.** Each rule's root
+  container was created with no frame level, so the aura button it built
+  on registration was pinned to the bar's level and then dragged below the
+  bar when the container was lowered to match. Outside a dungeon the later
+  re-pin repaired this; under the dungeon restriction that re-pin is refused,
+  so the tint stayed hidden under Plater's fill for the life of the plate.
+  The root container, and the Missing Debuffs ladder's root, now get their
+  final level before registering. Nested containers are unchanged.
+
+  Thanks to RDWorks for tracing this to its root cause and suggesting the fix.
+
 ## 1.12.0
 
 ### Added

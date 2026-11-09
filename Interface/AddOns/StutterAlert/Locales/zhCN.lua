@@ -239,6 +239,24 @@ L.EXPORT_D_EV_PREFIX           = "      插件通信：前缀为 %s 的消息（
 L.EXPORT_D_EV_BURST            = "      该帧的其他事件：%d  -  事件爆发"
 L.EXPORT_D_EV_NONE             = "      该帧没有触发任何事件 - 工作来自 OnUpdate 或计时器"
 
+-- == Export Report: system ==
+L.EXPORT_SYS_GPU               = "显卡：%s"
+L.EXPORT_SYS_INTEGRATED        = "%s（集成）"
+L.EXPORT_SYS_DISPLAY           = "显示：%dx%d，渲染比例 %d%%"
+L.EXPORT_SYS_DISPLAY_NOSCALE   = "显示：%dx%d"
+L.EXPORT_SYS_API               = "图形 API：%s"
+L.EXPORT_SYS_QUALITY           = "画面质量：%d（团队副本：%d）"
+L.EXPORT_SYS_QUALITY_NORAID    = "画面质量：%d"
+L.EXPORT_SYS_LIMITS            = "帧数限制：%s"
+L.EXPORT_SYS_LIMITS_NONE       = "帧数限制：无"
+L.EXPORT_SYS_LIMIT             = "%s %d"
+L.EXPORT_SYS_MAC               = "运行于 macOS"
+L.EXPORT_SYS_LATENCY           = "延迟：本地 %d ms，世界 %d ms"
+L.EXPORT_LATENCY_HIGH          = "网络：多数卡顿发生时，世界延迟明显高于你平时的 %d ms（%d/%d）。延迟突增后，游戏可能会在一帧内处理积压的数据。"
+L.EXPORT_COMBATLOG             = "卡顿期间战斗记录正在写入磁盘（%d/%d）。"
+L.EXPORT_COMBATLOG_ADV         = "卡顿期间战斗记录正在写入磁盘（%d/%d），且已开启高级战斗记录。"
+L.EXPORT_GXLOG                 = "如需处理器、内存和驱动信息，请同时附上游戏文件夹中 Logs 文件夹（与 Interface 同级）里的 gx.log。"
+
 -- == CVar display names (the game's own options wording) ==
 L.CVAR_MAX_FPS                 = "最大前台帧数"
 L.CVAR_MAX_FPS_BK              = "最大后台帧数"
@@ -254,6 +272,8 @@ L.CVAR_DEPTH                   = "景深效果"
 L.CVAR_TEXTURE_RES             = "材质分辨率"
 L.CVAR_PROJECTED               = "投射材质"
 L.CVAR_SPELL_DENSITY           = "法术密度"
+L.CVAR_TARGET_FPS              = "目标帧数"
+L.CVAR_VSYNC                   = "垂直同步"
 
 -- == Client / Flavor Names ==
 L.FLAVOR_RETAIL                = "正式服"
@@ -262,3 +282,4 @@ L.FLAVOR_CATA                  = "大地的裂变怀旧服"
 L.FLAVOR_WRATH                 = "巫妖王之怒怀旧服"
 L.FLAVOR_TBC                   = "燃烧的远征怀旧服"
 L.FLAVOR_CLASSIC_ERA           = "经典旧世"
+L.FLAVOR_FOREVER              = "WoW Forever"

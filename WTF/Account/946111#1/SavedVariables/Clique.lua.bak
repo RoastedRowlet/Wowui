@@ -9,10 +9,10 @@ CliqueDB3 = {
 ["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Zappyxatu - Stormrage"] = {
-["spec3_profileKey"] = "Zappyxatu - Stormrage",
-["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["spec2_profileKey"] = "Zappyxatu - Stormrage",
+["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["specswap"] = false,
+["spec3_profileKey"] = "Zappyxatu - Stormrage",
 },
 ["Madmareep - Stormrage"] = {
 ["spec1_profileKey"] = "Madmareep - Stormrage",
@@ -29,12 +29,12 @@ CliqueDB3 = {
 },
 ["Lonelylitten - Stormrage"] = {
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
+["spec2_profileKey"] = "Lonelylitten - Stormrage",
 ["downclick"] = false,
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
-["fastooc"] = false,
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["specswap"] = false,
-["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["fastooc"] = false,
 },
 ["Klutzykubfu - Stormrage"] = {
 ["spec1_profileKey"] = "Klutzykubfu - Stormrage",
@@ -55,6 +55,11 @@ CliqueDB3 = {
 ["created"] = 1793680276,
 ["version"] = "5.1",
 ["bindings"] = "CL02:95925f6bc23014c5bf4ab9cf19b4c9acda37270c07b28976ec61ec21e855c2d2a4e48f508adf7dedb61629b5dd1e93707ee79e73f35e8245672129e18047eea583c4198f1702aec8111270dc9cd001814f2caae36ef5f498de3dbca6e9cb7354dd7a252a0964da5bd4673470216523cd50f956b84cb7eb5f1dad2efb5d6bb1cd51ca4ab0422e853a056ffc8c2d650c4040ecb58224627178cfda103fcc9ade3c531a51d23be875c2e149fb1bba0a1afd614eca5874a3c6a6898d37e25804bb5c18e13a55b0510bca623a9bf554d1e0176a8fd6192ebb0eff4c1287d3e980cd56e44e1cbaab1c07d3099dcf2703e08d1656ab6029912b5bff98543bcc5a9fc5bad9e67857df21c2aed7c717",
+},
+["Lonelylitten - Stormrage"] = {
+["created"] = 1793774899,
+["version"] = "5.1",
+["bindings"] = "CL02:cd53514bc33010fe2b252fbe7468133b669fd482288c095d7ddaf610ea6d56dba42497ce31f6dfcdece850b2ad031f8440c85deebbeffb929bac8906d4245a935798735320895019d8f8045715908820570b40e2930f58d9e3f8f1e921edddbfa4e9f328b05123725b424a6934c81a14d9f816b282a2b0d104de4d0d82632e458bb0af3dd439cfecf52860fdab41d0f26830b7e8bb40c933259dbca88d7e67113eb7e42e33aed11b71340a2eb4375ee67314a0f5543499c96d4b7fe625b05072896f53d181e13563f4a7e0a6f89758da4d6c78442c08d382c66932ec9d423ee8d4ddf03ff854e735b80475f917d42e87557bf0d252f462a994a91c5f8f756811de84ae16ee9938973e63c189c169df20b6dbd9f429ebd3c1e0a8437f6dffec0b",
 },
 },
 },
@@ -368,12 +373,12 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["icon"] = 132212,
+["type"] = "menu",
 ["key"] = "SHIFT-BUTTON2",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 132212,
-["type"] = "menu",
 },
 {
 ["type"] = "target",

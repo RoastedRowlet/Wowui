@@ -48,10 +48,8 @@ events:SetScript("OnEvent", function(_, event, arg1)
         Detector:StartGrace()
         Detector:RebuildAddonList()
 
-        -- Per-addon memory costs ~50 ms to read, so it is sampled HERE and
-        -- nowhere else: we are inside the grace window we just started, where a
-        -- long frame is expected and already excluded from detection. The
-        -- sampler self-throttles, so rapid zoning will not pay the cost twice.
+        -- Memory costs about 50 ms to read, so it is sampled only here, inside
+        -- the grace window just started. See DESIGN-NOTES.md: Memory sampling.
         Detector:SampleAddonMemory()
 
     elseif event == "PLAYER_REGEN_DISABLED" then

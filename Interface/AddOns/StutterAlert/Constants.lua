@@ -6,12 +6,7 @@ local floor  = math.floor
 -- Our own folder name, used to keep StutterAlert out of its own blame list.
 ns.ADDON = ADDON
 
--- Cache the profiler metric enum fields we use. All twelve of these were
--- verified present on 12.0.7 (build 68887) by dumping Enum.AddOnProfilerMetric.
---
--- The CountTimeOver* ladder is effectively a per-addon cost histogram the client
--- maintains for free, so we never have to sample frame times ourselves to learn
--- how an addon normally behaves.
+-- Profiler metric enum fields. See DESIGN-NOTES.md: Profiler on every client.
 local M = Enum.AddOnProfilerMetric
 ns.METRIC = {
     LastTime             = M.LastTime,             -- ms spent by the addon in the most recent tick
@@ -43,9 +38,8 @@ ns.COLOR = {
     [ns.STATE.ELEVATED] = { 0.95, 0.65, 0.20 }, -- amber
     [ns.STATE.CRITICAL] = { 0.90, 0.25, 0.25 }, -- red
     ENGINE              = { 0.40, 0.55, 0.90 }, -- blue-ish: not addons
-    -- Desaturated grey: monitoring is suspended because the client is running to
-    -- a deliberate frame cap. Deliberately reads as "off", not as "calm" -- a
-    -- green button would claim everything was measured and fine.
+    -- Grey while monitoring is suspended by a frame cap. It must read as "off":
+    -- green would claim everything was measured and fine.
     THROTTLED           = { 0.45, 0.45, 0.48 },
 }
 
@@ -58,10 +52,8 @@ ns.GLYPH_GAME  = "|T939375:0|t"
 -- mark texture is the game's canonical "no icon" placeholder, so it always exists.
 ns.GLYPH_ADDON_FALLBACK = "|TInterface\\ICONS\\INV_Misc_QuestionMark:0|t"
 
--- Resolve an addon's own icon to an inline markup string. Prefers a declared
--- IconTexture (path or FileDataID), then an IconAtlas, then the generic marker.
--- Every branch is guarded so a missing/invalid declaration can't error or render
--- a broken square -- it just falls through to the next option.
+-- An addon's own icon as inline markup: IconTexture, then IconAtlas, then the
+-- generic marker. A missing or invalid declaration falls through.
 function ns.ResolveAddonIcon(name)
     local tex = C_AddOns.GetAddOnMetadata(name, "IconTexture")
     if tex and tex ~= "" then
@@ -97,14 +89,8 @@ function ns.StripColor(s)
     return s
 end
 
--- Cached per-addon version string, resolved once. Reported VERBATIM and never
--- parsed or compared: authors version however they like, and a live 12.0.7
--- install shows "330", "v12.0.20", "2.1.10" and "12.0.7 (v202607162050)" side by
--- side, so any comparison logic would be guesswork.
---
--- Note there is no way to read an addon's "## Interface:" line: 12.0.7's
--- GetAddOnMetadata returns nil for it on every addon, so staleness can only ever
--- be judged by a human reading the version string.
+-- Per-addon version string, cached. Reported verbatim, never parsed or compared.
+-- See DESIGN-NOTES.md: Version strings.
 ns.addonVersion = ns.addonVersion or {}
 function ns.AddonVersion(name)
     if not name then return nil end
@@ -119,11 +105,7 @@ function ns.AddonVersion(name)
     return cached
 end
 
--- Allocation buckets for hitch signatures. A long frame that allocated megabytes
--- was computing (building tables, concatenating, serializing); one that
--- allocated almost nothing was blocking on the engine (asset loads, cache
--- misses, tooltip scans). That single distinction separates the two fundamental
--- kinds of addon hitch, so it earns a place in the signature.
+-- Allocation buckets for hitch signatures. See DESIGN-NOTES.md: Allocation buckets.
 ns.ALLOC_BUCKET = {
     NONE   = "ALLOC_NONE",
     SMALL  = "ALLOC_SMALL",
@@ -139,18 +121,8 @@ function ns.AllocBucket(kb)
 end
 
 -- ---------------------------------------------------------------------------
--- Library / support packages.
---
--- When one of these is named as a culprit the profiler is not wrong, but it is
--- naming something no author can act on. 12.0.7 bills whichever addon owns the
--- executing code, and a shared library frame belongs to whichever copy won
--- LibStub. Verified directly with a probe: calling into another addon's function
--- does NOT re-attribute the cost, so every consumer of a shared library frame
--- has its time billed to the library's owner.
---
--- Detection is by name and is therefore a heuristic. It only ever ADDS a caveat
--- to the report - it never suppresses or moves blame - so a false positive costs
--- one hedged sentence rather than a wrong accusation.
+-- Library packages, matched by name. A match only adds a caveat to the report,
+-- never moves blame. See DESIGN-NOTES.md: Library packages.
 -- ---------------------------------------------------------------------------
 local LIB_PATTERNS = {
     "_Libraries$", "_Libs$", "_Lib$",
@@ -198,13 +170,8 @@ function ns.FormatKB(kb)
     return format(L.UNIT_KB, floor(kb + 0.5))
 end
 
--- Context bucket keys -> locale keys, used for both display and aggregates.
---
--- The five-man bucket is the one label that is not true on every client: on
--- retail it is dominated by Mythic+, which no Classic client has, so naming it
--- there would describe a game mode the player cannot enter. The `scenario`
--- bucket needs no such treatment -- it is filled from IsInInstance, so on a
--- client without scenarios it simply never fires.
+-- Context bucket keys to locale keys. Only retail's five-man label names
+-- Mythic+, which no Classic client has.
 ns.CONTEXT_LABEL = {
     raid     = "CTX_RAID",
     dungeon  = ns.IsRetail and "CTX_DUNGEON" or "CTX_DUNGEON_PLAIN",
@@ -221,10 +188,7 @@ ns.SEVERITY_LABEL = {
     [ns.STATE.CRITICAL] = "SEV_CRITICAL",
 }
 
--- Frame-cap console variable -> locale key for its human name. The detector
--- works in console variable names because that is what it probes, but a player
--- reading "maxFPSBk" learns nothing: they set a slider called Max Background
--- FPS. Same pattern Advisor.lua uses for the graphics variables.
+-- Frame-cap console variable to the locale key of its options-menu name.
 ns.CAP_CVAR_LABEL = {
     maxFPSBk = "CVAR_MAX_FPS_BK",
     maxFPS   = "CVAR_MAX_FPS",

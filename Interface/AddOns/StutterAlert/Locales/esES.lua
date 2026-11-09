@@ -239,6 +239,24 @@ L.EXPORT_D_EV_PREFIX           = "      Tráfico de addons: mensajes con la etiq
 L.EXPORT_D_EV_BURST            = "      Más eventos en ese fotograma: %d  -  una ráfaga de eventos"
 L.EXPORT_D_EV_NONE             = "      No se disparó ningún evento en ese fotograma - el trabajo venía de un OnUpdate o de un temporizador"
 
+-- == Export Report: system ==
+L.EXPORT_SYS_GPU               = "Tarjeta gráfica: %s"
+L.EXPORT_SYS_INTEGRATED        = "%s (integrada)"
+L.EXPORT_SYS_DISPLAY           = "Pantalla: %dx%d, escala de renderizado %d%%"
+L.EXPORT_SYS_DISPLAY_NOSCALE   = "Pantalla: %dx%d"
+L.EXPORT_SYS_API               = "API gráfica: %s"
+L.EXPORT_SYS_QUALITY           = "Calidad gráfica: %d (banda: %d)"
+L.EXPORT_SYS_QUALITY_NORAID    = "Calidad gráfica: %d"
+L.EXPORT_SYS_LIMITS            = "Límites de fotogramas: %s"
+L.EXPORT_SYS_LIMITS_NONE       = "Límites de fotogramas: ninguno"
+L.EXPORT_SYS_LIMIT             = "%s %d"
+L.EXPORT_SYS_MAC               = "Ejecutándose en macOS"
+L.EXPORT_SYS_LATENCY           = "Latencia: local %d ms, mundo %d ms"
+L.EXPORT_LATENCY_HIGH          = "Red: la latencia del mundo superaba con creces tus %d ms habituales en la mayoría de los tirones (%d de %d). Tras un pico de latencia, el juego puede procesar lo acumulado en un solo fotograma."
+L.EXPORT_COMBATLOG             = "El registro de combate se estaba escribiendo en el disco durante los tirones (%d de %d)."
+L.EXPORT_COMBATLOG_ADV         = "El registro de combate se estaba escribiendo en el disco durante los tirones (%d de %d), con el registro de combate avanzado activado."
+L.EXPORT_GXLOG                 = "Para el procesador, la memoria y el controlador, adjunta también gx.log, de la carpeta Logs de tu carpeta del juego (junto a Interface)."
+
 -- == CVar display names (the game's own options wording) ==
 L.CVAR_MAX_FPS                 = "FPS máx. en primer plano"
 L.CVAR_MAX_FPS_BK              = "FPS máx. en segundo plano"
@@ -254,6 +272,8 @@ L.CVAR_DEPTH                   = "Efectos de profundidad"
 L.CVAR_TEXTURE_RES             = "Resolución de texturas"
 L.CVAR_PROJECTED               = "Texturas proyectadas"
 L.CVAR_SPELL_DENSITY           = "Densidad de hechizos"
+L.CVAR_TARGET_FPS              = "FPS objetivo"
+L.CVAR_VSYNC                   = "Sincronización vertical"
 
 -- == Client / Flavor Names ==
 L.FLAVOR_RETAIL                = "Retail"
@@ -262,3 +282,4 @@ L.FLAVOR_CATA                  = "Cataclysm Classic"
 L.FLAVOR_WRATH                 = "Wrath of the Lich King Classic"
 L.FLAVOR_TBC                   = "Burning Crusade Classic"
 L.FLAVOR_CLASSIC_ERA           = "Classic Era"
+L.FLAVOR_FOREVER              = "WoW Forever"

@@ -1,7 +1,6 @@
 # Grid2
 
-## [4.1.9](https://github.com/michaelnpsp/Grid2/tree/4.1.9) (2026-10-16)
-[Full Changelog](https://github.com/michaelnpsp/Grid2/compare/4.1.7...4.1.9) [Previous Releases](https://github.com/michaelnpsp/Grid2/releases)
+## [4.1.10-beta](https://github.com/michaelnpsp/Grid2/tree/4.1.10-beta) (2026-11-06)
+[Full Changelog](https://github.com/michaelnpsp/Grid2/compare/4.1.8-beta...4.1.10-beta) [Previous Releases](https://github.com/michaelnpsp/Grid2/releases)
 
-- Missing buffs: Added a setting to ignore buffs the character does not know (GH issue #476)  
-    Icons indicators: Removed cap for "icons per row" setting (GH issue #475)  
+- Fixing pet warlock range check for retail (GH issue #479)  

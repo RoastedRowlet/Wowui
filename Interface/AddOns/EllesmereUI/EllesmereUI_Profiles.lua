@@ -678,6 +678,7 @@ end
 --      fonts  = <snapshot of EllesmereUIDB.fonts>,
 --      customColors = <snapshot of EllesmereUIDB.customColors>,
 --      darkMode = <per-profile Dark Mode palette + class/power/resource darken>,
+--      numberFormat = <per-profile Number Format, EllesmereUI_NumberFormat.lua>,
 --  }
 --  EllesmereUIDB.activeProfile = "Default"  (name of active profile)
 --  EllesmereUIDB.profileOrder  = { "Default", ... }
@@ -930,6 +931,8 @@ local function RepointAllDBs(profileName)
     -- RefreshDarkMode() also runs ApplyColorsToOUF, so the (possibly different)
     -- darken propagates to class/power colours even in global colour mode.
     EllesmereUI.RefreshDarkMode()
+    -- Number Format is per-profile too: drop the resolved configs and redraw.
+    EllesmereUI.RefreshNumberFormat()
     -- Sidebar sync icons key off the ACTIVE profile's group membership;
     -- re-evaluate them on every repoint (switch/create/delete/rename/import)
     if EllesmereUI._syncRefreshFns then
@@ -1065,6 +1068,7 @@ function EllesmereUI.SnapshotAllAddons()
     data.customColors = DeepCopy(cc)
     -- Dark Mode palette + darken amounts (always the active profile's own).
     data.darkMode = DeepCopy(EllesmereUI.GetDarkModeDB())
+    data.numberFormat = DeepCopy(EllesmereUI.GetNumberFormatDB())
     -- Spec Overrides ride with the profile (freshen the current spec's stored
     -- values from live first so exports never lag recent edits).
     if EllesmereUI.SpecOverrides_HarvestCurrent then
@@ -2090,7 +2094,7 @@ do
         "accentReskinElements",
     })
     -- Shared border-editor key sets (tooltip / popup menu / popup menu button)
-    for _, prefix in ipairs({ "tooltip", "popupMenu", "popupMenuButton" }) do
+    for _, prefix in ipairs({ "tooltip", "popupMenu", "popupMenuButton", "lootWindow", "lootIcon" }) do
         for _, suffix in ipairs({
             "BorderTexture", "BorderThickness", "BorderThicknessPx", "BorderColor",
             "BorderColorMode", "BorderOpacity", "BorderOffsetX",
@@ -2106,7 +2110,7 @@ do
         "reskinPlayerSpells", "reskinAdventureGuide", "reskinProfessionsBook",
         "reskinProfessions", "reskinWorldMap", "reskinGuild", "reskinCalendar",
         "reskinAchievements", "reskinMail", "reskinCatalyst", "reskinSocket",
-        "reskinItemUpgrade", "reskinLoot", "reskinLootToast", "lootToastQualityStrip",
+        "reskinItemUpgrade", "reskinLoot", "lootIconBorder", "lootWindowBorderQualityColor", "reskinLootToast", "lootToastQualityStrip",
         "lootToastQualityStripMoney", "lootToastScale",
         "reskinBNetToast",
         "reskinLootRoll", "reskinLootHistory", "reskinGroupInvite",
@@ -2149,7 +2153,6 @@ do
         "merchantShowAsList", "merchantListRowHeight", "merchantShowItemLevel", "merchantBulkBuy",
         "merchantExpand", "merchantCols", "merchantRows",
         "mailAltList", "mailAltListMax", "mailAltListMinLevel", "mailAltListSort",
-        "mailCloseBags",
         -- Friends List card (WoW Forever: the friend tiles and auto-accept)
         "friendsListCard",
     })
@@ -2276,8 +2279,8 @@ function EllesmereUI.ExportProfile(profileName, includedFolders, includeLayout, 
     -- fonts/customColors/darkMode/euiAccent are profile-GLOBAL appearance and are
     -- not separable per-addon, so a subset export must not carry them (they'd
     -- clobber the recipient's). Only a full-profile export carries them.
-    -- Profile-global appearance (fonts, custom colours, dark mode, accent)
-    -- and the account UI scale ride only when "Global Settings" is included
+    -- Profile-global appearance (fonts, custom colours, dark mode, accent,
+    -- number format) and the account UI scale ride only when "Global Settings" is included
     -- (default ON) -- full and subset exports alike, since the unified export
     -- flow offers the toggle for both (2026-07-20 redesign; the old subset
     -- path dropped uiScale unconditionally, which would have regressed scale
@@ -2287,6 +2290,7 @@ function EllesmereUI.ExportProfile(profileName, includedFolders, includeLayout, 
         exportData.fonts        = nil
         exportData.customColors = nil
         exportData.darkMode     = nil
+        exportData.numberFormat = nil
         exportData.euiAccent    = nil
         exportData.uiScale      = nil
     end
@@ -2407,14 +2411,21 @@ end
 --    goldLedger           cross-character and warband gold record
 --    qolUpgradeCalcChars  Upgrade Calculator per-character cache
 --    xpBarChars           XP bar session clock, XP rate and time this level
+--    timePlayedChars      Time Played block: each character's total played time
 --    questWatchChars      WoW Forever quest tools: quests each character's
 --                         filters and auto-track moved
+--    questTrackerChars    WoW Forever Custom Quest Tracker: each character's
+--                         untracked, collapsed, opened and pinned quests
 --    mailAltRoster        the Mail card's Alt List: every character recorded
 --    mailAltHidden        and the ones its Shown Characters leaves out
 --    raidHoroscope        Party Mode's Should I Raid Tonight?: each
 --                         character's birthday
 --    cdmCachedBarSizes    Cooldown Manager bar sizes cached per character
 --    bagCurrencyByChar    Bags' tracked currencies per character
+--    mageArmorByChar      AuraBuff Reminders (WoW Forever): the mage armor
+--                         each character last had up
+--    global               friend groups: the groups, their order and colours,
+--                         and each friend's group by BattleTag
 --  (The upgrade-calc and gold blobs are what PRIVATE_ADDON_KEYS strips from
 --  normal strings, at their current top-level homes. The three legacy gold
 --  keys stay listed: until Bags or DataBars loads and absorbs them they are
@@ -2425,6 +2436,8 @@ end
 --    gfxBackup              Optimize My FPS and Graphics' Restore values
 --    friendlyPlateVisSaved  friendly plates hidden in a follower dungeon
 --    chatTellMuted          the whisper sound Chat muted
+--  And the inline cogs this user has opened (cogSeen: their notification dots
+--  stay for whoever imports the string).
 -------------------------------------------------------------------------------
 local FULL_EXPORT_TYPE = "fullaccount"
 local FULL_EXPORT_EXCLUDED = {
@@ -2434,18 +2447,24 @@ local FULL_EXPORT_EXCLUDED = {
     warbandGold           = true,
     qolUpgradeCalcChars   = true,
     xpBarChars            = true,
+    timePlayedChars       = true,
     restoreOnUninstall    = true,
     gfxBackup             = true,
     friendlyPlateVisSaved = true,
     chatTellMuted         = true,
     groupFinderApps       = true,
     questWatchChars       = true,
+    questTrackerChars     = true,
     cdmRepopulatePending  = true,
+    cdmRepopulateDone     = true,
     mailAltRoster         = true,
     mailAltHidden         = true,
     raidHoroscope         = true,
     cdmCachedBarSizes     = true,
     bagCurrencyByChar     = true,
+    mageArmorByChar       = true,
+    global                = true,
+    cogSeen               = true,
 }
 
 -- Root stores keyed by profile name (or character) describe the recipient's
@@ -3452,6 +3471,13 @@ function EllesmereUI.ImportProfile(importStr, profileName)
         if imported.fonts then merged.fonts = DeepCopy(imported.fonts) end
         if imported.customColors then merged.customColors = DeepCopy(imported.customColors) end
         if imported.darkMode then merged.darkMode = DeepCopy(imported.darkMode) end
+        -- numberFormat only exists once its owner changed something, so a string
+        -- with the other global settings but none comes from the defaults.
+        if imported.numberFormat then
+            merged.numberFormat = DeepCopy(imported.numberFormat)
+        elseif imported.fonts then
+            merged.numberFormat = nil
+        end
         -- Override stores: ALL-OR-NOTHING (2026-07-20 redesign; the old per-folder
         -- value merge in SpecOverrides_MergeImportedStores is retired and must not be
         -- re-wired). Taking -> the exporter's complete override system (values + groups

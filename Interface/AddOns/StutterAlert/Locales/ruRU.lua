@@ -240,6 +240,24 @@ L.EXPORT_D_EV_PREFIX           = "      Трафик аддонов: сообщ�
 L.EXPORT_D_EV_BURST            = "      Ещё событий в этом кадре: %d  -  всплеск событий"
 L.EXPORT_D_EV_NONE             = "      В этом кадре не было событий - работа шла из OnUpdate или таймера"
 
+-- == Export Report: system ==
+L.EXPORT_SYS_GPU               = "Видеокарта: %s"
+L.EXPORT_SYS_INTEGRATED        = "%s (встроенная)"
+L.EXPORT_SYS_DISPLAY           = "Экран: %dx%d, масштаб отрисовки %d%%"
+L.EXPORT_SYS_DISPLAY_NOSCALE   = "Экран: %dx%d"
+L.EXPORT_SYS_API               = "Графический API: %s"
+L.EXPORT_SYS_QUALITY           = "Качество графики: %d (рейд: %d)"
+L.EXPORT_SYS_QUALITY_NORAID    = "Качество графики: %d"
+L.EXPORT_SYS_LIMITS            = "Ограничения кадров: %s"
+L.EXPORT_SYS_LIMITS_NONE       = "Ограничения кадров: нет"
+L.EXPORT_SYS_LIMIT             = "%s %d"
+L.EXPORT_SYS_MAC               = "Запущено на macOS"
+L.EXPORT_SYS_LATENCY           = "Задержка: домашняя %d ms, мир %d ms"
+L.EXPORT_LATENCY_HIGH          = "Сеть: при большинстве фризов задержка мира была заметно выше обычных %d ms (%d из %d). После скачка задержки игра может обработать накопившееся за один кадр."
+L.EXPORT_COMBATLOG             = "Во время фризов журнал боя записывался на диск (%d из %d)."
+L.EXPORT_COMBATLOG_ADV         = "Во время фризов журнал боя записывался на диск (%d из %d), с расширенным журналом боя."
+L.EXPORT_GXLOG                 = "Для данных о процессоре, памяти и драйвере приложите также gx.log из папки Logs в папке игры (рядом с Interface)."
+
 -- == CVar display names (the game's own options wording) ==
 L.CVAR_MAX_FPS                 = "Макс. частота кадров"
 L.CVAR_MAX_FPS_BK              = "Макс. частота кадров в фоне"
@@ -255,6 +273,8 @@ L.CVAR_DEPTH                   = "Эффекты глубины"
 L.CVAR_TEXTURE_RES             = "Разрешение текстур"
 L.CVAR_PROJECTED               = "Проецируемые текстуры"
 L.CVAR_SPELL_DENSITY           = "Плотность заклинаний"
+L.CVAR_TARGET_FPS              = "Целевая частота кадров"
+L.CVAR_VSYNC                   = "Вертикальная синхронизация"
 
 -- == Client / Flavor Names ==
 L.FLAVOR_RETAIL                = "Retail"
@@ -263,3 +283,4 @@ L.FLAVOR_CATA                  = "Cataclysm Classic"
 L.FLAVOR_WRATH                 = "Wrath of the Lich King Classic"
 L.FLAVOR_TBC                   = "Burning Crusade Classic"
 L.FLAVOR_CLASSIC_ERA           = "Classic Era"
+L.FLAVOR_FOREVER              = "WoW Forever"

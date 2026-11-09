@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 1418,
+["session"] = 1424,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -2126,12 +2126,6 @@ BugGrabberDB = {
 ["counter"] = 128,
 },
 {
-["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
-["session"] = 1388,
-["time"] = 1792544474,
-["counter"] = 40,
-},
-{
 ["message"] = "Interface/AddOns/EllesmereUI/EllesmereUI.lua:571: attempt to compare field 'duration' (a secret number value, while execution tainted by 'EllesmereUI')",
 ["time"] = 1792627642,
 ["locals"] = "(for state)=<table>{\n 1=EUIChatHearth1 <EllesmereUI.lua:435>\n 2=EUIChatHearth2 <EllesmereUI.lua:435>\n 3=EUIChatHearth3 <EllesmereUI.lua:435>\n}\n(for control)=1\n_=1\nbtn=EUIChatHearth1 <EllesmereUI.lua:435>{\n _castHL=Texture <EllesmereUI.lua:459>\n _hsID=556\n _hsType=\"spell\"\n icon=Texture <EllesmereUI.lua:437>\n cooldown=Cooldown <EllesmereUI.lua:444>\n}\naType=\"spell\"\nid=556\ncdInfo=<table>{\n modRate=<secret number>\n isEnabled=true\n startTime=<secret number>\n isActive=false\n duration=<secret number>\n}\n(*temporary)=<secret number>\n(*temporary)=556\n(*temporary)=<table>{\n modRate=<secret number>\n isEnabled=true\n startTime=<secret number>\n isActive=false\n duration=<secret number>\n}\n(*temporary)=nil\n(*temporary)=nil\n(*temporary)=nil\n(*temporary)=\"attempt to compare field 'duration' (a secret number value, while execution tainted by 'EllesmereUI')\"\nhearthBtns=<table>{\n 1=EUIChatHearth1 <EllesmereUI.lua:435>\n 2=EUIChatHearth2 <EllesmereUI.lua:435>\n 3=EUIChatHearth3 <EllesmereUI.lua:435>\n}\n",
@@ -2228,12 +2222,26 @@ BugGrabberDB = {
 ["counter"] = 41,
 },
 {
+["message"] = "Interface/AddOns/EllesmereUI/EllesmereUI.lua:572: attempt to compare field 'duration' (a secret number value, while execution tainted by 'EllesmereUI')",
+["time"] = 1793750773,
+["locals"] = "(for state)=<table>{\n 1=EUIChatHearth1 <EllesmereUI.lua:436>\n 2=EUIChatHearth2 <EllesmereUI.lua:436>\n 3=EUIChatHearth3 <EllesmereUI.lua:436>\n}\n(for control)=1\n_=1\nbtn=EUIChatHearth1 <EllesmereUI.lua:436>{\n _castHL=Texture <EllesmereUI.lua:460>\n _hsID=556\n _hsType=\"spell\"\n icon=Texture <EllesmereUI.lua:438>\n cooldown=Cooldown <EllesmereUI.lua:445>\n}\naType=\"spell\"\nid=556\ncdInfo=<table>{\n modRate=<secret number>\n isEnabled=true\n startTime=<secret number>\n isActive=false\n duration=<secret number>\n}\n(*temporary)=<secret number>\n(*temporary)=556\n(*temporary)=<table>{\n modRate=<secret number>\n isEnabled=true\n startTime=<secret number>\n isActive=false\n duration=<secret number>\n}\n(*temporary)=nil\n(*temporary)=nil\n(*temporary)=nil\n(*temporary)=\"attempt to compare field 'duration' (a secret number value, while execution tainted by 'EllesmereUI')\"\nhearthBtns=<table>{\n 1=EUIChatHearth1 <EllesmereUI.lua:436>\n 2=EUIChatHearth2 <EllesmereUI.lua:436>\n 3=EUIChatHearth3 <EllesmereUI.lua:436>\n}\n",
+["stack"] = "[Interface/AddOns/EllesmereUI/EllesmereUI.lua]:572: in function <Interface/AddOns/EllesmereUI/EllesmereUI.lua:567>\n[Interface/AddOns/EllesmereUI/EllesmereUI.lua]:632: in function <Interface/AddOns/EllesmereUI/EllesmereUI.lua:594>\n[Interface/AddOns/EllesmereUI/EllesmereUI.lua]:644: in function <Interface/AddOns/EllesmereUI/EllesmereUI.lua:638>\n[C]: ?\n[C]: in function 'Show'\n[Interface/AddOns/EllesmereUIChat/EUI_Chat_Sidebar.lua]:451: in function 'TogglePortalFlyout'\n[Interface/AddOns/EllesmereUIChat/EUI_Chat_Skin.lua]:602: in function <Interface/AddOns/EllesmereUIChat/EUI_Chat_Skin.lua:600>\n",
+["session"] = 1419,
+["counter"] = 12,
+},
+{
 ["message"] = "...erface/AddOns/CraftSim/Modules/CraftLog/CraftLog.lua:112: attempt to index local 'recipeData' (a nil value)",
-["time"] = 1793721875,
+["time"] = 1793769148,
 ["locals"] = "recipeData=nil\n(*temporary)=<table>{\n name=\"CraftLog\"\n}\n(*temporary)=\"Updating Reagents Count for: \"\n(*temporary)=nil\n(*temporary)=\"attempt to index local 'recipeData' (a nil value)\"\nCraftSim=<table>{\n COOLDOWNS=Frame <GUTIL.lua:238>\n STATISTICS=<table>\n PATCH_NOTES=<table>\n OPTIONAL_REAGENT_DATA=<table>\n ProfessionStats=<table>\n OnCraftData=<table>\n DEBUG=<table>\n CRAFT_LOG=Frame <GUTIL.lua:238>\n WIDGETS=<table>\n ProfessionGear=<table>\n CRAFT_BUFFS=Frame <GUTIL.lua:238>\n NodeData=<table>\n TOOLENCHANTDATA=<table>\n SLASH=<table>\n LOCAL_MX=<table>\n PRE_CRAFT_BUFF_GATE=<table>\n REAGENT_DATA=<table>\n WORK_ORDER_TRACKER=Frame <GUTIL.lua:238>\n EXPLANATIONS=<table>\n LibCompress=<table>\n TopGearResult=<table>\n ReagentData=<table>\n LOCAL_DE=<table>\n CONCENTRATION_TRACKER=Frame <GUTIL.lua:238>\n SUPPORTERS=<table>\n LibGraph=<table>\n OptionalReagentSlot=<table>\n Reagent=<table>\n RECIPE_INFO=<table>\n PRICE_APIS=<table>\n LOCAL_FR=<table>\n CraftSessionData=<table>\n ITEM_TOOLTIPS=<table>\n CraftQueueItem=<table>\n SPECIALIZATION_DATA=<table>\n LOCAL=<table>\n SHOPPING=Frame <GUTIL.lua:238>\n CraftQueue=<table>\n BagBuff=<table>\n Buff=<table>\n UTIL=<table>\n BuffData=<table>\n JSONBuilder=<table>\n LOCAL_ES=<table>\n CraftRecipeData=<table>\n PRE_CRAFT_CONDITION_IDS=<table>\n CraftSimObject=<table>\n PerkData=<table>\n ITEM_COUNT=Frame <GUTIL.lua:238>\n REAGENT_OPTIMIZATION=<table>\n TOPGEAR=<table>\n CraftResultItem=<table>\n CraftResult=<table>\n MULTICRAFT_SUPPORT_DATA=<table>\n OptionalReagent=<table>\n CONCENTRATION_CURVE_DATA=<table>\n ReagentOptimizationResult=<table>\n Statweights=<table>\n LOCAL_IT=<table>\n CONTROL_PANEL=<table>\n ConcentrationData=<table>\n ResultData=<table>\n SalvageReagentSlot=<table>\n RECIPE_SCAN=<table>\n AceSerializer=<table>\n INVENTORY_APIS=<table>\n CALC=<table>\n ReagentListItem=<table>\n SIMULATION_MODE=<table>\n ReagentItem=<table>\n OPTIONS=<table>\n PriceData=<table>\n INIT=Frame <GUTIL.lua:238>\n Object=<table>\n ProfessionGearSet=<table>\n SpecializationData=<table>\n ProfessionData=<table>\n LOCAL_RU=<table>\n PRICE_SOURCE=<table>\n PATRON_MOXIE_SURPLUS=<table>\n OPTIONAL_CURRENCY_REAGENT_DATA=<table>\n LOCAL_CN=<table>\n ENCHANT_RECIPE_DATA=<table>\n LOCAL_EN=<table>\n PATRON_MOXIE_VALUE_DB=<table>\n ProfessionStat=<table>\n PRICING=<table>\n CRAFT_LISTS=<table>\n CraftResultReagent=<table>\n GUTIL=<table>\n INVENTORY_API=<table>\n FRAME=<table>\n LibIcon=<table>\n CONST=<table>\n SPECIALIZATION_INFO=<table>\n MODULES=<table>\n CUSTOMER_HISTORY=Frame <GUTIL.lua:238>\n RecipeData=<table>\n DISENCHANT=Frame <GUTIL.lua:238>\n DB=<table>\n LibLog=<table>\n RECIPE_ACQUISITION=<table>\n LOCAL_TW=<table>\n INVENTORY_SOURCE=<table>\n CooldownData=<table>\n LOCAL_PT=<table>\n LOCAL_KO=<table>\n GGUI=<table>\n CRAFTQ=Frame <GUTIL.lua:238>\n PRICE_API=<table>\n MEDIA=<table>\n}\nLogger=<table>{\n name=\"CraftLog\"\n}\n",
 ["stack"] = "[Interface/AddOns/CraftSim/Modules/CraftLog/CraftLog.lua]:112: in function <...erface/AddOns/CraftSim/Modules/CraftLog/CraftLog.lua:110>\n",
-["session"] = 1418,
-["counter"] = 26,
+["session"] = 1420,
+["counter"] = 30,
+},
+{
+["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
+["session"] = 1420,
+["time"] = 1793771167,
+["counter"] = 50,
 },
 },
 }

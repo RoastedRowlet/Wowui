@@ -1,0 +1,17 @@
+# SavedVariables live outside this folder (WTF\...), but ignore defensively
+# in case anything is ever copied in alongside the addon during testing.
+*.lua.bak
+*.tmp
+*.log
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+
+# Local working copies kept beside a file while editing it.
+*.bak
+*.prepatch*
+
+# CodeGraph keeps its own rules in .codegraph/.gitignore, which excludes the
+# database and transient files while keeping the directory tracked.

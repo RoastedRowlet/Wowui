@@ -239,6 +239,24 @@ L.EXPORT_D_EV_PREFIX           = "      애드온 통신: 접두사가 %s인 메
 L.EXPORT_D_EV_BURST            = "      해당 프레임의 추가 이벤트: %d  -  이벤트 폭주"
 L.EXPORT_D_EV_NONE             = "      해당 프레임에 발생한 이벤트 없음 - 작업이 OnUpdate나 타이머에서 나왔습니다"
 
+-- == Export Report: system ==
+L.EXPORT_SYS_GPU               = "그래픽 카드: %s"
+L.EXPORT_SYS_INTEGRATED        = "%s (내장)"
+L.EXPORT_SYS_DISPLAY           = "화면: %dx%d, 렌더링 배율 %d%%"
+L.EXPORT_SYS_DISPLAY_NOSCALE   = "화면: %dx%d"
+L.EXPORT_SYS_API               = "그래픽 API: %s"
+L.EXPORT_SYS_QUALITY           = "그래픽 품질: %d (공격대: %d)"
+L.EXPORT_SYS_QUALITY_NORAID    = "그래픽 품질: %d"
+L.EXPORT_SYS_LIMITS            = "프레임 제한: %s"
+L.EXPORT_SYS_LIMITS_NONE       = "프레임 제한: 없음"
+L.EXPORT_SYS_LIMIT             = "%s %d"
+L.EXPORT_SYS_MAC               = "macOS에서 실행 중"
+L.EXPORT_SYS_LATENCY           = "지연 시간: 접속 %d ms, 월드 %d ms"
+L.EXPORT_LATENCY_HIGH          = "네트워크: 대부분의 끊김에서 월드 지연 시간이 평소(%d ms)보다 크게 높았습니다 (%d/%d). 지연이 튄 뒤에는 게임이 밀린 처리를 한 프레임에 몰아서 할 수 있습니다."
+L.EXPORT_COMBATLOG             = "끊김이 있는 동안 전투 기록이 디스크에 기록되고 있었습니다 (%d/%d)."
+L.EXPORT_COMBATLOG_ADV         = "끊김이 있는 동안 전투 기록이 디스크에 기록되고 있었습니다 (%d/%d). 고급 전투 기록이 켜져 있습니다."
+L.EXPORT_GXLOG                 = "CPU, 메모리, 드라이버 정보가 필요하면 게임 폴더의 Logs 폴더(Interface 옆)에 있는 gx.log도 첨부하세요."
+
 -- == CVar display names (the game's own options wording) ==
 L.CVAR_MAX_FPS                 = "최대 전경 FPS"
 L.CVAR_MAX_FPS_BK              = "최대 배경 FPS"
@@ -254,6 +272,8 @@ L.CVAR_DEPTH                   = "심도 효과"
 L.CVAR_TEXTURE_RES             = "텍스처 해상도"
 L.CVAR_PROJECTED               = "투영 텍스처"
 L.CVAR_SPELL_DENSITY           = "주문 밀도"
+L.CVAR_TARGET_FPS              = "목표 FPS"
+L.CVAR_VSYNC                   = "수직 동기화"
 
 -- == Client / Flavor Names ==
 L.FLAVOR_RETAIL                = "본 서버"
@@ -262,3 +282,4 @@ L.FLAVOR_CATA                  = "대격변 클래식"
 L.FLAVOR_WRATH                 = "리치 왕의 분노 클래식"
 L.FLAVOR_TBC                   = "불타는 성전 클래식"
 L.FLAVOR_CLASSIC_ERA           = "클래식 에라"
+L.FLAVOR_FOREVER              = "WoW Forever"

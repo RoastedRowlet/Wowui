@@ -1,5 +1,4 @@
-### Changes in 120100.99-Release:
+### Changes in 120100.100-Release:
 
-- Changed: Update Interface version
-- Removed: Old savedvariables migration
+- Added: Support for Forever
 

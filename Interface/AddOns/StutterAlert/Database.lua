@@ -15,16 +15,16 @@ local MAX_SESSION_PULLS = 5
 local function freshTotals()
     return {
         all = 0, addon = 0, game = 0,
-        -- Seconds actually monitored (loading screens excluded). Without this a
-        -- hitch count is uninterpretable: 454 hitches is alarming across twenty
-        -- minutes and unremarkable across twenty hours.
+        -- Seconds monitored (loading screens excluded): the denominator that
+        -- makes a hitch count readable.
         monitoredSec = 0,
-        -- Seconds spent with the window in the background (or otherwise running
-        -- to a cap slow enough that detection is meaningless), when monitoring
-        -- was suspended. Tracked rather than merely skipped so the report can say
-        -- how much of the session it did not measure, instead of quietly
-        -- presenting a shorter window as if it were the whole session.
+        -- Seconds suspended by a frame cap, so the report can state what it
+        -- did not measure.
         throttledSec = 0,
+        -- Usual world latency (30 s samples), and per-hitch network and
+        -- combat-log tallies, each with its own denominator.
+        latSum = 0, latN = 0, latChecked = 0, latHigh = 0,
+        logChecked = 0, logOn = 0,
         causes  = {},
         gameCtx = { combat = 0, moving = 0, byCtx = {}, byZone = {} },
     }
@@ -80,13 +80,8 @@ ns.DEFAULTS = {
         summaryHoldSec     = 14,
         bannerStackMax     = 4,
 
-        -- Which banners are allowed on screen. Presentation only: detection,
-        -- recording and the report are identical at every setting, so reports
-        -- stay comparable between installs no matter what this is set to.
-        --   "ALL"     - live hitch banners and post-combat summaries
-        --   "SUMMARY" - post-combat summaries only
-        --   "OFF"     - neither; the icon tint and the hover tooltip carry it
-        -- (Monitoring itself is `enabled`, which is a separate thing entirely.)
+        -- "ALL" (live hitches and summaries), "SUMMARY" or "OFF". Presentation
+        -- only: detection and the report are identical at every setting.
         bannerMode         = "ALL",
 
         -- Detection thresholds (milliseconds of frame time).
@@ -129,10 +124,8 @@ ns.DEFAULTS = {
     -- An entry here means the addon has actually been blamed for a hitch.
     aggregates = {},
 
-    -- Per-addon memory snapshots: [addonName] = { kb, delta, peak }.
-    -- Kept separate from aggregates because this is sampled for EVERY loaded
-    -- addon, and folding it into aggregates would create a full hitch record
-    -- (with its empty ctx/gaps/coWith/sigs tables) for a hundred innocent addons.
+    -- Per-addon memory: [addonName] = { kb, delta, peak }. Sampled for every
+    -- loaded addon, so it stays out of aggregates.
     memory = {},
 
     -- Capped hitch log (newest at the end).
@@ -166,20 +159,8 @@ function DB:Init()
         StutterAlertDB = deepCopy(ns.DEFAULTS)
     else
         applyDefaults(StutterAlertDB, ns.DEFAULTS)
-        -- Reset stored history when the schema changed so every figure starts from
-        -- the same point: v2 introduced reconciled `totals`, v3 added the per-cause
-        -- context tally (gameCtx), v4 added per-addon versions, allocation, frame
-        -- share, signatures, gaps and memory. Without a reset, old counts and the
-        -- new tallies would describe different spans, and old aggregates would be
-        -- missing sub-tables the report now expects.
-        --
-        -- v5 is a different kind of reset. Up to v4 a background FPS cap made
-        -- every frame read as a hitch, so anyone who alt-tabbed banked hundreds
-        -- of phantom "sustained slowdown" records -- and because `totals` is
-        -- never trimmed, those stayed permanently and skewed the advice panel
-        -- toward whichever zone the player happened to park in. Real and phantom
-        -- counts cannot be separated after the fact, so they go.
-        -- (Diagnostic data only; nothing of value lost.)
+        -- A schema change resets history so every figure covers one span.
+        -- See DESIGN-NOTES.md: Schema resets.
         if (StutterAlertDB.version or 1) < 5 then
             StutterAlertDB.log = {}
             StutterAlertDB.aggregates = {}
@@ -208,6 +189,15 @@ function DB:RecordHitch(record)
     -- export report's TL;DR and per-cause counts share one window with Top Sources.
     local t = data.totals
     t.all = t.all + 1
+    local rc = record.ctx
+    if rc and rc.latencyHigh ~= nil then
+        t.latChecked = (t.latChecked or 0) + 1
+        if rc.latencyHigh then t.latHigh = (t.latHigh or 0) + 1 end
+    end
+    if rc and rc.combatLog ~= nil then
+        t.logChecked = (t.logChecked or 0) + 1
+        if rc.combatLog then t.logOn = (t.logOn or 0) + 1 end
+    end
     if record.isAddon then
         t.addon = t.addon + 1
     else
@@ -337,10 +327,8 @@ function DB:GetMemory(name)
     return self.data.memory and self.data.memory[name]
 end
 
--- Mean seconds between this addon's hitches, but only when they are regular
--- enough for the average to mean anything. A coefficient of variation above
--- 25% reads as random rather than periodic, and we return nil rather than
--- claim a rhythm that is not there.
+-- Mean seconds between this addon's hitches, or nil when they are not regular
+-- (coefficient of variation above 25%).
 function DB:GetPeriod(agg)
     local g = agg and agg.gaps
     if not g or #g < 3 then return nil end

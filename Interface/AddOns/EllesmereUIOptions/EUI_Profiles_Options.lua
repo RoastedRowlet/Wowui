@@ -355,7 +355,7 @@ function _G._EUI_BuildProfilesPage(pageName, parent, yOffset)
         local bg = btn:CreateTexture(nil, "BACKGROUND")
         bg:SetAllPoints()
         bg:SetColorTexture(EllesmereUI.DD_BG_R, EllesmereUI.DD_BG_G, EllesmereUI.DD_BG_B, EllesmereUI.DD_BG_A)
-        local brd = EllesmereUI.MakeBorder(btn, 1, 1, 1, EllesmereUI.DD_BRD_A, PP)
+        local brd = EllesmereUI.MakeRoundedBorder(btn, 1, 1, 1, EllesmereUI.DD_BRD_A, bg)
         -- The resting alpha is the text colour's, the channel the hover
         -- colours below write, so a hover and leave land back on it.
         local lbl = EllesmereUI.MakeFont(btn, 13, nil, 1, 1, 1, EllesmereUI.DD_TXT_A)
@@ -394,7 +394,7 @@ function _G._EUI_BuildProfilesPage(pageName, parent, yOffset)
         local bg = menuFrame:CreateTexture(nil, "BACKGROUND")
         bg:SetAllPoints()
         bg:SetColorTexture(EllesmereUI.DD_BG_R, EllesmereUI.DD_BG_G, EllesmereUI.DD_BG_B, 0.98)
-        EllesmereUI.MakeBorder(menuFrame, 1, 1, 1, EllesmereUI.DD_BRD_A, PP)
+        EllesmereUI.MakeRoundedBorder(menuFrame, 1, 1, 1, EllesmereUI.DD_BRD_A, bg, nil, true)
         menuFrame:SetScript("OnShow", function(self)
             local s = anchor:GetEffectiveScale() / UIParent:GetEffectiveScale()
             self:SetScale(s)
@@ -678,7 +678,7 @@ function _G._EUI_BuildProfilesPage(pageName, parent, yOffset)
             local iBg = inputFrame:CreateTexture(nil, "BACKGROUND")
             iBg:SetAllPoints()
             iBg:SetColorTexture(EllesmereUI.DD_BG_R, EllesmereUI.DD_BG_G, EllesmereUI.DD_BG_B, EllesmereUI.DD_BG_A)
-            local inputBrd = EllesmereUI.MakeBorder(inputFrame, 1, 1, 1, EllesmereUI.DD_BRD_A, PP)
+            local inputBrd = EllesmereUI.MakeRoundedBorder(inputFrame, 1, 1, 1, EllesmereUI.DD_BRD_A, iBg)
             importPage._nameFlash = BuildErrorFlash(inputFrame, inputBrd)
 
             editBox = CreateFrame("EditBox", nil, inputFrame)
@@ -732,7 +732,7 @@ function _G._EUI_BuildProfilesPage(pageName, parent, yOffset)
         local stringHasBlizzSkin = (payload and payload.data
             and type(payload.data.blizzSkinGlobals) == "table") or false
         local includeWindowSkinsImport = false
-        -- "Global Settings": the exporter's global appearance (fonts, custom colours, dark mode, accent) and UI scale. Presence = deliberate
+        -- "Global Settings": the exporter's global appearance (fonts, custom colours, dark mode, accent, number format) and UI scale. Presence = deliberate
         -- include; this toggle is the recipient's opt-out. ON when carried, inert when the string has none.
         local stringHasGlobals = false
         do
@@ -740,6 +740,7 @@ function _G._EUI_BuildProfilesPage(pageName, parent, yOffset)
             if d then
                 stringHasGlobals = d.fonts ~= nil or d.customColors ~= nil
                     or d.darkMode ~= nil or d.euiAccent ~= nil or d.uiScale ~= nil
+                    or d.numberFormat ~= nil
             end
         end
         local includeGlobalsImport = stringHasGlobals
@@ -1262,13 +1263,14 @@ function _G._EUI_BuildProfilesPage(pageName, parent, yOffset)
                 -- Meta is transient -- never overlay/persist it into the profile.
                 filteredPayload.data.unlockLayoutMeta = nil
             end
-            -- Global appearance (fonts, customColors, darkMode, euiAccent) and scale ride the Include dropdown's "Global Settings" row (on
+            -- Global appearance (fonts, customColors, darkMode, euiAccent, numberFormat) and scale ride the Include dropdown's "Global Settings" row (on
             -- by default when carried): unchecked strips them all so the merge keeps the recipient's look. Module deselection alone never
             -- strips them -- the store merge takes each key only when present.
             if filteredPayload and filteredPayload.data and not includeGlobalsImport then
                 filteredPayload.data.fonts        = nil
                 filteredPayload.data.customColors = nil
                 filteredPayload.data.darkMode     = nil
+                filteredPayload.data.numberFormat = nil
                 filteredPayload.data.euiAccent    = nil
                 filteredPayload.data.uiScale      = nil
                 filteredPayload.data.applyUIScale = nil
@@ -1456,7 +1458,7 @@ function _G._EUI_BuildProfilesPage(pageName, parent, yOffset)
         local panelBg = panelFrame:CreateTexture(nil, "BACKGROUND")
         panelBg:SetAllPoints()
         panelBg:SetColorTexture(0.077, 0.068, 0.058, 0.50)
-        EllesmereUI.MakeBorder(panelFrame, 1, 1, 1, 0.10, PP)
+        EllesmereUI.MakeRoundedBorder(panelFrame, 1, 1, 1, 0.10, panelBg)
 
         local pasteSF = CreateFrame("ScrollFrame", nil, panelFrame)
         pasteSF:SetPoint("TOPLEFT", 16, -12)

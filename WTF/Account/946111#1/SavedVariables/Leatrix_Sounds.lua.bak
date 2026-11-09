@@ -1,0 +1,27 @@
+
+LeaSoundsDB = {
+["MainPanelX"] = -243.9394226074219,
+["MainPanelR"] = "CENTER",
+["SoundUnknown"] = "On",
+["SFXCatOff"] = {
+},
+["MobSoundsMenu"] = "On",
+["SoundMuted"] = "On",
+["MainPanelA"] = "CENTER",
+["MainPanelY"] = 25.00021934509277,
+["MainPanelW"] = 800,
+["AutoPlayNext"] = "Off",
+["MainPanelH"] = 616,
+["PlayInBackground"] = "On",
+["MusicCatOff"] = {
+},
+["SoundMusic"] = "On",
+["AddonLanguage"] = 1,
+["SoundSFX"] = "On",
+["ClickToPlay"] = "On",
+["MutedSounds"] = {
+},
+["CollapsedHeadings"] = {
+},
+["SoundUnplayable"] = "Off",
+}

@@ -1,10 +1,10 @@
-lightweight tag cb3e3af298e3124162c6bf44d1bebac53435eaec 12.1.5-03
+lightweight tag 83fdb00762fa0fb9ba3e3251a8fa7f3e4a92edba 12.1.5-04
 Author:	Dave Hendler <sollaires@gmail.com>
-Date:	Thu Oct 22 14:56:03 2026 -0700
+Date:	Thu Nov 5 14:37:45 2026 -0800
 
-commit cb3e3af298e3124162c6bf44d1bebac53435eaec
+commit 83fdb00762fa0fb9ba3e3251a8fa7f3e4a92edba
 Author: Dave Hendler <sollaires@gmail.com>
-Date:   Thu Oct 22 14:56:03 2026 -0700
+Date:   Thu Nov 5 14:37:45 2026 -0800
 
-    forever: Export hunter pet info
+    Handle Forever surname
 

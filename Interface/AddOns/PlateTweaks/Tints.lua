@@ -1144,6 +1144,14 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
     -- To the health bar, never the parent button: ours-to-theirs is refused.
     pcall(frame.SetAllPoints, frame, healthBar)
 
+    -- Root gets its FINAL level before registering. Register builds the aura
+    -- button immediately and pins it to the bar's level; lowering the
+    -- container afterwards drags that button below the bar, where the fill
+    -- covers the tint -- and under the dungeon restriction the re-pin in
+    -- AnchorTints is refused, so it stays hidden. Nested containers live
+    -- inside buttons and are left alone.
+    if depth == 1 then pcall(frame.SetFrameLevel, frame, record.level or level) end
+
     local key = "M" .. depth
     local useSlot = SlotsAvailable(frame)
     local Register = useSlot and frame.AddAuraSlot or frame.AddAuraGroup
@@ -1821,6 +1829,9 @@ function NS.BuildMissingBarStack(rig, healthBar, rules, level)
 
     frame:SetEnabled(false)
     pcall(frame.SetAllPoints, frame, healthBar)
+
+    -- Final level before registering; see AttachContainer for why.
+    if rank == 1 then pcall(frame.SetFrameLevel, frame, record.level or level) end
 
     local key = "N" .. rank
     local useSlot = SlotsAvailable(frame)

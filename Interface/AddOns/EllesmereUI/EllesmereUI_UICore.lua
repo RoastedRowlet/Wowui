@@ -87,9 +87,9 @@ EllesmereUI.RB_COLOURS       = RB_COLOURS
 -- opts: width, height (nil = fit the content: textTop, the text, gap, the
 -- button and btnBottom), text (already translated, so the call site keeps its
 -- literal key for the locale extractor),
--- onOkay, arrow ("top", the default: the box sits below its target; "left":
--- the box sits right of it), arrowOffset (px along that edge from its
--- centre), pp (default PanelPP), strata (default FULLSCREEN_DIALOG; false
+-- onOkay, arrow ("top", the default: the box sits below its target; "bottom":
+-- the box sits above it; "left": the box sits right of it), arrowOffset (px
+-- along that edge from its centre), pp (default PanelPP), strata (default FULLSCREEN_DIALOG; false
 -- keeps the parent's), level (default 200), font (a path; default the panel
 -- font), fontFlags (with font; default none), fontSize (12), textTop (17),
 -- textInset (30), spacing (6), gap (12, text to button with a fitted height),
@@ -138,6 +138,10 @@ function EllesmereUI.BuildTipCallout(parent, opts)
         clip:SetSize(TIP_ARROW, TIP_ARROW * 2)
         clip:SetPoint("RIGHT", tip, "LEFT", 1, off)
         holder:SetPoint("CENTER", clip, "RIGHT", 0, 0)
+    elseif opts.arrow == "bottom" then
+        clip:SetSize(TIP_ARROW * 2, TIP_ARROW)
+        clip:SetPoint("TOP", tip, "BOTTOM", off, 1)
+        holder:SetPoint("CENTER", clip, "TOP", 0, 0)
     else
         clip:SetSize(TIP_ARROW * 2, TIP_ARROW)
         clip:SetPoint("BOTTOM", tip, "TOP", off, -1)
@@ -1161,7 +1165,8 @@ end
 --      EllesmereUI.WithSurname(UnitName(unit))
 --  Retail gets the first value back unchanged. A secret name (protected
 --  content) comes back as is, first name only: it cannot be inspected or
---  joined. Your own surname follows Blizzard's show-surname preference.
+--  joined. Your own surname follows Blizzard's show-surname preference unless
+--  ignorePreference is set.
 --  Joined names are cached per name pair, so repaints build no strings.
 -------------------------------------------------------------------------------
 do
@@ -1170,12 +1175,12 @@ do
         and Constants.CharacterNameSeparatorConsts.CHARACTERNAME_SURNAME_SEPARATOR or " "
     local joined = {}   -- [name][surname] = the display string
 
-    function EllesmereUI.WithSurname(name, surname)
+    function EllesmereUI.WithSurname(name, surname, ignorePreference)
         if not IS_FOREVER then return name end
         if issecretvalue(name) or issecretvalue(surname) then return name end
         if type(name) ~= "string" or type(surname) ~= "string" or surname == "" then return name end
         local PI = C_PlayerInfo
-        if PI and PI.ShouldDisplaySurname and not PI.ShouldDisplaySurname() then
+        if not ignorePreference and PI and PI.ShouldDisplaySurname and not PI.ShouldDisplaySurname() then
             local myName, mySurname = (UnitNameUnmodified or UnitName)("player")
             if name == myName and surname == mySurname then return name end
         end
@@ -1266,6 +1271,22 @@ do
             return s
         end
 
+        -- The Name Format a unit's name takes:
+        --     mode = EllesmereUI.UnitNameFormat(mode, unit)
+        -- WoW Forever: First Name and Last Name part a character's name from
+        -- its surname, so they shape players' names only; a mob's, an NPC's or
+        -- a pet's name stays whole ("Rot Hide Gnoll" never reads "Rot"). Any
+        -- other mode, and a nil unit (an options preview), comes back as given.
+        -- Retail returns every mode as given: its player names are one word,
+        -- so there these two modes only ever shorten other names.
+        function EllesmereUI.UnitNameFormat(mode, unit)
+            if IS_FOREVER and unit and (mode == "first" or mode == "last") then
+                local isPlayer = UnitIsPlayer(unit)
+                if issecretvalue(isPlayer) or not isPlayer then return nil end
+            end
+            return mode
+        end
+
         -- The Name Format choices, for every dropdown that sets one:
         --     values, order, getValue, setValue = EllesmereUI.NameFormatMenu(get, set, opts)
         -- get() returns the saved value; set(v) receives "first", "last",
@@ -1278,6 +1299,8 @@ do
         -- a pick, a red line in the count popup). Options pages only.
         --     EllesmereUI.NameFormatCogRow(get, set, opts)
         -- A settings-cog dropdown row over the same; "full" arrives as nil.
+        -- opts.label replaces the row's "Name Format", opts.tooltip shows on
+        -- its dropdown.
         local LABELS = { first = "First Name", last = "Last Name", full = "Full Name", abbr = "Abbreviated" }
         local ORDER = { "full", "first", "last", "abbr", "custom" }
         local MAX_COUNT = 99
@@ -1337,7 +1360,8 @@ do
         function EllesmereUI.NameFormatCogRow(get, set, opts)
             local values, order, getValue, setValue = EllesmereUI.NameFormatMenu(get,
                 function(v) set((v ~= "full") and v or nil) end, opts)
-            return { type = "dropdown", label = "Name Format", values = values, order = order,
+            return { type = "dropdown", label = opts and opts.label or "Name Format",
+                tooltip = opts and opts.tooltip, values = values, order = order,
                 ddWidth = MENU_W, get = getValue, set = setValue }
         end
     end
@@ -1412,6 +1436,8 @@ end -- IS_FOREVER
 --    WatchPad(owner, fn)    fn(padOn) once per burst of PadConnected() edges
 --    UnwatchPad(owner)      stop following; the last one drops the events
 --    PadGamepadUI()         WoW Forever's Gamepad interface style is on
+--    PadTaintStandDown()    that style is on and its navigation still lets an
+--                           addon hook taint it (clients before 1.60.1 70707)
 --    RaiseGamePadCursor()   gamepad pointer on at a user-requested open
 --    RegisterPadFrame(f)    a NAMED, hidden window root we own joins the
 --                           controller cursor, once (never HUD frames)
@@ -1459,11 +1485,24 @@ do
         return style ~= nil and types ~= nil and style.GetCurrentStyle() == types.Gamepad
     end
 
+    -- The stand-downs that exist only because that style's navigation made a
+    -- protected call in the same execution as a hook of ours on a Blizzard
+    -- frame (or an open of a Blizzard panel from our click) ask this one.
+    -- Since 1.60.1 (70707) Blizzard_GamepadSmartNavigation runs its entry
+    -- points securely and calls frame callbacks through securecallfunction,
+    -- from its SecureHelper (the SmartNavigationSecureHelper frame, built as
+    -- the addon loads at startup), so those features run under the style on
+    -- such a client. Features a controller cannot drive keep PadGamepadUI().
+    local function PadTaintStandDown()
+        return PadGamepadUI() and _G.SmartNavigationSecureHelper == nil
+    end
+
     EllesmereUI.PadCP        = PadCP
     EllesmereUI.PadNative    = PadNative
     EllesmereUI.PadInUse     = PadInUse
     EllesmereUI.PadConnected = PadConnected
     EllesmereUI.PadGamepadUI = PadGamepadUI
+    EllesmereUI.PadTaintStandDown = PadTaintStandDown
 
     -- Following PadConnected(): one shared watcher for every feature that hides
     -- or shows something with the controller. Its frame is built at the first

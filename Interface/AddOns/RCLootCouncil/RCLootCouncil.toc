@@ -1,8 +1,8 @@
 ## Author: Potdisc
 ## Interface: 120105
-## Notes: Interface for running a Loot Council v3.24.1
+## Notes: Interface for running a Loot Council v3.25.0
 ## Title: RCLootCouncil
-## Version: 3.24.1
+## Version: 3.25.0
 ## SavedVariables: RCLootCouncilDB, RCLootCouncilLootDB
 ## AllowLoadGameType: standard
 ## OptionalDeps: LibStub, CallbackHandler-1.0, Ace3, lib-st, LibWindow-1.1, LibDialog-1.0, Simulationcraft
@@ -34,6 +34,7 @@ Core\CoreEvents.lua
 Classes\Core.lua
 Classes\Utils\Item.lua
 Classes\Lib\RxLua\embeds.xml
+Classes\Utils\Pool.lua
 Classes\Utils\TempTable.lua
 Classes\Utils\Log.lua
 Classes\Services\ErrorHandler.lua

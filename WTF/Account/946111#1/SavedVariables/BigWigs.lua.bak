@@ -11,11 +11,11 @@ BigWigs3DB = {
 ["Minimeditite - Area 52"] = "Default",
 },
 ["namespaces"] = {
-["BigWigs_Bosses_Crawth"] = {
+["BigWigs_Bosses_Kith'ix"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
-[377004] = 3129591,
+[1304424] = 3129591,
 },
 },
 },
@@ -125,11 +125,11 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Kith'ix"] = {
+["BigWigs_Bosses_Crawth"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
-[1304424] = 3129591,
+[377004] = 3129591,
 },
 },
 },
@@ -137,7 +137,7 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
+["emphasize"] = false,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -145,7 +145,7 @@ BigWigs3DB = {
 21,
 },
 ["visibleBarLimit"] = 1,
-["emphasize"] = false,
+["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -209,10 +209,18 @@ BigWigs3DB = {
 },
 ["myKeystones"] = {
 ["Player-60-0F7B141D"] = {
-["playerRating"] = 4133,
+["playerRating"] = 4144,
 ["specId"] = 262,
 ["keyMap"] = 0,
 ["name"] = "Zappyxatu",
+["keyLevel"] = 0,
+["realm"] = "Stormrage",
+},
+["Player-60-0F85ABEF"] = {
+["playerRating"] = 3405,
+["specId"] = 105,
+["keyMap"] = 0,
+["name"] = "Lonelylitten",
 ["keyLevel"] = 0,
 ["realm"] = "Stormrage",
 },
@@ -625,32 +633,23 @@ BigWigsStatsDB = {
 ["fkDuration"] = 163.7179999999935,
 },
 },
-[2887] = {
+[2894] = {
 ["normal"] = {
-["kills"] = 2,
-["fkDuration"] = 478.0889999999999,
-["best"] = 478.0889999999999,
-["bestDate"] = "2026/08/23",
-["wipes"] = 1,
-["fkDate"] = "2026/08/23",
+["kills"] = 4,
+["fkDate"] = "2026/08/19",
+["wipes"] = 2,
+["bestDate"] = "2026/08/19",
+["best"] = 272.8699999999953,
+["fkDuration"] = 272.8699999999953,
 },
 ["heroic"] = {
-["kills"] = 1,
-["fkDate"] = "2026/10/20",
-["bestDate"] = "2026/10/20",
-["fkWipes"] = 1,
-["best"] = 278.576,
-["wipes"] = 1,
-["fkDuration"] = 278.576,
-},
-["LFR"] = {
 ["kills"] = 5,
-["fkDuration"] = 292.4869999999646,
-["wipes"] = 3,
-["fkWipes"] = 1,
-["best"] = 155.6199999999953,
-["bestDate"] = "2026/10/13",
-["fkDate"] = "2026/08/18",
+["fkDate"] = "2026/08/24",
+["bestDate"] = "2026/10/20",
+["fkWipes"] = 5,
+["best"] = 186.3400000000002,
+["wipes"] = 10,
+["fkDuration"] = 386.3110000000015,
 },
 },
 [2871] = {
@@ -700,49 +699,32 @@ BigWigsStatsDB = {
 ["fkDuration"] = 339.2090000000026,
 },
 },
-[2894] = {
+[2887] = {
 ["normal"] = {
-["kills"] = 4,
-["fkDate"] = "2026/08/19",
-["wipes"] = 2,
-["bestDate"] = "2026/08/19",
-["best"] = 272.8699999999953,
-["fkDuration"] = 272.8699999999953,
-},
-["heroic"] = {
-["kills"] = 5,
-["fkDate"] = "2026/08/24",
-["bestDate"] = "2026/10/20",
-["fkWipes"] = 5,
-["best"] = 186.3400000000002,
-["wipes"] = 10,
-["fkDuration"] = 386.3110000000015,
-},
-},
-[2874] = {
-["heroic"] = {
-["kills"] = 4,
-["fkDuration"] = 425.4460000000108,
-["wipes"] = 9,
-["fkWipes"] = 5,
-["best"] = 202.4579999999996,
-["bestDate"] = "2026/10/20",
-["fkDate"] = "2026/08/24",
-},
-["normal"] = {
-["kills"] = 4,
-["fkDuration"] = 354.4259999999777,
-["best"] = 354.4259999999777,
-["bestDate"] = "2026/08/19",
+["kills"] = 2,
+["fkDuration"] = 478.0889999999999,
+["best"] = 478.0889999999999,
+["bestDate"] = "2026/08/23",
 ["wipes"] = 1,
-["fkDate"] = "2026/08/19",
+["fkDate"] = "2026/08/23",
+},
+["heroic"] = {
+["kills"] = 1,
+["fkDate"] = "2026/10/20",
+["bestDate"] = "2026/10/20",
+["fkWipes"] = 1,
+["best"] = 278.576,
+["wipes"] = 1,
+["fkDuration"] = 278.576,
 },
 ["LFR"] = {
-["kills"] = 2,
-["fkDuration"] = 222.4190000000235,
-["best"] = 205.9290000000037,
-["bestDate"] = "2026/08/25",
-["fkDate"] = "2026/08/25",
+["kills"] = 5,
+["fkDuration"] = 292.4869999999646,
+["wipes"] = 3,
+["fkWipes"] = 1,
+["best"] = 155.6199999999953,
+["bestDate"] = "2026/10/13",
+["fkDate"] = "2026/08/18",
 },
 },
 [2888] = {
@@ -770,6 +752,32 @@ BigWigsStatsDB = {
 ["best"] = 118.1369999999879,
 ["bestDate"] = "2026/10/13",
 ["fkDate"] = "2026/08/18",
+},
+},
+[2874] = {
+["heroic"] = {
+["kills"] = 4,
+["fkDuration"] = 425.4460000000108,
+["wipes"] = 9,
+["fkWipes"] = 5,
+["best"] = 202.4579999999996,
+["bestDate"] = "2026/10/20",
+["fkDate"] = "2026/08/24",
+},
+["normal"] = {
+["kills"] = 4,
+["fkDuration"] = 354.4259999999777,
+["best"] = 354.4259999999777,
+["bestDate"] = "2026/08/19",
+["wipes"] = 1,
+["fkDate"] = "2026/08/19",
+},
+["LFR"] = {
+["kills"] = 2,
+["fkDuration"] = 222.4190000000235,
+["best"] = 205.9290000000037,
+["bestDate"] = "2026/08/25",
+["fkDate"] = "2026/08/25",
 },
 },
 },

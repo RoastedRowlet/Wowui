@@ -40,8 +40,10 @@ nil,
 },
 },
 }
-TomTomWaypoints = nil
 TomTomWaypointsM = {
+["global"] = {
+["pinFlagsLive"] = true,
+},
 ["profileKeys"] = {
 ["Taurostotem - Area 52"] = "Taurostotem - Area 52",
 ["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",

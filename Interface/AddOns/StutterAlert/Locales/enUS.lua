@@ -1,23 +1,9 @@
 local _, ns = ...
 local L = ns.L
 
--- enUS is the base locale and always loads, regardless of client language, so
--- it acts as the fallback set. British clients report enUS too, so this file is
--- what every English-speaking player reads; there is no enGB to write.
---
--- Every other locale file starts with:  if GetLocale() ~= "deDE" then return end
--- then overrides the keys it translates, and is listed in Locales.xml.
---
--- Rules for a translation:
---   * Keep every %d / %s / %.1f in the same number, type and ORDER as here. A
---     mismatch is a Lua error the moment the line is shown, not a cosmetic slip.
---     %% is a literal percent sign and takes no argument.
---   * Never make a word agree with a number. Russian has three plural forms and
---     Chinese none, so counts are written as "label: %d" or "x%d", which read
---     correctly for any value in every language.
---   * Leave in English: slash commands and their arguments (/sa lock,
---     all|summary|off), event names, "ms", "FPS", and the addon's name.
---   * Lists are joined with LIST_SEP, so a translation never hardcodes ", ".
+-- Base locale, always loaded; British clients report enUS. Translations keep
+-- every placeholder in the same order, never make a word agree with a number,
+-- and leave slash commands, event names, ms, FPS and the addon name in English.
 
 -- == General ==
 L.ADDON_TITLE                  = "StutterAlert"
@@ -91,8 +77,7 @@ L.SEV_CRITICAL                 = "Critical"
 L.SEV_ELEVATED                 = "Elevated"
 
 -- == Slash Commands ==
--- The command words (/sa, lock, all|summary|off, ...) are what the player types
--- and what the parser matches, so they stay English in every translation.
+-- The command words are what the parser matches: they stay English.
 -- Format args: (1) one of the SLASH_BANNERS_* descriptions below
 L.SLASH_BANNERS                = "Pop-up banners: %s"
 L.SLASH_BANNERS_ALL            = "all (live hitches and pull summaries)"
@@ -188,9 +173,7 @@ L.SUMMARY_PULL_WORST           = "Last pull  -  hitches: %d, worst %s %d ms (gam
 L.TT_HINT_EXPORT               = "Left-Click for the full report and advice"
 
 -- == Export Report ==
--- The report is translated like everything else. Addon names, versions, event
--- names and numbers pass through untouched, so an author reading a report in
--- another language can still act on it.
+-- Addon names, versions, event names and numbers pass through untranslated.
 L.EXPORT_SCOPE                 = "Figures below cover everything since history was last cleared."
 -- Format args: (1) total hitches, (2) from addons, (3) from the game
 L.EXPORT_TLDR                  = "Hitches recorded: %d  -  from addons: %d, from the game: %d."
@@ -350,10 +333,41 @@ L.EXPORT_D_EV_BURST            = "      Further events on that frame: %d  -  an 
 -- No events at all means the work was not a reaction to one.
 L.EXPORT_D_EV_NONE             = "      No events fired on that frame - the work came from an OnUpdate or a timer"
 
--- CVar display names (the human label for each graphics console variable).
--- The advice sends the player looking for these in the options menu, so use
--- the game's own wording for this language, not a fresh translation. The same
--- goes for the menu path in ADVISE_CHANGE_WHERE.
+-- == Export Report: system ==
+-- Format arg: (1) graphics card names, joined with LIST_SEP
+L.EXPORT_SYS_GPU               = "Graphics card: %s"
+-- A card the client reports as low-power. Format arg: (1) card name
+L.EXPORT_SYS_INTEGRATED        = "%s (integrated)"
+-- Format args: (1) width, (2) height, (3) render scale percent. %% is a literal %.
+L.EXPORT_SYS_DISPLAY           = "Display: %dx%d, render scale %d%%"
+-- Format args: (1) width, (2) height
+L.EXPORT_SYS_DISPLAY_NOSCALE   = "Display: %dx%d"
+-- Shown only when the player forced one. Format arg: (1) API name, e.g. D3D11
+L.EXPORT_SYS_API               = "Graphics API: %s"
+-- The 1-10 Graphics Quality slider. Format args: (1) world, (2) raid
+L.EXPORT_SYS_QUALITY           = "Graphics quality: %d (raid: %d)"
+-- Format arg: (1) world quality
+L.EXPORT_SYS_QUALITY_NORAID    = "Graphics quality: %d"
+-- Format arg: (1) EXPORT_SYS_LIMIT items joined with LIST_SEP
+L.EXPORT_SYS_LIMITS            = "Frame limits: %s"
+L.EXPORT_SYS_LIMITS_NONE       = "Frame limits: none"
+-- Format args: (1) setting name, (2) FPS
+L.EXPORT_SYS_LIMIT             = "%s %d"
+L.EXPORT_SYS_MAC               = "Running on macOS"
+-- Format args: (1) home latency ms, (2) world latency ms
+L.EXPORT_SYS_LATENCY           = "Latency: home %d ms, world %d ms"
+-- Format args: (1) usual world latency ms, (2) hitches with high latency, (3) hitches checked
+L.EXPORT_LATENCY_HIGH          = "Network: world latency was well above your usual %d ms on most hitches (%d of %d). After a lag spike the game can process the backlog in a single frame."
+-- Format args: (1) hitches while logging, (2) hitches checked
+L.EXPORT_COMBATLOG             = "The combat log was being written to disk during hitches (%d of %d)."
+-- Same, when Advanced Combat Logging is on. Format args as EXPORT_COMBATLOG.
+L.EXPORT_COMBATLOG_ADV         = "The combat log was being written to disk during hitches (%d of %d), with Advanced Combat Logging on."
+-- The game folder is named differently per client, so name the Logs folder by
+-- what sits beside it.
+L.EXPORT_GXLOG                 = "For CPU, memory and driver details, also attach gx.log from the Logs folder in your game folder (next to Interface)."
+
+-- CVar display names. Use the game's own options-menu wording in each language,
+-- as for the menu path in ADVISE_CHANGE_WHERE.
 L.CVAR_MAX_FPS                 = "Max Foreground FPS"
 L.CVAR_MAX_FPS_BK              = "Max Background FPS"
 L.CVAR_VIEW_DISTANCE           = "View Distance"
@@ -368,15 +382,16 @@ L.CVAR_DEPTH                   = "Depth Effects"
 L.CVAR_TEXTURE_RES             = "Texture Resolution"
 L.CVAR_PROJECTED               = "Projected Textures"
 L.CVAR_SPELL_DENSITY           = "Spell Density"
+L.CVAR_TARGET_FPS              = "Target FPS"
+L.CVAR_VSYNC                   = "Vertical Sync"
 
 -- == Client / Flavor Names ==
--- Shown in the pasted report's client line so a reader can tell which game the
--- report came from. Flavor.lua maps WOW_PROJECT_ID to one of these keys, and
--- leaves the key unset for a project it has no name for. Use Blizzard's own
--- name for each game in this language.
+-- The game named in the report's client line, in Blizzard's own words for this
+-- language. Flavor.lua picks one by WOW_PROJECT_ID.
 L.FLAVOR_RETAIL                = "Retail"
 L.FLAVOR_MISTS                 = "Mists of Pandaria Classic"
 L.FLAVOR_CATA                  = "Cataclysm Classic"
 L.FLAVOR_WRATH                 = "Wrath of the Lich King Classic"
 L.FLAVOR_TBC                   = "Burning Crusade Classic"
 L.FLAVOR_CLASSIC_ERA           = "Classic Era"
+L.FLAVOR_FOREVER              = "WoW Forever"

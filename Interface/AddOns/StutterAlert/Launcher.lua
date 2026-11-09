@@ -28,7 +28,7 @@ local launcher = Broker and Broker:NewDataObject(NAME, {
     end,
 })
 
--- Retail only today; the Classic clients have no compartment.
+-- Retail and Forever; the Classic clients have no compartment.
 function Launcher:HasCompartment()
     return Icon ~= nil and Icon:IsButtonCompartmentAvailable()
 end

@@ -239,6 +239,24 @@ L.EXPORT_D_EV_PREFIX           = "      插件通訊：前綴為 %s 的訊息（
 L.EXPORT_D_EV_BURST            = "      該幀的其他事件：%d  -  事件爆發"
 L.EXPORT_D_EV_NONE             = "      該幀沒有觸發任何事件 - 工作來自 OnUpdate 或計時器"
 
+-- == Export Report: system ==
+L.EXPORT_SYS_GPU               = "顯示卡：%s"
+L.EXPORT_SYS_INTEGRATED        = "%s（內建）"
+L.EXPORT_SYS_DISPLAY           = "顯示：%dx%d，渲染比例 %d%%"
+L.EXPORT_SYS_DISPLAY_NOSCALE   = "顯示：%dx%d"
+L.EXPORT_SYS_API               = "圖形 API：%s"
+L.EXPORT_SYS_QUALITY           = "畫面品質：%d（團隊副本：%d）"
+L.EXPORT_SYS_QUALITY_NORAID    = "畫面品質：%d"
+L.EXPORT_SYS_LIMITS            = "幀數限制：%s"
+L.EXPORT_SYS_LIMITS_NONE       = "幀數限制：無"
+L.EXPORT_SYS_LIMIT             = "%s %d"
+L.EXPORT_SYS_MAC               = "於 macOS 上執行"
+L.EXPORT_SYS_LATENCY           = "延遲：本地 %d ms，世界 %d ms"
+L.EXPORT_LATENCY_HIGH          = "網路：多數卡頓發生時，世界延遲明顯高於你平時的 %d ms（%d/%d）。延遲突增後，遊戲可能會在一幀內處理積壓的資料。"
+L.EXPORT_COMBATLOG             = "卡頓期間戰鬥記錄正在寫入磁碟（%d/%d）。"
+L.EXPORT_COMBATLOG_ADV         = "卡頓期間戰鬥記錄正在寫入磁碟（%d/%d），且已開啟進階戰鬥記錄。"
+L.EXPORT_GXLOG                 = "如需處理器、記憶體和驅動程式資訊，請一併附上遊戲資料夾中 Logs 資料夾（與 Interface 同層）裡的 gx.log。"
+
 -- == CVar display names (the game's own options wording) ==
 L.CVAR_MAX_FPS                 = "前景最大 FPS"
 L.CVAR_MAX_FPS_BK              = "背景最大 FPS"
@@ -254,6 +272,8 @@ L.CVAR_DEPTH                   = "景深效果"
 L.CVAR_TEXTURE_RES             = "材質解析度"
 L.CVAR_PROJECTED               = "投影材質"
 L.CVAR_SPELL_DENSITY           = "法術密度"
+L.CVAR_TARGET_FPS              = "目標幀數"
+L.CVAR_VSYNC                   = "垂直同步"
 
 -- == Client / Flavor Names ==
 L.FLAVOR_RETAIL                = "正式版"
@@ -262,3 +282,4 @@ L.FLAVOR_CATA                  = "浩劫與重生經典版"
 L.FLAVOR_WRATH                 = "巫妖王之怒經典版"
 L.FLAVOR_TBC                   = "燃燒的遠征經典版"
 L.FLAVOR_CLASSIC_ERA           = "經典時代"
+L.FLAVOR_FOREVER              = "WoW Forever"

@@ -827,7 +827,9 @@ local FFD, GetFFD = EllesmereUI.NewFrameData()
 -- below-default text size genuinely scales the row under 70.
 --
 -- So nothing here writes the row height. Do not re-attempt; both shapes are
--- already disproven.
+-- already disproven. Another tile height is the custom friends list's
+-- (EllesmereUI_FriendsList.lua): rows of our own drawn over Blizzard's list,
+-- never a change to Blizzard's cards.
 --
 -- The tile's icon square: the name starts past it.
 local TILE_TARGET_H     = 46
@@ -1363,6 +1365,10 @@ end
 local function PaintCard(card)
     if not TILE_PAINT then return end
     if not Enabled() then return end
+    -- The custom friends list (EllesmereUI_FriendsList.lua) covers Blizzard's
+    -- cards while it shows: they stay unpainted, on file for the catch-up
+    -- when it stands down (Kit.RedecorateTiles).
+    if Kit._listShown then GetFFD(card); return end
 
     local ed = card.elementData
     local accountInfo = ed and ed.accountInfo
@@ -1420,6 +1426,28 @@ local function PaintCard(card)
     d.selBar:SetShown(sel)
     d.selFill:SetShown(sel)
 end
+
+-- The tile pieces the custom friends list (EllesmereUI_FriendsList.lua) draws
+-- its own rows with, so the two never drift apart. Skin builds the tile art,
+-- the three text lines and the status orb on any frame (a row of ours
+-- included); its state is the kit's frame data for that frame. LevelColor is
+-- the colour the character line's level takes.
+Kit._tile = {
+    Host         = function() return host end,
+    FontPath     = FontPath,
+    Skin         = SkinStructure,
+    Name         = BuildName,
+    CharLine     = BuildCharLine,
+    LevelColor   = LocationColor,
+    Info         = BuildInfo,
+    State        = TileState,
+    ClassFile    = GetClassFile,
+    ClassIconTex = SetClassIconTex,
+    Faction      = UpdateFaction,
+    Orb          = UpdateOrb,
+    Region       = UpdateRegion,
+    OFFLINE_ICON = OFFLINE_ICON,
+}
 
 -------------------------------------------------------------------------------
 --  Stock styles (Blizzard Style / Classic WoW UI): Blizzard's own card, laid
@@ -1699,8 +1727,9 @@ function Kit.StartTiles(h)
     if host then return end
     -- WoW Forever's Gamepad interface style navigates Blizzard's windows from
     -- secure code, and the tile hover hooks are script hooks on Blizzard's
-    -- cards, so the tiles stand down for the session under it.
-    if EllesmereUI.PadGamepadUI() then return end
+    -- cards, so the tiles stand down for the session under it where that
+    -- navigation can still be tainted (EllesmereUI.PadTaintStandDown).
+    if EllesmereUI.PadTaintStandDown() then return end
     host = h
     if h.style ~= "eui" then
         -- Stock styles decorate whichever window Blizzard shows (the switch
@@ -1796,8 +1825,9 @@ local function AutoAcceptOnEvent(self, event, _, _, _, _, _, _, inviterGUID)
         if isFriend then
             AcceptGroup()
             -- WoW Forever's Gamepad interface style runs Blizzard's popups from
-            -- secure code: its invite popup is left to it there.
-            if not EllesmereUI.PadGamepadUI() then
+            -- secure code: its invite popup is left to it where that navigation
+            -- can still be tainted (EllesmereUI.PadTaintStandDown).
+            if not EllesmereUI.PadTaintStandDown() then
                 autoAcceptHidePopup = true
                 self:RegisterEvent("GROUP_ROSTER_UPDATE")
             end

@@ -1,0 +1,9 @@
+# Keep development-only files out of `git archive` output, so the release zip
+# contains exactly what a user should unpack into Interface\AddOns.
+.gitattributes   export-ignore
+.gitignore       export-ignore
+.codegraph/      export-ignore
+dev/             export-ignore
+CLAUDE.md        export-ignore
+release-notes-*  export-ignore
+discord-*        export-ignore

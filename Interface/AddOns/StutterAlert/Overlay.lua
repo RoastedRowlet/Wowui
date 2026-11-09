@@ -743,22 +743,11 @@ function Overlay:ShowPullSummary(sinceTime)
 end
 
 -- ---------------------------------------------------------------------------
--- Shareable diagnostic report (left-click the button while locked).
---
--- The report has no options, so it has to do the filtering a settings panel
--- would otherwise do: every source gets one summary line, and only sources with
--- something genuinely abnormal about them earn a detail block. Repeated hitches
--- that share a signature collapse into one stated pattern rather than N
--- identical-looking lines.
+-- Shareable diagnostic report. See DESIGN-NOTES.md: Report.
 -- ---------------------------------------------------------------------------
 local floor = math.floor
 
--- Does this source warrant the full breakdown, or just a summary line?
---
--- Deliberately strict: either it happened more than once (so there is a pattern
--- worth describing) or the single occurrence genuinely hurt. A one-off 80 ms
--- spike does not earn eight lines of evidence, and letting it would turn a
--- five-source report into forty lines nobody reads.
+-- A detail block needs a pattern (two hitches) or one critical frame.
 local function isNotable(agg)
     if (agg.hitches or 0) >= 2 then return true end
     if (agg.peakMs or 0) >= DB.settings.criticalFrameMs then return true end
@@ -849,11 +838,8 @@ local function appendDetail(add, name, agg)
         if where then add(format(L.EXPORT_D_WHERE, where)) end
     end
 
-    -- The share can exceed 100%: the addon's time comes from the profiler while
-    -- the frame length comes from OnUpdate's elapsed, and the two clocks do not
-    -- have to agree on a short frame. Printing "167% of the frame" would be
-    -- plainly impossible and would discredit every other figure here, so above
-    -- 100% we state only what we can defend.
+    -- The share can exceed 100% (two clocks). Above 105% say "the whole frame".
+    -- See DESIGN-NOTES.md: Report.
     if agg.peakShare and agg.peakShare > 0 then
         if agg.peakShare > 1.05 then
             add(L.EXPORT_D_SHARE_ALL)
@@ -944,19 +930,116 @@ local function appendDetail(add, name, agg)
     end
 end
 
+-- ---------------------------------------------------------------------------
+-- System lines. Every read is probed: a missing API or console variable drops
+-- its line, never errors. CPU, RAM and driver have no API; EXPORT_GXLOG points
+-- the reader at the client's own gx.log for those.
+-- ---------------------------------------------------------------------------
+local function sysCVar(name)
+    if not (C_CVar and C_CVar.GetCVarInfo) then return nil end
+    local ok, value = pcall(C_CVar.GetCVarInfo, name)
+    if not ok then return nil end
+    return value
+end
+
+local function sysNum(name)
+    return tonumber(sysCVar(name))
+end
+
+-- Adapter names carry a " [n]" index suffix; one card can be listed twice.
+local function sysGPU()
+    local get = C_VideoOptions and C_VideoOptions.GetGxAdapterInfo
+    if not get then return nil end
+    local ok, list = pcall(get)
+    if not ok or type(list) ~= "table" then return nil end
+    local out, seen = {}, {}
+    for i = 1, #list do
+        local a = list[i]
+        local name = type(a) == "table" and a.name
+        if type(name) == "string" then
+            name = name:gsub("%s*%[%d+%]%s*$", "")
+            if name ~= "" and not seen[name] then
+                seen[name] = true
+                out[#out + 1] = a.isLowPower and format(L.EXPORT_SYS_INTEGRATED, name) or name
+            end
+        end
+    end
+    if #out == 0 then return nil end
+    return table.concat(out, L.LIST_SEP)
+end
+
+-- A cap counts only when its value is set and its checkbox, where the client
+-- has one, is not off.
+local function sysCap(useName, valueName)
+    local n = sysNum(valueName)
+    if not n or n <= 0 then return nil end
+    if sysNum(useName) == 0 then return nil end
+    return floor(n + 0.5)
+end
+
+local NET_MIN_HITCHES = 5   -- latency is not judged on fewer checked hitches
+
+local function appendSystem(add)
+    local gpu = sysGPU()
+    if gpu then add(format(L.EXPORT_SYS_GPU, gpu)) end
+
+    local okSize, w, h = pcall(GetPhysicalScreenSize)
+    w, h = okSize and tonumber(w), okSize and tonumber(h)
+    if w and h and w > 0 and h > 0 then
+        local scale = sysNum("renderScale")
+        if scale and scale > 0 then
+            add(format(L.EXPORT_SYS_DISPLAY, w, h, floor(scale * 100 + 0.5)))
+        else
+            add(format(L.EXPORT_SYS_DISPLAY_NOSCALE, w, h))
+        end
+    end
+
+    local api = sysCVar("gxApi")
+    if type(api) == "string" and api ~= "" and api:lower() ~= "auto" then
+        add(format(L.EXPORT_SYS_API, api))
+    end
+
+    local okNet, _, _, home, world = pcall(GetNetStats)
+    home, world = okNet and tonumber(home), okNet and tonumber(world)
+    if home and world and (home > 0 or world > 0) then
+        add(format(L.EXPORT_SYS_LATENCY, floor(home + 0.5), floor(world + 0.5)))
+    end
+
+    local quality, raidQuality = sysNum("graphicsQuality"), sysNum("RAIDgraphicsQuality")
+    if quality and raidQuality then
+        add(format(L.EXPORT_SYS_QUALITY, floor(quality), floor(raidQuality)))
+    elseif quality then
+        add(format(L.EXPORT_SYS_QUALITY_NORAID, floor(quality)))
+    end
+
+    local limits = {}
+    local fg = sysCap("useMaxFPS", "maxFPS")
+    if fg then limits[#limits + 1] = format(L.EXPORT_SYS_LIMIT, L.CVAR_MAX_FPS, fg) end
+    local bk = sysCap("useMaxFPSBk", "maxFPSBk")
+    if bk then limits[#limits + 1] = format(L.EXPORT_SYS_LIMIT, L.CVAR_MAX_FPS_BK, bk) end
+    local target = sysNum("useTargetFPS") == 1 and sysCap("useTargetFPS", "targetFPS")
+    if target then limits[#limits + 1] = format(L.EXPORT_SYS_LIMIT, L.CVAR_TARGET_FPS, target) end
+    if sysNum("vsync") == 1 then limits[#limits + 1] = L.CVAR_VSYNC end
+    if #limits > 0 then
+        add(format(L.EXPORT_SYS_LIMITS, table.concat(limits, L.LIST_SEP)))
+    else
+        add(L.EXPORT_SYS_LIMITS_NONE)
+    end
+
+    if IsMacClient then
+        local okMac, mac = pcall(IsMacClient)
+        if okMac and mac then add(L.EXPORT_SYS_MAC) end
+    end
+end
+
 function Overlay:BuildExportReport()
     local lines = {}
     local function add(s) lines[#lines + 1] = s or "" end
 
     add(versionedTitle())
 
-    -- GetBuildInfo returns version, build, date, tocversion, ...
-    --
-    -- Name the game as well as the version. The same addon now reports from
-    -- retail and from the Classic clients, and a report pasted into a thread
-    -- reads as "5.5.4" to someone who has no reason to know which game that is.
-    -- FLAVOR_KEY is nil on a project we have no name for, and the unnamed line
-    -- below is then exactly what it always was.
+    -- Name the game as well as the version: "5.5.4" alone means nothing to a
+    -- reader. FLAVOR_KEY is nil on a project we have no name for.
     local clientVer, clientBuild = GetBuildInfo()
     if ns.FLAVOR_KEY then
         add(format(L.EXPORT_CLIENT_FLAVOR, L[ns.FLAVOR_KEY],
@@ -964,6 +1047,7 @@ function Overlay:BuildExportReport()
     else
         add(format(L.EXPORT_CLIENT, tostring(clientVer), tostring(clientBuild)))
     end
+    appendSystem(add)
     add(L.EXPORT_SCOPE)
     add("")
 
@@ -992,27 +1076,36 @@ function Overlay:BuildExportReport()
             end
         end
 
-        -- Time deliberately left out of that denominator. Stated rather than
-        -- silently dropped: an author reading "2h monitored" deserves to know
-        -- the session was longer and why the rest was not measured.
+        -- Time left out of that denominator, stated so "2h monitored" is not
+        -- read as the whole session.
         local throttledSec = DB.data.totals.throttledSec
         if throttledSec and throttledSec >= 60 then
             local durText = ns.FormatDuration(throttledSec)
             if durText then add(format(L.EXPORT_THROTTLED, durText)) end
         end
 
-        -- A frame cap that is currently setting this machine's normal. Stated
-        -- because it is the one explanation for a low frame rate that no
-        -- graphics setting in the advice below can touch.
+        -- A cap setting this machine's normal: the one low-FPS cause no
+        -- graphics setting in the advice can touch.
         local capCVar, capFPS = ns.Detector:GetBaselineCap()
         if capCVar then
             add(format(L.EXPORT_BASELINE_CAP, capFPS, ns.CapCVarLabel(capCVar)))
         end
+
+        -- Named only when most hitches carry it, so latency never becomes the
+        -- default excuse. See DESIGN-NOTES.md: Network and combat logging.
+        local t = DB.data.totals
+        local latChecked, latHigh = t.latChecked or 0, t.latHigh or 0
+        if latChecked >= NET_MIN_HITCHES and latHigh * 2 > latChecked and (t.latN or 0) > 0 then
+            add(format(L.EXPORT_LATENCY_HIGH, floor(t.latSum / t.latN + 0.5), latHigh, latChecked))
+        end
+        if (t.logOn or 0) > 0 then
+            local key = sysNum("advancedCombatLogging") == 1 and "EXPORT_COMBATLOG_ADV" or "EXPORT_COMBATLOG"
+            add(format(L[key], t.logOn, t.logChecked or t.logOn))
+        end
     end
 
-    -- Constant cost. Stutters are only half the story: an addon burning a few ms
-    -- of every frame never trips the hitch threshold but still eats the budget,
-    -- and nothing in the addon reported that before.
+    -- Constant cost: a few ms every frame never trips the hitch threshold but
+    -- still eats the budget.
     local chronic, chronicSum = ns.Detector:GetChronicCost(5)
     if chronicSum and chronicSum > 0 then
         add("")
@@ -1047,8 +1140,7 @@ function Overlay:BuildExportReport()
         end
     end
 
-    -- Sorted biggest-first: pairs() order is arbitrary, which made the previous
-    -- report list causes in a different order every time it was generated.
+    -- Sorted so the same history renders the same report twice.
     local causeArr = {}
     for causeKey, n in pairs(sum.causes) do
         causeArr[#causeArr + 1] = { key = causeKey, n = n }
@@ -1071,6 +1163,7 @@ function Overlay:BuildExportReport()
     end
 
     add("")
+    add(L.EXPORT_GXLOG)
     add(L.EXPORT_FOOTER)
 
     return table.concat(lines, "\n")
@@ -1135,10 +1228,8 @@ function Overlay:ShowExport()
         sep:SetPoint("BOTTOMLEFT", LEFT_RIGHT, 14)
         sep:SetWidth(1)
 
-        -- RIGHT column: report header + copy/paste edit box.
-        -- Pinned on both sides so it wraps inside the column, and the scroll
-        -- frame hangs off its bottom. The column is ~245 units wide; unpinned,
-        -- a longer translation ran straight off the panel's right edge.
+        -- Right column header, pinned on both sides so a long translation wraps
+        -- inside the column. The scroll frame hangs off its bottom.
         local rhead = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         rhead:SetPoint("TOPLEFT", LEFT_RIGHT + 16, -46)
         rhead:SetPoint("TOPRIGHT", -30, -46)
@@ -1347,10 +1438,7 @@ function Overlay:Create()
                 showTooltip()
             end
         elseif button == "LeftButton" then
-            -- Deliberately NOT gated on `locked`. Locking governs whether the
-            -- button can be MOVED, not whether it can be clicked; gating the
-            -- report on it left anyone who had unlocked the button with a dead
-            -- left-click and a tooltip still promising a report.
+            -- Not gated on `locked`: locking stops moving, not clicking.
             ns.Overlay:ToggleExport()
         end
     end)

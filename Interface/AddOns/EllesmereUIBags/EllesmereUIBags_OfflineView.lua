@@ -672,7 +672,10 @@ local function Gold(v)
     if v.mode == "bank" and TabKind(v) == "warband" then return GL.WarbandMoney() end
     local key = ShownKey(v)
     if key == Offline.CurrentKey() then return GL.Money() end
-    local e = GL.Data().chars[key]
+    -- The ledger keys by GUID; an entry from an older build by "Name-Realm".
+    local c = Offline.Char(key)
+    local chars = GL.Data().chars
+    local e = (c and c.guid and chars[c.guid]) or chars[key]
     return e and e.money
 end
 
@@ -787,7 +790,7 @@ Paint = function(v, force)
     if list and filter then
         text = EllesmereUI.Lf("%d Items", shown)
     elseif list then
-        text = EllesmereUI.Lf("%d / %d Items", used, total)
+        text = EllesmereUI.Lf("%d / %d Slots", used, total)
     end
     v.countText = text
     if v.side then PaintSide(v) end

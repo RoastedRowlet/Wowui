@@ -64,12 +64,8 @@ function Detector:RebuildAddonList()
 end
 
 -- ---------------------------------------------------------------------------
--- Chronic cost: what your addons spend on EVERY frame, hitch or no hitch.
---
--- SessionAverageTime is maintained by the client, so this is a read rather than
--- a measurement. Unlike everything else here it deliberately includes
--- StutterAlert itself: our own overhead is a real cost to the player and hiding
--- it would be dishonest, even though we never blame ourselves for a spike.
+-- Chronic cost: what addons spend on every frame. Includes StutterAlert itself,
+-- unlike the blame list.
 -- ---------------------------------------------------------------------------
 function Detector:GetChronicCost(topN)
     local rows, sum = {}, 0
@@ -90,13 +86,8 @@ function Detector:GetChronicCost(topN)
 end
 
 -- ---------------------------------------------------------------------------
--- Per-addon memory, sampled ONLY inside the loading-screen grace window.
---
--- UpdateAddOnMemoryUsage was measured at 50-55 ms on a 107-addon install on
--- 12.0.7. That is three frames: calling it on a timer would make StutterAlert
--- the cause of a visible stutter every cycle, and calling it on a hitch frame
--- would make a bad frame worse. The one place it is free is behind a loading
--- screen, where a long frame is expected and already excluded from detection.
+-- Per-addon memory. UpdateAddOnMemoryUsage costs about 50 ms, so call this only
+-- inside the loading-screen grace window. See DESIGN-NOTES.md: Memory sampling.
 -- ---------------------------------------------------------------------------
 local lastMemSample     = 0
 local MEM_SAMPLE_GAP_SEC = 60
@@ -143,14 +134,9 @@ local function getTopAddons(k)
 end
 
 -- ---------------------------------------------------------------------------
--- Secret-value safety (12.0.7). Certain APIs return "secret" values in some
--- contexts (notably movement/position inside instanced combat). Insecure code
--- may not compare, do arithmetic on, serialize, or even evaluate the truthiness
--- of a secret -- any of those raises and taints execution. Our hitch records are
--- written to SavedVariables and rendered into the export report, so a secret
--- must NEVER reach ctx/records. These helpers read defensively: a hostile or
--- failing read degrades that one field to a safe default instead of aborting the
--- whole hitch, and only verified-plain values are returned.
+-- Secret values (12.0.7): comparing, arithmetic on, or testing the truth of a
+-- secret raises. Records reach SavedVariables, so no secret may enter them; a
+-- failed read degrades one field to its default.
 local function toBool(v) return v and true or false end
 local function plusZero(v) return v + 0 end
 
@@ -180,6 +166,19 @@ moveWatcher:SetScript("OnEvent", function(_, event)
     isMoving = (event == "PLAYER_STARTED_MOVING")
 end)
 
+-- Network context, declared before buildContext reads it.
+-- See DESIGN-NOTES.md: Network and combat logging.
+local LAT_SAMPLE_SEC     = 30    -- GetNetStats refreshes about this often
+local LAT_MIN_SAMPLES    = 4     -- usual latency needs this many samples first
+local LAT_HIGH_FLOOR_MS  = 150   -- a hitch is "high latency" at or above this
+local LAT_HIGH_RATIO     = 2     -- and at least this many times the usual
+local nextLatSample      = 0
+
+local function worldLatency()
+    local _, _, _, lw = GetNetStats()
+    return lw
+end
+
 local function buildContext()
     local inCombat = safeBool(function() return UnitAffectingCombat("player") end, false)
     local resting  = safeBool(IsResting, false)
@@ -199,20 +198,23 @@ local function buildContext()
         key = "world"
     end
 
-    -- Correlated conditions captured at hitch time (rare, so affordable). These
-    -- are CONTEXT shown to help the player decide -- never asserted as the cause.
-    -- Every read goes through the secret-safe helpers so a value that turns out
-    -- secret in instanced combat degrades one field rather than killing the hitch.
+    -- Context shown to the player, never asserted as the cause. Every read goes
+    -- through the secret-safe helpers.
     local nameplates = 0
     if C_NamePlate and C_NamePlate.GetNamePlates then
         local ok, plates = pcall(C_NamePlate.GetNamePlates)  -- 12.0.1: no args
         if ok and plates then nameplates = #plates end
     end
 
-    local latencyWorld = safeNum(function()
-        local _, _, _, lw = GetNetStats()
-        return lw
-    end, 0)
+    local latencyWorld = safeNum(worldLatency, 0)
+
+    -- nil until the usual latency is known, so early hitches stay uncounted.
+    local latencyHigh
+    local totals = DB.data and DB.data.totals
+    if latencyWorld > 0 and totals and (totals.latN or 0) >= LAT_MIN_SAMPLES then
+        local usual = totals.latSum / totals.latN
+        latencyHigh = latencyWorld >= math.max(LAT_HIGH_FLOOR_MS, usual * LAT_HIGH_RATIO)
+    end
 
     local fps = floor(safeNum(GetFramerate, 0) + 0.5)
     local groupSize = safeNum(GetNumGroupMembers, 0)
@@ -233,6 +235,8 @@ local function buildContext()
         zone         = zoneName,
         nameplates   = nameplates,
         latencyWorld = latencyWorld,
+        latencyHigh  = latencyHigh,
+        combatLog    = safeBool(LoggingCombat, nil), -- nil where the API is missing
         fps          = fps,
         moving       = isMoving,
         flying       = safeBool(IsFlying, false),
@@ -256,13 +260,9 @@ function Detector:GetSeverityLabel()
 end
 
 -- ---------------------------------------------------------------------------
--- Non-addon cause classifier. When a hitch is not blamed on an addon, this
--- returns the locale KEY for the most likely cause, checked most-confident
--- first, ending in an honest engine/render remainder. This is inference from
--- correlated signals -- not ground truth -- so the labels stay hedged.
+-- Detection tuning. Not user-configurable, so every install measures the same
+-- way and reports stay comparable.
 -- ---------------------------------------------------------------------------
--- Locked detection tuning (the shared benchmark; NOT user-configurable, so every
--- install measures the same way and reports stay comparable across machines).
 local LOADING_TAIL_SEC   = 5     -- a hitch within this long after a zone-in = streaming
 local BASELINE_TAU_SEC   = 1.5   -- EMA time-constant for "normal" frame time
 local WARMUP_SEC         = 2     -- learn this machine before trusting hitch shape
@@ -272,16 +272,8 @@ local CLUSTER_WINDOW_SEC = 5     -- look-back window for repeated hitches
 local CLUSTER_COUNT      = 4     -- this many hitches in the window = sustained, even if baseline lags
 local SCENE_UNITS        = 8     -- this many nearby units at hitch time = the engine is loading models/effects
 
--- Throttle regime: the game is deliberately running slowly because the player
--- said so (a background/foreground FPS cap, or a hard vsync lock), not because
--- anything stuttered.
---
--- The discriminator is SHAPE, not speed. A cap is a metronome -- the client
--- sleeps to hit an exact frame period, so consecutive frames are near-identical.
--- A machine that is genuinely struggling is never that even: real slow frames
--- jitter with whatever the engine happens to be doing. So "every recent frame is
--- long AND they are all nearly the same length" means capped, while "every
--- recent frame is long and they vary" stays a reported sustained slowdown.
+-- Throttle regime: a frame cap, told apart from a struggling machine by shape
+-- (a cap is a metronome). See DESIGN-NOTES.md: Throttle regime.
 local THROTTLE_FLOOR_MS  = 40    -- below ~25 fps before a regime is even considered
 local THROTTLE_SPREAD    = 0.12  -- (max-min)/mean across the window; a cap sits near 0
 local THROTTLE_CONFIRM   = 4     -- consecutive frames that must agree
@@ -290,25 +282,12 @@ local THROTTLE_DROP_RATIO= 0.75  -- normal must have been this much faster than 
 local THROTTLE_TAIL_SEC  = 1     -- ignore hitches this long after the regime ends
 
 -- ---------------------------------------------------------------------------
--- Frame-cap console variables.
---
--- Read exactly the way Advisor.lua reads graphics CVars: probed, never assumed.
--- A name this client does not know returns nil and simply drops out, so the
--- shape test below carries the decision on its own and a renamed CVar degrades
--- this from "capped, and here is the setting responsible" to "capped" -- never
--- to a wrong answer.
---
--- These only ever CORROBORATE a regime the frame shape already identified, and
--- name it for the player. They are never sufficient on their own: a cap being
--- configured says nothing about whether it is currently in force.
+-- Frame-cap console variables. They only corroborate and name a regime the
+-- shape already found; an unknown name drops out and the shape decides alone.
 -- ---------------------------------------------------------------------------
--- Both names confirmed present on a live 12.1 client (maxFPSBk 30, maxFPS 120).
--- The probes stay defensive anyway: these are console variables, not API, and
--- nothing here may depend on one existing.
 local CAP_CVARS = { "maxFPSBk", "maxFPS" }
 
--- The foreground cap alone. Kept separate because the two caps answer different
--- questions and confusing them silences a real fault: see matchingForegroundCap.
+-- Kept apart from CAP_CVARS: see matchingForegroundCap.
 local FG_CAP_CVARS = { "maxFPS" }
 
 local function capPeriodMs(name)
@@ -340,27 +319,16 @@ local function matchingCap(frameMs)
     return matchingCapIn(CAP_CVARS, frameMs)
 end
 
--- Only the FOREGROUND cap. Used when asking "is this machine's normal explained
--- by a limit the player set?", which is a question about a player who is sitting
--- at the screen -- so the background cap is not an admissible answer.
---
--- Checking both here silences a real fault. A background cap of 30 is a common
--- setting (it is the client's own default), so a player genuinely struggling at
--- 30 fps in the FOREGROUND has a baseline of 33 ms that coincidentally matches
--- their background cap. Treating that as "capped, not struggling" would deny
--- them the one diagnosis they needed. The background cap can never explain a
--- baseline anyway: while it is in force, monitoring is suspended and nothing is
--- being classified at all.
+-- Only the foreground cap may explain a baseline. Adding the background cap
+-- here would call a player struggling at 30 fps "capped" (30 is its default).
+-- See DESIGN-NOTES.md: Throttle regime.
 local function matchingForegroundCap(frameMs)
     return matchingCapIn(FG_CAP_CVARS, frameMs)
 end
 
 -- ---------------------------------------------------------------------------
--- Throttle regime state machine.
---
--- The ring holds the last THROTTLE_CONFIRM frame lengths. It is a fixed-size
--- array written once per frame with no allocation; everything else here runs
--- only on frames long enough to be candidate hitches, which are rare.
+-- Throttle regime state. The ring holds the last THROTTLE_CONFIRM frame lengths
+-- and is written every frame with no allocation.
 -- ---------------------------------------------------------------------------
 local frameRing      = {}
 local frameRingPos   = 0
@@ -383,12 +351,9 @@ local function resetFrameRing()
     for i = 1, THROTTLE_CONFIRM do frameRing[i] = nil end
 end
 
--- Is the ring a metronome? Returns (isMetronome, mean frame ms). False until the
--- ring is full, so a regime can never be declared on partial evidence.
---
--- Note there is no minimum frame length here: steady 60 fps is a metronome too.
--- The callers decide what a given metronome MEANS, because the answer differs --
--- see the background-cap test below.
+-- Is the ring a metronome? Returns (isMetronome, mean frame ms), false until the
+-- ring is full. No minimum length: steady 60 fps is a metronome too, and the
+-- callers decide what it means.
 local function ringShape()
     if frameRingCount < THROTTLE_CONFIRM then return false end
     local lo, hi, sum = math.huge, 0, 0
@@ -404,19 +369,9 @@ local function ringShape()
     return ((hi - lo) / mean) <= THROTTLE_SPREAD, mean
 end
 
--- Is this metronome specifically the BACKGROUND cap -- i.e. is the window not
--- being looked at?
---
--- This matters at any frame rate, not just a punishing one. A player capped at
--- 30 fps in the background produces 33 ms frames, which never reach the hitch
--- floor and so were never noisy -- but the time still got counted as measured
--- play, so an afternoon spent alt-tabbed silently inflated the denominator of
--- the report's "about N a minute".
---
--- The foreground cap is checked as an exclusion, not a match: when both caps are
--- set to the same value the two cases are indistinguishable, and assuming the
--- player is PLAYING is the safe way to be wrong -- it keeps measuring rather
--- than going quiet on someone sitting at the screen.
+-- Is this metronome the background cap, so the window is not being watched?
+-- A matching foreground cap excludes it: when both are equal, assume playing.
+-- See DESIGN-NOTES.md: Throttle regime.
 local function looksLikeBackgroundCap(meanMs)
     local bk = capPeriodMs("maxFPSBk")
     if not bk or math.abs(meanMs - bk) > bk * THROTTLE_CAP_TOL then return false end
@@ -424,22 +379,14 @@ local function looksLikeBackgroundCap(meanMs)
     local fg = capPeriodMs("maxFPS")
     if fg and math.abs(meanMs - fg) <= fg * THROTTLE_CAP_TOL then return false end
 
-    -- Third test, and the one that keeps a weak machine from being written off:
-    -- tabbing out is a CHANGE. The player was running faster a moment ago and is
-    -- now pinned at exactly the background cap. Without this, someone locked at
-    -- 30 fps in the foreground -- vsync at half refresh on a 60 Hz screen, say --
-    -- whose background cap also happens to be 30 (the client's default) would be
-    -- declared backgrounded while sitting at the screen, and monitoring would
-    -- stop for exactly the player who needs it most. Their baseline was already
-    -- 33 ms, so no change ever happened, and this test says so.
+    -- Tabbing out is a change: the baseline must have been faster than the cap.
+    -- Without this, a player locked at 30 fps in the foreground loses monitoring.
     if not baselineReady or baselineMs <= 0 then return false end
     return baselineMs < bk * THROTTLE_DROP_RATIO
 end
 
--- Seconds of frame time currently sitting in the ring. Used to take back the
--- monitored-time that was banked before the regime was confirmed, so the
--- report's hitches-per-minute denominator never counts time the player was not
--- even looking at the game.
+-- Seconds of frame time in the ring: monitored time banked before a regime was
+-- confirmed, taken back so the per-minute rate excludes it.
 local function ringSeconds()
     local sum = 0
     for i = 1, THROTTLE_CONFIRM do sum = sum + (frameRing[i] or 0) end
@@ -447,12 +394,8 @@ local function ringSeconds()
 end
 
 -- ---------------------------------------------------------------------------
--- Non-addon cause classifier. Returns the locale KEY for the most likely cause,
--- most-confident first, ending in an honest engine/unclear remainder. This is
--- inference from correlated signals -- not ground truth -- so the labels stay
--- hedged. Network latency and raw FPS are deliberately NOT treated as causes:
--- latency does not make a single frame render long, and average FPS hides a
--- one-frame spike. Both are captured as context only (see buildContext).
+-- Non-addon cause: the locale key of the likeliest cause, most confident first.
+-- Latency and average FPS are never causes. See DESIGN-NOTES.md: Cause ladder.
 -- ---------------------------------------------------------------------------
 local function classifyNonAddon(gcThisFrame, ctx)
     -- 1. Asset streaming shortly after a loading screen / zone change.
@@ -470,15 +413,8 @@ local function classifyNonAddon(gcThisFrame, ctx)
         return "HEADLINE_UNCLEAR"
     end
 
-    -- 4. Machine genuinely struggling: even ordinary frames are already slow.
-    --
-    -- Unless the player ASKED for slow frames. A foreground cap of 30 fps parks
-    -- the baseline at 33.3 ms against a floor of 33 -- one percent of clearance --
-    -- so every game-caused hitch on a capped laptop or handheld was being called
-    -- a sustained slowdown, and the advice panel then recommended lowering
-    -- shadows and view distance to fix a frame rate limit those settings do not
-    -- control. A cap explains the baseline; it does not explain THIS long frame,
-    -- so the ladder falls through to the causes that might.
+    -- 4. Machine struggling: ordinary frames are already slow. A foreground cap
+    --    explains the baseline, not this frame, so it falls through.
     if baselineMs >= SMOOTH_FLOOR_MS and not matchingForegroundCap(baselineMs) then
         return "HEADLINE_SUSTAINED"
     end
@@ -511,25 +447,9 @@ local function classifyNonAddon(gcThisFrame, ctx)
 end
 
 -- ---------------------------------------------------------------------------
--- Event ring: what the game was dispatching on the frame that hitched.
---
--- Knowing WHICH addon was slow is only half an answer; this supplies what it was
--- reacting to. A frame with RegisterAllEvents receives every event, and we note
--- them per frame so a hitch can name its trigger.
---
--- Affordable because 12.0.7 does NOT deliver COMBAT_LOG_EVENT_UNFILTERED to a
--- RegisterAllEvents frame (verified on build 68887: zero dispatches across a ten
--- second window in the open world). Measured load was 35 dispatches/sec at
--- ~0.001 ms/frame, and that figure INCLUDED the profiling calls used to measure
--- it, so the real cost is lower still.
---
--- DOUBLE BUFFERED, and the direction matters. OnUpdate's `elapsed` describes the
--- frame that just ENDED, but that frame's successor has already dispatched its
--- events by the time OnUpdate runs. The events belonging to the hitch are
--- therefore always in the PREVIOUS bucket, never the current one. This was
--- verified rather than assumed: a controlled 300 ms burn showed the long
--- `elapsed` and the matching profiler reading land on the same frame. Reading
--- the wrong bucket would yield confident, plausible, wrong answers.
+-- Event ring: what was dispatched on the frame that hitched. Double buffered:
+-- the hitch's events are always in the PREVIOUS bucket, never the current one.
+-- See DESIGN-NOTES.md: Event ring.
 -- ---------------------------------------------------------------------------
 local EVENT_CAP  = 128  -- per-frame slots; beyond this we only count the overflow
 local EVENT_KEEP = 5    -- distinct events kept on a stored hitch record
@@ -569,10 +489,8 @@ local function onEventCapture(_, event, arg1)
     end
 end
 
--- Stale prefix entries are deliberately NOT cleared on swap. A prefix at index i
--- is only ever read when the event at index i is CHAT_MSG_ADDON, and in that
--- case this frame overwrote it. Skipping the wipe keeps the per-frame cost to
--- two integer stores.
+-- Stale prefixes are not cleared: index i is read only when event i is
+-- CHAT_MSG_ADDON, and then this frame wrote it.
 local function swapEventBuckets()
     local t = evPrev
     evPrev  = evCur
@@ -585,10 +503,8 @@ end
 local function summarizeEvents()
     local b = evPrev
 
-    -- An EMPTY summary rather than nil, because "nothing fired" is a real and
-    -- useful finding: it means the work came from an OnUpdate or a timer rather
-    -- than an event. Reserving nil for a genuine capture failure keeps the two
-    -- cases distinguishable in the report.
+    -- Empty, not nil: "nothing fired" is a finding (OnUpdate or timer work), and
+    -- nil is reserved for a failed capture.
     if b.n == 0 and b.over == 0 then
         return { list = {}, total = 0, over = 0 }
     end
@@ -636,28 +552,14 @@ end
 -- "interval" spanning a logout.
 local lastHitchAt = {}
 
--- The most recently blamed addon, for co-occurrence. When several addons spike
--- inside one cluster window it usually means a single shared trigger rather
--- than several independent faults, and saying so is more accurate than
--- accusing all of them separately.
+-- The most recently blamed addon, for co-occurrence: several addons spiking in
+-- one cluster window usually share one trigger.
 local lastBlamed, lastBlamedAt = nil, 0
 
 -- ---------------------------------------------------------------------------
--- Deferred commit.
---
--- A candidate hitch is BUILT immediately -- it has to be, because the event ring
--- and the profiler both describe the frame that just ended and are gone by the
--- next one -- but it is not WRITTEN until we have seen enough later frames to
--- know whether it was a stutter or the first frame of a throttle regime.
---
--- Without this the transition into a background FPS cap costs THROTTLE_CONFIRM
--- junk hitches every time the player alt-tabs, and those are the expensive kind:
--- the log is a 100-entry ring, so junk does not merely clutter the report, it
--- evicts the real hitches the player was trying to diagnose.
---
--- The delay is THROTTLE_CONFIRM frames, so a real hitch banner appears about
--- 60 ms later than it used to at 60 fps. Nothing in the record shifts: `t`, the
--- event summary and every profiler reading were all captured at hitch time.
+-- Deferred commit: a hitch is built at once but written only after
+-- THROTTLE_CONFIRM frames prove it did not start a regime.
+-- See DESIGN-NOTES.md: Deferred commit.
 -- ---------------------------------------------------------------------------
 local pending = {}
 
@@ -732,10 +634,8 @@ function Detector:OnHitch(frameMs, gcThisFrame, allocKB)
         end
     end
 
-    -- How much of the long frame was actually this addon? The blame gate below
-    -- tests TOTAL addon time, so without this a frame where five addons each
-    -- spent a moderate amount could be pinned wholly on one of them. Recording
-    -- the share keeps the report honest about how strong the evidence is.
+    -- This addon's share of the frame. The blame gate tests total addon time,
+    -- so the share is what says how strong the evidence against one addon is.
     local culpritShare
     if culpritMs and frameMs > 0 then
         culpritShare = culpritMs / frameMs
@@ -749,10 +649,8 @@ function Detector:OnHitch(frameMs, gcThisFrame, allocKB)
     local isAddon  = (culprit ~= nil) and (addonMs >= frameMs * s.addonBlameFraction)
     local causeKey = (not isAddon) and classifyNonAddon(gcThisFrame, ctx) or nil
 
-    -- What the game was dispatching on the frame that hitched. Captured for
-    -- every hitch, addon or not, because "Busy scene" is far more useful when it
-    -- can also say what was firing. Guarded: event payloads can be secret in
-    -- 12.0.7, and losing the event list is preferable to losing the hitch.
+    -- Events on the hitching frame, for every hitch. Guarded: payloads can be
+    -- secret, and losing the list beats losing the hitch.
     local okEv, events = pcall(summarizeEvents)
     if not okEv then events = nil end
 
@@ -781,12 +679,9 @@ function Detector:OnHitch(frameMs, gcThisFrame, allocKB)
         end
         lastBlamed, lastBlamedAt = culprit, now
 
-        -- Signature: repeated hitches that share one of these collapse into a
-        -- single reported pattern instead of N identical-looking lines. The
-        -- dominant event is part of it, so "always CHAT_MSG_ADDON in a dungeon"
-        -- reads as one bug. If the event varies each time the signature will
-        -- fragment, and that fragmentation is itself the finding: these are not
-        -- the same fault repeating.
+        -- Hitches sharing a signature collapse into one reported pattern. The
+        -- top event is part of it; if it varies, the signature fragments, and
+        -- that is the finding.
         local topEvent = events and events.list and events.list[1] and events.list[1].name
         sigKey = ctxKey
             .. "/" .. (ctx.inCombat and "combat" or "calm")
@@ -872,11 +767,8 @@ local function onUpdate(_, elapsed)
         if severity < 0 then severity = 0 end
     end
 
-    -- GC sawtooth: a drop in total Lua memory means a collection ran this frame.
-    -- The same two reads also give us how much Lua memory the frame ALLOCATED,
-    -- which costs nothing extra and is one of the strongest "why" signals we
-    -- have: a long frame that allocated megabytes was computing, while one that
-    -- allocated nothing was blocking on the engine.
+    -- A drop in Lua memory means a collection ran this frame. The same reads
+    -- give the frame's allocation. See DESIGN-NOTES.md: Allocation buckets.
     local curGC = collectgarbage("count")
     local allocKB = curGC - prevGC
     local gcThisFrame = curGC < (prevGC - 1)
@@ -891,22 +783,16 @@ local function onUpdate(_, elapsed)
         if rel > threshold then threshold = rel end
     end
 
-    -- Throttle regime, evaluated before anything is recorded. The ring has to be
-    -- fed on EVERY frame -- including hitch frames and frames inside the loading
-    -- grace -- or the shape test would be reading a discontiguous history.
+    -- Throttle regime, before anything is recorded. Feed the ring on every
+    -- frame, hitches and grace included, or the shape test reads gaps.
     Detector.frameCount = (Detector.frameCount or 0) + 1
     pushFrame(frameMs)
 
     local totals = DB.data and DB.data.totals
 
-    -- A metronome means the regime is deliberate. Two things make it one worth
-    -- suspending detection for, and either is enough:
-    --   * it matches the BACKGROUND cap, so the player is not watching -- true at
-    --     any frame rate, including a 30 fps cap that never trips the hitch floor
-    --   * or it is slower than THROTTLE_FLOOR_MS, which is the fallback for when
-    --     no cap console variable can be read at all
-    -- A foreground cap is deliberately NOT enough on its own: the player is
-    -- sitting there playing, and detection still works fine against it.
+    -- Suspend for a metronome at the background cap, or one slower than
+    -- THROTTLE_FLOOR_MS (no cap variable readable). A foreground cap alone is
+    -- not enough. See DESIGN-NOTES.md: Throttle regime.
     local metronome, ringMean = ringShape()
     local isRegime = metronome and
         (looksLikeBackgroundCap(ringMean) or ringMean >= THROTTLE_FLOOR_MS)
@@ -938,22 +824,25 @@ local function onUpdate(_, elapsed)
         ns.Overlay:SetThrottled(true, throttleCVar)
     end
 
-    -- Nothing is measured while capped, and nothing for a moment afterwards. The
-    -- baseline is deliberately left FROZEN rather than fed these frames: it
-    -- describes what normal looks like when the player is actually playing, and
-    -- letting it drift up to the cap would blind the detector to real hitches
-    -- for seconds after they tab back in.
+    -- Nothing is measured while capped or just after. The baseline stays frozen;
+    -- drifting up to the cap would blind detection after tabbing back in.
     local inGrace = (now < graceUntil) or throttled or (now < throttleUntil)
 
     if throttled and totals then
         totals.throttledSec = (totals.throttledSec or 0) + elapsed
     end
 
-    -- Accumulate monitored time so the report can turn a raw hitch count into a
-    -- rate. Loading screens and throttled time are excluded, matching what
-    -- detection ignores.
+    -- Monitored time and the usual-latency samples skip what detection skips.
     if not inGrace and totals then
         totals.monitoredSec = (totals.monitoredSec or 0) + elapsed
+        if now >= nextLatSample then
+            nextLatSample = now + LAT_SAMPLE_SEC
+            local lw = safeNum(worldLatency, 0)
+            if lw > 0 then
+                totals.latSum = (totals.latSum or 0) + lw
+                totals.latN   = (totals.latN or 0) + 1
+            end
+        end
     end
 
     -- Commit or drop candidates from earlier frames. Runs after the regime check
@@ -1056,20 +945,14 @@ function Detector:GetStatus()
     return baselineMs, baselineReady
 end
 
--- Is the client currently running to a deliberate frame cap (backgrounded, or a
--- foreground cap), and which console variable corroborated it? Detection is
--- suspended while this is true, and both the tooltip and the report say so
--- rather than leaving a quiet button to be read as "all clear".
+-- Is the client running to a deliberate cap, and which console variable
+-- corroborated it? Detection is suspended while true, and the UI says so.
 function Detector:IsThrottled()
     return throttled, throttleCVar
 end
 
--- Is this machine's idea of "normal" set by a frame cap rather than by what it
--- can manage? Returns the console variable and the frame rate it is holding, or
--- nil. Detection is unaffected -- a capped client is still measured against its
--- own baseline -- but the cap has to be SAID, or a player looking at 30 fps and
--- a report full of engine hitches will go tuning graphics settings that cannot
--- move a limit they set themselves.
+-- Is this machine's normal set by a foreground cap? Returns the console variable
+-- and the frame rate it holds, or nil. Report only: detection is unaffected.
 function Detector:GetBaselineCap()
     if not baselineReady or baselineMs <= 0 then return nil end
     local name, periodMs = matchingForegroundCap(baselineMs)

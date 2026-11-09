@@ -31,4 +31,21 @@
 			</EventFrame>
 		</Frames>
 	</Frame>
+
+	<!-- A settings row with an optional image to the left of wrapped text.
+	     The height comes from the initializer (GetExtent), not from this size. -->
+	<Frame name="TomTomSettingsTextRowTemplate" mixin="TomTomSettingsTextRowMixin" virtual="true">
+		<Size y="40"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="Image" hidden="true"/>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString parentKey="Text" inherits="GameFontHighlight" justifyH="LEFT" justifyV="TOP"/>
+			</Layer>
+		</Layers>
+	</Frame>
+
+	<!-- Blizzard's color swatch row, with our own click handler that can add opacity. -->
+	<Frame name="TomTomSettingsColorSwatchControlTemplate" inherits="SettingsColorSwatchControlTemplate" mixin="TomTomSettingsColorSwatchControlMixin" virtual="true"/>
 </Ui>
