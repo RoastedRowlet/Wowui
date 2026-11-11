@@ -153,6 +153,16 @@ SimulationCraftDB = {
 ["season"] = 37,
 ["itemId"] = 268230,
 },
+{
+["currency"] = 3418,
+["ts"] = 1794309420,
+["source"] = 278285,
+["season"] = 37,
+["keyLevel"] = 1,
+["spec"] = 264,
+["context"] = 95,
+["itemId"] = 268203,
+},
 },
 },
 ["Madmareep - Stormrage"] = {

@@ -11,54 +11,14 @@ RaiderIO_Config = {
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
+["beaconDiagnosticsPending"] = {
+["active"] = false,
+["requested"] = false,
+},
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Hekasil-tichondrius"] = true,
-["us-Prophet-stormrage"] = true,
-["us-Kenpachî-illidan"] = true,
-["us-Kurkbentzarn-wyrmrest-accord"] = true,
-["us-Claptism-ysera"] = true,
-["us-Plappypus-sargeras"] = true,
-["us-Cappe-stormrage"] = true,
-["us-Ashenfate-stormrage"] = true,
-["us-Faeylla-stormrage"] = true,
-["us-Lighthand-emerald-dream"] = true,
-["us-Ayabrea-quelthalas"] = true,
-["us-Montclair-azuremyst"] = true,
-["us-Haidra-area-52"] = true,
-["us-Demonwhilson-stormrage"] = true,
-["us-Wildesel-stormrage"] = true,
-["us-Marcyk-area-52"] = true,
-["us-Loma-dalaran"] = true,
-["us-Sindelilah-stormrage"] = true,
-["us-Strotem-proudmoore"] = true,
-["us-Killuã-stormrage"] = true,
-["us-Nomsforsale-stormrage"] = true,
-["us-Margerydaw-stormrage"] = true,
-["us-Sinbreaker-stormrage"] = true,
-["us-Jalhidha-ragnaros"] = true,
-["us-Stubaloo-tichondrius"] = true,
-["us-Eticoo-quelthalas"] = true,
-["us-Illidagonit-stormrage"] = true,
-["us-Titanpuppett-aegwynn"] = true,
-["us-Gahmull-elune"] = true,
-["us-Roxannee-wyrmrest-accord"] = true,
-["us-Cheezilock-zuljin"] = true,
-["us-Azheel-stormrage"] = true,
-["us-Sociable-stormrage"] = true,
-["us-Rierson-stormrage"] = true,
-["us-Gahmull-stormrage"] = true,
-["us-Tassere-moon-guard"] = true,
-["us-Monawah-stormrage"] = true,
-["us-Rentwazkalmi-tichondrius"] = true,
-["us-Zithaniel-drakkari"] = true,
-["us-Voltún-ragnaros"] = true,
-["us-Umdead-zuljin"] = true,
-["us-Fistsofchuck-illidan"] = true,
-["us-Komikooll-barthilas"] = true,
-["us-Nickbladez-malganis"] = true,
-["us-Doeduk-tichondrius"] = true,
+["us-Apexchud-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }
@@ -67,3 +27,56 @@ RaiderIO_RWF = {
 }
 RaiderIO_CompletedReplays = {
 }
+RaiderIO_GameData = nil
+RaiderIO_ActivityCharacterContext = nil
+RaiderIO_BeaconDebug = nil
+RaiderIO_BeaconSummary = {
+["evicted"] = 0,
+["loads"] = {
+{
+["lastAt"] = 1794182845,
+["startedAt"] = 1794178272,
+["logoutAt"] = 1794182845,
+},
+{
+["lastAt"] = 1794195306,
+["startedAt"] = 1794194613,
+["logoutAt"] = 1794195306,
+},
+{
+["lastAt"] = 1794195369,
+["startedAt"] = 1794195317,
+["logoutAt"] = 1794195369,
+},
+{
+["lastAt"] = 1794197285,
+["startedAt"] = 1794195378,
+["logoutAt"] = 1794197285,
+},
+{
+["lastAt"] = 1794330134,
+["startedAt"] = 1794326533,
+["logoutAt"] = 1794330135,
+},
+{
+["lastAt"] = 1794340132,
+["startedAt"] = 1794336012,
+["logoutAt"] = 1794340131,
+},
+{
+["lastAt"] = 1794439331,
+["startedAt"] = 1794437081,
+["logoutAt"] = 1794439330,
+},
+{
+["lastAt"] = 1794439459,
+["startedAt"] = 1794439347,
+["logoutAt"] = 1794439459,
+},
+},
+["version"] = 1,
+["savedAt"] = 1794439459,
+}
+RaiderIO_BeaconSummaryExport = "{\"evicted\":0,\"loads\":[{\"lastAt\":1794182845,\"logoutAt\":1794182845,\"startedAt\":1794178272},{\"lastAt\":1794195306,\"logoutAt\":1794195306,\"startedAt\":1794194613},{\"lastAt\":1794195369,\"logoutAt\":1794195369,\"startedAt\":1794195317},{\"lastAt\":1794197285,\"logoutAt\":1794197285,\"startedAt\":1794195378},{\"lastAt\":1794330134,\"logoutAt\":1794330135,\"startedAt\":1794326533},{\"lastAt\":1794340132,\"logoutAt\":1794340131,\"startedAt\":1794336012},{\"lastAt\":1794439331,\"logoutAt\":1794439330,\"startedAt\":1794437081},{\"lastAt\":1794439459,\"logoutAt\":1794439459,\"startedAt\":1794439347}],\"savedAt\":1794439459,\"version\":1}"
+RaiderIO_SafetyLog = nil
+RaiderIO_JourneyEvidenceProbe = nil

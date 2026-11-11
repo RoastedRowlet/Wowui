@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Paladin-Retribution','Paladin-Protection',}
-local provider = {region='US',realm='Madoran',name='US',type='subscribers',zone=53,date='2026-11-03',data={Ko='Korinth:BAECNQAFFH8NAAIBAAYKBQmwDwDiAAaODQAABAAXAHUNAAAEABYAfw0AAAEACwCpDQAAAgApAFwNAAABAAQAMw0AAAEAEgABAAYKBQmwDwDiAAaODQAABAAXAHUNAAAEABYAfw0AAAEACwCpDQAAAgApAFwNAAABAAQAMw0AAAEAEgA1AAQKfzEAAwEACgqqGylRAKICAAEACgqqGylRAKICAAIAAgpnH4tWAIcAAAAA.',Mi='Miushi:BAEANQAECgEIAQABNQAFFAYIDQABAAUJAA==.',},}
+local provider = {region='US',realm='Madoran',name='US',type='subscribers',zone=53,date='2026-11-10',data={Ko='Korinth:BAECNQAFFH8OAAIBAAcKigk+CgAsAQeODQAABAAXAHUNAAAEABYAfw0AAAEACwCpDQAAAgApAFwNAAABAAQAXQ0AAAEAHQAzDQAAAQASAAEABwqKCT4KACwBB44NAAAEABcAdQ0AAAQAFgB/DQAAAQALAKkNAAACACkAXA0AAAEABABdDQAAAQAdADMNAAABABIANQAECn82AAMBAAoKqhspUQCiAgABAAoKqhspUQCiAgACAAMKIheLVgCHAAAAAA==.',Mi='Miushi:BAEANQABCgIIAgABNQAFFAcIDgABAIoJAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

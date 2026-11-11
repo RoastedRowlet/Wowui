@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Rogue-Subtlety','Rogue-Assassination',}
-local provider = {region='US',realm='Bladefist',name='US',type='subscribers',zone=53,date='2026-11-03',data={Sa='Samwield:BAEBNQAECn9CAAMBAAoK3B+FCwC8AgqODQAACQBUAHUNAAAJAF8Afw0AAAkAQACpDQAACQBRAFwNAAAHAFQAXQ0AAAMANgBlDQAABABRAKQNAAAEAFIAMw0AAAkAUgC5DQAAAwBYAAEACgrGH4ULALwCCo4NAAAJAFQAdQ0AAAkAXwB/DQAACQBAAKkNAAAHAE8AXA0AAAcAVABdDQAAAgA2AGUNAAAEAFEApA0AAAIAUgAzDQAACQBSALkNAAADAFgAAgADCusUUXgA0QADqQ0AAAIAUQBdDQAAAQAZAKQNAAACADUAAAA=.',Un='Unholysam:BAEANQAECgEIAQABNQAECgoKQgABANwfAA==.',},}
+local lookup = {}
+local provider = {region='US',realm='Bladefist',name='US',type='subscribers',zone=53,date='2026-11-10',data={},}
 provider.parse = parse
 
 local rawData = provider.data

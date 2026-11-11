@@ -3,10 +3,10 @@ CliqueDB = nil
 CliqueDB3 = {
 ["char"] = {
 ["Zappyxatu - Stormrage"] = {
-["spec3_profileKey"] = "Zappyxatu - Stormrage",
-["spec1_profileKey"] = "Zappyxatu - Stormrage",
-["specswap"] = false,
 ["spec2_profileKey"] = "Zappyxatu - Stormrage",
+["spec1_profileKey"] = "Zappyxatu - Stormrage",
+["spec3_profileKey"] = "Zappyxatu - Stormrage",
+["specswap"] = false,
 },
 ["Barelynoer - Area 52"] = {
 ["spec1_profileKey"] = "Barelynoer - Area 52",

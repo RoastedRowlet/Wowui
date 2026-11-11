@@ -40,7 +40,6 @@ nil,
 },
 },
 }
-TomTomWaypoints = nil
 TomTomWaypointsM = {
 ["profileKeys"] = {
 ["Taurostotem - Area 52"] = "Taurostotem - Area 52",
@@ -53,6 +52,9 @@ TomTomWaypointsM = {
 ["Barelynoer - Area 52"] = "Barelynoer - Area 52",
 ["Zappyxatu - Stormrage"] = "Zappyxatu - Stormrage",
 ["Minimeditite - Area 52"] = "Minimeditite - Area 52",
+},
+["global"] = {
+["pinFlagsLive"] = true,
 },
 ["profiles"] = {
 ["Taurostotem - Area 52"] = {
