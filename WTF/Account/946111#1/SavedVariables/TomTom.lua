@@ -23,6 +23,11 @@ nil,
 65.83320617675781,
 },
 },
+["paste"] = {
+["button"] = {
+["showInCompartment"] = true,
+},
+},
 ["block"] = {
 ["position"] = {
 "TOPRIGHT",
@@ -32,18 +37,10 @@ nil,
 -236.666748046875,
 },
 },
-["paste"] = {
-["button"] = {
-["showInCompartment"] = true,
-},
-},
 },
 },
 }
 TomTomWaypointsM = {
-["global"] = {
-["pinFlagsLive"] = true,
-},
 ["profileKeys"] = {
 ["Taurostotem - Area 52"] = "Taurostotem - Area 52",
 ["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
@@ -55,6 +52,9 @@ TomTomWaypointsM = {
 ["Barelynoer - Area 52"] = "Barelynoer - Area 52",
 ["Zappyxatu - Stormrage"] = "Zappyxatu - Stormrage",
 ["Minimeditite - Area 52"] = "Minimeditite - Area 52",
+},
+["global"] = {
+["pinFlagsLive"] = true,
 },
 ["profiles"] = {
 ["Taurostotem - Area 52"] = {
