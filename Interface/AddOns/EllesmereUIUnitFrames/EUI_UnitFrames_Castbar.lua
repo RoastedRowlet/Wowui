@@ -410,10 +410,12 @@ end
 
 -- While the cast icon shows on the portrait (backdrop +2), the backdrop's shape
 -- border, inner shadow and Outer Ring move onto an overlay at backdrop +3, so
--- the icon sits under them; when it hides they go back under a 3D model. The
--- overlay is a child of the backdrop, so the backdrop's shape mask still clips
--- them. Built through the options page pool (the preview shares this), which
--- also hands a pooled texture back to its own frame on reset.
+-- the icon sits under them; when it hides they go back to the backdrop, the
+-- shape border to its rest over a 3D model (bd._ringHome, from
+-- ns.UF_PortraitShapeModel). The overlay is a child of the backdrop, so the
+-- backdrop's shape mask still clips them. Built through the options page pool
+-- (the preview shares this), which also hands a pooled texture back to its
+-- own frame on reset.
 local function MoveDecoration(tex, parent)
     if tex and tex:GetParent() ~= parent then tex:SetParent(parent) end
 end
@@ -431,7 +433,7 @@ local function CastIconPortraitOverlay(bd, on)
         return
     end
     local parent = on and overlay or bd
-    MoveDecoration(bd._shapeBorderTex, parent)
+    MoveDecoration(bd._shapeBorderTex, on and overlay or bd._ringHome or bd)
     MoveDecoration(bd._innerShadow, parent)
     MoveDecoration(bd._outerRing, parent)
 end
@@ -584,6 +586,7 @@ local function CastbarUnlockKey(unit)
     if unit == "player" then return "playerCastbar"
     elseif unit == "target" then return "targetCastbar"
     elseif unit == "focus" then return "focusCastbar"
+    elseif unit == "pet" then return "petCastbar"
     end
 end
 
@@ -780,7 +783,10 @@ local function UpdateUnitFrameKickTick(castbar)
     castbar.kickPositioner:SetValue(castDuration:GetElapsedDuration())
     castbar.kickMarker:SetValue(interruptCD:GetRemainingDuration())
     castbar.kickTick:SetColorTexture(1, 1, 1, 1)
-    if isChannel and not isEmpowered then
+    -- Time runs right to left for a draining channel; Reverse Fill mirrors the
+    -- bar, so there a cast runs right to left and a channel left to right.
+    local timeRunsLeft = (isChannel and not isEmpowered) ~= (castbar:GetReverseFill() and true or false)
+    if timeRunsLeft then
         castbar.kickPositioner:SetFillStyle(Enum.StatusBarFillStyle.Reverse)
         castbar.kickMarker:SetFillStyle(Enum.StatusBarFillStyle.Reverse)
         -- LOAD-BEARING: SetFillStyle resets the inner fill to snap-ON and the global
@@ -796,8 +802,9 @@ local function UpdateUnitFrameKickTick(castbar)
         castbar.kickTick:SetPoint("TOP", castbar.kickMarker, "TOP", 0, 0)
         castbar.kickTick:SetPoint("BOTTOM", castbar.kickMarker, "BOTTOM", 0, 0)
         castbar.kickTick:SetPoint("RIGHT", castbar.kickMarker:GetStatusBarTexture(), "LEFT")
-        -- Reverse fill (draining channel): kick-ready point is the marker texture LEFT
-        -- edge; the available window runs from the channel end (bar left) to it.
+        -- Time runs right to left (a draining channel, or a cast on a reversed bar):
+        -- kick-ready point is the marker texture LEFT edge; the available window
+        -- runs from the cast's end (bar left) to it.
         -- Not-in-time pushes that edge past the left edge, crossing anchors to zero width.
         castbar.kickReadyFill:ClearAllPoints()
         castbar.kickReadyFill:SetPoint("TOP", castbar, "TOP", 0, 0)
@@ -819,8 +826,9 @@ local function UpdateUnitFrameKickTick(castbar)
         castbar.kickTick:SetPoint("TOP", castbar.kickMarker, "TOP", 0, 0)
         castbar.kickTick:SetPoint("BOTTOM", castbar.kickMarker, "BOTTOM", 0, 0)
         castbar.kickTick:SetPoint("LEFT", castbar.kickMarker:GetStatusBarTexture(), "RIGHT")
-        -- Standard fill (cast/empowered channel): kick-ready point is the marker
-        -- texture RIGHT edge; the window runs from it to the cast end (bar right).
+        -- Time runs left to right (a cast or empowered cast, or a channel on a
+        -- reversed bar): kick-ready point is the marker texture RIGHT edge; the
+        -- window runs from it to the cast's end (bar right).
         -- Not-in-time pushes that edge past the right edge, crossing anchors to zero width.
         castbar.kickReadyFill:ClearAllPoints()
         castbar.kickReadyFill:SetPoint("TOP", castbar, "TOP", 0, 0)
@@ -1115,7 +1123,8 @@ local function CreateCastBar(frame, unit, settings)
             cb.Time:ClearAllPoints()
             cb.Time:SetWidth(math.max(timerW * 2.5, barW * 0.5))
             cb.Time:SetJustifyH(jh)
-            cb.Time:SetPoint(pt, cb, pt, xb + (cb._durOX or 0), (cb._durOY or 0))
+            local _, _, _, _, timerY = ns.UF_CastChromeGeom()
+            cb.Time:SetPoint(pt, cb, pt, xb + (cb._durOX or 0), (cb._durOY or 0) + timerY)
         end
         -- Re-flow so a live JustifyH change takes effect on already-rendered text.
         ns.ReflowFontString(cb.Text)
@@ -1592,6 +1601,10 @@ local function SetupShowOnCastBar(frame, unit)
         if not stages then return end
         local isHoriz = element:GetOrientation() == "HORIZONTAL"
         local elementSize = isHoriz and element:GetWidth() or element:GetHeight()
+        -- The stages run with the fill: from the far end on a Reverse Fill bar.
+        local fromEnd = element:GetReverseFill() and true or false
+        local edge = isHoriz and (fromEnd and "RIGHT" or "LEFT") or (fromEnd and "TOP" or "BOTTOM")
+        local sign = fromEnd and -1 or 1
         local lastOffset = 0
         for stage, stageSection in next, stages do
             local offset = lastOffset + (elementSize * stageSection)
@@ -1605,9 +1618,9 @@ local function SetupShowOnCastBar(frame, unit)
             end
             pip:ClearAllPoints()
             if isHoriz then
-                pip:SetPoint("CENTER", element, "LEFT", offset, 0)
+                pip:SetPoint("CENTER", element, edge, sign * offset, 0)
             else
-                pip:SetPoint("CENTER", element, "BOTTOM", 0, offset)
+                pip:SetPoint("CENTER", element, edge, 0, sign * offset)
             end
             pip:Show()
         end
@@ -1672,8 +1685,9 @@ local function ApplyBlizzCastbarState()
 end
 
 -- Hide While Using Gamepad (Global Settings > Gamepad): Blizzard's gamepad UI
--- draws its own player cast bar, so ours stands down while a controller is
--- connected. It rides the same element switch "Show Player Cast Bar" off uses,
+-- draws its own player cast bar, so ours stands down while EllesmereUI.PadModeOn
+-- says gamepad mode is on (WoW Forever's Gamepad interface style, elsewhere a
+-- connected controller). It rides the same element switch "Show Player Cast Bar" off uses,
 -- keyed on a runtime flag the reload and visibility passes also read
 -- (ns._ufCastPadHidden); the saved toggle is never written. Blizzard's bar
 -- stays suppressed, except under WoW Forever's Gamepad interface style: from
@@ -1698,7 +1712,7 @@ function ns.UF_ApplyGamepadCastbar(padOn)
     end
     local hide = false
     if want then
-        if padOn == nil then padOn = EllesmereUI.PadConnected() end
+        if padOn == nil then padOn = EllesmereUI.PadModeOn() end
         hide = padOn and true or false
     end
     if hide == (ns._ufCastPadHidden == true) then return end

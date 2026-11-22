@@ -165,10 +165,11 @@ end
 -- ---------------------------------------------------------------------------
 -- Analysis: dominant cause + where/when, from the lifetime tallies.
 -- ---------------------------------------------------------------------------
+-- Ties broken by key: pairs() order would let the top cause or zone flap.
 local function topOf(tbl)
     local bestKey, bestN = nil, 0
     for k, n in pairs(tbl) do
-        if n > bestN then bestN, bestKey = n, k end
+        if n > bestN or (n == bestN and bestKey and k < bestKey) then bestN, bestKey = n, k end
     end
     return bestKey, bestN
 end
@@ -234,7 +235,10 @@ function Advisor:BuildAdviceText()
         add(col(HEAD, L.ADVISE_CAUSE_HEADER))
         local arr = {}
         for k, n in pairs(DB.data.totals.causes) do arr[#arr + 1] = { k = k, n = n } end
-        sort(arr, function(x, y) return x.n > y.n end)
+        sort(arr, function(x, y)
+            if x.n ~= y.n then return x.n > y.n end
+            return x.k < y.k
+        end)
         for i = 1, #arr do
             add(format(L.EXPORT_CAUSE_LINE, L[arr[i].k], arr[i].n))
         end

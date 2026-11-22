@@ -77,7 +77,9 @@ function ns.UpdatePowerSeam(power, s, stock, preview)
     local owner = power:GetParent()
     while owner and not (owner.unifiedBorder or owner._border) do owner = owner:GetParent() end
     local border = owner and (owner.unifiedBorder or owner._border)
-    local parent = owner or power
+    -- Hide Empty Power Bar hosts the seam in its text clip (power._epHost), so
+    -- the seam goes with the bar; seam._owner keeps the frame for the layout.
+    local parent = power._epHost or owner or power
     if not seam then
         -- Through the options frame pool: a real frame for a live bar, handed
         -- back by the pool on the options preview's next build.
@@ -88,6 +90,7 @@ function ns.UpdatePowerSeam(power, s, stock, preview)
         seam:SetParent(parent)
     end
     seam._power = power
+    seam._owner = owner or power
     seam:ClearAllPoints()
     seam:SetAllPoints(power)
     -- Above the fills and the unit frame border, on the border's strata; capped
@@ -127,7 +130,7 @@ function ns.UF_LayoutPowerSeam(seam)
         t._path = seam._path
     end
     local raise = PP.SnapForES(thick * 5 / 32, es)
-    local portraitSeam = seam:GetParent()._portraitSeparator
+    local portraitSeam = (seam._owner or seam:GetParent())._portraitSeparator
     local leftInset, rightInset = 0, 0
     if portraitSeam and portraitSeam:IsShown() then
         -- Leave one physical pixel clear where the portrait divider meets the seam.
@@ -648,11 +651,10 @@ local function CreatePowerBar(frame, unit, settings)
         elseif fmt == "both" then
             ns.SetTextZoneRaw(frame, ppFS, "%s | %s" .. pctSuffix, { TP.curpp, TP.perpp })
         elseif fmt == "smart" then
-            -- Percent for mana-based specs, numeric otherwise; resolved at apply
-            -- time and re-applied on spec change via ReloadAndUpdate. WoW Forever
-            -- passes the player's forced power (druid Mana) so it follows the bar.
-            local isPercent = EUI_IsSmartPowerPercent(unit == "player" and EllesmereUI.IS_FOREVER == true
-                and EllesmereUI.GetPlayerPowerOverride() or nil)
+            -- Percent for mana-based specs, numeric otherwise (always numeric on
+            -- WoW Forever); resolved at apply time and re-applied on spec change
+            -- via ReloadAndUpdate.
+            local isPercent = EUI_IsSmartPowerPercent()
             if isPercent then
                 ns.SetTextZoneRaw(frame, ppFS, "%s" .. pctSuffix, { TP.perpp })
             else
@@ -691,7 +693,8 @@ local function CreatePowerBar(frame, unit, settings)
             self._grayedOut = true
             if self.bg then
                 self.bg:SetColorTexture(0.25, 0.25, 0.25, 1)
-                self.bg:SetAlpha(1)
+                -- Gray tints the bg; its opacity stays the user's Background Opacity.
+                self.bg:SetAlpha((s.customPowerBgAlpha or 100) / 100)
             end
         elseif not shouldGray and self._grayedOut then
             self._grayedOut = false

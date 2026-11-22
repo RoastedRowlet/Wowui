@@ -185,13 +185,13 @@ end
 --  Page
 ----------------------------------------------------------------------------]]
 
-local function AddDatabaseSection(category, entry)
-    Settings.RegisterInitializer(category, CreateSettingsListSectionHeaderInitializer(entry.title))
-    Settings.RegisterInitializer(category, private.CreateTextInitializer({text = entry.help}))
+local function AddDatabaseSection(page, entry)
+    page:AddInitializer(CreateSettingsListSectionHeaderInitializer(entry.title))
+    page:AddInitializer(private.CreateTextInitializer({text = entry.help}))
 
     local variable = "TOMTOM_PROFILE_" .. entry.id:upper()
     local db = entry.db()
-    local setting = private.CreateUnregisteredSetting(category, variable, Settings.VarType.String,
+    local setting = private.CreateUnregisteredSetting(page.category, variable, Settings.VarType.String,
         L["Profile in use"], db:GetCurrentProfile(),
         function() return entry.db():GetCurrentProfile() end,
         function(value)
@@ -208,10 +208,10 @@ local function AddDatabaseSection(category, entry)
         end
         return container:GetData()
     end
-    Settings.RegisterInitializer(category, Settings.CreateDropdownInitializer(setting, GetOptions,
+    page:AddInitializer(Settings.CreateDropdownInitializer(setting, GetOptions,
         L["The profile that this character uses."]))
 
-    Settings.RegisterInitializer(category, private.CreateTextInitializer({
+    page:AddInitializer(private.CreateTextInitializer({
         watchVariables = {variable},
         textFunc = function()
             local names = CharactersOnProfile(entry.db())
@@ -219,18 +219,18 @@ local function AddDatabaseSection(category, entry)
         end,
     }))
 
-    Settings.RegisterInitializer(category, CreateSettingsButtonInitializer(L["Manage profiles..."],
+    page:AddInitializer(CreateSettingsButtonInitializer(L["Manage profiles..."],
         L["Manage profiles..."], function() ShowManageMenu(entry) end,
         L["Make, copy, delete or reset a profile."], true))
 end
 
 -- Called by BuildSettings, after the other pages.
 function private.BuildProfilesPage(parentCategory)
-    local category = Settings.RegisterVerticalLayoutSubcategory(parentCategory, L["Profiles"])
+    local page = private.CreateSettingsPage(L["Profiles"], parentCategory)
     for _, entry in ipairs(databases) do
-        AddDatabaseSection(category, entry)
+        AddDatabaseSection(page, entry)
     end
-    return category
+    return page.category
 end
 
 -- The waypoints database has no TOMTOM_PROFILE_CHANGED message, so the

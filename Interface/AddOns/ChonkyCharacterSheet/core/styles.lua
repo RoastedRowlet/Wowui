@@ -131,6 +131,7 @@ function CCS.RefreshStyleColors()
         CCS.CreateChonkyCharacterBG(false)
         CCS.CreateChonkyCharacterBG(true)
         CCS.CreateChonkyNineSlice(CharacterStatsPaneScrollBox)
+        CCS.CreateChonkyNineSlice(CharacterStatsPane)
         CCS.CreateChonkyNineSlice(CharacterModelFramebg)
         CCS.CreateChonkyNineSlice(InspectModelFramebg)
         CCS.UpdateThemeInfo()
@@ -723,6 +724,12 @@ function CCS.CreateChonkyNineSlice(parent)
         if parent.BG ~= nil then parent.BG:Hide() end
     end
     if option("theme") == "None" then frame:Hide() end
+
+    if not option("showcharacterstats") then
+        CharacterStatsPane.ChonkyNS:Hide()
+        CharacterStatsPane.BG:Hide()
+    end
+    
     return frame
 end
 
@@ -1074,7 +1081,8 @@ function CCS.CreateChonkyCharacterBG(isInspect)
     -- Ensure CharacterFrameBgbg exists (this function loads before characterSheet.lua, so we just create it here.
     ------------------------------------------------------------
     if isInspect == true and ( false or InspectFrame == nil) then return end
-    if CharacterFrameBg == nil then return end
+    local CharacterFrameBg = _G["CharacterFrameBg"] or CreateFrame("Frame", "CharacterFrameBg", CharacterFrame, BackdropTemplateMixin and "BackdropTemplate")
+
     
     local parent
     local bg_name 
@@ -1162,21 +1170,27 @@ function CCS.CreateChonkyCharacterBG(isInspect)
     local TopOverlay
     local LeftOverlay
     local RightOverlay
-    
+
     if isInspect == false then
-        if not PaperDollFrame.TopOverlay then
-            PaperDollFrame.TopOverlay = PaperDollFrame:CreateTexture(nil, "ARTWORK")
+        local CCS_PD_SetFrame = PaperDollFrame.CCS_PD_SetFrame or CreateFrame("Frame", nil, PaperDollFrame)
+        PaperDollFrame.CCS_PD_SetFrame = CCS_PD_SetFrame
+        CCS_PD_SetFrame:SetPoint("TOPLEFT", PaperDollFrame, "TOPLEFT")
+        CCS_PD_SetFrame:SetFrameStrata("LOW")
+        CCS_PD_SetFrame:SetFrameLevel(1)
+        if not PaperDollFrame.CCS_PD_SetFrame.TopOverlay then
+            PaperDollFrame.CCS_PD_SetFrame.TopOverlay = PaperDollFrame.CCS_PD_SetFrame:CreateTexture(nil, "ARTWORK")
         end
-        if not PaperDollFrame.LeftOverlay then
-            PaperDollFrame.LeftOverlay = PaperDollFrame:CreateTexture(nil, "ARTWORK")
+        if not PaperDollFrame.CCS_PD_SetFrame.LeftOverlay then
+            PaperDollFrame.CCS_PD_SetFrame.LeftOverlay = PaperDollFrame.CCS_PD_SetFrame:CreateTexture(nil, "ARTWORK")
         end
-        if not PaperDollFrame.RightOverlay then
-            PaperDollFrame.RightOverlay = PaperDollFrame:CreateTexture(nil, "ARTWORK")
+        if not PaperDollFrame.CCS_PD_SetFrame.RightOverlay then
+            PaperDollFrame.CCS_PD_SetFrame.RightOverlay = PaperDollFrame.CCS_PD_SetFrame:CreateTexture(nil, "ARTWORK")
         end
 
-        TopOverlay   = PaperDollFrame.TopOverlay
-        LeftOverlay  = PaperDollFrame.LeftOverlay
-        RightOverlay = PaperDollFrame.RightOverlay
+        TopOverlay   = CCS_PD_SetFrame.TopOverlay
+        LeftOverlay  = CCS_PD_SetFrame.LeftOverlay
+        RightOverlay = CCS_PD_SetFrame.RightOverlay
+
     end
     ------------------------------------------------------------
     -- THEME MODE
@@ -1315,9 +1329,9 @@ function CCS.UpdateThemeInfo()
         
         if CharacterFrame.ChonkyNS ~= nil then CharacterFrame.ChonkyNS:Hide() end
         if InspectFrame ~= nil and InspectFrame.ChonkyNS ~= nil then InspectFrame.ChonkyNS:Hide() end
-        if PaperDollFrame.TopOverlay ~= nil then PaperDollFrame.TopOverlay:Hide() end
-        if PaperDollFrame.LeftOverlay ~= nil then PaperDollFrame.LeftOverlay:Hide() end
-        if PaperDollFrame.RightOverlay ~= nil then PaperDollFrame.RightOverlay:Hide() end
+        if PaperDollFrame.CCS_PD_SetFrame.TopOverlay ~= nil then PaperDollFrame.CCS_PD_SetFrame.TopOverlay:Hide() end
+        if PaperDollFrame.CCS_PD_SetFrame.LeftOverlay ~= nil then PaperDollFrame.CCS_PD_SetFrame.LeftOverlay:Hide() end
+        if PaperDollFrame.CCS_PD_SetFrame.RightOverlay ~= nil then PaperDollFrame.CCS_PD_SetFrame.RightOverlay:Hide() end
 
         if ccsm_sf ~= nil and ccsm_sf.ChonkyNS ~= nil then ccsm_sf.ChonkyNS:Hide() end
         if ccsmi_sf ~= nil and ccsmi_sf.ChonkyNS ~= nil then ccsmi_sf.ChonkyNS:Hide() end
@@ -1330,34 +1344,34 @@ function CCS.UpdateThemeInfo()
 
     elseif option("theme") ~= "None" then
         if CharacterFrame.ChonkyNS ~= nil then CharacterFrame.ChonkyNS:SetShown(option("show_char_frame")) end
-        
-        if PaperDollFrame.TopOverlay then
+
+        if PaperDollFrame.CCS_PD_SetFrame.TopOverlay then
             if option("show_top_texture") then
-                PaperDollFrame.TopOverlay:SetAlpha(1)
-                PaperDollFrame.TopOverlay:Show()
+                PaperDollFrame.CCS_PD_SetFrame.TopOverlay:SetAlpha(1)
+                PaperDollFrame.CCS_PD_SetFrame.TopOverlay:Show()
             else
-                PaperDollFrame.TopOverlay:SetAlpha(0)                
-                PaperDollFrame.TopOverlay:Hide()
+                PaperDollFrame.CCS_PD_SetFrame.TopOverlay:SetAlpha(0)                
+                PaperDollFrame.CCS_PD_SetFrame.TopOverlay:Hide()
             end
         end
 
-        if PaperDollFrame.LeftOverlay then
+        if PaperDollFrame.CCS_PD_SetFrame.LeftOverlay then
             if option("show_left_texture") then
-                PaperDollFrame.LeftOverlay:SetAlpha(1)
-                PaperDollFrame.LeftOverlay:Show()
+                PaperDollFrame.CCS_PD_SetFrame.LeftOverlay:SetAlpha(1)
+                PaperDollFrame.CCS_PD_SetFrame.LeftOverlay:Show()
             else
-                PaperDollFrame.LeftOverlay:SetAlpha(0)
-                PaperDollFrame.LeftOverlay:Hide()
+                PaperDollFrame.CCS_PD_SetFrame.LeftOverlay:SetAlpha(0)
+                PaperDollFrame.CCS_PD_SetFrame.LeftOverlay:Hide()
             end
         end
 
-        if PaperDollFrame.RightOverlay then
+        if PaperDollFrame.CCS_PD_SetFrame.RightOverlay then
             if option("show_right_texture") then
-                PaperDollFrame.RightOverlay:SetAlpha(1)
-                PaperDollFrame.RightOverlay:Show()
+                PaperDollFrame.CCS_PD_SetFrame.RightOverlay:SetAlpha(1)
+                PaperDollFrame.CCS_PD_SetFrame.RightOverlay:Show()
             else
-                PaperDollFrame.RightOverlay:SetAlpha(0)
-                PaperDollFrame.RightOverlay:Hide()
+                PaperDollFrame.CCS_PD_SetFrame.RightOverlay:SetAlpha(0)
+                PaperDollFrame.CCS_PD_SetFrame.RightOverlay:Hide()
             end
         end
 

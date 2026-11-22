@@ -15,8 +15,10 @@ List all the waypoints in the local zone.
 #### /tomtomway list
 List all the waypoints everywhere.
 
-#### /tomtomway arrow
+#### /tomtomway arrow \[clear|remove]
 Print the status of the crazy arrow.
+* `clear` clears the waypoint from the crazy arrow. The waypoint stays.
+* `remove` removes the waypoint on the crazy arrow.
 
 #### /tomtomway block
 Print the status of the coordinate block.

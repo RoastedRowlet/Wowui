@@ -6454,12 +6454,11 @@ function NS.BuildThreatBand(sec, content)
   loadRow:Add(Flex.Item(band.zoneDrop, { width = UI.DROP_W, shrink = 0 }))
   band.groupLabel = Dim(loadRow.frame, "Group")
   loadRow:Add(Flex.Item(band.groupLabel, { width = UI.LABEL_XS, shrink = 0, clipText = true }))
-  band.groupDrop = ThreatLoadDrop("groups", NS.LoadGroupSummary, NS.LoadGroupEntries())
+  band.groupDrop = ThreatLoadDrop("groups", NS.ThreatGroupSummary, NS.LoadGroupEntries())
   loadRow:Add(Flex.Item(band.groupDrop, { width = UI.DROP_W, shrink = 0 }))
   band:Add(loadRow)
   TipLabel(band.loadLabel, "Where threat colouring loads",
-    "Tick the content you want threat colours in; nothing ticked means everywhere.\n\nSolo, or in a delve, there is nobody to lose a mob to -- switching threat off there gives its draw slots back to your spell rules.")
-
+    "Tick the content you want threat colours in. Nothing ticked for zones means everywhere. Nothing ticked for groups means party, raid, or solo with a pet -- never plain solo.\n\nSolo with no pet, every mob is on you, so threat says nothing and covers your spell rules. With a pet out it shows when a mob comes off the pet and onto you. Tick Solo to have threat solo regardless.")
   -- One row per state, with both halves on it -- the same shape as the table
   -- above, for the same reason: bar and border are two cells of one thing.
   local header = Flex.Box(content, { dir = "row", align = "center", height = UI.HEAD_H,

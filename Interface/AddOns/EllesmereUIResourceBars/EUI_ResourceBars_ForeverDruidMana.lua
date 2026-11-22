@@ -170,18 +170,18 @@ local function Paint(force)
 
     if not S.textOn then return end
     local fmt = S.fmt
+    -- A "smart" here reads as the value: WoW Forever has no Smart Text.
     local wantPct = fmt == "perpp" or fmt == "both"
-        or (fmt == "smart" and EllesmereUI.IsSmartPowerPercent and EllesmereUI.IsSmartPowerPercent(MANA))
     local txt
     if wantPct then
         -- Built only for a format that shows it.
         local pctRaw = UnitPowerPercent and UnitPowerPercent("player", MANA, true, CurveConstants and CurveConstants.ScaleTo100) or 0
         local percentText = format("%d", pctRaw) .. S.suffix
-        txt = (fmt == "both") and (ns.AbbreviateNumbers(cur) .. " | " .. percentText) or percentText
+        txt = (fmt == "both") and (ns.AbbreviateValue(cur, "power") .. " | " .. percentText) or percentText
     elseif fmt == "curmaxpp" then
-        txt = ns.AbbreviateNumbers(cur) .. " / " .. ns.AbbreviateNumbers(UnitPowerMax("player", MANA))
+        txt = ns.AbbreviateValue(cur, "power") .. " / " .. ns.AbbreviateValue(UnitPowerMax("player", MANA), "power")
     else
-        txt = ns.AbbreviateNumbers(cur)
+        txt = ns.AbbreviateValue(cur, "power")
     end
     S.text:SetText(txt)
 end
@@ -206,12 +206,22 @@ end
 -- lends them changes (shown / hidden, side, size, gap, offsets): a rebuild
 -- that leaves it in place schedules no anchor work. Unlock mode re-applies
 -- every link on exit, so a change there only records.
+local cascadeQueued = false
+local function CascadeSettled()
+    cascadeQueued = false
+    if not EllesmereUI._unlockActive then EllesmereUI.PropagateAnchorChain("ERB_Power") end
+end
 local function NotifyExtent()
     local sig = (S.shown and not S.parked and S.extSide) and S.extSig or nil
     if sig == S.extLast then return end
     S.extLast = sig
     if not EllesmereUI._unlockActive and EllesmereUI.PropagateAnchorChain then
         EllesmereUI.PropagateAnchorChain("ERB_Power")
+        -- A form change cascades mid-rebuild, on the bars' old edges: once more settled.
+        if not cascadeQueued then
+            cascadeQueued = true
+            C_Timer.After(0, CascadeSettled)
+        end
     end
 end
 
@@ -234,6 +244,11 @@ evf:SetScript("OnEvent", function(_, event, _, powerType)
         if Plain(powerType) and powerType and powerType ~= "MANA" then return end
         Paint(false)
     end
+end)
+
+-- A Number Format change repaints the text (Paint skips unchanged mana).
+EllesmereUI.RegisterNumberFormatCallback(function()
+    if S.live then Paint(true) end
 end)
 
 -------------------------------------------------------------------------------
@@ -517,7 +532,9 @@ end
 -- any provider installed before this file loaded.
 local prevExtent = EllesmereUI._GetAnchorTargetExtent
 EllesmereUI._GetAnchorTargetExtent = function(targetKey, side)
-    if targetKey == "ERB_Power" and S.shown and not S.parked and side == S.extSide then
+    -- Power Bar on the cursor: links measure its stand-in, so leave its edges alone.
+    if targetKey == "ERB_Power" and S.shown and not S.parked and side == S.extSide
+       and not S.pb._erbMouseTrack then
         local host, pb = S.host, S.pb
         local v, pv
         if side == "BOTTOM" then v, pv = host:GetBottom(), pb:GetBottom()
@@ -544,7 +561,7 @@ end
 -- the same edge linked elements measure from; 0 otherwise. Power Bar units
 -- (this bar is its child: one scale).
 function ns.FDM_BottomExtra()
-    if not (S.shown and not S.parked and S.extSide == "BOTTOM") then return 0 end
+    if not (S.shown and not S.parked and S.extSide == "BOTTOM") or S.pb._erbMouseTrack then return 0 end
     local hb, pb = S.host:GetBottom(), S.pb:GetBottom()
     if not (hb and pb) or hb >= pb then return 0 end
     return pb - hb

@@ -105,7 +105,6 @@ ns.DEFAULTS = {
         -- Quality-of-life.
         zoneGraceSec       = 3,    -- ignore hitches right after a loading screen
         soundOnCritical    = false,
-        muted              = {},   -- [addonName] = true
 
         -- The launcher (Launcher.lua). Off by default: the anchor button already sits on the HUD.
         minimapButton      = false,
@@ -159,6 +158,7 @@ function DB:Init()
         StutterAlertDB = deepCopy(ns.DEFAULTS)
     else
         applyDefaults(StutterAlertDB, ns.DEFAULTS)
+        StutterAlertDB.settings.muted = nil -- retired in 1.1.1, never had a UI
         -- A schema change resets history so every figure covers one span.
         -- See DESIGN-NOTES.md: Schema resets.
         if (StutterAlertDB.version or 1) < 5 then
@@ -183,6 +183,20 @@ function DB:RecordHitch(record)
     log[#log + 1] = record
     while #log > s.maxLogEntries do
         table.remove(log, 1)
+    end
+
+    local p = self.pull
+    if p then
+        p.total = p.total + 1
+        if (record.ms or 0) > p.worstAnyMs then p.worstAnyMs = record.ms or 0 end
+        if record.isAddon then
+            p.addonCount = p.addonCount + 1
+            if (record.culpritMs or 0) > p.worstMs then
+                p.worstMs      = record.culpritMs or 0
+                p.worstTitle   = record.culpritTitle or record.culprit
+                p.worstCulprit = record.culprit
+            end
+        end
     end
 
     -- Lifetime tallies: every hitch counts here regardless of the log cap, so the
@@ -443,52 +457,24 @@ function DB:GetTopSources(n)
     end
     table.sort(out, function(a, b)
         if a.hitches ~= b.hitches then return a.hitches > b.hitches end
-        return a.peakMs > b.peakMs
+        if a.peakMs ~= b.peakMs then return a.peakMs > b.peakMs end
+        return a.name < b.name
     end)
     for i = #out, n + 1, -1 do out[i] = nil end
     return out
 end
 
--- Summarize the stored log over a window. sinceTime == nil means the whole log.
--- Returns totals, the worst addon, the worst single frame of any cause, and a
--- per-cause count of the non-addon hitches (keyed by HEADLINE_* causeKey).
-function DB:Summarize(sinceTime)
-    local log = self.data.log
-    local total, addonCount = 0, 0
-    local worstMs, worstTitle, worstMult, worstCulprit = 0, nil, nil, nil
-    local worstAnyMs = 0
-    local causes = {}
+-- Counted live rather than read back from the log, which holds only 100 entries
+-- and would undercount a long pull.
+function DB:BeginPull()
+    self.pull = { total = 0, addonCount = 0, worstMs = 0, worstAnyMs = 0 }
+end
 
-    for i = #log, 1, -1 do
-        local r = log[i]
-        if sinceTime and r.t < sinceTime then break end
-        total = total + 1
-        if (r.ms or 0) > worstAnyMs then worstAnyMs = r.ms or 0 end
-
-        if r.isAddon then
-            addonCount = addonCount + 1
-            if (r.culpritMs or 0) > worstMs then
-                worstMs      = r.culpritMs or 0
-                worstTitle   = r.culpritTitle or r.culprit
-                worstCulprit = r.culprit
-                worstMult    = r.culpritMult
-            end
-        else
-            local key = r.causeKey or "HEADLINE_ENGINE"
-            causes[key] = (causes[key] or 0) + 1
-        end
-    end
-
-    return {
-        total        = total,
-        addonCount   = addonCount,
-        worstMs      = worstMs,
-        worstTitle   = worstTitle,
-        worstCulprit = worstCulprit,
-        worstMult    = worstMult,
-        worstAnyMs   = worstAnyMs,
-        causes       = causes,
-    }
+-- The pull's tally, or nil when none began (a /reload in combat).
+function DB:EndPull()
+    local p = self.pull
+    self.pull = nil
+    return p
 end
 
 -- Lifetime totals (since last cleared) for the export report, so every figure
@@ -536,4 +522,5 @@ function DB:ClearHistory()
     self.data.memory = {}
     self.data.totals = freshTotals()
     wipe(sessionPulls)
+    if self.pull then self:BeginPull() end
 end

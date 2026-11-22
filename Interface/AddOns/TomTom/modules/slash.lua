@@ -67,7 +67,37 @@ local function usage()
     ChatFrame1:AddMessage(L["|cffffff78/way local|r - Lists active waypoints in current zone"])
     ChatFrame1:AddMessage(L["|cffffff78/way list|r - Lists all active waypoints"])
     ChatFrame1:AddMessage(L["|cffffff78/way arrow|r - Prints status of the Crazy Arrow"])
+    ChatFrame1:AddMessage(L["|cffffff78/way arrow clear|r - Clears the waypoint from the Crazy Arrow"])
+    ChatFrame1:AddMessage(L["|cffffff78/way arrow remove|r - Removes the waypoint on the Crazy Arrow"])
     ChatFrame1:AddMessage(L["|cffffff78/way block|r - Prints status of the Coordinate Block"])
+end
+
+local function arrowUsage()
+    ChatFrame1:AddMessage(L["|cffffff78TomTom |r/way arrow |cffffff78Usage:|r"])
+    ChatFrame1:AddMessage(L["|cffffff78/way arrow|r - Prints status of the Crazy Arrow"])
+    ChatFrame1:AddMessage(L["|cffffff78/way arrow clear|r - Clears the waypoint from the Crazy Arrow"])
+    ChatFrame1:AddMessage(L["|cffffff78/way arrow remove|r - Removes the waypoint on the Crazy Arrow"])
+end
+
+local arrowActions = {
+    clear = false,
+    remove = true,
+}
+
+local function ArrowCommand(action)
+    if not action then
+        TomTom:DebugCrazyArrow()
+        return
+    end
+
+    local remove = arrowActions[action:lower()]
+    if remove == nil then
+        arrowUsage()
+    elseif TomTom:IsCrazyArrowEmpty() then
+        ChatFrame1:AddMessage(L["The Crazy Arrow has no waypoint"])
+    else
+        TomTom:ClearCrazyArrowPoint(remove)
+    end
 end
 
 TomTom.slashCommandUsage = usage
@@ -198,7 +228,7 @@ addon.SlashWayCommand = function(msg)
         TomTom:DebugListAllWaypoints()
         return
     elseif ltoken == "arrow" then
-        TomTom:DebugCrazyArrow()
+        ArrowCommand(tokens[2])
         return
     elseif ltoken == "block" then
         TomTom:DebugCoordBlock()

@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown','Shaman-Restoration',}
-local provider = {region='US',realm='Nazgrel',name='US',type='subscribers',zone=53,date='2026-11-10',data={Ma='Malena:BAEANQAECgcIEAAAAA==.',Sc='Scârlett:BAEANQADCgUICAABNQAECgcIEAABAAAAAA==.',Te='Tellah:BAEANQADCgQIBAABNQAFFAQIBgACAGYiAA==.',Ze='Zedra:BAEANQADCggIGAABNQAECgcIEAABAAAAAA==.Zedrâ:BAEANQADCggIDAABNQAECgcIEAABAAAAAA==.',},}
+local lookup = {'Warlock-Demonology','Shaman-Restoration',}
+local provider = {region='US',realm='Nazgrel',name='US',type='subscribers',zone=53,date='2026-11-17',data={Ma='Malena:BAEBNQAECn8VAAIBAAkKrAlTjABEAQmODQAABAAdAHUNAAACAB4Afw0AAAIAFgCpDQAAAwArAFwNAAACAAgAXQ0AAAEABABlDQAAAgAXAKQNAAABABQAuQ0AAAQAJgABAAkKrAlTjABEAQmODQAABAAdAHUNAAACAB4Afw0AAAIAFgCpDQAAAwArAFwNAAACAAgAXQ0AAAEABABlDQAAAgAXAKQNAAABABQAuQ0AAAQAJgAAAA==.',Sc='Scârlett:BAEANQADCgUICAABNQAECgkJFQABAKwJAA==.',Te='Tellah:BAEANQADCgQIBAABNQAFFAQIBgACAGYiAA==.',Ze='Zedra:BAEANQADCggIGAABNQAECgkJFQABAKwJAA==.Zedrâ:BAEANQADCggIDAABNQAECgkJFQABAKwJAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

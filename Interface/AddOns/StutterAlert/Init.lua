@@ -54,6 +54,7 @@ events:SetScript("OnEvent", function(_, event, arg1)
 
     elseif event == "PLAYER_REGEN_DISABLED" then
         combatStart = time()
+        DB:BeginPull()
         Overlay:SetCombat(true)
 
     elseif event == "PLAYER_REGEN_ENABLED" then

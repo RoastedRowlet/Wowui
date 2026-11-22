@@ -425,6 +425,16 @@ function NS.RelatedSpellIDs(spellID)
     if aliasID then set[aliasID] = true end
   end
 
+  -- WoW Forever: every rank of the same spell is its own aura ID. A rule built
+  -- on Corruption (Rank 3) must still match after you train Rank 4, and when
+  -- you deliberately cast a lower rank.
+  if name and NS.IS_FOREVER and NS.ForeverRankIDs then
+    local ranks = NS.ForeverRankIDs(name)
+    if ranks then
+      for id in pairs(ranks) do set[id] = true end
+    end
+  end
+
   -- Only cache once there is more than "the ID you gave me" -- a lone entry
   -- means nothing has been learned yet, and caching that freezes the wrong
   -- answer for the session.
@@ -438,6 +448,124 @@ end
 -- is only valid for the current build of this character.
 function NS.WipeRelatedCache()
   wipe(relatedCache)
+end
+
+-- ---------------------------------------------------------------------------
+-- WoW Forever spell ranks
+--
+-- Vanilla content means ranks, and every rank is a separate spell ID whose
+-- aura carries that same ID. An AuraContainer filter matches IDs exactly, so a
+-- rule holding one rank's ID goes dark the moment you train the next.
+--
+-- No API lists a spell's ranks. Two sources between them cover it:
+--   * the spellbook, which holds every rank this character has trained, and
+--   * the learn store, which holds every rank anyone on this account has been
+--     seen applying (filtered to this class, so a name shared across classes
+--     cannot leak in).
+-- Grouped by name, which is what ranks have in common. Built out of combat
+-- from SPELLS_CHANGED, so nothing here runs per plate.
+-- ---------------------------------------------------------------------------
+
+local rankIndex       -- lowercase name -> { [spellID] = true }
+local rankSignature = "none"
+
+local function AddRank(index, name, spellID)
+  if type(name) ~= "string" or name == "" or type(spellID) ~= "number" then return end
+  if issecretvalue and (issecretvalue(name) or issecretvalue(spellID)) then return end
+  local key = name:lower()
+  local ids = index[key]
+  if not ids then
+    ids = {}
+    index[key] = ids
+  end
+  ids[spellID] = true
+end
+
+-- Spellbook slots for the player bank, by skill line when the client has that
+-- API and by flat count otherwise.
+local function SpellbookSlots()
+  local slots = {}
+  if not (C_SpellBook and C_SpellBook.GetSpellBookItemInfo) then return slots end
+  local bank = Enum and Enum.SpellBookSpellBank and Enum.SpellBookSpellBank.Player
+  if not bank then return slots end
+
+  if C_SpellBook.GetNumSpellBookSkillLines and C_SpellBook.GetSpellBookSkillLineInfo then
+    local okLines, lines = pcall(C_SpellBook.GetNumSpellBookSkillLines)
+    if okLines and type(lines) == "number" then
+      for line = 1, lines do
+        local okInfo, info = pcall(C_SpellBook.GetSpellBookSkillLineInfo, line)
+        if okInfo and info then
+          local offset = info.itemIndexOffset or 0
+          for slot = offset + 1, offset + (info.numSpellBookItems or 0) do
+            slots[#slots + 1] = slot
+          end
+        end
+      end
+      return slots, bank
+    end
+  end
+
+  if C_SpellBook.GetNumSpellBookItems then
+    local okCount, count = pcall(C_SpellBook.GetNumSpellBookItems, bank)
+    if okCount and type(count) == "number" then
+      for slot = 1, count do slots[#slots + 1] = slot end
+    end
+  end
+  return slots, bank
+end
+
+local function BuildRankIndex()
+  local index = {}
+  local count, sum = 0, 0
+
+  local slots, bank = SpellbookSlots()
+  for _, slot in ipairs(slots) do
+    local okItem, item = pcall(C_SpellBook.GetSpellBookItemInfo, slot, bank)
+    if okItem and item and type(item.spellID) == "number"
+        and not (issecretvalue and issecretvalue(item.spellID)) then
+      AddRank(index, item.name or NS.SpellName(item.spellID), item.spellID)
+      count = count + 1
+      sum = sum + item.spellID
+    end
+  end
+
+  -- Observed ranks. Not part of the signature: the store only grows while you
+  -- play, and a sighting mid-pull must not trigger a rebuild.
+  local playerClass = select(2, UnitClass("player"))
+  for spellID, entry in pairs(PLATETWEAKS_SPELLS or {}) do
+    if type(entry) == "table" and entry.class == playerClass then
+      AddRank(index, entry.name, spellID)
+    end
+  end
+
+  return index, ("%d:%d"):format(count, sum)
+end
+
+-- Every ID that is a rank of the spell called `name`, or nil off Forever.
+function NS.ForeverRankIDs(name)
+  if not NS.IS_FOREVER or type(name) ~= "string" then return nil end
+  if not rankIndex then
+    rankIndex, rankSignature = BuildRankIndex()
+  end
+  return rankIndex[name:lower()]
+end
+
+-- Rebuilds the index and reports whether the spellbook's ranks changed.
+-- SPELLS_CHANGED fires for much more than training, so most calls say no.
+function NS.ForeverRanksChanged()
+  if not NS.IS_FOREVER then return false end
+  local previous = rankSignature
+  rankIndex, rankSignature = BuildRankIndex()
+  return previous ~= rankSignature
+end
+
+-- For the rebuild fingerprint in Core.lua.
+function NS.ForeverRankSignature()
+  if not NS.IS_FOREVER then return "" end
+  if not rankIndex then
+    rankIndex, rankSignature = BuildRankIndex()
+  end
+  return rankSignature
 end
 
 -- Turning what the user typed into the ID that actually lands.

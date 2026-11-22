@@ -691,9 +691,8 @@ end
 -- in-memory "last 5 pulls" ring shown in the tooltip.
 -- ---------------------------------------------------------------------------
 function Overlay:ShowPullSummary(sinceTime)
-    if not frame then return end
-
-    local sum = DB:Summarize(sinceTime)
+    local sum = DB:EndPull()
+    if not frame or not sum then return end
     local duration = time() - (sinceTime or time())
 
     -- Ignore trivial taps that produced nothing (dummy hits, instant procs).
@@ -761,7 +760,10 @@ local function contextSummary(agg)
         parts[#parts + 1] = { key = key, n = n }
     end
     if #parts == 0 then return nil end
-    table.sort(parts, function(a, b) return a.n > b.n end)
+    table.sort(parts, function(a, b)
+        if a.n ~= b.n then return a.n > b.n end
+        return a.key < b.key
+    end)
 
     local out = {}
     for i = 1, #parts do
@@ -1146,7 +1148,10 @@ function Overlay:BuildExportReport()
         causeArr[#causeArr + 1] = { key = causeKey, n = n }
     end
     if #causeArr > 0 then
-        table.sort(causeArr, function(a, b) return a.n > b.n end)
+        table.sort(causeArr, function(a, b)
+            if a.n ~= b.n then return a.n > b.n end
+            return a.key < b.key
+        end)
         add("")
         add(L.EXPORT_CAUSES_HEADER)
         for i = 1, #causeArr do

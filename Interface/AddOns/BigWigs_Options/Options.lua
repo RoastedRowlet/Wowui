@@ -233,11 +233,11 @@ do
 					},
 					discord = {
 						type = "input",
-						get = function() return "discord.gg/jGveg85" end,
+						get = function() return "discord.gg/gtDxWKvXE8" end,
 						set = function() end,
 						name = "Discord",
 						order = 52,
-						width = 0.75,
+						width = 0.9,
 					},
 					github = {
 						type = "input",
@@ -284,6 +284,15 @@ do
 					local optionsTable = updateablePlugins[pluginName].options()
 					aceConfigTableMainBigWigsTab.args[updateablePlugins[pluginName].key] = optionsTable
 					acr:NotifyChange("BigWigs")
+				elseif aceConfigTableMainBigWigsTab.args.general.args[pluginName] then
+					local updated = false
+					for tabTableKey, settingsTable in next, API.GetPluginOptionsCustomTabs(pluginName) do
+						updated = true
+						aceConfigTableMainBigWigsTab.args.general.args[pluginName].args[tabTableKey] = settingsTable
+					end
+					if updated then
+						acr:NotifyChange("BigWigs")
+					end
 				end
 			end)
 			loader.RegisterMessage({}, "BigWigs_OpenGUI", function()
@@ -313,6 +322,9 @@ do
 					if type(pluginOptions) == "table" then
 						registeredPlugins[pluginName] = true
 						aceConfigTableMainBigWigsTab.args.general.args[pluginName] = pluginOptions
+						for tabTableKey, settingsTable in next, API.GetPluginOptionsCustomTabs(pluginName) do
+							aceConfigTableMainBigWigsTab.args.general.args[pluginName].args[tabTableKey] = settingsTable
+						end
 					elseif type(subPanelOptions) == "table" then
 						registeredPlugins[pluginName] = true
 						if allowedDirectOpens[subPanelOptions.name] then
@@ -356,12 +368,6 @@ do
 		end
 		for key, optionsTable in next, API.GetPluginOptions() do
 			aceConfigTableMainBigWigsTab.args[key] = optionsTable
-		end
-		for pluginName, dataTable in next, API.GetPluginOptionsCustomTabs() do
-			if registeredPlugins[pluginName] then
-				local tabTableKey, settingsTable = dataTable[1], dataTable[2]
-				aceConfigTableMainBigWigsTab.args.general.args[pluginName].args[tabTableKey] = settingsTable
-			end
 		end
 
 		local lds = LibStub("LibDualSpec-1.0", true)
@@ -1578,36 +1584,37 @@ do
 					statGroup:SetTitle(L.statistics)
 					statGroup:SetLayout("Flow")
 					statGroup:SetFullWidth(true)
+					statGroup:PauseLayout()
 					scrollFrame:AddChild(statGroup)
 
 					local emptyFirstColumnLabel = AceGUI:Create("Label")
-					emptyFirstColumnLabel:SetWidth(110)
+					emptyFirstColumnLabel:SetRelativeWidth(0.20)
 					emptyFirstColumnLabel:SetText("")
 					statGroup:AddChild(emptyFirstColumnLabel)
 
 					local defeatColumnLabel = AceGUI:Create("InteractiveLabel")
-					defeatColumnLabel:SetWidth(83)
+					defeatColumnLabel:SetRelativeWidth(0.15)
 					defeatColumnLabel:SetText(L.defeat)
 					defeatColumnLabel:SetCallback("OnEnter", statsDefeatLabelOnEnter)
 					defeatColumnLabel:SetCallback("OnLeave", HideTooltip)
 					statGroup:AddChild(defeatColumnLabel)
 
 					local victoryColumnLabel = AceGUI:Create("InteractiveLabel")
-					victoryColumnLabel:SetWidth(83)
+					victoryColumnLabel:SetRelativeWidth(0.15)
 					victoryColumnLabel:SetText(L.victory)
 					victoryColumnLabel:SetCallback("OnEnter", statsVictoryLabelOnEnter)
 					victoryColumnLabel:SetCallback("OnLeave", HideTooltip)
 					statGroup:AddChild(victoryColumnLabel)
 
 					local fastestColumnLabel = AceGUI:Create("InteractiveLabel")
-					fastestColumnLabel:SetWidth(130)
+					fastestColumnLabel:SetRelativeWidth(0.24)
 					fastestColumnLabel:SetText(L.fastest)
 					fastestColumnLabel:SetCallback("OnEnter", statsFastestLabelOnEnter)
 					fastestColumnLabel:SetCallback("OnLeave", HideTooltip)
 					statGroup:AddChild(fastestColumnLabel)
 
 					local firstColumnLabel = AceGUI:Create("InteractiveLabel")
-					firstColumnLabel:SetWidth(140)
+					firstColumnLabel:SetRelativeWidth(0.25)
 					firstColumnLabel:SetText(L.first)
 					firstColumnLabel:SetCallback("OnEnter", statsFirstLabelOnEnter)
 					firstColumnLabel:SetCallback("OnLeave", HideTooltip)
@@ -1630,26 +1637,26 @@ do
 						end
 						if not found then
 							local difficultyText = AceGUI:Create("Label")
-							difficultyText:SetWidth(110)
+							difficultyText:SetRelativeWidth(0.20)
 							difficultyText:SetText(L.unknown)
 							statGroup:AddChild(difficultyText)
 
 							local defeatsLabel = AceGUI:Create("InteractiveLabel")
-							defeatsLabel:SetWidth(83)
+							defeatsLabel:SetRelativeWidth(0.15)
 							defeatsLabel:SetText(tbl.wipes or (not tbl.kills and "-" or "0"))
 							defeatsLabel:SetCallback("OnEnter", statsDefeatLabelOnEnter)
 							defeatsLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(defeatsLabel)
 
 							local victoriesLabel = AceGUI:Create("InteractiveLabel")
-							victoriesLabel:SetWidth(83)
+							victoriesLabel:SetRelativeWidth(0.15)
 							victoriesLabel:SetText(tbl.kills or "-")
 							victoriesLabel:SetCallback("OnEnter", statsVictoryLabelOnEnter)
 							victoriesLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(victoriesLabel)
 
 							local fastestVictoryLabel = AceGUI:Create("InteractiveLabel")
-							fastestVictoryLabel:SetWidth(130)
+							fastestVictoryLabel:SetRelativeWidth(0.24)
 							local value = tbl.best and SecondsToTime(tbl.best)
 							local bestDate = tbl.bestDate
 							if not value then
@@ -1664,7 +1671,7 @@ do
 							statGroup:AddChild(fastestVictoryLabel)
 
 							local firstKillDataLabel = AceGUI:Create("InteractiveLabel")
-							firstKillDataLabel:SetWidth(140)
+							firstKillDataLabel:SetRelativeWidth(0.25)
 							if not tbl.fkDate then
 								firstKillDataLabel:SetText("-")
 							else
@@ -1682,26 +1689,26 @@ do
 						local tbl = sDB[diff]
 						if tbl then
 							local difficultyText = AceGUI:Create("Label")
-							difficultyText:SetWidth(110)
+							difficultyText:SetRelativeWidth(0.20)
 							difficultyText:SetText(L[diff] or "?")
 							statGroup:AddChild(difficultyText)
 
 							local defeatsLabel = AceGUI:Create("InteractiveLabel")
-							defeatsLabel:SetWidth(83)
+							defeatsLabel:SetRelativeWidth(0.15)
 							defeatsLabel:SetText(tbl.wipes or (not tbl.kills and "-" or "0"))
 							defeatsLabel:SetCallback("OnEnter", statsDefeatLabelOnEnter)
 							defeatsLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(defeatsLabel)
 
 							local victoriesLabel = AceGUI:Create("InteractiveLabel")
-							victoriesLabel:SetWidth(83)
+							victoriesLabel:SetRelativeWidth(0.15)
 							victoriesLabel:SetText(tbl.kills or "-")
 							victoriesLabel:SetCallback("OnEnter", statsVictoryLabelOnEnter)
 							victoriesLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(victoriesLabel)
 
 							local fastestVictoryLabel = AceGUI:Create("InteractiveLabel")
-							fastestVictoryLabel:SetWidth(130)
+							fastestVictoryLabel:SetRelativeWidth(0.24)
 							local value = tbl.best and SecondsToTime(tbl.best)
 							local bestDate = tbl.bestDate
 							if not value then
@@ -1716,7 +1723,7 @@ do
 							statGroup:AddChild(fastestVictoryLabel)
 
 							local firstKillDataLabel = AceGUI:Create("InteractiveLabel")
-							firstKillDataLabel:SetWidth(140)
+							firstKillDataLabel:SetRelativeWidth(0.25)
 							if not tbl.fkDate then
 								firstKillDataLabel:SetText("-")
 							else
@@ -1728,6 +1735,7 @@ do
 							statGroup:AddChild(firstKillDataLabel)
 						end
 					end
+					statGroup:ResumeLayout()
 				end -- End statistics table
 			end
 
@@ -1913,7 +1921,15 @@ end
 
 do
 	local expansionHeader
-	if loader.isVanilla then
+	local expansionNames = L.expansionNames
+	if loader.isForever then
+		expansionHeader = {
+			"Forever",
+		}
+		expansionNames = {
+			L.forever,
+		}
+	elseif loader.isVanilla then
 		expansionHeader = {
 			"Classic",
 		}
@@ -2034,7 +2050,7 @@ do
 				missing:SetFullWidth(true)
 				container:AddChild(missing)
 
-				if disabled then
+				if disabled and addonState ~= "MISSING" then
 					local reload = AceGUI:Create("Button")
 					reload:SetText(L.enable)
 					reload:SetAutoWidth(true)
@@ -2136,7 +2152,7 @@ do
 				for i = 1, #expansionHeader do
 					local addonName = "BigWigs_" .. expansionHeader[i]
 					treeTbl[i] = {
-						text = L.expansionNames[i],
+						text = expansionNames[i],
 						value = addonName,
 						enabled = true,
 					}
@@ -2150,7 +2166,7 @@ do
 				for i = 1, #expansionHeader do
 					local addonName = "LittleWigs_" .. expansionHeader[i]
 					treeTbl[i] = {
-						text = L.expansionNames[i],
+						text = expansionNames[i],
 						value = addonName,
 						enabled = true,
 					}
@@ -2264,12 +2280,25 @@ do
 		end
 	end
 
-	function options:ConfigTableChange(_, appName)
-		if (appName == "BigWigs" or appName == "BigWigsTools") and currentlyOpenContainer then
-			acd:Open(appName, currentlyOpenContainer)
+	do
+		local pendingRefresh = nil
+		local function refreshConfig()
+			local appName = pendingRefresh
+			pendingRefresh = nil
+			if currentlyOpenContainer and currentlyOpenContainer:GetUserData("appName") == appName then
+				acd:Open(appName, currentlyOpenContainer)
+			end
 		end
+		function options:ConfigTableChange(_, appName)
+			if (appName == "BigWigs" or appName == "BigWigsTools") and currentlyOpenContainer and currentlyOpenContainer:GetUserData("appName") == appName then
+				if not pendingRefresh then
+					loader.CTimerAfter(0, refreshConfig)
+				end
+				pendingRefresh = appName
+			end
+		end
+		LibStub("AceConfigRegistry-3.0").RegisterCallback(options, "ConfigTableChange")
 	end
-	LibStub("AceConfigRegistry-3.0").RegisterCallback(options, "ConfigTableChange")
 
 	function OpenConfig(specificPanel)
 		if allowedDirectOpens[specificPanel] then

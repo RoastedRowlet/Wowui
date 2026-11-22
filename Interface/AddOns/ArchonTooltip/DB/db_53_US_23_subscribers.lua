@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Rogue-Subtlety','Paladin-Holy',}
-local provider = {region='US',realm='Azgalor',name='US',type='subscribers',zone=53,date='2026-11-10',data={Co='Coconut:BAEANQADCggIDgABNQAECgoKJwABADkQAA==.',St='Strawberry:BAEANQADCggICQABNQAECgoKJwABADkQAA==.',Tr='Truthless:BAECNQAFFH8KAAICAAQKrBkLDwA4AQSODQAABQBMAHUNAAABACIAfw0AAAEAWwCpDQAAAwA9AAIABAqsGQsPADgBBI4NAAAFAEwAdQ0AAAEAIgB/DQAAAQBbAKkNAAADAD0ANQAECn8rAAICAAoKoB9QDwBRAwACAAoKoB9QDwBRAwAAAA==.',},}
+local provider = {region='US',realm='Azgalor',name='US',type='subscribers',zone=53,date='2026-11-17',data={Co='Coconut:BAEANQADCggIDgABNQAECgoKLQABADkQAA==.',St='Strawberry:BAEANQADCggICQABNQAECgoKLQABADkQAA==.',Tr='Truthless:BAECNQAFFH8KAAICAAQKrBn7EAAxAQSODQAABQBMAHUNAAABACIAfw0AAAEAWwCpDQAAAwA9AAIABAqsGfsQADEBBI4NAAAFAEwAdQ0AAAEAIgB/DQAAAQBbAKkNAAADAD0ANQAECn8rAAICAAoKoB9QDwBRAwACAAoKoB9QDwBRAwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

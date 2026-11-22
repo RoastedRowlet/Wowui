@@ -121,7 +121,7 @@ do
 		if checkCount ~= db.profile.countBegin then
 			db.profile.countBegin = checkCount
 		end
-		if db.profile.windowHeight < 320 or db.profile.windowHeight > 620 then
+		if db.profile.windowHeight < 320 or db.profile.windowHeight > 620 or math.floor(db.profile.windowHeight+0.5) ~= db.profile.windowHeight then
 			db.profile.windowHeight = defaults.windowHeight
 		end
 		if type(db.profile.viewerPosition[1]) ~= "string" or type(db.profile.viewerPosition[2]) ~= "string"
@@ -158,7 +158,7 @@ do
 				db.profile.instanceKeysPosition[4] = y
 			end
 		end
-		if db.profile.instanceKeysFontSize < 14 or db.profile.instanceKeysFontSize > 200 then
+		if db.profile.instanceKeysFontSize < 14 or db.profile.instanceKeysFontSize > 200 or math.floor(db.profile.instanceKeysFontSize+0.5) ~= db.profile.instanceKeysFontSize then
 			db.profile.instanceKeysFontSize = defaults.instanceKeysFontSize
 		end
 		if db.profile.instanceKeysOutline ~= "NONE" and db.profile.instanceKeysOutline ~= "OUTLINE" and db.profile.instanceKeysOutline ~= "THICKOUTLINE" then
@@ -732,7 +732,7 @@ do
 		end
 
 		local guid = BigWigsLoader.UnitGUID("player")
-		local name = BigWigsLoader.UnitName("player")
+		local name = BigWigsAPI.UnitName("player")
 		local realm = GetRealmName()
 		local specID = LibSpec.MySpecialization()
 		BigWigs3DB.myKeystones[guid] = {
@@ -1651,7 +1651,7 @@ do
 	do
 		local UnitInParty = UnitInParty
 		function InMyParty(playerName)
-			if playerName == BigWigsLoader.UnitName("player") then
+			if playerName == BigWigsAPI.UnitName("player") then
 				return true
 			else
 				return UnitInParty(playerName)
@@ -1780,7 +1780,7 @@ do
 
 	local function LibKeystoneFunction(keyLevel, keyMap, playerRating, playerName, channel)
 		if channel == "PARTY" then
-			if not partyList[playerName] or playerName == BigWigsLoader.UnitName("player") or partyList[playerName][1] ~= keyLevel or partyList[playerName][2] ~= keyMap or partyList[playerName][3] ~= playerRating then
+			if not partyList[playerName] or playerName == BigWigsAPI.UnitName("player") or partyList[playerName][1] ~= keyLevel or partyList[playerName][2] ~= keyMap or partyList[playerName][3] ~= playerRating then
 				partyList[playerName] = {keyLevel, keyMap, playerRating}
 
 				if not tab1:IsEnabled() then -- Only if tab 1 (online) is showing
@@ -1838,8 +1838,10 @@ do
 				local linesToAdd = {}
 				for partyIterator = 1, 4 do
 					local unit = unitTbl[partyIterator]
-					if UnitExists(unit) then
-						local pName = BigWigsLoader.UnitName(unit) or "?"
+					local playerGUID = BigWigsLoader.UnitGUID(unit)
+					if UnitExists(unit) and playerGUID then
+						local pName = BigWigsAPI.UnitName(unit)
+						local pNameTrimmed = BigWigsAPI.UnitName(unit, true)
 						local ratingTbl = C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit)
 						local classColorHex = "FF808080"
 						local _, classFile = UnitClass(unit)
@@ -1850,14 +1852,14 @@ do
 							end
 						end
 						if not ratingTbl then
-							ratingTbl = backupRatings[pName]
+							ratingTbl = backupRatings[playerGUID]
 						else
-							backupRatings[pName] = ratingTbl
+							backupRatings[playerGUID] = ratingTbl
 						end
 						if not ratingTbl then
 							local scoreColorHex = HIGHLIGHT_FONT_COLOR:GenerateHexColor()
 							GameTooltip:AddLine()
-							linesToAdd[#linesToAdd+1] = {-1, pName, L.dungeonScoreNoDataString:format(classColorHex, pName)}
+							linesToAdd[#linesToAdd+1] = {-1, pName, L.dungeonScoreNoDataString:format(classColorHex, pNameTrimmed)}
 						else
 							for runsIterator = 1, 8 do
 								local run = ratingTbl.runs[runsIterator]
@@ -1871,7 +1873,7 @@ do
 										scoreColorHex, run.mapScore, -- Dungeon score
 										run.bestRunLevel, -- Dungeon level
 										duration > timeLimit and "FF4411" or "33FF99", minutes, seconds, -- Dungeon duration
-										classColorHex, pName -- Player name
+										classColorHex, pNameTrimmed -- Player name
 									)}
 									break
 								elseif runsIterator == 8 then
@@ -1881,7 +1883,7 @@ do
 										scoreColorHex, 0, -- Dungeon score
 										0, -- Dungeon level
 										"FFFFFF", 0, 0, -- Dungeon duration
-										classColorHex, pName -- Player name
+										classColorHex, pNameTrimmed -- Player name
 									)}
 								end
 							end
@@ -1942,11 +1944,11 @@ do
 		for partyIterator = 1, 4 do
 			local unit = unitTbl[partyIterator]
 			if UnitExists(unit) then
-				local pName = BigWigsLoader.UnitName(unit)
-				if pName then
+				local playerGUID = BigWigsLoader.UnitGUID(unit)
+				if playerGUID then
 					local ratingTbl = C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit)
 					if ratingTbl then
-						backupRatings[pName] = ratingTbl
+						backupRatings[playerGUID] = ratingTbl
 					end
 				end
 			end

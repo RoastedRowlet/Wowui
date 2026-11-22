@@ -26,6 +26,11 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
     env.SetCastBarPreviewFill(math.random(30, 85) / 100)
     ShuffleCastBarIcons()
     EllesmereUI:SetContentHeader(_castBarPreviewBuilder)
+    -- The builder draws the plain mock; the style (Blizzard Style, WoW
+    -- Forever, Classic WoW UI) lands with the update, which a first visit
+    -- otherwise never runs (only a cached page's restore does). Not from the
+    -- search's hidden pre-build: its header calls are stubbed.
+    if not EllesmereUI._prebuilding then UpdateCastBarPreview() end
 
     -- Clear this page's own click mappings (the table is shared with the display page, whose
     -- cached preview keeps its own; never from a hidden pre-build -- see the matching guard in
@@ -150,7 +155,7 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
           end }
     );  y = y - h
     -- Inline cog on Show Spell Icon
-    if not EllesmereUI._prebuilding then
+    do
         local rgn = iconRow._leftRegion
         local FREE_TIP = "This option requires the icon at bar size with no offset."
         local function IconFree() local p = DB(); return p and ns.ERB_CastIconFree(p.castBar) end
@@ -395,7 +400,7 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
             EllesmereUI.RegisterWidgetRefresh(function() updateBorderSwatch(); UpdateBorderSwatchState() end)
             UpdateBorderSwatchState()
         end
-        if not EllesmereUI._prebuilding then
+        do
             local rgn = cbBsRow._leftRegion
             local sepValues, sepOrder = ns.ERB_SeparatorArtValues(true)
             local cogBtn = EllesmereUI.BuildInlineCog(rgn, {
@@ -489,13 +494,15 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
                       end },
                 },
             })
-            local function UpdateCogVis()
-                local p = DB()
-                local tex = p and p.castBar.borderTexture or "solid"
-                if tex == "solid" or EllesmereUI.BlizzStyle.Get("castbar") then cogBtn:Hide() else cogBtn:Show() end
+            if not EllesmereUI._prebuilding then
+                local function UpdateCogVis()
+                    local p = DB()
+                    local tex = p and p.castBar.borderTexture or "solid"
+                    if tex == "solid" or EllesmereUI.BlizzStyle.Get("castbar") then cogBtn:Hide() else cogBtn:Show() end
+                end
+                EllesmereUI.RegisterWidgetRefresh(UpdateCogVis)
+                UpdateCogVis()
             end
-            EllesmereUI.RegisterWidgetRefresh(UpdateCogVis)
-            UpdateCogVis()
         end
     end
 
@@ -526,7 +533,7 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
     -- Inline cog on Fill Color: the gradient and the channel / uninterruptible
     -- color overrides (not under Blizzard Style, whose fill art is stock) and Out
     -- of Range Gray (every style).
-    if not EllesmereUI._prebuilding then
+    do
         local rgn = castColorRow._leftRegion
         local function gradientOff() return castFillBlizz end
         EllesmereUI.BuildInlineCog(rgn, {
@@ -758,7 +765,7 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
     );  y = y - h
     -- Inline cog on Bar Texture: Textured Background (greyed while the cast bar
     -- is off, and under Blizzard Style, whose own background art stays).
-    if not EllesmereUI._prebuilding then
+    do
         EllesmereUI.BuildInlineCog(textRow._leftRegion, {
             disabled = function() return castOff() or EllesmereUI.BlizzStyle.Active("castbar") == "blizzard" end,
             disabledTooltip = function()
@@ -771,7 +778,7 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
         })
     end
     -- Inline cog (RESIZE) on Spell Text for text size + x/y
-    if not EllesmereUI._prebuilding then
+    do
         local rgn = textRow._rightRegion
         EllesmereUI.BuildInlineCog(rgn, {
             disabled = function() local p = DB(); return p and (not p.castBar.enabled or not p.castBar.showSpellText) end,
@@ -866,7 +873,7 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
           end }
     );  y = y - h
     -- Inline cog (RESIZE) on Duration Text for timer size + x/y
-    if not EllesmereUI._prebuilding then
+    do
         local rgn = timerRow._leftRegion
         EllesmereUI.BuildInlineCog(rgn, {
             disabled = function() local p = DB(); return p and (not p.castBar.enabled or not p.castBar.showTimer) end,
@@ -890,13 +897,6 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
                   set = function(v)
                       local p = DB(); if not p then return end
                       p.castBar.timerY = v; RefreshCast()
-                  end },
-                { type = "toggle", label = "Full Craft Time",
-                  tooltip = "While crafting several items at once, the duration text shows the time left for the whole batch and the spell text shows the craft count.",
-                  get = function() local p = DB(); return p and p.castBar.fullCraftTime end,
-                  set = function(v)
-                      local p = DB(); if not p then return end
-                      p.castBar.fullCraftTime = v
                   end },
             },
         })
@@ -927,9 +927,25 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
     end
 
 
-    -- Row 5: Show Spell Rank (spell ranks exist only on WoW Forever)
-    if EllesmereUI.IS_FOREVER then
+    -- Row 5: Craft Batches, plus Show Spell Rank (spell ranks exist only on WoW Forever)
+    -- Craft Batches is stored as fullCraftTime (text) and mergeCrafts (bar + text).
     _, h = W:DualRow(parent, y,
+        { type = "dropdown", text = "Craft Batches",
+          tooltip = "How the cast bar shows a batch of crafts.",
+          disabled = castOff,
+          disabledTooltip = "Player Cast Bar",
+          values = { off = "Off", text = "Full Time Text", merge = "Merge Bar" },
+          order = { "off", "text", "merge" },
+          getValue = function()
+              local p = DB(); if not p then return "off" end
+              return p.castBar.mergeCrafts and "merge" or p.castBar.fullCraftTime and "text" or "off"
+          end,
+          setValue = function(v)
+              local p = DB(); if not p then return end
+              p.castBar.fullCraftTime = v == "text"
+              p.castBar.mergeCrafts = v == "merge"
+          end },
+        EllesmereUI.IS_FOREVER and
         { type = "toggle", text = "Show Spell Rank",
           tooltip = "Appends the spell's rank to the spell name, for spells that have one.",
           disabled = function()
@@ -941,10 +957,9 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
           setValue = function(v)
               local p = DB(); if not p then return end
               p.castBar.showSpellRank = v
-          end },
-        EllesmereUI.BlankRowCfg()
+          end }
+        or EllesmereUI.BlankRowCfg()
     );  y = y - h
-    end -- IS_FOREVER
 
 
     -- MARKS section
@@ -1112,6 +1127,9 @@ function ns.ERB_BuildCastBarPage(pageName, parent, yOffset)
         latOff,
         "Latency Overlay"
     )
+
+    -- OTHER BARS: Breath, Fatigue... drawn like this bar (MirrorTimerPage_Options.lua).
+    if ns.ERB_BuildTimerBarRows then y = ns.ERB_BuildTimerBarRows(parent, y) end
 
     -- Wire up click mappings for cast bar preview hit overlays (never from a hidden pre-build: the shared live table would end up pointing at off-screen rows)
     if not EllesmereUI._prebuilding then

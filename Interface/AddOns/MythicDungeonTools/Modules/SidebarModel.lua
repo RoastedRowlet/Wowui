@@ -14,6 +14,7 @@ local MAX_PORTRAITS = 7
 ---@field totalForces integer
 ---@field level integer
 ---@field useForcesCount boolean
+---@field preciseForcesPercent boolean percentages with two decimal places instead of one
 ---@field showHealth boolean
 ---@field healthOf fun(enemy: table): number enemy health at the current level
 ---@field formatHealth fun(health: number): string
@@ -22,6 +23,7 @@ local MAX_PORTRAITS = 7
 ---@field player {name: string, realm: string}?
 ---@field presets table[] every preset of the current dungeon, including the <New Preset> entry
 ---@field presetIdx integer
+---@field customRouteOrder boolean routes were reordered by hand, so the list keeps the saved order
 ---@field liveActive boolean
 ---@field livePresetUID string?
 ---@field inGroup boolean
@@ -69,10 +71,11 @@ local MAX_PORTRAITS = 7
 
 ---@param value number
 ---@param total number
+---@param precise boolean? two decimal places instead of one
 ---@return string
-function Model.FormatPercent(value, total)
+function Model.FormatPercent(value, total, precise)
   local percent = total > 0 and value / total * 100 or 0
-  return string.format("%.1f%%", percent)
+  return string.format(precise and "%.2f%%" or "%.1f%%", percent)
 end
 
 ---The progress bar's old coloring rule: red only when over by more than 8 forces at 102% or more.
@@ -236,9 +239,9 @@ function Model.PullItems(pulls, ctx)
     local r, g, b = ctx.pullColor(index)
     local pullText = ""
     if forces > 0 then
-      pullText = "+"..(ctx.useForcesCount and tostring(forces) or Model.FormatPercent(forces, total))
+      pullText = "+"..(ctx.useForcesCount and tostring(forces) or Model.FormatPercent(forces, total, ctx.preciseForcesPercent))
     end
-    local cumulativeText = ctx.useForcesCount and tostring(cumulative) or Model.FormatPercent(cumulative, total)
+    local cumulativeText = ctx.useForcesCount and tostring(cumulative) or Model.FormatPercent(cumulative, total, ctx.preciseForcesPercent)
     local healthText = ctx.showHealth and health > 0 and ctx.formatHealth(health) or nil
     local completes = not completed and total > 0 and previous < total and cumulative >= total and index < #pulls
     if completes then completed = true end
@@ -428,12 +431,13 @@ function Model.IsAuthoredBy(createdBy, player)
   return type(createdBy) == "table" and player ~= nil and createdBy.name == player.name and createdBy.realm == player.realm
 end
 
----Routes of the current dungeon in three groups. The <New Preset> entry (value == 0) never appears.
+---Routes of the current dungeon: the live route, and the rest. The rest are yours, then everyone else's, until they
+---are reordered by hand; then they keep their saved order. The <New Preset> entry (value == 0) never appears.
 ---@param ctx MDT.SidebarContext
----@return {live: MDT.RouteEntry[], mine: MDT.RouteEntry[], others: MDT.RouteEntry[]}
+---@return {live: MDT.RouteEntry[], routes: MDT.RouteEntry[]}
 function Model.RouteGroups(ctx)
-  local groups = { live = {}, mine = {}, others = {} }
-  local player = ctx.player
+  local groups = { live = {}, routes = {} }
+  local others = {}
   for idx, preset in ipairs(ctx.presets) do
     if preset.value ~= 0 then
       local createdBy = type(preset.createdBy) == "table" and preset.createdBy or nil
@@ -443,11 +447,13 @@ function Model.RouteGroups(ctx)
         isCurrent = idx == ctx.presetIdx,
         isLive = ctx.liveActive and preset.uid ~= nil and preset.uid == ctx.livePresetUID,
       }
-      local mine = not createdBy or Model.IsAuthoredBy(createdBy, player)
-      local group = entry.isLive and groups.live or mine and groups.mine or groups.others
+      -- The default route counts as yours, so it stays first.
+      local mine = ctx.customRouteOrder or idx == 1 or not createdBy or Model.IsAuthoredBy(createdBy, ctx.player)
+      local group = entry.isLive and groups.live or mine and groups.routes or others
       group[#group + 1] = entry
     end
   end
+  for _, entry in ipairs(others) do groups.routes[#groups.routes + 1] = entry end
   return groups
 end
 
@@ -458,23 +464,36 @@ end
 ---@field authorColor MDT.UI.RGBA?
 ---@field isCurrent boolean
 ---@field isLive boolean
+---@field dragGroup "routes"?
 
----One flat list: the live route, then your routes, then everyone else's. `query` matches name or author, case-insensitive.
----@param groups {live: MDT.RouteEntry[], mine: MDT.RouteEntry[], others: MDT.RouteEntry[]}
+---The default route stays first; it is the one route that can't be deleted.
+---@param entry MDT.RouteEntry
+local function canMove(entry) return entry.idx ~= 1 end
+
+---One flat list: the live route, then the rest. `query` matches name or author, case-insensitive. Unfiltered, every
+---route but the live and the default one can be dragged anywhere among the others.
+---@param groups {live: MDT.RouteEntry[], routes: MDT.RouteEntry[]}
 ---@param query string?
 ---@return MDT.SidebarRouteItem[]
 function Model.RouteListItems(groups, query)
   local needle = query and query:lower() or ""
   local items = {}
-  for _, group in ipairs({ groups.live, groups.mine, groups.others }) do
+  for _, name in ipairs({ "live", "routes" }) do
+    local group = groups[name]
+    local movable = 0
+    for _, entry in ipairs(group) do
+      if canMove(entry) then movable = movable + 1 end
+    end
+    local dragGroup = name ~= "live" and needle == "" and movable > 1 and name or nil
     for _, entry in ipairs(group) do
       local haystack = (entry.name.." "..(entry.author or "")):lower()
       if needle == "" or haystack:find(needle, 1, true) then
+        local entryGroup = canMove(entry) and dragGroup or nil
         items[#items + 1] = {
           kind = "route", key = entry.idx,
-          sig = table.concat({ entry.name, entry.author or "", tostring(entry.isCurrent), tostring(entry.isLive) }, "|"),
+          sig = table.concat({ entry.name, entry.author or "", tostring(entry.isCurrent), tostring(entry.isLive), entryGroup or "" }, "|"),
           idx = entry.idx, name = entry.name, author = entry.author, authorColor = entry.authorColor,
-          isCurrent = entry.isCurrent, isLive = entry.isLive,
+          isCurrent = entry.isCurrent, isLive = entry.isLive, dragGroup = entryGroup,
         }
       end
     end

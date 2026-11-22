@@ -1584,6 +1584,12 @@ local function ConfigFingerprint()
     adapters = NS.db and NS.db.adapters,
   }, {}, 0))
 
+  -- WoW Forever: a new rank changes the IDs every filter is built from while
+  -- every setting stays byte-identical, so the rank index is part of the print.
+  if NS.IS_FOREVER and NS.ForeverRankSignature then
+    base = base .. "|ranks:" .. NS.ForeverRankSignature()
+  end
+
   -- The spell gate reads the SPELLBOOK, so a talent change alters what would
   -- be built while every setting stays byte-identical.
   if NS.db and NS.db.tints and NS.db.tints.gateUnknownSpells and NS.CanApplyAura then
@@ -2016,7 +2022,8 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
   -- starts loading needs them built.
   elseif event == "ZONE_CHANGED_NEW_AREA" or event == "GROUP_ROSTER_UPDATE"
       or event == "PLAYER_DIFFICULTY_CHANGED" or event == "CHALLENGE_MODE_START"
-      or event == "CHALLENGE_MODE_COMPLETED" then
+      or event == "CHALLENGE_MODE_COMPLETED"
+      or (event == "UNIT_PET" and arg1 == "player") then
     -- Only when the answer MOVED. See NS.LoadContextChanged: these events
     -- fire far more often than the context they describe changes, and a
     -- rebuild that is deferred out of combat and then run for nothing is a
@@ -2054,6 +2061,20 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
       for _, each in pairs(rigs) do
         if each.unit == arg1 then NS.UpdateThreat(each) break end
       end
+    end
+
+  -- WoW Forever only (registered there only). The threat poll reads the role
+  -- every tick, so refreshing the cached answer is all a stance swap needs.
+  elseif event == "UPDATE_SHAPESHIFT_FORM" then
+    if NS.RefreshThreatRole then NS.RefreshThreatRole() end
+
+  -- WoW Forever only. SPELLS_CHANGED fires for far more than a new rank, so
+  -- Spells.lua compares the rank index and only a real change rebuilds.
+  elseif event == "SPELLS_CHANGED" then
+    if NS.RefreshThreatRole then NS.RefreshThreatRole() end
+    if NS.ForeverRanksChanged and NS.ForeverRanksChanged() then
+      if NS.WipeRelatedCache then NS.WipeRelatedCache() end
+      rebuildPending = true
     end
 
   elseif event == "PLAYER_SPECIALIZATION_CHANGED"
@@ -2113,9 +2134,18 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
     eventFrame:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-    eventFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-    eventFrame:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
-    eventFrame:RegisterEvent("TRAIT_CONFIG_UPDATED")
+    -- Spec, talent and Mythic+ events go through SafeRegisterEvent: WoW
+    -- Forever shares the engine but not every system, and an unknown event
+    -- throwing here would abort the rest of this handler.
+    NS.SafeRegisterEvent(eventFrame, "PLAYER_SPECIALIZATION_CHANGED")
+    NS.SafeRegisterEvent(eventFrame, "ACTIVE_TALENT_GROUP_CHANGED")
+    NS.SafeRegisterEvent(eventFrame, "TRAIT_CONFIG_UPDATED")
+    if NS.IS_FOREVER then
+      -- Learning a new rank changes which IDs a rule must match, and a
+      -- stance or form change is what the threat role reads there.
+      NS.SafeRegisterEvent(eventFrame, "SPELLS_CHANGED")
+      NS.SafeRegisterEvent(eventFrame, "UPDATE_SHAPESHIFT_FORM")
+    end
     eventFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
     eventFrame:RegisterEvent("PLAYER_FOCUS_CHANGED")
     eventFrame:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
@@ -2123,9 +2153,11 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
     -- Load conditions.
     eventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    -- Pet out or dismissed: the "Solo with a pet" group answer.
+    NS.SafeRegisterEvent(eventFrame, "UNIT_PET")
     eventFrame:RegisterEvent("PLAYER_DIFFICULTY_CHANGED")
-    eventFrame:RegisterEvent("CHALLENGE_MODE_START")
-    eventFrame:RegisterEvent("CHALLENGE_MODE_COMPLETED")
+    NS.SafeRegisterEvent(eventFrame, "CHALLENGE_MODE_START")
+    NS.SafeRegisterEvent(eventFrame, "CHALLENGE_MODE_COMPLETED")
     if NS.RefreshThreatRole then NS.RefreshThreatRole() end
   end
 end)
@@ -3993,7 +4025,9 @@ local function PrintThreat()
     (NS.db.tints.threatEnabled ~= false and cfg.enabled ~= false)
       and "|cff55dd55on|r" or "|cffff8800off|r",
     role,
-    (cfg.role or "auto") == "auto" and " (from your spec)" or " (set manually)"))
+    (cfg.role or "auto") == "auto"
+      and (NS.IS_FOREVER and " (from stance/form)" or " (from your spec)")
+      or " (set manually)"))
   local border = NS.ThreatBorderConfig()
   NS.Print(("  bar: %s | border: %s"):format(
     cfg.enabled ~= false and "|cff55dd55on|r" or "|cff808080off|r",

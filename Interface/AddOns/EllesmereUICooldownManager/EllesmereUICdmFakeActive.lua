@@ -124,7 +124,8 @@ local _hasUserRules = false                             -- any profile (user) ru
 -- when the UNIT_AURA payload shows one coming or going (ns.CdmFormAuraEdge).
 local _needUsable, _needForms, _needFormAuras, _formSeen = false, false, false, nil
 -- Any cd-state rule with a Stance Bar hide (EllesmereUICdmStanceBar.lua): a
--- stance bar page change (UPDATE_BONUS_ACTIONBAR, UPDATE_STEALTH for Prowl).
+-- stance bar page change (UPDATE_BONUS_ACTIONBAR, UPDATE_STEALTH for Prowl),
+-- and the player's UNIT_AURA for a WoW Forever druid's powershift.
 local _needStance = false
 local _formAuraRules = {}
 local _formAuraQueued = false
@@ -1004,11 +1005,11 @@ OnEvent = function(self, event, unit, updateInfo, spellID)
             for i = 1, #_auraRules do OpenFromAura(_auraRules[i]) end
             for i = 1, #_customRules do EvalCustom(_customRules[i]) end
         end
-        if _needForms then
+        if _needForms or (_needStance and ns.CdmStanceBarFormAura) then
             local form = ns.CdmCurrentFormID()
             if form ~= _formSeen then
                 _formSeen = form
-                ns.CdmRetryUnreadForms()
+                if _needForms then ns.CdmRetryUnreadForms() end
                 QueueCdStateEval()
             elseif _needFormAuras and ns.CdmFormAuraEdge(updateInfo, "preset") then
                 QueueFormAuraEval()
@@ -1066,7 +1067,8 @@ UpdateListeners = function()
             _events = CreateFrame("Frame")
             _events:SetScript("OnEvent", OnEvent)
         end
-        if _needAura or _needForms then _events:RegisterUnitEvent("UNIT_AURA", "player")
+        if _needAura or _needForms or (_needStance and ns.CdmStanceBarFormAura) then
+            _events:RegisterUnitEvent("UNIT_AURA", "player")
         else _events:UnregisterEvent("UNIT_AURA") end
         if _needCast then _events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
         else _events:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED") end
@@ -1509,10 +1511,16 @@ local function EvalCdStateRule(rule, icons, FCt)
     if soundKey == "none" then soundKey = nil end
     local stance = ns.CdmStanceBarOf(cas)
     if hide or glow or soundKey or stance then
-        local onCD = PresetOnCD(rule.spellID)
+        -- WoW Forever: a typed spell's icon reads another rank of it
+        -- (ns._cdmRankOf, kept by the injection); the cooldown, the usable
+        -- test and the form test are that rank's, the rule stays the typed ID's.
+        local cdKey = rule.spellID
+        local rankOf = ns._cdmRankOf
+        if rankOf then cdKey = rankOf[cdKey] or cdKey end
+        local onCD = PresetOnCD(cdKey)
         -- Separate read for the Hidden (CD Ready) effects: a charge spell is
         -- ready only at max charges (items fall through to "not onCD").
-        local ready = PresetCdReady(rule.spellID, onCD)
+        local ready = PresetCdReady(cdKey, onCD)
         -- Hidden Until Usable paints as Hidden (On CD) with "not usable"
         -- counting as unavailable, Hidden Outside Form/Stance with only the
         -- form deciding (ns.CD_STATE_HIDE); the glow and the sound below keep
@@ -1522,9 +1530,9 @@ local function EvalCdStateRule(rule, icons, FCt)
         if m and (m.usable or m.form) then
             hide = m.shift and "hiddenOnCDShift" or "hiddenOnCD"
             if m.form then
-                hideCD = PresetSpellTest(rule.spellID, ns.CdmSpellOutsideForm)
+                hideCD = PresetSpellTest(cdKey, ns.CdmSpellOutsideForm)
             elseif not onCD then
-                hideCD = PresetSpellTest(rule.spellID, ns.CdmSpellNotUsable)
+                hideCD = PresetSpellTest(cdKey, ns.CdmSpellNotUsable)
             end
         end
         -- Stance Bar: hidden on (or off) a stance bar page whatever the
@@ -1613,6 +1621,11 @@ end
 local function MapCast(rule)
     local spells, pending = ResolveCastSpells(rule.triggerSpellID or rule.spellID)
     _pendingCastRules[rule] = pending and next(pending) and pending or nil
+    -- WoW Forever: a cast reports the rank cast, which for a typed spell is
+    -- the rank its icon reads (ns._cdmRankOf).
+    local rankOf = ns._cdmRankOf
+    local rk = rankOf and not rule.triggerSpellID and rankOf[rule.spellID]
+    if rk then spells[#spells + 1] = rk end
     for i = 1, #spells do
         local sp = spells[i]
         local list = _castMap[sp]
@@ -1647,6 +1660,16 @@ RetryPendingCasts = function(itemID, success)
         end
     end
     if changed and not next(_pendingCastRules) then UpdateListeners() end
+end
+
+-- The rank a typed spell's icon reads changed (the injection, WoW Forever):
+-- its cast rules map the new rank and the state rules read it at once.
+function ns.FakeActive_RankChanged(sid)
+    for i = 1, #_rules do
+        local rule = _rules[i]
+        if rule.spellID == sid and rule.trigger == "cast" then MapCast(rule) end
+    end
+    QueueCdStateEval()
 end
 
 local function AddRule(rule)

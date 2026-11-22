@@ -29,7 +29,7 @@ local prevGC          = 0
 -- isolated spike apart from a machine that is genuinely struggling.
 local baselineMs       = 0
 local baselineReady    = false
-local monitorStartedAt = 0
+local warmSec          = 0    -- seconds of frames learned since monitoring started
 
 -- Timestamps of recent hitches, pruned to CLUSTER_WINDOW_SEC (drives "sustained").
 local hitchWindow      = {}
@@ -80,7 +80,10 @@ function Detector:GetChronicCost(topN)
             end
         end
     end
-    table.sort(rows, function(a, b) return a.ms > b.ms end)
+    table.sort(rows, function(a, b)
+        if a.ms ~= b.ms then return a.ms > b.ms end
+        return a.name < b.name
+    end)
     for i = #rows, (topN or 5) + 1, -1 do rows[i] = nil end
     return rows, sum
 end
@@ -331,6 +334,7 @@ end
 -- and is written every frame with no allocation.
 -- ---------------------------------------------------------------------------
 local frameRing      = {}
+local frameBanked    = {}    -- seconds each ring frame added to monitoredSec, 0 if none
 local frameRingPos   = 0
 local frameRingCount = 0
 
@@ -341,6 +345,7 @@ local throttleUntil  = 0     -- resume grace: set when the regime ends
 local function pushFrame(ms)
     frameRingPos = (frameRingPos % THROTTLE_CONFIRM) + 1
     frameRing[frameRingPos] = ms
+    frameBanked[frameRingPos] = 0
     if frameRingCount < THROTTLE_CONFIRM then
         frameRingCount = frameRingCount + 1
     end
@@ -348,7 +353,7 @@ end
 
 local function resetFrameRing()
     frameRingPos, frameRingCount = 0, 0
-    for i = 1, THROTTLE_CONFIRM do frameRing[i] = nil end
+    for i = 1, THROTTLE_CONFIRM do frameRing[i], frameBanked[i] = nil, nil end
 end
 
 -- Is the ring a metronome? Returns (isMetronome, mean frame ms), false until the
@@ -369,28 +374,35 @@ local function ringShape()
     return ((hi - lo) / mean) <= THROTTLE_SPREAD, mean
 end
 
--- Is this metronome the background cap, so the window is not being watched?
--- A matching foreground cap excludes it: when both are equal, assume playing.
--- See DESIGN-NOTES.md: Throttle regime.
-local function looksLikeBackgroundCap(meanMs)
+-- The background cap's period when this metronome sits on it and not on the
+-- foreground cap (when both are equal, assume playing). Otherwise nil.
+local function backgroundCapPeriod(meanMs)
     local bk = capPeriodMs("maxFPSBk")
-    if not bk or math.abs(meanMs - bk) > bk * THROTTLE_CAP_TOL then return false end
+    if not bk or math.abs(meanMs - bk) > bk * THROTTLE_CAP_TOL then return nil end
 
     local fg = capPeriodMs("maxFPS")
-    if fg and math.abs(meanMs - fg) <= fg * THROTTLE_CAP_TOL then return false end
-
-    -- Tabbing out is a change: the baseline must have been faster than the cap.
-    -- Without this, a player locked at 30 fps in the foreground loses monitoring.
-    if not baselineReady or baselineMs <= 0 then return false end
-    return baselineMs < bk * THROTTLE_DROP_RATIO
+    if fg and math.abs(meanMs - fg) <= fg * THROTTLE_CAP_TOL then return nil end
+    return bk
 end
 
--- Seconds of frame time in the ring: monitored time banked before a regime was
--- confirmed, taken back so the per-minute rate excludes it.
-local function ringSeconds()
+-- Is this metronome a window nobody is watching? A cap alone proves nothing; a
+-- fast normal pinned to a steady period does. Before a normal exists, only a
+-- slow match to the background cap counts. See DESIGN-NOTES.md: Throttle regime.
+local function isUnwatched(meanMs)
+    local bk = backgroundCapPeriod(meanMs)
+    if baselineReady and baselineMs > 0 then
+        if bk then return baselineMs < bk * THROTTLE_DROP_RATIO end
+        return meanMs >= THROTTLE_FLOOR_MS and baselineMs < meanMs * THROTTLE_DROP_RATIO
+    end
+    return bk ~= nil and meanMs >= THROTTLE_FLOOR_MS
+end
+
+-- Monitored seconds the ring's frames actually added. Moved to throttledSec on
+-- entering a regime; frames that were in a grace window never counted.
+local function bankedSeconds()
     local sum = 0
-    for i = 1, THROTTLE_CONFIRM do sum = sum + (frameRing[i] or 0) end
-    return sum / 1000
+    for i = 1, THROTTLE_CONFIRM do sum = sum + (frameBanked[i] or 0) end
+    return sum
 end
 
 -- ---------------------------------------------------------------------------
@@ -408,41 +420,36 @@ local function classifyNonAddon(gcThisFrame, ctx)
         return "HEADLINE_GC"
     end
 
-    -- 3. Until we've learned this machine's normal, don't characterize the shape.
-    if not baselineReady then
-        return "HEADLINE_UNCLEAR"
-    end
-
-    -- 4. Machine struggling: ordinary frames are already slow. A foreground cap
+    -- 3. Machine struggling: ordinary frames are already slow. A foreground cap
     --    explains the baseline, not this frame, so it falls through.
     if baselineMs >= SMOOTH_FLOOR_MS and not matchingForegroundCap(baselineMs) then
         return "HEADLINE_SUSTAINED"
     end
 
-    -- 5. Busy scene: many units nearby, so the engine is loading their models
+    -- 4. Busy scene: many units nearby, so the engine is loading their models
     --    and effects this frame. Common on big pulls and crowded hubs.
     if ctx and ctx.nameplates and ctx.nameplates >= SCENE_UNITS then
         return "HEADLINE_SCENE"
     end
 
-    -- 6. Sustained by clustering: a run of hitches even if the baseline lags.
+    -- 5. Sustained by clustering: a run of hitches even if the baseline lags.
     if #hitchWindow >= CLUSTER_COUNT then
         return "HEADLINE_SUSTAINED"
     end
 
-    -- 7. In combat but not a big pull: spell visuals, particles, and projected
+    -- 6. In combat but not a big pull: spell visuals, particles, and projected
     --    effects loading this frame. Common on bosses and small packs.
     if ctx and ctx.inCombat then
         return "HEADLINE_COMBAT_FX"
     end
 
-    -- 8. Travelling (especially flying/mounted): the engine is streaming terrain
+    -- 7. Travelling (especially flying/mounted): the engine is streaming terrain
     --    and textures as you move into new ground.
     if ctx and (ctx.flying or ctx.mounted or ctx.moving) then
         return "HEADLINE_STREAMING"
     end
 
-    -- 9. Otherwise: an isolated engine spike (a one-off model/effect/asset load).
+    -- 8. Otherwise: an isolated engine spike (a one-off model/effect/asset load).
     return "HEADLINE_ENGINE"
 end
 
@@ -615,14 +622,8 @@ function Detector:OnHitch(frameMs, gcThisFrame, allocKB)
     local addonMs = GetOverallMetric(LastTime) or 0
     local top = getTopAddons(s.topK)
 
-    local culprit, culpritMs
-    for i = 1, #top do
-        if not s.muted[top[i].name] then
-            culprit   = top[i].name
-            culpritMs = top[i].ms
-            break
-        end
-    end
+    local culprit   = top[1] and top[1].name
+    local culpritMs = top[1] and top[1].ms
 
     -- How abnormal was this culprit versus its OWN recent average? (>1 means a
     -- spike above its normal cost, not just a consistently-heavy addon.)
@@ -790,12 +791,8 @@ local function onUpdate(_, elapsed)
 
     local totals = DB.data and DB.data.totals
 
-    -- Suspend for a metronome at the background cap, or one slower than
-    -- THROTTLE_FLOOR_MS (no cap variable readable). A foreground cap alone is
-    -- not enough. See DESIGN-NOTES.md: Throttle regime.
     local metronome, ringMean = ringShape()
-    local isRegime = metronome and
-        (looksLikeBackgroundCap(ringMean) or ringMean >= THROTTLE_FLOOR_MS)
+    local isRegime = metronome and isUnwatched(ringMean)
 
     if throttled then
         -- The moment the shape breaks, the regime is over: either the player came
@@ -817,10 +814,12 @@ local function onUpdate(_, elapsed)
         discardPending()
         hitchWindow = {}
         if totals then
-            totals.throttledSec = (totals.throttledSec or 0) + ringSeconds()
-            totals.monitoredSec = (totals.monitoredSec or 0) - ringSeconds()
+            local banked = bankedSeconds()
+            totals.throttledSec = (totals.throttledSec or 0) + banked
+            totals.monitoredSec = (totals.monitoredSec or 0) - banked
             if totals.monitoredSec < 0 then totals.monitoredSec = 0 end
         end
+        for i = 1, THROTTLE_CONFIRM do frameBanked[i] = 0 end
         ns.Overlay:SetThrottled(true, throttleCVar)
     end
 
@@ -835,6 +834,7 @@ local function onUpdate(_, elapsed)
     -- Monitored time and the usual-latency samples skip what detection skips.
     if not inGrace and totals then
         totals.monitoredSec = (totals.monitoredSec or 0) + elapsed
+        frameBanked[frameRingPos] = elapsed
         if now >= nextLatSample then
             nextLatSample = now + LAT_SAMPLE_SEC
             local lw = safeNum(worldLatency, 0)
@@ -854,11 +854,13 @@ local function onUpdate(_, elapsed)
         flushPending(Detector.frameCount)
     end
 
-    if frameMs >= threshold and not inGrace then
+    -- Warm-up learns every frame and judges none: with no normal yet, a machine
+    -- whose every frame clears the floor would never learn one and would log a
+    -- hitch per frame. See DESIGN-NOTES.md: Warm-up.
+    if baselineReady and frameMs >= threshold and not inGrace then
         Detector:OnHitch(frameMs, gcThisFrame, allocKB)
     elseif not inGrace then
-        -- Update the rolling baseline ONLY on non-hitch, non-loading frames, so a
-        -- single spike or a loading screen can't poison the idea of "normal".
+        -- Once warm, only non-hitch frames feed it, so a spike can't move normal.
         local alpha = elapsed / BASELINE_TAU_SEC
         if alpha > 1 then alpha = 1 end
         if baselineMs <= 0 then
@@ -866,8 +868,9 @@ local function onUpdate(_, elapsed)
         else
             baselineMs = baselineMs + (frameMs - baselineMs) * alpha
         end
-        if not baselineReady and (now - monitorStartedAt) >= WARMUP_SEC then
-            baselineReady = true
+        if not baselineReady then
+            warmSec = warmSec + elapsed
+            if warmSec >= WARMUP_SEC then baselineReady = true end
         end
     end
 
@@ -895,7 +898,7 @@ function Detector:Enable()
     -- Cold start: re-learn this machine's normal before judging hitch shape.
     baselineMs       = 0
     baselineReady    = false
-    monitorStartedAt = GetTime()
+    warmSec          = 0
     hitchWindow      = {}
 
     -- Throttle detection starts from no history, so a regime has to re-prove

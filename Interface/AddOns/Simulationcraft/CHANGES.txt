@@ -1,10 +1,10 @@
-lightweight tag 83fdb00762fa0fb9ba3e3251a8fa7f3e4a92edba 12.1.5-04
+lightweight tag d0f225560949681d1eb5ce693ab7557a3c02064c 12.1.5-05
 Author:	Dave Hendler <sollaires@gmail.com>
-Date:	Thu Nov 5 14:37:45 2026 -0800
+Date:	Fri Nov 20 15:26:50 2026 -0800
 
-commit 83fdb00762fa0fb9ba3e3251a8fa7f3e4a92edba
+commit d0f225560949681d1eb5ce693ab7557a3c02064c
 Author: Dave Hendler <sollaires@gmail.com>
-Date:   Thu Nov 5 14:37:45 2026 -0800
+Date:   Fri Nov 20 15:26:50 2026 -0800
 
-    Handle Forever surname
+    Handle the API changes Blizz made to stop layer jumping forever addons
 

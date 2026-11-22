@@ -3,6 +3,34 @@
 All notable changes to PlateTweaks are recorded here. No file like this
 existed before 1.8.4, so history prior to that release is not reconstructed.
 
+## 1.13.0
+
+### Added
+
+- **WoW Forever support.** One download for retail and Forever: the TOC lists
+  both interfaces (120100 and 16001), and the addon detects which client it
+  is running on.
+- **Spell ranks on Forever.** A rule or icon matches every rank of its spell,
+  read from your spellbook and from the ranks you have been seen applying, so
+  it keeps working when you train the next rank or cast a lower one. The
+  debuff picker lists each spell once rather than once per rank.
+- **Forever tank detection.** Forever specs carry no role, so threat's
+  Automatic role reads Defensive Stance, Bear or Dire Bear Form, and
+  Righteous Fury there.
+- **"Solo with a pet"** in the Group load condition.
+
+### Changed
+
+- **Threat no longer colours plates solo** unless you have a pet out. With no
+  group ticked, threat loads in a party, in a raid, or solo with a pet; tick
+  Solo to have it solo regardless. Spell rules are unchanged: no group ticked
+  still means everywhere for them.
+
+### Fixed
+
+- Spec, talent and Mythic+ events are registered defensively, so a client
+  without one of them cannot stop the addon loading.
+
 ## 1.12.1
 
 ### Fixed

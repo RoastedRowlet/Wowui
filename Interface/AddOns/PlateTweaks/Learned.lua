@@ -105,6 +105,27 @@ function NS.LearnedDebuffs()
       end
     end
   end
+  -- WoW Forever records every rank under its own ID, so the picker would offer
+  -- Corruption four times. One row per name, holding the highest ID (later
+  -- ranks usually have higher IDs; which one is kept does not matter, since
+  -- the rule matches every rank regardless)
+  -- (NS.ForeverRankIDs).
+  if NS.IS_FOREVER then
+    local best, order = {}, {}
+    for _, row in ipairs(out) do
+      local key = row.name:lower()
+      local held = best[key]
+      if not held then
+        best[key] = row
+        order[#order + 1] = key
+      elseif row.spellID > held.spellID then
+        best[key] = row
+      end
+    end
+    out = {}
+    for _, key in ipairs(order) do out[#out + 1] = best[key] end
+  end
+
   table.sort(out, function(a, b) return a.name:lower() < b.name:lower() end)
   return out
 end

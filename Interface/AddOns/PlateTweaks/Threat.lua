@@ -86,7 +86,9 @@ end
 -- settings exist for people who tank on an off-spec, or who want a healer's
 -- reading while in a damage spec.
 NS.THREAT_ROLES = {
-  { key = "auto",   label = "Automatic (from your spec)" },
+  -- Forever has no spec roles; "auto" reads stance, form and Righteous Fury.
+  { key = "auto",   label = NS.IS_FOREVER and "Automatic (from stance/form)"
+                            or "Automatic (from your spec)" },
   { key = "tank",   label = "Tank" },
   { key = "dps",    label = "Damage" },
   { key = "healer", label = "Healer" },
@@ -149,7 +151,51 @@ local TANK_SPECS = {
 -- reader asks again.
 local playerIsTank, roleKnown = false, false
 
+-- WoW Forever: one spec per class and no role, so "auto" reads what a vanilla
+-- tank actually does -- Defensive Stance, Bear or Dire Bear Form, Righteous
+-- Fury. Form IDs are GetShapeshiftFormID's: 18 Defensive Stance, 5 Bear Form,
+-- 8 Dire Bear Form.
+local FOREVER_TANK_FORMS = {
+  WARRIOR = { [18] = true },
+  DRUID = { [5] = true, [8] = true },
+}
+local RIGHTEOUS_FURY = 25780
+local foreverCheckedAt = 0
+
+local function RefreshForeverRole()
+  local class = select(2, UnitClass("player"))
+  if not class then return false end
+
+  local forms = FOREVER_TANK_FORMS[class]
+  if forms then
+    local okForm, form = pcall(GetShapeshiftFormID)
+    if not okForm then return false end
+    playerIsTank = (form ~= nil and forms[form]) and true or false
+    roleKnown = true
+    return true
+  end
+
+  if class == "PALADIN" then
+    local getAura = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID
+    if not getAura then return false end
+    local okAura, aura = pcall(getAura, RIGHTEOUS_FURY)
+    -- Secret in combat: keep the last answer rather than flip to damage.
+    if not okAura or (issecretvalue and issecretvalue(aura)) then return roleKnown end
+    playerIsTank = aura ~= nil
+    roleKnown = true
+    return true
+  end
+
+  playerIsTank = false
+  roleKnown = true
+  return true
+end
+
 function NS.RefreshThreatRole()
+  if NS.IS_FOREVER then
+    foreverCheckedAt = GetTime and GetTime() or 0
+    return RefreshForeverRole()
+  end
   local ok, index = pcall(GetSpecialization)
   if not ok or not index then return false end
   local okID, id = pcall(GetSpecializationInfo, index)
@@ -160,7 +206,13 @@ function NS.RefreshThreatRole()
 end
 
 function NS.PlayerIsTank()
-  if not roleKnown then NS.RefreshThreatRole() end
+  -- Forever: Righteous Fury comes and goes with no event this file hears, so
+  -- the answer is re-read at most once a second instead of cached for good.
+  if NS.IS_FOREVER and GetTime and GetTime() - foreverCheckedAt > 1 then
+    NS.RefreshThreatRole()
+  elseif not roleKnown then
+    NS.RefreshThreatRole()
+  end
   return playerIsTank
 end
 
@@ -388,6 +440,31 @@ local function HealthColoringOff()
   return tints and tints.enabled == false
 end
 
+-- Where threat loads when no group is ticked.
+--
+-- Not "everywhere" as it is for a spell rule. Solo, every mob you fight is on
+-- you, so "aggro" lit every plate in every pull and covered the spell rules
+-- underneath -- the rules you are actually reading when nobody else is there
+-- to take a mob. With a pet out it means something again: a mob coming off the
+-- pet and onto you is the news. So an empty group list is party, raid, or solo
+-- with a pet; ticking Solo is the only way to get threat solo without a pet.
+local THREAT_DEFAULT_GROUPS = { party = true, raid = true, soloPet = true }
+
+function NS.ThreatLoad(cfg)
+  local load = (cfg or NS.ThreatConfig()).load
+  if type(load) ~= "table" then return { zones = {}, groups = THREAT_DEFAULT_GROUPS } end
+  if type(load.groups) == "table" and next(load.groups) ~= nil then return load end
+  return { zones = load.zones or {}, groups = THREAT_DEFAULT_GROUPS }
+end
+
+-- The editor's summary for the group picker. "Any group" would be a lie here.
+function NS.ThreatGroupSummary(load)
+  if type(load) == "table" and type(load.groups) == "table" and next(load.groups) ~= nil then
+    return NS.LoadGroupSummary(load)
+  end
+  return "Party, raid, or solo with a pet"
+end
+
 function NS.GetOrderedThreatRules()
   local tints = NS.db and NS.db.tints or EMPTY
   if HealthColoringOff() then return EMPTY end
@@ -397,7 +474,7 @@ function NS.GetOrderedThreatRules()
   -- Where threat is wanted. Solo there is nobody to lose a mob to, and in a
   -- delve the only other thing on your threat table is a brann, so "off
   -- outside group content" is a real profile rather than a preference.
-  if NS.LoadAllows and not NS.LoadAllows(cfg.load) then return EMPTY end
+  if NS.LoadAllows and not NS.LoadAllows(NS.ThreatLoad(cfg)) then return EMPTY end
   return EnabledStates(cfg)
 end
 
@@ -411,7 +488,7 @@ function NS.GetOrderedThreatBorders()
   -- control on it.
   if NS.ThreatConfig().enabled == false then return EMPTY end
   -- The same load conditions as the bar half: one row, one set of answers.
-  if NS.LoadAllows and not NS.LoadAllows(NS.ThreatConfig().load) then return EMPTY end
+  if NS.LoadAllows and not NS.LoadAllows(NS.ThreatLoad()) then return EMPTY end
   return EnabledStates(NS.ThreatBorderConfig())
 end
 

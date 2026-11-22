@@ -3,6 +3,10 @@ if not Grid2.isForever then return end
 
 Grid2.PlayerBuffs = {
 	[""] = {
+		19705,19706,19708,19709,19710,19711,24799,24870,25694,25941, -- Well fed
+		430,431,432,1133,1135,1137,10250,22734,24355,25696,26261,26402,26473,26475,29007,468767, -- Drink
+		433,434,435,1127,1129,1131,2639,5004,5005,5006,5007,6410,7737,10256,10257,18229,18230,18231,18232,18233,18234,22731,24005, -- Food
+		24707,24800,24869,25660,25695,25700,25702,25886,25888,26260,26401,26472,26474,28616,29008,29073,446713,470362,470369, -- Food
 	},
 	["WARRIOR"] = {
 		20230, 20240, 22857, 22858, -- Retaliation
@@ -36,7 +40,6 @@ Grid2.PlayerBuffs = {
 		20217, -- Blessing of Kings
 		23214, -- Summon Charger
 		20116, 20922, 20923, 20924, 26573, -- Consecration
-		1038, -- Blessing of Salvation
 		498, 5573, 13007, -- Divine Protection
 		1044, -- Blessing of Freedom
 		6940, 20729, -- Blessing of Sacrifice
@@ -63,11 +66,11 @@ Grid2.PlayerBuffs = {
 		475, -- Remove Lesser Curse
 	},
 	["PRIEST"] = {
-		17, 592, 600, 3747, 6065, 6066, 10898, 10899, 10900, 10901, 22187, 27607, -- Power Word: Shield
+		17, 592, 600, 3747, 6065, 6066, 10898, 10899, 10900, 10901, -- Power Word: Shield
 		6346, -- Fear Ward
-		1706, 27986, -- Levitate
+		1706, -- Levitate
 		7001, 27873, 27874, -- Lightwell Renew
-		15286, 15290, -- Vampiric Embrace
+		-- this is a debuff on hostile targets? 15286, 15290, -- Vampiric Embrace
 		586, 9578, 9579, 9592, 10941, 10942, 12685, -- Fade
 		588, 602, 1006, 7128, 10951, 10952, -- Inner Fire
 		20711, -- Spirit of Redemption
@@ -76,8 +79,13 @@ Grid2.PlayerBuffs = {
 		14892, -- Inspiration
 		14751, -- Inner Focus
 		21562, 21564, -- Prayer of Fortitude
-		139, 6074, 6075, 6076, 6077, 6078, 10927, 10928, 10929, 25315, 27606, -- Renew
-		14749, 14767, -- Improved Power Word: Fortitude
+		139, 6074, 6075, 6076, 6077, 6078, 10927, 10928, 10929, 25315, -- Renew
+		1243, 1244, 1245, 2791, 10937, 10938, -- Power Word: Fortitude
+		14752, 14818, 14819, 27841, -- Divine Spirit
+		27681, -- Prayer of Spirit
+		976, 10957, 10958, -- Shadow Protection
+		27683, -- Prayer of Shadow Protection
+		15271, -- Spirit Tap
 	},
 	["WARLOCK"] = {
 		7870, -- lesser invisibility

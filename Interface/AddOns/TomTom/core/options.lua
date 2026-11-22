@@ -89,7 +89,7 @@ local VAR_TYPES = {
 }
 
 -- Returns the setting object for a setting row.
-local function CreateRowSetting(category, section, row)
+local function CreateRowSetting(page, section, row)
     local namespace, key = SplitPath(section, row)
     local variable = row.variable or VariableName(namespace, key)
     assert(not settingsByVariable[variable], "Two settings rows for " .. variable)
@@ -125,7 +125,7 @@ local function CreateRowSetting(category, section, row)
         varType = type(default) == "number" and "Number" or "String"
     end
 
-    local setting = private.CreateUnregisteredSetting(category, variable, Settings.VarType[varType],
+    local setting = private.CreateUnregisteredSetting(page.category, variable, Settings.VarType[varType],
         row.name, default, get, set)
     settingsByVariable[variable] = setting
     return setting, namespace, key
@@ -148,27 +148,20 @@ TomTom:RegisterMessage("TOMTOM_PROFILE_CHANGED", RefreshAllRows)
 
 -- NotifyUpdate sets the row values only. The enabled state of a row with no
 -- parent row, the shown predicates and the "Controlled by" text change only
--- when the page shows again, so an open TomTom page shows again. In combat
--- it waits until the combat ends, to keep the settings panel free of taint.
-local redisplayQueued
+-- when the rows are made again. Each page has its own list, so this does not
+-- touch SettingsPanel and can also happen in combat.
+local settingsPages = {}
 
-local function RedisplayOpenPage()
-    redisplayQueued = false
-    local panel = SettingsPanel
-    if not (mainCategory and panel and panel:IsShown() and panel.GetCurrentCategory) then
-        return
-    end
-    local category = panel:GetCurrentCategory()
-    if category and (category == mainCategory or category:GetParentCategory() == mainCategory) then
-        panel:SelectCategory(category, true)
-    end
+local function CreatePage(name, parentCategory)
+    local page = private.CreateSettingsPage(name, parentCategory)
+    table.insert(settingsPages, page)
+    return page
 end
 
 TomTom:RegisterMessage("TOMTOM_FEATURE_SUPPRESSION_CHANGED", function()
     RefreshAllRows()
-    if not redisplayQueued then
-        redisplayQueued = true
-        TomTom:Defer(RedisplayOpenPage)
+    for _, page in ipairs(settingsPages) do
+        page:Redisplay()
     end
 end)
 
@@ -176,9 +169,8 @@ end)
 --  Rows
 ----------------------------------------------------------------------------]]
 
-local function AddInitializer(category, initializer)
-    Settings.RegisterInitializer(category, initializer)
-    return initializer
+local function AddInitializer(page, initializer)
+    return page:AddInitializer(initializer)
 end
 
 local function CreateSliderFormatter(row)
@@ -214,53 +206,53 @@ end
 
 local rowBuilders = {}
 
-function rowBuilders.header(category, _, row)
-    return AddInitializer(category, CreateSettingsListSectionHeaderInitializer(row.name, row.tooltip))
+function rowBuilders.header(page, _, row)
+    return AddInitializer(page, CreateSettingsListSectionHeaderInitializer(row.name, row.tooltip))
 end
 
-function rowBuilders.text(category, _, row)
-    return AddInitializer(category, private.CreateTextInitializer({
+function rowBuilders.text(page, _, row)
+    return AddInitializer(page, private.CreateTextInitializer({
         text = row.text, textFunc = row.textFunc, image = row.image, imageFunc = row.imageFunc,
     }))
 end
 
 -- A text row that refreshes when other settings change, for example a theme
 -- preview. watch is a list of keys in settingsKey, or "ns.key" paths.
-function rowBuilders.preview(category, section, row)
+function rowBuilders.preview(page, section, row)
     local variables = {}
     for _, watched in ipairs(row.watch or {}) do
         local namespace, key = watched:match("^([^.]+)%.(.+)$")
         table.insert(variables, VariableName(namespace or section.settingsKey, key or watched))
     end
-    return AddInitializer(category, private.CreateTextInitializer({
+    return AddInitializer(page, private.CreateTextInitializer({
         textFunc = row.textFunc, imageFunc = row.imageFunc, watchVariables = variables,
     }))
 end
 
-function rowBuilders.toggle(category, section, row)
-    local setting = CreateRowSetting(category, section, row)
-    return AddInitializer(category, Settings.CreateCheckboxInitializer(setting, nil, row.tooltip)), setting
+function rowBuilders.toggle(page, section, row)
+    local setting = CreateRowSetting(page, section, row)
+    return AddInitializer(page, Settings.CreateCheckboxInitializer(setting, nil, row.tooltip)), setting
 end
 
-function rowBuilders.range(category, section, row)
-    local setting = CreateRowSetting(category, section, row)
+function rowBuilders.range(page, section, row)
+    local setting = CreateRowSetting(page, section, row)
     local options = Settings.CreateSliderOptions(row.min, row.max, row.step)
     options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, CreateSliderFormatter(row))
-    return AddInitializer(category, Settings.CreateSliderInitializer(setting, options, row.tooltip)), setting
+    return AddInitializer(page, Settings.CreateSliderInitializer(setting, options, row.tooltip)), setting
 end
 
-function rowBuilders.select(category, section, row)
-    local setting = CreateRowSetting(category, section, row)
-    return AddInitializer(category, Settings.CreateDropdownInitializer(setting, SelectOptions(row), row.tooltip)), setting
+function rowBuilders.select(page, section, row)
+    local setting = CreateRowSetting(page, section, row)
+    return AddInitializer(page, Settings.CreateDropdownInitializer(setting, SelectOptions(row), row.tooltip)), setting
 end
 
-function rowBuilders.color(category, section, row)
-    local setting = CreateRowSetting(category, section, row)
-    return AddInitializer(category, private.CreateColorInitializer(setting, row.tooltip, row.opacity)), setting
+function rowBuilders.color(page, section, row)
+    local setting = CreateRowSetting(page, section, row)
+    return AddInitializer(page, private.CreateColorInitializer(setting, row.tooltip, row.opacity)), setting
 end
 
-function rowBuilders.execute(category, _, row)
-    return AddInitializer(category, CreateSettingsButtonInitializer(row.name, row.buttonText or row.name,
+function rowBuilders.execute(page, _, row)
+    return AddInitializer(page, CreateSettingsButtonInitializer(row.name, row.buttonText or row.name,
         row.func, row.tooltip, true))
 end
 
@@ -271,8 +263,8 @@ local function NotSuppressed(feature)
 end
 
 -- Shown only while another addon suppresses the feature.
-local function AddControlledRow(category, feature)
-    local initializer = AddInitializer(category, private.CreateTextInitializer({
+local function AddControlledRow(page, feature)
+    local initializer = AddInitializer(page, private.CreateTextInitializer({
         textFunc = function()
             return L["Controlled by %s"]:format(private.FeatureOwnersText(feature))
         end,
@@ -282,17 +274,17 @@ local function AddControlledRow(category, feature)
     end)
 end
 
-local function BuildRow(category, section, row, parentInitializer, parentSetting)
+local function BuildRow(page, section, row, parentInitializer, parentSetting)
     local builder = rowBuilders[row.type]
     assert(builder, "Unknown settings row type: " .. tostring(row.type))
-    local initializer, setting = builder(category, section, row)
+    local initializer, setting = builder(page, section, row)
 
     local suppress = row.suppress or section.suppress
     if suppress and setting then
         initializer:AddModifyPredicate(NotSuppressed(suppress))
     end
     if row.suppress then
-        AddControlledRow(category, row.suppress)
+        AddControlledRow(page, row.suppress)
     end
 
     if parentInitializer then
@@ -358,9 +350,9 @@ StaticPopupDialogs["TOMTOM_RESET_SETTINGS_PAGE"] = {
     hideOnEscape = 1,
 }
 
-local function ResetPage(page)
+local function ResetPage(def)
     local done = {}
-    for _, section in ipairs(page.sections) do
+    for _, section in ipairs(def.sections) do
         local namespace = section.settingsKey
         if namespace and not done[namespace] then
             done[namespace] = true
@@ -372,11 +364,11 @@ local function ResetPage(page)
     RefreshAllRows()
 end
 
-local function AddResetButton(category, page)
-    AddInitializer(category, CreateSettingsButtonInitializer(L["Reset to defaults"], L["Reset to defaults"],
+local function AddResetButton(page, def)
+    AddInitializer(page, CreateSettingsButtonInitializer(L["Reset to defaults"], L["Reset to defaults"],
         function()
-            StaticPopup_Show("TOMTOM_RESET_SETTINGS_PAGE", nil, nil, function() ResetPage(page) end)
-        end, page.id == "main"
+            StaticPopup_Show("TOMTOM_RESET_SETTINGS_PAGE", nil, nil, function() ResetPage(def) end)
+        end, def.id == "main"
             and L["Reset the general options on this page. The Features list and the other pages do not change."]
             or L["Reset the settings on this page. Other pages and the waypoints do not change."], true))
 end
@@ -390,36 +382,36 @@ end
 -- Builds the rows of a page. Returns the feature rows for the Features list.
 -- On the TomTom page the enable row is the Features list row, so
 -- listRows[section] gives it.
-local function BuildPage(category, page, listRows)
+local function BuildPage(page, def, listRows)
     local features = {}
     -- One "Controlled by" row for each feature on a page.
     local controlled = {}
-    for _, section in ipairs(page.sections) do
+    for _, section in ipairs(def.sections) do
         if section.header then
-            BuildRow(category, section, {type = "header", name = section.header})
+            BuildRow(page, section, {type = "header", name = section.header})
         end
         local enableInitializer, enableSetting
         if listRows and listRows[section] then
             enableInitializer = listRows[section]
             enableSetting = enableInitializer:GetSetting()
         elseif section.feature then
-            enableInitializer, enableSetting = BuildRow(category, section, FeatureRow(section))
+            enableInitializer, enableSetting = BuildRow(page, section, FeatureRow(section))
             table.insert(features, {tooltip = section.feature.tooltip, setting = enableSetting, section = section})
         end
         if section.suppress and not controlled[section.suppress] then
             controlled[section.suppress] = true
-            AddControlledRow(category, section.suppress)
+            AddControlledRow(page, section.suppress)
         end
         for _, row in ipairs(section.rows) do
-            BuildRow(category, section, row, enableInitializer, enableSetting)
+            BuildRow(page, section, row, enableInitializer, enableSetting)
         end
     end
     return features
 end
 
-local function AddAbout(category)
-    AddInitializer(category, CreateSettingsListSectionHeaderInitializer(L["About"]))
-    AddInitializer(category, private.CreateTextInitializer({
+local function AddAbout(page)
+    AddInitializer(page, CreateSettingsListSectionHeaderInitializer(L["About"]))
+    AddInitializer(page, private.CreateTextInitializer({
         image = {texture = "Interface\\AddOns\\TomTom\\Images\\Modern\\TomTom-Logo.tga", width = 64, height = 64},
         textFunc = function()
             return table.concat({
@@ -436,21 +428,22 @@ end
 -- Builds all TomTom settings pages. Call it once, at login.
 function private.BuildSettings()
     assert(not mainCategory, "BuildSettings runs only once")
-    local pages, byId = CollectPages()
+    local defs, byId = CollectPages()
 
-    local category, layout = Settings.RegisterVerticalLayoutCategory("TomTom")
+    local main = CreatePage("TomTom")
+    local category = main.category
     mainCategory = category
 
     local allFeatures = {}
     local subcategories = {}
-    for _, page in ipairs(pages) do
-        if page.id ~= "main" then
-            local subcategory = Settings.RegisterVerticalLayoutSubcategory(category, page.name)
-            for _, feature in ipairs(BuildPage(subcategory, page)) do
+    for _, def in ipairs(defs) do
+        if def.id ~= "main" then
+            local page = CreatePage(def.name, category)
+            for _, feature in ipairs(BuildPage(page, def)) do
                 table.insert(allFeatures, feature)
             end
-            AddResetButton(subcategory, page)
-            subcategories[page.id] = subcategory
+            AddResetButton(page, def)
+            subcategories[def.id] = page.category
         end
     end
 
@@ -464,38 +457,37 @@ function private.BuildSettings()
     local mainFeatures = {}
     for _, section in ipairs(byId.main and byId.main.sections or {}) do
         if section.feature then
-            local setting = CreateRowSetting(category, section, FeatureRow(section))
+            local setting = CreateRowSetting(main, section, FeatureRow(section))
             table.insert(mainFeatures, {tooltip = section.feature.tooltip, setting = setting, section = section})
         end
     end
 
     if #allFeatures + #mainFeatures > 0 then
-        AddInitializer(category, CreateSettingsListSectionHeaderInitializer(L["Features"]))
+        AddInitializer(main, CreateSettingsListSectionHeaderInitializer(L["Features"]))
         for _, feature in ipairs(allFeatures) do
             -- The same setting object as the row on the feature's own page
-            -- (SD1). Search lists the feature on its own page only (SD11).
+            -- (SD1).
             local initializer = Settings.CreateCheckboxInitializer(feature.setting, nil, feature.tooltip)
-            initializer:SetSearchIgnoredInLayout(layout)
             if feature.section.suppress then
                 initializer:AddModifyPredicate(NotSuppressed(feature.section.suppress))
             end
-            AddInitializer(category, initializer)
+            AddInitializer(main, initializer)
         end
         for _, feature in ipairs(mainFeatures) do
             local initializer = Settings.CreateCheckboxInitializer(feature.setting, nil, feature.tooltip)
             if feature.section.suppress then
                 initializer:AddModifyPredicate(NotSuppressed(feature.section.suppress))
             end
-            AddInitializer(category, initializer)
+            AddInitializer(main, initializer)
             listRows[feature.section] = initializer
         end
     end
 
     if byId.main then
-        BuildPage(category, byId.main, listRows)
-        AddResetButton(category, byId.main)
+        BuildPage(main, byId.main, listRows)
+        AddResetButton(main, byId.main)
     end
-    AddAbout(category)
+    AddAbout(main)
 
     Settings.RegisterAddOnCategory(category)
     return category, subcategories

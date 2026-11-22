@@ -48,10 +48,15 @@ NS.LOAD_ZONES = {
   { key = "arena",       label = "Arena" },
 }
 
+-- "soloPet" is a narrower Solo: alone, with a pet out. It exists for threat --
+-- solo with a pet tanking, "it came off the pet and onto you" is real news,
+-- while solo with no pet every mob is on you and the colour says nothing. A
+-- list holding plain Solo still matches with a pet out; see NS.LoadAllows.
 NS.LOAD_GROUPS = {
-  { key = "solo",  label = "Solo" },
-  { key = "party", label = "In a party" },
-  { key = "raid",  label = "In a raid" },
+  { key = "solo",    label = "Solo" },
+  { key = "soloPet", label = "Solo with a pet" },
+  { key = "party",   label = "In a party" },
+  { key = "raid",    label = "In a raid" },
 }
 
 local ZONE_LABEL, GROUP_LABEL = {}, {}
@@ -126,6 +131,10 @@ function NS.CurrentLoadGroup()
     group = "raid"
   elseif IsInGroup() then
     group = "party"
+  elseif UnitExists and UnitExists("pet") then
+    -- Its own answer, so summoning or dismissing a pet registers as a change
+    -- in NS.LoadContextChanged and rebuilds.
+    group = "soloPet"
   end
   cachedGroup = group
   return group
@@ -154,7 +163,12 @@ function NS.LoadAllows(load)
   local zones = load.zones
   if zones and next(zones) and not zones[NS.CurrentLoadZone()] then return false end
   local groups = load.groups
-  if groups and next(groups) and not groups[NS.CurrentLoadGroup()] then return false end
+  if groups and next(groups) then
+    local group = NS.CurrentLoadGroup()
+    -- Solo with a pet is still solo: a rule ticked for Solo keeps loading
+    -- when a pet is out. Only the reverse is narrower.
+    if not (groups[group] or (group == "soloPet" and groups.solo)) then return false end
+  end
   return true
 end
 

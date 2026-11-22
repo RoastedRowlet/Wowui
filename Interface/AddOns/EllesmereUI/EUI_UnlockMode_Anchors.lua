@@ -258,15 +258,6 @@ local function IsAnchored(barKey)
     return elem and elem.isAnchored and elem.isAnchored() or false
 end
 
--- Element anchored via a module option (e.g. ERB "Anchor To") with keepMoverWhenAnchored:
--- mover exists but is position-locked (module's anchor owns position) -- drag/nudge/
--- anchor-link disabled, resize and width/height match stay. On ns: deferred body is at the 200-local cap.
-function ns.IsMoverPosLocked(barKey)
-    local elem = registeredElements[barKey]
-    if not (elem and elem.keepMoverWhenAnchored) then return false end
-    return elem.isAnchored and elem.isAnchored() or false
-end
-
 -- Width/Height match persistent links
 local MatchH = {}
 
@@ -826,13 +817,13 @@ function MatchH.ApplyWidthMatch(sourceKey, targetKey)
             if UM.isUnlocked then
                 local sb = UM.GetBarFrame(sourceKey)
                 local savedAlpha = sb and EllesmereUI._GetFFD(sb).restoreAlpha
-                if sb and not savedAlpha then EllesmereUI._UnlockSetBarAlpha(sb, 0) end
+                if sb and not savedAlpha then EllesmereUI._UnlockBlankBar(sb) end
                 _propagatingMatch = true; EllesmereUI._propagatingMatch = true
                 pcall(sourceElem.setWidth, sourceKey, targetW)
                 _propagatingMatch = false; EllesmereUI._propagatingMatch = false
                 EllesmereUI.RecenterBarAnchor(sourceKey)
                 if sb and not savedAlpha then
-                    C_Timer.After(0, function() EllesmereUI._UnlockSetBarAlpha(sb, 1) end)
+                    C_Timer.After(0, function() EllesmereUI._UnlockUnblankBar(sb) end)
                 end
                 local m = movers[sourceKey]
                 if m then m:SyncSize() end
@@ -916,13 +907,13 @@ function MatchH.ApplyHeightMatch(sourceKey, targetKey)
             if UM.isUnlocked then
                 local sb = UM.GetBarFrame(sourceKey)
                 local savedAlpha = sb and EllesmereUI._GetFFD(sb).restoreAlpha
-                if sb and not savedAlpha then EllesmereUI._UnlockSetBarAlpha(sb, 0) end
+                if sb and not savedAlpha then EllesmereUI._UnlockBlankBar(sb) end
                 _propagatingMatch = true; EllesmereUI._propagatingMatch = true
                 pcall(sourceElem.setHeight, sourceKey, targetH)
                 _propagatingMatch = false; EllesmereUI._propagatingMatch = false
                 EllesmereUI.RecenterBarAnchor(sourceKey)
                 if sb and not savedAlpha then
-                    C_Timer.After(0, function() EllesmereUI._UnlockSetBarAlpha(sb, 1) end)
+                    C_Timer.After(0, function() EllesmereUI._UnlockUnblankBar(sb) end)
                 end
                 local m = movers[sourceKey]
                 if m then m:SyncSize() end
@@ -1024,7 +1015,7 @@ do
         if savedEdge.tgtx ~= nil or savedEdge.tgty ~= nil then return end
         local growDir = GetBarGrowDirActual(childKey)
         if not growDir or growDir == "CENTER" then return end
-        local targetBar = UM.GetBarFrame(info.target)
+        local targetBar = UM.GetAnchorTargetFrame(info.target)
         if not targetBar or not targetBar:GetLeft() then return end
         -- A clamp-held target is not at its saved spot: pairing it would make the
         -- child jump once the target is released. Retries next settle.
@@ -1565,6 +1556,9 @@ local _moveCheckScheduled = {}  -- [key] = true (dedupes same-frame checks)
 -- Class Resource rebuild) hit neither emitter and anchored children never learn the target moved.
 local function NotifyElementMoved(key)
     if UM.isUnlocked then return end  -- unlock mode owns positioning
+    -- A bar riding the cursor never cascades: its children sit on its stand-in.
+    local el = registeredElements[key]
+    if el and el.anchorStandIn and el.anchorStandIn() then return end
     if _moveCheckScheduled[key] then return end
     _moveCheckScheduled[key] = true
     C_Timer.After(0, function()
@@ -1597,11 +1591,16 @@ local function HookFrameSizeChanged(key)
     -- No hooks on chat frames: ChatFrame1 is docked inside Blizzard's secure
     -- FCF_OpenTemporaryWindow chain and any addon code in OnSizeChanged/SetPoint
     -- hooks taints the execution context. Chat persists its own position/size.
-    -- The quest tracker is laid out by Blizzard's managed frame container, in
-    -- combat too, and places itself from its Edit Mode layout entry.
-    if key and (key:find("^ECHAT_") or key == "EQT_Tracker") then return end
+    if key and key:find("^ECHAT_") then return end
     local bar = UM.GetBarFrame(key)
     if not bar then return end
+    -- The quest tracker key: Blizzard's tracker is laid out by its managed
+    -- frame container, in combat too, and places itself from its Edit Mode
+    -- layout entry (its unlock session stand-in included), so it takes no
+    -- hooks. WoW Forever's custom tracker, a frame of ours under the same key
+    -- that grows with its quests, does: its resize re-applies its anchor link,
+    -- which otherwise keeps its centre and moves the edge it hangs from.
+    if key == "EQT_Tracker" and bar ~= _G.EUI_CustomQuestTracker then return end
     if not _sizeHookedFrames[bar] then
         _sizeHookedFrames[bar] = true
         bar:HookScript("OnSizeChanged", function()
@@ -1903,7 +1902,7 @@ do
             EllesmereUI._AnchorPark.Park(childKey)
             return true
         end
-        local tgt = UM.GetBarFrame(fb.target)
+        local tgt = UM.GetAnchorTargetFrame(fb.target)
         if not tgt or not tgt:GetLeft() then
             -- Fallback target unavailable as well: hold position.
             return true

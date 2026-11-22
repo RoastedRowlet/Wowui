@@ -1,5 +1,21 @@
 # Changelog
 
+## v4.4.1
+
+### Options
+  - Fixed: after a search in the Settings panel, a key binding in combat
+    failed with "Interface action blocked" (blamed on TomTom). The TomTom
+    pages now hold their own list, out of reach of the settings search.
+  - Because of this fix, the settings search no longer finds TomTom
+    options, and a gamepad cannot move into the TomTom pages. Type
+    `/tomtom` to open them.
+
+### Changes and fixes
+  - `/way arrow clear` clears the waypoint from the crazy arrow.
+    `/way arrow remove` removes the waypoint on the crazy arrow.
+  - On retail and Forever, the player and cursor coordinates are in the
+    header of the world map, on top of it.
+
 ## v4.4.0-beta
 
 This beta changes most of the inner code of TomTom. Your waypoints and

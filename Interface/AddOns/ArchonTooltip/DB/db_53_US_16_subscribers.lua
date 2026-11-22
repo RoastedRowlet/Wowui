@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Paladin-Retribution','Priest-Holy',}
-local provider = {region='US',realm='Arathor',name='US',type='subscribers',zone=53,date='2026-11-10',data={Ca='Caspias:BAEANQADCggIEgAAAA==.',Da='Dayquil:BAEANQADCgcIBwABNQAFFAMIBgABACUKAA==.',Ps='Psypriest:BAECNQAFFH8OAAICAAYKUhl7CAASAgaODQAABQBQAHUNAAABACsAfw0AAAEAXgCpDQAAAgBPAFwNAAABAB8AMw0AAAQAOgACAAYKUhl7CAASAgaODQAABQBQAHUNAAABACsAfw0AAAEAXgCpDQAAAgBPAFwNAAABAB8AMw0AAAQAOgA1AAQKf0QAAgIACgpeIncGAL0DAAIACgpeIncGAL0DAAE1AAUUCAgjAAIAXA8A.',},}
+local provider = {region='US',realm='Arathor',name='US',type='subscribers',zone=53,date='2026-11-17',data={Ca='Caspias:BAEANQADCggIEgAAAA==.',Da='Dayquil:BAEANQADCgcIBwABNQAFFAQICgABANYMAA==.',Ps='Psypriest:BAECNQAFFH8OAAICAAYKUhm3CgAHAgaODQAABQBQAHUNAAABACsAfw0AAAEAXgCpDQAAAgBPAFwNAAABAB8AMw0AAAQAOgACAAYKUhm3CgAHAgaODQAABQBQAHUNAAABACsAfw0AAAEAXgCpDQAAAgBPAFwNAAABAB8AMw0AAAQAOgA1AAQKf0QAAgIACgpeIr0HALgDAAIACgpeIr0HALgDAAE1AAUUCQklAAIApQ4A.',},}
 provider.parse = parse
 
 local rawData = provider.data

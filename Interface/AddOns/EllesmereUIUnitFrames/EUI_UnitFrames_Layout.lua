@@ -127,6 +127,25 @@ function ns.GetBossSimpleBuffOffset(s)
     return x, y
 end
 
+-- Boss Simple Buff / Debuff Display duration text X/Y: simple<Buff|Debuff>CooldownTextOffsetX/Y
+-- if set, else the regular buff / debuff duration offsets, the view the column offsets above
+-- use, so a duration offset saved for the regular display reads on in the simple one. The
+-- live auras (BuildStyle), the simple cogs' sliders and the boss previews all read this.
+function ns.GetBossSimpleCdTextOffset(s, isBuff)
+    if not s then return 0, 0 end
+    local x, y
+    if isBuff then
+        x, y = s.simpleBuffCooldownTextOffsetX, s.simpleBuffCooldownTextOffsetY
+        if x == nil then x = s.buffCooldownTextOffsetX or 0 end
+        if y == nil then y = s.buffCooldownTextOffsetY or 0 end
+    else
+        x, y = s.simpleDebuffCooldownTextOffsetX, s.simpleDebuffCooldownTextOffsetY
+        if x == nil then x = s.debuffCooldownTextOffsetX or 0 end
+        if y == nil then y = s.debuffCooldownTextOffsetY or 0 end
+    end
+    return x, y
+end
+
 -- Boss aura icon spacing, in PHYSICAL pixels. Simple modes use dedicated keys
 -- (simpleBuffSpacing/simpleDebuffSpacing); regular auras use buffSpacing/debuffSpacing.
 -- No legacy equivalent, so every variant defaults to 1 independently. Callers convert
@@ -209,6 +228,13 @@ end
 local function ApplyClassColor(fs, unit, useClassColor, customR, customG, customB)
     if not fs then return end
     if useClassColor and unit then
+        if unit == "pet" then
+            local _, ct = UnitClass("player")
+            if ct and not issecretvalue(ct) then
+                local cc = EllesmereUI.GetClassColor(ct)
+                if cc then fs:SetTextColor(cc.r, cc.g, cc.b); return end
+            end
+        end
         -- Class color for players (and AI party members), reaction color for NPCs,
         -- matching the health bar and the custom Enemy Colors override. Shared
         -- with the eui-tgtname tag via ns.ResolveUnitNameColor.
@@ -263,6 +289,16 @@ function ns.UF_RecolorTexts(frame, unit, s)
         if btb.RightText then ApplyClassColor(btb.RightText, unit, s.btbRightClassColor, s.btbRightColorR, s.btbRightColorG, s.btbRightColorB) end
         if btb.CenterText then ApplyClassColor(btb.CenterText, unit, s.btbCenterClassColor, s.btbCenterColorR, s.btbCenterColorG, s.btbCenterColorB) end
         if btb._applyBTBPowerColors then btb._applyBTBPowerColors(s) end
+    end
+end
+
+-- Colors changed (EllesmereUI.ApplyColorsToOUF): texts are colored once when set,
+-- so the class-colored ones repaint here with the new palette.
+EllesmereUI._UFRecolorAllTexts = function()
+    local frames = I.frames
+    if not (frames and db) then return end
+    for unit in pairs(unitSettingsKey) do
+        if frames[unit] then ns.UF_RecolorTexts(frames[unit], unit) end
     end
 end
 
@@ -405,7 +441,8 @@ local function CreateBottomTextBar(frame, unit, settings, anchorFrame, xOffset, 
     btb._applyBTBPowerColors = ApplyBTBPowerColors
 
     -- Class icon overlay on a high-level frame so it renders above the border.
-    local classIconHolder = CreateFrame("Frame", nil, frame)
+    -- A child of the bar, so it hides with it (Text Bar off, stock looks).
+    local classIconHolder = CreateFrame("Frame", nil, btb)
     classIconHolder:SetAllPoints(textOvr)
     classIconHolder:SetFrameLevel(frame:GetFrameLevel() + 12)
     local classIconTex = classIconHolder:CreateTexture(nil, "ARTWORK")
@@ -416,6 +453,11 @@ local function CreateBottomTextBar(frame, unit, settings, anchorFrame, xOffset, 
     local function ApplyBTBClassIcon(s)
         local style = s.btbClassIcon or "none"
         if style == "none" then classIconTex:Hide(); return end
+        -- Players and AI party members only: UnitClass reports most NPCs as
+        -- warriors (the class colour rule of ApplyClassColor).
+        if not (UnitIsPlayer(unit) or (UnitInPartyIsAI and UnitInPartyIsAI(unit))) then
+            classIconTex:Hide(); return
+        end
         local _, classToken = UnitClass(unit)
         if issecretvalue(classToken) or not classToken then classIconTex:Hide(); return end
         if not ApplyClassIconTexture(classIconTex, classToken, style) then classIconTex:Hide(); return end
@@ -520,6 +562,11 @@ local function ReparentBarsToClip(frame, powerPosition, settings)
         if settings then
             ns.UpdatePowerBorder(frame.Power, settings)
         end
+    end
+    -- Hide Empty Power Bar (WoW Forever; EUI_UnitFrames_ForeverEmptyPower.lua)
+    -- works over the final parents and levels. Off and never on: this test.
+    if ns.UF_EmptyPower and ((settings and settings.hideEmptyPower) or frame._epParts) then
+        ns.UF_EmptyPower(frame, settings)
     end
 end
 

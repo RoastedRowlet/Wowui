@@ -6,8 +6,8 @@
 
 -- Custom rows for the Blizzard settings list: a color swatch that can carry
 -- opacity, and a text row with an optional image. The row templates are in
--- TomTom.xml. The settings pages use these functions; nothing here builds a
--- page.
+-- TomTom.xml. Also the page that holds the rows: a canvas category with its
+-- own settings list. core/options.lua decides what goes on each page.
 
 local addonName, addon = ...
 
@@ -212,4 +212,67 @@ function private.CreateTextInitializer(data)
     local initializer = CreateFromMixins(TomTomSettingsTextInitializerMixin)
     initializer:Init("TomTomSettingsTextRowTemplate", data)
     return initializer
+end
+
+--[[--------------------------------------------------------------------------
+--  Page: a canvas category with its own settings list
+----------------------------------------------------------------------------]]
+
+-- Blizzard's settings search reads the rows of all vertical layout
+-- categories outside securecallfunction. Rows that an addon makes are
+-- tainted, so after a search the keybinding rows run tainted and SetBinding
+-- fails in combat. Search skips canvas categories. Each TomTom page is a
+-- canvas that holds its own copy of Blizzard's settings list, so the TomTom
+-- rows and their frames never get into Blizzard's list.
+local PageMixin = {}
+
+function PageMixin:AddInitializer(initializer)
+    self.layout:AddInitializer(initializer)
+    self.onPage[initializer] = true
+    -- Blizzard's version reads the current layout of SettingsPanel. For a
+    -- canvas category that layout has no rows.
+    initializer.IsParentInitializerInLayout = self.isParentOnPage
+    return initializer
+end
+
+function PageMixin:GetInitializers()
+    return self.layout:GetInitializers()
+end
+
+-- SettingsPanel calls OnRefresh when it shows the page and when the panel
+-- opens. There is no OnDefault, so Blizzard's "Defaults" never reset TomTom
+-- (SD9).
+function PageMixin:OnRefresh()
+    self:Redisplay()
+end
+
+-- Makes the rows again, so that the shown and enabled states are current.
+-- SettingsPanel hides the canvas of a page that is not open.
+function PageMixin:Redisplay()
+    if self:IsShown() then
+        self.List:Display(self.layout:GetInitializers())
+    end
+end
+
+function private.CreateSettingsPage(name, parentCategory)
+    local page = Mixin(CreateFrame("Frame"), PageMixin)
+    page:Hide()
+    page.layout = CreateVerticalLayout()
+    page.onPage = {}
+    page.isParentOnPage = function(initializer)
+        local parent = initializer:GetParentInitializer()
+        return parent ~= nil and page.onPage[parent] == true
+    end
+
+    page.List = CreateFrame("Frame", nil, page, "SettingsListTemplate")
+    page.List:SetAllPoints()
+    page.List.Header.Title:SetText(name)
+    page.List.Header.DefaultsButton:Hide()
+
+    if parentCategory then
+        page.category = Settings.RegisterCanvasLayoutSubcategory(parentCategory, page, name)
+    else
+        page.category = Settings.RegisterCanvasLayoutCategory(page, name)
+    end
+    return page
 end

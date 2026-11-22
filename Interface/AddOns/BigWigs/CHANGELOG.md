@@ -1,8 +1,13 @@
 # BigWigs
 
-## [v427.8](https://github.com/BigWigsMods/BigWigs/tree/v427.8) (2026-10-23)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v427.7...v427.8) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v428.2](https://github.com/BigWigsMods/BigWigs/tree/v428.2) (2026-11-22)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v428.1...v428.2) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- Core: Don't disable non-boss modules on engage  
-- Parser: Match API calls spanning multiple lines  
-- TheVenomousAbyss/Nekzali: Fix Possession Barrage key  
+- Cleanup luacheck file  
+- Remove transmitting player name from DBM comms (cleanup)  
+- Tools/AutoInvite: Rewrite to compensate for latest WoW Forever changes (no more realm name)  
+- Update ruRU  
+- Tools/LFGTimer: Cleanup  
+- Update zhCN (#2837)  
+- Options: Fix menu categories  
+- Update deDE (#2836)  

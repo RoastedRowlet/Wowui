@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'DeathKnight-Frost','Druid-Restoration','Rogue-Assassination','Rogue-Outlaw','Rogue-Subtlety',}
-local provider = {region='US',realm='Warsong',name='US',type='subscribers',zone=53,date='2026-11-10',data={As='Aspir:BAEANQAECgEIAQABNQAFFAYIEgABAAUWAA==.',Bu='Buffmw:BAEANQAECgQIBQABNQAFFAoKPgACAJwjAA==.',['Fú']='Fúsión:BAEANQAECgEIAQABNQAECgoKKAADAIgiAA==.',Ja='Jarco:BAECNQAFFH8OAAQEAAcK1BakAAD8AQeODQAABABUAHUNAAABAB0Afw0AAAEAJQCpDQAAAwBOAFwNAAABAEoAZQ0AAAEAGAAzDQAAAwAuAAQABgocGqQAAPwBBo4NAAAEAFQAdQ0AAAEAHQB/DQAAAQAlAKkNAAADAE4AXA0AAAEASgAzDQAAAQAcAAUAAgqyCU4iAFQAAmUNAAABABgAMw0AAAEALgADAAEKAADoHQBOAAEzDQAAAQAYADUABAp/NAADBAAKClEkegEAcgMABAAJCtoiegEAcgMABQAKCuUi3QoAxgIAAAA=.',},}
+local lookup = {'Druid-Restoration','Rogue-Assassination','Rogue-Outlaw','Rogue-Subtlety',}
+local provider = {region='US',realm='Warsong',name='US',type='subscribers',zone=53,date='2026-11-17',data={Bu='Buffmw:BAEANQAECgQIBAABNQAFFAoKQAABAJwjAA==.',['Fú']='Fúsión:BAEANQAECgEIAQABNQAECgoKKAACAIgiAA==.',Ja='Jarco:BAECNQAFFH8OAAQDAAcK1BakAAD8AQeODQAABABUAHUNAAABAB0Afw0AAAEAJQCpDQAAAwBOAFwNAAABAEoAZQ0AAAEAGAAzDQAAAwAuAAMABgocGqQAAPwBBo4NAAAEAFQAdQ0AAAEAHQB/DQAAAQAlAKkNAAADAE4AXA0AAAEASgAzDQAAAQAcAAQAAgqyCVglAFQAAmUNAAABABgAMw0AAAEALgACAAEKAADoHQBOAAEzDQAAAQAYADUABAp/NAADAwAKClEkegEAcgMAAwAJCtoiegEAcgMABAAKCuUi3QoAxgIAAAA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

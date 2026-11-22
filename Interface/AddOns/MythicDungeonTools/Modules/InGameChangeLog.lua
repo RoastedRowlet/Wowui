@@ -2,24 +2,26 @@ local _, MDT = ...
 
 MDT.changeLog = {
   {
-    tag = "6.3.30",
-    date = "2026-11-04",
+    tag = "6.3.34",
+    date = "2026-11-16",
     notes = {
-      "Fixed route names not showing when importing or exporting multiple routes.",
+      "New option 'Show percentages with two decimal places' in Settings, off by default.",
     },
   },
   {
-    tag = "6.3.29",
-    date = "2026-11-01",
+    tag = "6.3.33",
+    date = "2026-11-11",
     notes = {
-      "Added the four Curious Yearlings next to the lone Territorial Matriarch in Den of Nalorakk.",
+      "Fixed a Lua error on Italian clients when showing an enemy's level.",
+      "Improved the French, Spanish, Italian, Korean, Brazilian Portuguese, Russian and Chinese translations.",
     },
   },
   {
-    tag = "6.3.28",
-    date = "2026-10-31",
+    tag = "6.3.32",
+    date = "2026-11-09",
     notes = {
-      "The Sporeblight Belcher and Leafy Grovecrawler in The Blinding Vale can now be selected separately.",
+      "New and imported routes are added to the bottom of the route list again.",
+      "New Settings option 'Add new routes at the top', off by default.",
     },
   },
 }
