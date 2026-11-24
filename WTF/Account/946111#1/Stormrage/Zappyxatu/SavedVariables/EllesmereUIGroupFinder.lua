@@ -1,0 +1,5 @@
+
+EllesmereUIGroupFinderCharDB = {
+["filters"] = {
+},
+}
